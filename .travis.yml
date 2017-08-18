@@ -3,10 +3,12 @@ language: python
 python:
 - pypy
 
+install: "python setup.py develop"
+
 deploy:
   provider: pypi
   user: python-egnyte
   password:
     secure: C3uE4Xh7J1akIq8RODvWBIZ3c9PxJQbiruzPgjDJJfGYX5G4vCDJVNmJ/sAtGF9AWvMVEaKwlNIdhzWQ8Uz7U3qkcf+Q+O+WJ4ZcIcGw7AfgIEmXuPTgcmxPYEdKBSq0q0vggZyT49a3GdXSxJWa1PlW2NnfB3o0W8bprcvpmBQTl5YOg9WjJW7MzXTCPn2PbS6g6jHo88WH7SOe9I5WBVFzbubWjaiDkrOKPI8gjg1eQ53mbuyuCtJp9/k9bOVEVMT92EBCCViRY3pM84f/Eqvd6r5NQcF4C5tNJ72RLZzuZ7gbDF9Mqoex3TA2pwoH2EcZ5MMdkjLdrtp45RBsl1B5bwB8xR8Ftej+kHrr0Sk9VfFWKZEoTH+F5EeHfrAHVGFU4dOUpB9PpJBzbNnklJ6VxOv5UYvWpwAeUUuiaExdseNUf6KGmGaBjquCc5GKCjkwhu+3Bv5pqa+Sj4+oQhFM1uEx4WoNumve2Wal5mhaUrLX1lLV80NEJ/D7Fmpshznu8F/GI9XWCL7XYOsukXU0TVrj6kmfpRBE0HHsg+WCa+3j36TBzOlPDfqznmjKKPP6h0uqjgMgNBbqlL97CKspQVotF6RuHIhDYzjJubhrrJTLnapxc9pmjRisQK8nhAb96ptXahWz/dEAhvntibK3Ve8D/JfCqZqqIl1XEXw=
-  on:
-    tags: true
+#  on:
+#    tags: true
