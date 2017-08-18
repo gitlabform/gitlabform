@@ -43,7 +43,7 @@ group_settings:
  
 ## More complete configuration example
 
-See [config.yml](config.yml) as an example of configuring all projects in "my_group" with some overrides for project "project1":
+See [config.yml](config.yml) as an example of configuring all projects in "my_group" with some overrides for project "project1".
 
 ## More complete usage examples
 
