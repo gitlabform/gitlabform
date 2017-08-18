@@ -1,0 +1,39 @@
+# Virtualenv
+# # http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
+.Python
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+.venv
+venv
+pip-selfcheck.json
+
+# Python general
+*.pyc
+
+# IntelliJ and Pycharm IDEA files
+*.iml
+.idea
+
+# general
+.cache
+
+# coverage.py
+.coverage
+
+# Setuptools distribution folder.
+/dist
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+/build
+MANIFEST
+
+# temp files
+*.swp
+
+# bak files
+*.bak

@@ -1,0 +1,117 @@
+# GitLab API access config
+gitlab:
+  url: https://gitlab.yourcompany.com
+  token: "<private token of an admin user>"
+
+group_settings:
+
+  'my_group': # GitLab project group
+
+    deploy_keys:
+      a_friendly_deploy_key_name:
+        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
+        title: ssh_key_name_that_is_shown_in_gitlab
+        can_push: false
+      another_friendly_deploy_key_name:
+        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
+        title: other_ssh_key_name_that_is_shown_in_gitlab
+        can_push: false
+
+    secret_variables:
+      a_friendly_secret_variable_name:
+        key: SSH_PRIVATE_KEY_BASE64
+        value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl(...)"
+
+    # keys and values here are as in https://docs.gitlab.com/ce/api/projects.html#edit-project
+    project_settings:
+      builds_enabled: true
+      public_builds: false # "Public pipelines" checkbox in GitLab web UI
+      visibility_level: 10 # internal
+      only_allow_merge_if_build_succeeds: true
+      only_allow_merge_if_all_discussions_are_resolved: true
+
+    branches:
+      develop:
+        protected: false
+      master:
+        protected: true
+        developers_can_push: false
+        developers_can_merge: true
+
+    services:
+      slack:
+        delete: true
+      drone-ci:
+        delete: true
+      jira:
+        url: https://jira.yourcompany.com
+        project_key: PRO # any JIRA project key will do
+
+    files:
+      'README.md':
+        overwrite: false
+        branches:
+          - develop
+        content: |
+          This is a default README. Please replace it with a proper one!
+      '.gitlab-ci.yml':
+        overwrite: true
+        branches: all
+        content: |
+          stages:
+            - test
+
+          test:
+            image: node:6
+            stage: test
+            script:
+              - npm test
+      'other-file':
+        overwrite: true
+        branches: all
+        content: |
+          Something.
+
+    hooks:
+      'some-old-hook-url':
+        delete: true
+      'http://127.0.0.1:5000/hooks/merge-request':
+        push_events: false # this is set to true by GitLab API by default
+        merge_requests_events: true
+        token: some_secret_auth_token
+
+project_settings:
+
+  'my_group/my_project1': # these are overrides for a single project in the "group" group
+
+    project_settings:
+      visibility_level: 0 # private
+
+    deploy_keys:
+      one_more_deploy_key:
+        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
+        title: ssh_key_name_that_is_shown_in_gitlab_3
+        can_push: false
+
+    branches:
+      special_branch:
+        protected: true
+        developers_can_push: false
+        developers_can_merge: true
+
+    files:
+      'some-file':
+        overwrite: true
+        branches:
+          - develop
+          - master
+        only_first_branch: true
+        content: |
+          This file will be added ONLY TO THE FIRST found branch from the list above.
+      'some-path/garbage-file':
+        delete: true
+        branches:
+          - develop
+          - master
+      'other-file':
+        ignore: true # this is for ignoring files that have some config on a group level
