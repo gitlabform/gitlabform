@@ -19,7 +19,7 @@ for particular projects).
 
 ## Quick start
 
-1. Install with: `pip install gitlabform`
+1. Install with: `pip3 install gitlabform`
 
 2. Create example `config.yml`:
 
