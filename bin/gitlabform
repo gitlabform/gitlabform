@@ -19,7 +19,7 @@ class GitLabForm(object):
     def main(self):
         args = self.parse_args()
         self.set_log_level(args)
-        gl, c = self.initizalize(args)
+        gl, c = self.initialize(args)
         projects_and_groups = self.get_projects_list(args, gl, c)
         self.run(args, gl, c, projects_and_groups)
 
@@ -61,7 +61,7 @@ class GitLabForm(object):
         fmt = logging.Formatter("%(message)s")
         logging.getLogger().handlers[0].setFormatter(fmt)
 
-    def initizalize(self, args):
+    def initialize(self, args):
 
         try:
             gl = GitLab(args.config)
@@ -169,14 +169,16 @@ class GitLabForm(object):
                                 logging.debug("Setting branch '%s' as unprotected", branch)
                                 gl.unprotect_branch(project_and_group, branch)
                         except NotFoundException:
-                            logging.warning("! Branch '%s' not found when trying to set it as protected/unprotected", branch)
+                            logging.warning("! Branch '%s' not found when trying to set it as protected/unprotected",
+                                            branch)
                             if args.strict:
                                 exit(3)
 
                 if 'services' in configuration:
                     logging.info("Setting services")
                     for service in sorted(configuration['services']):
-                        if 'delete' in configuration['services'][service] and configuration['services'][service]['delete']:
+                        if 'delete' in configuration['services'][service]\
+                                and configuration['services'][service]['delete']:
                             logging.debug("Deleting service '%s'", service)
                             gl.delete_service(project_and_group, service)
                         else:
@@ -196,7 +198,8 @@ class GitLabForm(object):
                                 if branch in all_branches:
                                     branches.append(branch)
                                 else:
-                                    logging.warning("! Branch '%s' not found, not processing file '%s' in it", branch, file)
+                                    logging.warning("! Branch '%s' not found, not processing file '%s' in it", branch,
+                                                    file)
                                     if args.strict:
                                         exit(3)
 
@@ -218,7 +221,8 @@ class GitLabForm(object):
                                     gl.delete_file(project_and_group, branch, file,
                                                    "Automated delete made by gitlabform")
                                 except NotFoundException:
-                                    logging.debug("Not deleting file '%s' in branch '%s' (already doesn't exist)", file, branch)
+                                    logging.debug("Not deleting file '%s' in branch '%s' (already doesn't exist)", file,
+                                                  branch)
                             else:
                                 try:
                                     current_content = gl.get_file(project_and_group, branch, file)
@@ -230,14 +234,15 @@ class GitLabForm(object):
                                                         configuration['files'][file]['content'],
                                                         "Automated change made by gitlabform")
                                         else:
-                                            logging.debug("Not changing file '%s' in branch '%s' (overwrite flag not set)",
-                                                          file, branch)
+                                            logging.debug("Not changing file '%s' in branch '%s' "
+                                                          "(overwrite flag not set)", file, branch)
                                     else:
-                                        logging.debug("Not changing file '%s' in branch '%s' (it\'s content is already "
-                                                      "as provided)", file, branch)
+                                        logging.debug("Not changing file '%s' in branch '%s' (it\'s content is already"
+                                                      " as provided)", file, branch)
                                 except NotFoundException:
                                     logging.debug("Creating file '%s' in branch '%s'", file, branch)
-                                    gl.add_file(project_and_group, branch, file, configuration['files'][file]['content'],
+                                    gl.add_file(project_and_group, branch, file,
+                                                configuration['files'][file]['content'],
                                                 "Automated add made by gitlabform")
 
                             # protect branch back after above operations
