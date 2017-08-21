@@ -18,7 +18,7 @@ class ConfigurationCore:
             logging.info("Reading config from: {}".format(config_path))
 
             with open(config_path, 'r') as ymlfile:
-                self.config_from_file = yaml.load(ymlfile)
+                self.config_from_file = yaml.safe_load(ymlfile)
 
         except Exception as e:
             raise ConfigFileNotFoundException(config_path)
