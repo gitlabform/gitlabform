@@ -6,6 +6,8 @@ python:
 
 install: python setup.py develop
 
+script: true
+
 deploy:
   provider: pypi
   distributions: sdist
