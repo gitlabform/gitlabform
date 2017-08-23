@@ -63,6 +63,14 @@ If you are satisfied with results consider running it with cron on a regular bas
 GitLab configuration stays the way defined in your config (for example in case of some admin changes
 some project settings temporarily by (yuck!) clicking).
 
+## Command line parameters
+
+Run:
+
+```gitlabform -h```
+
+...to see the current set of supported command line parameters.
+
 ## Requirements
 
 * Python 3.5+
