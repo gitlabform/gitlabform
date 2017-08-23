@@ -66,7 +66,7 @@ some project settings temporarily by (yuck!) clicking).
 ## Requirements
 
 * Python 3.5+
-* GitLab with API v3 support (< 9.5), tested on 9.1 & 9.3
+* GitLab 9.1.x-9.5.x
 
 ## Why?
 
@@ -83,7 +83,7 @@ It just goes through a loop of projects list and make a series of GitLab API req
 
 ## Ideas for improvement
 
-* Migrate to GitLab API v4
+* Migrate to GitLab API v4 (https://github.com/egnyte/gitlabform/issues/1)
 * Add more features
 * Add tests
 * Fix bugs
