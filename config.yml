@@ -115,3 +115,7 @@ project_settings:
           - master
       'other-file':
         ignore: true # this is for ignoring files that have some config on a group level
+
+skip_projects:
+  - my_group/this_project_will_not_be_processed_with_gitlabform_when_running_for_my_group
+  - my_group/and_this_too
