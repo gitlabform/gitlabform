@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from gitlabform.gitlabform.core import GitLabForm
+from gitlabform.gitlabform import GitLabForm
 
 if __name__ == '__main__':
     GitLabForm().main()
