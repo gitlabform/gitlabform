@@ -117,14 +117,15 @@ class GitLabFormCore(object):
         project_to_skip = self.c.get_skip_projects()
         effective_projects_and_groups = [x for x in projects_and_groups if x not in project_to_skip]
 
-        logging.warning('*** # of projects got from GitLab: %s', str(len(projects_and_groups)))
-        logging.info('*** # Projects list from GitLab: %s', str(', '.join(sorted(projects_and_groups))))
+        if len(project_to_skip) > 0:
+            logging.warning('*** # of projects got from GitLab: %s', str(len(projects_and_groups)))
+            logging.info('*** # Projects list from GitLab: %s', str(', '.join(sorted(projects_and_groups))))
 
-        logging.warning('*** # of projects to skip: %s', str(len(project_to_skip)))
-        logging.info('*** # Projects to skip: %s', str(', '.join(project_to_skip)))
+            logging.warning('*** # of projects to skip: %s', str(len(project_to_skip)))
+            logging.info('*** # Projects to skip: %s', str(', '.join(project_to_skip)))
 
-        logging.warning('*** # of projects to really process: %s', str(len(effective_projects_and_groups)))
-        logging.info('*** # Projects to actually process: %s', str(', '.join(effective_projects_and_groups)))
+        logging.warning('*** # of projects to process: %s', str(len(effective_projects_and_groups)))
+        logging.info('*** # Projects to process: %s', str(', '.join(effective_projects_and_groups)))
 
         return effective_projects_and_groups
 
@@ -250,8 +251,8 @@ class GitLabFormCore(object):
                     logging.debug("> Temporarily unprotecting the branch for managing files in it...")
                     self.gl.unprotect_branch(project_and_group, branch)
 
-                if 'ignore' in configuration['files'][file] and configuration['files'][file]['ignore']:
-                    logging.debug("Ignoring file '%s' in branch '%s'", file, branch)
+                if 'skip' in configuration['files'][file] and configuration['files'][file]['skip']:
+                    logging.debug("Skipping file '%s' in branch '%s'", file, branch)
                 elif 'delete' in configuration['files'][file] and configuration['files'][file]['delete']:
                     try:
                         self.gl.get_file(project_and_group, branch, file)
