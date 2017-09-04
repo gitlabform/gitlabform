@@ -10,7 +10,6 @@ script: true
 # test pypi
 #deploy:
 #  provider: pypi
-#  distributions: sdist
 #  server: https://test.pypi.org/legacy/
 #  user: python-egnyte
 #  password:
@@ -19,7 +18,6 @@ script: true
 deploy:
   provider: pypi
   user: python-egnyte
-  distributions: sdist
   server: https://upload.pypi.org/legacy/
   password:
     secure: "mvxlqAmq7Py5XBI3PEaJT71LmE1uGQZuqCIBxuXcBQLUVb+oJvsLYdK2OxSN3ty7AZvbYACh6PKbqwlmRRqpjvOtR2mpmLHap0i1cq9kSYwMqpuwv22dxY+ehe86+gKX2ENQdswp1zmiYmaoZjEAj+rti2ejiJTb8CsBxK65qA12qQUe5ZzhXc+bUjIw6q267DfvfWSbBKnFL4b66YNRRN2am5P0mRKGyNzUQKCKcqU4nUErU4Ge3vtSoNHz78w4I67hZeSZBKCu3y7fYHRt1V6UFx77NehNwzTfo0jUssieQ+8/9jr0/+Stuk45IaWnxfzTCrEJ1qOOuZF614ffBQtG1UE2YUfwAjpn1YOJ0dvnVi7NaTg4lUp+iI+n1psKqHYXkt8EV0zNLcqO0A49SLtId7qLiuaHHRjDxHeaWbTySp9mZ4xBGXSsF3VQVLLU5eqbT/malDm1TmK7G/HoKbIgqoA4z6lCNX2iaDKtrZuTKa/RyvLJTahTQrbWbDLTitRl+iaoo5nF2Q3MCh+MitOAoK8FKBsT7YWupV9N2CWCbvahNTCRBZTOOg146m3C0bedCzepxXtywl2PTibiVqD6LPEQ2Lez1Sm3OozufmxSFEzZahv9hVd5VxIiSuN/9PuLdO7YlpqFzDNzTehnprpbfksH+znfiJtUMJ2cyDk="
