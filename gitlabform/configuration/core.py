@@ -10,7 +10,11 @@ class ConfigurationCore:
 
     def __init__(self, config_path=None):
         try:
-            if not config_path:
+            # using this env var should be considered unofficial, we need this temporarily for backwards compatibility.
+            # support for it may be removed without notice, do not use it!
+            if not config_path and 'APP_HOME' in os.environ:
+                config_path = os.path.join(os.environ['APP_HOME'], 'config.yml')
+            elif not config_path:
                 config_path = os.path.join(Path.home(), '.gitlabform', 'config.yml')
             elif config_path in ['./config.yml', 'config.yml']:
                 config_path = os.path.join(os.getcwd(), 'config.yml')
