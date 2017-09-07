@@ -14,9 +14,10 @@ class ConfigurationCore:
             # support for it may be removed without notice, do not use it!
             if not config_path and 'APP_HOME' in os.environ:
                 config_path = os.path.join(os.environ['APP_HOME'], 'config.yml')
+            # this case is only meant for using gitlabform as a library
             elif not config_path:
-                config_path = os.path.join(Path.home(), '.gitlabform', 'config.yml')
-            elif config_path in ['./config.yml', 'config.yml']:
+                config_path = os.path.join(str(Path.home()), '.gitlabform', 'config.yml')
+            elif config_path in [os.path.join('.', 'config.yml'), 'config.yml']:
                 config_path = os.path.join(os.getcwd(), 'config.yml')
 
             logging.info("Reading config from: {}".format(config_path))

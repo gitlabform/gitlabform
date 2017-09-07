@@ -50,7 +50,7 @@ class GitLabFormCore(object):
         parser.add_argument('project_or_group', help='Project name in "group/project" format OR single group name '
                                                      'OR "ALL" to run for all groups in configuration')
 
-        parser.add_argument('-c', '--config', default='./config.yml', help='Config file path and filename', )
+        parser.add_argument('-c', '--config', default='config.yml', help='Config file path and filename')
 
         group_ex = parser.add_mutually_exclusive_group()
 
