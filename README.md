@@ -1,3 +1,6 @@
+[![PyPI version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
+[![Build Status](https://travis-ci.org/egnyte/gitlabform.svg?branch=master)](https://travis-ci.org/egnyte/gitlabform)
+
 # GitLabForm
 
 GitLabForm is an easy configuration as code tool for GitLab using config in plain YAML.
