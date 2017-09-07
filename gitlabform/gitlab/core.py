@@ -94,7 +94,7 @@ class GitLabCore:
         if isinstance(expected_codes, int):
             return str(expected_codes)
         elif isinstance(expected_codes, list):
-            return ', '.join(expected_codes)
+            return ', '.join(map(lambda x: str(x), expected_codes))
 
 
 class TestRequestFailedException(Exception):
