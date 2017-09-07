@@ -41,19 +41,20 @@ group_settings:
 
 4. Watch GitLabForm add/reset this deploy key to all projects in "my_group" group in your GitLab!
  
-## More complete configuration example
+## Configuration syntax
 
-See [config.yml](config.yml) as an example of configuring all projects in "my_group" with some overrides for project "project1".
+See [config.yml](config.yml) in this repo as a well documented example of configuring all projects in "my_group"
+with some overrides for project "my_project1".
 
-## More complete usage examples
+## More usage examples
 
 To apply settings for a single project run:
 
-```gitlabform group/project```
+```gitlabform my_group/my_project1```
 
 To apply settings for a group of projects run:
 
-```gitlabform group```
+```gitlabform my_group```
 
 To apply settings for all groups of projects defined in the config run:
 
@@ -63,7 +64,7 @@ If you are satisfied with results consider running it with cron on a regular bas
 GitLab configuration stays the way defined in your config (for example in case of some admin changes
 some project settings temporarily by (yuck!) clicking).
 
-## Command line parameters
+## All command line parameters
 
 Run:
 
@@ -87,7 +88,9 @@ but it has much more features and uses simpler configuration format.
 
 ## How does it work?
 
-It just goes through a loop of projects list and make a series of GitLab API requests.
+It just goes through a loop of projects list and make a series of GitLab API requests. Where possible it corresponds to
+GitLab API 1-to-1, so for example it just PUTs or POSTs the hash set at given place in its config transformed into JSON,
+so that it's not necessary to modify the app in case of some GitLab API changes.
 
 ## Ideas for improvement
 
