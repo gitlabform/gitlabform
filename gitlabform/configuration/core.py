@@ -8,7 +8,7 @@ class ConfigurationCore:
 
     config_from_file = None
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
         try:
             # using this env var should be considered unofficial, we need this temporarily for backwards compatibility.
             # support for it may be removed without notice, do not use it!
