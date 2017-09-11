@@ -8,11 +8,11 @@ class ConfigurationCore:
 
     config_from_file = None
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path):
         try:
             # using this env var should be considered unofficial, we need this temporarily for backwards compatibility.
             # support for it may be removed without notice, do not use it!
-            if not config_path and 'APP_HOME' in os.environ:
+            if 'APP_HOME' in os.environ:
                 config_path = os.path.join(os.environ['APP_HOME'], 'config.yml')
             # this case is only meant for using gitlabform as a library
             elif not config_path:
