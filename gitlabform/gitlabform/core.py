@@ -34,6 +34,39 @@ def if_in_config_and_not_skipped(method):
     return method_wrapper
 
 
+# dict that returns `default` if queried with ".get('key|subkey|subsubkey')" if any of the subkeys doesn't exist
+# based on https://stackoverflow.com/a/44859638/2693875
+class SafeDict(dict):
+
+    def get(self, path, default=None):
+        keys = path.split('|')
+        val = None
+
+        for key in keys:
+            if val:
+                if isinstance(val, list):
+                    val = [v.get(key, default) if v else None for v in val]
+                else:
+                    val = val.get(key, default)
+            else:
+                val = dict.get(self, key, default)
+
+            if not val:
+                break
+
+        return val
+
+
+def configuration_to_safe_dict(method):
+
+    @wraps(method)
+    def method_wrapper(self, project_and_group, configuration):
+
+        return method(self, project_and_group, SafeDict(configuration))
+
+    return method_wrapper
+
+
 class GitLabFormCore(object):
 
     def __init__(self):
@@ -225,6 +258,7 @@ class GitLabFormCore(object):
                 self.gl.set_service(project_and_group, service, configuration['services'][service])
 
     @if_in_config_and_not_skipped
+    @configuration_to_safe_dict
     def process_files(self, project_and_group, configuration):
         for file in sorted(configuration['files']):
 
@@ -245,20 +279,20 @@ class GitLabFormCore(object):
             for branch in branches:
 
                 # unprotect protected branch temporarily for operations below
-                if 'branches' in configuration \
-                        and branch in configuration['branches'] \
-                        and configuration['branches'][branch]['protected']:
+                if configuration.get('branches|' + branch + '|protected'):
                     logging.debug("> Temporarily unprotecting the branch for managing files in it...")
                     self.gl.unprotect_branch(project_and_group, branch)
 
-                if 'skip' in configuration['files'][file] and configuration['files'][file]['skip']:
+                if configuration.get('files|' + file + '|skip'):
                     logging.debug("Skipping file '%s' in branch '%s'", file, branch)
-                elif 'delete' in configuration['files'][file] and configuration['files'][file]['delete']:
+                elif configuration.get('files|' + file + '|delete'):
                     try:
                         self.gl.get_file(project_and_group, branch, file)
                         logging.debug("Deleting file '%s' in branch '%s'", file, branch)
                         self.gl.delete_file(project_and_group, branch, file,
-                                            "Automated delete made by gitlabform")
+                                            self.get_commit_message_for_file_change(
+                                                'delete', configuration.get('files|' + file + '|skip_ci'))
+                                            )
                     except NotFoundException:
                         logging.debug("Not deleting file '%s' in branch '%s' (already doesn't exist)", file,
                                       branch)
@@ -266,12 +300,13 @@ class GitLabFormCore(object):
                     try:
                         current_content = self.gl.get_file(project_and_group, branch, file)
                         if current_content != configuration['files'][file]['content']:
-                            if 'overwrite' in configuration['files'][file] \
-                                    and configuration['files'][file]['overwrite']:
+                            if configuration.get('files|' + file + '|overwrite'):
                                 logging.debug("Changing file '{0}' in branch '{1}'", file, branch)
                                 self.gl.set_file(project_and_group, branch, file,
                                                  configuration['files'][file]['content'],
-                                                 "Automated change made by gitlabform")
+                                                 self.get_commit_message_for_file_change(
+                                                     'change', configuration.get('files|' + file + '|skip_ci'))
+                                                 )
                             else:
                                 logging.debug("Not changing file '%s' in branch '%s' "
                                               "(overwrite flag not set)", file, branch)
@@ -282,21 +317,28 @@ class GitLabFormCore(object):
                         logging.debug("Creating file '%s' in branch '%s'", file, branch)
                         self.gl.add_file(project_and_group, branch, file,
                                          configuration['files'][file]['content'],
-                                         "Automated add made by gitlabform")
+                                         self.get_commit_message_for_file_change(
+                                             'add', configuration.get('files.' + file + '.skip_ci'))
+                                         )
 
                 # protect branch back after above operations
-                if 'branches' in configuration \
-                        and branch in configuration['branches'] \
-                        and configuration['branches'][branch]['protected']:
+                if configuration.get('branches|' + branch + '|protected'):
                     logging.debug("> Protecting the branch again.")
                     self.gl.protect_branch(project_and_group, branch,
                                            configuration['branches'][branch]['developers_can_push'],
                                            configuration['branches'][branch]['developers_can_merge'])
 
-                if 'only_first_branch' in configuration['files'][file] \
-                        and configuration['files'][file]['only_first_branch']:
+                if configuration.get('files|' + file + '|only_first_branch'):
                     logging.info('Skipping other branches for this file, as configured.')
                     break
+
+    def get_commit_message_for_file_change(self, operation, skip_build):
+
+        # add '[skip ci]' to commit message to skip CI job, as documented at
+        # https://docs.gitlab.com/ee/ci/yaml/README.html#skipping-jobs
+        skip_build_str = ' [skip ci]' if skip_build else ''
+
+        return "Automated %s made by gitlabform%s" % (operation, skip_build_str)
 
     @if_in_config_and_not_skipped
     def process_hooks(self, project_and_group, configuration):
