@@ -81,11 +81,14 @@ group_settings:
         overwrite: false
         branches:
           - develop
+        # this will prevent the commit that applies this file change triggering CI build
+        skip_build: true
         content: |
           This is a default README. Please replace it with a proper one!
       '.gitlab-ci.yml':
         overwrite: true
         branches: all
+        skip_build: false
         content: |
           stages:
             - test
@@ -98,6 +101,7 @@ group_settings:
       'other-file':
         overwrite: true
         branches: all
+        skip_build: false
         content: |
           Something.
 
@@ -139,6 +143,7 @@ project_settings:
         branches:
           - develop
           - master
+        skip_build: false
         # setting below value to `true` will make this file be set only for the first *existing* branch in the list above
         only_first_branch: true
         content: |
@@ -148,6 +153,7 @@ project_settings:
         branches:
           - develop
           - master
+        skip_build: true
       'other-file':
         skip: true # this will skip processing this *single file* in case it is configured on a group level
 
