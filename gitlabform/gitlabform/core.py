@@ -319,7 +319,7 @@ class GitLabFormCore(object):
                         self.gl.add_file(project_and_group, branch, file,
                                          configuration['files'][file]['content'],
                                          self.get_commit_message_for_file_change(
-                                             'add', configuration.get('files.' + file + '.skip_ci'))
+                                             'add', configuration.get('files|' + file + '|skip_ci'))
                                          )
 
                 # protect branch back after above operations
