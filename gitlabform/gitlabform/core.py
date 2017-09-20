@@ -248,10 +248,10 @@ class GitLabFormCore(object):
                     exit(3)
 
     @if_in_config_and_not_skipped
+    @configuration_to_safe_dict
     def process_services(self, project_and_group, configuration):
         for service in sorted(configuration['services']):
-            if 'delete' in configuration['services'][service] \
-                    and configuration['services'][service]['delete']:
+            if configuration.get('services|' + service + '|delete'):
                 logging.debug("Deleting service '%s'", service)
                 self.gl.delete_service(project_and_group, service)
             else:
@@ -342,10 +342,11 @@ class GitLabFormCore(object):
         return "Automated %s made by gitlabform%s" % (operation, skip_build_str)
 
     @if_in_config_and_not_skipped
+    @configuration_to_safe_dict
     def process_hooks(self, project_and_group, configuration):
         for hook in sorted(configuration['hooks']):
 
-            if 'delete' in configuration['hooks'][hook] and configuration['hooks'][hook]['delete']:
+            if configuration.get('hooks|' + hook + '|delete'):
                 hook_id = self.gl.get_hook_id(project_and_group, hook)
                 if hook_id:
                     logging.debug("Deleting hook '%s'", hook)
