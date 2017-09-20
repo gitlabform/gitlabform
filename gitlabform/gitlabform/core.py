@@ -89,7 +89,7 @@ class GitLabFormCore(object):
 
         group_ex.add_argument('-v', '--verbose', action="store_true", help='Verbose mode')
 
-        group_ex.add_argument('-d', '--debug', action="store_true", help='Verbose mode')
+        group_ex.add_argument('-d', '--debug', action="store_true", help='Debug mode (most verbose)')
 
         parser.add_argument('--strict', '-s', action="store_true", help='Stop on missing branches')
 
