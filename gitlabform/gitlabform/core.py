@@ -147,18 +147,19 @@ class GitLabFormCore(object):
             project_and_group = self.args.project_or_group
             projects_and_groups = [project_and_group]
 
-        project_to_skip = self.c.get_skip_projects()
-        effective_projects_and_groups = [x for x in projects_and_groups if x not in project_to_skip]
+        projects_to_skip = self.c.get_skip_projects()
+        effective_projects_and_groups = [x for x in projects_and_groups if x not in projects_to_skip]
 
-        if len(project_to_skip) > 0:
+        if len(projects_to_skip) > 0:
             logging.warning('*** # of projects got from GitLab: %s', str(len(projects_and_groups)))
             logging.info('*** # Projects list from GitLab: %s', str(', '.join(sorted(projects_and_groups))))
 
-            logging.warning('*** # of projects to skip: %s', str(len(project_to_skip)))
-            logging.info('*** # Projects to skip: %s', str(', '.join(project_to_skip)))
+            logging.warning('*** # of projects to skip: %s', str(len(projects_to_skip)))
+            logging.info('*** # Projects to skip: %s', str(', '.join(projects_to_skip)))
 
-        logging.warning('*** # of projects to process: %s', str(len(effective_projects_and_groups)))
-        logging.info('*** # Projects to process: %s', str(', '.join(effective_projects_and_groups)))
+        if len(effective_projects_and_groups) > 1:
+            logging.warning('*** # of projects to process: %s', str(len(effective_projects_and_groups)))
+            logging.info('*** # Projects to process: %s', str(', '.join(effective_projects_and_groups)))
 
         return effective_projects_and_groups
 
