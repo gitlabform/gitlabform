@@ -278,6 +278,7 @@ class GitLabFormCore(object):
                             exit(3)
 
             for branch in branches:
+                logging.info("Processing file '%s' in branch '%s'", file, branch)
 
                 # unprotect protected branch temporarily for operations below
                 if configuration.get('branches|' + branch + '|protected'):
