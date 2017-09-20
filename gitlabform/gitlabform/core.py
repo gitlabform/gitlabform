@@ -302,7 +302,7 @@ class GitLabFormCore(object):
                         current_content = self.gl.get_file(project_and_group, branch, file)
                         if current_content != configuration['files'][file]['content']:
                             if configuration.get('files|' + file + '|overwrite'):
-                                logging.debug("Changing file '{0}' in branch '{1}'", file, branch)
+                                logging.debug("Changing file '%s' in branch '%s'", file, branch)
                                 self.gl.set_file(project_and_group, branch, file,
                                                  configuration['files'][file]['content'],
                                                  self.get_commit_message_for_file_change(
