@@ -29,3 +29,7 @@ class GitLabBranches(GitLabCore):
         pid = self._get_project_id(project_and_group_name)
         result = self._make_requests_to_api("projects/%s/repository/branches" % pid)
         return sorted(map(lambda x: x['name'], result))
+
+    def get_branch(self, project_and_group_name, branch):
+        pid = self._get_project_id(project_and_group_name)
+        return self._make_requests_to_api("projects/%s/repository/branches/%s" % (pid, branch))
