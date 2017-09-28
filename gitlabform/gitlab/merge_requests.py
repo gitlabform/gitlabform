@@ -26,3 +26,7 @@ class GitLabMergeRequests(GitLabCore):
     def get_mrs(self, project_and_group_name):
         pid = self._get_project_id(project_and_group_name)
         return self._make_requests_to_api("projects/%s/merge_requests" % pid, paginated=True)
+
+    def get_mr(self, project_and_group_name, mr_id):  # NOT iid, like API docs suggest!
+        pid = self._get_project_id(project_and_group_name)
+        return self._make_requests_to_api("projects/%s/merge_requests/%s" % (pid, mr_id))
