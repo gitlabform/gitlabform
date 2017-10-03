@@ -17,8 +17,13 @@ GitLabForm enables you to manage:
 * (Project) Hooks,
 * (Add/edit or delete) Files,
 
-...for a group of projects, single projects and a combination of them (default config on a group level + overrides
-for particular projects).
+...for:
+
+* all projects in your GitLab instance,
+* a group of projects,
+* a single projects,
+
+...and a combination of them (default config for all projects + more specific for some groups + even more specific for particular projects).
 
 ## Quick start
 
@@ -46,8 +51,8 @@ group_settings:
  
 ## Configuration syntax
 
-See [config.yml](config.yml) in this repo as a well documented example of configuring all projects in "my_group"
-with some overrides for project "my_project1".
+See [config.yml](config.yml) in this repo as a well documented example of configuring all projects in all groups,
+projects in "my_group" group and specifically project "my_group/my_project1".
 
 ## More usage examples
 
@@ -59,7 +64,11 @@ To apply settings for a group of projects run:
 
 ```gitlabform my_group```
 
-To apply settings for all groups of projects defined in the config run:
+To apply settings for all groups of projects and projects defined explicitly in the config run:
+
+```gitlabform ALL_DEFINED```
+
+To apply settings for all projects run:
 
 ```gitlabform ALL```
 

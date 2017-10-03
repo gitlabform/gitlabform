@@ -3,9 +3,41 @@ gitlab:
   url: https://gitlab.yourcompany.com
   token: "<private token of an admin user>"
 
+#
+# You can define settings on 3 levels here:
+# * common - for ALL projects in ALL groups
+# * group - for ALL projects in selected groups
+# * project - for single projects
+#
+# Each level is optional.
+#
+# To generate effective settings to apply for a given project, if it configured on more than one level
+# (for example you run it for "my_group/my_project" with the example cofiguration below, where this project will
+# take configuration from all 3 levels), GitLabForm will merge those configurations.
+#
+# For sections which correspond to a single thing to set, like `project_settings` more specific configuration will
+# overwrite the more general.
+#
+# For sections where it is a list of things to set, like: `deploy_keys`, `secret_variables`, `hooks' and so on,
+# more specific configurations will be added to the more general.
+#
+# Exception: when `skip: true` is set on a more specific level, given config section is not set AT ALL for given project.
+#
+
+common_settings:
+
+  # common settings for ALL projects in ALL groups
+
+  secret_variables:
+    # this name is not actually used, it's just for you
+    a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
+      key: A_VERY_COMMONLY_USED_PASSWORD
+      value: "ThisIsAVerySecretPassword"
+
 group_settings:
 
-  'my_group': # common settings for ALL projects in this project group
+  # settings for ALL projects in 'my_group' group
+  'my_group':
 
     deploy_keys:
       # this name is not actually used, it's just for you
@@ -106,12 +138,7 @@ group_settings:
 
 project_settings:
 
-  # these are overrides for a single project "my_project" in the "group" group
-  #
-  # overrides are either merged (for sections which correspond to a single thing to set, like `project_settings`
-  # or additive where it is a list of things to set, like: `deploy_keys`, `secret_variables`, `hooks' and so on)
-  #
-  # EXCEPT when `skip: true` is set, in which case given config section is not set AT ALL for given project)
+  # settings specific to 'my_group/my_project1' project
   'my_group/my_project1':
 
     project_settings:

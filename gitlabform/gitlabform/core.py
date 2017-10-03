@@ -80,8 +80,11 @@ class GitLabFormCore(object):
                                                      ' using config in plain YAML.',
                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-        parser.add_argument('project_or_group', help='Project name in "group/project" format OR single group name '
-                                                     'OR "ALL" to run for all groups in configuration')
+        parser.add_argument('project_or_group',
+                            help='Project name in "group/project" format'
+                                 'OR a single group name '
+                                 'OR "ALL_DEFINED" to run for all groups and projects defined the config'
+                                 'OR "ALL" to run for all projects that you have access to')
 
         parser.add_argument('-c', '--config', default='config.yml', help='Config file path and filename')
 
