@@ -100,6 +100,8 @@ class GitLabFormCore(object):
                             help='Start processing projects from the given one '
                                  '(as numbered by "[x/y] Processing: group/project" messages)')
 
+        parser.add_argument('-n', '--noop', dest='noop', action="store_true", help='Run in no-op (dry run) mode')
+
         return parser.parse_args()
 
     def set_log_level(self):
@@ -134,35 +136,50 @@ class GitLabFormCore(object):
 
     def get_projects_list(self):
 
+        groups = []
+        projects_and_groups = []
+
         if self.args.project_or_group == "ALL":
+            # all projects from all groups we have access to
+            logging.warning('>>> Processing ALL groups and and projects')
+            groups = self.gl.get_groups()
+        elif self.args.project_or_group == "ALL_DEFINED":
+            logging.warning('>>> Processing ALL groups and projects defined in config')
             # all groups from config
             groups = self.c.get_groups()
-            logging.warning('>>> Processing ALL groups from config: %s', ', '.join(groups))
-            projects_and_groups = []
-            for group in groups:
-                projects_and_groups += self.gl.get_projects(group)
+            # and all projects from config
+            projects_and_groups = set(self.c.get_projects())
         elif not re.match(".*/.*", self.args.project_or_group):
             # single group
-            group = self.args.project_or_group
-            projects_and_groups = self.gl.get_projects(group)
+            groups = [self.args.project_or_group]
         else:
             # single project
-            project_and_group = self.args.project_or_group
-            projects_and_groups = [project_and_group]
+            projects_and_groups = [self.args.project_or_group]
 
-        projects_to_skip = self.c.get_skip_projects()
-        effective_projects_and_groups = [x for x in projects_and_groups if x not in projects_to_skip]
+        # skip groups before getting projects from gitlab to save time
+        if groups:
+            if self.c.get_skip_groups():
+                effective_groups = [x for x in groups if x not in self.c.get_skip_groups()]
+            else:
+                effective_groups = groups
+        else:
+            effective_groups = []
 
-        if len(projects_to_skip) > 0:
-            logging.warning('*** # of projects got from GitLab: %s', str(len(projects_and_groups)))
-            logging.info('*** # Projects list from GitLab: %s', str(', '.join(sorted(projects_and_groups))))
+        # gitlab can return single project in a few groups, so let's use a set for projects
+        projects_and_groups = set(projects_and_groups)
+        for group in effective_groups:
+            for project in self.gl.get_projects(group):
+                projects_and_groups.add(project)
+        projects_and_groups = sorted(list(projects_and_groups))
 
-            logging.warning('*** # of projects to skip: %s', str(len(projects_to_skip)))
-            logging.info('*** # Projects to skip: %s', str(', '.join(projects_to_skip)))
+        # skip projects after getting projects from gitlab
+        if self.c.get_skip_projects():
+            effective_projects_and_groups = [x for x in projects_and_groups if x not in self.c.get_skip_projects()]
+        else:
+            effective_projects_and_groups = projects_and_groups
 
-        if len(effective_projects_and_groups) > 1:
-            logging.warning('*** # of projects to process: %s', str(len(effective_projects_and_groups)))
-            logging.info('*** # Projects to process: %s', str(', '.join(effective_projects_and_groups)))
+        logging.warning('*** # of groups to process: %s', str(len(groups)))
+        logging.warning('*** # of projects to process: %s', str(len(effective_projects_and_groups)))
 
         return effective_projects_and_groups
 
@@ -180,9 +197,15 @@ class GitLabFormCore(object):
 
             logging.warning('* [%s/%s] Processing: %s', i, len(projects_and_groups), project_and_group)
 
-            configuration = self.c.get_config_for_project(project_and_group)
+            configuration = self.c.get_effective_config_for_project(project_and_group)
 
             try:
+
+                if self.args.noop:
+                    logging.warning('Not actually processing because running in noop mode.')
+                    logging.debug('Configuration that would be applied: %s' % str(configuration))
+                    continue
+
                 self.process_project_settings(project_and_group, configuration)
                 self.process_deploy_keys(project_and_group, configuration)
                 self.process_secret_variables(project_and_group, configuration)
