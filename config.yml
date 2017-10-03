@@ -182,7 +182,11 @@ project_settings:
       'other-file':
         skip: true # this will skip processing this *single file* in case it is configured on a group level
 
-# this will skip *whole* projects from being processed
+# this will skip these projects from being processed
 skip_projects:
   - my_group/this_project_will_not_be_processed_with_gitlabform_when_running_for_my_group
   - my_group/and_this_too
+
+# this will skip these groups from being processed
+skip_groups:
+  - my_other_group
