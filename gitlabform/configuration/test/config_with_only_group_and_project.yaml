@@ -3,8 +3,14 @@ group_settings:
   some_group:
     project_settings:
       foo: bar
+    hooks:
+      a:
+        foo: bar
 
 project_settings:
-  some_project/some_group:
+  some_group/some_project:
     project_settings:
       bar: foo
+    hooks:
+      b:
+        bar: foo
