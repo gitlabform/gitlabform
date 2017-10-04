@@ -11,15 +11,12 @@ gitlab:
 #
 # Each level is optional.
 #
-# To generate effective settings to apply for a given project, if it configured on more than one level
-# (for example you run it for "my_group/my_project" with the example cofiguration below, where this project will
+# To generate effective settings to apply for a given project, if it is configured on more than one level
+# (for example you run it for "my_group/my_project" with the example configuration below, where this project will
 # take configuration from all 3 levels), GitLabForm will merge those configurations.
 #
-# For sections which correspond to a single thing to set, like `project_settings` more specific configuration will
-# overwrite the more general.
-#
-# For sections where it is a list of things to set, like: `deploy_keys`, `secret_variables`, `hooks' and so on,
-# more specific configurations will be added to the more general.
+# Merging is additive, so for sections like `deploy_keys`, `secret_variables`, `hooks' on each lower level
+# the effective configuration will contain elements from higher levels plus elements from lower levels.
 #
 # Exception: when `skip: true` is set on a more specific level, given config section is not set AT ALL for given project.
 #
