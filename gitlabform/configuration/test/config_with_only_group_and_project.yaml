@@ -1,0 +1,10 @@
+---
+group_settings:
+  some_group:
+    project_settings:
+      foo: bar
+
+project_settings:
+  some_project/some_group:
+    project_settings:
+      bar: foo

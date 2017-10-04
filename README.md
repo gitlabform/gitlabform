@@ -108,7 +108,7 @@ so that it's not necessary to modify the app in case of some GitLab API changes.
 
 * Migrate to GitLab API v4 (https://github.com/egnyte/gitlabform/issues/1)
 * Add more features
-* Add tests
+* Add more tests
 * Fix bugs
 
 ## License

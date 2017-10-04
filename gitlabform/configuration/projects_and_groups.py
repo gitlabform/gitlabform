@@ -41,8 +41,11 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         except KeyNotFoundException:
             common_config = {}
 
+        logging.debug("Common config: %s" % common_config)
+
+        # this project is not in any config - return empty config
         if not project_config and not group_config and not common_config:
-            raise ConfigNotFoundException
+            return {}
 
         # this is simplistic, but for our config format should be enough for additive merge
         # of project, group and common configs

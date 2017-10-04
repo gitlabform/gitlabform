@@ -22,6 +22,9 @@ setup(name='gitlabform',
             'requests==2.18.3',
             'pyyaml==3.12',
       ],
+      tests_requires=[
+            'pytest',
+      ],
       scripts=[
             'bin/gitlabform',
       ],
