@@ -5,13 +5,21 @@ from gitlabform.gitlab.core import GitLabCore
 
 class GitLabProjects(GitLabCore):
 
+    def get_all_projects(self):
+        """
+        :param group: group name
+        :return: sorted list of ALL projects you have access to, strings "group/project_name"
+        """
+        result = self._make_requests_to_api("/projects?order_by=name&sort=asc", paginated=True)
+        return sorted(map(lambda x: x['path_with_namespace'], result))
+
     def get_projects(self, group):
         """
         :param group: group name
         :return: sorted list of strings "group/project_name"
         """
         result = self._make_requests_to_api("/groups/%s/projects?simple=true" % urllib.parse.quote_plus(group),
-                                              paginated=True)
+                                            paginated=True)
         return sorted(map(lambda x: group + '/' + x['path'], result))
 
     def post_deploy_key(self, project_and_group_name, deploy_key):
