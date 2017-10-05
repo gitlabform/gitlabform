@@ -19,9 +19,9 @@ GitLabForm enables you to manage:
 
 ...for:
 
-* all projects in your GitLab instance,
+* all projects you have access to,
 * a group of projects,
-* a single projects,
+* a single project,
 
 ...and a combination of them (default config for all projects + more specific for some groups + even more specific for particular projects).
 
@@ -56,19 +56,19 @@ projects in "my_group" group and specifically project "my_group/my_project1".
 
 ## More usage examples
 
-To apply settings for a single project run:
+To apply settings for a single project, run:
 
 ```gitlabform my_group/my_project1```
 
-To apply settings for a group of projects run:
+To apply settings for a group of projects, run:
 
 ```gitlabform my_group```
 
-To apply settings for all groups of projects and projects defined explicitly in the config run:
+To apply settings for all groups of projects and projects explicitly defined in the config, run:
 
 ```gitlabform ALL_DEFINED```
 
-To apply settings for all projects run:
+To apply settings for all projects, run:
 
 ```gitlabform ALL```
 
