@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='gitlabform',
-      version='0.19.1',
+      version='0.19.2',
       description='Easy configuration as code tool for GitLab using config in plain YAML',
       url='https://github.com/egnyte/gitlabform',
       author='Egnyte',
@@ -9,7 +9,6 @@ setup(name='gitlabform',
       classifiers=[
             "Programming Language :: Python :: 3.5",
             "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: 3.7",
             "Development Status :: 4 - Beta",
             "Intended Audience :: Information Technology",
             "Intended Audience :: System Administrators",
