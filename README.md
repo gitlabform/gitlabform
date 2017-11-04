@@ -87,7 +87,7 @@ Run:
 ## Requirements
 
 * Python 3.5+
-* GitLab 9.1.x-9.5.x
+* GitLab 9.1.x-10.0.x
 
 ## Why?
 
