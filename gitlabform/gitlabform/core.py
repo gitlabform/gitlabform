@@ -3,7 +3,8 @@ import logging.config
 import re
 import traceback
 import sys
-
+from pathlib import Path
+import os
 from functools import wraps
 
 from gitlabform.configuration import Configuration
@@ -329,13 +330,29 @@ class GitLabFormCore(object):
                                       branch)
                 else:
                     # change or create file
+
+                    if configuration.get('files|' + file + '|content') \
+                            and configuration.get('files|' + file + '|file'):
+                        logging.fatal("File '%s' in '%s' has both `content` and `file` set - "
+                                      "use only one of these keys.", file, project_and_group)
+                        exit(4)
+                    elif configuration.get('files|' + file + '|content'):
+                        new_content = configuration.get('files|' + file + '|content')
+                    else:
+                        path_in_config = Path(configuration.get('files|' + file + '|file'))
+                        if path_in_config.is_absolute():
+                            new_content = path_in_config.read_text()
+                        else:
+                            # relative paths are relative to config file location
+                            new_content = Path(os.path.join(self.c.config_dir, str(path_in_config))).read_text()
+
                     try:
                         current_content = self.gl.get_file(project_and_group, branch, file)
-                        if current_content != configuration['files'][file]['content']:
+                        if current_content != new_content:
                             if configuration.get('files|' + file + '|overwrite'):
                                 logging.debug("Changing file '%s' in branch '%s'", file, branch)
                                 self.gl.set_file(project_and_group, branch, file,
-                                                 configuration['files'][file]['content'],
+                                                 new_content,
                                                  self.get_commit_message_for_file_change(
                                                      'change', configuration.get('files|' + file + '|skip_ci'))
                                                  )
@@ -348,7 +365,7 @@ class GitLabFormCore(object):
                     except NotFoundException:
                         logging.debug("Creating file '%s' in branch '%s'", file, branch)
                         self.gl.add_file(project_and_group, branch, file,
-                                         configuration['files'][file]['content'],
+                                         new_content,
                                          self.get_commit_message_for_file_change(
                                              'add', configuration.get('files|' + file + '|skip_ci'))
                                          )

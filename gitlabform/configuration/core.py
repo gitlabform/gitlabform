@@ -7,6 +7,7 @@ from pathlib import Path
 class ConfigurationCore:
 
     config_from_file = None
+    config_dir = None
 
     def __init__(self, config_path=None):
         try:
@@ -24,6 +25,9 @@ class ConfigurationCore:
 
             with open(config_path, 'r') as ymlfile:
                 self.config_from_file = yaml.safe_load(ymlfile)
+
+            # we need config path for accessing files for relative paths
+            self.config_dir = os.path.dirname(config_path)
 
         except Exception as e:
             raise ConfigFileNotFoundException(config_path)
