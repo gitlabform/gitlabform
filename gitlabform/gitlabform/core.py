@@ -288,6 +288,11 @@ class GitLabFormCore(object):
     @configuration_to_safe_dict
     def process_files(self, project_and_group, configuration):
         for file in sorted(configuration['files']):
+            logging.debug("Processing file '%s'...", file)
+
+            if configuration.get('files|' + file + '|skip'):
+                logging.debug("Skipping file '%s'", file)
+                continue
 
             all_branches = self.gl.get_branches(project_and_group)
             if configuration['files'][file]['branches'] == 'all':
@@ -311,9 +316,7 @@ class GitLabFormCore(object):
                     logging.debug("> Temporarily unprotecting the branch for managing files in it...")
                     self.gl.unprotect_branch(project_and_group, branch)
 
-                if configuration.get('files|' + file + '|skip'):
-                    logging.debug("Skipping file '%s' in branch '%s'", file, branch)
-                elif configuration.get('files|' + file + '|delete'):
+                if configuration.get('files|' + file + '|delete'):
                     try:
                         self.gl.get_file(project_and_group, branch, file)
                         logging.debug("Deleting file '%s' in branch '%s'", file, branch)
@@ -325,6 +328,7 @@ class GitLabFormCore(object):
                         logging.debug("Not deleting file '%s' in branch '%s' (already doesn't exist)", file,
                                       branch)
                 else:
+                    # change or create file
                     try:
                         current_content = self.gl.get_file(project_and_group, branch, file)
                         if current_content != configuration['files'][file]['content']:
