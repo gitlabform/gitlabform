@@ -13,13 +13,22 @@ class GitLabProjects(GitLabCore):
         result = self._make_requests_to_api("/projects?order_by=name&sort=asc", paginated=True)
         return sorted(map(lambda x: x['path_with_namespace'], result))
 
-    def get_projects(self, group):
+    def get_projects(self, group, only_from_group_namespace=True):
         """
         :param group: group name
+        :param only_from_group_namespace: if `group` is also used as a *users* group to give access to projects
+               within other namespaces than `group`, then to get projects only within namespace `group` with this method
+               you should set `only_from_group_namespace` to True
         :return: sorted list of strings "group/project_name"
         """
-        result = self._make_requests_to_api("/groups/%s/projects?simple=true", group, paginated=True)
-        return sorted(map(lambda x: group + '/' + x['path'], result))
+        projects = self._make_requests_to_api("/groups/%s/projects", group, paginated=True)
+
+        project_and_groups = sorted(map(lambda x: x['path_with_namespace'], projects))
+
+        if only_from_group_namespace:
+            return [x for x in project_and_groups if x.startswith(group + '/')]
+        else:
+            return project_and_groups
 
     def post_deploy_key(self, project_and_group_name, deploy_key):
         pid = self._get_project_id(project_and_group_name)
