@@ -237,6 +237,10 @@ class GitLabFormCore(object):
 
     @if_in_config_and_not_skipped
     def process_secret_variables(self, project_and_group, configuration):
+        if not self.gl.get_project_settings(project_and_group)['builds_enabled']:
+            logging.warning("Builds not enabled in this project so I can't set secret variables here.")
+            return
+
         logging.debug("Secret variables BEFORE: %s", self.gl.get_secret_variables(project_and_group))
         for secret_variable in sorted(configuration['secret_variables']):
             logging.info("Setting secret variable: %s", secret_variable)
