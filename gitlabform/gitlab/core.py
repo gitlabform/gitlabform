@@ -96,12 +96,11 @@ class GitLabCore:
         else:
             if type(single_arg_or_args_tuple) == tuple:
                 # URL-encode each arg in the tuple and return it as tuple too
-                url_encoded_args = []
+                url_encoded_args = ()
                 for arg in single_arg_or_args_tuple:
-                    url_encoded_args.append(urllib.parse.quote_plus(arg))
-                url_encoded_args = tuple(url_encoded_args)
+                    url_encoded_args += (urllib.parse.quote_plus(str(arg)), )
             else:
-                # URL-encode only arg
+                # URL-encode single arg
                 url_encoded_args = urllib.parse.quote_plus(single_arg_or_args_tuple)
 
             return format_string % url_encoded_args
@@ -119,6 +118,7 @@ class GitLabCore:
             return str(expected_codes)
         elif isinstance(expected_codes, list):
             return ', '.join(map(lambda x: str(x), expected_codes))
+
 
 class TestRequestFailedException(Exception):
     pass
