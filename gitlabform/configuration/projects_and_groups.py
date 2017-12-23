@@ -28,7 +28,7 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
 
         logging.debug("Project config: %s" % project_config)
 
-        group, _ = group_and_project.split('/')
+        group, _ = group_and_project.rsplit('/', 1)
         try:
             group_config = self.get_config_for_group(group)
         except ConfigNotFoundException:
