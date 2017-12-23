@@ -12,7 +12,7 @@ class GitLabRepositories(GitLabCore):
 
     def compare(self, project_and_group_name, c_from, c_to):
         pid = self._get_project_id(project_and_group_name)
-        return self._make_requests_to_api("/projects/%s/repository/compare?from=%s&to=%s", (pid, c_from, c_to))
+        return self._make_requests_to_api("projects/%s/repository/compare?from=%s&to=%s", (pid, c_from, c_to))
 
     def get_file(self, project_and_group_name, branch, path):
         pid = self._get_project_id(project_and_group_name)

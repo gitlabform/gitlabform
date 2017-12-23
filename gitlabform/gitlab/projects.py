@@ -10,23 +10,8 @@ class GitLabProjects(GitLabCore):
         :param group: group name
         :return: sorted list of ALL projects you have access to, strings "group/project_name"
         """
-        result = self._make_requests_to_api("/projects?order_by=name&sort=asc", paginated=True)
+        result = self._make_requests_to_api("projects?order_by=name&sort=asc", paginated=True)
         return sorted(map(lambda x: x['path_with_namespace'], result))
-
-    def get_projects(self, group):
-        """
-        :param group: group name
-        :return: sorted list of strings "group/project_name". Note that only projects from "group" namespace are
-                 returned, so if "group" (= members of this group) is also a member of some projects, they won't be
-                 returned here.
-        """
-        projects = self._make_requests_to_api("/groups/%s/projects", group, paginated=True)
-
-        all_project_and_groups = sorted(map(lambda x: x['path_with_namespace'], projects))
-
-        project_and_groups_in_group_namespace = [x for x in all_project_and_groups if x.startswith(group + '/')]
-
-        return project_and_groups_in_group_namespace
 
     def post_deploy_key(self, project_and_group_name, deploy_key):
         pid = self._get_project_id(project_and_group_name)
