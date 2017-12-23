@@ -56,7 +56,7 @@ class GitLabCore:
             results = first_response.json()
             total_pages = int(first_response.headers['X-Total-Pages'])
             for page in range(2, total_pages + 1):
-                response = self._make_request_to_api(path_as_format_string + "&page=" + page, args, method, data,
+                response = self._make_request_to_api(path_as_format_string + "&page=" + str(page), args, method, data,
                                                      expected_codes)
                 results += response.json()
 
