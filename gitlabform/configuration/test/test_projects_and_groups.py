@@ -39,3 +39,27 @@ class TestConfigurationProjectsAndGroups:
 
         additive__hooks = x['hooks']
         assert additive__hooks == {'a': {'foo': 'bar'}, 'b': {'bar': 'foo'}}  # added from both group and project level
+
+    def test__get_effective_config_for_project__subgroups__project_from_config__level1(self):
+
+        current_path = os.path.dirname(os.path.realpath(__file__))
+        c = ConfigurationProjectsAndGroups(os.path.join(current_path, 'config_with_subgroups.yaml'))
+
+        x = c.get_effective_config_for_project('some_group/subgroup_level_1/some_project')
+
+        additive__project_settings = x['project_settings']
+
+        # project and only subgroup level 1
+        assert additive__project_settings == {'foo': 'bar2', 'bar': 'something_else2'}
+
+    def test__get_effective_config_for_project__subgroups__project_from_config__level2(self):
+
+        current_path = os.path.dirname(os.path.realpath(__file__))
+        c = ConfigurationProjectsAndGroups(os.path.join(current_path, 'config_with_subgroups.yaml'))
+
+        x = c.get_effective_config_for_project('some_group/subgroup_level_1/subgroup_level_2/some_project')
+
+        additive__project_settings = x['project_settings']
+
+        # project and only subgroup level 2
+        assert additive__project_settings == {'foo': 'bar3', 'bar': 'something_else3'}
