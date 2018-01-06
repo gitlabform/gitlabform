@@ -345,10 +345,13 @@ class GitLabFormCore(object):
                     else:
                         path_in_config = Path(configuration.get('files|' + file + '|file'))
                         if path_in_config.is_absolute():
-                            new_content = path_in_config.read_text()
+                            path = path_in_config.read_text()
                         else:
                             # relative paths are relative to config file location
-                            new_content = Path(os.path.join(self.c.config_dir, str(path_in_config))).read_text()
+                            path = Path(os.path.join(self.c.config_dir, str(path_in_config)))
+                        new_content = path.read_text()
+
+                    new_content = self.get_file_content_as_template(new_content, project_and_group)
 
                     try:
                         current_content = self.gl.get_file(project_and_group, branch, file)
@@ -392,6 +395,24 @@ class GitLabFormCore(object):
         skip_build_str = ' [skip ci]' if skip_build else ''
 
         return "Automated %s made by gitlabform%s" % (operation, skip_build_str)
+
+    def get_file_content_as_template(self, template, project_and_group):
+        # use jinja2-like syntax, but let's keep it simple for now
+        # note that there is no support for escaping!
+
+        project = self.get_project(project_and_group)
+        content = re.sub(r'\{\{\s+project\s+\}\}', project, template)
+
+        group = self.get_group(project_and_group)
+        content = re.sub(r'\{\{\s+group\s+\}\}', group, content)
+
+        return content
+
+    def get_group(self, project_and_group):
+        return re.match('(.*)/.*', project_and_group).group(1)
+
+    def get_project(self, project_and_group):
+        return re.match('.*/(.*)', project_and_group).group(1)
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
