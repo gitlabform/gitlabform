@@ -15,7 +15,7 @@ GitLabForm enables you to manage:
 * Branches (protect/unprotect),
 * Services,
 * (Project) Hooks,
-* (Add/edit or delete) Files,
+* (Add/edit or delete) Files, with simple templating,
 
 ...for:
 

@@ -133,6 +133,14 @@ group_settings:
         # You can provide file contents with external file too. Both absolute and relative paths are supported.
         # Relative paths are interpreted as relative to `config.yml` file location.
         file: some-file.txt
+      'file-using-templating':
+        overwrite: true
+        branches: all
+        content: |
+          Simple templating is supported. We are using Jinja2-like syntax.
+          {{ project }} will be replaced by project name, while {{ group }} by a group name.
+          All occurences will be replaced.
+          There is no support for escaping as of now.
 
 project_settings:
 
