@@ -71,9 +71,9 @@ class GitLabCore:
         return str(result['id'])
 
     def _make_requests_to_api(self, path_as_format_string, args=None, method='GET', data=None, expected_codes=200,
-                              paginated=False):
+                              paginated=False, json=None):
         if not paginated:
-            response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes)
+            response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
             return response.json()
         else:
             if '?' in path_as_format_string:
@@ -81,22 +81,27 @@ class GitLabCore:
             else:
                 path_as_format_string += '?per_page=100'
 
-            first_response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes)
+            first_response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
             results = first_response.json()
             total_pages = int(first_response.headers['X-Total-Pages'])
             for page in range(2, total_pages + 1):
                 response = self._make_request_to_api(path_as_format_string + "&page=" + str(page), args, method, data,
-                                                     expected_codes)
+                                                     expected_codes, json)
                 results += response.json()
 
         return results
 
-    def _make_request_to_api(self, path_as_format_string, args, method, data, expected_codes):
+    def _make_request_to_api(self, path_as_format_string, args, method, data, expected_codes, json):
+        if data and json:
+            raise Exception("You need to pass either data or json, not both!")
+
         url = self.url + "/api/v3/" + self._format_with_url_encoding(path_as_format_string, args)
         logging.debug("URL-encoded url=%s" % url)
         headers = {'PRIVATE-TOKEN': self.__token}
         if data:
             response = s.request(method, url, headers=headers, data=data, timeout=10)
+        elif json:
+            response = s.request(method, url, headers=headers, json=json, timeout=10)
         else:
             response = s.request(method, url, headers=headers, timeout=10)
         logging.debug("response code=%s" % response.status_code)

@@ -1,4 +1,4 @@
-import urllib
+import json
 
 from gitlabform.gitlab.core import GitLabCore
 
@@ -93,3 +93,37 @@ class GitLabProjects(GitLabCore):
         data = {**data, **data_required}
         pid = self._get_project_id(project_and_group_name)
         self._make_requests_to_api("projects/%s/hooks", pid, 'POST', data, expected_codes=201)
+
+    def post_approvals(self, project_and_group_name, data):
+        pid = self._get_project_id(project_and_group_name)
+        data_required = {'id': pid}
+        data = {**data, **data_required}
+        self._make_requests_to_api("projects/%s/approvals", pid, 'POST', data, expected_codes=201)
+
+    def put_approvers(self, project_and_group_name, approvers, approver_groups):
+        """
+        :param project_and_group_name: "group/project" string
+        :param approvers: list of approver user names
+        :param approver_groups: list of approver group paths
+        """
+
+        # gitlab API expects ids, not names of users and groups, so we need to convert first
+        approver_ids = []
+        for approver_name in approvers:
+            approver_ids.append(self._get_user_id(approver_name))
+        approver_group_ids = []
+        for group_path in approver_groups:
+            approver_group_ids.append(self._get_group_id(group_path))
+
+        # we need to pass data to this gitlab API endpoint as JSON, because when passing as data the JSON converter
+        # used by requests lib changes empty arrays into nulls and omits it, which results in
+        # {"error":"approver_group_ids is missing"} error from gitlab...
+        # TODO: create JSON object directly, omit converting string to JSON
+        pid = self._get_project_id(project_and_group_name)
+        data = "{"\
+               + '"id":' + str(pid) + ','\
+               + '"approver_ids": [' + ','.join(str(x) for x in approver_ids) + '],'\
+               + '"approver_group_ids": [' + ','.join(str(x) for x in approver_group_ids) + ']'\
+               + "}"
+        json_data = json.loads(data)
+        self._make_requests_to_api("projects/%s/approvers", pid, 'PUT', data=None, json=json_data)
