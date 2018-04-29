@@ -208,6 +208,7 @@ class GitLabFormCore(object):
                     continue
 
                 self.process_project_settings(project_and_group, configuration)
+                self.process_merge_requests(project_and_group, configuration)
                 self.process_deploy_keys(project_and_group, configuration)
                 self.process_secret_variables(project_and_group, configuration)
                 self.process_branches(project_and_group, configuration)
@@ -226,6 +227,25 @@ class GitLabFormCore(object):
         logging.info("Setting project settings: %s", project_settings)
         self.gl.put_project_settings(project_and_group, project_settings)
         logging.debug("Project settings AFTER: %s", self.gl.get_project_settings(project_and_group))
+
+    @if_in_config_and_not_skipped
+    @configuration_to_safe_dict
+    def process_merge_requests(self, project_and_group, configuration):
+        approvals = configuration.get('merge_requests|approvals')
+        if approvals:
+            logging.info("Setting approvals settings: %s", approvals)
+            self.gl.post_approvals(project_and_group, approvals)
+
+        approvers = configuration.get('merge_requests|approvers')
+        approver_groups = configuration.get('merge_requests|approver_groups')
+        # checking if is not None allows configs with empty array to work
+        if approvers is not None or approver_groups is not None:
+            if not approvers:
+                approvers = []
+            if not approver_groups:
+                approver_groups = []
+            logging.info("Setting approvers to users %s and groups %s" % (approvers, approver_groups))
+            self.gl.put_approvers(project_and_group, approvers, approver_groups)
 
     @if_in_config_and_not_skipped
     def process_deploy_keys(self, project_and_group, configuration):
