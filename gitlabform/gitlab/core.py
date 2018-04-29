@@ -36,6 +36,35 @@ class GitLabCore:
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
 
+    def _get_user_id(self, username):
+        users = self._make_requests_to_api("users?username=%s", username, 'GET')
+
+        # this API endpoint is for lookup, not search, so 'username' has to be full and exact username
+        # also it's not possible to get more than 1 user as a result
+
+        if len(users) == 0:
+            raise NotFoundException("No users found when searching for username '%s'" % username)
+
+        return users[0]['id']
+
+    def _get_group_id(self, path):
+        groups = self._make_requests_to_api("groups?search=%s", path, 'GET')
+
+        # this API endpoint is for search, not lookup, so: 1. we may find more than 1 group if the 'group' is part of
+        # more than 1 groups name or path, for example: search for 'foo' will return 'foo' and 'foobar' groups.
+        # 2. we may find non-exact match, for example: search for 'foo' will return 'foobar' group.
+        # we only want the exact matches here.
+
+        if len(groups) == 0:
+            raise NotFoundException("No groups found when searching for group path '%s'" % path)
+
+        for group in groups:
+            if group['path'] == path:
+                return group['id']
+
+        raise NotFoundException("None of the found group(s) when searching for group path '%s'"
+                                " has an exactly matching path: %s" % (path, groups))
+
     def _get_project_id(self, project_and_group):
         # This is a NEW workaround for https://github.com/gitlabhq/gitlabhq/issues/8290
         result = self.get_project(project_and_group)
