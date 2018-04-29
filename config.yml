@@ -68,6 +68,24 @@ group_settings:
       only_allow_merge_if_build_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
 
+    merge_requests:
+      # keys and values here are as described at
+      # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
+      # (note that some Merge Requests-related settings are set in project_settings! read linked gitlab API docs for details)
+      approvals:
+        approvals_before_merge: 2
+        reset_approvals_on_push: true
+        disable_overriding_approvers_per_merge_request: true
+      # below settings are using https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-allowed-approvers
+      # but instead of user and group ids ONLY use usernames and groups paths here
+      # if neither 'approvers' or 'approver_groups' below are set, approvers are NOT managed by gitlabform
+      # you DON'T have to provide both
+      approvers:
+        - user1
+        - user2
+      approver_groups:
+        - my_group1
+
     # keys names are branches names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/branches.html#protect-repository-branch
     branches:
