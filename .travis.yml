@@ -4,7 +4,9 @@ python:
 - '3.5'
 - '3.6'
 
-install: python setup.py develop
+install:
+  - pip install pypandoc
+  - python setup.py develop
 
 script:
   - py.test
