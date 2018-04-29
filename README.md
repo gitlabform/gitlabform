@@ -54,7 +54,7 @@ group_settings:
  
 ## Configuration syntax
 
-See [config.yml](config.yml) in this repo as a well documented example of configuring all projects in all groups,
+See [config.yml](https://github.com/egnyte/gitlabform/blob/master/config.yml) in this repo as a well documented example of configuring all projects in all groups,
 projects in "my_group" group and specifically project "my_group/my_project1".
 
 ## More usage examples
@@ -90,7 +90,7 @@ Run:
 ## Requirements
 
 * Python 3.5+
-* GitLab 9.1.x+
+* GitLab 9.1+ (EE 10.6+ for merge_requests section)
 
 ## Why?
 
