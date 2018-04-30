@@ -68,7 +68,7 @@ group_settings:
       only_allow_merge_if_build_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
 
-    # *** This section required GitLab EE 10.6+ ***
+    # *** This section requires GitLab EE 10.6+ ***
     merge_requests:
       # keys and values here are as described at
       # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
