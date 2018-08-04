@@ -2,6 +2,8 @@
 gitlab:
   url: https://gitlab.yourcompany.com
   token: "<private token of an admin user>"
+  # GitLab API version. As of now only 4 is supported.
+  api_version: 4
 
 #
 # You can define settings on 3 levels here:
