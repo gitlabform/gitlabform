@@ -21,7 +21,7 @@ class GitLabMergeRequests(GitLabCore):
 
     def update_mr(self, project_and_group_name, mr_iid, data):
         pid = self._get_project_id(project_and_group_name)
-        self._make_requests_to_api("projects/%s/merge_request/%s", (pid, mr_iid), method='PUT', data=data)
+        self._make_requests_to_api("projects/%s/merge_requests/%s", (pid, mr_iid), method='PUT', data=data)
 
     def get_mrs(self, project_and_group_name):
         """
