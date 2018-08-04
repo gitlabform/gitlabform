@@ -28,6 +28,10 @@ class GitLabProjects(GitLabCore):
         pid = self._get_project_id(project_and_group_name)
         return self._make_requests_to_api("projects/%s/deploy_keys", pid)
 
+    def get_deploy_key(self, project_and_group_name, id):
+        pid = self._get_project_id(project_and_group_name)
+        return self._make_requests_to_api("projects/%s/deploy_keys/%s", (pid, id), 'GET')
+
     def post_secret_variable(self, project_and_group_name, secret_variable):
         pid = self._get_project_id(project_and_group_name)
         # secret_variable has to be like this:
