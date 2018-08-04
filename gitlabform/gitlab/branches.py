@@ -4,44 +4,40 @@ from gitlabform.gitlab.core import GitLabCore
 class GitLabBranches(GitLabCore):
 
     def protect_branch(self, project_and_group_name, branch, developers_can_push, developers_can_merge):
-        pid = self._get_project_id(project_and_group_name)
         data = {
-            "id": pid,
+            "id": project_and_group_name,
             "branch": branch,
             "developers_can_push": developers_can_push,
             "developers_can_merge": developers_can_merge,
         }
-        return self._make_requests_to_api("projects/%s/repository/branches/%s/protect", (pid, branch),
+        return self._make_requests_to_api("projects/%s/repository/branches/%s/protect",
+                                          (project_and_group_name, branch),
                                           method='PUT', data=data,
                                           expected_codes=[200, 201])
 
     def unprotect_branch(self, project_and_group_name, branch):
-        pid = self._get_project_id(project_and_group_name)
         data = {
-            "id": pid,
+            "id": project_and_group_name,
             "branch": branch,
         }
-        return self._make_requests_to_api("projects/%s/repository/branches/%s/unprotect", (pid, branch),
+        return self._make_requests_to_api("projects/%s/repository/branches/%s/unprotect",
+                                          (project_and_group_name, branch),
                                           method='PUT', data=data,
                                           expected_codes=[200, 201])
 
     def get_branches(self, project_and_group_name):
-        pid = self._get_project_id(project_and_group_name)
-        result = self._make_requests_to_api("projects/%s/repository/branches", pid)
+        result = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name)
         return sorted(map(lambda x: x['name'], result))
 
     def get_branch(self, project_and_group_name, branch):
-        pid = self._get_project_id(project_and_group_name)
-        return self._make_requests_to_api("projects/%s/repository/branches/%s", (pid, branch))
+        return self._make_requests_to_api("projects/%s/repository/branches/%s", (project_and_group_name, branch))
 
-    def delete_branch(self, group_and_project_name, branch):
-        pid = self._get_project_id(group_and_project_name)
-        self._make_requests_to_api("projects/%s/repository/branches/%s", (pid, branch), method='DELETE')
+    def delete_branch(self, project_and_group_name, branch):
+        self._make_requests_to_api("projects/%s/repository/branches/%s", (project_and_group_name, branch),
+                                   method='DELETE')
 
     def get_protected_branches(self, project_and_group_name):
-        pid = self._get_project_id(project_and_group_name)
-
-        branches = self._make_requests_to_api("projects/%s/repository/branches", pid)
+        branches = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name)
 
         protected_branches = []
         for branch in branches:
@@ -52,14 +48,12 @@ class GitLabBranches(GitLabCore):
         return protected_branches
 
     def get_unprotected_branches(self, project_and_group_name):
-        pid = self._get_project_id(project_and_group_name)
+        branches = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name)
 
-        branches = self._make_requests_to_api("projects/%s/repository/branches", pid)
-
-        feature_branches = []
+        unprotected_branches = []
         for branch in branches:
             if not branch['protected']:
                 name = branch['name']
-                feature_branches.append(name)
+                unprotected_branches.append(name)
 
-        return feature_branches
+        return unprotected_branches

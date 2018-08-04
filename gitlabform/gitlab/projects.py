@@ -89,6 +89,7 @@ class GitLabProjects(GitLabCore):
         self._make_requests_to_api("projects/%s/hooks", project_and_group_name, 'POST', data, expected_codes=201)
 
     def post_approvals(self, project_and_group_name, data):
+        # for this endpoint GitLab still actually wants pid, not "group/project"...
         pid = self._get_project_id(project_and_group_name)
         data_required = {'id': pid}
         data = {**data, **data_required}
@@ -113,6 +114,7 @@ class GitLabProjects(GitLabCore):
         # used by requests lib changes empty arrays into nulls and omits it, which results in
         # {"error":"approver_group_ids is missing"} error from gitlab...
         # TODO: create JSON object directly, omit converting string to JSON
+        # for this endpoint GitLab still actually wants pid, not "group/project"...
         pid = self._get_project_id(project_and_group_name)
         data = "{"\
                + '"id":' + str(pid) + ','\
