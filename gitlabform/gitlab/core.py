@@ -95,7 +95,7 @@ class GitLabCore:
         if data and json:
             raise Exception("You need to pass either data or json, not both!")
 
-        url = self.url + "/api/v3/" + self._format_with_url_encoding(path_as_format_string, args)
+        url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
         logging.debug("URL-encoded url=%s" % url)
         headers = {'PRIVATE-TOKEN': self.__token}
         if data:
