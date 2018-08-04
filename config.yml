@@ -65,7 +65,7 @@ group_settings:
       builds_enabled: true
       public_builds: false # "Public pipelines" checkbox in GitLab web UI
       visibility_level: 10 # internal
-      only_allow_merge_if_build_succeeds: true
+      only_allow_merge_if_pipeline_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
 
     # *** This section requires GitLab EE 10.6+ ***
