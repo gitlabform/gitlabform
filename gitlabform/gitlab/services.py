@@ -9,5 +9,4 @@ class GitLabServices(GitLabCore):
 
     def delete_service(self, project_and_group_name, service):
         pid = self._get_project_id(project_and_group_name)
-        return self._make_requests_to_api("projects/%s/services/%s", (pid, service), 'DELETE',
-                                          expected_codes=[200, 204])
+        self._make_requests_to_api("projects/%s/services/%s", (pid, service), 'DELETE', expected_codes=[200, 204])
