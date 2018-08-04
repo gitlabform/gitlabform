@@ -107,6 +107,10 @@ class GitLabCore:
         logging.debug("response code=%s" % response.status_code)
         if response.status_code == 404:
             raise NotFoundException("Resource path='%s' not found!" % url)
+        elif response.status_code == 204:
+            # code calling this function assumes that it can do response.json() so fake it to return empty dict
+            response.json = lambda: {}
+            return response
         elif not self._is_expected_code(response.status_code, expected_codes):
             e = UnexpectedResponseException(
                 "Request url='%s', method=%s, data='%s' failed "
