@@ -1,12 +1,10 @@
+import sys
 import logging
 import urllib
-
 import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-
-from gitlabform.configuration.core import ConfigurationCore
-
+from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
 
 s = requests.Session()
 
@@ -32,6 +30,20 @@ class GitLabCore:
             logging.info("Connected to GitLab version: %s (%s)" % (version['version'], version['revision']))
         except Exception as e:
             raise TestRequestFailedException(e)
+        try:
+            api_version = configuration.get("gitlab|api_version")
+            if api_version != 4:
+                raise ApiVersionIncorrectException(e)
+            logging.info("Config file is declared to be compatible with GitLab API v4")
+        except KeyNotFoundException:
+            logging.fatal("Aborting. GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
+                          "names have changed. By its design GitLabForm reads some parameter names directly from "
+                          "config.yml so you need to update those names by yourself. See changes in config.yml "
+                          "in this diff to see what had to be changed there: "
+                          "https://github.com/egnyte/gitlabform/pull/28/files . "
+                          "After updating your config.yml please add 'api_version' key to 'gitlab' section and set it "
+                          "to 4 to indicate that your config is v4-compatible.")
+            sys.exit(3)
 
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
@@ -95,7 +107,7 @@ class GitLabCore:
         if data and json:
             raise Exception("You need to pass either data or json, not both!")
 
-        url = self.url + "/api/v3/" + self._format_with_url_encoding(path_as_format_string, args)
+        url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
         logging.debug("URL-encoded url=%s" % url)
         headers = {'PRIVATE-TOKEN': self.__token}
         if data:
@@ -107,6 +119,10 @@ class GitLabCore:
         logging.debug("response code=%s" % response.status_code)
         if response.status_code == 404:
             raise NotFoundException("Resource path='%s' not found!" % url)
+        elif response.status_code == 204:
+            # code calling this function assumes that it can do response.json() so fake it to return empty dict
+            response.json = lambda: {}
+            return response
         elif not self._is_expected_code(response.status_code, expected_codes):
             e = UnexpectedResponseException(
                 "Request url='%s', method=%s, data='%s' failed "
@@ -155,6 +171,10 @@ class GitLabCore:
 
 
 class TestRequestFailedException(Exception):
+    pass
+
+
+class ApiVersionIncorrectException(Exception):
     pass
 
 

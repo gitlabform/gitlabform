@@ -2,6 +2,8 @@
 gitlab:
   url: https://gitlab.yourcompany.com
   token: "<private token of an admin user>"
+  # GitLab API version. As of now only 4 is supported.
+  api_version: 4
 
 #
 # You can define settings on 3 levels here:
@@ -62,10 +64,10 @@ group_settings:
 
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
-      builds_enabled: true
-      public_builds: false # "Public pipelines" checkbox in GitLab web UI
-      visibility_level: 10 # internal
-      only_allow_merge_if_build_succeeds: true
+      jobs_enabled: true
+      public_jobs: false # "Public pipelines" checkbox in GitLab web UI
+      visibility: internal
+      only_allow_merge_if_pipeline_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
 
     # *** This section requires GitLab EE 10.6+ ***
@@ -169,7 +171,7 @@ project_settings:
     project_settings:
       # this will make this project settings set to values defined on a group level, but with this single parameter
       # overriden
-      visibility_level: 0 # private
+      visibility: private
 
     deploy_keys:
       # see comment above - this key will be ADDED to the keys configured on a group level
