@@ -64,7 +64,7 @@ group_settings:
     project_settings:
       builds_enabled: true
       public_builds: false # "Public pipelines" checkbox in GitLab web UI
-      visibility_level: 10 # internal
+      visibility: internal
       only_allow_merge_if_pipeline_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
 
@@ -169,7 +169,7 @@ project_settings:
     project_settings:
       # this will make this project settings set to values defined on a group level, but with this single parameter
       # overriden
-      visibility_level: 0 # private
+      visibility: private
 
     deploy_keys:
       # see comment above - this key will be ADDED to the keys configured on a group level
