@@ -89,10 +89,10 @@ class GitLabProjects(GitLabCore):
         self._make_requests_to_api("projects/%s/hooks", project_and_group_name, 'POST', data, expected_codes=201)
 
     def post_approvals(self, project_and_group_name, data):
-        data_required = {'id': project_and_group_name}
+        pid = self._get_project_id(project_and_group_name)
+        data_required = {'id': pid}
         data = {**data, **data_required}
-        # TODO: according to docs you actually need pid here...
-        self._make_requests_to_api("projects/%s/approvals", project_and_group_name, 'POST', data, expected_codes=201)
+        self._make_requests_to_api("projects/%s/approvals", pid, 'POST', data, expected_codes=201)
 
     def put_approvers(self, project_and_group_name, approvers, approver_groups):
         """
@@ -113,10 +113,11 @@ class GitLabProjects(GitLabCore):
         # used by requests lib changes empty arrays into nulls and omits it, which results in
         # {"error":"approver_group_ids is missing"} error from gitlab...
         # TODO: create JSON object directly, omit converting string to JSON
+        pid = self._get_project_id(project_and_group_name)
         data = "{"\
-               + '"id":' + project_and_group_name + ','\
+               + '"id":' + str(pid) + ','\
                + '"approver_ids": [' + ','.join(str(x) for x in approver_ids) + '],'\
                + '"approver_group_ids": [' + ','.join(str(x) for x in approver_group_ids) + ']'\
                + "}"
         json_data = json.loads(data)
-        self._make_requests_to_api("projects/%s/approvers", project_and_group_name, 'PUT', data=None, json=json_data)
+        self._make_requests_to_api("projects/%s/approvers", pid, 'PUT', data=None, json=json_data)
