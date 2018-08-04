@@ -21,7 +21,7 @@ class GitLabRepositories(GitLabCore):
 
     def set_file(self, project_and_group_name, branch, path, content, commit_message):
         data = {
-            "branch_name": branch,
+            "branch": branch,
             "path": path,
             "content": content,
             "commit_message": commit_message
@@ -32,7 +32,7 @@ class GitLabRepositories(GitLabCore):
 
     def add_file(self, project_and_group_name, branch, path, content, commit_message):
         data = {
-            "branch_name": branch,
+            "branch": branch,
             "path": path,
             "content": content,
             "commit_message": commit_message
@@ -43,7 +43,7 @@ class GitLabRepositories(GitLabCore):
 
     def delete_file(self, project_and_group_name, branch, path, commit_message):
         data = {
-            "branch_name": branch,
+            "branch": branch,
             "path": path,
             "commit_message": commit_message
         }
