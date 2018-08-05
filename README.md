@@ -38,6 +38,7 @@ GitLabForm enables you to manage:
 gitlab:
   url: https://gitlab.yourcompany.com
   token: "<private token of an admin user>"
+  api_version: 4
 
 group_settings:
   'my_group':
