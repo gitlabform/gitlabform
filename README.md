@@ -91,7 +91,7 @@ Run:
 ## Requirements
 
 * Python 3.5+
-* GitLab 9.1+ (EE 10.6+ for merge_requests section)
+* GitLab 11+ for gitlabform >=1.0.0, GitLab 9.1-10.8 for gitlabform <1.0.0, (GitLab EE 10.6+ for merge_requests section)
 
 ## Why?
 
