@@ -26,7 +26,7 @@ class GitLabBranches(GitLabCore):
                                           expected_codes=[200, 201])
 
     def get_branches(self, project_and_group_name):
-        result = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name)
+        result = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name, paginated=True)
         return sorted(map(lambda x: x['name'], result))
 
     def get_branch(self, project_and_group_name, branch):
