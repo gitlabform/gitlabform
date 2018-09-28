@@ -26,7 +26,7 @@ setup(name='gitlabform',
       packages=find_packages(),
       install_requires=[
             'requests==2.18.4',
-            'pyyaml==3.12',
+            'pyyaml==3.13',
       ],
       tests_requires=[
             'pytest',
