@@ -108,9 +108,15 @@ It just goes through a loop of projects list and make a series of GitLab API req
 GitLab API 1-to-1, so for example it just PUTs or POSTs the hash set at given place in its config transformed into JSON,
 so that it's not necessary to modify the app in case of some GitLab API changes.
 
-## Ideas for improvement
+## Contributing
 
-See https://github.com/egnyte/gitlabform/issues
+Development environment setup how-to:
+
+1. Install build requirements - `pandoc` binary package + `pypandoc` python package.
+
+2. Create virtualenv with Python 3.5+, for example in `venv` dir which is in `.gitignore`.
+
+3. Activate the virtualenv and install gitlabform in it in develop mode (`python setup.py develop`).
 
 ## License
 
