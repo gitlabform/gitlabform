@@ -37,3 +37,7 @@ MANIFEST
 
 # bak files
 *.bak
+
+# prevent accidental pushing own config to github
+config.yml
+/config
