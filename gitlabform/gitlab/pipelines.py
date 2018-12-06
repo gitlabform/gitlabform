@@ -9,7 +9,7 @@ class GitLabPipelines(GitLabCore):
                     'qa', 'qabranchprod', 'qabranchrc']
 
     def check_envs(self):
-        sleep = 3
+        sleep = 60
         print('Current time %s, waiting %ss.' % (datetime.now(), sleep))
         t.sleep(sleep)
         print('Starts at %s.' % (datetime.now()))
