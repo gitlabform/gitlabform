@@ -4,7 +4,7 @@ from datetime import *
 
 
 class GitLabPipelines(GitLabCore):
-    SDDC_ENVS = 'sddc/envs'
+    SDDC_ENVS = '441'
     BRANCHES = ['egnyte', 'global_production', 'global_qa', 'internal', 'partners', 'perf2', 'production',
                     'qa', 'qabranchprod', 'qabranchrc']
 
@@ -28,13 +28,19 @@ class GitLabPipelines(GitLabCore):
     def get_project_id(self, module):
         name = (module.split('/'))[1]
         project = self._make_requests_to_api("projects?search=%s", name)
+        print(project[0])
         return project[0]['id']
 
 
     def test(self, modules_and_new_tags):
         print('test')
-        print(modules_and_new_tags)
         for module_and_tag in modules_and_new_tags:
             module, tag = module_and_tag
-            print(module)
-            print(self.get_project_id(module))
+            id = self.get_project_id((module))
+            print(id)
+            test = self._make_requests_to_api("projects/%s/repository/commits", str(id))
+            print(test)
+            print('----------------------------------------')
+            print(test[0])
+            single_commit = self._make_requests_to_api("projects/%s/repository/commits/%s", (str(id), test[0]['id']))
+            print(single_commit)
