@@ -37,7 +37,7 @@ class GitLabBranches(GitLabCore):
                                    method='DELETE')
 
     def get_protected_branches(self, project_and_group_name):
-        branches = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name)
+        branches = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name, paginated=True)
 
         protected_branches = []
         for branch in branches:
@@ -48,7 +48,7 @@ class GitLabBranches(GitLabCore):
         return protected_branches
 
     def get_unprotected_branches(self, project_and_group_name):
-        branches = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name)
+        branches = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name, paginated=True)
 
         unprotected_branches = []
         for branch in branches:
