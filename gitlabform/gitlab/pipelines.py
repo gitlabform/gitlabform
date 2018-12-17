@@ -11,7 +11,6 @@ class GitLabPipelines(GitLabCore):
 
     def get_pipeline(self, project_and_group_name, pipeline_id):
         pipeline = self._make_requests_to_api("/projects/%s/pipelines/%s", (project_and_group_name, pipeline_id))
-        print(pipeline)
         return pipeline
 
     def retry_pipeline(self, project_and_group_name, pipeline_id):
