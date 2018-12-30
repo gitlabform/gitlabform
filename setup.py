@@ -28,7 +28,7 @@ setup(name='gitlabform',
             'requests>=2.20.0',
             'pyyaml==3.13',
       ],
-      tests_requires=[
+      tests_require=[
             'pytest',
       ],
       setup_requires=[
