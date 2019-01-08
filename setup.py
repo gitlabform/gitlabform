@@ -16,6 +16,7 @@ setup(name='gitlabform',
       classifiers=[
             "Programming Language :: Python :: 3.5",
             "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
             "Development Status :: 4 - Beta",
             "Intended Audience :: Information Technology",
             "Intended Audience :: System Administrators",
