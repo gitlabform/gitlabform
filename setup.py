@@ -7,7 +7,7 @@ def convert_markdown_to_rst(file):
 
 
 setup(name='gitlabform',
-      version='1.0.4',
+      version='1.0.5',
       description='Easy configuration as code tool for GitLab using config in plain YAML',
       long_description=convert_markdown_to_rst('README.md'),
       url='https://github.com/egnyte/gitlabform',
@@ -26,7 +26,7 @@ setup(name='gitlabform',
       packages=find_packages(),
       install_requires=[
             'requests>=2.20.0',
-            'pyyaml==3.13',
+            'pyyaml>=4.2b1',
       ],
       tests_requires=[
             'pytest',
