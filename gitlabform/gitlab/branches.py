@@ -32,6 +32,16 @@ class GitLabBranches(GitLabCore):
     def get_branch(self, project_and_group_name, branch):
         return self._make_requests_to_api("projects/%s/repository/branches/%s", (project_and_group_name, branch))
 
+    def create_branch(self, project_and_group_name, branchname, ref):
+        data = {
+            "id": project_and_group_name,
+            "branch": branchname,
+            "ref": ref,
+        }
+        self._make_requests_to_api("projects/%s/repository/branches", (project_and_group_name),
+                                    method='POST', data=data,
+                                    expected_codes=[200, 201])
+
     def delete_branch(self, project_and_group_name, branch):
         self._make_requests_to_api("projects/%s/repository/branches/%s", (project_and_group_name, branch),
                                    method='DELETE')
