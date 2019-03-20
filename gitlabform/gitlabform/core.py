@@ -371,7 +371,8 @@ class GitLabFormCore(object):
                             path = Path(os.path.join(self.c.config_dir, str(path_in_config)))
                         new_content = path.read_text()
 
-                    new_content = self.get_file_content_as_template(new_content, project_and_group)
+                    if configuration.get('files|' + file + '|template', True):
+                        new_content = self.get_file_content_as_template(new_content, project_and_group)
 
                     try:
                         current_content = self.gl.get_file(project_and_group, branch, file)

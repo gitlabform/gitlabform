@@ -161,8 +161,11 @@ group_settings:
           Simple templating is supported via jinja2 with two variables
           {{ project }} will be replaced by project name, while {{ group }} by a group name.
           All occurences will be replaced.
-          There is no support for escaping as of now.
-
+      'file-escape-templating':
+        branches: all
+        template: no
+        content: |
+          {{ project }} will be rendered literally
 project_settings:
 
   # settings specific to 'my_group/my_project1' project
