@@ -17,7 +17,7 @@ GitLabForm enables you to manage:
 * Branches (protect/unprotect),
 * Services,
 * (Project) Hooks,
-* (Add/edit or delete) Files, with simple templating based on jinja2,
+* (Add/edit or delete) Files, with templating based on jinja2 (now supports custom variables!),
 * Merge Requests approvals settings and approvers (EE 10.6+ only),
 
 ...for:
