@@ -32,7 +32,7 @@ class ConfigurationCore:
         except Exception as e:
             raise ConfigFileNotFoundException(config_path)
 
-    def get(self, path):
+    def get(self, path, default=None):
         """
         :param path: "path" to given element in YAML file, for example for:
 
@@ -57,7 +57,10 @@ class ConfigurationCore:
             for token in tokens:
                 current = current[token]
         except:
-            raise KeyNotFoundException
+            if default:
+                return default
+            else:
+                raise KeyNotFoundException
 
         return current
 

@@ -36,7 +36,9 @@ GitLabForm enables you to manage:
 
 ```yaml
 gitlab:
+  # You can also set in your environment GITLAB_URL
   url: https://gitlab.yourcompany.com
+  # You can also set in your environment GITLAB_TOKEN
   token: "<private token of an admin user>"
   api_version: 4
 
