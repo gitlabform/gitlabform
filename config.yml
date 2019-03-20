@@ -160,7 +160,7 @@ group_settings:
         overwrite: true
         branches: all
         content: |
-          Simple templating is supported via jinja2 with two variables
+          Simple templating is supported via jinja2 with two default variables
           {{ project }} will be replaced by project name, while {{ group }} by a group name.
           All occurences will be replaced.
       'file-escape-templating':
@@ -171,10 +171,10 @@ group_settings:
       'file-with-custom-variable':
         branches: all
         content: |
-          {{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env. Group and project are always accessable by jinja.
+          {{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env. Group: {{ group }} and project: {{ project }} are always accessable by jinja.
         jinja_env:
-          foo: 'foo'
-          bar: 'bar'
+          foo: 'fooz'
+          bar: 'barz'
 
 
 project_settings:
