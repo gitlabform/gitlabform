@@ -3,8 +3,6 @@
 
 # GitLabForm
 
-[![Join the chat at https://gitter.im/egnyte/gitlabform](https://badges.gitter.im/egnyte/gitlabform.svg)](https://gitter.im/egnyte/gitlabform?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 GitLabForm is an easy configuration as code tool for GitLab using config in plain YAML.
 
 ## Features
@@ -17,6 +15,7 @@ GitLabForm enables you to manage:
 * Branches (protect/unprotect),
 * Services,
 * (Project) Hooks,
+* (Project) Push Rules,
 * (Add/edit or delete) Files, with templating based on jinja2 (now supports custom variables!),
 * Merge Requests approvals settings and approvers (EE 10.6+ only),
 

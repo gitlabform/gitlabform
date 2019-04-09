@@ -68,6 +68,18 @@ class GitLabProjects(GitLabCore):
         # ..as documented at: https://docs.gitlab.com/ce/api/projects.html#edit-project
         self._make_requests_to_api("projects/%s", project_and_group_name, 'PUT', project_settings)
 
+    def get_project_push_rules(self, project_and_group_name):
+        return self._make_requests_to_api("projects/%s/push_rule", project_and_group_name)
+
+    def put_project_push_rules(self, project_and_group_name, push_rules):
+        # push_rules has to be like this:
+        # {
+        #     'setting1': value1,
+        #     'setting2': value2,
+        # }
+        # ..as documented at: https://docs.gitlab.com/ee/api/projects.html#edit-project-push-rule
+        self._make_requests_to_api("projects/%s/push_rule", project_and_group_name, 'PUT', push_rules)
+
     def get_hook_id(self, project_and_group_name, url):
         hooks = self._make_requests_to_api("projects/%s/hooks", project_and_group_name, 'GET')
         for hook in hooks:

@@ -72,6 +72,17 @@ group_settings:
       only_allow_merge_if_pipeline_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
 
+    # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
+    project_push_rules:
+      commit_message_regex: "Fixes \d +"
+      branch_name_regex: ""
+      deny_delete_tag: false
+      member_check: false
+      prevent_secrets: false
+      author_email_regex: ""
+      file_name_regex: ""
+      max_file_size: 0 # in MB, 0 means unlimited
+
     # *** This section requires GitLab EE 10.6+ ***
     merge_requests:
       # keys and values here are as described at

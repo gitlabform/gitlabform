@@ -208,6 +208,7 @@ class GitLabFormCore(object):
                     continue
 
                 self.process_project_settings(project_and_group, configuration)
+                self.process_project_push_rules(project_and_group, configuration)
                 self.process_merge_requests(project_and_group, configuration)
                 self.process_deploy_keys(project_and_group, configuration)
                 self.process_secret_variables(project_and_group, configuration)
@@ -227,6 +228,14 @@ class GitLabFormCore(object):
         logging.info("Setting project settings: %s", project_settings)
         self.gl.put_project_settings(project_and_group, project_settings)
         logging.debug("Project settings AFTER: %s", self.gl.get_project_settings(project_and_group))
+
+    @if_in_config_and_not_skipped
+    def process_project_push_rules(self, project_and_group, configuration):
+        push_rules = configuration['project_push_rules']
+        logging.debug("Project push rules settings BEFORE: %s", self.gl.get_project_push_rules(project_and_group))
+        logging.info("Setting project push rules: %s", push_rules)
+        self.gl.put_project_push_rules(project_and_group, push_rules)
+        logging.debug("Project push rules AFTER: %s", self.gl.get_project_push_rules(project_and_group))
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
