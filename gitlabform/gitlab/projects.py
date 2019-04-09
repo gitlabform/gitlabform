@@ -10,7 +10,7 @@ class GitLabProjects(GitLabCore):
         :param group: group name
         :return: sorted list of ALL projects you have access to, strings "group/project_name"
         """
-        result = self._make_requests_to_api("projects?order_by=name&sort=asc", paginated=True)
+        result = self._make_requests_to_api("projects?order_by=name&sort=asc")
         return sorted(map(lambda x: x['path_with_namespace'], result))
 
     def post_deploy_key(self, project_and_group_name, deploy_key):

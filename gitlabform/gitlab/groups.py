@@ -7,7 +7,7 @@ class GitLabGroups(GitLabCore):
         """
         :return: sorted list of groups
         """
-        result = self._make_requests_to_api("groups?all_available=true", paginated=True)
+        result = self._make_requests_to_api("groups?all_available=true")
         # TODO: for subgroups support switch to full_path below
         return sorted(map(lambda x: x['path'], result))
 
@@ -18,7 +18,7 @@ class GitLabGroups(GitLabCore):
     #     :param group: group name
     #     :return: sorted list of subgroups of given group
     #     """
-    #     result = self._make_requests_to_api("groups/%s/subgroups?all_available=true", group, paginated=True)
+    #     result = self._make_requests_to_api("groups/%s/subgroups?all_available=true", group)
     #     return sorted(map(lambda x: x['path'], result))
 
     def get_projects(self, group):
@@ -28,7 +28,7 @@ class GitLabGroups(GitLabCore):
                  returned, so if "group" (= members of this group) is also a member of some projects, they won't be
                  returned here.
         """
-        projects = self._make_requests_to_api("groups/%s/projects", group, paginated=True)
+        projects = self._make_requests_to_api("groups/%s/projects", group)
 
         all_project_and_groups = sorted(map(lambda x: x['path_with_namespace'], projects))
 

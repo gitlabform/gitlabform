@@ -83,18 +83,17 @@ class GitLabCore:
         return str(result['id'])
 
     def _make_requests_to_api(self, path_as_format_string, args=None, method='GET', data=None, expected_codes=200,
-                              paginated=False, json=None):
-        if not paginated:
-            response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
-            return response.json()
-        else:
-            if '?' in path_as_format_string:
-                path_as_format_string += '&per_page=100'
-            else:
-                path_as_format_string += '?per_page=100'
+                              json=None):
 
-            first_response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
-            results = first_response.json()
+        if '?' in path_as_format_string:
+            path_as_format_string += '&per_page=100'
+        else:
+            path_as_format_string += '?per_page=100'
+
+        first_response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
+        results = first_response.json()
+
+        if 'X-Total-Pages' in first_response.headers:
             total_pages = int(first_response.headers['X-Total-Pages'])
             for page in range(2, total_pages + 1):
                 response = self._make_request_to_api(path_as_format_string + "&page=" + str(page), args, method, data,

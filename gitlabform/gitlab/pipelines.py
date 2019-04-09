@@ -4,8 +4,7 @@ from gitlabform.gitlab.core import GitLabCore
 class GitLabPipelines(GitLabCore):
 
     def get_pipelines(self, project_and_group_name, branch):
-        pipelines = self._make_requests_to_api("projects/%s/pipelines?ref=%s", (project_and_group_name, branch),
-                                               paginated=True)
+        pipelines = self._make_requests_to_api("projects/%s/pipelines?ref=%s", (project_and_group_name, branch))
         return pipelines
 
     def get_pipeline(self, project_and_group_name, pipeline_id):

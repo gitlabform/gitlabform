@@ -28,7 +28,7 @@ class GitLabMergeRequests(GitLabCore):
         :return: get all *open* MRs in given project
         """
         return self._make_requests_to_api("projects/%s/merge_requests?scope=all&state=opened",
-                                          project_and_group_name, paginated=True)
+                                          project_and_group_name)
 
     def get_mr(self, project_and_group_name, mr_iid):
         return self._make_requests_to_api("projects/%s/merge_requests/%s", (project_and_group_name, mr_iid))
