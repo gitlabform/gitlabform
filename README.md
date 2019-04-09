@@ -16,7 +16,7 @@ GitLabForm enables you to manage:
 * Services,
 * (Project) Hooks,
 * (Project) Push Rules,
-* (Add/edit or delete) Files, with simple templating,
+* (Add/edit or delete) Files, with templating based on jinja2 (now supports custom variables!),
 * Merge Requests approvals settings and approvers (EE 10.6+ only),
 
 ...for:
@@ -35,7 +35,9 @@ GitLabForm enables you to manage:
 
 ```yaml
 gitlab:
+  # You can also set in your environment GITLAB_URL
   url: https://gitlab.yourcompany.com
+  # You can also set in your environment GITLAB_TOKEN
   token: "<private token of an admin user>"
   api_version: 4
 
@@ -51,7 +53,7 @@ group_settings:
 3. Run `gitlabform my_group`
 
 4. Watch GitLabForm add/reset this deploy key to all projects in "my_group" group in your GitLab!
- 
+
 ## Configuration syntax
 
 See [config.yml](https://github.com/egnyte/gitlabform/blob/master/config.yml) in this repo as a well documented example of configuring all projects in all groups,
@@ -95,7 +97,7 @@ Run:
 ## Why?
 
 This tool was created as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890)
-but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729) 
+but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729)
 (released in GitLab 9.4) to keep configuration as code.
 
 GitLabForm is slightly similar to [GitLab provider](https://www.terraform.io/docs/providers/gitlab/index.html) for Terraform (which we love, btw!),

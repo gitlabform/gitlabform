@@ -1,6 +1,8 @@
 # GitLab API access config
 gitlab:
+  # You can also set in your environment GITLAB_URL
   url: https://gitlab.yourcompany.com
+  # You can also set in your environment GITLAB_TOKEN
   token: "<private token of an admin user>"
   # GitLab API version. As of now only 4 is supported.
   api_version: 4
@@ -169,10 +171,22 @@ group_settings:
         overwrite: true
         branches: all
         content: |
-          Simple templating is supported. We are using Jinja2-like syntax.
+          Simple templating is supported via jinja2 with two default variables
           {{ project }} will be replaced by project name, while {{ group }} by a group name.
           All occurences will be replaced.
-          There is no support for escaping as of now.
+      'file-escape-templating':
+        branches: all
+        template: no
+        content: |
+          {{ project }} will be rendered literally
+      'file-with-custom-variable':
+        branches: all
+        content: |
+          {{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env. Group: {{ group }} and project: {{ project }} are always accessable by jinja.
+        jinja_env:
+          foo: 'fooz'
+          bar: 'barz'
+
 
 project_settings:
 

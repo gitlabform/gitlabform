@@ -380,7 +380,11 @@ class GitLabFormCore(object):
                             path = Path(os.path.join(self.c.config_dir, str(path_in_config)))
                         new_content = path.read_text()
 
-                    new_content = self.get_file_content_as_template(new_content, project_and_group)
+                    if configuration.get('files|' + file + '|template', True):
+                        new_content = self.get_file_content_as_template(
+                            new_content,
+                            project_and_group,
+                            **configuration.get('files|' + file + '|jinja_env', dict()))
 
                     try:
                         current_content = self.gl.get_file(project_and_group, branch, file)
@@ -425,17 +429,13 @@ class GitLabFormCore(object):
 
         return "Automated %s made by gitlabform%s" % (operation, skip_build_str)
 
-    def get_file_content_as_template(self, template, project_and_group):
-        # use jinja2-like syntax, but let's keep it simple for now
-        # note that there is no support for escaping!
-
-        project = self.get_project(project_and_group)
-        content = re.sub(r'\{\{\s+project\s+\}\}', project, template)
-
-        group = self.get_group(project_and_group)
-        content = re.sub(r'\{\{\s+group\s+\}\}', group, content)
-
-        return content
+    def get_file_content_as_template(self, template, project_and_group, **kwargs):
+        # Use jinja with variables project and group
+        from jinja2 import Template
+        return Template(template).render(
+            project=self.get_project(project_and_group),
+            group=self.get_group(project_and_group),
+            **kwargs)
 
     def get_group(self, project_and_group):
         return re.match('(.*)/.*', project_and_group).group(1)

@@ -2,6 +2,7 @@ import sys
 import logging
 import urllib
 import requests
+from os import environ
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
@@ -23,8 +24,8 @@ class GitLabCore:
 
     def __init__(self, config_path=None):
         configuration = ConfigurationCore(config_path)
-        self.url = configuration.get("gitlab|url")
-        self.__token = configuration.get("gitlab|token")
+        self.url = configuration.get("gitlab|url", environ.get("GITLAB_URL"))
+        self.__token = configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
         try:
             version = self._make_requests_to_api("version")
             logging.info("Connected to GitLab version: %s (%s)" % (version['version'], version['revision']))
