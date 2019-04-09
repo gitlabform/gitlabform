@@ -17,6 +17,7 @@ GitLabForm enables you to manage:
 * Branches (protect/unprotect),
 * Services,
 * (Project) Hooks,
+* (Project) Push Rules,
 * (Add/edit or delete) Files, with simple templating,
 * Merge Requests approvals settings and approvers (EE 10.6+ only),
 
