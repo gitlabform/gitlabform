@@ -28,7 +28,7 @@ setup(name='gitlabform',
       install_requires=[
             'requests>=2.20.0',
             'pyyaml>=4.2b1',
-            'Jinja2==2.10',
+            'Jinja2>=2.10.1,<3',
       ],
       tests_require=[
             'pytest',
