@@ -17,9 +17,10 @@ class GitLabTags(GitLabCore):
 
     def protect_tag(self, project_and_group_name, tag_name, create_access_level):
         data = {
-            'name': tag_name,
-            'create_access_level': create_access_level
+            'name': tag_name
         }
+        if create_access_level:
+            data['create_access_level'] = create_access_level
         return self._make_requests_to_api("projects/%s/protected_tags", project_and_group_name, method='POST',
                                           data=data, expected_codes=201)
 

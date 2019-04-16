@@ -314,7 +314,7 @@ class GitLabFormCore(object):
             try:
                 if configuration['tags'][tag]['protected']:
                     create_access_level = configuration['tags'][tag]['create_access_level'] if \
-                        'create_access_level' in configuration['tags'][tag] else '30'
+                        'create_access_level' in configuration['tags'][tag] else None
                     logging.debug("Setting tag '%s' as *protected*", tag)
                     try:
                         # try to unprotect first
