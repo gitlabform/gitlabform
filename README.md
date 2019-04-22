@@ -13,6 +13,7 @@ GitLabForm enables you to manage:
 * Deployment keys,
 * Secret variables,
 * Branches (protect/unprotect),
+* Tags (protect/unprotect),
 * Services,
 * (Project) Hooks,
 * (Project) Push Rules,
