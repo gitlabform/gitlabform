@@ -213,6 +213,7 @@ class GitLabFormCore(object):
                 self.process_deploy_keys(project_and_group, configuration)
                 self.process_secret_variables(project_and_group, configuration)
                 self.process_branches(project_and_group, configuration)
+                self.process_tags(project_and_group, configuration)
                 self.process_services(project_and_group, configuration)
                 self.process_files(project_and_group, configuration)
                 self.process_hooks(project_and_group, configuration)
@@ -304,6 +305,28 @@ class GitLabFormCore(object):
             except NotFoundException:
                 logging.warning("! Branch '%s' not found when trying to set it as protected/unprotected",
                                 branch)
+                if self.args.strict:
+                    exit(3)
+
+    @if_in_config_and_not_skipped
+    def process_tags(self, project_and_group, configuration):
+        for tag in sorted(configuration['tags']):
+            try:
+                if configuration['tags'][tag]['protected']:
+                    create_access_level = configuration['tags'][tag]['create_access_level'] if \
+                        'create_access_level' in configuration['tags'][tag] else None
+                    logging.debug("Setting tag '%s' as *protected*", tag)
+                    try:
+                        # try to unprotect first
+                        self.gl.unprotect_tag(project_and_group, tag)
+                    except NotFoundException:
+                        pass
+                    self.gl.protect_tag(project_and_group, tag, create_access_level)
+                else:
+                    logging.debug("Setting tag '%s' as *unprotected*", tag)
+                    self.gl.unprotect_tag(project_and_group, tag)
+            except NotFoundException:
+                logging.warning("! Tag '%s' not found when trying to set it as protected/unprotected", tag)
                 if self.args.strict:
                     exit(3)
 
