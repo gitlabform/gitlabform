@@ -1,6 +1,6 @@
 import json
 
-from gitlabform.gitlab.core import GitLabCore
+from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabProjects(GitLabCore):
@@ -10,8 +10,11 @@ class GitLabProjects(GitLabCore):
         :param group: group name
         :return: sorted list of ALL projects you have access to, strings "group/project_name"
         """
-        result = self._make_requests_to_api("projects?order_by=name&sort=asc", paginated=True)
-        return sorted(map(lambda x: x['path_with_namespace'], result))
+        try:
+            result = self._make_requests_to_api("projects?order_by=name&sort=asc", paginated=True)
+            return sorted(map(lambda x: x['path_with_namespace'], result))
+        except NotFoundException:
+            return []
 
     def post_deploy_key(self, project_and_group_name, deploy_key):
         # deploy_key has to be like this:
@@ -57,7 +60,10 @@ class GitLabProjects(GitLabCore):
         return self._make_requests_to_api("projects/%s/variables", project_and_group_name)
 
     def get_project_settings(self, project_and_group_name):
-        return self._make_requests_to_api("projects/%s", project_and_group_name)
+        try:
+            return self._make_requests_to_api("projects/%s", project_and_group_name)
+        except NotFoundException:
+            return dict()
 
     def put_project_settings(self, project_and_group_name, project_settings):
         # project_settings has to be like this:
@@ -69,7 +75,10 @@ class GitLabProjects(GitLabCore):
         self._make_requests_to_api("projects/%s", project_and_group_name, 'PUT', project_settings)
 
     def get_project_push_rules(self, project_and_group_name):
-        return self._make_requests_to_api("projects/%s/push_rule", project_and_group_name)
+        try:
+            return self._make_requests_to_api("projects/%s/push_rule", project_and_group_name)
+        except NotFoundException:
+            return dict()
 
     def put_project_push_rules(self, project_and_group_name, push_rules):
         # push_rules has to be like this:
