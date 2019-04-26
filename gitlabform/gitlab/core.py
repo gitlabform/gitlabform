@@ -7,30 +7,26 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
 
-s = requests.Session()
-
-retries = Retry(total=3,
-                backoff_factor=0.25,
-                status_forcelist=[500, 502, 503, 504])
-
-s.mount('http://', HTTPAdapter(max_retries=retries))
-s.mount('https://', HTTPAdapter(max_retries=retries))
-
 
 class GitLabCore:
 
     url = None
     __token = None
 
-    def __init__(self, config_path=None):
-        configuration = ConfigurationCore(config_path)
-        self.url = configuration.get("gitlab|url", environ.get("GITLAB_URL"))
-        self.__token = configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
-        try:
-            version = self._make_requests_to_api("version")
-            logging.info("Connected to GitLab version: %s (%s)" % (version['version'], version['revision']))
-        except Exception as e:
-            raise TestRequestFailedException(e)
+    @staticmethod
+    def create_requests_session():
+        s = requests.Session()
+
+        retries = Retry(total=3,
+                        backoff_factor=0.25,
+                        status_forcelist=[500, 502, 503, 504])
+
+        s.mount('http://', HTTPAdapter(max_retries=retries))
+        s.mount('https://', HTTPAdapter(max_retries=retries))
+        return s
+
+    @staticmethod
+    def verify_api_version(configuration):
         try:
             api_version = configuration.get("gitlab|api_version")
             if api_version != 4:
@@ -45,6 +41,29 @@ class GitLabCore:
                           "After updating your config.yml please add 'api_version' key to 'gitlab' section and set it "
                           "to 4 to indicate that your config is v4-compatible.")
             sys.exit(3)
+
+    @classmethod
+    def from_config_file(cls, config_path=None):
+        configuration = ConfigurationCore(config_path)
+        cls.verify_api_version(configuration)
+        instance = cls(
+            url=configuration.get("gitlab|url", environ.get("GITLAB_URL")),
+            token=configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
+        )
+        instance.check_connection()
+        return instance
+
+    def __init__(self, url, token):
+        self.url = url
+        self.__token = token
+        self.s = self.create_requests_session()
+
+    def check_connection(self):
+        try:
+            version = self._make_requests_to_api("version")
+            logging.info("Connected to GitLab version: %s (%s)" % (version['version'], version['revision']))
+        except Exception as e:
+            raise TestRequestFailedException(e)
 
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
@@ -112,11 +131,11 @@ class GitLabCore:
         logging.debug("URL-encoded url=%s" % url)
         headers = {'PRIVATE-TOKEN': self.__token}
         if data:
-            response = s.request(method, url, headers=headers, data=data, timeout=10)
+            response = self.s.request(method, url, headers=headers, data=data, timeout=10)
         elif json:
-            response = s.request(method, url, headers=headers, json=json, timeout=10)
+            response = self.s.request(method, url, headers=headers, json=json, timeout=10)
         else:
-            response = s.request(method, url, headers=headers, timeout=10)
+            response = self.s.request(method, url, headers=headers, timeout=10)
         logging.debug("response code=%s" % response.status_code)
         if response.status_code == 404:
             raise NotFoundException("Resource path='%s' not found!" % url)

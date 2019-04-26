@@ -121,7 +121,7 @@ class GitLabFormCore(object):
     def initialize_configuration_and_gitlab(self):
 
         try:
-            gl = GitLab(self.args.config)
+            gl = GitLab.from_config_file(self.args.config)
             c = Configuration(self.args.config)
             return gl, c
         except ConfigFileNotFoundException as e:
