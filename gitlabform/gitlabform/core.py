@@ -6,6 +6,9 @@ import sys
 from pathlib import Path
 import os
 from functools import wraps
+from itertools import starmap
+import json
+import hashlib
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import ConfigFileNotFoundException
@@ -17,7 +20,7 @@ from gitlabform.gitlab.core import NotFoundException
 def if_in_config_and_not_skipped(method):
 
     @wraps(method)
-    def method_wrapper(self, project_and_group, configuration):
+    def method_wrapper(self, project_and_group, configuration, **kwargs):
 
         wrapped_method_name = method.__name__
         # for method name like "process_hooks" this returns "hooks"
@@ -27,8 +30,8 @@ def if_in_config_and_not_skipped(method):
             if 'skip' in configuration[config_section_name] and configuration[config_section_name]['skip']:
                 logging.info("Skipping %s - explicitly configured to do so." % config_section_name)
             else:
-                logging.info("Setting %s" % config_section_name)
-                return method(self, project_and_group, configuration)
+                logging.info("Processing %s" % config_section_name)
+                return method(self, project_and_group, configuration, **kwargs)
         else:
             logging.debug("Skipping %s - not in config." % config_section_name)
 
@@ -61,14 +64,45 @@ class SafeDict(dict):
 def configuration_to_safe_dict(method):
 
     @wraps(method)
-    def method_wrapper(self, project_and_group, configuration):
+    def method_wrapper(self, project_and_group, configuration, **kwargs):
 
-        return method(self, project_and_group, SafeDict(configuration))
+        return method(self, project_and_group, SafeDict(configuration), **kwargs)
 
     return method_wrapper
 
 
 class GitLabFormCore(object):
+
+    def log_diff(self, subject, given, current, only_changed=False, hide_entries=None):
+        # Simple function to create strings for values which should be hidden
+        # example: <secret b2c1a982>
+        hide = lambda s: "<secret {}>".format(hashlib.md5(s.encode('utf-8')).hexdigest()[:8])
+
+        # Compose values in list of `[key, from_config, from_server]``
+        changes = [ [k, json.dumps(current.get(k, "???")),  json.dumps(v) ] for k, v in given.items() ]
+
+        # Remove unchanged if needed
+        if only_changed:
+            changes = filter(lambda i: i[1] != i[2], changes)
+
+        # Hide secrets
+        if hide_entries:
+            changes = list(map(lambda i: [i[0], hide(i[1]), hide(i[2])] if i[0] in hide_entries else i, changes))
+
+        # calculate field size for nice formatting
+        max_key_len = str(max(map(lambda i: len(i[0]), changes)))
+        max_val_1 = str(max(map(lambda i: len(i[1]), changes)))
+        max_val_2 = str(max(map(lambda i: len(i[2]), changes)))
+
+        # generate placeholders for outpurt pattern: `     value: before  => after   `
+        pattern = "{:>"+ max_key_len + "}: {:<"+ max_val_1 + "} => {:<"+ max_val_2 + "}"
+
+        # create string
+        text = '{subject}:\n{diff}'.format(
+            subject=subject,
+            diff='\n'.join(starmap(pattern.format, changes))
+        )
+        logging.info(text)
 
     def __init__(self):
         self.args = self.parse_args()
@@ -205,45 +239,71 @@ class GitLabFormCore(object):
                 if self.args.noop:
                     logging.warning('Not actually processing because running in noop mode.')
                     logging.debug('Configuration that would be applied: %s' % str(configuration))
-                    continue
 
-                self.process_project_settings(project_and_group, configuration)
-                self.process_project_push_rules(project_and_group, configuration)
-                self.process_merge_requests(project_and_group, configuration)
-                self.process_deploy_keys(project_and_group, configuration)
-                self.process_secret_variables(project_and_group, configuration)
-                self.process_branches(project_and_group, configuration)
-                self.process_tags(project_and_group, configuration)
-                self.process_services(project_and_group, configuration)
-                self.process_files(project_and_group, configuration)
-                self.process_hooks(project_and_group, configuration)
-                self.process_members(project_and_group, configuration)
+                do_apply = not self.args.noop
+
+                self.process_project_settings(project_and_group, configuration, do_apply=do_apply)
+                self.process_project_push_rules(project_and_group, configuration, do_apply=do_apply)
+                self.process_merge_requests(project_and_group, configuration, do_apply=do_apply)
+                self.process_deploy_keys(project_and_group, configuration, do_apply=do_apply)
+                self.process_secret_variables(project_and_group, configuration, do_apply=do_apply)
+                self.process_branches(project_and_group, configuration, do_apply=do_apply)
+                self.process_tags(project_and_group, configuration, do_apply=do_apply)
+                self.process_services(project_and_group, configuration, do_apply=do_apply)
+                self.process_files(project_and_group, configuration, do_apply=do_apply)
+                self.process_hooks(project_and_group, configuration, do_apply=do_apply)
+                self.process_members(project_and_group, configuration, do_apply=do_apply)
+
 
             except Exception as e:
                 logging.error("+++ Error while processing '%s'", project_and_group)
                 traceback.print_exc()
 
     @if_in_config_and_not_skipped
-    def process_project_settings(self, project_and_group, configuration):
+    def process_project_settings(self, project_and_group, configuration, do_apply=True):
         project_settings = configuration['project_settings']
-        logging.debug("Project settings BEFORE: %s", self.gl.get_project_settings(project_and_group))
-        logging.info("Setting project settings: %s", project_settings)
-        self.gl.put_project_settings(project_and_group, project_settings)
-        logging.debug("Project settings AFTER: %s", self.gl.get_project_settings(project_and_group))
+        current_project_settings = self.gl.get_project_settings(project_and_group)
+        self.log_diff(
+            "Project %s changes" % project_and_group,
+            project_settings,
+            current_project_settings
+        )
+
+        if do_apply:
+            logging.debug("Project settings BEFORE: %s", current_project_settings)
+            logging.info("Setting project settings: %s", project_settings)
+            self.gl.put_project_settings(project_and_group, project_settings)
+            logging.debug("Project settings AFTER: %s", self.gl.get_project_settings(project_and_group))
 
     @if_in_config_and_not_skipped
-    def process_project_push_rules(self, project_and_group, configuration):
+    def process_project_push_rules(self, project_and_group, configuration, do_apply=True):
         push_rules = configuration['project_push_rules']
-        logging.debug("Project push rules settings BEFORE: %s", self.gl.get_project_push_rules(project_and_group))
-        logging.info("Setting project push rules: %s", push_rules)
-        self.gl.put_project_push_rules(project_and_group, push_rules)
-        logging.debug("Project push rules AFTER: %s", self.gl.get_project_push_rules(project_and_group))
+        current_push_rules =  self.gl.get_project_push_rules(project_and_group)
+        self.log_diff(
+            "Project %s push rules changes" % project_and_group,
+            push_rules,
+            current_push_rules
+        )
+
+        if do_apply:
+            logging.debug("Project push rules settings BEFORE: %s", current_push_rules)
+            logging.info("Setting project push rules: %s", push_rules)
+            self.gl.put_project_push_rules(project_and_group, push_rules)
+            logging.debug("Project push rules AFTER: %s", self.gl.get_project_push_rules(project_and_group))
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
-    def process_merge_requests(self, project_and_group, configuration):
+    def process_merge_requests(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            logging.info("Diffing for merge_requests section is not supported")
+            return
         approvals = configuration.get('merge_requests|approvals')
         if approvals:
+            self.log_diff(
+                "Project %s approvals changes" % project_and_group,
+                approvals,
+                dict()
+            )
             logging.info("Setting approvals settings: %s", approvals)
             self.gl.post_approvals(project_and_group, approvals)
 
@@ -260,7 +320,11 @@ class GitLabFormCore(object):
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
-    def process_members(self, project_and_group, configuration):
+    def process_members(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            # TODO: support diffing for arrays
+            logging.info("Diffing for members section is not supported")
+            return
         groups = configuration.get('members|groups')
         if groups:
             for group in groups:
@@ -289,8 +353,11 @@ class GitLabFormCore(object):
                     pass
                 self.gl.add_member_to_project(project_and_group, user, access, expiry)
 
-    @if_in_config_and_not_skipped
-    def process_deploy_keys(self, project_and_group, configuration):
+    def process_deploy_keys(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            # TODO: support diffing for arrays
+            logging.info("Diffing for deploy_keys section is not supported")
+            return
         logging.debug("Deploy keys BEFORE: %s", self.gl.get_deploy_keys(project_and_group))
         for deploy_key in sorted(configuration['deploy_keys']):
             logging.info("Setting deploy key: %s", deploy_key)
@@ -298,7 +365,11 @@ class GitLabFormCore(object):
         logging.debug("Deploy keys AFTER: %s", self.gl.get_deploy_keys(project_and_group))
 
     @if_in_config_and_not_skipped
-    def process_secret_variables(self, project_and_group, configuration):
+    def process_secret_variables(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            # TODO: support diffing for arrays
+            logging.info("Diffing for secret_variables is not supported")
+            return
         if not self.gl.get_project_settings(project_and_group)['jobs_enabled']:
             logging.warning("Jobs (CI) not enabled in this project so I can't set secret variables here.")
             return
@@ -321,7 +392,12 @@ class GitLabFormCore(object):
         logging.debug("Secret variables AFTER: %s", self.gl.get_secret_variables(project_and_group))
 
     @if_in_config_and_not_skipped
-    def process_branches(self, project_and_group, configuration):
+    def process_branches(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            # TODO: support diffing for arrays
+            # TODO: Get current config for protected branches
+            logging.info("Diffing for protected branches is not supported")
+            return
         for branch in sorted(configuration['branches']):
             try:
                 if configuration['branches'][branch]['protected']:
@@ -341,7 +417,12 @@ class GitLabFormCore(object):
                     exit(3)
 
     @if_in_config_and_not_skipped
-    def process_tags(self, project_and_group, configuration):
+    def process_tags(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            # TODO: support diffing for arrays
+            # TODO: Get current config for protected tags
+            logging.info("Diffing for tags is not supported")
+            return
         for tag in sorted(configuration['tags']):
             try:
                 if configuration['tags'][tag]['protected']:
@@ -364,7 +445,12 @@ class GitLabFormCore(object):
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
-    def process_services(self, project_and_group, configuration):
+    def process_services(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            # TODO: support diffing for arrays
+            # TODO: Get current config for services
+            logging.info("Diffing for services is not supported")
+            return
         for service in sorted(configuration['services']):
             if configuration.get('services|' + service + '|delete'):
                 logging.debug("Deleting service '%s'", service)
@@ -375,7 +461,12 @@ class GitLabFormCore(object):
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
-    def process_files(self, project_and_group, configuration):
+    def process_files(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            # TODO: support diffing for arrays
+            # TODO: Get current config for files
+            logging.info("Diffing for files is not supported")
+            return
         for file in sorted(configuration['files']):
             logging.debug("Processing file '%s'...", file)
 
@@ -500,7 +591,12 @@ class GitLabFormCore(object):
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
-    def process_hooks(self, project_and_group, configuration):
+    def process_hooks(self, project_and_group, configuration, do_apply=True):
+        if not do_apply:
+            # TODO: support diffing for arrays
+            # TODO: Get current config for hooks
+            logging.info("Diffing for hooks section is not supported")
+            return
         for hook in sorted(configuration['hooks']):
 
             if configuration.get('hooks|' + hook + '|delete'):
