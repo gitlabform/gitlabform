@@ -265,7 +265,7 @@ class GitLabFormCore(object):
             for group in groups:
                 logging.debug("Setting group '%s' as a member", group)
                 access = groups[group]['group_access'] if \
-                        'group_access' in groups[group] else '30'
+                        'group_access' in groups[group] else None
                 expiry = groups[group]['expires_at'] if \
                         'expires_at' in groups[group] else ""
                 try:
@@ -279,7 +279,7 @@ class GitLabFormCore(object):
             for user in users:
                 logging.debug("Setting user '%s' as a member", user)
                 access = users[user]['access_level'] if \
-                        'access_level' in users[user] else '30'
+                        'access_level' in users[user] else None
                 expiry = users[user]['expires_at'] if \
                         'expires_at' in users[user] else ""
                 try:

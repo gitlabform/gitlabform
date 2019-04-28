@@ -139,9 +139,10 @@ class GitLabProjects(GitLabCore):
     def share_with_group(self, project_and_group_name, group_name, group_access, expires_at):
         data = {
             "group_id": self._get_group_id(group_name),
-            "group_access": group_access,
             "expires_at": expires_at
         }
+        if group_access is not None:
+            data['group_access'] = group_access
         return self._make_requests_to_api("projects/%s/share", project_and_group_name, method='POST', data=data,
                                           expected_codes=201)
 
