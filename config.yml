@@ -124,6 +124,13 @@ group_settings:
           access_level: 40
           expires_at: 2019-09-26
 
+    # keys names are tags names and values are as parameters described at
+    # https://docs.gitlab.com/ee/api/protected_tags.html
+    tags:
+      'v*':
+        protected: true
+        create_access_level: 40
+
     # service names are as in the endpoints described at https://docs.gitlab.com/ce/api/services.html
     # hashes under those name correspond to the parameters described for given service there
     # except where services are deleted with `delete: true`
