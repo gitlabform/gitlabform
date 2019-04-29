@@ -1,4 +1,4 @@
-from gitlabform.gitlab.core import GitLabCore
+from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabGroups(GitLabCore):
@@ -28,7 +28,10 @@ class GitLabGroups(GitLabCore):
                  returned, so if "group" (= members of this group) is also a member of some projects, they won't be
                  returned here.
         """
-        projects = self._make_requests_to_api("groups/%s/projects", group, paginated=True)
+        try:
+            projects = self._make_requests_to_api("groups/%s/projects", group, paginated=True)
+        except NotFoundException:
+            projects = []
 
         all_project_and_groups = sorted(map(lambda x: x['path_with_namespace'], projects))
 
