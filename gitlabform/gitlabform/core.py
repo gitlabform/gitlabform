@@ -217,6 +217,7 @@ class GitLabFormCore(object):
                 self.process_services(project_and_group, configuration)
                 self.process_files(project_and_group, configuration)
                 self.process_hooks(project_and_group, configuration)
+                self.process_members(project_and_group, configuration)
 
             except Exception as e:
                 logging.error("+++ Error while processing '%s'", project_and_group)
@@ -256,6 +257,37 @@ class GitLabFormCore(object):
                 approver_groups = []
             logging.info("Setting approvers to users %s and groups %s" % (approvers, approver_groups))
             self.gl.put_approvers(project_and_group, approvers, approver_groups)
+
+    @if_in_config_and_not_skipped
+    @configuration_to_safe_dict
+    def process_members(self, project_and_group, configuration):
+        groups = configuration.get('members|groups')
+        if groups:
+            for group in groups:
+                logging.debug("Setting group '%s' as a member", group)
+                access = groups[group]['group_access'] if \
+                        'group_access' in groups[group] else None
+                expiry = groups[group]['expires_at'] if \
+                        'expires_at' in groups[group] else ""
+                try:
+                    self.gl.unshare_with_group(project_and_group, group)
+                except NotFoundException:
+                    pass
+                self.gl.share_with_group(project_and_group, group, access, expiry)
+
+        users = configuration.get('members|users')
+        if users:
+            for user in users:
+                logging.debug("Setting user '%s' as a member", user)
+                access = users[user]['access_level'] if \
+                        'access_level' in users[user] else None
+                expiry = users[user]['expires_at'] if \
+                        'expires_at' in users[user] else ""
+                try:
+                    self.gl.remove_member_from_project(project_and_group, user)
+                except NotFoundException:
+                    pass
+                self.gl.add_member_to_project(project_and_group, user, access, expiry)
 
     @if_in_config_and_not_skipped
     def process_deploy_keys(self, project_and_group, configuration):

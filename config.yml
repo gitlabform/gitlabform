@@ -112,6 +112,18 @@ group_settings:
         developers_can_push: false
         developers_can_merge: true
 
+    # keys names are members/groups names and values are as parameters described at
+    # https://docs.gitlab.com/ee/api/projects.html#share-project-with-group
+    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
+    members:
+      groups:
+        my-group:
+          group_access: 40
+      users:
+        my-user:
+          access_level: 40
+          expires_at: 2019-09-26
+
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
     tags:
