@@ -6,6 +6,8 @@ gitlab:
   token: "<private token of an admin user>"
   # GitLab API version. As of now only 4 is supported.
   api_version: 4
+  # SSL will be verified by default, you can turn checks off by passing `ssl_verify: false`
+  ssl_verify: true
 
 #
 # You can define settings on 3 levels here:

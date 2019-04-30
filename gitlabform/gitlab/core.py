@@ -13,8 +13,7 @@ class GitLabCore:
     url = None
     __token = None
 
-    @staticmethod
-    def create_requests_session():
+    def create_requests_session(self, ssl_verify):
         s = requests.Session()
 
         retries = Retry(total=3,
@@ -23,6 +22,7 @@ class GitLabCore:
 
         s.mount('http://', HTTPAdapter(max_retries=retries))
         s.mount('https://', HTTPAdapter(max_retries=retries))
+        s.verify = ssl_verify
         return s
 
     @staticmethod
@@ -48,15 +48,16 @@ class GitLabCore:
         cls.verify_api_version(configuration)
         instance = cls(
             url=configuration.get("gitlab|url", environ.get("GITLAB_URL")),
-            token=configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
+            token=configuration.get("gitlab|token", environ.get("GITLAB_TOKEN")),
+            ssl_verify=configuration.get("gitlab|ssl_verify", True)
         )
         instance.check_connection()
         return instance
 
-    def __init__(self, url, token):
+    def __init__(self, url, token, ssl_verify=True):
         self.url = url
         self.__token = token
-        self.s = self.create_requests_session()
+        self.s = self.create_requests_session(ssl_verify)
 
     def check_connection(self):
         try:
