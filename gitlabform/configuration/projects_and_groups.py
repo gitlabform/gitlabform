@@ -12,7 +12,7 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         :return: sorted list of projects with configs
         """
         try:
-            return sorted(self.get("project_settings").keys())
+            return sorted(self.get("project_settings", {}).keys())
         except KeyNotFoundException:
             raise ConfigNotFoundException
 
@@ -79,7 +79,7 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         :return: sorted list of groups with configs
         """
         try:
-            return sorted(self.get("group_settings").keys())
+            return sorted(self.get("group_settings", default={}).keys())
         except KeyNotFoundException:
             raise ConfigNotFoundException
 
