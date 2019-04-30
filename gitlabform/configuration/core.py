@@ -57,7 +57,7 @@ class ConfigurationCore:
             for token in tokens:
                 current = current[token]
         except:
-            if default:
+            if default is not None:
                 return default
             else:
                 raise KeyNotFoundException
