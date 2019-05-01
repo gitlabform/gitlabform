@@ -26,7 +26,6 @@ gitlab:
 #
 
 common_settings:
-
   # common settings for ALL projects in ALL groups
 
   secret_variables:
@@ -36,10 +35,8 @@ common_settings:
       value: "ThisIsAVerySecretPassword"
 
 group_settings:
-
   # settings for ALL projects in 'my_group' group
-  'my_group':
-
+  "my_group":
     deploy_keys:
       # this name is not actually used, it's just for you
       a_friendly_deploy_key_name:
@@ -74,7 +71,7 @@ group_settings:
 
     # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
     project_push_rules:
-      commit_message_regex: "Fixes \d +"
+      commit_message_regex: 'Fixes \d +'
       branch_name_regex: ""
       deny_delete_tag: false
       member_check: false
@@ -127,7 +124,7 @@ group_settings:
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
     tags:
-      'v*':
+      "v*":
         protected: true
         create_access_level: 40
 
@@ -147,9 +144,9 @@ group_settings:
     # https://docs.gitlab.com/ee/api/projects.html#edit-project-hook
     # except where hooks are deleted with `delete: true`
     hooks:
-      'http://host.domain.com/some-old-hook-you-want-to-remove-from-config':
+      "http://host.domain.com/some-old-hook-you-want-to-remove-from-config":
         delete: true
-      'http://127.0.0.1:5000/hooks/merge-request':
+      "http://127.0.0.1:5000/hooks/merge-request":
         push_events: false # this is set to true by GitLab API by default
         merge_requests_events: true
         token: some_secret_auth_token
@@ -159,7 +156,7 @@ group_settings:
     # note that this is gitlabform-specific feature, it DOES NOT directly correspond to GitLab API like other sections
     # (although it uses https://docs.gitlab.com/ee/api/repository_files.html)
     files:
-      'README.md':
+      "README.md":
         overwrite: false
         branches:
           - develop
@@ -168,7 +165,7 @@ group_settings:
         skip_ci: true
         content: |
           This is a default README. Please replace it with a proper one!
-      '.gitlab-ci.yml':
+      ".gitlab-ci.yml":
         overwrite: true
         branches: all
         content: |
@@ -180,39 +177,36 @@ group_settings:
             stage: test
             script:
               - npm test
-      'other-file':
+      "other-file":
         overwrite: true
         branches: all
         # You can provide file contents with external file too. Both absolute and relative paths are supported.
         # Relative paths are interpreted as relative to `config.yml` file location.
         file: some-file.txt
-      'file-using-templating':
+      "file-using-templating":
         overwrite: true
         branches: all
         content: |
           Simple templating is supported via jinja2 with two default variables
           {{ project }} will be replaced by project name, while {{ group }} by a group name.
           All occurences will be replaced.
-      'file-escape-templating':
+      "file-escape-templating":
         branches: all
         template: no
         content: |
           {{ project }} will be rendered literally
-      'file-with-custom-variable':
+      "file-with-custom-variable":
         branches: all
         content: |
           {{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env.
           Group: {{ group }} and project: {{ project }} are always accessable by jinja.
         jinja_env:
-          foo: 'fooz'
-          bar: 'barz'
-
+          foo: "fooz"
+          bar: "barz"
 
 project_settings:
-
   # settings specific to 'my_group/my_project1' project
-  'my_group/my_project1':
-
+  "my_group/my_project1":
     project_settings:
       # this will make this project settings set to values defined on a group level, but with this single parameter
       # overriden
@@ -236,7 +230,7 @@ project_settings:
       skip: true # this will skip whole hooks config *section* for this project, although it is set on group level
 
     files:
-      'some-file':
+      "some-file":
         overwrite: true
         branches:
           - develop
@@ -245,13 +239,13 @@ project_settings:
         only_first_branch: true
         content: |
           We want this file to be set only in the first existing branch from the branch list above.
-      'some-path/garbage-file':
+      "some-path/garbage-file":
         delete: true
         branches:
           - develop
           - master
         skip_ci: true
-      'other-file':
+      "other-file":
         skip: true # this will skip processing this *single file* in case it is configured on a group level
 
 # this will skip these projects from being processed
