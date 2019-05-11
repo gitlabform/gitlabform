@@ -97,7 +97,9 @@ group_settings:
         - user1
         - user2
       approver_groups:
-        - my_group1
+        - my_group
+        - my_group1/subgroup
+        - my_group2/subgroup/subsubgroup
 
     # keys names are branches names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/branches.html#protect-repository-branch

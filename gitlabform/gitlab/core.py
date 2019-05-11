@@ -61,22 +61,69 @@ class GitLabCore:
         return users[0]['id']
 
     def _get_group_id(self, path):
-        groups = self._make_requests_to_api("groups?search=%s", path, 'GET')
 
-        # this API endpoint is for search, not lookup, so: 1. we may find more than 1 group if the 'group' is part of
-        # more than 1 groups name or path, for example: search for 'foo' will return 'foo' and 'foobar' groups.
-        # 2. we may find non-exact match, for example: search for 'foo' will return 'foobar' group.
-        # we only want the exact matches here.
+        if '/' not in path:
+            # This API endpoint is for search, not lookup, so:
+            # 1. we may find more than 1 group if the 'group' is part of more than 1 groups name or path,
+            #    for example: search for 'foo' will return 'foo' and 'foobar' groups.
+            # 2. we may find non-exact match, for example: search for 'foo' will return 'foobar' group.
+            #    we only want the exact matches here.
+            groups = self._make_requests_to_api("groups?search=%s", path, 'GET')
 
-        if len(groups) == 0:
-            raise NotFoundException("No groups found when searching for group path '%s'" % path)
+            if len(groups) == 0:
+                raise NotFoundException("No groups found when searching for group path '%s'" % path)
 
-        for group in groups:
-            if group['path'] == path:
+            for group in groups:
+                    return group['id']
+
+            raise NotFoundException("None of the found group(s) when searching for group path '%s'"
+                                    " has an exactly matching path: %s" % (path, groups))
+
+        else:
+            if path.endswith('/'):
+                path = path[:-1]
+            return self._get_subgroup_id_recursive(path)
+
+    def _get_subgroup_id_recursive(self, full_path, search_path=None, parent_group=None):
+        if search_path is None and parent_group is None:
+            path = full_path.split('/', 1)
+            groups = self._make_requests_to_api("groups?search=%s", path[0], 'GET')
+
+            if len(groups) == 0:
+                raise NotFoundException("No parent groups found when searching for group path '%s'" % full_path)
+
+            for group in groups:
+                if group['full_path'] == path[0]:
+                    logging.debug("found parent group id %s matching path %s of full path %s" % (group['id'], path[0], full_path))
+                    parent_group = group['id']
+
+            if parent_group is None:
+                raise NotFoundException("None of the found group(s) when searching for group path '%s'"
+                                        " has an exactly matching path: %s" % (full_path, path[0]))
+
+            return self._get_subgroup_id_recursive(full_path, path[1], parent_group)
+
+        # Search for subgroups
+        sub_groups = self._make_requests_to_api("groups/%s/subgroups", str(parent_group), 'GET')
+
+        path = search_path.split('/', 1)
+
+        if len(sub_groups) == 0:
+            raise NotFoundException("No subgroups '%s' found for parent group: %s" % (path[0], parent_group))
+
+        for group in sub_groups:
+            if group['path'] == path[0] and len(path) > 1:
+                logging.debug(
+                    "found sub group id '%s' matching path '%s' of full path '%s'" % (group['id'], path[0], full_path))
+                logging.debug("recursively looking for path '%s' of full path '%s'" % (path[1], full_path))
+                return self._get_subgroup_id_recursive(full_path, path[1], group['id'])
+            elif group['path'] == path[0]:
+                logging.debug(
+                    "found final sub group id '%s' matching path '%s' of full path '%s'" % (group['id'], path[0], full_path))
                 return group['id']
 
-        raise NotFoundException("None of the found group(s) when searching for group path '%s'"
-                                " has an exactly matching path: %s" % (path, groups))
+        raise NotFoundException("None of the found subgroup(s) when searching for subgroup path '%s'"
+                                " has an exactly matching path: %s" % (path[0], full_path))
 
     def _get_project_id(self, project_and_group):
         # This is a NEW workaround for https://github.com/gitlabhq/gitlabhq/issues/8290
