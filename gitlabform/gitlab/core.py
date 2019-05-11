@@ -74,6 +74,7 @@ class GitLabCore:
                 raise NotFoundException("No groups found when searching for group path '%s'" % path)
 
             for group in groups:
+                if group['path'] == path:
                     return group['id']
 
             raise NotFoundException("None of the found group(s) when searching for group path '%s'"
