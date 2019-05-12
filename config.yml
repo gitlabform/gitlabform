@@ -186,6 +186,14 @@ group_settings:
         # You can provide file contents with external file too. Both absolute and relative paths are supported.
         # Relative paths are interpreted as relative to `config.yml` file location.
         file: some-file.txt
+      "rendered-file":
+        overwrite: true
+        branches: all
+        # jinja templating in gitlabform is supported by FileSystemLoader, so templates could also render each other using for example {% extends 'relative/path/to/other.jinja2' %}
+        file: some-file.txt.jinja2
+        template: yes
+        jinja_env:
+          foo: 'bar'
       "file-using-templating":
         overwrite: true
         branches: all

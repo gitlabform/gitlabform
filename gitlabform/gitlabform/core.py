@@ -3,8 +3,10 @@ import logging.config
 import re
 import traceback
 import sys
-from pathlib import Path
 import os
+import jinja2
+
+from pathlib import Path
 from functools import wraps
 
 from gitlabform.configuration import Configuration
@@ -74,6 +76,7 @@ class GitLabFormCore(object):
         self.args = self.parse_args()
         self.set_log_level()
         self.gl, self.c = self.initialize_configuration_and_gitlab()
+        self.jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=os.getcwd()))
 
     def parse_args(self):
 
@@ -437,9 +440,10 @@ class GitLabFormCore(object):
 
                     if configuration.get('files|' + file + '|template', True):
                         new_content = self.get_file_content_as_template(
-                            new_content,
-                            project_and_group,
-                            **configuration.get('files|' + file + '|jinja_env', dict()))
+                            path if path else new_content,
+                            **{ 'project': self.get_project(project_and_group),
+                                'group': self.get_group(project_and_group),
+                                **configuration.get('files|' + file + '|jinja_env', dict())})
 
                     try:
                         current_content = self.gl.get_file(project_and_group, branch, file)
@@ -484,13 +488,17 @@ class GitLabFormCore(object):
 
         return "Automated %s made by gitlabform%s" % (operation, skip_build_str)
 
-    def get_file_content_as_template(self, template, project_and_group, **kwargs):
+    def get_file_content_as_template(self, template, **kwargs):
         # Use jinja with variables project and group
-        from jinja2 import Template
-        return Template(template).render(
-            project=self.get_project(project_and_group),
-            group=self.get_group(project_and_group),
-            **kwargs)
+        if isinstance(template, Path):
+            # We need to resolve relative path for template
+            #  comparing to the current working directory
+            return self.jinja_env.get_template(str(
+                template.relative_to(
+                    Path(os.getcwd())))).render(**kwargs)
+        else:
+            return self.jinja_env.from_string(template).render(**kwargs)
+
 
     def get_group(self, project_and_group):
         return re.match('(.*)/.*', project_and_group).group(1)
