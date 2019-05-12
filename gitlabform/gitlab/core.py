@@ -20,12 +20,29 @@ s.mount('https://', HTTPAdapter(max_retries=retries))
 class GitLabCore:
 
     url = None
-    __token = None
+    token = None
+
+    # This functions sets variable from configuration,
+    # but if key is not set, it uses same variable from environment
+    # in convention "GITLAB_KEYUPPERCASE"
+    # if none value was found exception is raised
+    def __init_attr_with_env_default(self, configuration, attr_name, root_key='gitlab'):
+        var_name = attr_name.replace('_', '')
+        try:
+            val = configuration.get("%s|%s" % (root_key, var_name))
+            setattr(self, attr_name, val)
+        except KeyNotFoundException:
+            val = environ.get("GITLAB_%s" % (var_name.upper()))
+            if not val:
+                raise KeyNotFoundException("You need to set gitlab -> %s key in config.yaml or use environment variable GITLAB_%s" % (var_name, var_name.upper()))
+            setattr(self, attr_name, val)
 
     def __init__(self, config_path=None):
         configuration = ConfigurationCore(config_path)
-        self.url = configuration.get("gitlab|url", environ.get("GITLAB_URL"))
-        self.__token = configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
+
+        self.__init_attr_with_env_default(configuration, 'url')
+        self.__init_attr_with_env_default(configuration, 'token')
+
         try:
             version = self._make_requests_to_api("version")
             logging.info("Connected to GitLab version: %s (%s)" % (version['version'], version['revision']))
@@ -96,7 +113,7 @@ class GitLabCore:
 
         url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
         logging.debug("URL-encoded url=%s" % url)
-        headers = {'PRIVATE-TOKEN': self.__token}
+        headers = {'PRIVATE-TOKEN': self.token}
         if data:
             response = s.request(method, url, headers=headers, data=data, timeout=10)
         elif json:
