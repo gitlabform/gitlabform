@@ -9,7 +9,7 @@ class GitLabGroups(GitLabCore):
         """
         result = self._make_requests_to_api("groups?all_available=true", paginated=True)
         # TODO: for subgroups support switch to full_path below
-        return sorted(map(lambda x: x['path'], result))
+        return sorted(map(lambda x: x['full_path'], result))
 
     # since GitLab 10.3
 
