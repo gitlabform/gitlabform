@@ -8,18 +8,7 @@ class GitLabGroups(GitLabCore):
         :return: sorted list of groups
         """
         result = self._make_requests_to_api("groups?all_available=true", paginated=True)
-        # TODO: for subgroups support switch to full_path below
-        return sorted(map(lambda x: x['path'], result))
-
-    # since GitLab 10.3
-
-    # def get_subgroups(self, group):
-    #     """
-    #     :param group: group name
-    #     :return: sorted list of subgroups of given group
-    #     """
-    #     result = self._make_requests_to_api("groups/%s/subgroups?all_available=true", group, paginated=True)
-    #     return sorted(map(lambda x: x['path'], result))
+        return sorted(map(lambda x: x['full_path'], result))
 
     def get_projects(self, group):
         """
@@ -29,7 +18,7 @@ class GitLabGroups(GitLabCore):
                  returned here.
         """
         try:
-            projects = self._make_requests_to_api("groups/%s/projects", group, paginated=True)
+            projects = self._make_requests_to_api("groups/%s/projects?include_subgroups=true", group, paginated=True)
         except NotFoundException:
             projects = []
 

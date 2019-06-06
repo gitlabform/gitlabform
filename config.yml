@@ -10,7 +10,7 @@ gitlab:
 #
 # You can define settings on 3 levels here:
 # * common - for ALL projects in ALL groups
-# * group - for ALL projects in selected groups
+# * group/subgroup - for ALL projects in selected group/subgroup (recursively)
 # * project - for single projects
 #
 # Each level is optional.
@@ -113,7 +113,6 @@ group_settings:
         - user1
         - user2
       approver_groups:
-        # note: this is the only place as of now where the subgroups are supported in this app
         - my_group
         - my_group1/subgroup
         - my_group2/subgroup/subsubgroup
@@ -134,6 +133,8 @@ group_settings:
     members:
       groups:
         my-group:
+          group_access: 40
+        my-other-group/subgroup:
           group_access: 40
       users:
         my-user:
