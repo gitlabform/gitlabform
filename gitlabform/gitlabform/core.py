@@ -149,12 +149,18 @@ class GitLabFormCore(object):
             groups = self.c.get_groups()
             # and all projects from config
             projects_and_groups = set(self.c.get_projects())
-        elif not re.match(".*/.*", self.args.project_or_group):
-            # single group
-            groups = [self.args.project_or_group]
         else:
-            # single project
-            projects_and_groups = [self.args.project_or_group]
+            if '/' in self.args.project_or_group:
+                try:
+                    self.gl._get_group_id(self.args.project_or_group)
+                    # it's a subgroup
+                    groups = [self.args.project_or_group]
+                except NotFoundException:
+                    # it's a single project
+                    projects_and_groups = [self.args.project_or_group]
+            else:
+                # it's a single group
+                groups = [self.args.project_or_group]
 
         # skip groups before getting projects from gitlab to save time
         if groups:
