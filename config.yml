@@ -90,14 +90,17 @@ group_settings:
         reset_approvals_on_push: true
         disable_overriding_approvers_per_merge_request: true
       # below settings are using https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-allowed-approvers
-      # but instead of user and group ids ONLY use usernames and groups paths here
+      # but instead of user and group ids ONLY use usernames and full groups/subgroup paths here
       # if neither 'approvers' or 'approver_groups' below are set, approvers are NOT managed by gitlabform
       # you DON'T have to provide both
       approvers:
         - user1
         - user2
       approver_groups:
-        - my_group1
+        # note: this is the only place as of now where the subgroups are supported in this app
+        - my_group
+        - my_group1/subgroup
+        - my_group2/subgroup/subsubgroup
 
     # keys names are branches names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/branches.html#protect-repository-branch
