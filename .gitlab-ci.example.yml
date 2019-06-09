@@ -1,26 +1,14 @@
-stages:
-- apply
+image: egnyte/gitlabform:latest
 
-.gitlabform:
-  stage: apply
-  image: egnyte/gitlabform:latest
-  services:
-  - docker:dind
-  tags:
-  - docker
-  - shared
-
-apply:toolkitz:
- .extends: .gitlabform
- only:
+project:
+  only:
     changes:
     - config.yml
-  script: my_group/subgroup/project
+  script: gitlabform my_group/subgroup/project
 
-apply:get_up:
-  .extends: .gitlabform
+group:
   only:
     changes:
     - other-config.yml
-  script: -c other-config.yml my_whole_other_group
+  script: gitlabform -c other-config.yml my_whole_other_group
 
