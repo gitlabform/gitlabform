@@ -6,8 +6,7 @@ python:
 
 # docker
 env:
-- python_version=3.6 alpine_version=alpine3.9 debian_version=stretch
-- python_version=3.7 alpine_version=alpine3.9 debian_version=stretch
+- alpine_version=alpine3.9 debian_version=stretch
 
 services:
 - docker
@@ -32,11 +31,8 @@ deploy:
   before_deploy:
   - "pip install pypandoc"
 - provider: script
-  env:
-  - PUSH_IMAGES=true python_version=3.6 alpine_version=alpine3.9 debian_version=stretch
-  - PUSH_IMAGES=true python_version=3.7 alpine_version=alpine3.9 debian_version=stretch
   on:
     tags: true
   before_deploy:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  script: bash docker.sh
+  script: PUSH_IMAGES=true bash docker.sh
