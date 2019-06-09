@@ -15,6 +15,7 @@ install:
 
 script:
 - py.test
+- bash docker.sh
 
 deploy:
 - provider: pypi
@@ -31,8 +32,9 @@ deploy:
   - python_version=3.7
   - alpine_version=alpine3.9
   - debian_version=stretch
+  - PUSH_IMAGES=true
   on:
     tags: true
   before_deploy:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  script: basn docker.sh
+  script: bash docker.sh
