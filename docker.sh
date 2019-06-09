@@ -6,21 +6,22 @@ do
     effective_version="${os}_version"
     suffix="${os}${!effective_version}"
     latest="egnyte/gitlabform:latest-${suffix}"
-    docker pull "${latest}" || echo "no cche is availkable"
-    docker build \
-        --build-arg PY_VERSION=$python_version \
-        --build-arg OS_VERSION="${!effective_version}" \
-        --file "${os}.Dockerfile" \
-        --tag "${latest}" .
+    docker pull "${latest}" || echo "no cache is available"
+
+    export PY_VERSION=$python_version
+    export OS_VERSION="${!effective_version}"
+    envsubst < "${os}.Dockerfile" > Dockerfile
+
+    docker build --tag "${latest}" .
     tags="$tags ${latest}"
 
     docker tag "${latest}" "egnyte/gitlabform:${version}-${suffix}"
-    tags="$tags !$"
+    tags="$tags egnyte/gitlabform:${version}-${suffix}"
 
     if [ "$os" = "alpine" ]
     then
         docker tag "${latest}" "egnyte/gitlabform:latest"
-        tags="$tags !$"
+        tags="$tags egnyte/gitlabform:latest"
     fi
 done
 
