@@ -5,7 +5,7 @@ python_version="$(python3 --version | awk '{print $2}' | cut -d'.' -f 1-2)"
 for os in alpine debian
 do
     effective_version="${os}_version"
-    suffix="${os}${!effective_version}"
+    suffix="${!effective_version}"
     latest="egnyte/gitlabform:latest-${suffix}"
     docker pull "${latest}" || echo "no cache is available"
     docker build \

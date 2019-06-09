@@ -1,3 +1,5 @@
+ARG PY_VERSION
+ARG OS_VERSION
 FROM python:${PY_VERSION}-${OS_VERSION}
 COPY --from=pandoc/core:2.7.2 /usr/bin/pandoc* /usr/bin/
 RUN apk add --no-cache \
