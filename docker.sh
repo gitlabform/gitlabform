@@ -7,12 +7,11 @@ do
     suffix="${os}${!effective_version}"
     latest="egnyte/gitlabform:latest-${suffix}"
     docker pull "${latest}" || echo "no cache is available"
-
-    export PY_VERSION=$python_version
-    export OS_VERSION="${!effective_version}"
-    envsubst < "${os}.Dockerfile" > Dockerfile
-
-    docker build --tag "${latest}" .
+    docker build \
+        --build-arg PY_VERSION=$python_version \
+        --build-arg OS_VERSION="${!effective_version}" \
+        --file "${os}.Dockerfile" \
+        --tag "${latest}" .
     tags="$tags ${latest}"
 
     docker tag "${latest}" "egnyte/gitlabform:${version}-${suffix}"
