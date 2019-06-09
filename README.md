@@ -31,7 +31,7 @@ GitLabForm enables you to manage:
 
 ## Quick start
 
-1. Install with: `pip3 install gitlabform`
+1. Install with: `pip3 install gitlabform`, or create docker wrapper like this `alias gitlabform='docker run -it -e GITLAB_TOKEN=my_secret_token -v $(pwd):/config egnyte/gitlabform'`
 
 2. Create example `config.yml`:
 
