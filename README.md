@@ -33,7 +33,7 @@ GitLabForm enables you to manage:
 
 1. pip3: `pip3 install gitlabform` - that's all!
 
-2. docker: you can wrap running gitlabform as a docker command, minimal version of it is: `alias gitlabform='docker run -it -v $(pwd):/config egnyte/gitlabform:latest``. You can use any version of gitlabform with suffix -alpine3.9 (recommended) or -debian9, depending on your specific needs.
+2. docker: you can wrap running gitlabform as a docker command, minimal version of it is: `alias gitlabform='docker run -it -v $(pwd):/config egnyte/gitlabform:latest gitlabform`. You can use any version of gitlabform with suffix -alpine3.9 (recommended) or -debian9, depending on your specific needs.
 
 ## Quick start
 

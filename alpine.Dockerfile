@@ -9,4 +9,3 @@ RUN pip3 install --no-cache-dir pypandoc
 COPY . /gitlabform
 RUN cd gitlabform && python setup.py develop
 WORKDIR /config
-ENTRYPOINT [ "gitlabform" ]
