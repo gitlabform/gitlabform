@@ -7,13 +7,13 @@ python:
 services:
 - docker
 
-script:
-- py.test
-
 install:
 - sudo apt-get -y install pandoc
 - pip install pypandoc
 - python setup.py develop
+
+script:
+- py.test
 - docker build -t egnyte/gitlabform:$(cat version)-alpine3:9 -f alpine.Dockerfile .
 - docker build -t egnyte/gitlabform:$(cat version)-debian9 -f alpine.Dockerfile .
 
@@ -35,9 +35,15 @@ deploy:
   - docker tag egnyte/gitlabform:latest-alpine3:9 egnyte/gitlabform:latest
   - docker tag egnyte/gitlabform:$(cat version)-debian9 egnyte/gitlabform:latest-debian9
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  script:
-  - |
-    for image in egnyte/gitlabform:$(cat version)-alpine3:9 egnyte/gitlabform:$(cat version)-debian9 egnyte/gitlabform:latest-alpine3:9 egnyte/gitlabform:latest-debian9 egnyte/gitlabform:latest
+  script: |
+    images=(
+      egnyte/gitlabform:$(cat version)-alpine3:9
+      egnyte/gitlabform:$(cat version)-debian9
+      egnyte/gitlabform:latest-alpine3:9
+      egnyte/gitlabform:latest-debian9
+      egnyte/gitlabform:latest
+    )
+    for image in "${images[@]}"
     do
       docker push $image
     done
