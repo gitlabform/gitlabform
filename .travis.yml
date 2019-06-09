@@ -14,8 +14,6 @@ install:
 
 script:
 - py.test
-- docker build -t egnyte/gitlabform:$(cat version)-alpine3:9 -f alpine.Dockerfile .
-- docker build -t egnyte/gitlabform:$(cat version)-debian9 -f alpine.Dockerfile .
 
 deploy:
 - provider: pypi
@@ -28,22 +26,12 @@ deploy:
   before_deploy:
   - "pip install pypandoc"
 - provider: script
+  env:
+  - python_version=3.7
+  - alpine_version=alpine3.9
+  - debian_version=stretch
   on:
     tags: true
   before_deploy:
-  - docker tag egnyte/gitlabform:$(cat version)-alpine3:9 egnyte/gitlabform:latest-alpine3:9
-  - docker tag egnyte/gitlabform:latest-alpine3:9 egnyte/gitlabform:latest
-  - docker tag egnyte/gitlabform:$(cat version)-debian9 egnyte/gitlabform:latest-debian9
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  script: |
-    images=(
-      egnyte/gitlabform:$(cat version)-alpine3:9
-      egnyte/gitlabform:$(cat version)-debian9
-      egnyte/gitlabform:latest-alpine3:9
-      egnyte/gitlabform:latest-debian9
-      egnyte/gitlabform:latest
-    )
-    for image in "${images[@]}"
-    do
-      docker push $image
-    done
+  script: basn docker.sh
