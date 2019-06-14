@@ -1,13 +1,12 @@
 from setuptools import setup, find_packages
 from pypandoc import convert
 
-
 def convert_markdown_to_rst(file):
       return convert(file, 'rst')
 
 
 setup(name='gitlabform',
-      version='1.5.0',
+      version=open('version').read(),
       description='Easy configuration as code tool for GitLab using config in plain YAML',
       long_description=convert_markdown_to_rst('README.md'),
       url='https://github.com/egnyte/gitlabform',

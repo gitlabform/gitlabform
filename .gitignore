@@ -41,3 +41,6 @@ MANIFEST
 # prevent accidental pushing own config to github
 config-develop.yml
 /config
+
+# vscode
+.vscode/

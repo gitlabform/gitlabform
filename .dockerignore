@@ -1,0 +1,8 @@
+config.yml
+*.Dockerfile
+.dockerignore
+.git
+.gitignore
+.travis.yml
+docker.sh
+.gitlab-ci.example.yml

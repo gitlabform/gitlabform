@@ -1,0 +1,14 @@
+image: egnyte/gitlabform:latest
+
+project:
+  only:
+    changes:
+    - config.yml
+  script: gitlabform my_group/subgroup/project
+
+group:
+  only:
+    changes:
+    - other-config.yml
+  script: gitlabform -c other-config.yml my_whole_other_group
+

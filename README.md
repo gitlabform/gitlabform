@@ -29,11 +29,15 @@ GitLabForm enables you to manage:
 
 ...and a combination of them (default config for all projects + more specific for some groups + even more specific for particular projects).
 
+## Installation
+
+1. pip3: `pip3 install gitlabform` - that's all!
+
+2. docker: you can wrap running gitlabform as a docker command, minimal version of it is: `alias gitlabform='docker run -it -v $(pwd):/config egnyte/gitlabform:latest gitlabform`. You can use any version of gitlabform with suffix -alpine3.9 (recommended) or -debian9, depending on your specific needs.
+
 ## Quick start
 
-1. Install with: `pip3 install gitlabform`
-
-2. Create example `config.yml`:
+1. Create example `config.yml`:
 
 ```yaml
 gitlab:
@@ -52,9 +56,9 @@ group_settings:
         can_push: false
 ```
 
-3. Run `gitlabform my_group`
+2. Run `gitlabform my_group`
 
-4. Watch GitLabForm add/reset this deploy key to all projects in "my_group" group in your GitLab!
+3. Watch GitLabForm add/reset this deploy key to all projects in "my_group" group in your GitLab!
 
 ## Configuration syntax
 
@@ -110,6 +114,10 @@ but it has much more features and uses simpler configuration format.
 It just goes through a loop of projects list and make a series of GitLab API requests. Where possible it corresponds to
 GitLab API 1-to-1, so for example it just PUTs or POSTs the hash set at given place in its config transformed into JSON,
 so that it's not necessary to modify the app in case of some GitLab API changes.
+
+## Gitlab CI/CD support
+
+You can use gitlabform as a part of your [CCA](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline, example for gitlab could be found at .gitlab-ci.example.yml file. Important note is that when you are exposing your configuration to the pipeline, you have to ensure that token with access to gitlab instance is well protected. Recommended way to do that is to set GITLAB_TOKEN as an environment variable in your pipeline.
 
 ## Contributing
 
