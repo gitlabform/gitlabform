@@ -29,7 +29,8 @@ for image in $tags
 do
     if [ ! -z "${PUSH_IMAGES}" ]
     then
-            docker push $image
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        docker push $image
     else
         echo "$image"
     fi
