@@ -74,6 +74,45 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
 
         return project_config
 
+    def get_effective_config_for_group(self, group) -> dict:
+        """
+        :param group: "group_name"
+        :return: merged configuration for this group, from common, group. Merging is additive.
+        """
+        try:
+            group_config = self.get_config_for_group(group)
+        except ConfigNotFoundException:
+            group_config = {}
+
+        logging.debug("Group config: %s" % group_config)
+
+        try:
+            common_config = self.get("common_settings")
+        except KeyNotFoundException:
+            common_config = {}
+
+        logging.debug("Common config: %s" % common_config)
+
+        # this project is not in any config - return empty config
+        if not group_config and not common_config:
+            return {}
+
+        # this is simplistic, but for our config format should be enough for additive merge
+        # of project, group and common configs
+
+        # first merge common config with group configs
+        for key in group_config.keys() | common_config.keys():
+
+            if key in common_config and key not in group_config:
+                group_config[key] = common_config[key]
+            elif key in group_config and key not in common_config:
+                group_config[key] = group_config[key]
+            else:
+                # overwrite common settings with group settings
+                group_config[key] = {**common_config[key], **group_config[key]}
+
+        return group_config
+
     def get_groups(self) -> list:
         """
         :return: sorted list of groups with configs
