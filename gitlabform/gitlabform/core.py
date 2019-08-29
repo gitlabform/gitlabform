@@ -34,7 +34,6 @@ def if_in_config_and_not_skipped(method):
 
     return method_wrapper
 
-
 # dict that returns `default` if queried with ".get('key|subkey|subsubkey')" if any of the subkeys doesn't exist
 # based on https://stackoverflow.com/a/44859638/2693875
 class SafeDict(dict):
@@ -121,8 +120,8 @@ class GitLabFormCore(object):
     def initialize_configuration_and_gitlab(self):
 
         try:
-            gl = GitLab(self.args.config)
-            c = Configuration(self.args.config)
+            gl = GitLab(self.args.config.strip())
+            c = Configuration(self.args.config.strip())
             return gl, c
         except ConfigFileNotFoundException as e:
             logging.fatal('Aborting - config file not found at: %s', e)
@@ -132,8 +131,8 @@ class GitLabFormCore(object):
             sys.exit(2)
 
     def main(self):
-        projects_and_groups = self.get_projects_list()
-        self.process_all(projects_and_groups)
+        projects_and_groups, groups = self.get_projects_list()
+        self.process_all(projects_and_groups, groups)
 
     def get_projects_list(self):
 
@@ -182,11 +181,15 @@ class GitLabFormCore(object):
         logging.warning('*** # of groups to process: %s', str(len(groups)))
         logging.warning('*** # of projects to process: %s', str(len(effective_projects_and_groups)))
 
-        return effective_projects_and_groups
+        return effective_projects_and_groups, effective_groups
 
-    def process_all(self, projects_and_groups):
+    def process_all(self, projects_and_groups, groups):
 
         i = 0
+
+        for group in groups:
+            configuration = self.c.get_effective_config_for_group(group)
+            self.process_group_secret_variables(group, configuration)
 
         for project_and_group in projects_and_groups:
 
@@ -319,6 +322,25 @@ class GitLabFormCore(object):
                                              configuration['secret_variables'][secret_variable])
 
         logging.debug("Secret variables AFTER: %s", self.gl.get_secret_variables(project_and_group))
+
+    @if_in_config_and_not_skipped
+    def process_group_secret_variables(self, group, configuration):
+        logging.debug("Secret variables BEFORE: %s", self.gl.get_group_secret_variables(group))
+        for secret_variable in sorted(configuration['group_secret_variables']):
+            logging.info("Setting secret variable: %s", secret_variable)
+
+            try:
+                current_value = \
+                    self.gl.get_group_secret_variable(group,
+                                                configuration['group_secret_variables'][secret_variable]['key'])
+                if current_value != configuration['group_secret_variables'][secret_variable]['value']:
+                    self.gl.put_group_secret_variable(group,
+                                                configuration['group_secret_variables'][secret_variable])
+            except NotFoundException:
+                self.gl.post_group_secret_variable(group,
+                                             configuration['group_secret_variables'][secret_variable])
+
+        logging.debug("Secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
 
     @if_in_config_and_not_skipped
     def process_branches(self, project_and_group, configuration):
