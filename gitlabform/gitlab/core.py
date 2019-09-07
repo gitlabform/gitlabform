@@ -60,6 +60,9 @@ class GitLabCore:
 
         return users[0]['id']
 
+    def _get_user(self, id):
+        return self._make_requests_to_api("users/%s", str(id), 'GET')
+
     def _get_group_id(self, path):
         group = self._make_requests_to_api("groups/%s", path, 'GET')
         return str(group['id'])
