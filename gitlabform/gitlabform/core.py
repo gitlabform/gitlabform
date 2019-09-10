@@ -325,9 +325,9 @@ class GitLabFormCore(object):
 
     @if_in_config_and_not_skipped
     def process_group_secret_variables(self, group, configuration):
-        logging.debug("Secret variables BEFORE: %s", self.gl.get_group_secret_variables(group))
+        logging.debug("Group secret variables BEFORE: %s", self.gl.get_group_secret_variables(group))
         for secret_variable in sorted(configuration['group_secret_variables']):
-            logging.info("Setting secret variable: %s", secret_variable)
+            logging.info("Setting group secret variable: %s", secret_variable)
 
             try:
                 current_value = \
@@ -340,7 +340,7 @@ class GitLabFormCore(object):
                 self.gl.post_group_secret_variable(group,
                                              configuration['group_secret_variables'][secret_variable])
 
-        logging.debug("Secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
+        logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
 
     @if_in_config_and_not_skipped
     def process_branches(self, project_and_group, configuration):
