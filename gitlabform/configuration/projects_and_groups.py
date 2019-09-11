@@ -67,7 +67,11 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         elements = subgroup.split('/')
         last_element = None
         for element in elements:
-            if last_element:
+            if not last_element:
+                effective_config = self.get_group_config(element)
+                logging.debug("First level config for '%s': %s" % (element, effective_config))
+                last_element = element
+            else:
                 next_level_subgroup = last_element + '/' + element
                 next_level_subgroup_config = self.get_group_config(next_level_subgroup)
                 logging.debug("Config for '%s': %s"
@@ -76,10 +80,6 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
                 logging.debug("Merged previous level config for '%s' with config for '%s': %s"
                               % (last_element, next_level_subgroup, effective_config))
                 last_element = last_element + '/' + element
-            else:
-                effective_config = self.get_group_config(element)
-                logging.debug("First level config for '%s': %s" % (element, effective_config))
-                last_element = element
 
         return effective_config
 
