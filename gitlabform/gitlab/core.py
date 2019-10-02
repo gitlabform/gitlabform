@@ -7,25 +7,30 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
 
-s = requests.Session()
-
-retries = Retry(total=3,
-                backoff_factor=0.25,
-                status_forcelist=[500, 502, 503, 504])
-
-s.mount('http://', HTTPAdapter(max_retries=retries))
-s.mount('https://', HTTPAdapter(max_retries=retries))
-
 
 class GitLabCore:
 
     url = None
-    __token = None
+    token = None
+    ssl_verify = None
+    session = None
 
     def __init__(self, config_path=None):
         configuration = ConfigurationCore(config_path)
         self.url = configuration.get("gitlab|url", environ.get("GITLAB_URL"))
-        self.__token = configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
+        self.token = configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
+        self.ssl_verify = configuration.get("gitlab|ssl_verify", True)
+
+        self.session = requests.Session()
+
+        retries = Retry(total=3,
+                        backoff_factor=0.25,
+                        status_forcelist=[500, 502, 503, 504])
+
+        self.session.mount('http://', HTTPAdapter(max_retries=retries))
+        self.session.mount('https://', HTTPAdapter(max_retries=retries))
+        self.session.verify = self.ssl_verify
+
         try:
             version = self._make_requests_to_api("version")
             logging.info("Connected to GitLab version: %s (%s)" % (version['version'], version['revision']))
@@ -99,13 +104,13 @@ class GitLabCore:
 
         url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
         logging.debug("URL-encoded url=%s" % url)
-        headers = {'PRIVATE-TOKEN': self.__token}
+        headers = {'PRIVATE-TOKEN': self.token}
         if data:
-            response = s.request(method, url, headers=headers, data=data, timeout=10)
+            response = self.session.request(method, url, headers=headers, data=data, timeout=10)
         elif json:
-            response = s.request(method, url, headers=headers, json=json, timeout=10)
+            response = self.session.request(method, url, headers=headers, json=json, timeout=10)
         else:
-            response = s.request(method, url, headers=headers, timeout=10)
+            response = self.session.request(method, url, headers=headers, timeout=10)
         logging.debug("response code=%s" % response.status_code)
         if response.status_code == 404:
             raise NotFoundException("Resource path='%s' not found!" % url)
