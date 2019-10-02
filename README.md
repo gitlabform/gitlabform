@@ -46,6 +46,7 @@ gitlab:
   # You can also set in your environment GITLAB_TOKEN
   token: "<private token of an admin user>"
   api_version: 4
+  ssl_verify: true
 
 group_settings:
   'my_group':
