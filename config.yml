@@ -18,7 +18,7 @@ gitlab:
 # Each level is optional.
 #
 # To generate effective settings to apply for a given project, if it is configured on more than one level
-# (for example you run it for "my_group/my_project" with the example configuration below, where this project will
+# (for example you run it for "my-group/my-project" with the example configuration below, where this project will
 # take configuration from all 3 levels), GitLabForm will merge those configurations.
 #
 # Merging is additive, so for sections like `deploy_keys`, `secret_variables`, `hooks' on each lower level
@@ -45,8 +45,8 @@ common_settings:
       protected: false #
 
 group_settings:
-  # settings for ALL projects in 'my_group' group
-  "my_group":
+  # settings for ALL projects in 'my-group' group
+  "my-group":
     deploy_keys:
       # this name is not actually used, it's just for you
       a_friendly_deploy_key_name:
@@ -115,9 +115,9 @@ group_settings:
         - user1
         - user2
       approver_groups:
-        - my_group
-        - my_group1/subgroup
-        - my_group2/subgroup/subsubgroup
+        - my-group
+        - my-group1/subgroup
+        - my-group2/subgroup/subsubgroup
 
     # keys names are branches names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/branches.html#protect-repository-branch
@@ -227,8 +227,8 @@ group_settings:
           bar: "barz"
 
 project_settings:
-  # settings specific to 'my_group/my_project1' project
-  "my_group/my_project1":
+  # settings specific to 'my-group/my-project1' project
+  "my-group/my-project1":
     project_settings:
       # this will make this project settings set to values defined on a group level, but with this single parameter
       # overriden
@@ -272,9 +272,9 @@ project_settings:
 
 # this will skip these projects from being processed
 skip_projects:
-  - my_group/this_project_will_not_be_processed_with_gitlabform_when_running_for_my_group
-  - my_group/and_this_too
+  - my-group/this-project-will-not-be-processed-with-gitlabform-when-running-for-my-group
+  - my-group/and-this-too
 
 # this will skip these groups from being processed
 skip_groups:
-  - my_other_group
+  - my-other-group

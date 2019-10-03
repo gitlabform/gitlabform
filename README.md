@@ -12,7 +12,7 @@ GitLabForm enables you to manage:
 * Project settings,
 * Project members (users and groups),
 * Deployment keys,
-* Secret variables (on project and group level),
+* Secret variables (on project and group/subgroup level),
 * Branches (protect/unprotect),
 * Tags (protect/unprotect),
 * Services,
@@ -24,10 +24,10 @@ GitLabForm enables you to manage:
 ...for:
 
 * all projects you have access to,
-* a group of projects,
+* a group/subgroup of projects,
 * a single project,
 
-...and a combination of them (default config for all projects + more specific for some groups + even more specific for particular projects).
+...and a combination of them (default config for all projects + more specific for some groups/subgroups + even more specific for particular projects).
 
 ## Installation
 
