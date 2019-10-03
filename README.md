@@ -37,6 +37,9 @@ GitLabForm enables you to manage:
 
 ## Quick start
 
+Let's assume that you want to have the same deployment key in all projects in a group "My Group" (with path "my-group").
+If so then:
+
 1. Create example `config.yml`:
 
 ```yaml
@@ -49,7 +52,7 @@ gitlab:
   ssl_verify: true
 
 group_settings:
-  'my_group':
+  my-group:
     deploy_keys:
       a_friendly_deploy_key_name:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3WiHAsm2UTz2dU1vKFYUGfHI1p5fIv84BbtV/9jAKvZhVHDqMa07PgVtkttjvDC8bA1kezhOBKcO0KNzVoDp0ENq7WLxFyLFMQ9USf8LmOY70uV/l8Gpcn1ZT7zRBdEzUUgF/PjZukqVtuHqf9TCO8Ekvjag9XRfVNadKs25rbL60oqpIpEUqAbmQ4j6GFcfBBBPuVlKfidI6O039dAnDUsmeafwCOhEvQmF+N5Diauw3Mk+9TMKNlOWM+pO2DKxX9LLLWGVA9Dqr6dWY0eHjWKUmk2B1h1HYW+aUyoWX2TGsVX9DlNY7CKiQGsL5MRH9IXKMQ8cfMweKoEcwSSXJ
@@ -57,24 +60,24 @@ group_settings:
         can_push: false
 ```
 
-2. Run `gitlabform my_group`
+2. Run `gitlabform my-group`
 
-3. Watch GitLabForm add/reset this deploy key to all projects in "my_group" group in your GitLab!
+3. Watch GitLabForm add this deploy key to all projects in "My Group" group in your GitLab!
 
 ## Configuration syntax
 
 See [config.yml](https://github.com/egnyte/gitlabform/blob/master/config.yml) in this repo as a well documented example of configuring all projects in all groups,
-projects in "my_group" group and specifically project "my_group/my_project1".
+projects in "my-group" group and specifically project "my-group/my-project1".
 
 ## More usage examples
 
 To apply settings for a single project, run:
 
-```gitlabform my_group/my_project1```
+```gitlabform my-group/my-project1```
 
 To apply settings for a group of projects, run:
 
-```gitlabform my_group```
+```gitlabform my-group```
 
 To apply settings for all groups of projects and projects explicitly defined in the config, run:
 
