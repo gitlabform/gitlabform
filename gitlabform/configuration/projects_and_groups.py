@@ -108,7 +108,7 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         :return: merged configuration for this group, from common, group. Merging is additive.
         """
         try:
-            group_config = self.get_config_for_group(group)
+            group_config = self.get_group_config(group)
         except ConfigNotFoundException:
             group_config = {}
 
