@@ -3,10 +3,12 @@ language: python
 python:
 - '3.5'
 - '3.6'
+- '3.7'
+- '3.8'
 
 # docker
 env:
-- alpine_version=alpine3.9 debian_version=stretch
+- alpine_version=alpine3.10 debian_version=buster
 
 services:
 - docker
