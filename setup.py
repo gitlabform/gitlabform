@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
-from pypandoc import convert
+from pypandoc import convert_file
 
 def convert_markdown_to_rst(file):
-      return convert(file, 'rst')
+      return convert_file(file, 'rst')
 
 
 setup(name='gitlabform',
@@ -16,6 +16,7 @@ setup(name='gitlabform',
             "Programming Language :: Python :: 3.5",
             "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
             "Development Status :: 4 - Beta",
             "Intended Audience :: Information Technology",
             "Intended Audience :: System Administrators",
