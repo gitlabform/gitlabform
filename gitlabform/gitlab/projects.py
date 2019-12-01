@@ -87,7 +87,11 @@ class GitLabProjects(GitLabCore):
         #     'setting2': value2,
         # }
         # ..as documented at: https://docs.gitlab.com/ee/api/projects.html#edit-project-push-rule
-        self._make_requests_to_api("projects/%s/push_rule", project_and_group_name, 'PUT', push_rules)
+
+        # for this endpoint GitLab fails if project name contains ".", so lets use pid instead
+        pid = self._get_project_id(project_and_group_name)
+
+        self._make_requests_to_api("projects/%s/push_rule", pid, 'PUT', push_rules)
 
     def get_hook_id(self, project_and_group_name, url):
         hooks = self._make_requests_to_api("projects/%s/hooks", project_and_group_name, 'GET')
