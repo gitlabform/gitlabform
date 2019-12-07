@@ -9,7 +9,9 @@ GitLabForm is an easy configuration as code tool for GitLab using config in plai
 
 GitLabForm enables you to manage:
 
+* Group settings,
 * Project settings,
+* Archive/unarchive project,
 * Project members (users and groups),
 * Deployment keys,
 * Secret variables (on project and group/subgroup level),

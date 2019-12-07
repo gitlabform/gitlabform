@@ -232,6 +232,12 @@ group_settings:
     project:
       archive: true
 
+  group-with-spammy-projects:
+    # configures settings for the 'group-with-spammy-projects' group
+    group_settings:
+      # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
+      emails_disabled: true
+
 project_settings:
   # settings specific to 'my-group/my-project1' project
   "my-group/my-project1":
