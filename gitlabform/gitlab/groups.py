@@ -28,6 +28,21 @@ class GitLabGroups(GitLabCore):
 
         return project_and_groups_in_group_namespace
 
+    def get_group_settings(self, project_and_group_name):
+        try:
+            return self._make_requests_to_api("groups/%s", project_and_group_name)
+        except NotFoundException:
+            return dict()
+
+    def put_group_settings(self, project_and_group_name, group_settings):
+        # group_settings has to be like this:
+        # {
+        #     'setting1': value1,
+        #     'setting2': value2,
+        # }
+        # ..as documented at: https://docs.gitlab.com/ee/api/groups.html#update-group
+        self._make_requests_to_api("groups/%s", project_and_group_name, 'PUT', group_settings)
+
     def post_group_secret_variable(self, group, secret_variable):
         # secret_variable has to be like this:
         # {

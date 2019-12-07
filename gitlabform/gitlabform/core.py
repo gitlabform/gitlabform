@@ -196,6 +196,7 @@ class GitLabFormCore(object):
         for group in groups:
             configuration = self.c.get_effective_config_for_group(group)
             self.process_group_secret_variables(group, configuration)
+            self.process_group_settings(group, configuration)
 
         for project_and_group in projects_and_groups:
 
@@ -348,6 +349,14 @@ class GitLabFormCore(object):
                                              configuration['group_secret_variables'][secret_variable])
 
         logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
+
+    @if_in_config_and_not_skipped
+    def process_group_settings(self, group, configuration):
+        group_settings = configuration['group_settings']
+        logging.debug("Group settings BEFORE: %s", self.gl.get_group_settings(group))
+        logging.info("Setting group settings: %s", group_settings)
+        self.gl.put_group_settings(group, group_settings)
+        logging.debug("Group settings AFTER: %s", self.gl.get_group_settings(group))
 
     @if_in_config_and_not_skipped
     def process_branches(self, project_and_group, configuration):
