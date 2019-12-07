@@ -226,6 +226,12 @@ group_settings:
           foo: "fooz"
           bar: "barz"
 
+  # settings for ALL projects in 'old-projects-group' group
+  old-projects-group:
+    # this will archive all the projects in the 'old-projects-group' group
+    project:
+      archive: true
+
 project_settings:
   # settings specific to 'my-group/my-project1' project
   "my-group/my-project1":

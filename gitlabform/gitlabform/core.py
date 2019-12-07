@@ -216,6 +216,7 @@ class GitLabFormCore(object):
                     logging.debug('Configuration that would be applied: %s' % str(configuration))
                     continue
 
+                self.process_project(project_and_group, configuration)
                 self.process_project_settings(project_and_group, configuration)
                 self.process_project_push_rules(project_and_group, configuration)
                 self.process_merge_requests(project_and_group, configuration)
@@ -546,3 +547,16 @@ class GitLabFormCore(object):
                 else:
                     logging.debug("Creating hook '%s'", hook)
                     self.gl.post_hook(project_and_group, hook, configuration['hooks'][hook])
+
+    @if_in_config_and_not_skipped
+    @configuration_to_safe_dict
+    def process_project(self, project_and_group, configuration):
+        project = configuration['project']
+        if project:
+            if 'archive' in project:
+                if project['archive']:
+                    logging.info("Archiving project...")
+                    self.gl.archive(project_and_group)
+                else:
+                    logging.info("Unarchiving project...")
+                    self.gl.unarchive(project_and_group)
