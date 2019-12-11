@@ -285,6 +285,12 @@ class GitLabFormCore(object):
                 except NotFoundException:
                     pass
                 self.gl.share_with_group(project_and_group, group, access, expiry)
+            if configuration.get('members|enforce_group_shares') == True:
+                # remove groups that are not part of the configuration
+                for remote_group_share in self.gl.get_project_group_shares(project_and_group):
+                    if remote_group_share not in groups:
+                        logging.debug("Removing '%s' since it is not in group configuration", remote_group_share)
+                        self.gl.unshare_with_group(project_and_group, remote_group_share)
 
         users = configuration.get('members|users')
         if users:

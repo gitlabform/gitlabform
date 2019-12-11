@@ -133,6 +133,9 @@ group_settings:
     # https://docs.gitlab.com/ee/api/projects.html#share-project-with-group
     # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
     members:
+      # enforce_group_shares will remove all group-shares from the project
+      # if it is not defined in the config under groups 
+      enforce_group_shares: true  # default: false if omitted
       groups:
         my-group:
           group_access: 40

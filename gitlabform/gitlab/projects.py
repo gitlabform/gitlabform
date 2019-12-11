@@ -149,6 +149,17 @@ class GitLabProjects(GitLabCore):
         json_data = json.loads(data)
         self._make_requests_to_api("projects/%s/approvers", pid, 'PUT', data=None, json=json_data)
 
+    def get_project_group_shares(self, project_and_group_name):
+        """
+        :param project_and_group_name: "group/project" string
+        :return list of group paths that the project is shared with
+        """
+        settings = self.get_project_settings(project_and_group_name)
+        try:
+            return [g["group_full_path"] for g in settings["shared_with_groups"] ]
+        except NotFoundException:
+            return []
+
     def share_with_group(self, project_and_group_name, group_name, group_access, expires_at):
         data = {
             "group_id": self._get_group_id(group_name),
