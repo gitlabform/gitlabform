@@ -135,12 +135,15 @@ group_settings:
     members:
       # enforce_group_shares will remove all group-shares from the project
       # if it is not defined in the config under groups 
-      enforce_group_shares: true  # default: false if omitted
+      enforce_group_shares: true  # default: false
       groups:
         my-group:
           group_access: 40
         my-other-group/subgroup:
           group_access: 40
+      # enforce_user_shares will remove all members from the project
+      # if it is not defined in the config under users
+      enforce_user_shares: true  # default: false
       users:
         my-user:
           access_level: 40
