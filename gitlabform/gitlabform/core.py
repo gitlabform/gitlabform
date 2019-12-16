@@ -285,12 +285,6 @@ class GitLabFormCore(object):
                 except NotFoundException:
                     pass
                 self.gl.share_with_group(project_and_group, group, access, expiry)
-            if configuration.get('members|enforce_group_shares') == True:
-                # remove groups that are not part of the configuration
-                for remote_group_share in self.gl.get_project_group_shares(project_and_group):
-                    if remote_group_share not in groups:
-                        logging.info("Removing '%s' since it is not in group configuration", remote_group_share)
-                        self.gl.unshare_with_group(project_and_group, remote_group_share)
 
         users = configuration.get('members|users')
         if users:
@@ -305,6 +299,26 @@ class GitLabFormCore(object):
                 except NotFoundException:
                     pass
                 self.gl.add_member_to_project(project_and_group, user, access, expiry)
+
+        if configuration.get('members|enforce_group_shares') == True:
+            # remove groups that are not part of the configuration
+            self.enforce_group_shares(project_and_group, groups)
+
+        if configuration.get('members|enforce_user_shares') == True:
+            # remove users that are not part of the configuration
+            self.enforce_user_shares(project_and_group, users)
+
+    def enforce_group_shares(self, project_and_group, groups):
+        for remote_group_share in self.gl.get_project_group_shares(project_and_group):
+            if remote_group_share not in groups:
+                logging.info("Removing group '%s': it is not in group configuration", remote_group_share)
+                self.gl.unshare_with_group(project_and_group, remote_group_share)
+
+    def enforce_user_shares(self, project_and_group, users):
+        for user in self.gl.get_project_members(project_and_group):
+            if users == None or user not in users:
+                logging.info("Removing user '%s': it is not in users configuration", user)
+                self.gl.remove_member_from_project(project_and_group, user)
 
     @if_in_config_and_not_skipped
     def process_deploy_keys(self, project_and_group, configuration):

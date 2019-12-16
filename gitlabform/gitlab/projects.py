@@ -1,5 +1,6 @@
 import json
 
+
 from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
@@ -159,6 +160,19 @@ class GitLabProjects(GitLabCore):
             return [g["group_full_path"] for g in settings["shared_with_groups"] ]
         except NotFoundException:
             return []
+
+
+    def get_project_members(self, project_and_group_name):
+        """
+        :param project_and_group_name: "group/project" string
+        :return list of usernames of the members of the project
+        """
+        try:
+            members = self._make_requests_to_api("projects/%s/members", project_and_group_name)
+            return [m["username"] for m in members]
+        except NotFoundException:
+            return dict()
+
 
     def share_with_group(self, project_and_group_name, group_name, group_access, expires_at):
         data = {
