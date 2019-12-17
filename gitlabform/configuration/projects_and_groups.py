@@ -84,6 +84,18 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
 
         return effective_config
 
+    # since gitlab does not support have group inheritance, we need to implement it
+    def merge_group_members_with_inheritance(self, more_general_config, more_specific_config) -> dict:
+        merged_members = {}
+        if "members" in more_general_config and "groups" in more_general_config["members"]:
+            for group_name, group_access in more_general_config["members"]["groups"].items():
+                merged_members[group_name] = group_access
+
+        if "members" in more_specific_config and "groups" in more_specific_config["members"]:
+            for group_name, group_access in more_specific_config["members"]["groups"].items():
+                merged_members[group_name] = group_access
+        return merged_members
+
     def merge_configs(self, more_general_config, more_specific_config) -> dict:
         """
         :return: merge more general config with more specific configs.
@@ -100,8 +112,14 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
             elif not isinstance(more_specific_config[key] , collections.Mapping):
                 merged_config[key] = more_specific_config[key]
             else:
-                # overwrite more general config settings with more specific config
-                merged_config[key] = {**more_general_config[key], **more_specific_config[key]}
+                if key == "members":
+                    # inherit groups instead of overwrite
+                    merged_config["members"] = self.merge_group_members_with_inheritance(more_general_config, more_specific_config)
+                else:
+                    # overwrite more general config settings with more specific config
+                    merged_config[key] = {**more_general_config[key], **more_specific_config[key]}
+
+            print("MERGED", merged_config)
 
         return merged_config
 
