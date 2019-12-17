@@ -1,6 +1,7 @@
 import logging
 
 from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
+import collections
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +96,8 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
             if key in more_general_config and key not in more_specific_config:
                 merged_config[key] = more_general_config[key]
             elif key in more_specific_config and key not in more_general_config:
+                merged_config[key] = more_specific_config[key]
+            elif not isinstance(more_specific_config[key] , collections.Mapping):
                 merged_config[key] = more_specific_config[key]
             else:
                 # overwrite more general config settings with more specific config
