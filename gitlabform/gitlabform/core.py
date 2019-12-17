@@ -197,6 +197,7 @@ class GitLabFormCore(object):
             configuration = self.c.get_effective_config_for_group(group)
             self.process_group_secret_variables(group, configuration)
             self.process_group_settings(group, configuration)
+            self.process_group_members(group, configuration)
 
         for project_and_group in projects_and_groups:
 
@@ -300,13 +301,13 @@ class GitLabFormCore(object):
                     pass
                 self.gl.add_member_to_project(project_and_group, user, access, expiry)
 
-        if configuration.get('members|enforce_group_shares') == True:
+        if configuration.get('enforce_group_members'):
             # remove groups that are not part of the configuration
-            self.enforce_group_shares(project_and_group, groups)
+            self.enforce_group_shares(project_and_group, groups if groups else [])
 
-        if configuration.get('members|enforce_user_shares') == True:
+        if configuration.get('enforce_user_members'):
             # remove users that are not part of the configuration
-            self.enforce_user_shares(project_and_group, users)
+            self.enforce_user_shares(project_and_group, users if users else [])
 
     def enforce_group_shares(self, project_and_group, groups):
         for remote_group_share in self.gl.get_project_group_shares(project_and_group):
@@ -316,7 +317,7 @@ class GitLabFormCore(object):
 
     def enforce_user_shares(self, project_and_group, users):
         for user in self.gl.get_project_members(project_and_group):
-            if users == None or user not in users:
+            if user not in users:
                 logging.info("Removing user '%s': it is not in users configuration", user)
                 self.gl.remove_member_from_project(project_and_group, user)
 
@@ -369,6 +370,25 @@ class GitLabFormCore(object):
                                              configuration['group_secret_variables'][secret_variable])
 
         logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
+
+    def process_group_members(self, group, configuration):
+        members = configuration.get('members')
+        users = members.get('users')
+        remote_users = self.gl.get_group_members(group)
+        if configuration.get('enforce_user_members'):
+            for user in remote_users:
+                if not users or user not in users:
+                    logging.info("Removing user '%s' from group: it is not in users configuration", user)
+                    self.gl.remove_member_from_group(group, user)
+        if users:
+            for username, user in users.items():
+                expiry = user['expires_at'] if \
+                            'expires_at' in username else ""
+                if username in remote_users:
+                    self.gl.update_member_of_group(group, username, user['access_level'], expiry)
+                else:
+                    self.gl.add_member_to_group(group, username, user['access_level'], expiry)
+
 
     @if_in_config_and_not_skipped
     def process_group_settings(self, group, configuration):

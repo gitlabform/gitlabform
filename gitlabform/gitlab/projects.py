@@ -171,7 +171,25 @@ class GitLabProjects(GitLabCore):
             members = self._make_requests_to_api("projects/%s/members", project_and_group_name)
             return [m["username"] for m in members]
         except NotFoundException:
-            return dict()
+            return list()
+
+    def get_group_members(self, group_name, skip_owner=True):
+        """
+        :param group_name name of group string
+        :param skip_owner do not include the owner in user list
+        :return list of usernames of the members of the group
+        """
+        try:
+            id = self._get_group_id(group_name)
+            members = self._make_requests_to_api("groups/%s/members", id)
+            member_usernames = []
+            for m in members:
+                if skip_owner and m["access_level"] == 50:
+                    continue
+                member_usernames.append(m["username"])
+            return member_usernames
+        except NotFoundException:
+            return list()
 
 
     def share_with_group(self, project_and_group_name, group_name, group_access, expires_at):
