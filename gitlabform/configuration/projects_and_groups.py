@@ -118,9 +118,6 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
                 else:
                     # overwrite more general config settings with more specific config
                     merged_config[key] = {**more_general_config[key], **more_specific_config[key]}
-
-            print("MERGED", merged_config)
-
         return merged_config
 
     def get_effective_config_for_group(self, group) -> dict:
