@@ -86,14 +86,13 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
 
     # since gitlab does not support have group inheritance, we need to implement it
     def merge_group_members_with_inheritance(self, more_general_config, more_specific_config) -> dict:
-        merged_members = {}
+        merged_members = {"groups":{}}
         if "members" in more_general_config and "groups" in more_general_config["members"]:
             for group_name, group_access in more_general_config["members"]["groups"].items():
-                merged_members[group_name] = group_access
-
+                merged_members["groups"][group_name] = group_access
         if "members" in more_specific_config and "groups" in more_specific_config["members"]:
             for group_name, group_access in more_specific_config["members"]["groups"].items():
-                merged_members[group_name] = group_access
+                merged_members["groups"][group_name] = group_access
         return merged_members
 
     def merge_configs(self, more_general_config, more_specific_config) -> dict:
@@ -112,12 +111,10 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
             elif not isinstance(more_specific_config[key] , collections.Mapping):
                 merged_config[key] = more_specific_config[key]
             else:
-                if key == "members":
-                    # inherit groups instead of overwrite
-                    merged_config["members"] = self.merge_group_members_with_inheritance(more_general_config, more_specific_config)
-                else:
-                    # overwrite more general config settings with more specific config
-                    merged_config[key] = {**more_general_config[key], **more_specific_config[key]}
+                # overwrite more general config settings with more specific config
+                merged_config[key] = {**more_general_config[key], **more_specific_config[key]}
+        # inherit groups instead of overwrite
+        merged_config["members"] = self.merge_group_members_with_inheritance(more_general_config, more_specific_config)
         return merged_config
 
     def get_effective_config_for_group(self, group) -> dict:
