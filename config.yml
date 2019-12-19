@@ -149,6 +149,8 @@ group_settings:
       users:
         my-user:
             example:
+              access_level: 40
+              expires_at: 2019-09-26
 
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
