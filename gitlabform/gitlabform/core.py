@@ -215,7 +215,7 @@ class GitLabFormCore(object):
 
                 if self.args.noop:
                     logging.warning('Not actually processing because running in noop mode.')
-                    logging.debug('Configuration that would be applied: %s' % str(configuration))
+                    logging.warning('Configuration that would be applied: %s' % str(configuration))
                     continue
 
                 self.process_project(project_and_group, configuration)
