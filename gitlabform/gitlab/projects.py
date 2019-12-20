@@ -212,13 +212,17 @@ class GitLabProjects(GitLabCore):
         if group_access is not None:
             data['group_access'] = group_access
         group_id = self._get_group_id(group_name)
+        project_id = self._get_project_id(project_and_group_name)
         logging.warning("|\t📒 ~~ MOD group access: %s [%s] to: %s", group_name, group_access, project_and_group_name)
-        return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='PUT', data=data, expected_codes=200)
+        # Gitlab is missing the Edit a share Endpoint so we do share/unshare
+        self._make_requests_to_api("projects/%s/share/%s", (project_id, group_id), method='DELETE', expected_codes=204)
+        return self._make_requests_to_api("projects/%s/share", project_id, method='POST', data=data, expected_codes=201)
 
     def unshare_with_group(self, project_and_group_name, group_name):
         group_id = self._get_group_id(group_name)
+        project_id = self._get_project_id(project_and_group_name)
         logging.warning("|\t🚫 -- DEL group access: %s to: %s", group_name, project_and_group_name)
-        return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='DELETE',
+        return self._make_requests_to_api("projects/%s/share/%s", (project_id, group_id), method='DELETE',
                                           expected_codes=204)
 
 
