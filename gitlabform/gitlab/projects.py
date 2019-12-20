@@ -201,7 +201,7 @@ class GitLabProjects(GitLabCore):
         }
         if group_access is not None:
             data['group_access'] = group_access
-        logging.warning("\t✅ ++ ADD group access: %s [%s] to: %s", group_name, group_access, project_and_group_name)
+        logging.warning("|\t✅ ++ ADD group access: %s [%s] to: %s", group_name, group_access, project_and_group_name)
         return self._make_requests_to_api("projects/%s/share", project_and_group_name, method='POST', data=data, expected_codes=201)
 
     def update_group_share_of_project(self, project_and_group_name, group_name, group_access, expires_at):
@@ -212,12 +212,12 @@ class GitLabProjects(GitLabCore):
         if group_access is not None:
             data['group_access'] = group_access
         group_id = self._get_group_id(group_name)
-        logging.warning("\t📒 ~~ MOD group access: %s [%s] to: %s", group_name, group_access, project_and_group_name)
+        logging.warning("|\t📒 ~~ MOD group access: %s [%s] to: %s", group_name, group_access, project_and_group_name)
         return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='PUT', data=data, expected_codes=200)
 
     def unshare_with_group(self, project_and_group_name, group_name):
         group_id = self._get_group_id(group_name)
-        logging.warning("\t🚫 -- DEL group access: %s to: %s", group_name, project_and_group_name)
+        logging.warning("|\t🚫 -- DEL group access: %s to: %s", group_name, project_and_group_name)
         return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='DELETE',
                                           expected_codes=204)
 

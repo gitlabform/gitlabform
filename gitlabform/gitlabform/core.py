@@ -207,7 +207,7 @@ class GitLabFormCore(object):
                 logging.warning('$$$ [%s/%s] Skipping: %s...', i, len(projects_and_groups), project_and_group)
                 continue
 
-            logging.warning('/--* [%s/%s] Processing: %s', i, len(projects_and_groups), project_and_group)
+            logging.warning('/‾‾* [%s/%s] Processing: %s', i, len(projects_and_groups), project_and_group)
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
@@ -224,7 +224,7 @@ class GitLabFormCore(object):
                 self.process_files(project_and_group, configuration)
                 self.process_hooks(project_and_group, configuration)
                 self.process_members(project_and_group, configuration)
-                logging.warning('\--* [%s/%s] Done: %s', i, len(projects_and_groups), project_and_group)
+                logging.warning('\__* [%s/%s] Done: %s', i, len(projects_and_groups), project_and_group)
 
             except Exception as e:
                 logging.error("+++ Error while processing '%s'", project_and_group)
