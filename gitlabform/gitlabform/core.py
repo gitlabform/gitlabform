@@ -210,7 +210,8 @@ class GitLabFormCore(object):
                 logging.warning('$$$ [%s/%s] Skipping: %s...', i, len(projects_and_groups), project_and_group)
                 continue
 
-            logging.warning('/‾‾* [%s/%s] Processing: %s', i, len(projects_and_groups), project_and_group)
+            msg = "Processing" if self.gl.noop else "Planning"
+            logging.warning('/‾‾* [%s/%s] %s: %s', i, len(projects_and_groups), msg, project_and_group)
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
