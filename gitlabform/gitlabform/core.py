@@ -132,7 +132,9 @@ class GitLabFormCore(object):
 
     def main(self):
         projects_and_groups, groups = self.get_projects_list()
-        self.process_all(projects_and_groups, groups)
+        success_state = self.process_all(projects_and_groups, groups)
+        if not success_state:
+            sys.exit(1)
 
     def get_projects_list(self):
 
@@ -192,6 +194,7 @@ class GitLabFormCore(object):
     def process_all(self, projects_and_groups, groups):
 
         i = 0
+        success_state = True
 
         for group in groups:
             configuration = self.c.get_effective_config_for_group(group)
@@ -227,8 +230,10 @@ class GitLabFormCore(object):
                 logging.warning('\__* [%s/%s] Done: %s', i, len(projects_and_groups), project_and_group)
 
             except Exception as e:
+                success_state = False
                 logging.error("+++ Error while processing '%s'", project_and_group)
                 traceback.print_exc()
+        return success_state
 
     @if_in_config_and_not_skipped
     def process_project_settings(self, project_and_group, configuration):
