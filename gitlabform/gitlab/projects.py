@@ -1,5 +1,5 @@
 import json
-
+import logging.config
 
 from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
@@ -153,13 +153,14 @@ class GitLabProjects(GitLabCore):
     def get_project_group_shares(self, project_and_group_name):
         """
         :param project_and_group_name: "group/project" string
-        :return list of group paths that the project is shared with
+        :return dict of group shares with key of full_path, value of the group_share data
+                docs: https://docs.gitlab.com/ee/api/projects.html#get-single-project
         """
         settings = self.get_project_settings(project_and_group_name)
         try:
-            return [g["group_full_path"] for g in settings["shared_with_groups"] ]
+            return {g["group_full_path"]: g for g in settings["shared_with_groups"]}
         except NotFoundException:
-            return []
+            return dict()
 
 
     def get_project_members(self, project_and_group_name):
@@ -199,13 +200,26 @@ class GitLabProjects(GitLabCore):
         }
         if group_access is not None:
             data['group_access'] = group_access
-        return self._make_requests_to_api("projects/%s/share", project_and_group_name, method='POST', data=data,
-                                          expected_codes=201)
+        logging.warning("++ADD group access:", group_name,, group_access "\t to:", project_and_group_name)
+        return self._make_requests_to_api("projects/%s/share", project_and_group_name, method='POST', data=data, expected_codes=201)
+
+    def update_group_share_of_project(self, project_and_group_name, group_name, group_access, expires_at):
+        data = {
+            "group_id": self._get_group_id(group_name),
+            "expires_at": expires_at
+        }
+        if group_access is not None:
+            data['group_access'] = group_access
+        group_id = self._get_group_id(group_name)
+        logging.warning("~~UPDATE group access:", group_name, group_access, "\t to:", project_and_group_name)
+        return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='PUT', data=data, expected_codes=200)
 
     def unshare_with_group(self, project_and_group_name, group_name):
         group_id = self._get_group_id(group_name)
+        logging.warning("--REMOVE group access:", group_name, group_access, "\t to:", project_and_group_name)
         return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='DELETE',
                                           expected_codes=204)
+
 
     def archive(self, project_and_group_name):
         return self._make_requests_to_api("projects/%s/archive", project_and_group_name, method='POST',

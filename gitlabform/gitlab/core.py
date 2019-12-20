@@ -78,7 +78,11 @@ class GitLabCore:
         return str(result['id'])
 
     def _make_requests_to_api(self, path_as_format_string, args=None, method='GET', data=None, expected_codes=200,
-                              paginated=False, json=None):
+                              paginated=False, json=None, noop=False):
+        if noop and method.upper() not in ['GET', 'LIST', "HEAD"]:
+            logging.info("NOOP: not sending request")
+            logging.info(method, self._format_with_url_encoding(path_as_format_string, args), data)
+            return
         if not paginated:
             response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
             return response.json()

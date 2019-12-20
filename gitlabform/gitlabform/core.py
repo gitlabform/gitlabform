@@ -210,6 +210,7 @@ class GitLabFormCore(object):
             logging.warning('* [%s/%s] Processing: %s', i, len(projects_and_groups), project_and_group)
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
+            configuration["NOOP"] = self.args.noop
 
             try:
 
@@ -273,6 +274,7 @@ class GitLabFormCore(object):
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
     def process_members(self, project_and_group, configuration):
+        remote_group_shares = self.gl.get_project_group_shares(project_and_group)
         groups = configuration.get('members|groups')
         if groups:
             for group in groups:
@@ -281,11 +283,14 @@ class GitLabFormCore(object):
                         'group_access' in groups[group] else None
                 expiry = groups[group]['expires_at'] if \
                         'expires_at' in groups[group] else ""
-                try:
-                    self.gl.unshare_with_group(project_and_group, group)
-                except NotFoundException:
-                    pass
-                self.gl.share_with_group(project_and_group, group, access, expiry)
+                if group not in remote_group_shares.keys(): # TODO: there is actual change to the remote group one in level or expiry
+                    # new group share
+                    self.gl.share_with_group(project_and_group, group, access, expiry)
+                else:
+                    remote_expiry = "" if remote_group_shares[group]["expires_at"] == None else remote_group_shares[group]["expires_at"]
+                    if remote_group_shares[group]["group_access_level"] != access or remote_expiry != expiry:
+                        # data changed of old group share
+                        self.gl.update_group_share_of_project(project_and_group,group,access, expiry)
 
         users = configuration.get('members|users')
         if users:
@@ -310,7 +315,7 @@ class GitLabFormCore(object):
             self.enforce_user_shares(project_and_group, users if users else [])
 
     def enforce_group_shares(self, project_and_group, groups):
-        for remote_group_share in self.gl.get_project_group_shares(project_and_group):
+        for remote_group_share in self.gl.get_project_group_shares(project_and_group).keys():
             if remote_group_share not in groups:
                 logging.info("Removing group '%s': it is not in group configuration", remote_group_share)
                 self.gl.unshare_with_group(project_and_group, remote_group_share)

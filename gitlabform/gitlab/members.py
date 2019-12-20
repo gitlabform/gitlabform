@@ -43,3 +43,15 @@ class GitLabMembers(GitLabCore):
         self._make_requests_to_api("groups/%s/members/%s", (group_name, self._get_user_id(user)),
                                         method='DELETE', expected_codes=204)
 
+
+
+    def update_groupshare_of_project(self, group_name, user, access_level, expires_at):
+        user_id =self._get_user_id(user)
+        data = {
+            "user_id": user_id,
+            "expires_at": expires_at
+        }
+        if access_level is not None:
+            data['access_level'] = access_level
+        return self._make_requests_to_api("groups/%s/members/%s", (group_name, user_id), method="PUT",
+                                         data=data, expected_codes=200)
