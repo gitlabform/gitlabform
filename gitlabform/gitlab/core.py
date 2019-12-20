@@ -14,9 +14,11 @@ class GitLabCore:
     token = None
     ssl_verify = None
     session = None
+    noop = None
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=None, noop=False):
         configuration = ConfigurationCore(config_path)
+        self.noop = noop
         self.url = configuration.get("gitlab|url", environ.get("GITLAB_URL"))
         self.token = configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
         self.ssl_verify = configuration.get("gitlab|ssl_verify", True)
@@ -79,9 +81,8 @@ class GitLabCore:
 
     def _make_requests_to_api(self, path_as_format_string, args=None, method='GET', data=None, expected_codes=200,
                               paginated=False, json=None, noop=False):
-        if noop and method.upper() not in ['GET', 'LIST', "HEAD"]:
-            logging.info("NOOP: not sending request")
-            logging.info(method, self._format_with_url_encoding(path_as_format_string, args), data)
+        if self.noop and method.upper() not in ['GET', 'LIST', "HEAD"]:
+            logging.debug("noop: " + method+ " " + self._format_with_url_encoding(path_as_format_string, args))
             return
         if not paginated:
             response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)

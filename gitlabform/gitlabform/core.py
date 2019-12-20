@@ -25,9 +25,9 @@ def if_in_config_and_not_skipped(method):
 
         if config_section_name in configuration:
             if 'skip' in configuration[config_section_name] and configuration[config_section_name]['skip']:
-                logging.info("Skipping %s - explicitly configured to do so." % config_section_name)
+                logging.debug("Skipping %s - explicitly configured to do so." % config_section_name)
             else:
-                logging.info("Setting %s" % config_section_name)
+                logging.debug("Setting %s" % config_section_name)
                 return method(self, project_and_group, configuration)
         else:
             logging.debug("Skipping %s - not in config." % config_section_name)
@@ -120,7 +120,7 @@ class GitLabFormCore(object):
     def initialize_configuration_and_gitlab(self):
 
         try:
-            gl = GitLab(self.args.config.strip())
+            gl = GitLab(self.args.config.strip(), self.args.noop)
             c = Configuration(self.args.config.strip())
             return gl, c
         except ConfigFileNotFoundException as e:
@@ -207,18 +207,11 @@ class GitLabFormCore(object):
                 logging.warning('$$$ [%s/%s] Skipping: %s...', i, len(projects_and_groups), project_and_group)
                 continue
 
-            logging.warning('* [%s/%s] Processing: %s', i, len(projects_and_groups), project_and_group)
+            logging.warning('* 🕐 [%s/%s]Processing: %s', i, len(projects_and_groups), project_and_group)
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
-            configuration["NOOP"] = self.args.noop
 
             try:
-
-                if self.args.noop:
-                    logging.warning('Not actually processing because running in noop mode.')
-                    logging.warning('Configuration that would be applied: %s' % str(configuration))
-                    continue
-
                 self.process_project(project_and_group, configuration)
                 self.process_project_settings(project_and_group, configuration)
                 self.process_project_push_rules(project_and_group, configuration)
@@ -231,6 +224,7 @@ class GitLabFormCore(object):
                 self.process_files(project_and_group, configuration)
                 self.process_hooks(project_and_group, configuration)
                 self.process_members(project_and_group, configuration)
+                logging.warning('* ✅ [%s/%s] Done: %s', i, len(projects_and_groups), project_and_group)
 
             except Exception as e:
                 logging.error("+++ Error while processing '%s'", project_and_group)
@@ -292,6 +286,7 @@ class GitLabFormCore(object):
                         # data changed of old group share
                         self.gl.update_group_share_of_project(project_and_group,group,access, expiry)
 
+        remote_members = self.gl.get_project_members(project_and_group)
         users = configuration.get('members|users')
         if users:
             for user in users:
@@ -300,11 +295,13 @@ class GitLabFormCore(object):
                         'access_level' in users[user] else None
                 expiry = users[user]['expires_at'] if \
                         'expires_at' in users[user] else ""
-                try:
-                    self.gl.remove_member_from_project(project_and_group, user)
-                except NotFoundException:
-                    pass
-                self.gl.add_member_to_project(project_and_group, user, access, expiry)
+                if user not in remote_members.keys():
+                    # new user
+                    self.gl.add_member_to_project(project_and_group, user, access, expiry)
+                else:
+                    remote_expiry = "" if remote_members[user]["expires_at"] == None else remote_members[user]["expires_at"]
+                    if remote_members[user]["access_level"] != access or remote_expiry != expiry:
+                        self.gl.update_member_of_project(project_and_group,user, access, expiry)
 
         if configuration.get('enforce_group_members'):
             # remove groups that are not part of the configuration
@@ -317,13 +314,11 @@ class GitLabFormCore(object):
     def enforce_group_shares(self, project_and_group, groups):
         for remote_group_share in self.gl.get_project_group_shares(project_and_group).keys():
             if remote_group_share not in groups:
-                logging.info("Removing group '%s': it is not in group configuration", remote_group_share)
                 self.gl.unshare_with_group(project_and_group, remote_group_share)
 
     def enforce_user_shares(self, project_and_group, users):
-        for user in self.gl.get_project_members(project_and_group):
+        for user in self.gl.get_project_members(project_and_group).keys():
             if user not in users:
-                logging.info("Removing user '%s': it is not in users configuration", user)
                 self.gl.remove_member_from_project(project_and_group, user)
 
     @if_in_config_and_not_skipped
@@ -383,7 +378,6 @@ class GitLabFormCore(object):
         if configuration.get('enforce_user_members'):
             for user in remote_users:
                 if not users or user not in users:
-                    logging.info("Removing user '%s' from group: it is not in users configuration", user)
                     self.gl.remove_member_from_group(group, user)
         if users:
             for username, user in users.items():

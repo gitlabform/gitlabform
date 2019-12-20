@@ -166,11 +166,12 @@ class GitLabProjects(GitLabCore):
     def get_project_members(self, project_and_group_name):
         """
         :param project_and_group_name: "group/project" string
-        :return list of usernames of the members of the project
+        :return dict of users with key of username and value of user_share data
+                docs: https://docs.gitlab.com/ee/api/members.html#list-all-members-of-a-group-or-project
         """
         try:
             members = self._make_requests_to_api("projects/%s/members", project_and_group_name)
-            return [m["username"] for m in members]
+            return {m["username"]:m for m in members}
         except NotFoundException:
             return list()
 
@@ -200,7 +201,7 @@ class GitLabProjects(GitLabCore):
         }
         if group_access is not None:
             data['group_access'] = group_access
-        logging.warning("++ADD group access:", group_name,, group_access "\t to:", project_and_group_name)
+        logging.warning("\t++ ADD group access: %s [%s] to: %s", group_name, group_access, project_and_group_name)
         return self._make_requests_to_api("projects/%s/share", project_and_group_name, method='POST', data=data, expected_codes=201)
 
     def update_group_share_of_project(self, project_and_group_name, group_name, group_access, expires_at):
@@ -211,12 +212,12 @@ class GitLabProjects(GitLabCore):
         if group_access is not None:
             data['group_access'] = group_access
         group_id = self._get_group_id(group_name)
-        logging.warning("~~UPDATE group access:", group_name, group_access, "\t to:", project_and_group_name)
+        logging.warning("\t~~ UPD group access: %s [%s] to: %s", group_name, group_access, project_and_group_name)
         return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='PUT', data=data, expected_codes=200)
 
     def unshare_with_group(self, project_and_group_name, group_name):
         group_id = self._get_group_id(group_name)
-        logging.warning("--REMOVE group access:", group_name, group_access, "\t to:", project_and_group_name)
+        logging.warning("\t-- DEL group access: %s to: %s", group_name, project_and_group_name)
         return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='DELETE',
                                           expected_codes=204)
 
