@@ -121,6 +121,11 @@ class GitLabProjects(GitLabCore):
         data = {**data, **data_required}
         self._make_requests_to_api("projects/%s/approvals", pid, 'POST', data, expected_codes=201)
 
+    def get_approvals(self, project_and_group_name):
+        # for this endpoint GitLab still actually wants pid, not "group/project"...
+        pid = self._get_project_id(project_and_group_name)
+        return self._make_requests_to_api("projects/%s/approvals", pid, 'GET', expected_codes=200)
+
     def put_approvers(self, project_and_group_name, approvers, approver_groups):
         """
         :param project_and_group_name: "group/project" string

@@ -236,11 +236,24 @@ class GitLabFormCore(object):
                 traceback.print_exc()
         return success_state
 
+    def diff_map(self, remote_map, local_config_map)-> dict():
+        diff = dict()
+        for k, v in local_config_map.items():
+            if k not in remote_map:
+                logging.warn("config key '%s' not found in API response", k)
+                continue
+            if remote_map[k] != local_config_map[k]:
+                diff[k] = local_config_map[k]
+        return diff
+
     @if_in_config_and_not_skipped
     def process_project_settings(self, project_and_group, configuration):
         project_settings = configuration['project_settings']
-        logging.debug("Project settings BEFORE: %s", self.gl.get_project_settings(project_and_group))
-        logging.info("Setting project settings: %s", project_settings)
+        remote_settings = self.gl.get_project_settings(project_and_group)
+        logging.debug("Project settings BEFORE: %s", remote_settings)
+        diff = self.diff_map(remote_settings, project_settings)
+        if diff != {}:
+            logging.info("Setting project settings: %s", diff)
         self.gl.put_project_settings(project_and_group, project_settings)
         logging.debug("Project settings AFTER: %s", self.gl.get_project_settings(project_and_group))
 
@@ -257,7 +270,10 @@ class GitLabFormCore(object):
     def process_merge_requests(self, project_and_group, configuration):
         approvals = configuration.get('merge_requests|approvals')
         if approvals:
-            logging.info("Setting approvals settings: %s", approvals)
+            remote_approvals = self.gl.get_approvals(project_and_group)
+            diff = self.diff_map(remote_approvals, approvals)
+            if diff != {}:
+                logging.info("Setting approvals settings: %s", diff)
             self.gl.post_approvals(project_and_group, approvals)
 
         approvers = configuration.get('merge_requests|approvers')
