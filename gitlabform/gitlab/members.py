@@ -56,6 +56,6 @@ class GitLabMembers(GitLabCore):
                                          data=data, expected_codes=200)
 
     def remove_member_from_group(self, group_name, user):
-        logging.warning("|\t🚫 -- DEL user membership to group: %s [%s] to: %s", user, group_name)
+        logging.warning("|\t🚫 -- DEL user membership to group: %s to: %s", user, group_name)
         self._make_requests_to_api("groups/%s/members/%s", (group_name, self._get_user_id(user)),
                                         method='DELETE', expected_codes=204)

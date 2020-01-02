@@ -327,11 +327,11 @@ class GitLabFormCore(object):
 
         if configuration.get('enforce_group_members'):
             # remove groups that are not part of the configuration
-            self.enforce_group_shares(project_and_group, groups if groups else [])
+            self.enforce_group_shares(project_and_group, groups if groups else {})
 
         if configuration.get('enforce_user_members'):
             # remove users that are not part of the configuration
-            self.enforce_user_shares(project_and_group, users if users else [])
+            self.enforce_user_shares(project_and_group, users if users else {})
 
     def enforce_group_shares(self, project_and_group, groups):
         for remote_group_share in self.gl.get_project_group_shares(project_and_group).keys():
