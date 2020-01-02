@@ -421,8 +421,12 @@ class GitLabFormCore(object):
 
     @if_in_config_and_not_skipped
     def process_branches(self, project_and_group, configuration):
-        for branch in sorted(configuration['branches']):
+        for branch, branch_conf in sorted(configuration['branches'].items()):
             try:
+                remote_config = self.gl.get_branch(project_and_group, branch)
+                diff = self.diff_map(remote_config, branch_conf)
+                if diff != {}:
+                    logging.info("Setting branch settings: %s", diff)
                 if configuration['branches'][branch]['protected']:
                     logging.debug("Setting branch '%s' as *protected*", branch)
                     # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
