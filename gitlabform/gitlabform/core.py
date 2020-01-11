@@ -80,14 +80,10 @@ class GitLabFormCore(object):
             self.project_or_group = project_or_group
             self.config_string = config_string
             self.verbose = False
-            if debug:
-                self.debug = True
-            else:
-                self.debug = False
+            self.debug = bool(debug)
             self.strict = True
             self.start_from = 1
             self.noop = False
-
             self.set_log_level(tests=True)
         else:
             self.project_or_group, self.config, self.verbose, self.debug, self.strict, self.start_from, self.noop \
@@ -151,12 +147,9 @@ class GitLabFormCore(object):
         try:
             if hasattr(self, 'config_string'):
                 gl = GitLab(config_string=self.config_string)
-            else:
-                gl = GitLab(self.config.strip())
-
-            if hasattr(self, 'config_string'):
                 c = Configuration(config_string=self.config_string)
             else:
+                gl = GitLab(self.config.strip())
                 c = Configuration(self.config.strip())
             return gl, c
         except ConfigFileNotFoundException as e:
