@@ -107,7 +107,9 @@ class TestServices:
         gf = GitLabForm(config_string=config_service, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        # push_events = True
+        service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'asana')
+        assert service['active'] is True
+        assert service['push_events'] is True
 
         gf = GitLabForm(config_string=config_service_change, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
         gf.main()
