@@ -18,6 +18,11 @@ jobs:
 services:
 - docker
 
+addons:
+  apt:
+    packages:
+      - expect-dev  # for unbuffer
+
 install:
 - sudo apt-get -y install pandoc
 - pip install pypandoc
@@ -30,9 +35,9 @@ before_script:
 
 script:
 # unit tests
-- if [[ -z $INTEGRATION ]] ; then py.test --ignore gitlabform/gitlabform/test ; fi
+- if [[ -z $INTEGRATION ]] ; then unbuffer py.test --ignore gitlabform/gitlabform/test ; fi
 # integration tests
-- if [[ -n $INTEGRATION ]] ; then py.test gitlabform/gitlabform/test ; fi
+- if [[ -n $INTEGRATION ]] ; then unbuffer py.test gitlabform/gitlabform/test ; fi
 
 deploy:
 - provider: pypi
