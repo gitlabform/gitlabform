@@ -170,7 +170,8 @@ class TestMergeRequestApprovers:
         gf = GitLabForm(config_string=config__approvers_only_users, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        # approvers = 2
+        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        assert len(approvers['approvers']) == 2
 
         gf = GitLabForm(config_string=config__approvers_only_users_change, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
@@ -189,7 +190,8 @@ class TestMergeRequestApprovers:
         gf = GitLabForm(config_string=config__approvers_only_groups, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        # approvers_groups = 1
+        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        assert len(approvers['approver_groups']) == 1
 
         gf = GitLabForm(config_string=config__approvers_only_groups_change, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
@@ -209,13 +211,14 @@ class TestMergeRequestApprovers:
         gf = GitLabForm(config_string=config__approvers_both, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        # approvers = 1, approvers_groups = 1
+        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        assert len(approvers['approvers']) == 1
+        assert len(approvers['approver_groups']) == 1
 
         gf = GitLabForm(config_string=config__approvers_both_groups_change, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
         approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
-        print(str(approvers))
         assert len(approvers['approvers']) == 1
         assert len(approvers['approver_groups']) == 2
 
@@ -223,12 +226,13 @@ class TestMergeRequestApprovers:
         gf = GitLabForm(config_string=config__approvers_both, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        # approvers = 1, approvers_groups = 1
+        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        assert len(approvers['approvers']) == 1
+        assert len(approvers['approver_groups']) == 1
 
         gf = GitLabForm(config_string=config__approvers_both_users_change, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
         approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
-        print(str(approvers))
         assert len(approvers['approvers']) == 2
         assert len(approvers['approver_groups']) == 1
