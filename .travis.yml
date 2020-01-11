@@ -2,18 +2,18 @@ language: python
 
 jobs:
   include:
+    # integration tests
     - python: "3.7"
       env: INTEGRATION=true
-    - python: "3.8"
+    # unit tests + deployments (on tags only)
     - python: "3.7"
+      env:
+        - secure: "H6voGOBAqMavbLK63M3IAl+6GtAj1pZWExwPvmMytHVRXUeyxlC7Gy7piknUk+rAXE8F/bRwSRrdLxlN3i5SIQWlel4Zj+VSls8M7FUc05NtqSN8m3khm7Xr3u5/W58OXyiqJ3/9ozc5b8N4tuTPKBsxVlZCQuz1KhHn1WV/uPaJoKOlOoR3S6jJFPCPpDYNaadBtZNrmRgXux3KProO6pikqHQ6W9qtvK2YjJXVfXF3R1hhfdWD5Jo6yX0B1aINYWYoUWiQXdaahp0iU7ALENeaij6mB+U1Fo6/Fu9xHvU4cBdRsh2WtZUjHjiIKh5ZYFtWurQr8l/7fNz+zsaCD4y2Uc3QNvLsZ2H57sh593luT8UbQWrwUVnRkO2f5plGY/4M9M3YpeleUNbp9MX6PJHafl7YYtGIGwdad3l70d0Qmf1VxT2nSHp3VvmlxAWGtKBbMtKWYBaUZOjnteGCYfE5SosD54gmgb2gkspRafI+ef+A6MK5+WU8SAmCtxrzJgky9GsuRhn9KddOx1EZqPMfVaByy6Tcjp/f2Uc66Rd416IPjLEEcU6XmO8gGV9Obu5VEbvdiHxEnJTHcXmrB4fqjntn60Yn/1R9P0U5QVBqJowf6zTOztRtD9JgYaWYpz0/TMvkasLFXdvhCJl2vCIp91cY2Pr/Z/RzVce7eh4="
+        - alpine_version=alpine3.10 debian_version=buster
+    # unit tests only
+    - python: "3.8"
     - python: "3.6"
     - python: "3.5"
-
-# for docker build
-env:
-- alpine_version=alpine3.10 debian_version=buster
-- secure: "oY8Ir2Yykb1hspxxhrfktAJlPmjkGlSHg7tCVCq+jWZ1ZoyTSyR7hY3UCz0QUMG5Kug5AMp5kGXIxE+7nFbK5k0jGk+Vhd0v5AxDf+Q0JouK57ONEQE30rSXtBlJMTpRInI45/6qbszMI3SEIhunBRt5y335uCs80+ZeqDXjc710q4SZR+Q6dCU6K0d0ayRS4eFVROctUQjTv+oWvqx0pevAeOqJklscVyzdKwpf0QijMp7tRrMrqw0e4fT9zqIMObSRt8jE/3tzDGBFQq71iOEZ6RLAYInhXWp5wAtN6RAjind2vTIH9pOfh487fE7YkJL8C4Uhhb91yxN44UYdT6pJ9fvm/6/eI9gx/7pWCVacnv3Zxwkp1n2HKvPfUwAosnKgd75BpfgBfjOdqCgDFfaxamL7f7i3Xt8Hz2LsTGSXq8A6gem7WyVn+O3hBuF8eGKeJDzmf8QFaKmhAcRgZFJ6PTvpjPGSvUvrTkYVF99ejiQtDg1/DFTsxr1P4ayV9ESl4DbUV/7udz6Nm7m7TT7mV4VIvsHcVNYAAdYMNg3E8EOdvmf0Fx1lB/8FQDGpN6iNviYr/IZoV9LXcUSt5B8YhpMXJtx4dKDmM/AZtf/XKo/LkCHbYZIE5VmTtAXpj51WcO8Fv4cfOthCGlSQPiCKaJyiUx/1BafNRlh1f/E="
-- secure: "AG31O8hZ8lcNy4KZNz+lOD263dP6bUc6L++NDuaQ+OEztdLNt38+rs7XidynXvSVdzoXgtH4tzPZAMeU84jPu0bYy+8FZi7LRMB9YPqbNQSuN4iCaMUgbKlasIuLlQQ3jeZiR6jR1KHelo2bc4vELUxqpGB0k8L8lqgw0DmTZGGJt+LkhVDlt9Di4I/J7WCYrzxf4uG0q/CT6xAXmY3nOSWVOam84NUDjVdrtZcKjqdNC1Bm44HE2F/fG/YpcHPARW9WOUtv4pcvic7+bbp3AGvX7VwykuCvzM46PQiTVSJGXFMZn1R2Mxfjp+a1vFqwcZAIe9FOiWyr2YvY5GeWMtHSAnyGvLTAurocRZ8gvBUylgXGwfJqTz1zHvPmAFk/d3Te5PPKG3hA27ssbK1rIi51RybZzU4T2CvMAF6gbVIWgiTeZII41iG+Wm5CQI5RmjSdLKzNBZdi/PFn52Cj6tzLYmXKyMAYcVFmRDE7D/cC5CV//8ShnU37BFWZ79IlGuD4PWyvTbqfNvgQcrCrARYiUmrmoOZ3fZCkdHd5sAH/bfq7AUR3crFyNhX1DrON/K7kc+u7ADbsk3AjjRchD56XlQFCA2ZLf06HvuD+RkhzRVpNT+X6Vtl7bPcM0yb3HMCK5crB4h+fu8nk6XALRcen7/RUGBr8b+3kw//mgrA="
 
 services:
 - docker
@@ -24,15 +24,15 @@ install:
 - python setup.py develop
 
 before_script:
-- if [[ -n INTEGRATION ]] ; then bash run_gitlab_in_docker.sh ; fi
-- if [[ -n INTEGRATION ]] ; then export GITLAB_URL=$(cat gitlab_url.txt) ; fi
-- if [[ -n INTEGRATION ]] ; then export GITLAB_TOKEN=$(cat gitlab_token.txt) ; fi
+- if [[ -n $INTEGRATION ]] ; then bash run_gitlab_in_docker.sh ; fi
+- if [[ -n $INTEGRATION ]] ; then export GITLAB_URL=$(cat gitlab_url.txt) ; fi
+- if [[ -n $INTEGRATION ]] ; then export GITLAB_TOKEN=$(cat gitlab_token.txt) ; fi
 
 script:
 # unit tests
-- if [[ -z INTEGRATION ]] ; then py.test --ignore gitlabform/gitlabform/test ; fi
+- if [[ -z $INTEGRATION ]] ; then py.test --ignore gitlabform/gitlabform/test ; fi
 # integration tests
-- if [[ -n INTEGRATION ]] ; then py.test gitlabform/gitlabform/test ; fi
+- if [[ -n $INTEGRATION ]] ; then py.test gitlabform/gitlabform/test ; fi
 
 deploy:
 - provider: pypi
