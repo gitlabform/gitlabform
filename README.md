@@ -42,7 +42,7 @@ GitLabForm has roughly the same purpose as [GitLab provider](https://www.terrafo
 for [Terraform](https://www.terraform.io/) (which is a tool that we love and that clearly inspired this app),
 but it has a different set of features and uses a different configuration format.
 
-[Please read more about "GitLab provider for Terraform" vs "GitLabForm", including a feature matrix, here](GT_VS_GLF.md).
+[Please read more about GitLab provider for Terraform vs GitLabForm, including a feature matrix, here](GT_VS_GLF.md).
 
 ## Requirements
 
