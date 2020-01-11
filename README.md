@@ -40,7 +40,7 @@ using passing the parameters as-is to GitLab APIs with PUT/POST requests.
 
 GitLabForm has roughly the same purpose as [GitLab provider](https://www.terraform.io/docs/providers/gitlab/index.html)
 for [Terraform](https://www.terraform.io/) (which is a tool that we love and that clearly inspired this app),
-but but it has a different set of features and uses a different configuration format.
+but it has a different set of features and uses a different configuration format.
 
 [Please read more about "GitLab provider for Terraform" vs "GitLabForm", including a feature matrix, here](GT_VS_GLF.md).
 
