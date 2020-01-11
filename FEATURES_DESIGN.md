@@ -4,7 +4,7 @@ GitLabForm has been heavily inspired by [Puppet's hiera](https://puppet.com/docs
 is where we borrowed from the concept of a hierarchical configuration that is inherited from the higher to the lower
 levers while you also can override some config parts on the lower levels.
 
-**Example 1 - configuration inheritance & overriding **
+**Example 1 - configuration inheritance & overriding**
 
 You want to configure all your GitLab instance projects to have JIRA integration enabled for your MRs to have
 ticket ids shown as links to JIRA in the web UI, but you DON'T want the integration that enables to close JIRA
