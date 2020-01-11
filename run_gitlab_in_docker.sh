@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ev
+set -euo pipefail
 
 echo "Starting GitLab..."
 
