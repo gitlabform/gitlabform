@@ -3,7 +3,8 @@
 
 # GitLabForm
 
-GitLabForm is an easy configuration as code tool for GitLab using config in plain YAML.
+GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
+using hierarchical configuration written in YAML.
 
 ## Features
 
@@ -20,26 +21,46 @@ GitLabForm enables you to manage:
 * Services,
 * (Project) Hooks,
 * (Project) Push Rules,
-* (Add/edit or delete) Files, with templating based on jinja2 (now supports custom variables!),
+* (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
 * Merge Requests approvals settings and approvers (EE 10.6+ only),
 
 ...for:
 
-* all projects you have access to,
+* all projects in your GitLab instance/that you have access to,
 * a group/subgroup of projects,
 * a single project,
 
-...and a combination of them (default config for all projects + more specific for some groups/subgroups + even more specific for particular projects).
+...and a combination of them.
+
+GitLabForm uses hierarchical configuration with inheritance, merging/overwriting and addivity. GitLabForm is also
+using passing the parameters as-is to GitLab APIs with PUT/POST requests.
+[Read more about these features here](FEATURES_DESIGN.md) .
+
+### Similar apps
+
+GitLabForm has roughly the same purpose as [GitLab provider](https://www.terraform.io/docs/providers/gitlab/index.html)
+for [Terraform](https://www.terraform.io/) (which is a tool that we love and that clearly inspired this app),
+but but it has a different set of features and uses a different configuration format.
+
+[Please read more about "GitLab provider for Terraform" vs "GitLabForm", including a feature matrix, here](GT_VS_GLF.md).
+
+## Requirements
+
+* Python 3.5+
+* GitLab 11+ for gitlabform >=1.0.0, GitLab 9.1-10.8 for gitlabform <1.0.0, (GitLab EE 10.6+ for merge_requests section)
 
 ## Installation
 
-1. pip3: `pip3 install gitlabform` - that's all!
+A. Pip: `pip3 install gitlabform`
 
-2. docker: you can wrap running gitlabform as a docker command, minimal version of it is: `alias gitlabform='docker run -it -v $(pwd):/config egnyte/gitlabform:latest gitlabform`. You can use any version of gitlabform with suffix -alpine3.9 (recommended) or -debian9, depending on your specific needs.
+B. Docker: you run GitLabForm in a Docker container with this oneliner:
+`docker run -it -v $(pwd):/config egnyte/gitlabform:latest gitlabform`.
+Instead of "latest" you can also use a specific version and choose from Alpine and Debian-based images.
+See the [GitLabForm DockerHub](https://hub.docker.com/r/egnyte/gitlabform/tags) page for a list of available tags.
 
 ## Quick start
 
-Let's assume that you want to have the same deployment key in all projects in a group "My Group" (with path "my-group").
+Let's assume that you want to add a deployment key to all projects in a group "My Group" (with path "my-group").
 If so then:
 
 1. Create example `config.yml`:
@@ -56,7 +77,7 @@ gitlab:
 group_settings:
   my-group:
     deploy_keys:
-      a_friendly_deploy_key_name:
+      a_friendly_deploy_key_name:  # this name is only used in GitLabForm config
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3WiHAsm2UTz2dU1vKFYUGfHI1p5fIv84BbtV/9jAKvZhVHDqMa07PgVtkttjvDC8bA1kezhOBKcO0KNzVoDp0ENq7WLxFyLFMQ9USf8LmOY70uV/l8Gpcn1ZT7zRBdEzUUgF/PjZukqVtuHqf9TCO8Ekvjag9XRfVNadKs25rbL60oqpIpEUqAbmQ4j6GFcfBBBPuVlKfidI6O039dAnDUsmeafwCOhEvQmF+N5Diauw3Mk+9TMKNlOWM+pO2DKxX9LLLWGVA9Dqr6dWY0eHjWKUmk2B1h1HYW+aUyoWX2TGsVX9DlNY7CKiQGsL5MRH9IXKMQ8cfMweKoEcwSSXJ
         title: ssh_key_name_that_is_shown_in_gitlab
         can_push: false
@@ -68,10 +89,11 @@ group_settings:
 
 ## Configuration syntax
 
-See [config.yml](https://github.com/egnyte/gitlabform/blob/master/config.yml) in this repo as a well documented example of configuring all projects in all groups,
-projects in "my-group" group and specifically project "my-group/my-project1".
+See [config.yml](https://github.com/egnyte/gitlabform/blob/master/config.yml) in this repo as a well documented example
+of all the features, including configuring all projects in all groups, projects in "my-group" group and specifically
+project "my-group/my-project1".
 
-## More usage examples
+## More cli usage examples
 
 To apply settings for a single project, run:
 
@@ -89,11 +111,6 @@ To apply settings for all projects, run:
 
 ```gitlabform ALL```
 
-If you are satisfied with results consider running it with cron on a regular basis to ensure that your
-GitLab configuration stays the way defined in your config (for example in case of some admin changes
-some project settings temporarily by (yuck!) clicking).
-
-## All command line parameters
 
 Run:
 
@@ -101,29 +118,35 @@ Run:
 
 ...to see the current set of supported command line parameters.
 
-## Requirements
+## Running in an automated pipeline
 
-* Python 3.5+
-* GitLab 11+ for gitlabform >=1.0.0, GitLab 9.1-10.8 for gitlabform <1.0.0, (GitLab EE 10.6+ for merge_requests section)
+You can use GitLabForm as a part of your [CCA](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline
+to.
 
-## Why?
+For example, you can run it with a schedule to unify your GitLab configuration each night, after it may have drifted
+from the configuration in the code during the working day.
 
-This tool was created as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890)
+Or you can run the pipeline from a webhook after a new project is created in GitLab to have have the initial config
+for new projects done automatically as soon as the projects are created.
+
+
+Example for running GitLabForm using GitLab CI is provided in the `.gitlab-ci.example.yml` file.
+
+Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is 
+encrypted) for security reasons - please set it in the `GITLAB_TOKEN` environment variable instead.
+
+For GitLab CI a secure place to set it would be a [Secret/Protected Variable in the project configuration](https://docs.gitlab.com/ee/ci/variables/#via-the-ui)).
+
+## History
+
+This tool was originally created as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890)
 but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729)
-(released in GitLab 9.4) to keep configuration as code.
+(released in GitLab 9.4) to keep the configuration as code.
 
-GitLabForm is slightly similar to [GitLab provider](https://www.terraform.io/docs/providers/gitlab/index.html) for Terraform (which we love, btw!),
-but it has much more features and uses simpler configuration format.
-
-## How does it work?
-
-It just goes through a loop of projects list and make a series of GitLab API requests. Where possible it corresponds to
-GitLab API 1-to-1, so for example it just PUTs or POSTs the hash set at given place in its config transformed into JSON,
-so that it's not necessary to modify the app in case of some GitLab API changes.
-
-## Gitlab CI/CD support
-
-You can use gitlabform as a part of your [CCA](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline, example for gitlab could be found at .gitlab-ci.example.yml file. Important note is that when you are exposing your configuration to the pipeline, you have to ensure that token with access to gitlab instance is well protected. Recommended way to do that is to set GITLAB_TOKEN as an environment variable in your pipeline.
+Later on we added features that allowed us to use GitLabForm to improve a group containing around 100 similar projects
+to move to a unified development flow (by managing branches protection and the Pull Requests configuration),
+basic tests and deployment process (by managing secret variables, deployment keys and files, such as `.gitlab-ci.yml`),
+integrations (such as JIRA or Slack) and more.
 
 ## Contributing
 
