@@ -18,28 +18,30 @@ class ConfigurationCore:
             sys.exit(1)
 
         try:
-            if config_path:
-                # using this env var should be considered unofficial, we need this temporarily
-                # for backwards compatibility. support for it may be removed without notice, do not use it!
+            if config_string:
+                logging.info("Reading config from provided string.")
+                self.config = yaml.safe_load(config_string)
+                self.config_dir = '.'
+            else:  # maybe config_path
                 if 'APP_HOME' in os.environ:
+                    # using this env var should be considered unofficial, we need this temporarily
+                    # for backwards compatibility. support for it may be removed without notice, do not use it!
                     config_path = os.path.join(os.environ['APP_HOME'], 'config.yml')
-                # this case is only meant for using gitlabform as a library
                 elif not config_path:
+                    # this case is only meant for using gitlabform as a library
                     config_path = os.path.join(str(Path.home()), '.gitlabform', 'config.yml')
                 elif config_path in [os.path.join('.', 'config.yml'), 'config.yml']:
+                    # provided points to config.yml in the app current working dir
                     config_path = os.path.join(os.getcwd(), 'config.yml')
 
                 logging.info("Reading config from file: {}".format(config_path))
 
                 with open(config_path, 'r') as ymlfile:
                     self.config = yaml.safe_load(ymlfile)
+                    logging.debug("Config parsed successfully as YAML.")
 
                 # we need config path for accessing files for relative paths
                 self.config_dir = os.path.dirname(config_path)
-            else:
-                logging.info("Reading config from provided string.")
-                self.config = yaml.safe_load(config_string)
-                self.config_dir = '.'
 
         except (FileNotFoundError, IOError):
             raise ConfigFileNotFoundException(config_path)
