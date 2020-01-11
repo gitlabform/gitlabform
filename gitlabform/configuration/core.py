@@ -19,7 +19,7 @@ class ConfigurationCore:
 
         try:
             if config_string:
-                logging.info("Reading config from provided string.")
+                logging.info('Reading config from provided string.')
                 self.config = yaml.safe_load(config_string)
                 self.config_dir = '.'
             else:  # maybe config_path
@@ -38,7 +38,7 @@ class ConfigurationCore:
 
                 with open(config_path, 'r') as ymlfile:
                     self.config = yaml.safe_load(ymlfile)
-                    logging.debug("Config parsed successfully as YAML.")
+                    logging.debug('Config parsed successfully as YAML.')
 
                 # we need config path for accessing files for relative paths
                 self.config_dir = os.path.dirname(config_path)
