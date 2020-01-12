@@ -1,14 +1,17 @@
 # GitLab provider for Terraform vs GitLabForm
 
-[Terraform](https://www.terraform.io/), the almost universal "* as code" tool from Hashicorp, which inspired
+[Terraform](https://www.terraform.io/), the almost universal "* as a code" tool from Hashicorp, which inspired
 this app (hence the name!), has a [provider for configuring GitLab](https://www.terraform.io/docs/providers/gitlab/index.html)
 using the Hashicorp Configuration Language (HCL).
 
-It is an older and more mature solution than GitLabForm, using a semi-standard configuration language but it's also more
-generic. GitLabForm has been built only for managing GitLab and around different concepts that provide a different
-set of features, arguably a more powerful one.
+It is an older and more mature solution than GitLabForm, using a de-facto standard configuration language but it's also more
+generic.
 
-**Key differences** between GitLab provider for Terraform ("**GT**") and GitLabForm ("**GLF**"):
+GitLabForm has been built specifically for managing GitLab and has been designed around different concepts that provide a different set of features, arguably a more powerful one.
+
+## Key differences
+
+...between GitLab provider for Terraform ("**GT**") and GitLabForm ("**GLF**"):
 
 * **GT** allows creating resources such as users, groups and projects while **GLF** (as of now) allows only configuring existing
 entities (with an exception for management of files in the repo, which is a unique **GLF** feature),
@@ -30,6 +33,8 @@ entities (with an exception for management of files in the repo, which is a uniq
 
 You can read more about the last two points in the GitLabForm key features design article [here](FEATURES_DESIGN.md).
 
-For your convenience we have prepared a **feature matrix/comparison sheet** for these two tools [here](http://bit.ly/36LXpRx).
+## Feature matrix/comparison sheet
+
+For your convenience we have prepared [GitLab provider for Terraform vs GitLabForm feature matrix / comparion sheet](http://bit.ly/36LXpRx).
 Note: this sheet **MAY** contain errors and **WILL** get outdated. Please report these issues in it using comments.
 Thank you!
