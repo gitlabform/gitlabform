@@ -30,6 +30,6 @@ entities (with an exception for management of files in the repo, which is a uniq
 
 You can read more about the last two points in the GitLabForm key features design article [here](FEATURES_DESIGN.md).
 
-For your convenience we have prepared a **feature matrix/comparison sheet** for these two tools [here](https://docs.google.com/spreadsheets/d/1CN8rhuK3vBiJ9whhbdVa56pQYKp26-V_s_S7qBtfQRM/edit#gid=0).
+For your convenience we have prepared a **feature matrix/comparison sheet** for these two tools [here](http://bit.ly/36LXpRx).
 Note: this sheet **MAY** contain errors and **WILL** get outdated. Please report these issues in it using comments.
 Thank you!
