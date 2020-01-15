@@ -172,7 +172,10 @@ group_settings:
       drone-ci:
         delete: true
       jira:
+        active: true
         url: https://jira.yourcompany.com
+        username: foo
+        password: bar
 
     # key names here are hook URLs and values are as parameters described at
     # https://docs.gitlab.com/ee/api/projects.html#edit-project-hook
