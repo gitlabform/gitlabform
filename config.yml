@@ -173,7 +173,6 @@ group_settings:
         delete: true
       jira:
         url: https://jira.yourcompany.com
-        project_key: PRO # any JIRA project key will do
 
     # key names here are hook URLs and values are as parameters described at
     # https://docs.gitlab.com/ee/api/projects.html#edit-project-hook
