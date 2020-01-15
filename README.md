@@ -39,8 +39,8 @@ GitLabForm enables you to manage:
 
 ...and a combination of them.
 
-GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
-GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](FEATURES_DESIGN.md#raw-parameters-passing).
+GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration). GitLabForm is also
+using [passing the parameters as-is to GitLab APIs with PUT/POST requests](FEATURES_DESIGN.md#raw-parameters-passing).
 
 ### Comparison to similar apps
 
@@ -129,9 +129,10 @@ Run:
 You can use GitLabForm as a part of your [CCA (Continuous Configuration Automation)](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline.
 
 For example, you can run it:
-
 * with a schedule to unify your GitLab configuration each night, after it may have drifted
+from the configuration in the code during the working day.
 * from a webhook after a new project is created in GitLab to have have the initial config
+for new projects done automatically as soon as the projects are created.
 
 Example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](.gitlab-ci.example.yml) file.
 
