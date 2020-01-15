@@ -1,5 +1,4 @@
 import logging
-import os
 import pytest
 from gitlabform.configuration import ConfigurationProjectsAndGroups
 
@@ -7,59 +6,128 @@ from gitlabform.configuration import ConfigurationProjectsAndGroups
 logger = logging.getLogger(__name__)
 
 
-class TestConfigurationProjectsAndGroups:
+@pytest.fixture
+def configuration_with_only_group_and_project():
+    config_yaml = '''
+---
+group_settings:
+  some_group:
+    project_settings:
+      foo: bar
+    hooks:
+      a:
+        foo: bar
 
-    def test__get_effective_config_for_project__only_group_and_project__other_project(self):
+project_settings:
+  some_group/some_project:
+    project_settings:
+      bar: foo
+    hooks:
+      b:
+        bar: foo
+'''
 
-        current_path = os.path.dirname(os.path.realpath(__file__))
-        c = ConfigurationProjectsAndGroups(os.path.join(current_path, 'config_with_only_group_and_project.yaml'))
+    return ConfigurationProjectsAndGroups(config_string=config_yaml)
 
-        x = c.get_effective_config_for_project('project_not_in_config/group_not_in_config')
 
-        assert x == {}
+@pytest.fixture
+def configuration_with_subgroups():
+    config_yaml = '''
+---
+group_settings:
+  some_group:
+    project_settings:
+      foo: bar
+    hooks:
+      a:
+        foo: bar
 
-    def test__get_effective_config_for_project__only_group_and_project__project_from_config__additive_project_settings(self):
+  some_group/subgroup_level_1:
+    project_settings:
+      foo: bar2
+    hooks:
+      a:
+        foo: bar2
 
-        current_path = os.path.dirname(os.path.realpath(__file__))
-        c = ConfigurationProjectsAndGroups(os.path.join(current_path, 'config_with_only_group_and_project.yaml'))
+  some_group/subgroup_level_1/subgroup_level_2:
+    project_settings:
+      foo: bar3
+    hooks:
+      a:
+        foo: bar3
 
-        x = c.get_effective_config_for_project('some_group/some_project')
+project_settings:
+  some_group/some_project:
+    project_settings:
+      bar: something_else
+    hooks:
+      b:
+        bar: something_else
 
-        additive__project_settings = x['project_settings']
+  some_group/subgroup_level_1/some_project:
+      project_settings:
+        bar: something_else2
+      hooks:
+        b:
+          bar: something_else2
 
-        # merged hashes from group and project levels
-        assert additive__project_settings == {'foo': 'bar', 'bar': 'foo'}
+  some_group/subgroup_level_1/subgroup_level_2/some_project:
+      project_settings:
+        bar: something_else3
+      hooks:
+        b:
+          bar: something_else3
+'''
 
-    def test__get_effective_config_for_project__only_group_and_project__project_from_config__additive_hooks(self):
+    return ConfigurationProjectsAndGroups(config_string=config_yaml)
 
-        current_path = os.path.dirname(os.path.realpath(__file__))
-        c = ConfigurationProjectsAndGroups(os.path.join(current_path, 'config_with_only_group_and_project.yaml'))
 
-        x = c.get_effective_config_for_project('some_group/some_project')
+def test__get_effective_config_for_project__other_project(configuration_with_only_group_and_project):
 
-        additive__hooks = x['hooks']
-        assert additive__hooks == {'a': {'foo': 'bar'}, 'b': {'bar': 'foo'}}  # added from both group and project level
+    x = configuration_with_only_group_and_project.\
+        get_effective_config_for_project('project_not_in_config/group_not_in_config')
 
-    def test__get_effective_config_for_project__subgroups__project_from_config__level1(self):
+    assert x == {}
 
-        current_path = os.path.dirname(os.path.realpath(__file__))
-        c = ConfigurationProjectsAndGroups(os.path.join(current_path, 'config_with_subgroups.yaml'))
 
-        x = c.get_effective_config_for_project('some_group/subgroup_level_1/some_project')
+def test__get_effective_config_for_project__project_from_config__additive_project_settings\
+                (configuration_with_only_group_and_project):
 
-        additive__project_settings = x['project_settings']
+    x = configuration_with_only_group_and_project.\
+        get_effective_config_for_project('some_group/some_project')
 
-        # project and only subgroup level 1
-        assert additive__project_settings == {'foo': 'bar2', 'bar': 'something_else2'}
+    additive__project_settings = x['project_settings']
 
-    def test__get_effective_config_for_project__subgroups__project_from_config__level2(self):
+    # merged hashes from group and project levels
+    assert additive__project_settings == {'foo': 'bar', 'bar': 'foo'}
 
-        current_path = os.path.dirname(os.path.realpath(__file__))
-        c = ConfigurationProjectsAndGroups(os.path.join(current_path, 'config_with_subgroups.yaml'))
 
-        x = c.get_effective_config_for_project('some_group/subgroup_level_1/subgroup_level_2/some_project')
+def test__get_effective_config_for_project__project_from_config__additive_hooks\
+                (configuration_with_only_group_and_project):
 
-        additive__project_settings = x['project_settings']
+    x = configuration_with_only_group_and_project.\
+        get_effective_config_for_project('some_group/some_project')
 
-        # project and only subgroup level 2
-        assert additive__project_settings == {'foo': 'bar3', 'bar': 'something_else3'}
+    additive__hooks = x['hooks']
+    assert additive__hooks == {'a': {'foo': 'bar'}, 'b': {'bar': 'foo'}}  # added from both group and project level
+
+
+def test__get_effective_config_for_project__project_from_config__level1(configuration_with_subgroups):
+
+    x = configuration_with_subgroups.get_effective_config_for_project('some_group/subgroup_level_1/some_project')
+
+    additive__project_settings = x['project_settings']
+
+    # project and only subgroup level 1
+    assert additive__project_settings == {'foo': 'bar2', 'bar': 'something_else2'}
+
+
+def test__get_effective_config_for_project__project_from_config__level2(configuration_with_subgroups):
+
+    x = configuration_with_subgroups.\
+        get_effective_config_for_project('some_group/subgroup_level_1/subgroup_level_2/some_project')
+
+    additive__project_settings = x['project_settings']
+
+    # project and only subgroup level 2
+    assert additive__project_settings == {'foo': 'bar3', 'bar': 'something_else3'}

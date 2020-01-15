@@ -8,8 +8,9 @@ from gitlabform.gitlab.services import GitLabServices
 from gitlabform.gitlab.tags import GitLabTags
 from gitlabform.gitlab.pipelines import GitLabPipelines
 from gitlabform.gitlab.members import GitLabMembers
+from gitlabform.gitlab.users import GitLabUsers
 
 
 class GitLab(GitLabBranches, GitLabCommits, GitLabMergeRequests, GitLabProjects, GitLabRepositories, GitLabServices,
-             GitLabTags, GitLabGroups, GitLabPipelines, GitLabMembers):
+             GitLabTags, GitLabGroups, GitLabPipelines, GitLabMembers, GitLabUsers):
     pass

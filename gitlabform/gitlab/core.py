@@ -1,9 +1,9 @@
 import sys
 import logging
-import urllib
 import requests
-from os import environ
-from requests.packages.urllib3.util.retry import Retry
+import os
+from urllib3.util.retry import Retry
+from urllib import parse
 from requests.adapters import HTTPAdapter
 from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
 
@@ -15,10 +15,19 @@ class GitLabCore:
     ssl_verify = None
     session = None
 
-    def __init__(self, config_path=None):
-        configuration = ConfigurationCore(config_path)
-        self.url = configuration.get("gitlab|url", environ.get("GITLAB_URL"))
-        self.token = configuration.get("gitlab|token", environ.get("GITLAB_TOKEN"))
+    def __init__(self, config_path=None, config_string=None):
+
+        if config_path and config_string:
+            logging.fatal('Please initialize with either config_path or config_string, not both.')
+            sys.exit(1)
+
+        if config_path:
+            configuration = ConfigurationCore(config_path=config_path)
+        else:
+            configuration = ConfigurationCore(config_string=config_string)
+
+        self.url = configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
+        self.token = configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
         self.ssl_verify = configuration.get("gitlab|ssl_verify", True)
 
         self.session = requests.Session()
@@ -39,7 +48,7 @@ class GitLabCore:
         try:
             api_version = configuration.get("gitlab|api_version")
             if api_version != 4:
-                raise ApiVersionIncorrectException(e)
+                raise ApiVersionIncorrectException()
             logging.info("Config file is declared to be compatible with GitLab API v4")
         except KeyNotFoundException:
             logging.fatal("Aborting. GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
@@ -65,8 +74,8 @@ class GitLabCore:
 
         return users[0]['id']
 
-    def _get_user(self, id):
-        return self._make_requests_to_api("users/%s", str(id), 'GET')
+    def _get_user(self, user_id):
+        return self._make_requests_to_api("users/%s", str(user_id), 'GET')
 
     def _get_group_id(self, path):
         group = self._make_requests_to_api("groups/%s", path, 'GET')
@@ -104,7 +113,7 @@ class GitLabCore:
 
         url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
         logging.debug("url = %s , method = %s , data = %s", url, method, data)
-        headers = {'PRIVATE-TOKEN': self.token}
+        headers = {'Authorization': 'Bearer ' + self.token}
         if data:
             response = self.session.request(method, url, headers=headers, data=data, timeout=10)
         elif json:
@@ -143,10 +152,10 @@ class GitLabCore:
                 # URL-encode each arg in the tuple and return it as tuple too
                 url_encoded_args = ()
                 for arg in single_arg_or_args_tuple:
-                    url_encoded_args += (urllib.parse.quote_plus(str(arg)), )
+                    url_encoded_args += (parse.quote_plus(str(arg)), )
             else:
                 # URL-encode single arg
-                url_encoded_args = urllib.parse.quote_plus(single_arg_or_args_tuple)
+                url_encoded_args = parse.quote_plus(single_arg_or_args_tuple)
 
             return format_string % url_encoded_args
 

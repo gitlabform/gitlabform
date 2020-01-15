@@ -1,17 +1,10 @@
 [![PyPI version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
-[![Build Status](https://travis-ci.org/egnyte/gitlabform.svg?branch=master)](https://travis-ci.org/egnyte/gitlabform)
+[![Build Status](https://travis-ci.com/egnyte/gitlabform.svg?branch=integration_tests)](https://travis-ci.com/egnyte/gitlabform)
 
 # GitLabForm
 
 GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
-
-## Table of Contents
-
-* What you get? - [Features](#features) (& [Comparison to similar apps](#comparison-to-similar-apps))
-* Basic use - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
-* Advanced use - [Full configuration syntax](#full-configuration-syntax), [More cli usage examples](#more-cli-usage-examples), [Running in an automated pipeline](#running-in-an-automated-pipeline)
-* Join us! - [Contributing](#contributing), [History](#history), [License](#license)
 
 ## Features
 
@@ -29,7 +22,7 @@ GitLabForm enables you to manage:
 * (Project) Hooks,
 * (Project) Push Rules,
 * (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
-* Merge Requests approvals settings and approvers (**GitLab EE only**),
+* Merge Requests approvals settings and approvers (EE 10.6+ only),
 
 ...for:
 
@@ -39,30 +32,31 @@ GitLabForm enables you to manage:
 
 ...and a combination of them.
 
-GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration). GitLabForm is also
-using [passing the parameters as-is to GitLab APIs with PUT/POST requests](FEATURES_DESIGN.md#raw-parameters-passing).
+GitLabForm uses hierarchical configuration with inheritance, merging/overwriting and addivity. GitLabForm is also
+using passing the parameters as-is to GitLab APIs with PUT/POST requests.
+[Read more about these features here](FEATURES_DESIGN.md) .
 
-### Comparison to similar apps
+### Similar apps
 
 GitLabForm has roughly the same purpose as [GitLab provider](https://www.terraform.io/docs/providers/gitlab/index.html)
-for [Terraform](https://www.terraform.io/) (which is a tool that we love and which has inspired us to write this app),
+for [Terraform](https://www.terraform.io/) (which is a tool that we love and that clearly inspired this app),
 but it has a different set of features and uses a different configuration format.
 
-Please read more about [GitLab provider for Terraform vs GitLabForm](GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
+[Please read more about GitLab provider for Terraform vs GitLabForm, including a feature matrix, here](GT_VS_GLF.md).
 
 ## Requirements
 
-* Python 3.5+ or Docker
-* GitLab 11+, GitLab EE for Merge Requests management
+* Python 3.5+
+* GitLab 11+ for gitlabform >=1.0.0, GitLab 9.1-10.8 for gitlabform <1.0.0, (GitLab EE 10.6+ for merge_requests section)
 
 ## Installation
 
 A. Pip: `pip3 install gitlabform`
 
-B. Docker: run GitLabForm in a Docker container with this oneliner:
+B. Docker: you run GitLabForm in a Docker container with this oneliner:
 `docker run -it -v $(pwd):/config egnyte/gitlabform:latest gitlabform`.
 Instead of "latest" you can also use a specific version and choose from Alpine and Debian-based images.
-See the [GitLabForm's DockerHub page](https://hub.docker.com/r/egnyte/gitlabform/tags) for a list of available tags.
+See the [GitLabForm DockerHub](https://hub.docker.com/r/egnyte/gitlabform/tags) page for a list of available tags.
 
 ## Quick start
 
@@ -93,7 +87,7 @@ group_settings:
 
 3. Watch GitLabForm add this deploy key to all projects in "My Group" group in your GitLab!
 
-## Full configuration syntax
+## Configuration syntax
 
 See [config.yml](https://github.com/egnyte/gitlabform/blob/master/config.yml) in this repo as a well documented example
 of all the features, including configuring all projects in all groups, projects in "my-group" group and specifically
@@ -126,15 +120,17 @@ Run:
 
 ## Running in an automated pipeline
 
-You can use GitLabForm as a part of your [CCA (Continuous Configuration Automation)](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline.
+You can use GitLabForm as a part of your [CCA](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline
+to.
 
-For example, you can run it:
-* with a schedule to unify your GitLab configuration each night, after it may have drifted
+For example, you can run it with a schedule to unify your GitLab configuration each night, after it may have drifted
 from the configuration in the code during the working day.
-* from a webhook after a new project is created in GitLab to have have the initial config
+
+Or you can run the pipeline from a webhook after a new project is created in GitLab to have have the initial config
 for new projects done automatically as soon as the projects are created.
 
-Example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](.gitlab-ci.example.yml) file.
+
+Example for running GitLabForm using GitLab CI is provided in the `.gitlab-ci.example.yml` file.
 
 Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is 
 encrypted) for security reasons - please set it in the `GITLAB_TOKEN` environment variable instead.
@@ -166,6 +162,48 @@ pip3 install pypandoc
 ```
 python setup.py develop
 ```
+
+### Running unit tests locally
+
+GitLabForm uses py.test for tests. To run unit tests locally:
+
+1. Activate the virtualenv created above
+
+2. `pip install pytest`
+
+3. Run `then py.test --ignore gitlabform/gitlabform/test` to run all tests except the integration tests (see below).
+
+### Running integrations tests locally or on own GitLab instance
+
+GitLabForm also comes with a set of tests that make real requests to a running GitLab instance. You can run them
+against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.
+
+To run them against a local GitLab instance:
+
+1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
+
+```
+./run_gitlab_in_docker.sh
+export GITLAB_URL=$(cat gitlab_url.txt)
+export GITLAB_TOKEN=$(cat gitlab_token.txt)
+```
+
+2. Run `py.test gitlabform/gitlabform/test` to start the tests
+
+**Note**: although GitLabForm integration tests operate own their own groups, projects and users, it should be safe
+to run them against your own GitLab instance, but we do to take any responsibility for it. Please review the code
+to ensure what it does and run on your own risk.
+
+To run them against your own GitLab instance:
+
+1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
+and `GITLAB_URL`:
+```
+export GITLAB_URL="https://mygitlab.company.com"
+export GITLAB_TOKEN="<my admin user API token>"
+```
+
+2. Run `py.test gitlabform/gitlabform/test` to start the tests
 
 ## History
 

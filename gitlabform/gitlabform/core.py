@@ -14,6 +14,8 @@ from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.gitlab.core import NotFoundException
 
 
+# wrapper function that prevents actually calling the wrapped function if the function
+# is set to be skipped in the configuration
 def if_in_config_and_not_skipped(method):
 
     @wraps(method)
@@ -33,6 +35,7 @@ def if_in_config_and_not_skipped(method):
             logging.debug("Skipping %s - not in config." % config_section_name)
 
     return method_wrapper
+
 
 # dict that returns `default` if queried with ".get('key|subkey|subsubkey')" if any of the subkeys doesn't exist
 # based on https://stackoverflow.com/a/44859638/2693875
@@ -57,6 +60,8 @@ class SafeDict(dict):
         return val
 
 
+# wrapper function that converts regular dict that is returned by the wrapped function
+# to a SafeDict
 def configuration_to_safe_dict(method):
 
     @wraps(method)
@@ -69,9 +74,26 @@ def configuration_to_safe_dict(method):
 
 class GitLabFormCore(object):
 
-    def __init__(self):
-        self.args = self.parse_args()
-        self.set_log_level()
+    def __init__(self, project_or_group=None, config_string=None, debug=False):
+
+        if project_or_group and config_string:
+            self.project_or_group = project_or_group
+            self.config_string = config_string
+            self.verbose = False
+            if debug:
+                self.debug = True
+            else:
+                self.debug = False
+            self.strict = True
+            self.start_from = 1
+            self.noop = False
+
+            self.set_log_level(tests=True)
+        else:
+            self.project_or_group, self.config, self.verbose, self.debug, self.strict, self.start_from, self.noop \
+                = self.parse_args()
+            self.set_log_level()
+
         self.gl, self.c = self.initialize_configuration_and_gitlab()
 
     def parse_args(self):
@@ -102,26 +124,40 @@ class GitLabFormCore(object):
 
         parser.add_argument('-n', '--noop', dest='noop', action="store_true", help='Run in no-op (dry run) mode')
 
-        return parser.parse_args()
+        args = parser.parse_args()
 
-    def set_log_level(self):
+        return args.project_or_group, args.config, args.verbose, args.debug, args.strict, args.start_from, args.noop
+
+    def set_log_level(self, tests=False):
 
         logging.basicConfig()
         level = logging.WARNING
-        if self.args.verbose:
+        if self.verbose:
             level = logging.INFO
-        elif self.args.debug:
+        elif self.debug:
             level = logging.DEBUG
         logging.getLogger().setLevel(level)
 
-        fmt = logging.Formatter("%(message)s")
-        logging.getLogger().handlers[0].setFormatter(fmt)
+        if not tests:
+            fmt = logging.Formatter("%(message)s")
+            logging.getLogger().handlers[0].setFormatter(fmt)
+        else:
+            # disable printing to stdout/err because pytest will catch it anyway
+            handler = logging.getLogger().handlers[0]
+            logging.getLogger().removeHandler(handler)
 
     def initialize_configuration_and_gitlab(self):
 
         try:
-            gl = GitLab(self.args.config.strip())
-            c = Configuration(self.args.config.strip())
+            if hasattr(self, 'config_string'):
+                gl = GitLab(config_string=self.config_string)
+            else:
+                gl = GitLab(self.config.strip())
+
+            if hasattr(self, 'config_string'):
+                c = Configuration(config_string=self.config_string)
+            else:
+                c = Configuration(self.config.strip())
             return gl, c
         except ConfigFileNotFoundException as e:
             logging.fatal('Aborting - config file not found at: %s', e)
@@ -139,28 +175,28 @@ class GitLabFormCore(object):
         groups = []
         projects_and_groups = []
 
-        if self.args.project_or_group == "ALL":
+        if self.project_or_group == "ALL":
             # all projects from all groups we have access to
             logging.warning('>>> Processing ALL groups and and projects')
             groups = self.gl.get_groups()
-        elif self.args.project_or_group == "ALL_DEFINED":
+        elif self.project_or_group == "ALL_DEFINED":
             logging.warning('>>> Processing ALL groups and projects defined in config')
             # all groups from config
             groups = self.c.get_groups()
             # and all projects from config
             projects_and_groups = set(self.c.get_projects())
         else:
-            if '/' in self.args.project_or_group:
+            if '/' in self.project_or_group:
                 try:
-                    self.gl._get_group_id(self.args.project_or_group)
+                    self.gl._get_group_id(self.project_or_group)
                     # it's a subgroup
-                    groups = [self.args.project_or_group]
+                    groups = [self.project_or_group]
                 except NotFoundException:
                     # it's a single project
-                    projects_and_groups = [self.args.project_or_group]
+                    projects_and_groups = [self.project_or_group]
             else:
                 # it's a single group
-                groups = [self.args.project_or_group]
+                groups = [self.project_or_group]
 
         # skip groups before getting projects from gitlab to save time
         if groups:
@@ -202,7 +238,7 @@ class GitLabFormCore(object):
 
             i += 1
 
-            if i < self.args.start_from:
+            if i < self.start_from:
                 logging.warning('$$$ [%s/%s] Skipping: %s...', i, len(projects_and_groups), project_and_group)
                 continue
 
@@ -212,7 +248,7 @@ class GitLabFormCore(object):
 
             try:
 
-                if self.args.noop:
+                if self.noop:
                     logging.warning('Not actually processing because running in noop mode.')
                     logging.debug('Configuration that would be applied: %s' % str(configuration))
                     continue
@@ -375,7 +411,7 @@ class GitLabFormCore(object):
             except NotFoundException:
                 logging.warning("! Branch '%s' not found when trying to set it as protected/unprotected",
                                 branch)
-                if self.args.strict:
+                if self.strict:
                     exit(3)
 
     @if_in_config_and_not_skipped
@@ -397,7 +433,7 @@ class GitLabFormCore(object):
                     self.gl.unprotect_tag(project_and_group, tag)
             except NotFoundException:
                 logging.warning("! Tag '%s' not found when trying to set it as protected/unprotected", tag)
-                if self.args.strict:
+                if self.strict:
                     exit(3)
 
     @if_in_config_and_not_skipped
@@ -432,7 +468,7 @@ class GitLabFormCore(object):
                     else:
                         logging.warning("! Branch '%s' not found, not processing file '%s' in it", branch,
                                         file)
-                        if self.args.strict:
+                        if self.strict:
                             exit(3)
 
             for branch in branches:
