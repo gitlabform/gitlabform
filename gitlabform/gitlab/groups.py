@@ -3,6 +3,19 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 class GitLabGroups(GitLabCore):
 
+    def create_group(self, name, path):
+        data = {
+            'name': name,
+            'path': path,
+        }
+        return self._make_requests_to_api("groups", data=data, method='POST', expected_codes=201)
+
+    def delete_group(self, group_name):
+        return self._make_requests_to_api("groups/%s", group_name, method='DELETE', expected_codes=202)
+
+    def get_group(self, name):
+        return self._make_requests_to_api("groups/%s", name)
+
     def get_groups(self):
         """
         :return: sorted list of groups

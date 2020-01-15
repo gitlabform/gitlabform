@@ -5,6 +5,17 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 class GitLabProjects(GitLabCore):
 
+    def create_project(self, name, path, namespace_id):
+        data = {
+            'name': name,
+            'path': path,
+            'namespace_id': namespace_id,
+        }
+        return self._make_requests_to_api("projects", data=data, method='POST', expected_codes=201)
+
+    def delete_project(self, project_and_group_name):
+        return self._make_requests_to_api("projects/%s", project_and_group_name, method='DELETE', expected_codes=202)
+
     def get_all_projects(self):
         """
         :param group: group name
@@ -119,6 +130,10 @@ class GitLabProjects(GitLabCore):
         data_required = {'id': pid}
         data = {**data, **data_required}
         self._make_requests_to_api("projects/%s/approvals", pid, 'POST', data, expected_codes=201)
+
+    def get_approvers(self, project_and_group_name):
+        pid = self._get_project_id(project_and_group_name)
+        return self._make_requests_to_api("projects/%s/approvals", pid)
 
     def put_approvers(self, project_and_group_name, approvers, approver_groups):
         """
