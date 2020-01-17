@@ -44,3 +44,7 @@ config-develop.yml
 
 # vscode
 .vscode/
+
+data/
+logs/
+config/
