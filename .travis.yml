@@ -2,6 +2,9 @@ language: python
 
 jobs:
   include:
+    # security tests
+    - python: "3.7"
+      env: SECURITY=true
     # integration tests
     - python: "3.7"
       env: INTEGRATION=true
@@ -32,12 +35,15 @@ before_script:
 - if [[ -n $INTEGRATION ]] ; then bash run_gitlab_in_docker.sh ; fi
 - if [[ -n $INTEGRATION ]] ; then export GITLAB_URL=$(cat gitlab_url.txt) ; fi
 - if [[ -n $INTEGRATION ]] ; then export GITLAB_TOKEN=$(cat gitlab_token.txt) ; fi
+- if [[ -n $SECURITY ]] ; then pip install bandit ; fi
 
 script:
 # unit tests
 - if [[ -z $INTEGRATION ]] ; then unbuffer py.test --ignore gitlabform/gitlabform/test ; fi
 # integration tests
 - if [[ -n $INTEGRATION ]] ; then unbuffer py.test gitlabform/gitlabform/test ; fi
+# security tests
+- if [[ -n $SECURITY ]] ; then bandit -r gitlabform -x "*/test/*" ; fi
 
 deploy:
 - provider: pypi
