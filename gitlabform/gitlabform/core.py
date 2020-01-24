@@ -300,7 +300,7 @@ class GitLabFormCore(object):
         approvals = configuration.get('merge_requests|approvals')
         if approvals:
             logging.info("Setting approvals settings: %s", approvals)
-            self.gl.post_approvals(project_and_group, approvals)
+            self.gl.post_approvals_settings(project_and_group, approvals)
 
         approvers = configuration.get('merge_requests|approvers')
         approver_groups = configuration.get('merge_requests|approver_groups')

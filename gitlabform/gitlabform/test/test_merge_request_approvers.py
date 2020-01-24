@@ -110,38 +110,38 @@ class TestMergeRequestApprovers:
         gf = GitLabForm(config_string=config__approvers_only_users, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        approvers = gitlab.get_approvals_settings(GROUP_AND_PROJECT_NAME)
         assert len(approvers['approvers']) == 2
 
     def test__if_change_works__only_users(self, gitlab):
         gf = GitLabForm(config_string=config__approvers_only_users, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        approvers = gitlab.get_approvals_settings(GROUP_AND_PROJECT_NAME)
         assert len(approvers['approvers']) == 2
 
         gf = GitLabForm(config_string=config__approvers_only_users_change, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        approvers = gitlab.get_approvals_settings(GROUP_AND_PROJECT_NAME)
         assert len(approvers['approvers']) == 1
 
     def test__if_it_works__only_groups(self, gitlab):
         gf = GitLabForm(config_string=config__approvers_only_groups, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        approvers = gitlab.get_approvals_settings(GROUP_AND_PROJECT_NAME)
         assert len(approvers['approver_groups']) == 1
 
     def test__if_change_works__only_groups(self, gitlab):
         gf = GitLabForm(config_string=config__approvers_only_groups, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        approvers = gitlab.get_approvals_settings(GROUP_AND_PROJECT_NAME)
         assert len(approvers['approver_groups']) == 1
 
         gf = GitLabForm(config_string=config__approvers_only_groups_change, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        approvers = gitlab.get_approvers(GROUP_AND_PROJECT_NAME)
+        approvers = gitlab.get_approvals_settings(GROUP_AND_PROJECT_NAME)
         assert len(approvers['approver_groups']) == 2
