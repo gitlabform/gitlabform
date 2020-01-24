@@ -135,34 +135,71 @@ class GitLabProjects(GitLabCore):
         pid = self._get_project_id(project_and_group_name)
         return self._make_requests_to_api("projects/%s/approvals", pid)
 
-    def put_approvers(self, project_and_group_name, approvers, approver_groups):
-        """
-        :param project_and_group_name: "group/project" string
-        :param approvers: list of approver user names
-        :param approver_groups: list of approver group paths
-        """
-
-        # gitlab API expects ids, not names of users and groups, so we need to convert first
-        approver_ids = []
-        for approver_name in approvers:
-            approver_ids.append(self._get_user_id(approver_name))
-        approver_group_ids = []
-        for group_path in approver_groups:
-            approver_group_ids.append(self._get_group_id(group_path))
+    def delete_legacy_approvers(self, project_and_group_name):
+        # uses pre-12.3, deprecated API to clean up the setup of approvers made the old way of configuring approvers
 
         # we need to pass data to this gitlab API endpoint as JSON, because when passing as data the JSON converter
         # used by requests lib changes empty arrays into nulls and omits it, which results in
         # {"error":"approver_group_ids is missing"} error from gitlab...
-        # TODO: create JSON object directly, omit converting string to JSON
+
         # for this endpoint GitLab still actually wants pid, not "group/project"...
         pid = self._get_project_id(project_and_group_name)
-        data = "{"\
-               + '"id":' + str(pid) + ','\
-               + '"approver_ids": [' + ','.join(str(x) for x in approver_ids) + '],'\
-               + '"approver_group_ids": [' + ','.join(str(x) for x in approver_group_ids) + ']'\
+        data = "{" \
+               + '"id":' + str(pid) + ',' \
+               + '"approver_ids": [],' \
+               + '"approver_group_ids": []' \
                + "}"
         json_data = json.loads(data)
         self._make_requests_to_api("projects/%s/approvers", pid, 'PUT', data=None, json=json_data)
+
+    def get_approvals_rules(self, project_and_group_name):
+        # for this endpoint GitLab still actually wants pid, not "group/project"...
+        pid = self._get_project_id(project_and_group_name)
+        return self._make_requests_to_api("projects/%s/approval_rules", pid)
+
+    def delete_approvals_rule(self, project_and_group_name, approval_rule_id):
+        # for this endpoint GitLab still actually wants pid, not "group/project"...
+        pid = self._get_project_id(project_and_group_name)
+        self._make_requests_to_api("projects/%s/approval_rules/%s", (pid, approval_rule_id), method='DELETE')
+
+    def create_approval_rule(self, project_and_group_name, name, approvals_required, approvers, approver_groups):
+        pid = self._get_project_id(project_and_group_name)
+
+        data = self._create_approval_rule_data(project_and_group_name, name, approvals_required, approvers,
+                                               approver_groups)
+
+        self._make_requests_to_api("projects/%s/approval_rules", pid, method='POST', data=data, expected_codes=201)
+
+    def update_approval_rule(self, project_and_group_name, approval_rule_id, name, approvals_required,
+                             approvers, approver_groups):
+        pid = self._get_project_id(project_and_group_name)
+
+        data = self._create_approval_rule_data(project_and_group_name, name, approvals_required, approvers,
+                                               approver_groups)
+        data['approval_rule_id'] = approval_rule_id
+
+        self._make_requests_to_api("projects/%s/approval_rules/%s", (pid, approval_rule_id), method='PUT', data=data)
+
+    def _create_approval_rule_data(self, project_and_group_name, name, approvals_required, approvers, approver_groups):
+        pid = self._get_project_id(project_and_group_name)
+
+        # gitlab API expects ids, not names of users and groups, so we need to convert first
+        user_ids = []
+        for approver_name in approvers:
+            user_ids.append(self._get_user_id(approver_name))
+        group_ids = []
+        for group_path in approver_groups:
+            group_ids.append(self._get_group_id(group_path))
+
+        data = {
+            'id': pid,
+            'name': name,
+            'approvals_required': approvals_required,
+            'user_ids': user_ids,
+            'group_ids': group_ids,
+        }
+
+        return data
 
     def share_with_group(self, project_and_group_name, group_name, group_access, expires_at):
         data = {
