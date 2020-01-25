@@ -1,5 +1,5 @@
 [![PyPI version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
-[![Build Status](https://travis-ci.com/egnyte/gitlabform.svg?branch=integration_tests)](https://travis-ci.com/egnyte/gitlabform)
+[![Build Status](https://travis-ci.com/egnyte/gitlabform.svg?branch=master)](https://travis-ci.com/egnyte/gitlabform)
 
 # GitLabForm
 
