@@ -15,9 +15,7 @@ def gitlab(request):
     gl = get_gitlab()
 
     def fin():
-        # the only thing needed to clean up after below tests is disabling the test integrations
-        gl.delete_service(GROUP_AND_PROJECT_NAME, 'asana')
-        gl.delete_service(GROUP_AND_PROJECT_NAME, 'jira')
+        # disable test integrations
         gl.delete_service(GROUP_AND_PROJECT_NAME, 'mattermost')
 
     request.addfinalizer(fin)
