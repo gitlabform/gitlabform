@@ -62,3 +62,10 @@ def add_users_to_group(group_name, usernames):
         except UnexpectedResponseException:
             # this is fine - user is already in the group
             pass
+
+
+def create_readme_in_project(project_and_group):
+    try:
+        gl.get_file(project_and_group, 'master', 'README.md')
+    except:
+        gl.add_file(project_and_group, 'master', 'README.md', 'Hello World!', 'My README')
