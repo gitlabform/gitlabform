@@ -67,5 +67,6 @@ def add_users_to_group(group_name, usernames):
 def create_readme_in_project(project_and_group):
     try:
         gl.get_file(project_and_group, 'master', 'README.md')
+        gl.set_file(project_and_group, 'master', 'README.md', 'Hello World!', 'Restore original content')
     except:
-        gl.add_file(project_and_group, 'master', 'README.md', 'Hello World!', 'My README')
+        gl.add_file(project_and_group, 'master', 'README.md', 'Hello World!', 'Create README')
