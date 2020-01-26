@@ -18,12 +18,12 @@ def gitlab(request):
     for branch in ['protected_branch1', 'protected_branch2', 'regular_branch1', 'regular_branch2']:
         gl.create_branch(GROUP_AND_PROJECT_NAME, branch, 'master')
 
-    # def fin():
-    #     # delete all created branches
-    #     for branch_to_delete in ['protected_branch1', 'protected_branch2', 'regular_branch1', 'regular_branch2']:
-    #         gl.delete_branch(GROUP_AND_PROJECT_NAME, branch_to_delete)
-    #
-    # request.addfinalizer(fin)
+    def fin():
+        # delete all created branches
+        for branch_to_delete in ['protected_branch1', 'protected_branch2', 'regular_branch1', 'regular_branch2']:
+            gl.delete_branch(GROUP_AND_PROJECT_NAME, branch_to_delete)
+
+    request.addfinalizer(fin)
     return gl  # provide fixture value
 
 
