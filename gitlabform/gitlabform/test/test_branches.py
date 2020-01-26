@@ -15,19 +15,16 @@ def gitlab(request):
     create_group(GROUP_NAME)
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
     create_readme_in_project(GROUP_AND_PROJECT_NAME)  # in master branch
-    gl.create_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_but_allow_all', 'master')
-    gl.create_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_disallow_all', 'master')
-    gl.create_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges', 'master')
-    gl.create_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes', 'master')
+
+    branches = ['protect_branch_but_allow_all', 'protect_branch_and_disallow_all',
+                'protect_branch_and_allow_merges', 'protect_branch_and_allow_pushes']
+    for branch in branches:
+        gl.create_branch(GROUP_AND_PROJECT_NAME, branch, 'master')
 
     def fin():
         # delete all created branches
-        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_but_allow_all')
-        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_disallow_all')
-        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges')
-        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes')
-        # master is created as unprotected by default, so revert it to this state
-        gl.unprotect_branch(GROUP_AND_PROJECT_NAME, 'master')
+        for branch_to_delete in branches:
+            gl.delete_branch(GROUP_AND_PROJECT_NAME, branch_to_delete)
 
     request.addfinalizer(fin)
     return gl  # provide fixture value
