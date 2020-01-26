@@ -241,6 +241,10 @@ group_settings:
         jinja_env:
           foo: "fooz"
           bar: "barz"
+      "file-to-set-in-protected-branches":
+        branches: protected
+        content: |
+          This file will be added to all protected branches.
 
   # settings for ALL projects in 'old-projects-group' group
   old-projects-group:

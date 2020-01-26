@@ -18,12 +18,12 @@ def gitlab(request):
     for branch in ['protected_branch1', 'protected_branch2', 'regular_branch1', 'regular_branch2']:
         gl.create_branch(GROUP_AND_PROJECT_NAME, branch, 'master')
 
-    def fin():
-        # delete all created branches
-        for branch_to_delete in ['protected_branch1', 'protected_branch2', 'regular_branch1', 'regular_branch2']:
-            gl.delete_branch(GROUP_AND_PROJECT_NAME, branch_to_delete)
-
-    request.addfinalizer(fin)
+    # def fin():
+    #     # delete all created branches
+    #     for branch_to_delete in ['protected_branch1', 'protected_branch2', 'regular_branch1', 'regular_branch2']:
+    #         gl.delete_branch(GROUP_AND_PROJECT_NAME, branch_to_delete)
+    #
+    # request.addfinalizer(fin)
     return gl  # provide fixture value
 
 
@@ -63,8 +63,12 @@ project_settings:
     branches:
       protected_branch1:
         protected: true
+        developers_can_push: true
+        developers_can_merge: true
       protected_branch2:
         protected: true
+        developers_can_push: true
+        developers_can_merge: true
     files:
       "README.md":
         overwrite: true
@@ -100,10 +104,11 @@ class TestFiles:
                         project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        for branch in ['protected_branch1', 'protected_branch2']:
+        # master branch is protected by default
+        for branch in ['master', 'protected_branch1', 'protected_branch2']:
             file_content = gitlab.get_file(GROUP_AND_PROJECT_NAME, branch, 'README.md')
             assert file_content == 'Content for protected branches only'
 
-        for branch in ['master', 'regular_branch1', 'regular_branch2']:
+        for branch in ['regular_branch1', 'regular_branch2']:
             file_content = gitlab.get_file(GROUP_AND_PROJECT_NAME, branch, 'README.md')
             assert not file_content == 'Content for protected branches only'

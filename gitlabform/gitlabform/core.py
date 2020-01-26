@@ -453,6 +453,9 @@ class GitLabFormCore(object):
             all_branches = self.gl.get_branches(project_and_group)
             if configuration['files'][file]['branches'] == 'all':
                 branches = sorted(all_branches)
+            elif configuration['files'][file]['branches'] == 'protected':
+                protected_branches = self.gl.get_protected_branches(project_and_group)
+                branches = sorted(protected_branches)
             else:
                 branches = []
                 for branch in configuration['files'][file]['branches']:
