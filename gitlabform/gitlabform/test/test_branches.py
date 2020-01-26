@@ -15,43 +15,45 @@ def gitlab(request):
     create_group(GROUP_NAME)
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
     create_readme_in_project(GROUP_AND_PROJECT_NAME)  # in master branch
-    gl.create_branch(GROUP_AND_PROJECT_NAME, 'branch1', 'master')
-    gl.create_branch(GROUP_AND_PROJECT_NAME, 'branch2', 'master')
-    gl.create_branch(GROUP_AND_PROJECT_NAME, 'branch3', 'master')
-    gl.create_branch(GROUP_AND_PROJECT_NAME, 'branch4', 'master')
+    gl.create_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_but_allow_all', 'master')
+    gl.create_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_disallow_all', 'master')
+    gl.create_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges', 'master')
+    gl.create_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes', 'master')
 
     def fin():
-        # the only thing needed to clean up after below tests is deleting all created branches
-        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'branch1')
-        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'branch2')
-        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'branch3')
-        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'branch4')
+        # delete all created branches
+        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_but_allow_all')
+        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_disallow_all')
+        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges')
+        gl.delete_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes')
+        # master is created as unprotected by default, so revert it to this state
+        gl.unprotect_branch(GROUP_AND_PROJECT_NAME, 'master')
 
     request.addfinalizer(fin)
     return gl  # provide fixture value
 
 
-protect_branch_but_allow_pushes = """
+protect_branch_but_allow_all = """
 gitlab:
   api_version: 4
 
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
-      branch1:
+      protect_branch_but_allow_all:
         protected: true
         developers_can_push: true
         developers_can_merge: true
 """
 
-protect_branch_and_disallow_pushes = """
+protect_branch_and_disallow_all = """
 gitlab:
   api_version: 4
 
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
-      branch2:
+      protect_branch_and_disallow_all:
         protected: true
         developers_can_push: false
         developers_can_merge: false
@@ -64,33 +66,48 @@ gitlab:
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
-      branch3:
+      protect_branch_and_allow_merges:
         protected: true
         developers_can_push: false
         developers_can_merge: true
-      branch4:
+      protect_branch_and_allow_pushes:
+        protected: true
+        developers_can_push: true
+        developers_can_merge: false
+"""
+
+unprotect_branches = """
+gitlab:
+  api_version: 4
+
+project_settings:
+  gitlabform_tests_group/branches_project:
+    branches:
+      protect_branch_and_allow_merges:
+        protected: false
+      protect_branch_and_allow_pushes:
         protected: false
 """
 
 
 class TestBranches:
 
-    def test__protect_branch_but_allow_pushes(self, gitlab):
-        gf = GitLabForm(config_string=protect_branch_but_allow_pushes,
+    def test__protect_branch_but_allow_all(self, gitlab):
+        gf = GitLabForm(config_string=protect_branch_but_allow_all,
                         project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'branch1')
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_but_allow_all')
         assert branch['protected'] is True
         assert branch['developers_can_push'] is True
         assert branch['developers_can_merge'] is True
 
-    def test__protect_branch_and_disallow_pushes(self, gitlab):
-        gf = GitLabForm(config_string=protect_branch_and_disallow_pushes,
+    def test__protect_branch_and_disallow_all(self, gitlab):
+        gf = GitLabForm(config_string=protect_branch_and_disallow_all,
                         project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'branch2')
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_disallow_all')
         assert branch['protected'] is True
         assert branch['developers_can_push'] is False
         assert branch['developers_can_merge'] is False
@@ -100,10 +117,22 @@ class TestBranches:
                         project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'branch3')
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges')
         assert branch['protected'] is True
         assert branch['developers_can_push'] is False
         assert branch['developers_can_merge'] is True
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'branch4')
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes')
+        assert branch['protected'] is True
+        assert branch['developers_can_push'] is True
+        assert branch['developers_can_merge'] is False
+
+        gf = GitLabForm(config_string=unprotect_branches,
+                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges')
+        assert branch['protected'] is False
+
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes')
         assert branch['protected'] is False
