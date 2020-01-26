@@ -9,8 +9,8 @@ using hierarchical configuration written in YAML.
 ## Table of Contents
 
 * What you get? - [Features](#features) (& [Comparison to similar apps](#comparison-to-similar-apps))
-* Basic use - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
-* Advanced use - [Full configuration syntax](#full-configuration-syntax), [More cli usage examples](#more-cli-usage-examples), [Running in an automated pipeline](#running-in-an-automated-pipeline)
+* Basic usage - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
+* Advanced usage - [Full configuration syntax](#full-configuration-syntax), [More cli usage examples](#more-cli-usage-examples), [Running in an automated pipeline](#running-in-an-automated-pipeline)
 * Join us! - [Contributing](#contributing), [History](#history), [License](#license)
 
 ## Features
