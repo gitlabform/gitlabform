@@ -101,18 +101,16 @@ project_settings:
 
 # Raw parameters passing
 
-When GitLabForm was originally developed, in 2017, GitLab development pace was so fast that we were not able to keep up with it
-by updating GitLabForm whenever a parameter was added or changed in the GitLab's API.
+Since 2017, when GitLabForm was originally developed, GitLab development pace is so fast that we are not able to keep up with it
+by updating GitLabForm whenever a parameter is added or changed in the GitLab's API.
 
 Because of that we made a decision to use "raw parameters passing" - for many configuration elements whatever you put inside
 it as a dict, will be sent with a PUT/POST request into the appropriate GitLab API as-is.
 
 The advantage of this approach is that you can use each of the +40 parameters from [the GitLab API for Projects](https://docs.gitlab.com/ee/api/projects.html#edit-project)
 to configure your project with GitLabForm and when GitLab adds a new parameter there you can start using it on the day
-you update your GitLab instance, without waiting for GitLabForm to be updated to support it.
+you update your GitLab instance, without waiting for GitLabForm to be updated to support it. Similarly for the Group settings, using +20 parameters from [the GitLab API for Groups](https://docs.gitlab.com/ee/api/groups.html#update-group).
+And if your GitLabForm run fails because one of the fields you are using has been removed, then you know that you
+have to update your config.
 
-The disadvantage is that you may also be hit by GitLab API changes (that you have have missed in its changelog) and/or
-GitLab bugs that may render parts of your config not working after you update your GitLab instance.
-
-But note that in this case you can often fix the problem on your own by for example changing the deprecated names
-of your parameters in your config to new ones without waiting for a GitLabForm update.  
+The disadvantage is that you HAVE TO read [the GitLab API docs](https://docs.gitlab.com/ee/api/api_resources.html) when you create your initial config for some entities, like Projects or Groups.
