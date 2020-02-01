@@ -6,7 +6,7 @@ You can:
 * ask questions, report issues, ask for features or write anything message to the app authors - use **Issues** for all
 of these,
 * contribute to the documentation and example configuration - with **Pull Requests**, 
-* contribute your bugfixes, new features, refactoring and other code improvements - with **Pull Requests**,
+* contribute your bug fixes, new features, refactoring and other code improvements - with **Pull Requests**,
 
 ...and probably more! If you want to help in any way but don't know how - create an **Issue**.
 
@@ -29,19 +29,18 @@ If it does then please try to report what environment you have, what you try to 
 and what does in fact happen.
 
 To be more specific please remember to:
-  * provide GitLab version,
-  * provide GitLabForm version,
-  * provide your Python version and Operating System,
-  * provide config in whole or a relevant fragment (of course you can and should redacting any values you need
+* provide GitLab version,
+* provide GitLabForm version,
+* provide your Python version and Operating System,
+* provide config in whole, or a relevant fragment (of course you can and should redact any values you need
 to redact for privacy and security reasons),
 
 ### Feature requests
 
 Please note that although we do accept feature requests we do not promise to fulfill them.
 
-But it's still worth creating an issue for this as it shows interest in given feature and that may be taken
-into account by both existing app authors as well as new contributors when planning to implement something
-new.
+However, it's still worth creating an issue for this as it shows interest in given feature and that may be taken
+into account by both existing app authors and new contributors when planning to implement something new.
 
 ## Pull Requests
 
@@ -71,12 +70,58 @@ brew install pandoc
 pip3 install pypandoc
 ```
 
-3. Install gitlabform in develop mode:
+3. Install GitLabForm in develop mode:
 ```
 python setup.py develop
 ```
 
-#### General guidelines
+#### How to implement things in GitLabForm?
+
+Please see the [implementation design article](IMPLEMENTATION_DESIGN.md).
+
+#### Running unit tests locally
+
+GitLabForm uses py.test for tests. To run unit tests locally:
+
+1. Activate the virtualenv created above
+
+2. `pip install pytest`
+
+3. Run `then py.test --ignore gitlabform/gitlabform/test` to run all tests except the integration tests (see below).
+
+#### Running integrations tests locally or on own GitLab instance
+
+GitLabForm also comes with a set of tests that make real requests to a running GitLab instance. You can run them
+against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.
+
+##### Running integration tests using GitLab instance in Docker
+
+1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
+
+```
+./run_gitlab_in_docker.sh
+export GITLAB_URL=$(cat gitlab_url.txt)
+export GITLAB_TOKEN=$(cat gitlab_token.txt)
+```
+
+2. Run `py.test gitlabform/gitlabform/test` to start the tests
+
+##### Running integration tests using your own GitLab instance
+
+**Note**: although GitLabForm integration tests operate own their own groups, projects and users, it should be safe
+to run them against your own GitLab instance, but we DO NOT take any format responsibility for it. Please review 
+the code to ensure what it does and run it at your own risk!
+
+1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
+and `GITLAB_URL`:
+```
+export GITLAB_URL="https://mygitlab.company.com"
+export GITLAB_TOKEN="<my admin user API token>"
+```
+
+2. Run `py.test gitlabform/gitlabform/test` to start the tests
+
+#### General coding guidelines
 
 Similarly to the guidelines for making PRs with documentation improvements - please use the common sense:
 
@@ -89,11 +134,7 @@ Similarly to the guidelines for making PRs with documentation improvements - ple
 * squash your commits (unless there is a reason not to),
 * try to write [good commit message(s)](https://chris.beams.io/posts/git-commit/),
  
-..and so on.
+...and so on.
 
 We are open to refactoring but in case of bigger efforts we suggest creating an issue first and discussing
 what you propose to do before doing it.
-
-#### How to implement things in GitLabForm?
-
-Please see the [implementation design article](IMPLEMENTATION_DESIGN.md).

@@ -130,14 +130,14 @@ Run:
 You can use GitLabForm as a part of your [CCA (Continuous Configuration Automation)](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline.
 
 For example, you can run it:
-* with a schedule to unify your GitLab configuration each night, after it may have drifted
-from the configuration in the code during the working day.
-* from a webhook after a new project is created in GitLab to have have the initial config
-for new projects done automatically as soon as the projects are created.
+* with a schedule on `ALL_DEFINED` or `ALL` projects to unify your GitLab configuration, after it may have drifted
+from the configuration (we recommend running it each night),
+* from a webhook after a new project is created in GitLab to initialize it with a shared config.
 
-Example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](.gitlab-ci.example.yml) file.
+An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](.gitlab-ci.example.yml) 
+file.
 
-Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is 
+Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is
 encrypted) for security reasons - please set it in the `GITLAB_TOKEN` environment variable instead.
 
 For GitLab CI a secure place to set it would be a [Secret/Protected Variable in the project configuration](https://docs.gitlab.com/ee/ci/variables/#via-the-ui).
@@ -149,54 +149,16 @@ Please see the [contribution guide](CONTRIBUTING.md) for info about all kinds of
 * documentation and code contributions,
 * other.
 
-For detailed info about how the app code is organized, where is what and where and how to add fixes/new feature,
-please see the [implementation design](IMPLEMENTATION_DESIGN.md) article.
+[Contribution guide](CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
+build it, run the tests and learn about the code guidelines.
 
-### Running unit tests locally
 
-GitLabForm uses py.test for tests. To run unit tests locally:
-
-1. Activate the virtualenv created above
-
-2. `pip install pytest`
-
-3. Run `then py.test --ignore gitlabform/gitlabform/test` to run all tests except the integration tests (see below).
-
-### Running integrations tests locally or on own GitLab instance
-
-GitLabForm also comes with a set of tests that make real requests to a running GitLab instance. You can run them
-against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.
-
-To run them against a local GitLab instance:
-
-1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
-
-```
-./run_gitlab_in_docker.sh
-export GITLAB_URL=$(cat gitlab_url.txt)
-export GITLAB_TOKEN=$(cat gitlab_token.txt)
-```
-
-2. Run `py.test gitlabform/gitlabform/test` to start the tests
-
-**Note**: although GitLabForm integration tests operate own their own groups, projects and users, it should be safe
-to run them against your own GitLab instance, but we do to take any responsibility for it. Please review the code
-to ensure what it does and run on your own risk.
-
-To run them against your own GitLab instance:
-
-1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
-and `GITLAB_URL`:
-```
-export GITLAB_URL="https://mygitlab.company.com"
-export GITLAB_TOKEN="<my admin user API token>"
-```
-
-2. Run `py.test gitlabform/gitlabform/test` to start the tests
+For detailed info about how the app code has been organized, where is what and where and how to fix bugs and/or
+add new features, please see the [implementation design](IMPLEMENTATION_DESIGN.md) article.
 
 ## History
 
-This tool was originally created as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890)
+This tool has been originally created as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890)
 but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729)
 (released in GitLab 9.4) to keep the configuration as code.
 
