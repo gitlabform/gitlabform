@@ -32,11 +32,11 @@ class GitLabBranches(GitLabCore):
     def get_branch(self, project_and_group_name, branch):
         return self._make_requests_to_api("projects/%s/repository/branches/%s", (project_and_group_name, branch))
 
-    def create_branch(self, project_and_group_name, branchname, ref):
+    def create_branch(self, project_and_group_name, new_branch_name, create_branch_from_ref):
         data = {
             "id": project_and_group_name,
-            "branch": branchname,
-            "ref": ref,
+            "branch": new_branch_name,
+            "ref": create_branch_from_ref,
         }
         self._make_requests_to_api("projects/%s/repository/branches", (project_and_group_name),
                                     method='POST', data=data,

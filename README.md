@@ -1,5 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
-[![Build Status](https://travis-ci.org/egnyte/gitlabform.svg?branch=master)](https://travis-ci.org/egnyte/gitlabform)
+![GitHub Release Date](https://img.shields.io/github/release-date/egnyte/gitlabform)
+[![Build Status](https://travis-ci.com/egnyte/gitlabform.svg?branch=master)](https://travis-ci.com/egnyte/gitlabform)
 
 # GitLabForm
 
@@ -9,8 +10,8 @@ using hierarchical configuration written in YAML.
 ## Table of Contents
 
 * What you get? - [Features](#features) (& [Comparison to similar apps](#comparison-to-similar-apps))
-* Basic use - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
-* Advanced use - [Full configuration syntax](#full-configuration-syntax), [More cli usage examples](#more-cli-usage-examples), [Running in an automated pipeline](#running-in-an-automated-pipeline)
+* Basic usage - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
+* Advanced usage - [Full configuration syntax](#full-configuration-syntax), [More cli usage examples](#more-cli-usage-examples), [Running in an automated pipeline](#running-in-an-automated-pipeline)
 * Join us! - [Contributing](#contributing), [History](#history), [License](#license)
 
 ## Features
@@ -150,6 +151,48 @@ Please see the [contribution guide](CONTRIBUTING.md) for info about all kinds of
 
 For detailed info about how the app code is organized, where is what and where and how to add fixes/new feature,
 please see the [implementation design](IMPLEMENTATION_DESIGN.md) article.
+
+### Running unit tests locally
+
+GitLabForm uses py.test for tests. To run unit tests locally:
+
+1. Activate the virtualenv created above
+
+2. `pip install pytest`
+
+3. Run `then py.test --ignore gitlabform/gitlabform/test` to run all tests except the integration tests (see below).
+
+### Running integrations tests locally or on own GitLab instance
+
+GitLabForm also comes with a set of tests that make real requests to a running GitLab instance. You can run them
+against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.
+
+To run them against a local GitLab instance:
+
+1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
+
+```
+./run_gitlab_in_docker.sh
+export GITLAB_URL=$(cat gitlab_url.txt)
+export GITLAB_TOKEN=$(cat gitlab_token.txt)
+```
+
+2. Run `py.test gitlabform/gitlabform/test` to start the tests
+
+**Note**: although GitLabForm integration tests operate own their own groups, projects and users, it should be safe
+to run them against your own GitLab instance, but we do to take any responsibility for it. Please review the code
+to ensure what it does and run on your own risk.
+
+To run them against your own GitLab instance:
+
+1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
+and `GITLAB_URL`:
+```
+export GITLAB_URL="https://mygitlab.company.com"
+export GITLAB_TOKEN="<my admin user API token>"
+```
+
+2. Run `py.test gitlabform/gitlabform/test` to start the tests
 
 ## History
 

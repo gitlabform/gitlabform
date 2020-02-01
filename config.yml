@@ -3,6 +3,7 @@ gitlab:
   # You can also set in your environment GITLAB_URL
   url: https://gitlab.yourcompany.com
   # You can also set in your environment GITLAB_TOKEN
+  # this can be both private token OR OAuth2 access token
   token: "<private token of an admin user>"
   # GitLab API version. As of now only 4 is supported.
   api_version: 4
@@ -240,6 +241,10 @@ group_settings:
         jinja_env:
           foo: "fooz"
           bar: "barz"
+      "file-to-set-in-protected-branches":
+        branches: protected
+        content: |
+          This file will be added to all protected branches.
 
   # settings for ALL projects in 'old-projects-group' group
   old-projects-group:
