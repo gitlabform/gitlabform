@@ -14,9 +14,16 @@ from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.gitlab.core import NotFoundException
 
 
-# wrapper function that prevents actually calling the wrapped function if the function
-# is set to be skipped in the configuration
 def if_in_config_and_not_skipped(method):
+    """
+    This is a universal method of making some config parts skippable because of missing config or explicit "skip: true"
+    in it.
+
+    This wrapper function if it is applied on a method with a name like "process_members" looks for "members" in the
+    effective config of a project (method name with "process_" omitted).
+    If it does not exist - then this method is skipped.
+    If it does exist but contains a key "skip: true" - then this method is also skipped.
+    """
 
     @wraps(method)
     def method_wrapper(self, project_and_group, configuration):
@@ -37,10 +44,17 @@ def if_in_config_and_not_skipped(method):
     return method_wrapper
 
 
-# dict that returns `default` if queried with ".get('key|subkey|subsubkey')" if any of the subkeys doesn't exist
-# based on https://stackoverflow.com/a/44859638/2693875
 class SafeDict(dict):
+    """
+    A dict that a "get" method that allows to use a path-like reference to its subdict values.
 
+    For example with a dict like {"key": {"subkey": {"subsubkey": "value"}}}
+    you can use a string 'key|subkey|subsubkey' to get the 'value'.
+
+    The default value is returned if ANY of the subelements does not exist.
+
+    Code based on https://stackoverflow.com/a/44859638/2693875
+    """
     def get(self, path, default=None):
         keys = path.split('|')
         val = None
@@ -60,10 +74,10 @@ class SafeDict(dict):
         return val
 
 
-# wrapper function that converts regular dict that is returned by the wrapped function
-# to a SafeDict
 def configuration_to_safe_dict(method):
-
+    """
+    This wrapper function calls the method with the configuration converted from a regular dict into a SafeDict
+    """
     @wraps(method)
     def method_wrapper(self, project_and_group, configuration):
 

@@ -144,29 +144,13 @@ For GitLab CI a secure place to set it would be a [Secret/Protected Variable in 
 
 ## Contributing
 
-Contributions are very welcome! We do not have strict requirements for Pull Requests yet, so if you want to add your features quickly then this is the best time to do it. ;) But seriously: the usual rules apply - working, readable, commented code with squashed commits with helpful messages is preferred.
+Please see the [contribution guide](CONTRIBUTING.md) for info about all kinds of contributions, like:
+* questions, feature requests,
+* documentation and code contributions,
+* other.
 
-Please start with reading the [features design article](FEATURES_DESIGN.md) to get to know the app's basic design concepts.
-
-Development environment setup how-to:
-
-1. Create virtualenv with Python 3.5+, for example in `venv` dir which is in `.gitignore` and activate it:
-```
-virtualenv -p python3 venv
-. venv/bin/activate
-```
-
-2. Install build requirements - `pandoc` binary package + `pypandoc` python package:
-```
-# for macOS:
-brew install pandoc  
-pip3 install pypandoc
-```
-
-3. Install gitlabform in develop mode:
-```
-python setup.py develop
-```
+For detailed info about how the app code is organized, where is what and where and how to add fixes/new feature,
+please see the [implementation design](IMPLEMENTATION_DESIGN.md) article.
 
 ### Running unit tests locally
 

@@ -88,6 +88,26 @@ class GitLabCore:
 
     def _make_requests_to_api(self, path_as_format_string, args=None, method='GET', data=None, expected_codes=200,
                               paginated=False, json=None):
+        """
+        Makes a HTTP request (or requests) to the GitLab API endpoint. It takes case of making as many requests as
+        needed in case we are using a paginated endpoint. (See underlying method for authentication, retries,
+        timeout etc.)
+
+        :param path_as_format_string: path with parts to be replaced by values from `args` replaced by '%s'
+                                      (aka the old-style Python string formatting, see:
+                                       https://docs.python.org/2/library/stdtypes.html#string-formatting )
+        :param args: single element or a tuple of values to put under '%s's in `path_as_format_string`
+        :param method: uppercase string of a HTTP method name, like 'GET' or 'PUT'
+        :param data: dict with data to be 'PUT'ted or 'POST'ed
+        :param expected_codes: a single HTTP code (like: 200) or a list of accepted HTTP codes
+                               - if the call to the API will return other code an exception will be thrown
+        :param paginated: if given API is paginated (see https://docs.gitlab.com/ee/api/#pagination )
+        :param json: alternatively to `dict` you can set this to a string that can be parsed as JSON that will
+                     be used as data to be 'PUT'ted or 'POST'ed
+        :return: data returned by the endpoint, as a JSON object. If the API is paginated the it returns JSONs with
+                 arrays of objects and then this method returns JSON with a single array that contains all of those
+                 objects.
+        """
         if not paginated:
             response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
             return response.json()
@@ -108,6 +128,13 @@ class GitLabCore:
         return results
 
     def _make_request_to_api(self, path_as_format_string, args, method, data, expected_codes, json):
+        """
+        Makes a single request to the GitLab API. Takes care of the authentication, basic error processing,
+        retries, timeout etc.
+
+        :param for the params description please see `_make_requests_to_api()`
+        :return: data returned by the endpoint, as a JSON object.
+        """
         if data and json:
             raise Exception("You need to pass either data or json, not both!")
 
@@ -142,7 +169,7 @@ class GitLabCore:
     def _format_with_url_encoding(format_string, single_arg_or_args_tuple):
 
         # we want to URL-encode all the args, but not the path itself which looks like "/foo/%s/bar"
-        # because / here are NOT to be URL-encoded
+        # because '/'s here are NOT to be URL-encoded
 
         if not single_arg_or_args_tuple:
             # there are no params, so the format_string is the URL
