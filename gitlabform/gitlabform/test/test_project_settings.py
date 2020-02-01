@@ -40,5 +40,6 @@ class TestProjectSettings:
         gf.main()
 
         settings = gitlab.get_project_settings(GROUP_AND_PROJECT_NAME)
-        assert settings['builds_access_level'] is 'private'
         assert settings['visibility'] is 'private'
+        # there is no such field in the "Get single project" API :/
+        #assert settings['builds_access_level'] is 'private'
