@@ -84,7 +84,7 @@ Similarly to the guidelines for making PRs with documentation improvements - ple
   * in case of non-trivial logic add/change please add unit tests,
   * for all bug fixes and new features using GitLab API please add integration tests
    (after [#75](https://github.com/egnyte/gitlabform/pull/75) gets merged),
-* follow the standard Python coding guidelines ([PEP8](https://www.python.org/dev/peps/pep-0008/),
+* follow the standard Python coding guidelines ([PEP8])(https://www.python.org/dev/peps/pep-0008/),
 * try to use similar style and formatting of the code as existing one,
 * squash your commits (unless there is a reason not to),
 * try to write [good commit message(s)](https://chris.beams.io/posts/git-commit/),
