@@ -49,6 +49,15 @@ def create_users_in_project(user_base_name, no_of_users, project_and_group):
             pass
 
 
+def create_users(user_base_name, no_of_users):
+    for user_no in range(1, no_of_users + 1):
+        username = user_base_name + str(user_no)
+        try:
+            gl.get_user_by_name(username)
+        except NotFoundException:
+            gl.create_user(username + "@example.com", username + " Example", username, "password")
+
+
 def delete_users(user_base_name, no_of_users):
     for user_no in range(1, no_of_users + 1):
         username = user_base_name + str(user_no)

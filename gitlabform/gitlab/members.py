@@ -17,6 +17,13 @@ class GitLabMembers(GitLabCore):
         return self._make_requests_to_api("projects/%s/members/%s", (project_and_group_name, self._get_user_id(user)),
                                           method='DELETE', expected_codes=204)
 
+    def get_group_members(self, group_name, all=False):
+        url_template = "groups/%s/members"
+        if all:
+            url_template += "/all"
+
+        return self._make_requests_to_api(url_template, group_name)
+
     def add_member_to_group(self, group_name, username, access_level, expires_at=None):
         data = {
             "user_id": self._get_user_id(username),
