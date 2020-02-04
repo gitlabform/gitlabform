@@ -240,6 +240,7 @@ class GitLabFormCore(object):
             configuration = self.c.get_effective_config_for_group(group)
             self.process_group_secret_variables(group, configuration)
             self.process_group_settings(group, configuration)
+            self.process_group_members(group, configuration)
 
         for project_and_group in projects_and_groups:
 
@@ -400,6 +401,24 @@ class GitLabFormCore(object):
         logging.info("Setting group settings: %s", group_settings)
         self.gl.put_group_settings(group, group_settings)
         logging.debug("Group settings AFTER: %s", self.gl.get_group_settings(group))
+
+    @if_in_config_and_not_skipped
+    def process_group_members(self, group, configuration):
+        logging.debug("Group members BEFORE: %s", self.gl.get_group_members(group))
+        users = configuration.get('group_members')
+        if users:
+            for user in users:
+                logging.debug("Setting user '%s' as a member", user)
+                access = users[user]['access_level'] if \
+                    'access_level' in users[user] else None
+                expiry = users[user]['expires_at'] if \
+                    'expires_at' in users[user] else ""
+                try:
+                    self.gl.remove_member_from_group(group, user)
+                except NotFoundException:
+                    pass
+                self.gl.add_member_to_group(group, user, access, expiry)
+        logging.debug("Group members AFTER: %s", self.gl.get_group_members(group))
 
     @if_in_config_and_not_skipped
     def process_branches(self, project_and_group, configuration):
