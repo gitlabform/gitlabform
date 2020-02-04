@@ -73,6 +73,15 @@ def add_users_to_group(group_name, usernames):
             pass
 
 
+def remove_users_from_group(group_name, usernames):
+    for username in usernames:
+        try:
+            gl.remove_member_from_group(group_name, username)
+        except NotFoundException:
+            # this is fine - user is removed from group
+            pass
+
+
 def create_readme_in_project(project_and_group):
     try:
         gl.get_file(project_and_group, 'master', 'README.md')

@@ -143,14 +143,14 @@ group_settings:
         developers_can_push: true
         developers_can_merge: false
 
-    # this is for managing *group* members (only users can be them)
+    # this is for adding/changing the access level of group members - only users can be them
+    # note: removing members from the config DOES NOT remove their access!
+    #
     # keys names are user names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
     group_members:
       my-user:
         access_level: 40
-        # this is optional
-        expires_at: 2019-09-26
 
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
@@ -297,7 +297,9 @@ project_settings:
       "other-file":
         skip: true # this will skip processing this *single file* in case it is configured on a group level
 
-    # this is for managing *project* members - they can be groups or users
+    # this is for adding/changing the access level of project members - groups or users
+    # note: removing members from the config DOES NOT remove their access!
+    #
     # keys names are members/groups names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/projects.html#share-project-with-group
     # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
