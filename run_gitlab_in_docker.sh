@@ -7,6 +7,9 @@ echo "Starting GitLab..."
 docker pull gitlab/gitlab-ee:latest
 
 mkdir -p config
+if [[ -f Gitlab.gitlab-license ]] ; then
+  cp Gitlab.gitlab-license config/
+fi
 mkdir -p logs
 mkdir -p data
 
