@@ -308,6 +308,15 @@ class GitLabFormCore(object):
         if approvers is not None or approver_groups is not None \
                 and approvals and 'approvals_before_merge' in approvals:
 
+            # because of https://gitlab.com/gitlab-org/gitlab/issues/198770 we cannot set more than 1 user
+            # or 1 group as approvers, sorry
+            if (approvers and len(approvers) > 1) or (approver_groups and len(approver_groups) > 1):
+                logging.fatal("Because of https://gitlab.com/gitlab-org/gitlab/issues/198770 you cannot set more than "
+                              "1 user or 1 group as approvers, sorry."
+                              "Please see https://github.com/egnyte/gitlabform/issues/68#issuecomment-581003703 "
+                              "for information about a possible workaround for this limitation.")
+                sys.exit(4)
+
             # in pre-12.3 API approvers (users and groups) were configured under the same endpoint as approvals settings
             approvals_settings = self.gl.get_approvals_settings(project_and_group)
             if 'approvers' in approvals_settings or 'approver_groups' in approvals_settings:
