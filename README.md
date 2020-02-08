@@ -31,7 +31,9 @@ GitLabForm enables you to manage:
 * (Project) Hooks,
 * (Project) Push Rules,
 * (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
-* Merge Requests approvals settings and approvers (**GitLab EE only**),
+* Merge Requests approvals settings and approvers (**GitLab EE only**) {up to 1 user and 1 group
+because of a [GitLab bug #198770](https://gitlab.com/gitlab-org/gitlab/issues/198770), see
+[#68](https://github.com/egnyte/gitlabform/issues/68) for details}.
 
 ...for:
 
