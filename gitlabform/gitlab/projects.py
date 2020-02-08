@@ -189,10 +189,10 @@ class GitLabProjects(GitLabCore):
             user_ids.append(self._get_user_id(approver_name))
         group_ids = []
         for group_path in approver_groups:
-            group_ids.append(self._get_group_id(group_path))
+            group_ids.append(int(self._get_group_id(group_path)))
 
         data = {
-            'id': pid,
+            'id': int(pid),
             'name': name,
             'approvals_required': approvals_required,
             'user_ids': user_ids,

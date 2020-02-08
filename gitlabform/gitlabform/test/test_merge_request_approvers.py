@@ -11,6 +11,8 @@ USER_BASE_NAME = 'merge_requests_user'  # user1, user2, ...
 
 GROUP_WITH_USER1_AND_USER2 = 'gitlabform_tests_group_with_user1_and_user2'
 
+GROUP_WITH_USER3 = 'gitlabform_tests_group_with_user3'
+
 GROUP_WITH_USER4 = 'gitlabform_tests_group_with_user4'
 
 DEVELOPER_ACCESS = 30
@@ -26,6 +28,9 @@ def gitlab(request):
 
     create_group(GROUP_WITH_USER1_AND_USER2)
     add_users_to_group(GROUP_WITH_USER1_AND_USER2, ['merge_requests_user1', 'merge_requests_user2'])
+
+    create_group(GROUP_WITH_USER3)
+    add_users_to_group(GROUP_WITH_USER3, ['merge_requests_user3'])
 
     create_group(GROUP_WITH_USER4)
     add_users_to_group(GROUP_WITH_USER4, ['merge_requests_user4'])
@@ -47,6 +52,8 @@ gitlab:
 
 project_settings:
   gitlabform_tests_group/merge_requests_project:
+    project_settings:
+      merge_requests_access_level: "enabled"
     merge_requests:
       approvals:
         approvals_before_merge: 1
@@ -63,6 +70,8 @@ gitlab:
 
 project_settings:
   gitlabform_tests_group/merge_requests_project:
+    project_settings:
+      merge_requests_access_level: "enabled"
     merge_requests:
       approvals:
         approvals_before_merge: 1
@@ -78,6 +87,8 @@ gitlab:
 
 project_settings:
   gitlabform_tests_group/merge_requests_project:
+    project_settings:
+      merge_requests_access_level: "enabled"
     merge_requests:
       approvals:
         approvals_before_merge: 1
@@ -85,6 +96,7 @@ project_settings:
         disable_overriding_approvers_per_merge_request: true
       approver_groups:
         - gitlabform_tests_group_with_user1_and_user2
+        - gitlabform_tests_group_with_user3
 """
 
 config__approvers_only_groups_change = """
@@ -93,13 +105,14 @@ gitlab:
 
 project_settings:
   gitlabform_tests_group/merge_requests_project:
+    project_settings:
+      merge_requests_access_level: "enabled"
     merge_requests:
       approvals:
         approvals_before_merge: 1
         reset_approvals_on_push: true
         disable_overriding_approvers_per_merge_request: true
       approver_groups:
-        - gitlabform_tests_group_with_user1_and_user2
         - gitlabform_tests_group_with_user4
 """
 
@@ -138,8 +151,8 @@ class TestMergeRequestApprovers:
 
         rules = gitlab.get_approvals_rules(GROUP_AND_PROJECT_NAME)
         assert len(rules) == 1
+        assert len(rules[0]['groups']) == 2
         assert len(rules[0]['users']) == 0
-        assert len(rules[0]['groups']) == 1
 
     def test__if_change_works__only_groups(self, gitlab):
         gf = GitLabForm(config_string=config__approvers_only_groups, project_or_group=GROUP_AND_PROJECT_NAME)
@@ -147,13 +160,13 @@ class TestMergeRequestApprovers:
 
         rules = gitlab.get_approvals_rules(GROUP_AND_PROJECT_NAME)
         assert len(rules) == 1
+        assert len(rules[0]['groups']) == 2
         assert len(rules[0]['users']) == 0
-        assert len(rules[0]['groups']) == 1
 
         gf = GitLabForm(config_string=config__approvers_only_groups_change, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
         rules = gitlab.get_approvals_rules(GROUP_AND_PROJECT_NAME)
         assert len(rules) == 1
+        assert len(rules[0]['groups']) == 1
         assert len(rules[0]['users']) == 0
-        assert len(rules[0]['groups']) == 2

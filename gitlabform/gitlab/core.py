@@ -1,3 +1,4 @@
+import json
 import sys
 import logging
 import requests
@@ -79,6 +80,7 @@ class GitLabCore:
 
     def _get_group_id(self, path):
         group = self._make_requests_to_api("groups/%s", path, 'GET')
+        # TODO: add tests for all that uses this and then stop converting these ints to strings here
         return str(group['id'])
 
     def _get_project_id(self, project_and_group):
@@ -127,7 +129,8 @@ class GitLabCore:
 
         return results
 
-    def _make_request_to_api(self, path_as_format_string, args, method, data, expected_codes, json):
+    def _make_request_to_api(self, path_as_format_string, args, method, dict_data, expected_codes, json_data):
+
         """
         Makes a single request to the GitLab API. Takes care of the authentication, basic error processing,
         retries, timeout etc.
@@ -135,16 +138,17 @@ class GitLabCore:
         :param for the params description please see `_make_requests_to_api()`
         :return: data returned by the endpoint, as a JSON object.
         """
-        if data and json:
-            raise Exception("You need to pass either data or json, not both!")
+
+        if dict_data and json_data:
+            raise Exception("You need to pass the either as dict (dict_data) or JSON (json_data), not both!")
 
         url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
-        logging.debug("url = %s , method = %s , data = %s", url, method, data)
+        logging.debug("url = %s , method = %s , data = %s", url, method, json.dumps(dict_data, sort_keys=True))
         headers = {'Authorization': 'Bearer ' + self.token}
-        if data:
-            response = self.session.request(method, url, headers=headers, data=data, timeout=10)
-        elif json:
-            response = self.session.request(method, url, headers=headers, json=json, timeout=10)
+        if dict_data:
+            response = self.session.request(method, url, headers=headers, data=dict_data, timeout=10)
+        elif json_data:
+            response = self.session.request(method, url, headers=headers, json=json_data, timeout=10)
         else:
             response = self.session.request(method, url, headers=headers, timeout=10)
         logging.debug("response code=%s" % response.status_code)
@@ -158,11 +162,12 @@ class GitLabCore:
             e = UnexpectedResponseException(
                 "Request url='%s', method=%s, data='%s' failed "
                 "- expected code(s) %s, got code %s & body: '%s'" %
-                (url, method, data,
+                (url, method, dict_data,
                  self._expected_code_to_str(expected_codes), response.status_code, response.content))
             e.status_code = response.status_code
             raise e
         else:
+            logging.debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
             return response
 
     @staticmethod
