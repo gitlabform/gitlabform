@@ -139,6 +139,8 @@ class GitLabCore:
         :return: data returned by the endpoint, as a JSON object.
         """
 
+        expected_codes = self._listify(expected_codes)
+
         if dict_data and json_data:
             raise Exception("You need to pass the either as dict (dict_data) or JSON (json_data), not both!")
 
@@ -152,23 +154,22 @@ class GitLabCore:
         else:
             response = self.session.request(method, url, headers=headers, timeout=10)
         logging.debug("response code=%s" % response.status_code)
-        if response.status_code == 404:
-            raise NotFoundException("Resource path='%s' not found!" % url)
-        elif response.status_code == 204:
+
+        if response.status_code == 204:
             # code calling this function assumes that it can do response.json() so fake it to return empty dict
             response.json = lambda: {}
-            return response
-        elif not self._is_expected_code(response.status_code, expected_codes):
-            e = UnexpectedResponseException(
-                "Request url='%s', method=%s, data='%s' failed "
-                "- expected code(s) %s, got code %s & body: '%s'" %
-                (url, method, dict_data,
-                 self._expected_code_to_str(expected_codes), response.status_code, response.content))
-            e.status_code = response.status_code
-            raise e
-        else:
-            logging.debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
-            return response
+
+        if response.status_code not in expected_codes:
+            if response.status_code == 404:
+                raise NotFoundException("Resource path='%s' not found!" % url)
+            else:
+                raise UnexpectedResponseException(
+                    "Request url='%s', method=%s, data='%s' failed - expected code(s) %s, got code %s & body: '%s'" %
+                    (url, method, dict_data, str(expected_codes), response.status_code, response.content),
+                    response.status_code)
+
+        logging.debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
+        return response
 
     @staticmethod
     def _format_with_url_encoding(format_string, single_arg_or_args_tuple):
@@ -192,18 +193,11 @@ class GitLabCore:
             return format_string % url_encoded_args
 
     @staticmethod
-    def _is_expected_code(code, expected_codes):
+    def _listify(expected_codes):
         if isinstance(expected_codes, int):
-            return code == expected_codes
-        elif isinstance(expected_codes, list):
-            return code in expected_codes
-
-    @staticmethod
-    def _expected_code_to_str(expected_codes):
-        if isinstance(expected_codes, int):
-            return str(expected_codes)
-        elif isinstance(expected_codes, list):
-            return ', '.join(map(lambda x: str(x), expected_codes))
+            return [expected_codes]
+        else:
+            return expected_codes
 
 
 class TestRequestFailedException(Exception):
@@ -219,4 +213,10 @@ class NotFoundException(Exception):
 
 
 class UnexpectedResponseException(Exception):
-    pass
+
+    def __init__(self, message, status_code):
+        self.message = message
+        self.status_code = status_code
+
+    def __str__(self):
+        return self.message

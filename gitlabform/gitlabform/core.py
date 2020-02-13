@@ -10,7 +10,7 @@ from functools import wraps
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import ConfigFileNotFoundException
 from gitlabform.gitlab import GitLab
-from gitlabform.gitlab.core import TestRequestFailedException
+from gitlabform.gitlab.core import TestRequestFailedException, UnexpectedResponseException
 from gitlabform.gitlab.core import NotFoundException
 
 
@@ -360,10 +360,10 @@ class GitLabFormCore(object):
                         'group_access' in groups[group] else None
                 expiry = groups[group]['expires_at'] if \
                         'expires_at' in groups[group] else ""
-                try:
-                    self.gl.unshare_with_group(project_and_group, group)
-                except NotFoundException:
-                    pass
+
+                # we will remove group access first and then re-add them,
+                # to ensure that the groups have the expected access level
+                self.gl.unshare_with_group(project_and_group, group)
                 self.gl.share_with_group(project_and_group, group, access, expiry)
 
         users = configuration.get('members|users')
@@ -374,10 +374,7 @@ class GitLabFormCore(object):
                         'access_level' in users[user] else None
                 expiry = users[user]['expires_at'] if \
                         'expires_at' in users[user] else ""
-                try:
-                    self.gl.remove_member_from_project(project_and_group, user)
-                except NotFoundException:
-                    pass
+                self.gl.remove_member_from_project(project_and_group, user)
                 self.gl.add_member_to_project(project_and_group, user, access, expiry)
 
     @if_in_config_and_not_skipped
@@ -449,11 +446,12 @@ class GitLabFormCore(object):
                     'access_level' in users[user] else None
                 expiry = users[user]['expires_at'] if \
                     'expires_at' in users[user] else ""
-                try:
-                    self.gl.remove_member_from_group(group, user)
-                except NotFoundException:
-                    pass
+
+                # we will remove the user first and then re-add they,
+                # to ensure that the user has the expected access level
+                self.gl.remove_member_from_group(group, user)
                 self.gl.add_member_to_group(group, user, access, expiry)
+
         logging.debug("Group members AFTER: %s", self.gl.get_group_members(group))
 
     @if_in_config_and_not_skipped

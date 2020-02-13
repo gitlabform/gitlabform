@@ -212,9 +212,10 @@ class GitLabProjects(GitLabCore):
                                           expected_codes=201)
 
     def unshare_with_group(self, project_and_group_name, group_name):
+        # 404 means that the group already has not access, so let's accept it for idempotency
         group_id = self._get_group_id(group_name)
         return self._make_requests_to_api("projects/%s/share/%s", (project_and_group_name, group_id), method='DELETE',
-                                          expected_codes=204)
+                                          expected_codes=[204, 404])
 
     def archive(self, project_and_group_name):
         return self._make_requests_to_api("projects/%s/archive", project_and_group_name, method='POST',
