@@ -100,10 +100,8 @@ gitlab:
 group_settings:
   gitlabform_tests_group:
     group_members:
-      group_member_user4:
-        access_level: 30 # not an Owner anymore
-      group_member_user3:
-        access_level: 50 # new Owner anymore
+      group_member_user3: # new Owner
+        access_level: 50
 """
 
 zero_owners = """
@@ -115,6 +113,15 @@ group_settings:
     group_members:
       group_member_user4:
         access_level: 40
+"""
+
+zero_users = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  gitlabform_tests_group:
+    group_members: {}
 """
 
 
@@ -187,8 +194,8 @@ class TestGroupMembers:
 
         members = gitlab.get_group_members(GROUP_NAME)
         assert len(members) == 1
-        members_usernames = [member['username'] for member in members]
-        assert members_usernames.count('group_member_user4') == 1
+        assert members[0]['access_level'] == 50
+        assert members[0]['username'] == 'group_member_user4'
 
         gf = GitLabForm(config_string=change_owner,
                         project_or_group=GROUP_NAME)
@@ -196,13 +203,16 @@ class TestGroupMembers:
 
         members = gitlab.get_group_members(GROUP_NAME)
         assert len(members) == 1
-        for member in members:
-            if member['username'] == 'group_member_user4':
-                assert member['access_level'] == 30
-            if member['username'] == 'group_member_user3':
-                assert member['access_level'] == 50
+        assert members[0]['access_level'] == 50
+        assert members[0]['username'] == 'group_member_user3'
 
     def test__zero_owners(self, gitlab):
+        gf = GitLabForm(config_string=zero_owners,
+                        project_or_group=GROUP_NAME)
+        with pytest.raises(SystemExit):
+            gf.main()
+
+    def test__zero_users(self, gitlab):
         gf = GitLabForm(config_string=zero_owners,
                         project_or_group=GROUP_NAME)
         with pytest.raises(SystemExit):
