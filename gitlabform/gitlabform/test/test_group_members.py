@@ -22,7 +22,7 @@ def gitlab(request):
     return gl  # provide fixture value
 
 
-add_user1_and_user2 = """
+some_users = """
 gitlab:
   api_version: 4
 
@@ -30,23 +30,83 @@ group_settings:
   gitlabform_tests_group:
     group_members:
       group_member_user1:
-        access_level: 40
+        access_level: 50
       group_member_user2:
         access_level: 30
-"""
-
-add_user3 = """
-gitlab:
-  api_version: 4
-
-group_settings:
-  gitlabform_tests_group:
-    group_members:
       group_member_user3:
         access_level: 40
 """
 
-add_user4 = """
+add_users = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  gitlabform_tests_group:
+    group_members:
+      group_member_user1:
+        access_level: 50
+      group_member_user2:
+        access_level: 30
+      group_member_user3:
+        access_level: 40
+      group_member_user4: # new user
+        access_level: 40
+"""
+
+remove_users = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  gitlabform_tests_group:
+    group_members:
+      group_member_user1:
+        access_level: 50
+      group_member_user3:
+        access_level: 40
+"""
+
+change_some_users_access = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  gitlabform_tests_group:
+    group_members:
+      group_member_user1:
+        access_level: 50
+      group_member_user2:
+        access_level: 40 # changed level
+      group_member_user3:
+        access_level: 30 # changed level
+"""
+
+one_owner = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  gitlabform_tests_group:
+    group_members:
+      group_member_user4:
+        access_level: 50
+"""
+
+change_owner = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  gitlabform_tests_group:
+    group_members:
+      group_member_user4:
+        access_level: 30 # not an Owner anymore
+      group_member_user3:
+        access_level: 50 # new Owner anymore
+"""
+
+zero_owners = """
 gitlab:
   api_version: 4
 
@@ -55,77 +115,95 @@ group_settings:
     group_members:
       group_member_user4:
         access_level: 40
-"""
-
-change_user4 = """
-gitlab:
-  api_version: 4
-
-group_settings:
-  gitlabform_tests_group:
-    group_members:
-      group_member_user4:
-        access_level: 30
 """
 
 
 class TestGroupMembers:
 
-    def test__add_user1_and_user2(self, gitlab):
-        gf = GitLabForm(config_string=add_user1_and_user2,
+    def __setup_some_users(self, gitlab):
+        gf = GitLabForm(config_string=some_users,
                         project_or_group=GROUP_NAME)
         gf.main()
 
         members = gitlab.get_group_members(GROUP_NAME)
-        # root user that created the group is one of the members as owner
         assert len(members) == 3
-        members_usernames = [member['username'] for member in members]
-        assert members_usernames.count('group_member_user1') == 1
-        assert members_usernames.count('group_member_user2') == 1
-
-    def test__add_user1_and_user2_and_then_add_user3(self, gitlab):
-        gf = GitLabForm(config_string=add_user1_and_user2,
-                        project_or_group=GROUP_NAME)
-        gf.main()
-
-        members = gitlab.get_group_members(GROUP_NAME)
-        # root user that created the group is one of the members as owner
-        assert len(members) == 3
-        members_usernames = [member['username'] for member in members]
-        assert members_usernames.count('group_member_user1') == 1
-        assert members_usernames.count('group_member_user2') == 1
-        
-        gf = GitLabForm(config_string=add_user3,
-                        project_or_group=GROUP_NAME)
-        gf.main()
-        
-        members = gitlab.get_group_members(GROUP_NAME)
-        # we DO NOT remove existing users with gitlabform (yet)!
-        assert len(members) == 3 + 1
         members_usernames = [member['username'] for member in members]
         assert members_usernames.count('group_member_user1') == 1
         assert members_usernames.count('group_member_user2') == 1
         assert members_usernames.count('group_member_user3') == 1
 
-    def test__add_and_then_change_user4_access_level(self, gitlab):
-        gf = GitLabForm(config_string=add_user4,
+    def test__setup_users(self, gitlab):
+        self.__setup_some_users(gitlab)
+
+    def test__add_users(self, gitlab):
+        self.__setup_some_users(gitlab)
+
+        gf = GitLabForm(config_string=add_users,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+        
+        members = gitlab.get_group_members(GROUP_NAME)
+        assert len(members) == 4
+        members_usernames = [member['username'] for member in members]
+        assert members_usernames.count('group_member_user1') == 1
+        assert members_usernames.count('group_member_user2') == 1
+        assert members_usernames.count('group_member_user3') == 1
+        assert members_usernames.count('group_member_user4') == 1
+
+    def test__remove_users(self, gitlab):
+        self.__setup_some_users(gitlab)
+
+        gf = GitLabForm(config_string=remove_users,
                         project_or_group=GROUP_NAME)
         gf.main()
 
         members = gitlab.get_group_members(GROUP_NAME)
-        # root user that created the group is one of the members as owner
         assert len(members) == 2
+        members_usernames = [member['username'] for member in members]
+        assert members_usernames.count('group_member_user1') == 1
+        assert members_usernames.count('group_member_user3') == 1
+
+    def test__change_some_users_access(self, gitlab):
+        self.__setup_some_users(gitlab)
+
+        gf = GitLabForm(config_string=change_some_users_access,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        members = gitlab.get_group_members(GROUP_NAME)
+        assert len(members) == 3
         for member in members:
-            if member['username'] == 'group_member_user4':
+            if member['username'] == 'group_member_user1':
+                assert member['access_level'] == 50
+            if member['username'] == 'group_member_user2':
                 assert member['access_level'] == 40
+            if member['username'] == 'group_member_user3':
+                assert member['access_level'] == 30
 
-        gf = GitLabForm(config_string=change_user4,
+    def test__change_owner(self, gitlab):
+        gf = GitLabForm(config_string=one_owner,
                         project_or_group=GROUP_NAME)
         gf.main()
 
         members = gitlab.get_group_members(GROUP_NAME)
-        # root user that created the group is one of the members as owner
-        assert len(members) == 2
+        assert len(members) == 1
+        members_usernames = [member['username'] for member in members]
+        assert members_usernames.count('group_member_user4') == 1
+
+        gf = GitLabForm(config_string=change_owner,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        members = gitlab.get_group_members(GROUP_NAME)
+        assert len(members) == 1
         for member in members:
             if member['username'] == 'group_member_user4':
                 assert member['access_level'] == 30
+            if member['username'] == 'group_member_user3':
+                assert member['access_level'] == 50
+
+    def test__zero_owners(self, gitlab):
+        gf = GitLabForm(config_string=zero_owners,
+                        project_or_group=GROUP_NAME)
+        with pytest.raises(SystemExit):
+            gf.main()
