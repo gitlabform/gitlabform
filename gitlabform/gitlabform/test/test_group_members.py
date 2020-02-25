@@ -213,7 +213,7 @@ class TestGroupMembers:
             gf.main()
 
     def test__zero_users(self, gitlab):
-        gf = GitLabForm(config_string=zero_owners,
+        gf = GitLabForm(config_string=zero_users,
                         project_or_group=GROUP_NAME)
         with pytest.raises(SystemExit):
             gf.main()
