@@ -16,26 +16,26 @@ install:
 jobs:
   include:
     # unit tests
-#    - python: "3.8"
-#      script: unbuffer py.test --ignore gitlabform/gitlabform/test
-#    - python: "3.7"
-#      script: unbuffer py.test --ignore gitlabform/gitlabform/test
-#    - python: "3.6"
-#      script: unbuffer py.test --ignore gitlabform/gitlabform/test
-#    - python: "3.5"
-#      script: unbuffer py.test --ignore gitlabform/gitlabform/test
-#    - name: "Security tests"
-#      python: "3.7"
-#      before_script:
-#      - pip install bandit
-#      script: bandit -r gitlabform -x "*/test/*"
-#    - name: "Integration tests"
-#      python: "3.7"
-#      before_script:
-#      - bash run_gitlab_in_docker.sh
-#      - export GITLAB_URL=$(cat gitlab_url.txt)
-#      - export GITLAB_TOKEN=$(cat gitlab_token.txt)
-#      script: unbuffer py.test gitlabform/gitlabform/test
+    - python: "3.8"
+      script: unbuffer py.test --ignore gitlabform/gitlabform/test
+    - python: "3.7"
+      script: unbuffer py.test --ignore gitlabform/gitlabform/test
+    - python: "3.6"
+      script: unbuffer py.test --ignore gitlabform/gitlabform/test
+    - python: "3.5"
+      script: unbuffer py.test --ignore gitlabform/gitlabform/test
+    - name: "Security tests"
+      python: "3.7"
+      before_script:
+      - pip install bandit
+      script: bandit -r gitlabform -x "*/test/*"
+    - name: "Integration tests"
+      python: "3.7"
+      before_script:
+      - bash run_gitlab_in_docker.sh
+      - export GITLAB_URL=$(cat gitlab_url.txt)
+      - export GITLAB_TOKEN=$(cat gitlab_token.txt)
+      script: unbuffer py.test gitlabform/gitlabform/test
     # release (on tags only)
     - stage: Release
       if: tag IS present
