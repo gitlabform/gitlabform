@@ -2,21 +2,29 @@ language: python
 
 jobs:
   include:
+    # unit tests
+    - stage: test
+      python: "3.8"
+    - stage: test
+      python: "3.7"
+    - stage: test
+      python: "3.6"
+    - stage: test
+      python: "3.5"
     # security tests
-    - python: "3.7"
+    - stage: test
+      python: "3.7"
       env: SECURITY=true
     # integration tests
-    - python: "3.7"
+    - stage: test
+      python: "3.7"
       env: INTEGRATION=true
-    # unit tests + deployments (on tags only)
-    - python: "3.7"
+
+    # deployments (on tags only)
+    - stage: deploy
       env:
         - secure: "H6voGOBAqMavbLK63M3IAl+6GtAj1pZWExwPvmMytHVRXUeyxlC7Gy7piknUk+rAXE8F/bRwSRrdLxlN3i5SIQWlel4Zj+VSls8M7FUc05NtqSN8m3khm7Xr3u5/W58OXyiqJ3/9ozc5b8N4tuTPKBsxVlZCQuz1KhHn1WV/uPaJoKOlOoR3S6jJFPCPpDYNaadBtZNrmRgXux3KProO6pikqHQ6W9qtvK2YjJXVfXF3R1hhfdWD5Jo6yX0B1aINYWYoUWiQXdaahp0iU7ALENeaij6mB+U1Fo6/Fu9xHvU4cBdRsh2WtZUjHjiIKh5ZYFtWurQr8l/7fNz+zsaCD4y2Uc3QNvLsZ2H57sh593luT8UbQWrwUVnRkO2f5plGY/4M9M3YpeleUNbp9MX6PJHafl7YYtGIGwdad3l70d0Qmf1VxT2nSHp3VvmlxAWGtKBbMtKWYBaUZOjnteGCYfE5SosD54gmgb2gkspRafI+ef+A6MK5+WU8SAmCtxrzJgky9GsuRhn9KddOx1EZqPMfVaByy6Tcjp/f2Uc66Rd416IPjLEEcU6XmO8gGV9Obu5VEbvdiHxEnJTHcXmrB4fqjntn60Yn/1R9P0U5QVBqJowf6zTOztRtD9JgYaWYpz0/TMvkasLFXdvhCJl2vCIp91cY2Pr/Z/RzVce7eh4="
         - alpine_version=alpine3.10 debian_version=buster
-    # unit tests only
-    - python: "3.8"
-    - python: "3.6"
-    - python: "3.5"
 
 services:
 - docker
