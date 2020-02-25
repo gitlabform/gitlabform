@@ -16,28 +16,22 @@ install:
 jobs:
   include:
     # unit tests
-    - stage: test
-      python: "3.8"
+    - python: "3.8"
       script: unbuffer py.test --ignore gitlabform/gitlabform/test
-    - stage: test
-      python: "3.7"
+    - python: "3.7"
       script: unbuffer py.test --ignore gitlabform/gitlabform/test
-    - stage: test
-      python: "3.6"
+    - python: "3.6"
       script: unbuffer py.test --ignore gitlabform/gitlabform/test
-    - stage: test
-      python: "3.5"
+    - python: "3.5"
       script: unbuffer py.test --ignore gitlabform/gitlabform/test
     # security tests
-    - stage: test
-      python: "3.7"
+    - python: "3.7"
       env: SECURITY=true
       before_script:
       - pip install bandit
       script: bandit -r gitlabform -x "*/test/*"
     # integration tests
-    - stage: test
-      python: "3.7"
+    - python: "3.7"
       env: INTEGRATION=true
       before_script:
       - bash run_gitlab_in_docker.sh
