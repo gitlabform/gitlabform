@@ -29,7 +29,7 @@ GitLabForm enables you to manage:
 * Tags (protect/unprotect),
 * Services,
 * (Project) Hooks,
-* (Project) Push Rules,
+* (Project) Push Rules (**GitLab EE only**),
 * (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
 * Merge Requests approvals settings and approvers (**GitLab EE only**) {up to 1 user and 1 group
 because of a [GitLab bug #198770](https://gitlab.com/gitlab-org/gitlab/issues/198770), see
@@ -57,7 +57,7 @@ Please read more about [GitLab provider for Terraform vs GitLabForm](GT_VS_GLF.m
 ## Requirements
 
 * Python 3.5+ or Docker
-* GitLab 11+, GitLab EE for Merge Requests management
+* GitLab 11+, GitLab EE for Merge Requests & Push Rules management
 
 ## Installation
 
