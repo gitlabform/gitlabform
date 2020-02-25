@@ -22,7 +22,7 @@ GitLabForm enables you to manage:
 * Project settings,
 * Archive/unarchive project,
 * Project members (users and groups) {add/change access level, NO removal yet},
-* Group members (users) {add/change access level, NO removal yet},
+* Group members (users) {add/remove user, change access level},
 * Deployment keys,
 * Secret variables (on project and group/subgroup level),
 * Branches (protect/unprotect),

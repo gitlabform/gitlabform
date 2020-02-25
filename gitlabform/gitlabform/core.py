@@ -455,12 +455,12 @@ class GitLabFormCore(object):
                 users_to_set_by_access_level.setdefault(access_level, []).append(user)
 
             # check if the configured users contain at least one Owner
-            if 50 not in users_to_set_by_access_level.keys():
-                logging.fatal("You cannot configure a group to have no Owners. GitLab requires a group "
-                              " to contain at least 1 member who is an Owner (access_level = 50).")
+            if 50 not in users_to_set_by_access_level.keys() and configuration.get('enforce_group_members'):
+                logging.fatal("With 'enforce_group_members' flag you cannot have no Owners (access_level = 50) in your "
+                              " group members config. GitLab requires at least 1 Owner per group.")
                 sys.exit(4)
 
-            # you HAVE TO start configuring access from Owners to prevent case when there is no Owner
+            # we HAVE TO start configuring access from Owners to prevent case when there is no Owner
             # in a group
             for level in [50, 40, 30, 20, 10]:
 
@@ -491,11 +491,15 @@ class GitLabFormCore(object):
                         logging.debug("Adding user '%s' who previously was not a member.")
                         self.gl.add_member_to_group(group, user, access_level_to_set, expires_at_to_set)
 
-            # remove users not configured explicitly
-            users_not_configured = set([user['username'] for user in users_before]) - set(users_to_set_by_username.keys())
-            for user in users_not_configured:
-                logging.debug("Removing user '%s' who is not configured to be a member.")
-                self.gl.remove_member_from_group(group, user)
+            if configuration.get('enforce_group_members'):
+                # remove users not configured explicitly
+                # note: only direct members are removed - inherited are left
+                users_not_configured = set([user['username'] for user in users_before]) - set(users_to_set_by_username.keys())
+                for user in users_not_configured:
+                    logging.debug("Removing user '%s' who is not configured to be a member.")
+                    self.gl.remove_member_from_group(group, user)
+            else:
+                logging.debug("Not enforcing group members.")
 
             logging.debug("Group members AFTER: %s", self.gl.get_group_members(group))
 

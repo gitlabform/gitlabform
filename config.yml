@@ -144,13 +144,17 @@ group_settings:
         developers_can_merge: false
 
     # this is for adding/changing the access level of group members - only users can be them
-    # note: removing members from the config DOES NOT remove their access!
+    # for removing users please see the flag below.
     #
     # keys names are user names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
     group_members:
       my-user:
-        access_level: 40
+        access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+
+    # if this flag is set to 'true', then removing a user the above config will remove the user from the group
+    # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
+    enforce_group_members: true  # default: false
 
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html

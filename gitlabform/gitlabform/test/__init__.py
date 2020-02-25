@@ -10,7 +10,7 @@ gitlab:
 GROUP_NAME = 'gitlabform_tests_group'
 
 DEVELOPER_ACCESS = 30
-
+OWNER_ACCESS = 50
 
 gl = GitLab(config_string=CONFIG)
 
@@ -64,10 +64,10 @@ def delete_users(user_base_name, no_of_users):
         gl.delete_user(username)
 
 
-def add_users_to_group(group_name, usernames):
+def add_users_to_group(group_name, usernames, access_level=DEVELOPER_ACCESS):
     for username in usernames:
         try:
-            gl.add_member_to_group(group_name, username, DEVELOPER_ACCESS)
+            gl.add_member_to_group(group_name, username, access_level)
         except UnexpectedResponseException:
             # this is fine - user is already in the group
             pass

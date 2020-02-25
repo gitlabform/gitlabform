@@ -1,7 +1,8 @@
 import pytest
 
 from gitlabform.gitlabform import GitLabForm
-from gitlabform.gitlabform.test import create_group, create_users, remove_users_from_group, get_gitlab, GROUP_NAME
+from gitlabform.gitlabform.test import create_group, create_users, remove_users_from_group, get_gitlab, \
+    add_users_to_group, OWNER_ACCESS, GROUP_NAME
 
 
 USER_BASE_NAME = 'group_member_user'  # user1, user2, ...
@@ -14,7 +15,13 @@ def gitlab(request):
     create_group(GROUP_NAME)
     create_users(USER_BASE_NAME, 4)
 
+    add_users_to_group(GROUP_NAME, ['root'])
+    remove_users_from_group(GROUP_NAME, ['group_member_user1', 'group_member_user2', 'group_member_user3',
+                                         'group_member_user4'])
+
     def fin():
+        # same at the end
+        add_users_to_group(GROUP_NAME, ['root'], OWNER_ACCESS)
         remove_users_from_group(GROUP_NAME, ['group_member_user1', 'group_member_user2', 'group_member_user3',
                                              'group_member_user4'])
 
@@ -29,7 +36,7 @@ gitlab:
 group_settings:
   gitlabform_tests_group:
     group_members:
-      group_member_user1:
+      root: # creator of the group
         access_level: 50
       group_member_user2:
         access_level: 30
@@ -44,6 +51,8 @@ gitlab:
 group_settings:
   gitlabform_tests_group:
     group_members:
+      root: # creator of the group
+        access_level: 50
       group_member_user1:
         access_level: 50
       group_member_user2:
@@ -60,11 +69,41 @@ gitlab:
 
 group_settings:
   gitlabform_tests_group:
+    enforce_group_members: true
     group_members:
       group_member_user1:
         access_level: 50
       group_member_user3:
         access_level: 40
+"""
+
+not_remove_users_with_enforce_false = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  gitlabform_tests_group:
+    enforce_group_members: false
+    group_members:
+      root: # creator of the group
+        access_level: 50
+      group_member_user2:
+        access_level: 30
+    # a user removed
+"""
+
+not_remove_users_without_enforce = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  gitlabform_tests_group:
+    group_members:
+      root: # creator of the group
+        access_level: 50
+      group_member_user2:
+        access_level: 30
+    # a user removed
 """
 
 change_some_users_access = """
@@ -74,6 +113,8 @@ gitlab:
 group_settings:
   gitlabform_tests_group:
     group_members:
+      root: # creator of the group
+        access_level: 50
       group_member_user1:
         access_level: 50
       group_member_user2:
@@ -89,7 +130,7 @@ gitlab:
 group_settings:
   gitlabform_tests_group:
     group_members:
-      group_member_user4:
+      root: # creator of the group
         access_level: 50
 """
 
@@ -99,6 +140,7 @@ gitlab:
 
 group_settings:
   gitlabform_tests_group:
+    enforce_group_members: true
     group_members:
       group_member_user3: # new Owner
         access_level: 50
@@ -110,6 +152,7 @@ gitlab:
 
 group_settings:
   gitlabform_tests_group:
+    enforce_group_members: true
     group_members:
       group_member_user4:
         access_level: 40
@@ -121,13 +164,15 @@ gitlab:
 
 group_settings:
   gitlabform_tests_group:
+    enforce_group_members: true
     group_members: {}
 """
 
 
-class TestGroupMembers:
+class Helpers:
 
-    def __setup_some_users(self, gitlab):
+    @staticmethod
+    def setup_some_users(gitlab):
         gf = GitLabForm(config_string=some_users,
                         project_or_group=GROUP_NAME)
         gf.main()
@@ -135,30 +180,34 @@ class TestGroupMembers:
         members = gitlab.get_group_members(GROUP_NAME)
         assert len(members) == 3
         members_usernames = [member['username'] for member in members]
-        assert members_usernames.count('group_member_user1') == 1
+        assert members_usernames.count('root') == 1
         assert members_usernames.count('group_member_user2') == 1
         assert members_usernames.count('group_member_user3') == 1
 
+
+class TestGroupMembers:
+
     def test__setup_users(self, gitlab):
-        self.__setup_some_users(gitlab)
+        Helpers.setup_some_users(gitlab)
 
     def test__add_users(self, gitlab):
-        self.__setup_some_users(gitlab)
+        Helpers.setup_some_users(gitlab)
 
         gf = GitLabForm(config_string=add_users,
                         project_or_group=GROUP_NAME)
         gf.main()
         
         members = gitlab.get_group_members(GROUP_NAME)
-        assert len(members) == 4
+        assert len(members) == 5
         members_usernames = [member['username'] for member in members]
+        assert members_usernames.count('root') == 1
         assert members_usernames.count('group_member_user1') == 1
         assert members_usernames.count('group_member_user2') == 1
         assert members_usernames.count('group_member_user3') == 1
         assert members_usernames.count('group_member_user4') == 1
 
     def test__remove_users(self, gitlab):
-        self.__setup_some_users(gitlab)
+        Helpers.setup_some_users(gitlab)
 
         gf = GitLabForm(config_string=remove_users,
                         project_or_group=GROUP_NAME)
@@ -170,16 +219,46 @@ class TestGroupMembers:
         assert members_usernames.count('group_member_user1') == 1
         assert members_usernames.count('group_member_user3') == 1
 
+    def test__not_remove_users_with_enforce_false(self, gitlab):
+        Helpers.setup_some_users(gitlab)
+
+        gf = GitLabForm(config_string=not_remove_users_with_enforce_false,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        members = gitlab.get_group_members(GROUP_NAME)
+        assert len(members) == 3
+        members_usernames = [member['username'] for member in members]
+        assert members_usernames.count('root') == 1
+        assert members_usernames.count('group_member_user2') == 1
+        assert members_usernames.count('group_member_user3') == 1
+
+    def test__not_remove_users_without_enforce(self, gitlab):
+        Helpers.setup_some_users(gitlab)
+
+        gf = GitLabForm(config_string=not_remove_users_without_enforce,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        members = gitlab.get_group_members(GROUP_NAME)
+        assert len(members) == 3
+        members_usernames = [member['username'] for member in members]
+        assert members_usernames.count('root') == 1
+        assert members_usernames.count('group_member_user2') == 1
+        assert members_usernames.count('group_member_user3') == 1
+
     def test__change_some_users_access(self, gitlab):
-        self.__setup_some_users(gitlab)
+        Helpers.setup_some_users(gitlab)
 
         gf = GitLabForm(config_string=change_some_users_access,
                         project_or_group=GROUP_NAME)
         gf.main()
 
         members = gitlab.get_group_members(GROUP_NAME)
-        assert len(members) == 3
+        assert len(members) == 4
         for member in members:
+            if member['username'] == 'root':
+                assert member['access_level'] == 50
             if member['username'] == 'group_member_user1':
                 assert member['access_level'] == 50
             if member['username'] == 'group_member_user2':
@@ -195,7 +274,7 @@ class TestGroupMembers:
         members = gitlab.get_group_members(GROUP_NAME)
         assert len(members) == 1
         assert members[0]['access_level'] == 50
-        assert members[0]['username'] == 'group_member_user4'
+        assert members[0]['username'] == 'root'
 
         gf = GitLabForm(config_string=change_owner,
                         project_or_group=GROUP_NAME)
