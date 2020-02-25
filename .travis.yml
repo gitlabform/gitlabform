@@ -31,12 +31,14 @@ jobs:
     # security tests
     - stage: test
       python: "3.7"
+      env: SECURITY=true
       before_script:
       - pip install bandit
       script: bandit -r gitlabform -x "*/test/*"
     # integration tests
     - stage: test
       python: "3.7"
+      env: INTEGRATION=true
       before_script:
       - bash run_gitlab_in_docker.sh
       - export GITLAB_URL=$(cat gitlab_url.txt)
