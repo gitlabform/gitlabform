@@ -11,7 +11,8 @@ class GitLabGroups(GitLabCore):
         return self._make_requests_to_api("groups", data=data, method='POST', expected_codes=201)
 
     def delete_group(self, group_name):
-        return self._make_requests_to_api("groups/%s", group_name, method='DELETE', expected_codes=202)
+        return self._make_requests_to_api("groups/%s", group_name, method='DELETE',
+                                          expected_codes=[200, 202, 204])
 
     def get_group(self, name):
         return self._make_requests_to_api("groups/%s", name)

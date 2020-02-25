@@ -44,7 +44,7 @@ class GitLabBranches(GitLabCore):
 
     def delete_branch(self, project_and_group_name, branch):
         self._make_requests_to_api("projects/%s/repository/branches/%s", (project_and_group_name, branch),
-                                   method='DELETE')
+                                   method='DELETE', expected_codes=[200, 204])
 
     def get_protected_branches(self, project_and_group_name):
         branches = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name, paginated=True)

@@ -26,4 +26,4 @@ class GitLabTags(GitLabCore):
 
     def unprotect_tag(self, project_and_group_name, tag_name):
         return self._make_requests_to_api("projects/%s/protected_tags/%s", (project_and_group_name, tag_name),
-                                          method='DELETE', expected_codes=201)
+                                          method='DELETE', expected_codes=[201, 204])

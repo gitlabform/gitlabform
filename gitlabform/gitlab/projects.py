@@ -14,7 +14,8 @@ class GitLabProjects(GitLabCore):
         return self._make_requests_to_api("projects", data=data, method='POST', expected_codes=201)
 
     def delete_project(self, project_and_group_name):
-        return self._make_requests_to_api("projects/%s", project_and_group_name, method='DELETE', expected_codes=202)
+        return self._make_requests_to_api("projects/%s", project_and_group_name, method='DELETE',
+                                          expected_codes=[202, 204])
 
     def get_all_projects(self):
         """
@@ -112,7 +113,8 @@ class GitLabProjects(GitLabCore):
         return None
 
     def delete_hook(self, project_and_group_name, hook_id):
-        self._make_requests_to_api("projects/%s/hooks/%s", (project_and_group_name, hook_id), 'DELETE')
+        self._make_requests_to_api("projects/%s/hooks/%s", (project_and_group_name, hook_id), 'DELETE',
+                                   expected_codes=[200, 204])
 
     def put_hook(self, project_and_group_name, hook_id, url, data):
         data_required = {'url': url}
@@ -160,7 +162,8 @@ class GitLabProjects(GitLabCore):
     def delete_approvals_rule(self, project_and_group_name, approval_rule_id):
         # for this endpoint GitLab still actually wants pid, not "group/project"...
         pid = self._get_project_id(project_and_group_name)
-        self._make_requests_to_api("projects/%s/approval_rules/%s", (pid, approval_rule_id), method='DELETE')
+        self._make_requests_to_api("projects/%s/approval_rules/%s", (pid, approval_rule_id), method='DELETE',
+                                   expected_codes=[200, 204])
 
     def create_approval_rule(self, project_and_group_name, name, approvals_required, approvers, approver_groups):
         pid = self._get_project_id(project_and_group_name)

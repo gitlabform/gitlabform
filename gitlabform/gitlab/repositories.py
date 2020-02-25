@@ -46,4 +46,4 @@ class GitLabRepositories(GitLabCore):
             "commit_message": commit_message
         }
         return self._make_requests_to_api("projects/%s/repository/files/%s", (project_and_group_name, path),
-                                          'DELETE', data=data)
+                                          'DELETE', data=data, expected_codes=[200, 204])
