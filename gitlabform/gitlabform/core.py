@@ -287,11 +287,16 @@ class GitLabFormCore(object):
         logging.debug("Project settings AFTER: %s", self.gl.get_project_settings(project_and_group))
 
     @if_in_config_and_not_skipped
-    def process_project_push_rules(self, project_and_group, configuration):
+    def process_project_push_rules(self, project_and_group: str, configuration):
         push_rules = configuration['project_push_rules']
-        logging.debug("Project push rules settings BEFORE: %s", self.gl.get_project_push_rules(project_and_group))
-        logging.info("Setting project push rules: %s", push_rules)
-        self.gl.put_project_push_rules(project_and_group, push_rules)
+        old_project_push_rules = self.gl.get_project_push_rules(project_and_group)
+        logging.debug("Project push rules settings BEFORE: %s", old_project_push_rules)
+        if old_project_push_rules:
+            logging.info("Updating project push rules: %s", push_rules)
+            self.gl.put_project_push_rules(project_and_group, push_rules)
+        else:
+            logging.info("Creating project push rules: %s", push_rules)
+            self.gl.post_project_push_rules(project_and_group, push_rules)
         logging.debug("Project push rules AFTER: %s", self.gl.get_project_push_rules(project_and_group))
 
     @if_in_config_and_not_skipped
