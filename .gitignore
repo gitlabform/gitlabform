@@ -52,4 +52,4 @@ logs/
 auth.txt
 gitlab_token.txt
 gitlab_url.txt
-Gitlab.gitlab-license
+*.gitlab-license
