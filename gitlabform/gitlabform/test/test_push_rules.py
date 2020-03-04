@@ -74,18 +74,12 @@ class Helpers:
 class TestFiles:
 
     def test__apply_push_rules(self, gitlab: GitLab):
-        gf = GitLabForm(config_string=set_project_push_rules,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
-        gf.main()
-
-        push_rules = gitlab.get_project_push_rules(GROUP_AND_PROJECT_NAME)
-        assert push_rules == {}
+        Helpers.setup_push_rules(gitlab)
 
     def test__edit_push_rules(self, gitlab: GitLab):
         Helpers.setup_push_rules(gitlab)
         gf = GitLabForm(config_string=set_project_push_rules,
                         project_or_group=GROUP_AND_PROJECT_NAME)
-
         gf.main()
 
         push_rules = gitlab.get_project_push_rules(GROUP_AND_PROJECT_NAME)
