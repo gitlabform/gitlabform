@@ -115,7 +115,7 @@ class GitLabProjects(GitLabCore):
 
         pid: str = self._get_project_id(project_and_group_name)
 
-        self._make_requests_to_api("projects/%s/push_rule", pid, 'POST', push_rules)
+        self._make_requests_to_api("projects/%s/push_rule", pid, 'POST', push_rules, expected_codes=201)
 
     def get_hook_id(self, project_and_group_name, url):
         hooks = self._make_requests_to_api("projects/%s/hooks", project_and_group_name, 'GET')
