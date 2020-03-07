@@ -89,25 +89,25 @@ class TestServices:
         service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
         assert service['commit_events'] is True
 
-    def test__if_jira_commit_events_false_works(self, gitlab: GitLab):
-        gf = GitLabForm(config_string=config_service_jira_commit_events_false, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
-        gf.main()
-
-        service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
-        assert service['commit_events'] is False
-
-    def test__if_change_works(self, gitlab: GitLab):
-        gf = GitLabForm(config_string=config_service_jira_commit_events_true, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
-        gf.main()
-
-        service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
-        assert service['commit_events'] is True
-
-        gf = GitLabForm(config_string=config_service_jira_commit_events_false, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
-        gf.main()
-
-        service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
-        assert service['commit_events'] is False
+    # def test__if_jira_commit_events_false_works(self, gitlab: GitLab):
+    #     gf = GitLabForm(config_string=config_service_jira_commit_events_false, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
+    #     gf.main()
+    #
+    #     service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
+    #     assert service['commit_events'] is False
+    #
+    # def test__if_change_works(self, gitlab: GitLab):
+    #     gf = GitLabForm(config_string=config_service_jira_commit_events_true, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
+    #     gf.main()
+    #
+    #     service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
+    #     assert service['commit_events'] is True
+    #
+    #     gf = GitLabForm(config_string=config_service_jira_commit_events_false, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
+    #     gf.main()
+    #
+    #     service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
+    #     assert service['commit_events'] is False
 
     # def test__mattermost_confidential_issues_events(self, gitlab: GitLab):
     #     gf = GitLabForm(config_string=config_service_mattermost_confidential_issues_events,
