@@ -566,15 +566,16 @@ class GitLabFormCore(object):
                 logging.debug("Deleting service '%s'", service)
                 self.gl.delete_service(project_and_group, service)
             else:
-                try:
-                    if service == 'jira':
+
+                if service == 'jira':
+                    try:
                         # try to workaround https://github.com/egnyte/gitlabform/issues/69 :
                         # JIRA service changes seem to not work, so lets try to recreate it each time
                         self.gl.get_service(project_and_group, 'jira')
                         logging.debug("Deleting the existing JIRA service first as a workaround for GitLab issue")
                         self.gl.delete_service(project_and_group, 'jira')
-                except NotFoundException:
-                    logging.debug("Service was not configured before.")
+                    except NotFoundException:
+                        logging.debug("JIRA service is not configured yet.")
 
                 logging.debug("Setting service '%s'", service)
                 self.gl.set_service(project_and_group, service, configuration['services'][service])
