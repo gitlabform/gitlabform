@@ -278,6 +278,8 @@ class GitLabFormCore(object):
                 logging.error("+++ Error while processing '%s'", project_and_group)
                 traceback.print_exc()
 
+            logging.debug('@ [%s/%s] FINISHED Processing: %s', i, len(projects_and_groups), project_and_group)
+
     @if_in_config_and_not_skipped
     def process_project_settings(self, project_and_group, configuration):
         project_settings = configuration['project_settings']
@@ -564,6 +566,17 @@ class GitLabFormCore(object):
                 logging.debug("Deleting service '%s'", service)
                 self.gl.delete_service(project_and_group, service)
             else:
+                try:
+                    if 'push_events' in configuration['services'][service]:
+                        # try to workaround https://github.com/egnyte/gitlabform/issues/70 :
+                        # if we change 'push_events' field value then try to recreate the service
+                        service_before = self.gl.get_service(project_and_group, service)
+                        if service_before.get('push_events') != configuration['services'][service].get('push_events'):
+                            logging.debug("Changing the value of 'push_events' flag, so we have to recreate the service")
+                            self.gl.delete_service(project_and_group, service)
+                except NotFoundException:
+                    logging.debug("Service was not configured before.")
+
                 logging.debug("Setting service '%s'", service)
                 self.gl.set_service(project_and_group, service, configuration['services'][service])
 
