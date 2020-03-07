@@ -567,13 +567,12 @@ class GitLabFormCore(object):
                 self.gl.delete_service(project_and_group, service)
             else:
                 try:
-                    if 'push_events' in configuration['services'][service]:
-                        # try to workaround https://github.com/egnyte/gitlabform/issues/70 :
-                        # if we change 'push_events' field value then try to recreate the service
-                        service_before = self.gl.get_service(project_and_group, service)
-                        if service_before.get('push_events') != configuration['services'][service].get('push_events'):
-                            logging.debug("Changing the value of 'push_events' flag, so we have to recreate the service")
-                            self.gl.delete_service(project_and_group, service)
+                    if service == 'jira':
+                        # try to workaround https://github.com/egnyte/gitlabform/issues/69 :
+                        # JIRA service changes seem to not work, so lets try to recreate it each time
+                        self.gl.get_service(project_and_group, 'jira')
+                        logging.debug("Deleting the existing JIRA service first as a workaround for GitLab issue")
+                        self.gl.delete_service(project_and_group, 'jira')
                 except NotFoundException:
                     logging.debug("Service was not configured before.")
 
