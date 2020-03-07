@@ -38,6 +38,21 @@ project_settings:
         commit_events: true
 """
 
+config_service_jira_commit_events_true_recreate = """
+gitlab:
+  api_version: 4
+project_settings:
+  gitlabform_tests_group/services_project:
+    services:
+      jira:
+        recreate: true # gitlabform-specific
+        url: http://foo.bar.com
+        username: foo
+        password: bar
+        active: true
+        commit_events: true
+"""
+
 config_service_jira_commit_events_false = """
 gitlab:
   api_version: 4
@@ -84,7 +99,20 @@ class TestServices:
         assert service['active'] is False
 
     def test__if_jira_commit_events_true_works(self, gitlab: GitLab):
-        gf = GitLabForm(config_string=config_service_jira_commit_events_true, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
+        gf = GitLabForm(config_string=config_service_jira_commit_events_true, project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
+        assert service['commit_events'] is True
+
+    def test__if_jira_commit_events_true_recreate_works(self, gitlab: GitLab):
+        gf = GitLabForm(config_string=config_service_jira_commit_events_true_recreate, project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
+        assert service['commit_events'] is True
+
+        gf = GitLabForm(config_string=config_service_jira_commit_events_true_recreate, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
         service = gitlab.get_service(GROUP_AND_PROJECT_NAME, 'jira')
