@@ -55,9 +55,11 @@ Please read more about [GitLab provider for Terraform vs GitLabForm](GT_VS_GLF.m
 ### Limitations
 
 Some of the app features are limited because of the GitLab issues/bugs. Please upvote these issues/bugs if they affect you:
+
 * Services:
   * you cannot set `push_events` to `false` because of [GitLab issue #209343](https://gitlab.com/gitlab-org/gitlab/-/issues/209343)
   * JIRA service has fields which cannot be set using API because of [GitLab issue #202216](https://gitlab.com/gitlab-org/gitlab/-/issues/202216)
+
 * Merge Requests approvals settings and approvers:
   * you can only set up to 1 user and 1 group as approvers because of [GitLab issue #198770](https://gitlab.com/gitlab-org/gitlab/issues/198770),
    see [this comment](https://github.com/egnyte/gitlabform/issues/68#issuecomment-581003703) for a temporary workaround.
