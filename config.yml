@@ -176,6 +176,11 @@ group_settings:
         url: https://jira.yourcompany.com
         username: foo
         password: bar
+        # below extra parameters, used only by GitLabForm, makes the app delete and recreate the integration
+        # on each run. it is a possible workaround for https://github.com/egnyte/gitlabform/issues/69
+        # !!! Note: it is unsafe to use it if you customized the integration using GitLab web UI as you
+        # may lose this manual configuration !!!
+        recreate: true
 
     # key names here are hook URLs and values are as parameters described at
     # https://docs.gitlab.com/ee/api/projects.html#edit-project-hook
