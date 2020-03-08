@@ -27,13 +27,11 @@ GitLabForm enables you to manage:
 * Secret variables (on project and group/subgroup level),
 * Branches (protect/unprotect),
 * Tags (protect/unprotect),
-* Services,
+* Services - with [limitations, see below](#limitations),
 * (Project) Hooks,
 * (Project) Push Rules (**GitLab EE only**),
 * (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
-* Merge Requests approvals settings and approvers (**GitLab EE only**) {up to 1 user and 1 group
-because of a [GitLab bug #198770](https://gitlab.com/gitlab-org/gitlab/issues/198770), see
-[#68](https://github.com/egnyte/gitlabform/issues/68) for details}.
+* Merge Requests approvals settings and approvers (**GitLab EE only**) - with [limitations, see below](#limitations).
 
 ...for:
 
@@ -53,6 +51,18 @@ for [Terraform](https://www.terraform.io/) (which is a tool that we love and whi
 but it has a different set of features and uses a different configuration format.
 
 Please read more about [GitLab provider for Terraform vs GitLabForm](GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
+
+### Limitations
+
+Some of the app features are limited because of the GitLab issues/bugs. Please upvote these issues/bugs if they affect you:
+* Services:
+  * you cannot set `push_events` to `false` because of [GitLab issue #209343](https://gitlab.com/gitlab-org/gitlab/-/issues/209343)
+  * JIRA service has fields which cannot be set using API because of [GitLab issue #202216](https://gitlab.com/gitlab-org/gitlab/-/issues/202216)
+* Merge Requests approvals settings and approvers:
+  * you can only set up to 1 user and 1 group as approvers because of [GitLab issue #198770](https://gitlab.com/gitlab-org/gitlab/issues/198770),
+   see [this comment](https://github.com/egnyte/gitlabform/issues/68#issuecomment-581003703) for a temporary workaround.
+
+Note that these issues/bugs affect all the apps using GitLab API.
 
 ## Requirements
 
