@@ -566,16 +566,13 @@ class GitLabFormCore(object):
                 logging.debug("Deleting service '%s'", service)
                 self.gl.delete_service(project_and_group, service)
             else:
-                try:
-                    if 'push_events' in configuration['services'][service]:
-                        # try to workaround https://github.com/egnyte/gitlabform/issues/70 :
-                        # if we change 'push_events' field value then try to recreate the service
-                        service_before = self.gl.get_service(project_and_group, service)
-                        if service_before.get('push_events') != configuration['services'][service].get('push_events'):
-                            logging.debug("Changing the value of 'push_events' flag, so we have to recreate the service")
-                            self.gl.delete_service(project_and_group, service)
-                except NotFoundException:
-                    logging.debug("Service was not configured before.")
+                if 'recreate' in configuration['services'][service] and configuration['services'][service]['recreate']:
+                    # support from this configuration key has been added in v1.13.4
+                    # we will remove it here to avoid passing it to the GitLab API
+                    logging.warning("Ignoring deprecated 'recreate' field in the '%s' service config. "
+                                    "Please remove it from the config file permanently as this workaround is not "
+                                    "needed anymore.", service)
+                    del configuration['services'][service]['recreate']
 
                 logging.debug("Setting service '%s'", service)
                 self.gl.set_service(project_and_group, service, configuration['services'][service])
