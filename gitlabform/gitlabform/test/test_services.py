@@ -96,7 +96,7 @@ class TestServices:
         assert service['active'] is False
 
     def test__if_push_events_true_works(self, gitlab: GitLab):
-        gf = GitLabForm(config_string=config_service_push_events_true, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
+        gf = GitLabForm(config_string=config_service_push_events_true, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
         services = []
@@ -108,7 +108,7 @@ class TestServices:
         assert all([service['push_events'] for service in services])  is True
 
     def test__if_push_events_false_works(self, gitlab: GitLab):
-        gf = GitLabForm(config_string=config_service_push_events_false, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
+        gf = GitLabForm(config_string=config_service_push_events_false, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
         services = []
@@ -120,7 +120,7 @@ class TestServices:
         assert all([service['push_events'] for service in services]) is False
 
     def test__if_change_works(self, gitlab: GitLab):
-        gf = GitLabForm(config_string=config_service_push_events_true, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
+        gf = GitLabForm(config_string=config_service_push_events_true, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
         services = []
@@ -131,7 +131,7 @@ class TestServices:
         assert all([service['active'] for service in services]) is True
         assert all([service['push_events'] for service in services])  is True
 
-        gf = GitLabForm(config_string=config_service_push_events_false, project_or_group=GROUP_AND_PROJECT_NAME, debug=True)
+        gf = GitLabForm(config_string=config_service_push_events_false, project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 
         services = []
