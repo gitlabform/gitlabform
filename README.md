@@ -9,7 +9,7 @@ using hierarchical configuration written in YAML.
 
 ## Table of Contents
 
-* What you get? - [Features](#features) (& [Comparison to similar apps](#comparison-to-similar-apps))
+* What you get? - [Features](#features) (with [Comparison to similar apps](#comparison-to-similar-apps) and [Limitations](#limitations))
 * Basic usage - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
 * Advanced usage - [Full configuration syntax](#full-configuration-syntax), [More cli usage examples](#more-cli-usage-examples), [Running in an automated pipeline](#running-in-an-automated-pipeline)
 * Join us! - [Contributing](#contributing), [History](#history), [License](#license)
@@ -31,9 +31,7 @@ GitLabForm enables you to manage:
 * (Project) Hooks,
 * (Project) Push Rules (**GitLab EE only**),
 * (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
-* Merge Requests approvals settings and approvers (**GitLab EE only**) {up to 1 user and 1 group
-because of a [GitLab bug #198770](https://gitlab.com/gitlab-org/gitlab/issues/198770), see
-[#68](https://github.com/egnyte/gitlabform/issues/68) for details}.
+* Merge Requests approvals settings and approvers (**GitLab EE only**) - with [limitations, see below](#limitations),
 
 ...for:
 
@@ -53,6 +51,16 @@ for [Terraform](https://www.terraform.io/) (which is a tool that we love and whi
 but it has a different set of features and uses a different configuration format.
 
 Please read more about [GitLab provider for Terraform vs GitLabForm](GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
+
+### Limitations
+
+Some of the app features are limited because of the GitLab issues/bugs. Please upvote these issues/bugs if they affect you:
+
+* Merge Requests approvals settings and approvers:
+  * you can only set up to 1 user and 1 group as approvers because of [GitLab issue #198770](https://gitlab.com/gitlab-org/gitlab/issues/198770),
+   see [this comment](https://github.com/egnyte/gitlabform/issues/68#issuecomment-581003703) for a temporary workaround.
+
+Note that these issues/bugs affect all the apps using GitLab API.
 
 ## Requirements
 
