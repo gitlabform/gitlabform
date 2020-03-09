@@ -183,7 +183,8 @@ class GitLabProjects(GitLabCore):
         data = self._create_approval_rule_data(project_and_group_name, name, approvals_required, approvers,
                                                approver_groups)
 
-        self._make_requests_to_api("projects/%s/approval_rules", pid, method='POST', data=data, expected_codes=201)
+        self._make_requests_to_api("projects/%s/approval_rules", pid, method='POST', data=None, expected_codes=201,
+                                   json=data)
 
     def update_approval_rule(self, project_and_group_name, approval_rule_id, name, approvals_required,
                              approvers, approver_groups):
@@ -193,7 +194,8 @@ class GitLabProjects(GitLabCore):
                                                approver_groups)
         data['approval_rule_id'] = approval_rule_id
 
-        self._make_requests_to_api("projects/%s/approval_rules/%s", (pid, approval_rule_id), method='PUT', data=data)
+        self._make_requests_to_api("projects/%s/approval_rules/%s", (pid, approval_rule_id), method='PUT', data=None,
+                                   json=data)
 
     def _create_approval_rule_data(self, project_and_group_name, name, approvals_required, approvers, approver_groups):
         pid = self._get_project_id(project_and_group_name)
