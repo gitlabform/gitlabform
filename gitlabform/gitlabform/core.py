@@ -477,16 +477,16 @@ class GitLabFormCore(object):
                         expires_at_before = users_before_by_username[user]['expires_at']
 
                         if access_level_before == access_level_to_set and expires_at_before == expires_at_to_set:
-                            logging.debug("Nothing to change for user '%s' - same config now as to set.")
+                            logging.debug("Nothing to change for user '%s' - same config now as to set.", user)
                         else:
-                            logging.debug("Re-adding user '%s' to change their access level or expires at.")
+                            logging.debug("Re-adding user '%s' to change their access level or expires at.", user)
                             # we will remove the user first and then re-add they,
                             # to ensure that the user has the expected access level
                             self.gl.remove_member_from_group(group, user)
                             self.gl.add_member_to_group(group, user, access_level_to_set, expires_at_to_set)
 
                     else:
-                        logging.debug("Adding user '%s' who previously was not a member.")
+                        logging.debug("Adding user '%s' who previously was not a member.", user)
                         self.gl.add_member_to_group(group, user, access_level_to_set, expires_at_to_set)
 
             if configuration.get('enforce_group_members'):
@@ -494,7 +494,7 @@ class GitLabFormCore(object):
                 # note: only direct members are removed - inherited are left
                 users_not_configured = set([user['username'] for user in users_before]) - set(users_to_set_by_username.keys())
                 for user in users_not_configured:
-                    logging.debug("Removing user '%s' who is not configured to be a member.")
+                    logging.debug("Removing user '%s' who is not configured to be a member.", user)
                     self.gl.remove_member_from_group(group, user)
             else:
                 logging.debug("Not enforcing group members.")

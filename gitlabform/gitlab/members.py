@@ -24,7 +24,7 @@ class GitLabMembers(GitLabCore):
         if all:
             url_template += "/all"
 
-        return self._make_requests_to_api(url_template, group_name)
+        return self._make_requests_to_api(url_template, group_name, paginated=True)
 
     def add_member_to_group(self, group_name, username, access_level, expires_at=None):
         data = {
