@@ -146,7 +146,7 @@ class GitLabCore:
 
         url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
         logging.debug("url = %s , method = %s , data = %s", url, method, json.dumps(dict_data, sort_keys=True))
-        headers = {'Authorization': 'Bearer ' + self.token}
+        headers = {"PRIVATE-TOKEN": (self.token)}
         if dict_data:
             response = self.session.request(method, url, headers=headers, data=dict_data, timeout=10)
         elif json_data:
