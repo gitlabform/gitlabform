@@ -86,6 +86,23 @@ project_settings:
         protected: false
 """
 
+mixed_config_with_new_api = """
+gitlab:
+  api_version: 4
+
+project_settings:
+  gitlabform_tests_group/branches_project:
+    branches:
+      protect_branch_and_allow_merges:
+        push_access_level: 0
+        merge_access_level: 30
+        unprotect_access_level: 40
+      protect_branch_and_allow_pushes:
+        push_access_level: 30
+        merge_access_level: 30
+        unprotect_access_level: 40
+"""
+
 
 class TestBranches:
 
@@ -133,3 +150,18 @@ class TestBranches:
 
         branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes')
         assert branch['protected'] is False
+
+    def test__mixed_config_with_new_api(self, gitlab):
+        gf = GitLabForm(config_string=mixed_config_with_new_api,
+                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges')
+        assert branch['push_access_level'] is 0
+        assert branch['merge_access_level'] is 30
+        assert branch['unprotect_access_level'] is 40
+
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes')
+        assert branch['push_access_level'] is 30
+        assert branch['merge_access_level'] is 30
+        assert branch['unprotect_access_level'] is 40
