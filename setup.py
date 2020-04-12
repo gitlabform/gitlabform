@@ -30,6 +30,7 @@ setup(name='gitlabform',
             'requests>=2.20.0,<3',
             'pyyaml>=5.1.2,<6',
             'Jinja2>=2.10.1,<3',
+            'MarkupSafe==1.1.1',
       ],
       tests_require=[
             'pytest',
