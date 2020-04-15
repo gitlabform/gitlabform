@@ -43,6 +43,9 @@ class GitLabBranches(GitLabCore):
     def get_branch(self, project_and_group_name, branch):
         return self._make_requests_to_api("projects/%s/repository/branches/%s", (project_and_group_name, branch))
 
+    def get_branch_access_levels(self, project_and_group_name, branch):
+        return self._make_requests_to_api("projects/%s/protected_branches/%s", (project_and_group_name, branch))
+
     def create_branch(self, project_and_group_name, new_branch_name, create_branch_from_ref):
         data = {
             "id": project_and_group_name,
