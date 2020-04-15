@@ -511,7 +511,7 @@ class GitLabFormCore(object):
     def process_branches(self, project_and_group, configuration):
         for branch in sorted(configuration['branches']):
             try:
-                if 'protected' in configuration['branches'][branch]:
+                if 'protected' in configuration['branches'][branch] and configuration['branches'][branch]['protected']:
                     logging.debug("Setting branch '%s' as *protected*", branch)
                     # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
                     self.gl.unprotect_branch(project_and_group, branch)
