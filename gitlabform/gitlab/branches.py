@@ -36,6 +36,13 @@ class GitLabBranches(GitLabCore):
                                           method='PUT', data=data,
                                           expected_codes=[200, 201])
 
+    def unprotect_branch_new_api(self, project_and_group_name, branch):
+        # 404 means that the branch is already unprotected
+        return self._make_requests_to_api("projects/%s/protected_branches/%s",
+                                          (project_and_group_name, branch),
+                                          method='DELETE',
+                                          expected_codes=[200, 201, 204, 404])
+
     def get_branches(self, project_and_group_name):
         result = self._make_requests_to_api("projects/%s/repository/branches", project_and_group_name, paginated=True)
         return sorted(map(lambda x: x['name'], result))
