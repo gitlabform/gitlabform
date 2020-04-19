@@ -96,10 +96,12 @@ project_settings:
   gitlabform_tests_group/branches_project:
     branches:
       protect_branch_and_allow_merges_access_levels:
+        protected: true
         push_access_level: 0
         merge_access_level: 30
         unprotect_access_level: 40
       '*_allow_pushes_access_levels':
+        protected: true
         push_access_level: 30
         merge_access_level: 30
         unprotect_access_level: 40
@@ -113,10 +115,12 @@ project_settings:
   gitlabform_tests_group/branches_project:
     branches:
       protect_branch_and_allow_merges_access_levels:
+        protected: true
         push_access_level: 0
         merge_access_level: 40
         unprotect_access_level: 40
       '*_allow_pushes_access_levels':
+        protected: true
         push_access_level: 40
         merge_access_level: 40
         unprotect_access_level: 40
@@ -156,6 +160,7 @@ project_settings:
   gitlabform_tests_group/branches_project:
     branches:
       protect_branch:
+        protected: true
         push_access_level: 0
         merge_access_level: 40
         unprotect_access_level: 40
@@ -170,6 +175,33 @@ project_settings:
     branches:
       protect_branch:
         protected: false
+"""
+
+config_unprotect_branch_with_old_api = """
+gitlab:
+  api_version: 4
+
+project_settings:
+  gitlabform_tests_group/branches_project:
+    branches:
+      protect_branch:
+        protected: false
+        developers_can_push: true
+        developers_can_merge: true
+"""
+
+config_unprotect_branch_with_new_api = """
+gitlab:
+  api_version: 4
+
+project_settings:
+  gitlabform_tests_group/branches_project:
+    branches:
+      protect_branch:
+        protected: false
+        push_access_level: 0
+        merge_access_level: 40
+        unprotect_access_level: 40
 """
 
 class TestBranches:
@@ -304,6 +336,40 @@ class TestBranches:
         assert branch['developers_can_merge'] is True
 
         gf = GitLabForm(config_string=config_protect_branch_unprotect,
+                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
+        assert branch['protected'] is False
+
+    def test_unprotect_when_the_rest_of_the_parameters_are_still_specified_old_api(self, gitlab):
+        gf = GitLabForm(config_string=config_protect_branch_with_old_api,
+                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
+        assert branch['protected'] is True
+        assert branch['developers_can_push'] is True
+        assert branch['developers_can_merge'] is True
+
+        gf = GitLabForm(config_string=config_unprotect_branch_with_old_api,
+                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
+        assert branch['protected'] is False
+
+    def test_unprotect_when_the_rest_of_the_parameters_are_still_specified_new_api(self, gitlab):
+        gf = GitLabForm(config_string=config_protect_branch_with_new_api,
+                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        branch = gitlab.get_branch_access_levels(GROUP_AND_PROJECT_NAME, 'protect_branch')
+        assert branch['push_access_levels'][0]['access_level'] is 0
+        assert branch['merge_access_levels'][0]['access_level'] is 40
+        assert branch['unprotect_access_levels'][0]['access_level'] is 40
+
+        gf = GitLabForm(config_string=config_unprotect_branch_with_new_api,
                         project_or_group=GROUP_AND_PROJECT_NAME)
         gf.main()
 

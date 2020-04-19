@@ -143,6 +143,12 @@ group_settings:
         developers_can_push: true
         developers_can_merge: false
       branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed:
+        protected: true
+        push_access_level: 0
+        merge_access_level: 30
+        unprotect_access_level: 40
+      '*-branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed_configured_using_wildcard':
+        protected: true
         push_access_level: 0
         merge_access_level: 30
         unprotect_access_level: 40
