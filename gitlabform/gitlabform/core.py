@@ -512,20 +512,21 @@ class GitLabFormCore(object):
         for branch in sorted(configuration['branches']):
             try:
                 if 'protected' in configuration['branches'][branch] and configuration['branches'][branch]['protected']:
-                    logging.debug("Setting branch '%s' as *protected*", branch)
-                    # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
-                    self.gl.unprotect_branch_new_api(project_and_group, branch)
-                    self.gl.protect_branch(project_and_group, branch,
-                                           configuration['branches'][branch]['developers_can_push'],
-                                           configuration['branches'][branch]['developers_can_merge'])
-                elif 'push_access_level' and 'merge_access_level' and 'unprotect_access_level' in configuration['branches'][branch]:
-                    logging.debug("Setting branch '%s' access level", branch)
-                    # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
-                    self.gl.unprotect_branch_new_api(project_and_group, branch)
-                    self.gl.branch_access_level(project_and_group, branch,
-                                                configuration['branches'][branch]['push_access_level'],
-                                                configuration['branches'][branch]['merge_access_level'],
-                                                configuration['branches'][branch]['unprotect_access_level'])
+                    if ('developers_can_push' and 'developers_can_merge') in configuration['branches'][branch]:
+                        logging.debug("Setting branch '%s' as *protected*", branch)
+                        # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
+                        self.gl.unprotect_branch_new_api(project_and_group, branch)
+                        self.gl.protect_branch(project_and_group, branch,
+                                               configuration['branches'][branch]['developers_can_push'],
+                                               configuration['branches'][branch]['developers_can_merge'])
+                    elif ('push_access_level' and 'merge_access_level' and 'unprotect_access_level') in configuration['branches'][branch]:
+                        logging.debug("Setting branch '%s' access level", branch)
+                        # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
+                        self.gl.unprotect_branch_new_api(project_and_group, branch)
+                        self.gl.branch_access_level(project_and_group, branch,
+                                                    configuration['branches'][branch]['push_access_level'],
+                                                    configuration['branches'][branch]['merge_access_level'],
+                                                    configuration['branches'][branch]['unprotect_access_level'])
                 else:
                     logging.debug("Setting branch '%s' as unprotected", branch)
                     self.gl.unprotect_branch_new_api(project_and_group, branch)
