@@ -87,7 +87,7 @@ GitLabForm uses py.test for tests. To run unit tests locally:
 
 2. `pip install pytest`
 
-3. Run `then py.test --ignore gitlabform/gitlabform/test` to run all tests except the integration tests (see below).
+3. Run `py.test --ignore gitlabform/gitlabform/test` to run all tests except the integration tests (see below).
 
 #### Running integrations tests locally or on own GitLab instance
 
