@@ -145,7 +145,8 @@ class GitLabCore:
             raise Exception("You need to pass the either as dict (dict_data) or JSON (json_data), not both!")
 
         url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
-        logging.debug("url = %s , method = %s , data = %s", url, method, json.dumps(dict_data, sort_keys=True))
+        logging.debug("url = %s , method = %s , data = %s, json = %s", url, method,
+                      json.dumps(dict_data, sort_keys=True), json.dumps(json_data, sort_keys=True))
         headers = {
             'PRIVATE-TOKEN': self.token,
             'Authorization': 'Bearer ' + self.token,
