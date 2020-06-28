@@ -241,18 +241,15 @@ class GitLabFormCore(object):
             g += 1
 
             configuration = self.c.get_effective_config_for_group(group)
-            self.process_group_secret_variables(group, configuration)
-            self.process_group_settings(group, configuration)
-            self.process_group_members(group, configuration)
+
+            logging.warning('> (%s/%s) Processing: %s', g, len(groups), group)
+
+            if self.noop:
+                logging.warning('Not actually processing because running in noop mode.')
+                logging.debug('Configuration that would be applied: %s' % str(configuration))
+                continue
 
             try:
-
-                logging.warning('> (%s/%s) Processing: %s', g, len(groups), group)
-
-                if self.noop:
-                    logging.warning('Not actually processing because running in noop mode.')
-                    logging.debug('Configuration that would be applied: %s' % str(configuration))
-                    continue
 
                 self.process_group_secret_variables(group, configuration)
                 self.process_group_settings(group, configuration)
@@ -278,12 +275,12 @@ class GitLabFormCore(object):
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
-            try:
+            if self.noop:
+                logging.warning('Not actually processing because running in noop mode.')
+                logging.debug('Configuration that would be applied: %s' % str(configuration))
+                continue
 
-                if self.noop:
-                    logging.warning('Not actually processing because running in noop mode.')
-                    logging.debug('Configuration that would be applied: %s' % str(configuration))
-                    continue
+            try:
 
                 self.process_project(project_and_group, configuration)
                 self.process_project_settings(project_and_group, configuration)
