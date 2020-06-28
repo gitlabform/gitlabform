@@ -234,23 +234,47 @@ class GitLabFormCore(object):
 
     def process_all(self, projects_and_groups, groups):
 
-        i = 0
+        g = 0
 
         for group in groups:
+
+            g += 1
+
             configuration = self.c.get_effective_config_for_group(group)
             self.process_group_secret_variables(group, configuration)
             self.process_group_settings(group, configuration)
             self.process_group_members(group, configuration)
 
+            try:
+
+                logging.warning('> (%s/%s) Processing: %s', g, len(groups), group)
+
+                if self.noop:
+                    logging.warning('Not actually processing because running in noop mode.')
+                    logging.debug('Configuration that would be applied: %s' % str(configuration))
+                    continue
+
+                self.process_group_secret_variables(group, configuration)
+                self.process_group_settings(group, configuration)
+                self.process_group_members(group, configuration)
+
+            except Exception as e:
+                logging.error("+++ Error while processing '%s'", group)
+                traceback.print_exc()
+
+            logging.debug('< (%s/%s) FINISHED Processing: %s', g, len(groups), group)
+
+        p = 0
+
         for project_and_group in projects_and_groups:
 
-            i += 1
+            p += 1
 
-            if i < self.start_from:
-                logging.warning('$$$ [%s/%s] Skipping: %s...', i, len(projects_and_groups), project_and_group)
+            if p < self.start_from:
+                logging.warning('$$$ [%s/%s] Skipping: %s...', p, len(projects_and_groups), project_and_group)
                 continue
 
-            logging.warning('* [%s/%s] Processing: %s', i, len(projects_and_groups), project_and_group)
+            logging.warning('* [%s/%s] Processing: %s', p, len(projects_and_groups), project_and_group)
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
@@ -278,7 +302,7 @@ class GitLabFormCore(object):
                 logging.error("+++ Error while processing '%s'", project_and_group)
                 traceback.print_exc()
 
-            logging.debug('@ [%s/%s] FINISHED Processing: %s', i, len(projects_and_groups), project_and_group)
+            logging.debug('@ [%s/%s] FINISHED Processing: %s', p, len(projects_and_groups), project_and_group)
 
     @if_in_config_and_not_skipped
     def process_project_settings(self, project_and_group, configuration):
