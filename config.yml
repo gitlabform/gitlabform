@@ -43,7 +43,19 @@ common_settings:
       key: A_VERY_COMMONLY_USED_PASSWORD
       value: "ThisIsAVerySecretPassword"
       variable_type: env_var #or file
-      protected: false #
+      protected: "false" #
+
+  group_delete_secret_variables:
+    # If variables exist at the group level, they will be deleted
+    deleteThese:
+      - var1
+      - var2
+
+  delete_secret_variables:
+    # If variables exist at the project level they will be deleted
+    deleteTheseAlso:
+      - var3
+
 
 group_settings:
   # settings for ALL projects in 'my-group' group
@@ -78,7 +90,7 @@ group_settings:
         key: A_VERY_COMMONLY_USED_PASSWORD
         value: "ThisIsAVerySecretPassword"
         variable_type: env_var #or file
-        protected: false #
+        protected: "false" #
       
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:

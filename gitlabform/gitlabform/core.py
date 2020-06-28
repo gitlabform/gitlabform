@@ -239,6 +239,7 @@ class GitLabFormCore(object):
         for group in groups:
             configuration = self.c.get_effective_config_for_group(group)
             self.process_group_secret_variables(group, configuration)
+            self.process_group_delete_secret_variables(group, configuration)
             self.process_group_settings(group, configuration)
             self.process_group_members(group, configuration)
 
@@ -267,6 +268,7 @@ class GitLabFormCore(object):
                 self.process_merge_requests(project_and_group, configuration)
                 self.process_deploy_keys(project_and_group, configuration)
                 self.process_secret_variables(project_and_group, configuration)
+                self.process_delete_secret_variables(project_and_group, configuration)
                 self.process_branches(project_and_group, configuration)
                 self.process_tags(project_and_group, configuration)
                 self.process_services(project_and_group, configuration)
@@ -397,12 +399,31 @@ class GitLabFormCore(object):
                 current_value = \
                     self.gl.get_secret_variable(project_and_group,
                                                 configuration['secret_variables'][secret_variable]['key'])
-                if current_value != configuration['secret_variables'][secret_variable]['value']:
-                    self.gl.put_secret_variable(project_and_group,
-                                                configuration['secret_variables'][secret_variable])
+                self.gl.put_secret_variable(project_and_group,
+                                             configuration['secret_variables'][secret_variable])
             except NotFoundException:
                 self.gl.post_secret_variable(project_and_group,
                                              configuration['secret_variables'][secret_variable])
+
+        logging.debug("Secret variables AFTER: %s", self.gl.get_secret_variables(project_and_group))
+
+    @if_in_config_and_not_skipped
+    def process_delete_secret_variables(self, project_and_group, configuration):
+        if not self.gl.get_project_settings(project_and_group)['jobs_enabled']:
+            logging.warning("Jobs (CI) not enabled in this project so I can't set secret variables here.")
+            return
+        logging.debug("Secret variables BEFORE: %s", self.gl.get_secret_variables(project_and_group))
+        for secret_variable in sorted(configuration['delete_secret_variables']):
+            logging.info("Processing delete secret variable: %s in %s", secret_variable, project_and_group)
+            for v in configuration['delete_secret_variables'][secret_variable]:
+
+                try:
+                    current_value = \
+                        self.gl.get_secret_variable(project_and_group, v)
+                    logging.info ("Deleting %s in %s", v, project_and_group)
+                    self.gl.delete_secret_variables(project_and_group, v)
+                except NotFoundException:
+                    logging.info("%s does not exist in %s", v, project_and_group)
 
         logging.debug("Secret variables AFTER: %s", self.gl.get_secret_variables(project_and_group))
 
@@ -416,12 +437,28 @@ class GitLabFormCore(object):
                 current_value = \
                     self.gl.get_group_secret_variable(group,
                                                 configuration['group_secret_variables'][secret_variable]['key'])
-                if current_value != configuration['group_secret_variables'][secret_variable]['value']:
-                    self.gl.put_group_secret_variable(group,
-                                                configuration['group_secret_variables'][secret_variable])
+                self.gl.put_group_secret_variable(group,
+                                             configuration['group_secret_variables'][secret_variable])
             except NotFoundException:
                 self.gl.post_group_secret_variable(group,
                                              configuration['group_secret_variables'][secret_variable])
+
+        logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
+
+    @if_in_config_and_not_skipped
+    def process_group_delete_secret_variables(self, group, configuration):
+        logging.debug("Group secret variables BEFORE: %s", self.gl.get_group_secret_variables(group))
+        for secret_variable in sorted(configuration['group_delete_secret_variables']):
+            logging.info("Processing group delete secret variable: %s", secret_variable)
+            for v in configuration['group_delete_secret_variables'][secret_variable]:
+                logging.debug("Checking: %s", v)
+                try:
+                    current_value = \
+                        self.gl.get_group_secret_variable(group, v)
+                    logging.info ("Deleting %s in %s", v, group)
+                    self.gl.delete_group_secret_variable(group, v)
+                except NotFoundException:
+                    logging.info("%s does not exist in %s", v, group)
 
         logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
 

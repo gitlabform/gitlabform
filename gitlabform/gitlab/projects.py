@@ -71,6 +71,10 @@ class GitLabProjects(GitLabCore):
     def get_secret_variables(self, project_and_group_name):
         return self._make_requests_to_api("projects/%s/variables", project_and_group_name)
 
+    def delete_secret_variables(self, project_and_group_name, secret_variable_key):
+        self._make_requests_to_api("projects/%s/variables/%s", (project_and_group_name, secret_variable_key), method='DELETE', expected_codes=[204])
+
+
     def get_project_settings(self, project_and_group_name):
         try:
             return self._make_requests_to_api("projects/%s", project_and_group_name)
