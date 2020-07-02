@@ -1,3 +1,7 @@
+# This key prevents GitLabForm from actually using this config.
+# Please remove it if you create your config as a copy of this file.
+example_config: true
+
 # GitLab API access config
 gitlab:
   # You can also set in your environment GITLAB_URL

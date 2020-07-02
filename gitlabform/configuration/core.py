@@ -43,6 +43,13 @@ class ConfigurationCore:
                 # we need config path for accessing files for relative paths
                 self.config_dir = os.path.dirname(config_path)
 
+                if self.config.get('example_config'):
+                    logging.fatal("Example config detected, aborting.\n"
+                                  "Haven't you forgotten to use `-c <config_file` switch?\n"
+                                  "If you created your config based on the example one then please remove "
+                                  "'example_config' key.")
+                    sys.exit(1)
+
         except (FileNotFoundError, IOError):
             raise ConfigFileNotFoundException(config_path)
 
