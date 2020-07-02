@@ -88,13 +88,13 @@ def configuration_to_safe_dict(method):
 
 class GitLabFormCore(object):
 
-    def __init__(self, project_or_group=None, config_string=None, debug=False):
+    def __init__(self, project_or_group=None, config_string=None):
 
         if project_or_group and config_string:
             self.project_or_group = project_or_group
             self.config_string = config_string
             self.verbose = False
-            self.debug = bool(debug)
+            self.debug = True
             self.strict = True
             self.start_from = 1
             self.noop = False
@@ -406,8 +406,8 @@ class GitLabFormCore(object):
 
     @if_in_config_and_not_skipped
     def process_secret_variables(self, project_and_group, configuration):
-        if not self.gl.get_project_settings(project_and_group)['jobs_enabled']:
-            logging.warning("Jobs (CI) not enabled in this project so I can't set secret variables here.")
+        if self.gl.get_project_settings(project_and_group)['builds_access_level'] == 'disabled':
+            logging.warning("Builds disabled in this project so I can't set secret variables here.")
             return
 
         logging.debug("Secret variables BEFORE: %s", self.gl.get_secret_variables(project_and_group))
