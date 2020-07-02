@@ -35,12 +35,14 @@ gitlab:
 common_settings:
   # common settings for ALL projects in ALL groups
 
+  # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
   secret_variables:
     # this name is not actually used, it's just for you
     a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
       key: A_VERY_COMMONLY_USED_PASSWORD
       value: "ThisIsAVerySecretPassword"
-  
+
+  # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
   group_secret_variables:
     # this name is not actually used, it's just for you
     a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
@@ -70,12 +72,14 @@ group_settings:
         title: other_ssh_key_name_that_is_shown_in_gitlab
         can_push: false
 
+    # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
     secret_variables:
       # this name is not actually used, it's just for you
       a_friendly_secret_variable_name:
         key: SSH_PRIVATE_KEY_BASE64
         value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
 
+    # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
     group_secret_variables:
       # this name is not actually used, it's just for you
       a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
