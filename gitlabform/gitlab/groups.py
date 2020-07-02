@@ -11,8 +11,9 @@ class GitLabGroups(GitLabCore):
         return self._make_requests_to_api("groups", data=data, method='POST', expected_codes=201)
 
     def delete_group(self, group_name):
+        # 404 means that the group does not exist anymore, so let's accept it for idempotency
         return self._make_requests_to_api("groups/%s", group_name, method='DELETE',
-                                          expected_codes=[200, 202, 204])
+                                          expected_codes=[200, 202, 204, 404])
 
     def get_group(self, name):
         return self._make_requests_to_api("groups/%s", name)

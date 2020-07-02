@@ -26,9 +26,10 @@ gitlab:
   api_version: 4
 
 project_settings:
-  project_settings:
-    builds_access_level: private
-    visibility: private
+  """ + GROUP_AND_PROJECT_NAME + """:
+    project_settings:
+      builds_access_level: private
+      visibility: private
 """
 
 

@@ -14,8 +14,9 @@ class GitLabProjects(GitLabCore):
         return self._make_requests_to_api("projects", data=data, method='POST', expected_codes=201)
 
     def delete_project(self, project_and_group_name):
+        # 404 means that the project does not exist anymore, so let's accept it for idempotency
         return self._make_requests_to_api("projects/%s", project_and_group_name, method='DELETE',
-                                          expected_codes=[202, 204])
+                                          expected_codes=[202, 204, 404])
 
     def get_all_projects(self):
         """
