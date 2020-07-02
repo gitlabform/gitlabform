@@ -58,26 +58,14 @@ class GitLabGroups(GitLabCore):
         self._make_requests_to_api("groups/%s", project_and_group_name, 'PUT', group_settings)
 
     def post_group_secret_variable(self, group, secret_variable):
-        # secret_variable has to be like this:
-        # {
-        #     'key': key,
-        #     'value': value,
-        #     "variable_type": "env_var",
-        #     "protected": false
-        # }
-        # ..as documented at: https://docs.gitlab.com/ce/api/build_variables.html#create-variable
+        # secret_variable has to be like documented at:
+        # https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
         self._make_requests_to_api("groups/%s/variables", group, 'POST', secret_variable,
                                    expected_codes=201)
 
     def put_group_secret_variable(self, group, secret_variable):
-        # secret_variable has to be like this:
-        # {
-        #     'key': key,
-        #     'value': value,
-        #     "variable_type": "env_var",
-        #     "protected": false
-        # }
-        # ..as documented at: https://docs.gitlab.com/ce/api/build_variables.html#update-variable
+        # secret_variable has to be like documented at:
+        # https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
         self._make_requests_to_api("groups/%s/variables/%s", (group, secret_variable['key']),
                                    'PUT', secret_variable)
 

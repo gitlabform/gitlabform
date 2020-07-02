@@ -46,22 +46,14 @@ class GitLabProjects(GitLabCore):
         return self._make_requests_to_api("projects/%s/deploy_keys/%s", (project_and_group_name, id), 'GET')
 
     def post_secret_variable(self, project_and_group_name, secret_variable):
-        # secret_variable has to be like this:
-        # {
-        #     'key': key,
-        #     'value': value,
-        # }
-        # ..as documented at: https://docs.gitlab.com/ce/api/build_variables.html#create-variable
+        # secret_variable has to be like documented at:
+        # https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
         self._make_requests_to_api("projects/%s/variables", project_and_group_name, 'POST', secret_variable,
                                    expected_codes=201)
 
     def put_secret_variable(self, project_and_group_name, secret_variable):
-        # secret_variable has to be like this:
-        # {
-        #     'key': key,
-        #     'value': value,
-        # }
-        # ..as documented at: https://docs.gitlab.com/ce/api/build_variables.html#update-variable
+        # secret_variable has to be like documented at:
+        # https://docs.gitlab.com/ce/api/build_variables.html#update-variable
         self._make_requests_to_api("projects/%s/variables/%s", (project_and_group_name, secret_variable['key']),
                                    'PUT', secret_variable)
 

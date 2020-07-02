@@ -415,15 +415,9 @@ class GitLabFormCore(object):
             logging.info("Setting secret variable: %s", secret_variable)
 
             try:
-                current_value = \
-                    self.gl.get_secret_variable(project_and_group,
-                                                configuration['secret_variables'][secret_variable]['key'])
-                if current_value != configuration['secret_variables'][secret_variable]['value']:
-                    self.gl.put_secret_variable(project_and_group,
-                                                configuration['secret_variables'][secret_variable])
+                self.gl.put_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
             except NotFoundException:
-                self.gl.post_secret_variable(project_and_group,
-                                             configuration['secret_variables'][secret_variable])
+                self.gl.post_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
 
         logging.debug("Secret variables AFTER: %s", self.gl.get_secret_variables(project_and_group))
 
@@ -434,15 +428,9 @@ class GitLabFormCore(object):
             logging.info("Setting group secret variable: %s", secret_variable)
 
             try:
-                current_value = \
-                    self.gl.get_group_secret_variable(group,
-                                                configuration['group_secret_variables'][secret_variable]['key'])
-                if current_value != configuration['group_secret_variables'][secret_variable]['value']:
-                    self.gl.put_group_secret_variable(group,
-                                                configuration['group_secret_variables'][secret_variable])
+                self.gl.put_group_secret_variable(group, configuration['group_secret_variables'][secret_variable])
             except NotFoundException:
-                self.gl.post_group_secret_variable(group,
-                                             configuration['group_secret_variables'][secret_variable])
+                self.gl.post_group_secret_variable(group, configuration['group_secret_variables'][secret_variable])
 
         logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
 
