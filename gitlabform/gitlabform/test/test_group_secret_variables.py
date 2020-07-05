@@ -62,6 +62,37 @@ group_settings:
         value: bleble
 """
 
+config_masked_secret_variables = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  """ + GROUP_NAME + """:
+    project_settings:
+      builds_access_level: enabled
+    group_secret_variables:
+      foo:
+        key: FOO
+        # https://docs.gitlab.com/ee/ci/variables/#masked-variable-requirements
+        value: 12345678
+        masked: true
+"""
+
+config_protected_secret_variables = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  """ + GROUP_NAME + """:
+    project_settings:
+      builds_access_level: enabled
+    group_secret_variables:
+      foo:
+        key: FOO
+        value: abc
+        protected: true
+"""
+
 
 class TestGroupSecretVariables:
 
@@ -99,3 +130,21 @@ class TestGroupSecretVariables:
         secret_variables_keys = set([secret['key'] for secret in secret_variables])
         assert len(secret_variables) == 2
         assert secret_variables_keys == {'FOO', 'BAR'}
+
+    def test__masked_secret_variables(self, gitlab):
+        gf = GitLabForm(config_string=config_masked_secret_variables,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        secret_variable = gitlab.get_group_secret_variable_object(GROUP_NAME, 'FOO')
+        assert secret_variable['value'] == '12345678'
+        assert secret_variable['masked']
+
+    def test__protected_secret_variables(self, gitlab):
+        gf = GitLabForm(config_string=config_protected_secret_variables,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        secret_variable = gitlab.get_group_secret_variable_object(GROUP_NAME, 'FOO')
+        assert secret_variable['value'] == 'abc'
+        assert secret_variable['protected']
