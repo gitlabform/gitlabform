@@ -75,3 +75,7 @@ class GitLabGroups(GitLabCore):
 
     def get_group_secret_variables(self, group):
         return self._make_requests_to_api("groups/%s/variables", group)
+
+    def delete_group_secret_variable(self, group, secret_variable):
+        self._make_requests_to_api("groups/%s/variables/%s", (group, secret_variable), 'DELETE',
+                                   expected_codes=[200, 202, 204, 404])
