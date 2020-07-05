@@ -1,6 +1,5 @@
 import pytest
 
-from gitlabform.gitlab.core import UnexpectedResponseException
 from gitlabform.gitlabform import GitLabForm
 from gitlabform.gitlabform.test import create_group, create_project_in_group, get_gitlab, GROUP_NAME
 
@@ -69,7 +68,7 @@ group_settings:
 """
 
 
-class TestProjectSettings:
+class TestGroupSecretVariables:
 
     def test__single_secret_variable(self, gitlab):
         gf = GitLabForm(config_string=config_single_secret_variable,
