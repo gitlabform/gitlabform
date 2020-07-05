@@ -54,11 +54,7 @@ Please read more about [GitLab provider for Terraform vs GitLabForm](GT_VS_GLF.m
 
 ### Limitations
 
-Some of the app features are limited because of the GitLab issues/bugs. Please upvote these issues/bugs if they affect you:
-
-* (none as of now but we leave this section as a placeholder for future use)
-
-Note that these issues/bugs affect all the apps using GitLab API.
+Some of the app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/egnyte/gitlabform/issues?q=is%3Aissue+is%3Aopen+label%3A%22gitlab+issue%22). Please check the links to the GitLab issue(s) in their comments and please upvote them if they are affecting you. Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
 
 ## Requirements
 
