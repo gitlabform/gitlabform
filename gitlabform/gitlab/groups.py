@@ -58,6 +58,9 @@ class GitLabGroups(GitLabCore):
         # ..as documented at: https://docs.gitlab.com/ee/api/groups.html#update-group
         self._make_requests_to_api("groups/%s", project_and_group_name, 'PUT', group_settings)
 
+    def delete_group_secret_variable(self, group, secret_variable_key):
+        self._make_requests_to_api("groups/%s/variables/%s", (group, secret_variable_key), method='DELETE', expected_codes=[204])
+
     def post_group_secret_variable(self, group, secret_variable):
         # secret_variable has to be like documented at:
         # https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable

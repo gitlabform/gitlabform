@@ -41,6 +41,7 @@ common_settings:
     a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
       key: A_VERY_COMMONLY_USED_PASSWORD
       value: "ThisIsAVerySecretPassword"
+      delete: false  # Set to true to delete this variable
 
   # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
   group_secret_variables:
@@ -50,6 +51,7 @@ common_settings:
       value: "ThisIsAVerySecretPassword"
       variable_type: env_var #or file
       protected: false #
+      delete: false  # Set to true to delete this variable
 
 group_settings:
   # settings for ALL projects in 'my-group' group

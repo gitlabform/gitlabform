@@ -13,7 +13,6 @@ from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException, UnexpectedResponseException
 from gitlabform.gitlab.core import NotFoundException
 
-
 def if_in_config_and_not_skipped(method):
     """
     This is a universal method of making some config parts skippable because of missing config or explicit "skip: true"
@@ -411,8 +410,19 @@ class GitLabFormCore(object):
             return
 
         logging.debug("Secret variables BEFORE: %s", self.gl.get_secret_variables(project_and_group))
+
         for secret_variable in sorted(configuration['secret_variables']):
             logging.info("Setting secret variable: %s", secret_variable)
+
+            if "delete" in configuration['secret_variables'][secret_variable]:
+                key = configuration['secret_variables'][secret_variable]["key"]
+                if configuration['secret_variables'][secret_variable]["delete"]:
+                    logging.debug(f"Deleting {secret_variable}: {key} in project {project_and_group}")
+                    try:
+                        self.gl.delete_secret_variable(project_and_group, key)
+                    except:
+                        logging.warn(f"Could not delete variable {key} in group {project_and_group}")
+                    return
 
             try:
                 self.gl.put_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
@@ -424,8 +434,19 @@ class GitLabFormCore(object):
     @if_in_config_and_not_skipped
     def process_group_secret_variables(self, group, configuration):
         logging.debug("Group secret variables BEFORE: %s", self.gl.get_group_secret_variables(group))
+
         for secret_variable in sorted(configuration['group_secret_variables']):
             logging.info("Setting group secret variable: %s", secret_variable)
+
+            if "delete" in configuration['group_secret_variables'][secret_variable]:
+                key = configuration['group_secret_variables'][secret_variable]["key"]
+                if configuration['group_secret_variables'][secret_variable]["delete"]:
+                    logging.debug(f"Deleting {secret_variable}: {key} in group {group}")
+                    try:
+                        self.gl.delete_group_secret_variable(group, key)
+                    except:
+                        logging.warn(f"Could not delete variable {key} in group {group}")
+                    return
 
             try:
                 self.gl.put_group_secret_variable(group, configuration['group_secret_variables'][secret_variable])
@@ -433,6 +454,7 @@ class GitLabFormCore(object):
                 self.gl.post_group_secret_variable(group, configuration['group_secret_variables'][secret_variable])
 
         logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
+        logging.info("gRoups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
 
     @if_in_config_and_not_skipped
     def process_group_settings(self, group, configuration):
