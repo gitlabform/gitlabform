@@ -89,7 +89,7 @@ group_settings:
     group_secret_variables:
       foo:
         key: FOO
-        value: abc
+        value: 123
         protected: true
 """
 
@@ -146,5 +146,22 @@ class TestGroupSecretVariables:
         gf.main()
 
         secret_variable = gitlab.get_group_secret_variable_object(GROUP_NAME, 'FOO')
-        assert secret_variable['value'] == 'abc'
+        assert secret_variable['value'] == '123'
         assert secret_variable['protected']
+
+    def test__protected_change_secret_variables(self, gitlab):
+        gf = GitLabForm(config_string=config_single_secret_variable,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        secret_variable = gitlab.get_group_secret_variable_object(GROUP_NAME, 'FOO')
+        assert secret_variable['value'] == '123'
+        assert secret_variable['protected'] is False
+
+        gf = GitLabForm(config_string=config_protected_secret_variables,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        secret_variable = gitlab.get_group_secret_variable_object(GROUP_NAME, 'FOO')
+        assert secret_variable['value'] == '123'
+        assert secret_variable['protected'] is True
