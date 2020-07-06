@@ -88,3 +88,12 @@ def create_readme_in_project(project_and_group):
         gl.set_file(project_and_group, 'master', 'README.md', 'Hello World!', 'Restore original content')
     except:
         gl.add_file(project_and_group, 'master', 'README.md', 'Hello World!', 'Create README')
+
+
+def delete_variables_from_group(group_name, variables):
+    for variable in variables:
+        try:
+            gl.delete_group_secret_variable(group_name, variable)
+        except NotFoundException:
+            # this is fine - variable is removed from group
+            pass

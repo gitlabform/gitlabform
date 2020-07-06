@@ -85,9 +85,11 @@ group_settings:
       a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
         key: A_VERY_COMMONLY_USED_PASSWORD
         value: "ThisIsAVerySecretPassword"
-        variable_type: env_var #or file
-        protected: false #
-      
+        protected: true
+        # note that there are extra requirements for variables to be "masked",
+        # see https://docs.gitlab.com/ee/ci/variables/#masked-variable-requirements
+        masked: true
+
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
       jobs_enabled: true

@@ -28,13 +28,13 @@ setup(name='gitlabform',
       packages=find_packages(),
       install_requires=[
             'certifi',  # we want the latest root certs for security
-            'requests==2.23.0',
+            'requests==2.24.0',
             'chardet==3.0.4',
-            'idna==2.9',
-            'Jinja2==2.11.1',
+            'idna==2.10',
+            'Jinja2==2.11.2',
             'MarkupSafe==1.1.1',
             'PyYAML==5.3.1',
-            'urllib3==1.25.8',
+            'urllib3==1.25.9',
       ],
       tests_require=[
             'pytest',

@@ -82,7 +82,7 @@ project_settings:
 """
 
 
-class TestProjectSettings:
+class TestSecretVariables:
 
     def test__builds_disabled(self, gitlab):
         gf = GitLabForm(config_string=config_builds_not_enabled,
