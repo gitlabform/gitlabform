@@ -454,7 +454,6 @@ class GitLabFormCore(object):
                 self.gl.post_group_secret_variable(group, configuration['group_secret_variables'][secret_variable])
 
         logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
-        logging.info("gRoups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
 
     @if_in_config_and_not_skipped
     def process_group_settings(self, group, configuration):

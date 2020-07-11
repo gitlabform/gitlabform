@@ -50,6 +50,21 @@ project_settings:
         value: 123
 """
 
+config_delete_secret_variable = """
+gitlab:
+  api_version: 4
+
+project_settings:
+  """ + GROUP_AND_PROJECT_NAME + """:
+    project_settings:
+      builds_access_level: enabled
+    secret_variables:
+      foo:
+        key: FOO
+        value: 123
+        delete: true
+"""
+
 config_single_secret_variable2 = """
 gitlab:
   api_version: 4
@@ -100,6 +115,22 @@ class TestProjectSettings:
 
         secret_variables = gitlab.get_secret_variables(GROUP_AND_PROJECT_NAME)
         assert len(secret_variables) == 1
+
+    def test__delete_secret_variable(self, gitlab):
+        gf = GitLabForm(config_string=config_single_secret_variable,
+                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        secret_variables = gitlab.get_secret_variables(GROUP_AND_PROJECT_NAME)
+        assert len(secret_variables) == 1
+        assert secret_variables[0]['value'] == '123'
+
+        gf = GitLabForm(config_string=config_delete_secret_variable,
+                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf.main()
+
+        secret_variables = gitlab.get_secret_variables(GROUP_AND_PROJECT_NAME)
+        assert len(secret_variables) == 0
 
     def test__reset_single_secret_variable(self, gitlab):
         gf = GitLabForm(config_string=config_single_secret_variable,
