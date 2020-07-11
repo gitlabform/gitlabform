@@ -4,7 +4,7 @@ from gitlabform.gitlabform import GitLabForm
 from gitlabform.gitlabform.test import create_group, get_gitlab, delete_variables_from_group, GROUP_NAME
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def gitlab(request):
     create_group(GROUP_NAME)
 
@@ -29,6 +29,21 @@ group_settings:
       foo:
         key: FOO
         value: 123
+"""
+
+config_delete_secret_variable = """
+gitlab:
+  api_version: 4
+
+group_settings:
+  """ + GROUP_NAME + """:
+    project_settings:
+      builds_access_level: enabled
+    group_secret_variables:
+      foo:
+        key: FOO
+        value: 123
+        delete: true
 """
 
 config_single_secret_variable2 = """
@@ -120,6 +135,22 @@ class TestGroupSecretVariables:
         secret_variables = gitlab.get_group_secret_variables(GROUP_NAME)
         assert len(secret_variables) == 1
         assert secret_variables[0]['value'] == '123456'
+
+    def test__delete_secret_variable(self, gitlab):
+        gf = GitLabForm(config_string=config_single_secret_variable,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        secret_variables = gitlab.get_group_secret_variables(GROUP_NAME)
+        assert len(secret_variables) == 1
+        assert secret_variables[0]['value'] == '123'
+
+        gf = GitLabForm(config_string=config_delete_secret_variable,
+                        project_or_group=GROUP_NAME)
+        gf.main()
+
+        secret_variables = gitlab.get_group_secret_variables(GROUP_NAME)
+        assert len(secret_variables) == 0
 
     def test__more_secret_variables(self, gitlab):
         gf = GitLabForm(config_string=config_more_secret_variables,
