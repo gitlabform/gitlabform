@@ -1,6 +1,6 @@
 import logging.config
 
-from gitlab import GitlabCreateError
+from gitlab import GitlabGetError
 
 from gitlabform.gitlabform.core import if_in_config_and_not_skipped
 
@@ -20,12 +20,11 @@ class SecretVariables(object):
             logging.info("Setting secret variable: %s", secret_variable)
 
             try:
-                project.variables.create(secret_variable)
-            except GitlabCreateError:  # already exists
                 existing_variable = project.variables.get(secret_variable['key'])
                 for key, value in secret_variable.items():
                     setattr(existing_variable, key, value)
                 existing_variable.save()
+            except GitlabGetError:  # doesn't exist yet
+                project.variables.create(secret_variable)
 
         logging.debug("Secret variables AFTER: %s", project.variables.list())
-

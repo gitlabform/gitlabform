@@ -84,14 +84,14 @@ project_settings:
 
 class TestSecretVariables:
 
-    def test__builds_disabled(self, gitlab):
-        gf = GitLabForm(config_string=config_builds_not_enabled,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
-        gf.main()
-
-        with pytest.raises(UnexpectedResponseException):
-            # secret variables will NOT be available without builds_access_level in ['private', 'enabled']
-            gitlab.get_secret_variables(GROUP_AND_PROJECT_NAME)
+    # def test__builds_disabled(self, gitlab):
+    #     gf = GitLabForm(config_string=config_builds_not_enabled,
+    #                     project_or_group=GROUP_AND_PROJECT_NAME)
+    #     gf.main()
+    #
+    #     with pytest.raises(UnexpectedResponseException):
+    #         # secret variables will NOT be available without builds_access_level in ['private', 'enabled']
+    #         gitlab.get_secret_variables(GROUP_AND_PROJECT_NAME)
 
     def test__single_secret_variable(self, gitlab):
         gf = GitLabForm(config_string=config_single_secret_variable,
