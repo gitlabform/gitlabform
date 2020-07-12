@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 import os
 from functools import wraps
+import gitlab
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import ConfigFileNotFoundException
@@ -160,8 +161,11 @@ class GitLabFormCore(object):
 
         try:
             if hasattr(self, 'config_string'):
-                gl = GitLab(config_string=self.config_string)
+                # gl = GitLab(config_string=self.config_string)
                 c = Configuration(config_string=self.config_string)
+                url = os.getenv('GITLAB_URL')
+                oauth_token = os.getenv('GITLAB_TOKEN')
+                gl = gitlab.Gitlab(url, oauth_token=oauth_token)
             else:
                 gl = GitLab(self.config.strip())
                 c = Configuration(self.config.strip())
@@ -195,10 +199,10 @@ class GitLabFormCore(object):
         else:
             if '/' in self.project_or_group:
                 try:
-                    self.gl._get_group_id(self.project_or_group)
+                    self.gl.groups.get(self.project_or_group)
                     # it's a subgroup
                     groups = [self.project_or_group]
-                except NotFoundException:
+                except:
                     # it's a single project
                     projects_and_groups = [self.project_or_group]
             else:
@@ -282,18 +286,18 @@ class GitLabFormCore(object):
 
             try:
 
-                self.process_project(project_and_group, configuration)
-                self.process_project_settings(project_and_group, configuration)
-                self.process_project_push_rules(project_and_group, configuration)
-                self.process_merge_requests(project_and_group, configuration)
-                self.process_deploy_keys(project_and_group, configuration)
+                # self.process_project(project_and_group, configuration)
+                # self.process_project_settings(project_and_group, configuration)
+                # self.process_project_push_rules(project_and_group, configuration)
+                # self.process_merge_requests(project_and_group, configuration)
+                # self.process_deploy_keys(project_and_group, configuration)
                 self.process_secret_variables(project_and_group, configuration)
-                self.process_branches(project_and_group, configuration)
-                self.process_tags(project_and_group, configuration)
-                self.process_services(project_and_group, configuration)
-                self.process_files(project_and_group, configuration)
-                self.process_hooks(project_and_group, configuration)
-                self.process_members(project_and_group, configuration)
+                # self.process_branches(project_and_group, configuration)
+                # self.process_tags(project_and_group, configuration)
+                # self.process_services(project_and_group, configuration)
+                # self.process_files(project_and_group, configuration)
+                # self.process_hooks(project_and_group, configuration)
+                # self.process_members(project_and_group, configuration)
 
             except Exception as e:
                 logging.error("+++ Error while processing '%s'", project_and_group)
@@ -404,22 +408,22 @@ class GitLabFormCore(object):
             self.gl.post_deploy_key(project_and_group, configuration['deploy_keys'][deploy_key])
         logging.debug("Deploy keys AFTER: %s", self.gl.get_deploy_keys(project_and_group))
 
-    @if_in_config_and_not_skipped
-    def process_secret_variables(self, project_and_group, configuration):
-        if self.gl.get_project_settings(project_and_group)['builds_access_level'] == 'disabled':
-            logging.warning("Builds disabled in this project so I can't set secret variables here.")
-            return
-
-        logging.debug("Secret variables BEFORE: %s", self.gl.get_secret_variables(project_and_group))
-        for secret_variable in sorted(configuration['secret_variables']):
-            logging.info("Setting secret variable: %s", secret_variable)
-
-            try:
-                self.gl.put_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
-            except NotFoundException:
-                self.gl.post_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
-
-        logging.debug("Secret variables AFTER: %s", self.gl.get_secret_variables(project_and_group))
+    # @if_in_config_and_not_skipped
+    # def process_secret_variables(self, project_and_group, configuration):
+    #     if self.gl.get_project_settings(project_and_group)['builds_access_level'] == 'disabled':
+    #         logging.warning("Builds disabled in this project so I can't set secret variables here.")
+    #         return
+    #
+    #     logging.debug("Secret variables BEFORE: %s", self.gl.get_secret_variables(project_and_group))
+    #     for secret_variable in sorted(configuration['secret_variables']):
+    #         logging.info("Setting secret variable: %s", secret_variable)
+    #
+    #         try:
+    #             self.gl.put_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
+    #         except NotFoundException:
+    #             self.gl.post_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
+    #
+    #     logging.debug("Secret variables AFTER: %s", self.gl.get_secret_variables(project_and_group))
 
     @if_in_config_and_not_skipped
     def process_group_secret_variables(self, group, configuration):

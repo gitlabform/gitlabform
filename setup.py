@@ -35,6 +35,7 @@ setup(name='gitlabform',
             'MarkupSafe==1.1.1',
             'PyYAML==5.3.1',
             'urllib3==1.25.9',
+            'python-gitlab>=2.4.0,<2.5',
       ],
       tests_require=[
             'pytest',
