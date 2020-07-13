@@ -136,7 +136,7 @@ class GitLabFormCore(object):
 
         parser.add_argument('--start-from', dest='start_from', default=1, type=int,
                             help='Start processing projects from the given one '
-                                 '(as numbered by "[x/y] Processing: <group>/<project>" messages)')
+                                 '(as numbered by "[x/y] Processing: group/project" messages)')
 
         parser.add_argument('-n', '--noop', dest='noop', action="store_true", help='Run in no-op (dry run) mode')
 
@@ -267,7 +267,7 @@ class GitLabFormCore(object):
 
             configuration = self.c.get_effective_config_for_group(group)
 
-            logging.warning('> (%s/%s) Processing group: %s', g, len(groups), group)
+            logging.warning('> (%s/%s) Processing: %s', g, len(groups), group)
 
             if self.noop:
                 logging.warning('Not actually processing because running in noop mode.')
@@ -284,7 +284,7 @@ class GitLabFormCore(object):
                 logging.error("+++ Error while processing '%s'", group)
                 traceback.print_exc()
 
-            logging.debug('< (%s/%s) FINISHED Processing group: %s', g, len(groups), group)
+            logging.debug('< (%s/%s) FINISHED Processing: %s', g, len(groups), group)
 
         p = 0
 
@@ -296,7 +296,7 @@ class GitLabFormCore(object):
                 logging.warning('$$$ [%s/%s] Skipping: %s...', p, len(projects_and_groups), project_and_group)
                 continue
 
-            logging.warning('* [%s/%s] Processing project: %s', p, len(projects_and_groups), project_and_group)
+            logging.warning('* [%s/%s] Processing: %s', p, len(projects_and_groups), project_and_group)
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
@@ -324,7 +324,7 @@ class GitLabFormCore(object):
                 logging.error("+++ Error while processing '%s'", project_and_group)
                 traceback.print_exc()
 
-            logging.debug('@ [%s/%s] FINISHED Processing project: %s', p, len(projects_and_groups), project_and_group)
+            logging.debug('@ [%s/%s] FINISHED Processing: %s', p, len(projects_and_groups), project_and_group)
 
     @if_in_config_and_not_skipped
     def process_project_settings(self, project_and_group, configuration):

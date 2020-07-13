@@ -1,4 +1,3 @@
-from gitlabform import Singleton
 from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.groups import GitLabGroups
@@ -13,6 +12,5 @@ from gitlabform.gitlab.users import GitLabUsers
 
 
 class GitLab(GitLabBranches, GitLabCommits, GitLabMergeRequests, GitLabProjects, GitLabRepositories, GitLabServices,
-             GitLabTags, GitLabGroups, GitLabPipelines, GitLabMembers, GitLabUsers,
-             metaclass=Singleton):
+             GitLabTags, GitLabGroups, GitLabPipelines, GitLabMembers, GitLabUsers):
     pass
