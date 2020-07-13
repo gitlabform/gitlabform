@@ -6,7 +6,9 @@ import os
 from urllib3.util.retry import Retry
 from urllib import parse
 from requests.adapters import HTTPAdapter
-from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
+
+from gitlabform.configuration import Configuration
+from gitlabform.configuration.core import KeyNotFoundException
 
 
 class GitLabCore:
@@ -23,9 +25,9 @@ class GitLabCore:
             sys.exit(1)
 
         if config_path:
-            configuration = ConfigurationCore(config_path=config_path)
+            configuration = Configuration(config_path=config_path)
         else:
-            configuration = ConfigurationCore(config_string=config_string)
+            configuration = Configuration(config_string=config_string)
 
         self.url = configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
         self.token = configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
