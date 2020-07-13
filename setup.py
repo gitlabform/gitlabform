@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
 from pypandoc import convert_file
 
+
 def convert_markdown_to_rst(file):
-      return convert_file(file, 'rst')
+    return convert_file(file, 'rst')
 
 
 setup(name='gitlabform',
