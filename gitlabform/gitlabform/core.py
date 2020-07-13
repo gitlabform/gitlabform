@@ -6,12 +6,15 @@ import sys
 from pathlib import Path
 import os
 from functools import wraps
+import luddite
+import pkg_resources
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import ConfigFileNotFoundException
 from gitlabform.gitlab import GitLab
-from gitlabform.gitlab.core import TestRequestFailedException, UnexpectedResponseException
+from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.gitlab.core import NotFoundException
+
 
 def if_in_config_and_not_skipped(method):
     """
@@ -98,18 +101,22 @@ class GitLabFormCore(object):
             self.start_from = 1
             self.noop = False
             self.set_log_level(tests=True)
+            self.skip_version_check = True
         else:
-            self.project_or_group, self.config, self.verbose, self.debug, self.strict, self.start_from, self.noop \
-                = self.parse_args()
+            self.project_or_group, self.config, self.verbose, self.debug, self.strict, self.start_from, self.noop, \
+                self.skip_version_check = self.parse_args()
             self.set_log_level()
+            print(self.get_version(self.skip_version_check))
 
         self.gl, self.c = self.initialize_configuration_and_gitlab()
 
     def parse_args(self):
 
-        parser = argparse.ArgumentParser(description='Easy configuration as code tool for GitLab'
-                                                     ' using config in plain YAML.',
-                                         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser(
+            description='Specialized "configuration as a code" tool for GitLab projects, groups and more'
+                        ' using hierarchical configuration written in YAML',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
 
         parser.add_argument('project_or_group',
                             help='Project name in "group/project" format'
@@ -133,9 +140,15 @@ class GitLabFormCore(object):
 
         parser.add_argument('-n', '--noop', dest='noop', action="store_true", help='Run in no-op (dry run) mode')
 
+        parser.add_argument('-V', '--version', action='version', version=self.get_version(False))
+
+        parser.add_argument('-k', '--skip-version-check', dest='skip_version_check', action="store_true",
+                            help="Skips checking if the latest version is used")
+
         args = parser.parse_args()
 
-        return args.project_or_group, args.config, args.verbose, args.debug, args.strict, args.start_from, args.noop
+        return args.project_or_group, args.config, args.verbose, args.debug, args.strict, args.start_from, args.noop, \
+            args.skip_version_check
 
     def set_log_level(self, tests=False):
 
@@ -154,6 +167,19 @@ class GitLabFormCore(object):
             # disable printing to stdout/err because pytest will catch it anyway
             handler = logging.getLogger().handlers[0]
             logging.getLogger().removeHandler(handler)
+
+    def get_version(self, skip_version_check):
+        local_version = pkg_resources.get_distribution('gitlabform').version
+        version = f'GitLabForm version: {local_version}'
+
+        if not skip_version_check:
+            latest_version = luddite.get_version_pypi('gitlabform')
+            if local_version == latest_version:
+                version += ' (the latest)'
+            else:
+                version += f' (the latest is {latest_version} - please update!)'
+
+        return version
 
     def initialize_configuration_and_gitlab(self):
 
