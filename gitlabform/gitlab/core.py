@@ -50,7 +50,6 @@ class GitLabCore:
             api_version = configuration.get("gitlab|api_version")
             if api_version != 4:
                 raise ApiVersionIncorrectException()
-            logging.info("Config file is declared to be compatible with GitLab API v4")
         except KeyNotFoundException:
             logging.fatal("Aborting. GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
                           "names have changed. By its design GitLabForm reads some parameter names directly from "
