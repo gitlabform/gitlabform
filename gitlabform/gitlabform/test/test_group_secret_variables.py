@@ -4,7 +4,7 @@ from gitlabform.gitlabform import GitLabForm
 from gitlabform.gitlabform.test import create_group, get_gitlab, delete_variables_from_group, GROUP_NAME
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def gitlab(request):
     create_group(GROUP_NAME)
 

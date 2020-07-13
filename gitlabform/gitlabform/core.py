@@ -412,18 +412,18 @@ class GitLabFormCore(object):
         logging.debug("Secret variables BEFORE: %s", self.gl.get_secret_variables(project_and_group))
 
         for secret_variable in sorted(configuration['secret_variables']):
-            logging.info("Setting secret variable: %s", secret_variable)
 
             if "delete" in configuration['secret_variables'][secret_variable]:
                 key = configuration['secret_variables'][secret_variable]["key"]
                 if configuration['secret_variables'][secret_variable]["delete"]:
-                    logging.debug(f"Deleting {secret_variable}: {key} in project {project_and_group}")
+                    logging.info(f"Deleting {secret_variable}: {key} in project {project_and_group}")
                     try:
                         self.gl.delete_secret_variable(project_and_group, key)
                     except:
                         logging.warn(f"Could not delete variable {key} in group {project_and_group}")
-                    return
+                    continue
 
+            logging.info("Setting secret variable: %s", secret_variable)
             try:
                 self.gl.put_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
             except NotFoundException:
@@ -436,18 +436,18 @@ class GitLabFormCore(object):
         logging.debug("Group secret variables BEFORE: %s", self.gl.get_group_secret_variables(group))
 
         for secret_variable in sorted(configuration['group_secret_variables']):
-            logging.info("Setting group secret variable: %s", secret_variable)
 
             if "delete" in configuration['group_secret_variables'][secret_variable]:
                 key = configuration['group_secret_variables'][secret_variable]["key"]
                 if configuration['group_secret_variables'][secret_variable]["delete"]:
-                    logging.debug(f"Deleting {secret_variable}: {key} in group {group}")
+                    logging.info(f"Deleting {secret_variable}: {key} in group {group}")
                     try:
                         self.gl.delete_group_secret_variable(group, key)
                     except:
                         logging.warn(f"Could not delete variable {key} in group {group}")
-                    return
+                    continue
 
+            logging.info("Setting group secret variable: %s", secret_variable)
             try:
                 self.gl.put_group_secret_variable(group, configuration['group_secret_variables'][secret_variable])
             except NotFoundException:
