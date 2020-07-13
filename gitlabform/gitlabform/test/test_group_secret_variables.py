@@ -8,7 +8,7 @@ PROJECT_NAME = 'group_secret_variables_project'
 GROUP_AND_PROJECT_NAME = GROUP_NAME + '/' + PROJECT_NAME
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def gitlab(request):
     create_group(GROUP_NAME)
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
