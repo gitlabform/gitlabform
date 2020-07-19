@@ -1,6 +1,8 @@
 [![PyPI version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
 ![GitHub Release Date](https://img.shields.io/github/release-date/egnyte/gitlabform)
 [![Build Status](https://travis-ci.com/egnyte/gitlabform.svg?branch=master)](https://travis-ci.com/egnyte/gitlabform)
+![PyPI downloads](https://img.shields.io/pypi/dm/gitlabform?label=PyPI%20Downloads)
+![docker pulls](https://img.shields.io/docker/pulls/egnyte/gitlabform)
 
 # GitLabForm
 
