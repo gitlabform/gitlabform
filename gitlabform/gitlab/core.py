@@ -15,6 +15,7 @@ class GitLabCore:
     token = None
     ssl_verify = None
     session = None
+    timeout = None
 
     def __init__(self, config_path=None, config_string=None):
 
@@ -30,6 +31,7 @@ class GitLabCore:
         self.url = configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
         self.token = configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
         self.ssl_verify = configuration.get("gitlab|ssl_verify", True)
+        self.timeout = configuration.get("gitlab|timeout", 10)
 
         self.session = requests.Session()
 
@@ -151,11 +153,11 @@ class GitLabCore:
             'Authorization': 'Bearer ' + self.token,
         }
         if dict_data:
-            response = self.session.request(method, url, headers=headers, data=dict_data, timeout=10)
+            response = self.session.request(method, url, headers=headers, data=dict_data, timeout=self.timeout)
         elif json_data:
-            response = self.session.request(method, url, headers=headers, json=json_data, timeout=10)
+            response = self.session.request(method, url, headers=headers, json=json_data, timeout=self.timeout)
         else:
-            response = self.session.request(method, url, headers=headers, timeout=10)
+            response = self.session.request(method, url, headers=headers, timeout=self.timeout)
         logging.debug("response code=%s" % response.status_code)
 
         if response.status_code == 204:
