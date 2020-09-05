@@ -15,6 +15,11 @@ install:
 
 jobs:
   include:
+    # check code formatting
+    - python: "3.8"
+      before_script:
+      - pip install black
+      script: black --check .
     # unit tests
     - python: "3.8"
       script: unbuffer py.test --ignore gitlabform/gitlabform/test
