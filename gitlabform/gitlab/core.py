@@ -20,7 +20,9 @@ class GitLabCore:
     def __init__(self, config_path=None, config_string=None):
 
         if config_path and config_string:
-            logging.fatal('Please initialize with either config_path or config_string, not both.')
+            logging.fatal(
+                "Please initialize with either config_path or config_string, not both."
+            )
             sys.exit(1)
 
         if config_path:
@@ -35,17 +37,20 @@ class GitLabCore:
 
         self.session = requests.Session()
 
-        retries = Retry(total=3,
-                        backoff_factor=0.25,
-                        status_forcelist=[500, 502, 503, 504])
+        retries = Retry(
+            total=3, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504]
+        )
 
-        self.session.mount('http://', HTTPAdapter(max_retries=retries))
-        self.session.mount('https://', HTTPAdapter(max_retries=retries))
+        self.session.mount("http://", HTTPAdapter(max_retries=retries))
+        self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.verify = self.ssl_verify
 
         try:
             version = self._make_requests_to_api("version")
-            logging.info("Connected to GitLab version: %s (%s)" % (version['version'], version['revision']))
+            logging.info(
+                "Connected to GitLab version: %s (%s)"
+                % (version["version"], version["revision"])
+            )
         except Exception as e:
             raise TestRequestFailedException(e)
         try:
@@ -53,44 +58,56 @@ class GitLabCore:
             if api_version != 4:
                 raise ApiVersionIncorrectException()
         except KeyNotFoundException:
-            logging.fatal("Aborting. GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
-                          "names have changed. By its design GitLabForm reads some parameter names directly from "
-                          "config.yml so you need to update those names by yourself. See changes in config.yml "
-                          "in this diff to see what had to be changed there: "
-                          "https://github.com/egnyte/gitlabform/pull/28/files . "
-                          "After updating your config.yml please add 'api_version' key to 'gitlab' section and set it "
-                          "to 4 to indicate that your config is v4-compatible.")
+            logging.fatal(
+                "Aborting. GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
+                "names have changed. By its design GitLabForm reads some parameter names directly from "
+                "config.yml so you need to update those names by yourself. See changes in config.yml "
+                "in this diff to see what had to be changed there: "
+                "https://github.com/egnyte/gitlabform/pull/28/files . "
+                "After updating your config.yml please add 'api_version' key to 'gitlab' section and set it "
+                "to 4 to indicate that your config is v4-compatible."
+            )
             sys.exit(3)
 
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
 
     def _get_user_id(self, username):
-        users = self._make_requests_to_api("users?username=%s", username, 'GET')
+        users = self._make_requests_to_api("users?username=%s", username, "GET")
 
         # this API endpoint is for lookup, not search, so 'username' has to be full and exact username
         # also it's not possible to get more than 1 user as a result
 
         if len(users) == 0:
-            raise NotFoundException("No users found when searching for username '%s'" % username)
+            raise NotFoundException(
+                "No users found when searching for username '%s'" % username
+            )
 
-        return users[0]['id']
+        return users[0]["id"]
 
     def _get_user(self, user_id):
-        return self._make_requests_to_api("users/%s", str(user_id), 'GET')
+        return self._make_requests_to_api("users/%s", str(user_id), "GET")
 
     def _get_group_id(self, path):
-        group = self._make_requests_to_api("groups/%s", path, 'GET')
+        group = self._make_requests_to_api("groups/%s", path, "GET")
         # TODO: add tests for all that uses this and then stop converting these ints to strings here
-        return str(group['id'])
+        return str(group["id"])
 
     def _get_project_id(self, project_and_group):
         # This is a NEW workaround for https://github.com/gitlabhq/gitlabhq/issues/8290
         result = self.get_project(project_and_group)
-        return str(result['id'])
+        return str(result["id"])
 
-    def _make_requests_to_api(self, path_as_format_string, args=None, method='GET', data=None, expected_codes=200,
-                              paginated=False, json=None):
+    def _make_requests_to_api(
+        self,
+        path_as_format_string,
+        args=None,
+        method="GET",
+        data=None,
+        expected_codes=200,
+        paginated=False,
+        json=None,
+    ):
         """
         Makes a HTTP request (or requests) to the GitLab API endpoint. It takes case of making as many requests as
         needed in case we are using a paginated endpoint. (See underlying method for authentication, retries,
@@ -112,25 +129,37 @@ class GitLabCore:
                  objects.
         """
         if not paginated:
-            response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
+            response = self._make_request_to_api(
+                path_as_format_string, args, method, data, expected_codes, json
+            )
             return response.json()
         else:
-            if '?' in path_as_format_string:
-                path_as_format_string += '&per_page=100'
+            if "?" in path_as_format_string:
+                path_as_format_string += "&per_page=100"
             else:
-                path_as_format_string += '?per_page=100'
+                path_as_format_string += "?per_page=100"
 
-            first_response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
+            first_response = self._make_request_to_api(
+                path_as_format_string, args, method, data, expected_codes, json
+            )
             results = first_response.json()
-            total_pages = int(first_response.headers['X-Total-Pages'])
+            total_pages = int(first_response.headers["X-Total-Pages"])
             for page in range(2, total_pages + 1):
-                response = self._make_request_to_api(path_as_format_string + "&page=" + str(page), args, method, data,
-                                                     expected_codes, json)
+                response = self._make_request_to_api(
+                    path_as_format_string + "&page=" + str(page),
+                    args,
+                    method,
+                    data,
+                    expected_codes,
+                    json,
+                )
                 results += response.json()
 
         return results
 
-    def _make_request_to_api(self, path_as_format_string, args, method, dict_data, expected_codes, json_data):
+    def _make_request_to_api(
+        self, path_as_format_string, args, method, dict_data, expected_codes, json_data
+    ):
 
         """
         Makes a single request to the GitLab API. Takes care of the authentication, basic error processing,
@@ -143,21 +172,38 @@ class GitLabCore:
         expected_codes = self._listify(expected_codes)
 
         if dict_data and json_data:
-            raise Exception("You need to pass the either as dict (dict_data) or JSON (json_data), not both!")
+            raise Exception(
+                "You need to pass the either as dict (dict_data) or JSON (json_data), not both!"
+            )
 
-        url = self.url + "/api/v4/" + self._format_with_url_encoding(path_as_format_string, args)
-        logging.debug("url = %s , method = %s , data = %s, json = %s", url, method,
-                      json.dumps(dict_data, sort_keys=True), json.dumps(json_data, sort_keys=True))
+        url = (
+            self.url
+            + "/api/v4/"
+            + self._format_with_url_encoding(path_as_format_string, args)
+        )
+        logging.debug(
+            "url = %s , method = %s , data = %s, json = %s",
+            url,
+            method,
+            json.dumps(dict_data, sort_keys=True),
+            json.dumps(json_data, sort_keys=True),
+        )
         headers = {
-            'PRIVATE-TOKEN': self.token,
-            'Authorization': 'Bearer ' + self.token,
+            "PRIVATE-TOKEN": self.token,
+            "Authorization": "Bearer " + self.token,
         }
         if dict_data:
-            response = self.session.request(method, url, headers=headers, data=dict_data, timeout=self.timeout)
+            response = self.session.request(
+                method, url, headers=headers, data=dict_data, timeout=self.timeout
+            )
         elif json_data:
-            response = self.session.request(method, url, headers=headers, json=json_data, timeout=self.timeout)
+            response = self.session.request(
+                method, url, headers=headers, json=json_data, timeout=self.timeout
+            )
         else:
-            response = self.session.request(method, url, headers=headers, timeout=self.timeout)
+            response = self.session.request(
+                method, url, headers=headers, timeout=self.timeout
+            )
         logging.debug("response code=%s" % response.status_code)
 
         if response.status_code == 204:
@@ -169,9 +215,17 @@ class GitLabCore:
                 raise NotFoundException("Resource path='%s' not found!" % url)
             else:
                 raise UnexpectedResponseException(
-                    "Request url='%s', method=%s, data='%s' failed - expected code(s) %s, got code %s & body: '%s'" %
-                    (url, method, dict_data, str(expected_codes), response.status_code, response.content),
-                    response.status_code)
+                    "Request url='%s', method=%s, data='%s' failed - expected code(s) %s, got code %s & body: '%s'"
+                    % (
+                        url,
+                        method,
+                        dict_data,
+                        str(expected_codes),
+                        response.status_code,
+                        response.content,
+                    ),
+                    response.status_code,
+                )
 
         logging.debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
         return response
@@ -190,7 +244,7 @@ class GitLabCore:
                 # URL-encode each arg in the tuple and return it as tuple too
                 url_encoded_args = ()
                 for arg in single_arg_or_args_tuple:
-                    url_encoded_args += (parse.quote_plus(str(arg)), )
+                    url_encoded_args += (parse.quote_plus(str(arg)),)
             else:
                 # URL-encode single arg
                 url_encoded_args = parse.quote_plus(single_arg_or_args_tuple)
@@ -218,7 +272,6 @@ class NotFoundException(Exception):
 
 
 class UnexpectedResponseException(Exception):
-
     def __init__(self, message, status_code):
         self.message = message
         self.status_code = status_code

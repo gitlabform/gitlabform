@@ -11,6 +11,17 @@ from gitlabform.gitlab.members import GitLabMembers
 from gitlabform.gitlab.users import GitLabUsers
 
 
-class GitLab(GitLabBranches, GitLabCommits, GitLabMergeRequests, GitLabProjects, GitLabRepositories, GitLabServices,
-             GitLabTags, GitLabGroups, GitLabPipelines, GitLabMembers, GitLabUsers):
+class GitLab(
+    GitLabBranches,
+    GitLabCommits,
+    GitLabMergeRequests,
+    GitLabProjects,
+    GitLabRepositories,
+    GitLabServices,
+    GitLabTags,
+    GitLabGroups,
+    GitLabPipelines,
+    GitLabMembers,
+    GitLabUsers,
+):
     pass

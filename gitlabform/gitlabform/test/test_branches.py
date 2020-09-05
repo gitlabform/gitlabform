@@ -1,11 +1,16 @@
 import pytest
 
 from gitlabform.gitlabform import GitLabForm
-from gitlabform.gitlabform.test import create_group, create_project_in_group, get_gitlab, create_readme_in_project, \
-    GROUP_NAME
+from gitlabform.gitlabform.test import (
+    create_group,
+    create_project_in_group,
+    get_gitlab,
+    create_readme_in_project,
+    GROUP_NAME,
+)
 
-PROJECT_NAME = 'branches_project'
-GROUP_AND_PROJECT_NAME = GROUP_NAME + '/' + PROJECT_NAME
+PROJECT_NAME = "branches_project"
+GROUP_AND_PROJECT_NAME = GROUP_NAME + "/" + PROJECT_NAME
 
 
 @pytest.fixture(scope="module")
@@ -16,12 +21,17 @@ def gitlab(request):
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
     create_readme_in_project(GROUP_AND_PROJECT_NAME)  # in master branch
 
-    branches = ['protect_branch_but_allow_all', 'protect_branch_and_disallow_all',
-                'protect_branch_and_allow_merges', 'protect_branch_and_allow_pushes',
-                'protect_branch_and_allow_merges_access_levels', 'protect_branch_and_allow_pushes_access_levels',
-                'protect_branch']
+    branches = [
+        "protect_branch_but_allow_all",
+        "protect_branch_and_disallow_all",
+        "protect_branch_and_allow_merges",
+        "protect_branch_and_allow_pushes",
+        "protect_branch_and_allow_merges_access_levels",
+        "protect_branch_and_allow_pushes_access_levels",
+        "protect_branch",
+    ]
     for branch in branches:
-        gl.create_branch(GROUP_AND_PROJECT_NAME, branch, 'master')
+        gl.create_branch(GROUP_AND_PROJECT_NAME, branch, "master")
 
     def fin():
         # delete all created branches
@@ -204,174 +214,244 @@ project_settings:
         unprotect_access_level: 40
 """
 
-class TestBranches:
 
+class TestBranches:
     def test__protect_branch_but_allow_all(self, gitlab):
-        gf = GitLabForm(config_string=protect_branch_but_allow_all,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=protect_branch_but_allow_all,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_but_allow_all')
-        assert branch['protected'] is True
-        assert branch['developers_can_push'] is True
-        assert branch['developers_can_merge'] is True
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_but_allow_all"
+        )
+        assert branch["protected"] is True
+        assert branch["developers_can_push"] is True
+        assert branch["developers_can_merge"] is True
 
     def test__protect_branch_and_disallow_all(self, gitlab):
-        gf = GitLabForm(config_string=protect_branch_and_disallow_all,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=protect_branch_and_disallow_all,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_disallow_all')
-        assert branch['protected'] is True
-        assert branch['developers_can_push'] is False
-        assert branch['developers_can_merge'] is False
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_disallow_all"
+        )
+        assert branch["protected"] is True
+        assert branch["developers_can_push"] is False
+        assert branch["developers_can_merge"] is False
 
     def test__mixed_config(self, gitlab):
-        gf = GitLabForm(config_string=mixed_config,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=mixed_config, project_or_group=GROUP_AND_PROJECT_NAME
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges')
-        assert branch['protected'] is True
-        assert branch['developers_can_push'] is False
-        assert branch['developers_can_merge'] is True
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_allow_merges"
+        )
+        assert branch["protected"] is True
+        assert branch["developers_can_push"] is False
+        assert branch["developers_can_merge"] is True
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes')
-        assert branch['protected'] is True
-        assert branch['developers_can_push'] is True
-        assert branch['developers_can_merge'] is False
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_allow_pushes"
+        )
+        assert branch["protected"] is True
+        assert branch["developers_can_push"] is True
+        assert branch["developers_can_merge"] is False
 
-        gf = GitLabForm(config_string=unprotect_branches,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=unprotect_branches, project_or_group=GROUP_AND_PROJECT_NAME
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges')
-        assert branch['protected'] is False
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_allow_merges"
+        )
+        assert branch["protected"] is False
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes')
-        assert branch['protected'] is False
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_allow_pushes"
+        )
+        assert branch["protected"] is False
 
     def test__mixed_config_with_new_api(self, gitlab):
-        gf = GitLabForm(config_string=mixed_config_with_access_levels,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=mixed_config_with_access_levels,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch_access_levels(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges_access_levels')
-        assert branch['push_access_levels'][0]['access_level'] is 0
-        assert branch['merge_access_levels'][0]['access_level'] is 30
-        assert branch['unprotect_access_levels'][0]['access_level'] is 40
+        branch = gitlab.get_branch_access_levels(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_allow_merges_access_levels"
+        )
+        assert branch["push_access_levels"][0]["access_level"] is 0
+        assert branch["merge_access_levels"][0]["access_level"] is 30
+        assert branch["unprotect_access_levels"][0]["access_level"] is 40
 
-        branch = gitlab.get_branch_access_levels(GROUP_AND_PROJECT_NAME, '*_allow_pushes_access_levels')
-        assert branch['push_access_levels'][0]['access_level'] is 30
-        assert branch['merge_access_levels'][0]['access_level'] is 30
-        assert branch['unprotect_access_levels'][0]['access_level'] is 40
+        branch = gitlab.get_branch_access_levels(
+            GROUP_AND_PROJECT_NAME, "*_allow_pushes_access_levels"
+        )
+        assert branch["push_access_levels"][0]["access_level"] is 30
+        assert branch["merge_access_levels"][0]["access_level"] is 30
+        assert branch["unprotect_access_levels"][0]["access_level"] is 40
 
-        gf = GitLabForm(config_string=mixed_config_with_access_levels_update,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=mixed_config_with_access_levels_update,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch_access_levels(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges_access_levels')
-        assert branch['push_access_levels'][0]['access_level'] is 0
-        assert branch['merge_access_levels'][0]['access_level'] is 40
-        assert branch['unprotect_access_levels'][0]['access_level'] is 40
+        branch = gitlab.get_branch_access_levels(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_allow_merges_access_levels"
+        )
+        assert branch["push_access_levels"][0]["access_level"] is 0
+        assert branch["merge_access_levels"][0]["access_level"] is 40
+        assert branch["unprotect_access_levels"][0]["access_level"] is 40
 
-        branch = gitlab.get_branch_access_levels(GROUP_AND_PROJECT_NAME, '*_allow_pushes_access_levels')
-        assert branch['push_access_levels'][0]['access_level'] is 40
-        assert branch['merge_access_levels'][0]['access_level'] is 40
-        assert branch['unprotect_access_levels'][0]['access_level'] is 40
+        branch = gitlab.get_branch_access_levels(
+            GROUP_AND_PROJECT_NAME, "*_allow_pushes_access_levels"
+        )
+        assert branch["push_access_levels"][0]["access_level"] is 40
+        assert branch["merge_access_levels"][0]["access_level"] is 40
+        assert branch["unprotect_access_levels"][0]["access_level"] is 40
 
-        gf = GitLabForm(config_string=mixed_config_with_access_levels_unprotect_branches,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=mixed_config_with_access_levels_unprotect_branches,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_merges_access_levels')
-        assert branch['protected'] is False
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_allow_merges_access_levels"
+        )
+        assert branch["protected"] is False
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch_and_allow_pushes_access_levels')
-        assert branch['protected'] is False
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_and_allow_pushes_access_levels"
+        )
+        assert branch["protected"] is False
 
-    def test_protect_branch_with_old_api_next_update_with_new_api_and_unprotect(self, gitlab):
-        gf = GitLabForm(config_string=config_protect_branch_with_old_api,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+    def test_protect_branch_with_old_api_next_update_with_new_api_and_unprotect(
+        self, gitlab
+    ):
+        gf = GitLabForm(
+            config_string=config_protect_branch_with_old_api,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['protected'] is True
-        assert branch['developers_can_push'] is True
-        assert branch['developers_can_merge'] is True
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, "protect_branch")
+        assert branch["protected"] is True
+        assert branch["developers_can_push"] is True
+        assert branch["developers_can_merge"] is True
 
-        gf = GitLabForm(config_string=config_protect_branch_with_new_api,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=config_protect_branch_with_new_api,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch_access_levels(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['push_access_levels'][0]['access_level'] is 0
-        assert branch['merge_access_levels'][0]['access_level'] is 40
-        assert branch['unprotect_access_levels'][0]['access_level'] is 40
+        branch = gitlab.get_branch_access_levels(
+            GROUP_AND_PROJECT_NAME, "protect_branch"
+        )
+        assert branch["push_access_levels"][0]["access_level"] is 0
+        assert branch["merge_access_levels"][0]["access_level"] is 40
+        assert branch["unprotect_access_levels"][0]["access_level"] is 40
 
-        gf = GitLabForm(config_string=config_protect_branch_unprotect,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=config_protect_branch_unprotect,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['protected'] is False
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, "protect_branch")
+        assert branch["protected"] is False
 
-    def test_protect_branch_with_new_api_next_update_with_old_api_and_unprotect(self, gitlab):
-        gf = GitLabForm(config_string=config_protect_branch_with_new_api,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+    def test_protect_branch_with_new_api_next_update_with_old_api_and_unprotect(
+        self, gitlab
+    ):
+        gf = GitLabForm(
+            config_string=config_protect_branch_with_new_api,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch_access_levels(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['push_access_levels'][0]['access_level'] is 0
-        assert branch['merge_access_levels'][0]['access_level'] is 40
-        assert branch['unprotect_access_levels'][0]['access_level'] is 40
+        branch = gitlab.get_branch_access_levels(
+            GROUP_AND_PROJECT_NAME, "protect_branch"
+        )
+        assert branch["push_access_levels"][0]["access_level"] is 0
+        assert branch["merge_access_levels"][0]["access_level"] is 40
+        assert branch["unprotect_access_levels"][0]["access_level"] is 40
 
-        gf = GitLabForm(config_string=config_protect_branch_with_old_api,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=config_protect_branch_with_old_api,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['protected'] is True
-        assert branch['developers_can_push'] is True
-        assert branch['developers_can_merge'] is True
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, "protect_branch")
+        assert branch["protected"] is True
+        assert branch["developers_can_push"] is True
+        assert branch["developers_can_merge"] is True
 
-        gf = GitLabForm(config_string=config_protect_branch_unprotect,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=config_protect_branch_unprotect,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['protected'] is False
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, "protect_branch")
+        assert branch["protected"] is False
 
-    def test_unprotect_when_the_rest_of_the_parameters_are_still_specified_old_api(self, gitlab):
-        gf = GitLabForm(config_string=config_protect_branch_with_old_api,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+    def test_unprotect_when_the_rest_of_the_parameters_are_still_specified_old_api(
+        self, gitlab
+    ):
+        gf = GitLabForm(
+            config_string=config_protect_branch_with_old_api,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['protected'] is True
-        assert branch['developers_can_push'] is True
-        assert branch['developers_can_merge'] is True
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, "protect_branch")
+        assert branch["protected"] is True
+        assert branch["developers_can_push"] is True
+        assert branch["developers_can_merge"] is True
 
-        gf = GitLabForm(config_string=config_unprotect_branch_with_old_api,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=config_unprotect_branch_with_old_api,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['protected'] is False
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, "protect_branch")
+        assert branch["protected"] is False
 
-    def test_unprotect_when_the_rest_of_the_parameters_are_still_specified_new_api(self, gitlab):
-        gf = GitLabForm(config_string=config_protect_branch_with_new_api,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+    def test_unprotect_when_the_rest_of_the_parameters_are_still_specified_new_api(
+        self, gitlab
+    ):
+        gf = GitLabForm(
+            config_string=config_protect_branch_with_new_api,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch_access_levels(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['push_access_levels'][0]['access_level'] is 0
-        assert branch['merge_access_levels'][0]['access_level'] is 40
-        assert branch['unprotect_access_levels'][0]['access_level'] is 40
+        branch = gitlab.get_branch_access_levels(
+            GROUP_AND_PROJECT_NAME, "protect_branch"
+        )
+        assert branch["push_access_levels"][0]["access_level"] is 0
+        assert branch["merge_access_levels"][0]["access_level"] is 40
+        assert branch["unprotect_access_levels"][0]["access_level"] is 40
 
-        gf = GitLabForm(config_string=config_unprotect_branch_with_new_api,
-                        project_or_group=GROUP_AND_PROJECT_NAME)
+        gf = GitLabForm(
+            config_string=config_unprotect_branch_with_new_api,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
         gf.main()
 
-        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, 'protect_branch')
-        assert branch['protected'] is False
+        branch = gitlab.get_branch(GROUP_AND_PROJECT_NAME, "protect_branch")
+        assert branch["protected"] is False

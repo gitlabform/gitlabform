@@ -32,11 +32,17 @@ def if_in_config_and_not_skipped(method):
 
         wrapped_method_name = method.__name__
         # for method name like "process_hooks" this returns "hooks"
-        config_section_name = '_'.join(wrapped_method_name.split('_')[1:])
+        config_section_name = "_".join(wrapped_method_name.split("_")[1:])
 
         if config_section_name in configuration:
-            if 'skip' in configuration[config_section_name] and configuration[config_section_name]['skip']:
-                logging.info("Skipping %s - explicitly configured to do so." % config_section_name)
+            if (
+                "skip" in configuration[config_section_name]
+                and configuration[config_section_name]["skip"]
+            ):
+                logging.info(
+                    "Skipping %s - explicitly configured to do so."
+                    % config_section_name
+                )
             else:
                 logging.info("Setting %s" % config_section_name)
                 return method(self, project_and_group, configuration)
@@ -57,8 +63,9 @@ class SafeDict(dict):
 
     Code based on https://stackoverflow.com/a/44859638/2693875
     """
+
     def get(self, path, default=None):
-        keys = path.split('|')
+        keys = path.split("|")
         val = None
 
         for key in keys:
@@ -80,6 +87,7 @@ def configuration_to_safe_dict(method):
     """
     This wrapper function calls the method with the configuration converted from a regular dict into a SafeDict
     """
+
     @wraps(method)
     def method_wrapper(self, project_and_group, configuration):
 
@@ -89,7 +97,6 @@ def configuration_to_safe_dict(method):
 
 
 class GitLabFormCore(object):
-
     def __init__(self, project_or_group=None, config_string=None):
 
         if project_or_group and config_string:
@@ -103,8 +110,16 @@ class GitLabFormCore(object):
             self.set_log_level(tests=True)
             self.skip_version_check = True
         else:
-            self.project_or_group, self.config, self.verbose, self.debug, self.strict, self.start_from, self.noop, \
-                self.skip_version_check = self.parse_args()
+            (
+                self.project_or_group,
+                self.config,
+                self.verbose,
+                self.debug,
+                self.strict,
+                self.start_from,
+                self.noop,
+                self.skip_version_check,
+            ) = self.parse_args()
             self.set_log_level()
             print(self.get_version(self.skip_version_check))
 
@@ -114,41 +129,80 @@ class GitLabFormCore(object):
 
         parser = argparse.ArgumentParser(
             description='Specialized "configuration as a code" tool for GitLab projects, groups and more'
-                        ' using hierarchical configuration written in YAML',
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+            " using hierarchical configuration written in YAML",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         )
 
-        parser.add_argument('project_or_group',
-                            help='Project name in "group/project" format'
-                                 'OR a single group name '
-                                 'OR "ALL_DEFINED" to run for all groups and projects defined the config'
-                                 'OR "ALL" to run for all projects that you have access to')
+        parser.add_argument(
+            "project_or_group",
+            help='Project name in "group/project" format'
+            "OR a single group name "
+            'OR "ALL_DEFINED" to run for all groups and projects defined the config'
+            'OR "ALL" to run for all projects that you have access to',
+        )
 
-        parser.add_argument('-c', '--config', default='config.yml', help='Config file path and filename')
+        parser.add_argument(
+            "-c", "--config", default="config.yml", help="Config file path and filename"
+        )
 
         group_ex = parser.add_mutually_exclusive_group()
 
-        group_ex.add_argument('-v', '--verbose', action="store_true", help='Verbose mode')
+        group_ex.add_argument(
+            "-v", "--verbose", action="store_true", help="Verbose mode"
+        )
 
-        group_ex.add_argument('-d', '--debug', action="store_true", help='Debug mode (most verbose)')
+        group_ex.add_argument(
+            "-d", "--debug", action="store_true", help="Debug mode (most verbose)"
+        )
 
-        parser.add_argument('--strict', '-s', action="store_true", help='Stop on missing branches and tags')
+        parser.add_argument(
+            "--strict",
+            "-s",
+            action="store_true",
+            help="Stop on missing branches and tags",
+        )
 
-        parser.add_argument('--start-from', dest='start_from', default=1, type=int,
-                            help='Start processing projects from the given one '
-                                 '(as numbered by "[x/y] Processing: group/project" messages)')
+        parser.add_argument(
+            "--start-from",
+            dest="start_from",
+            default=1,
+            type=int,
+            help="Start processing projects from the given one "
+            '(as numbered by "[x/y] Processing: group/project" messages)',
+        )
 
-        parser.add_argument('-n', '--noop', dest='noop', action="store_true", help='Run in no-op (dry run) mode')
+        parser.add_argument(
+            "-n",
+            "--noop",
+            dest="noop",
+            action="store_true",
+            help="Run in no-op (dry run) mode",
+        )
 
-        parser.add_argument('-V', '--version', action='version', version=self.get_version(False))
+        parser.add_argument(
+            "-V", "--version", action="version", version=self.get_version(False)
+        )
 
-        parser.add_argument('-k', '--skip-version-check', dest='skip_version_check', action="store_true",
-                            help="Skips checking if the latest version is used")
+        parser.add_argument(
+            "-k",
+            "--skip-version-check",
+            dest="skip_version_check",
+            action="store_true",
+            help="Skips checking if the latest version is used",
+        )
 
         args = parser.parse_args()
 
-        return args.project_or_group, args.config, args.verbose, args.debug, args.strict, args.start_from, args.noop, \
-            args.skip_version_check
+        return (
+            args.project_or_group,
+            args.config,
+            args.verbose,
+            args.debug,
+            args.strict,
+            args.start_from,
+            args.noop,
+            args.skip_version_check,
+        )
 
     def set_log_level(self, tests=False):
 
@@ -169,22 +223,22 @@ class GitLabFormCore(object):
             logging.getLogger().removeHandler(handler)
 
     def get_version(self, skip_version_check):
-        local_version = pkg_resources.get_distribution('gitlabform').version
-        version = f'GitLabForm version: {local_version}'
+        local_version = pkg_resources.get_distribution("gitlabform").version
+        version = f"GitLabForm version: {local_version}"
 
         if not skip_version_check:
-            latest_version = luddite.get_version_pypi('gitlabform')
+            latest_version = luddite.get_version_pypi("gitlabform")
             if local_version == latest_version:
-                version += ' (the latest)'
+                version += " (the latest)"
             else:
-                version += f' (the latest is {latest_version} - please update!)'
+                version += f" (the latest is {latest_version} - please update!)"
 
         return version
 
     def initialize_configuration_and_gitlab(self):
 
         try:
-            if hasattr(self, 'config_string'):
+            if hasattr(self, "config_string"):
                 gl = GitLab(config_string=self.config_string)
                 c = Configuration(config_string=self.config_string)
             else:
@@ -192,7 +246,7 @@ class GitLabFormCore(object):
                 c = Configuration(self.config.strip())
             return gl, c
         except ConfigFileNotFoundException as e:
-            logging.fatal('Aborting - config file not found at: %s', e)
+            logging.fatal("Aborting - config file not found at: %s", e)
             sys.exit(1)
         except TestRequestFailedException as e:
             logging.fatal("Aborting - GitLab test request failed, details: '%s'", e)
@@ -209,16 +263,16 @@ class GitLabFormCore(object):
 
         if self.project_or_group == "ALL":
             # all projects from all groups we have access to
-            logging.warning('>>> Processing ALL groups and and projects')
+            logging.warning(">>> Processing ALL groups and and projects")
             groups = self.gl.get_groups()
         elif self.project_or_group == "ALL_DEFINED":
-            logging.warning('>>> Processing ALL groups and projects defined in config')
+            logging.warning(">>> Processing ALL groups and projects defined in config")
             # all groups from config
             groups = self.c.get_groups()
             # and all projects from config
             projects_and_groups = set(self.c.get_projects())
         else:
-            if '/' in self.project_or_group:
+            if "/" in self.project_or_group:
                 try:
                     self.gl._get_group_id(self.project_or_group)
                     # it's a subgroup
@@ -233,7 +287,9 @@ class GitLabFormCore(object):
         # skip groups before getting projects from gitlab to save time
         if groups:
             if self.c.get_skip_groups():
-                effective_groups = [x for x in groups if x not in self.c.get_skip_groups()]
+                effective_groups = [
+                    x for x in groups if x not in self.c.get_skip_groups()
+                ]
             else:
                 effective_groups = groups
         else:
@@ -248,12 +304,16 @@ class GitLabFormCore(object):
 
         # skip projects after getting projects from gitlab
         if self.c.get_skip_projects():
-            effective_projects_and_groups = [x for x in projects_and_groups if x not in self.c.get_skip_projects()]
+            effective_projects_and_groups = [
+                x for x in projects_and_groups if x not in self.c.get_skip_projects()
+            ]
         else:
             effective_projects_and_groups = projects_and_groups
 
-        logging.warning('*** # of groups to process: %s', str(len(groups)))
-        logging.warning('*** # of projects to process: %s', str(len(effective_projects_and_groups)))
+        logging.warning("*** # of groups to process: %s", str(len(groups)))
+        logging.warning(
+            "*** # of projects to process: %s", str(len(effective_projects_and_groups))
+        )
 
         return effective_projects_and_groups, effective_groups
 
@@ -267,11 +327,13 @@ class GitLabFormCore(object):
 
             configuration = self.c.get_effective_config_for_group(group)
 
-            logging.warning('> (%s/%s) Processing: %s', g, len(groups), group)
+            logging.warning("> (%s/%s) Processing: %s", g, len(groups), group)
 
             if self.noop:
-                logging.warning('Not actually processing because running in noop mode.')
-                logging.debug('Configuration that would be applied: %s' % str(configuration))
+                logging.warning("Not actually processing because running in noop mode.")
+                logging.debug(
+                    "Configuration that would be applied: %s" % str(configuration)
+                )
                 continue
 
             try:
@@ -284,7 +346,7 @@ class GitLabFormCore(object):
                 logging.error("+++ Error while processing '%s'", group)
                 traceback.print_exc()
 
-            logging.debug('< (%s/%s) FINISHED Processing: %s', g, len(groups), group)
+            logging.debug("< (%s/%s) FINISHED Processing: %s", g, len(groups), group)
 
         p = 0
 
@@ -293,16 +355,28 @@ class GitLabFormCore(object):
             p += 1
 
             if p < self.start_from:
-                logging.warning('$$$ [%s/%s] Skipping: %s...', p, len(projects_and_groups), project_and_group)
+                logging.warning(
+                    "$$$ [%s/%s] Skipping: %s...",
+                    p,
+                    len(projects_and_groups),
+                    project_and_group,
+                )
                 continue
 
-            logging.warning('* [%s/%s] Processing: %s', p, len(projects_and_groups), project_and_group)
+            logging.warning(
+                "* [%s/%s] Processing: %s",
+                p,
+                len(projects_and_groups),
+                project_and_group,
+            )
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
             if self.noop:
-                logging.warning('Not actually processing because running in noop mode.')
-                logging.debug('Configuration that would be applied: %s' % str(configuration))
+                logging.warning("Not actually processing because running in noop mode.")
+                logging.debug(
+                    "Configuration that would be applied: %s" % str(configuration)
+                )
                 continue
 
             try:
@@ -324,19 +398,30 @@ class GitLabFormCore(object):
                 logging.error("+++ Error while processing '%s'", project_and_group)
                 traceback.print_exc()
 
-            logging.debug('@ [%s/%s] FINISHED Processing: %s', p, len(projects_and_groups), project_and_group)
+            logging.debug(
+                "@ [%s/%s] FINISHED Processing: %s",
+                p,
+                len(projects_and_groups),
+                project_and_group,
+            )
 
     @if_in_config_and_not_skipped
     def process_project_settings(self, project_and_group, configuration):
-        project_settings = configuration['project_settings']
-        logging.debug("Project settings BEFORE: %s", self.gl.get_project_settings(project_and_group))
+        project_settings = configuration["project_settings"]
+        logging.debug(
+            "Project settings BEFORE: %s",
+            self.gl.get_project_settings(project_and_group),
+        )
         logging.info("Setting project settings: %s", project_settings)
         self.gl.put_project_settings(project_and_group, project_settings)
-        logging.debug("Project settings AFTER: %s", self.gl.get_project_settings(project_and_group))
+        logging.debug(
+            "Project settings AFTER: %s",
+            self.gl.get_project_settings(project_and_group),
+        )
 
     @if_in_config_and_not_skipped
     def process_project_push_rules(self, project_and_group: str, configuration):
-        push_rules = configuration['project_push_rules']
+        push_rules = configuration["project_push_rules"]
         old_project_push_rules = self.gl.get_project_push_rules(project_and_group)
         logging.debug("Project push rules settings BEFORE: %s", old_project_push_rules)
         if old_project_push_rules:
@@ -345,36 +430,46 @@ class GitLabFormCore(object):
         else:
             logging.info("Creating project push rules: %s", push_rules)
             self.gl.post_project_push_rules(project_and_group, push_rules)
-        logging.debug("Project push rules AFTER: %s", self.gl.get_project_push_rules(project_and_group))
+        logging.debug(
+            "Project push rules AFTER: %s",
+            self.gl.get_project_push_rules(project_and_group),
+        )
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
     def process_merge_requests(self, project_and_group, configuration):
-        approvals = configuration.get('merge_requests|approvals')
+        approvals = configuration.get("merge_requests|approvals")
         if approvals:
             logging.info("Setting approvals settings: %s", approvals)
             self.gl.post_approvals_settings(project_and_group, approvals)
 
-        approvers = configuration.get('merge_requests|approvers')
-        approver_groups = configuration.get('merge_requests|approver_groups')
+        approvers = configuration.get("merge_requests|approvers")
+        approver_groups = configuration.get("merge_requests|approver_groups")
         # checking if "is not None" allows configs with empty array to work
-        if approvers is not None or approver_groups is not None \
-                and approvals and 'approvals_before_merge' in approvals:
+        if (
+            approvers is not None
+            or approver_groups is not None
+            and approvals
+            and "approvals_before_merge" in approvals
+        ):
 
             # in pre-12.3 API approvers (users and groups) were configured under the same endpoint as approvals settings
             approvals_settings = self.gl.get_approvals_settings(project_and_group)
-            if 'approvers' in approvals_settings or 'approver_groups' in approvals_settings:
+            if (
+                "approvers" in approvals_settings
+                or "approver_groups" in approvals_settings
+            ):
                 logging.debug("Deleting legacy approvers setup")
                 self.gl.delete_legacy_approvers(project_and_group)
 
-            approval_rule_name = 'Approvers (configured using GitLabForm)'
+            approval_rule_name = "Approvers (configured using GitLabForm)"
 
             # is a rule already configured and just needs updating?
             approval_rule_id = None
             rules = self.gl.get_approvals_rules(project_and_group)
             for rule in rules:
-                if rule['name'] == approval_rule_name:
-                    approval_rule_id = rule['id']
+                if rule["name"] == approval_rule_name:
+                    approval_rule_id = rule["id"]
                     break
 
             if not approvers:
@@ -384,106 +479,170 @@ class GitLabFormCore(object):
 
             if approval_rule_id:
                 # the rule exists, needs an update
-                logging.info("Updating approvers rule to users %s and groups %s" % (approvers, approver_groups))
-                self.gl.update_approval_rule(project_and_group, approval_rule_id, approval_rule_name,
-                                             approvals['approvals_before_merge'], approvers, approver_groups)
+                logging.info(
+                    "Updating approvers rule to users %s and groups %s"
+                    % (approvers, approver_groups)
+                )
+                self.gl.update_approval_rule(
+                    project_and_group,
+                    approval_rule_id,
+                    approval_rule_name,
+                    approvals["approvals_before_merge"],
+                    approvers,
+                    approver_groups,
+                )
             else:
                 # the rule does not exist yet, let's create it
-                logging.info("Creating approvers rule to users %s and groups %s" % (approvers, approver_groups))
-                self.gl.create_approval_rule(project_and_group, approval_rule_name,
-                                             approvals['approvals_before_merge'], approvers, approver_groups)
+                logging.info(
+                    "Creating approvers rule to users %s and groups %s"
+                    % (approvers, approver_groups)
+                )
+                self.gl.create_approval_rule(
+                    project_and_group,
+                    approval_rule_name,
+                    approvals["approvals_before_merge"],
+                    approvers,
+                    approver_groups,
+                )
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
     def process_members(self, project_and_group, configuration):
-        groups = configuration.get('members|groups')
+        groups = configuration.get("members|groups")
         if groups:
             for group in groups:
                 logging.debug("Setting group '%s' as a member", group)
-                access = groups[group]['group_access'] if \
-                        'group_access' in groups[group] else None
-                expiry = groups[group]['expires_at'] if \
-                        'expires_at' in groups[group] else ""
+                access = (
+                    groups[group]["group_access"]
+                    if "group_access" in groups[group]
+                    else None
+                )
+                expiry = (
+                    groups[group]["expires_at"] if "expires_at" in groups[group] else ""
+                )
 
                 # we will remove group access first and then re-add them,
                 # to ensure that the groups have the expected access level
                 self.gl.unshare_with_group(project_and_group, group)
                 self.gl.share_with_group(project_and_group, group, access, expiry)
 
-        users = configuration.get('members|users')
+        users = configuration.get("members|users")
         if users:
             for user in users:
                 logging.debug("Setting user '%s' as a member", user)
-                access = users[user]['access_level'] if \
-                        'access_level' in users[user] else None
-                expiry = users[user]['expires_at'] if \
-                        'expires_at' in users[user] else ""
+                access = (
+                    users[user]["access_level"]
+                    if "access_level" in users[user]
+                    else None
+                )
+                expiry = (
+                    users[user]["expires_at"] if "expires_at" in users[user] else ""
+                )
                 self.gl.remove_member_from_project(project_and_group, user)
                 self.gl.add_member_to_project(project_and_group, user, access, expiry)
 
     @if_in_config_and_not_skipped
     def process_deploy_keys(self, project_and_group, configuration):
-        logging.debug("Deploy keys BEFORE: %s", self.gl.get_deploy_keys(project_and_group))
-        for deploy_key in sorted(configuration['deploy_keys']):
+        logging.debug(
+            "Deploy keys BEFORE: %s", self.gl.get_deploy_keys(project_and_group)
+        )
+        for deploy_key in sorted(configuration["deploy_keys"]):
             logging.info("Setting deploy key: %s", deploy_key)
-            self.gl.post_deploy_key(project_and_group, configuration['deploy_keys'][deploy_key])
-        logging.debug("Deploy keys AFTER: %s", self.gl.get_deploy_keys(project_and_group))
+            self.gl.post_deploy_key(
+                project_and_group, configuration["deploy_keys"][deploy_key]
+            )
+        logging.debug(
+            "Deploy keys AFTER: %s", self.gl.get_deploy_keys(project_and_group)
+        )
 
     @if_in_config_and_not_skipped
     def process_secret_variables(self, project_and_group, configuration):
-        if self.gl.get_project_settings(project_and_group)['builds_access_level'] == 'disabled':
-            logging.warning("Builds disabled in this project so I can't set secret variables here.")
+        if (
+            self.gl.get_project_settings(project_and_group)["builds_access_level"]
+            == "disabled"
+        ):
+            logging.warning(
+                "Builds disabled in this project so I can't set secret variables here."
+            )
             return
 
-        logging.debug("Secret variables BEFORE: %s", self.gl.get_secret_variables(project_and_group))
+        logging.debug(
+            "Secret variables BEFORE: %s",
+            self.gl.get_secret_variables(project_and_group),
+        )
 
-        for secret_variable in sorted(configuration['secret_variables']):
+        for secret_variable in sorted(configuration["secret_variables"]):
 
-            if "delete" in configuration['secret_variables'][secret_variable]:
-                key = configuration['secret_variables'][secret_variable]["key"]
-                if configuration['secret_variables'][secret_variable]["delete"]:
-                    logging.info(f"Deleting {secret_variable}: {key} in project {project_and_group}")
+            if "delete" in configuration["secret_variables"][secret_variable]:
+                key = configuration["secret_variables"][secret_variable]["key"]
+                if configuration["secret_variables"][secret_variable]["delete"]:
+                    logging.info(
+                        f"Deleting {secret_variable}: {key} in project {project_and_group}"
+                    )
                     try:
                         self.gl.delete_secret_variable(project_and_group, key)
                     except:
-                        logging.warn(f"Could not delete variable {key} in group {project_and_group}")
+                        logging.warn(
+                            f"Could not delete variable {key} in group {project_and_group}"
+                        )
                     continue
 
             logging.info("Setting secret variable: %s", secret_variable)
             try:
-                self.gl.put_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
+                self.gl.put_secret_variable(
+                    project_and_group,
+                    configuration["secret_variables"][secret_variable],
+                )
             except NotFoundException:
-                self.gl.post_secret_variable(project_and_group, configuration['secret_variables'][secret_variable])
+                self.gl.post_secret_variable(
+                    project_and_group,
+                    configuration["secret_variables"][secret_variable],
+                )
 
-        logging.debug("Secret variables AFTER: %s", self.gl.get_secret_variables(project_and_group))
+        logging.debug(
+            "Secret variables AFTER: %s",
+            self.gl.get_secret_variables(project_and_group),
+        )
 
     @if_in_config_and_not_skipped
     def process_group_secret_variables(self, group, configuration):
-        logging.debug("Group secret variables BEFORE: %s", self.gl.get_group_secret_variables(group))
+        logging.debug(
+            "Group secret variables BEFORE: %s",
+            self.gl.get_group_secret_variables(group),
+        )
 
-        for secret_variable in sorted(configuration['group_secret_variables']):
+        for secret_variable in sorted(configuration["group_secret_variables"]):
 
-            if "delete" in configuration['group_secret_variables'][secret_variable]:
-                key = configuration['group_secret_variables'][secret_variable]["key"]
-                if configuration['group_secret_variables'][secret_variable]["delete"]:
+            if "delete" in configuration["group_secret_variables"][secret_variable]:
+                key = configuration["group_secret_variables"][secret_variable]["key"]
+                if configuration["group_secret_variables"][secret_variable]["delete"]:
                     logging.info(f"Deleting {secret_variable}: {key} in group {group}")
                     try:
                         self.gl.delete_group_secret_variable(group, key)
                     except:
-                        logging.warn(f"Could not delete variable {key} in group {group}")
+                        logging.warn(
+                            f"Could not delete variable {key} in group {group}"
+                        )
                     continue
 
             logging.info("Setting group secret variable: %s", secret_variable)
             try:
-                self.gl.put_group_secret_variable(group, configuration['group_secret_variables'][secret_variable])
+                self.gl.put_group_secret_variable(
+                    group, configuration["group_secret_variables"][secret_variable]
+                )
             except NotFoundException:
-                self.gl.post_group_secret_variable(group, configuration['group_secret_variables'][secret_variable])
+                self.gl.post_group_secret_variable(
+                    group, configuration["group_secret_variables"][secret_variable]
+                )
 
-        logging.debug("Groups secret variables AFTER: %s", self.gl.get_group_secret_variables(group))
+        logging.debug(
+            "Groups secret variables AFTER: %s",
+            self.gl.get_group_secret_variables(group),
+        )
 
     @if_in_config_and_not_skipped
     def process_group_settings(self, group, configuration):
-        group_settings = configuration['group_settings']
+        group_settings = configuration["group_settings"]
         logging.debug("Group settings BEFORE: %s", self.gl.get_group_settings(group))
         logging.info("Setting group settings: %s", group_settings)
         self.gl.put_group_settings(group, group_settings)
@@ -492,7 +651,7 @@ class GitLabFormCore(object):
     @if_in_config_and_not_skipped
     def process_group_members(self, group, configuration):
 
-        users_to_set_by_username = configuration.get('group_members')
+        users_to_set_by_username = configuration.get("group_members")
         if users_to_set_by_username:
 
             # group users before by username
@@ -500,57 +659,88 @@ class GitLabFormCore(object):
             logging.debug("Group members BEFORE: %s", users_before)
             users_before_by_username = dict()
             for user in users_before:
-                users_before_by_username[user['username']] = user
+                users_before_by_username[user["username"]] = user
 
             # group users to set by access level
             users_to_set_by_access_level = dict()
             for user in users_to_set_by_username:
-                access_level = users_to_set_by_username[user]['access_level']
+                access_level = users_to_set_by_username[user]["access_level"]
                 users_to_set_by_access_level.setdefault(access_level, []).append(user)
 
             # check if the configured users contain at least one Owner
-            if 50 not in users_to_set_by_access_level.keys() and configuration.get('enforce_group_members'):
-                logging.fatal("With 'enforce_group_members' flag you cannot have no Owners (access_level = 50) in your "
-                              " group members config. GitLab requires at least 1 Owner per group.")
+            if 50 not in users_to_set_by_access_level.keys() and configuration.get(
+                "enforce_group_members"
+            ):
+                logging.fatal(
+                    "With 'enforce_group_members' flag you cannot have no Owners (access_level = 50) in your "
+                    " group members config. GitLab requires at least 1 Owner per group."
+                )
                 sys.exit(4)
 
             # we HAVE TO start configuring access from Owners to prevent case when there is no Owner
             # in a group
             for level in [50, 40, 30, 20, 10]:
 
-                users_to_set_with_this_level = users_to_set_by_access_level[level] \
-                    if level in users_to_set_by_access_level else []
+                users_to_set_with_this_level = (
+                    users_to_set_by_access_level[level]
+                    if level in users_to_set_by_access_level
+                    else []
+                )
 
                 for user in users_to_set_with_this_level:
 
-                    access_level_to_set = users_to_set_by_username[user]['access_level']
-                    expires_at_to_set = users_to_set_by_username[user]['expires_at'] \
-                        if 'expires_at' in users_to_set_by_username[user] else None
+                    access_level_to_set = users_to_set_by_username[user]["access_level"]
+                    expires_at_to_set = (
+                        users_to_set_by_username[user]["expires_at"]
+                        if "expires_at" in users_to_set_by_username[user]
+                        else None
+                    )
 
                     if user in users_before_by_username:
 
-                        access_level_before = users_before_by_username[user]['access_level']
-                        expires_at_before = users_before_by_username[user]['expires_at']
+                        access_level_before = users_before_by_username[user][
+                            "access_level"
+                        ]
+                        expires_at_before = users_before_by_username[user]["expires_at"]
 
-                        if access_level_before == access_level_to_set and expires_at_before == expires_at_to_set:
-                            logging.debug("Nothing to change for user '%s' - same config now as to set.", user)
+                        if (
+                            access_level_before == access_level_to_set
+                            and expires_at_before == expires_at_to_set
+                        ):
+                            logging.debug(
+                                "Nothing to change for user '%s' - same config now as to set.",
+                                user,
+                            )
                         else:
-                            logging.debug("Re-adding user '%s' to change their access level or expires at.", user)
+                            logging.debug(
+                                "Re-adding user '%s' to change their access level or expires at.",
+                                user,
+                            )
                             # we will remove the user first and then re-add they,
                             # to ensure that the user has the expected access level
                             self.gl.remove_member_from_group(group, user)
-                            self.gl.add_member_to_group(group, user, access_level_to_set, expires_at_to_set)
+                            self.gl.add_member_to_group(
+                                group, user, access_level_to_set, expires_at_to_set
+                            )
 
                     else:
-                        logging.debug("Adding user '%s' who previously was not a member.", user)
-                        self.gl.add_member_to_group(group, user, access_level_to_set, expires_at_to_set)
+                        logging.debug(
+                            "Adding user '%s' who previously was not a member.", user
+                        )
+                        self.gl.add_member_to_group(
+                            group, user, access_level_to_set, expires_at_to_set
+                        )
 
-            if configuration.get('enforce_group_members'):
+            if configuration.get("enforce_group_members"):
                 # remove users not configured explicitly
                 # note: only direct members are removed - inherited are left
-                users_not_configured = set([user['username'] for user in users_before]) - set(users_to_set_by_username.keys())
+                users_not_configured = set(
+                    [user["username"] for user in users_before]
+                ) - set(users_to_set_by_username.keys())
                 for user in users_not_configured:
-                    logging.debug("Removing user '%s' who is not configured to be a member.", user)
+                    logging.debug(
+                        "Removing user '%s' who is not configured to be a member.", user
+                    )
                     self.gl.remove_member_from_group(group, user)
             else:
                 logging.debug("Not enforcing group members.")
@@ -559,50 +749,71 @@ class GitLabFormCore(object):
 
         else:
 
-            logging.fatal("You cannot configure a group to have no members. GitLab requires a group "
-                          " to contain at least 1 member who is an Owner (access_level = 50).")
+            logging.fatal(
+                "You cannot configure a group to have no members. GitLab requires a group "
+                " to contain at least 1 member who is an Owner (access_level = 50)."
+            )
             sys.exit(4)
 
     @if_in_config_and_not_skipped
     def process_branches(self, project_and_group, configuration):
-        for branch in sorted(configuration['branches']):
+        for branch in sorted(configuration["branches"]):
             self._protect_branch(project_and_group, configuration, branch)
 
     def _protect_branch(self, project_and_group, configuration, branch):
         try:
-            if 'protected' in configuration['branches'][branch] and configuration['branches'][branch]['protected']:
-                if ('developers_can_push' and 'developers_can_merge') in configuration['branches'][branch]:
+            if (
+                "protected" in configuration["branches"][branch]
+                and configuration["branches"][branch]["protected"]
+            ):
+                if ("developers_can_push" and "developers_can_merge") in configuration[
+                    "branches"
+                ][branch]:
                     logging.debug("Setting branch '%s' as *protected*", branch)
                     # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
                     self.gl.unprotect_branch_new_api(project_and_group, branch)
-                    self.gl.protect_branch(project_and_group, branch,
-                                           configuration['branches'][branch]['developers_can_push'],
-                                           configuration['branches'][branch]['developers_can_merge'])
-                elif ('push_access_level' and 'merge_access_level' and 'unprotect_access_level') in \
-                        configuration['branches'][branch]:
+                    self.gl.protect_branch(
+                        project_and_group,
+                        branch,
+                        configuration["branches"][branch]["developers_can_push"],
+                        configuration["branches"][branch]["developers_can_merge"],
+                    )
+                elif (
+                    "push_access_level"
+                    and "merge_access_level"
+                    and "unprotect_access_level"
+                ) in configuration["branches"][branch]:
                     logging.debug("Setting branch '%s' access level", branch)
                     # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
                     self.gl.unprotect_branch_new_api(project_and_group, branch)
-                    self.gl.branch_access_level(project_and_group, branch,
-                                                configuration['branches'][branch]['push_access_level'],
-                                                configuration['branches'][branch]['merge_access_level'],
-                                                configuration['branches'][branch]['unprotect_access_level'])
+                    self.gl.branch_access_level(
+                        project_and_group,
+                        branch,
+                        configuration["branches"][branch]["push_access_level"],
+                        configuration["branches"][branch]["merge_access_level"],
+                        configuration["branches"][branch]["unprotect_access_level"],
+                    )
             else:
                 logging.debug("Setting branch '%s' as unprotected", branch)
                 self.gl.unprotect_branch_new_api(project_and_group, branch)
         except NotFoundException:
-            logging.warning("! Branch '%s' not found when trying to set it as protected/unprotected",
-                            branch)
+            logging.warning(
+                "! Branch '%s' not found when trying to set it as protected/unprotected",
+                branch,
+            )
             if self.strict:
                 exit(3)
 
     @if_in_config_and_not_skipped
     def process_tags(self, project_and_group, configuration):
-        for tag in sorted(configuration['tags']):
+        for tag in sorted(configuration["tags"]):
             try:
-                if configuration['tags'][tag]['protected']:
-                    create_access_level = configuration['tags'][tag]['create_access_level'] if \
-                        'create_access_level' in configuration['tags'][tag] else None
+                if configuration["tags"][tag]["protected"]:
+                    create_access_level = (
+                        configuration["tags"][tag]["create_access_level"]
+                        if "create_access_level" in configuration["tags"][tag]
+                        else None
+                    )
                     logging.debug("Setting tag '%s' as *protected*", tag)
                     try:
                         # try to unprotect first
@@ -614,53 +825,67 @@ class GitLabFormCore(object):
                     logging.debug("Setting tag '%s' as *unprotected*", tag)
                     self.gl.unprotect_tag(project_and_group, tag)
             except NotFoundException:
-                logging.warning("! Tag '%s' not found when trying to set it as protected/unprotected", tag)
+                logging.warning(
+                    "! Tag '%s' not found when trying to set it as protected/unprotected",
+                    tag,
+                )
                 if self.strict:
                     exit(3)
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
     def process_services(self, project_and_group, configuration):
-        for service in sorted(configuration['services']):
-            if configuration.get('services|' + service + '|delete'):
+        for service in sorted(configuration["services"]):
+            if configuration.get("services|" + service + "|delete"):
                 logging.debug("Deleting service '%s'", service)
                 self.gl.delete_service(project_and_group, service)
             else:
-                if 'recreate' in configuration['services'][service] and configuration['services'][service]['recreate']:
+                if (
+                    "recreate" in configuration["services"][service]
+                    and configuration["services"][service]["recreate"]
+                ):
                     # support from this configuration key has been added in v1.13.4
                     # we will remove it here to avoid passing it to the GitLab API
-                    logging.warning("Ignoring deprecated 'recreate' field in the '%s' service config. "
-                                    "Please remove it from the config file permanently as this workaround is not "
-                                    "needed anymore.", service)
-                    del configuration['services'][service]['recreate']
+                    logging.warning(
+                        "Ignoring deprecated 'recreate' field in the '%s' service config. "
+                        "Please remove it from the config file permanently as this workaround is not "
+                        "needed anymore.",
+                        service,
+                    )
+                    del configuration["services"][service]["recreate"]
 
                 logging.debug("Setting service '%s'", service)
-                self.gl.set_service(project_and_group, service, configuration['services'][service])
+                self.gl.set_service(
+                    project_and_group, service, configuration["services"][service]
+                )
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
     def process_files(self, project_and_group, configuration):
-        for file in sorted(configuration['files']):
+        for file in sorted(configuration["files"]):
             logging.debug("Processing file '%s'...", file)
 
-            if configuration.get('files|' + file + '|skip'):
+            if configuration.get("files|" + file + "|skip"):
                 logging.debug("Skipping file '%s'", file)
                 continue
 
             all_branches = self.gl.get_branches(project_and_group)
-            if configuration['files'][file]['branches'] == 'all':
+            if configuration["files"][file]["branches"] == "all":
                 branches = sorted(all_branches)
-            elif configuration['files'][file]['branches'] == 'protected':
+            elif configuration["files"][file]["branches"] == "protected":
                 protected_branches = self.gl.get_protected_branches(project_and_group)
                 branches = sorted(protected_branches)
             else:
                 branches = []
-                for branch in configuration['files'][file]['branches']:
+                for branch in configuration["files"][file]["branches"]:
                     if branch in all_branches:
                         branches.append(branch)
                     else:
-                        logging.warning("! Branch '%s' not found, not processing file '%s' in it", branch,
-                                        file)
+                        logging.warning(
+                            "! Branch '%s' not found, not processing file '%s' in it",
+                            branch,
+                            file,
+                        )
                         if self.strict:
                             exit(3)
 
@@ -668,128 +893,179 @@ class GitLabFormCore(object):
                 logging.info("Processing file '%s' in branch '%s'", file, branch)
 
                 # unprotect protected branch temporarily for operations below
-                if configuration.get('branches|' + branch + '|protected'):
-                    logging.debug("> Temporarily unprotecting the branch for managing files in it...")
+                if configuration.get("branches|" + branch + "|protected"):
+                    logging.debug(
+                        "> Temporarily unprotecting the branch for managing files in it..."
+                    )
                     self.gl.unprotect_branch(project_and_group, branch)
 
-                if configuration.get('files|' + file + '|delete'):
+                if configuration.get("files|" + file + "|delete"):
                     try:
                         self.gl.get_file(project_and_group, branch, file)
                         logging.debug("Deleting file '%s' in branch '%s'", file, branch)
-                        self.gl.delete_file(project_and_group, branch, file,
-                                            self.get_commit_message_for_file_change(
-                                                'delete', configuration.get('files|' + file + '|skip_ci'))
-                                            )
+                        self.gl.delete_file(
+                            project_and_group,
+                            branch,
+                            file,
+                            self.get_commit_message_for_file_change(
+                                "delete",
+                                configuration.get("files|" + file + "|skip_ci"),
+                            ),
+                        )
                     except NotFoundException:
-                        logging.debug("Not deleting file '%s' in branch '%s' (already doesn't exist)", file,
-                                      branch)
+                        logging.debug(
+                            "Not deleting file '%s' in branch '%s' (already doesn't exist)",
+                            file,
+                            branch,
+                        )
                 else:
                     # change or create file
 
-                    if configuration.get('files|' + file + '|content') \
-                            and configuration.get('files|' + file + '|file'):
-                        logging.fatal("File '%s' in '%s' has both `content` and `file` set - "
-                                      "use only one of these keys.", file, project_and_group)
+                    if configuration.get(
+                        "files|" + file + "|content"
+                    ) and configuration.get("files|" + file + "|file"):
+                        logging.fatal(
+                            "File '%s' in '%s' has both `content` and `file` set - "
+                            "use only one of these keys.",
+                            file,
+                            project_and_group,
+                        )
                         exit(4)
-                    elif configuration.get('files|' + file + '|content'):
-                        new_content = configuration.get('files|' + file + '|content')
+                    elif configuration.get("files|" + file + "|content"):
+                        new_content = configuration.get("files|" + file + "|content")
                     else:
-                        path_in_config = Path(configuration.get('files|' + file + '|file'))
+                        path_in_config = Path(
+                            configuration.get("files|" + file + "|file")
+                        )
                         if path_in_config.is_absolute():
                             path = path_in_config.read_text()
                         else:
                             # relative paths are relative to config file location
-                            path = Path(os.path.join(self.c.config_dir, str(path_in_config)))
+                            path = Path(
+                                os.path.join(self.c.config_dir, str(path_in_config))
+                            )
                         new_content = path.read_text()
 
-                    if configuration.get('files|' + file + '|template', True):
+                    if configuration.get("files|" + file + "|template", True):
                         new_content = self.get_file_content_as_template(
                             new_content,
                             project_and_group,
-                            **configuration.get('files|' + file + '|jinja_env', dict()))
+                            **configuration.get("files|" + file + "|jinja_env", dict()),
+                        )
 
                     try:
-                        current_content = self.gl.get_file(project_and_group, branch, file)
+                        current_content = self.gl.get_file(
+                            project_and_group, branch, file
+                        )
                         if current_content != new_content:
-                            if configuration.get('files|' + file + '|overwrite'):
-                                logging.debug("Changing file '%s' in branch '%s'", file, branch)
-                                self.gl.set_file(project_and_group, branch, file,
-                                                 new_content,
-                                                 self.get_commit_message_for_file_change(
-                                                     'change', configuration.get('files|' + file + '|skip_ci'))
-                                                 )
+                            if configuration.get("files|" + file + "|overwrite"):
+                                logging.debug(
+                                    "Changing file '%s' in branch '%s'", file, branch
+                                )
+                                self.gl.set_file(
+                                    project_and_group,
+                                    branch,
+                                    file,
+                                    new_content,
+                                    self.get_commit_message_for_file_change(
+                                        "change",
+                                        configuration.get("files|" + file + "|skip_ci"),
+                                    ),
+                                )
                             else:
-                                logging.debug("Not changing file '%s' in branch '%s' "
-                                              "(overwrite flag not set)", file, branch)
+                                logging.debug(
+                                    "Not changing file '%s' in branch '%s' "
+                                    "(overwrite flag not set)",
+                                    file,
+                                    branch,
+                                )
                         else:
-                            logging.debug("Not changing file '%s' in branch '%s' (it\'s content is already"
-                                          " as provided)", file, branch)
+                            logging.debug(
+                                "Not changing file '%s' in branch '%s' (it's content is already"
+                                " as provided)",
+                                file,
+                                branch,
+                            )
                     except NotFoundException:
                         logging.debug("Creating file '%s' in branch '%s'", file, branch)
-                        self.gl.add_file(project_and_group, branch, file,
-                                         new_content,
-                                         self.get_commit_message_for_file_change(
-                                             'add', configuration.get('files|' + file + '|skip_ci'))
-                                         )
+                        self.gl.add_file(
+                            project_and_group,
+                            branch,
+                            file,
+                            new_content,
+                            self.get_commit_message_for_file_change(
+                                "add", configuration.get("files|" + file + "|skip_ci")
+                            ),
+                        )
 
                 # protect branch back after above operations
-                if configuration.get('branches|' + branch + '|protected'):
+                if configuration.get("branches|" + branch + "|protected"):
                     logging.debug("> Protecting the branch again.")
                     self._protect_branch(project_and_group, configuration, branch)
-                if configuration.get('files|' + file + '|only_first_branch'):
-                    logging.info('Skipping other branches for this file, as configured.')
+                if configuration.get("files|" + file + "|only_first_branch"):
+                    logging.info(
+                        "Skipping other branches for this file, as configured."
+                    )
                     break
 
     def get_commit_message_for_file_change(self, operation, skip_build):
 
         # add '[skip ci]' to commit message to skip CI job, as documented at
         # https://docs.gitlab.com/ee/ci/yaml/README.html#skipping-jobs
-        skip_build_str = ' [skip ci]' if skip_build else ''
+        skip_build_str = " [skip ci]" if skip_build else ""
 
         return "Automated %s made by gitlabform%s" % (operation, skip_build_str)
 
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group
         from jinja2 import Template
+
         return Template(template).render(
             project=self.get_project(project_and_group),
             group=self.get_group(project_and_group),
-            **kwargs)
+            **kwargs,
+        )
 
     def get_group(self, project_and_group):
-        return re.match('(.*)/.*', project_and_group).group(1)
+        return re.match("(.*)/.*", project_and_group).group(1)
 
     def get_project(self, project_and_group):
-        return re.match('.*/(.*)', project_and_group).group(1)
+        return re.match(".*/(.*)", project_and_group).group(1)
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
     def process_hooks(self, project_and_group, configuration):
-        for hook in sorted(configuration['hooks']):
+        for hook in sorted(configuration["hooks"]):
 
-            if configuration.get('hooks|' + hook + '|delete'):
+            if configuration.get("hooks|" + hook + "|delete"):
                 hook_id = self.gl.get_hook_id(project_and_group, hook)
                 if hook_id:
                     logging.debug("Deleting hook '%s'", hook)
                     self.gl.delete_hook(project_and_group, hook_id)
                 else:
-                    logging.debug("Not deleting hook '%s', because it doesn't exist", hook)
+                    logging.debug(
+                        "Not deleting hook '%s', because it doesn't exist", hook
+                    )
             else:
                 hook_id = self.gl.get_hook_id(project_and_group, hook)
                 if hook_id:
                     logging.debug("Changing existing hook '%s'", hook)
-                    self.gl.put_hook(project_and_group, hook_id, hook, configuration['hooks'][hook])
+                    self.gl.put_hook(
+                        project_and_group, hook_id, hook, configuration["hooks"][hook]
+                    )
                 else:
                     logging.debug("Creating hook '%s'", hook)
-                    self.gl.post_hook(project_and_group, hook, configuration['hooks'][hook])
+                    self.gl.post_hook(
+                        project_and_group, hook, configuration["hooks"][hook]
+                    )
 
     @if_in_config_and_not_skipped
     @configuration_to_safe_dict
     def process_project(self, project_and_group, configuration):
-        project = configuration['project']
+        project = configuration["project"]
         if project:
-            if 'archive' in project:
-                if project['archive']:
+            if "archive" in project:
+                if project["archive"]:
                     logging.info("Archiving project...")
                     self.gl.archive(project_and_group)
                 else:

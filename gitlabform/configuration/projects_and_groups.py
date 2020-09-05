@@ -6,7 +6,6 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigurationProjectsAndGroups(ConfigurationCore):
-
     def get_projects(self) -> list:
         """
         :return: sorted list of projects with configs
@@ -28,8 +27,8 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         common_config = self.get_config_common()
         logging.debug("Common config: %s" % common_config)
 
-        group, project = group_and_project.rsplit('/', 1)
-        if '/' in group:
+        group, project = group_and_project.rsplit("/", 1)
+        if "/" in group:
             group_config = self.get_effective_subgroup_config(group)
         else:
             group_config = self.get_group_config(group)
@@ -39,10 +38,14 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         logging.debug("Project config: %s" % project_config)
 
         common_and_group_config = self.merge_configs(common_config, group_config)
-        logging.debug("Effective config common+group/subgroup: %s" % common_and_group_config)
+        logging.debug(
+            "Effective config common+group/subgroup: %s" % common_and_group_config
+        )
 
         effective_config = self.merge_configs(common_and_group_config, project_config)
-        logging.debug("Effective config common+group/subgroup+project: %s" % effective_config)
+        logging.debug(
+            "Effective config common+group/subgroup+project: %s" % effective_config
+        )
 
         return effective_config
 
@@ -64,22 +67,30 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         #
 
         effective_config = {}
-        elements = subgroup.split('/')
+        elements = subgroup.split("/")
         last_element = None
         for element in elements:
             if not last_element:
                 effective_config = self.get_group_config(element)
-                logging.debug("First level config for '%s': %s" % (element, effective_config))
+                logging.debug(
+                    "First level config for '%s': %s" % (element, effective_config)
+                )
                 last_element = element
             else:
-                next_level_subgroup = last_element + '/' + element
+                next_level_subgroup = last_element + "/" + element
                 next_level_subgroup_config = self.get_group_config(next_level_subgroup)
-                logging.debug("Config for '%s': %s"
-                              % (next_level_subgroup, next_level_subgroup_config))
-                effective_config = self.merge_configs(effective_config, next_level_subgroup_config)
-                logging.debug("Merged previous level config for '%s' with config for '%s': %s"
-                              % (last_element, next_level_subgroup, effective_config))
-                last_element = last_element + '/' + element
+                logging.debug(
+                    "Config for '%s': %s"
+                    % (next_level_subgroup, next_level_subgroup_config)
+                )
+                effective_config = self.merge_configs(
+                    effective_config, next_level_subgroup_config
+                )
+                logging.debug(
+                    "Merged previous level config for '%s' with config for '%s': %s"
+                    % (last_element, next_level_subgroup, effective_config)
+                )
+                last_element = last_element + "/" + element
 
         return effective_config
 
@@ -98,7 +109,10 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
                 merged_config[key] = more_specific_config[key]
             else:
                 # overwrite more general config settings with more specific config
-                merged_config[key] = {**more_general_config[key], **more_specific_config[key]}
+                merged_config[key] = {
+                    **more_general_config[key],
+                    **more_specific_config[key],
+                }
 
         return merged_config
 

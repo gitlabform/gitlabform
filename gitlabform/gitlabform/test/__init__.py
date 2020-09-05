@@ -7,7 +7,7 @@ gitlab:
   api_version: 4
     """
 
-GROUP_NAME = 'gitlabform_tests_group'
+GROUP_NAME = "gitlabform_tests_group"
 
 DEVELOPER_ACCESS = 30
 OWNER_ACCESS = 50
@@ -28,10 +28,10 @@ def create_group(group_name):
 
 def create_project_in_group(group_name, project_name):
     try:
-        gl.get_project(group_name + '/' + project_name)
+        gl.get_project(group_name + "/" + project_name)
     except NotFoundException:
         group = gl.get_group(group_name)
-        gl.create_project(project_name, project_name, group['id'])
+        gl.create_project(project_name, project_name, group["id"])
 
 
 def create_users_in_project(user_base_name, no_of_users, project_and_group):
@@ -40,7 +40,9 @@ def create_users_in_project(user_base_name, no_of_users, project_and_group):
         try:
             gl.get_user_by_name(username)
         except NotFoundException:
-            gl.create_user(username + "@example.com", username + " Example", username, "password")
+            gl.create_user(
+                username + "@example.com", username + " Example", username, "password"
+            )
 
         try:
             gl.add_member_to_project(project_and_group, username, DEVELOPER_ACCESS)
@@ -55,7 +57,9 @@ def create_users(user_base_name, no_of_users):
         try:
             gl.get_user_by_name(username)
         except NotFoundException:
-            gl.create_user(username + "@example.com", username + " Example", username, "password")
+            gl.create_user(
+                username + "@example.com", username + " Example", username, "password"
+            )
 
 
 def delete_users(user_base_name, no_of_users):
@@ -84,10 +88,18 @@ def remove_users_from_group(group_name, usernames):
 
 def create_readme_in_project(project_and_group):
     try:
-        gl.get_file(project_and_group, 'master', 'README.md')
-        gl.set_file(project_and_group, 'master', 'README.md', 'Hello World!', 'Restore original content')
+        gl.get_file(project_and_group, "master", "README.md")
+        gl.set_file(
+            project_and_group,
+            "master",
+            "README.md",
+            "Hello World!",
+            "Restore original content",
+        )
     except:
-        gl.add_file(project_and_group, 'master', 'README.md', 'Hello World!', 'Create README')
+        gl.add_file(
+            project_and_group, "master", "README.md", "Hello World!", "Create README"
+        )
 
 
 def delete_variables_from_group(group_name, variables):
