@@ -109,3 +109,9 @@ def delete_variables_from_group(group_name, variables):
         except NotFoundException:
             # this is fine - variable is removed from group
             pass
+
+
+def delete_pipeline_schedules_from_project(project_and_group):
+    schedules = gl.get_all_pipeline_schedules(project_and_group)
+    for schedule in schedules:
+        gl.delete_pipeline_schedule(project_and_group, schedule["id"])

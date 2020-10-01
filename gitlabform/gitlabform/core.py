@@ -1,19 +1,21 @@
 import argparse
 import logging.config
-import re
-import traceback
-import sys
-from pathlib import Path
 import os
+import re
+import sys
+import traceback
 from functools import wraps
+from pathlib import Path
+from typing import Dict, List
+
 import luddite
 import pkg_resources
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import ConfigFileNotFoundException
 from gitlabform.gitlab import GitLab
-from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.gitlab.core import NotFoundException
+from gitlabform.gitlab.core import TestRequestFailedException
 
 
 def if_in_config_and_not_skipped(method):
@@ -393,6 +395,7 @@ class GitLabFormCore(object):
                 self.process_files(project_and_group, configuration)
                 self.process_hooks(project_and_group, configuration)
                 self.process_members(project_and_group, configuration)
+                self.process_schedules(project_and_group, configuration)
 
             except Exception as e:
                 logging.error("+++ Error while processing '%s'", project_and_group)
@@ -1071,3 +1074,126 @@ class GitLabFormCore(object):
                 else:
                     logging.info("Unarchiving project...")
                     self.gl.unarchive(project_and_group)
+
+    @if_in_config_and_not_skipped
+    @configuration_to_safe_dict
+    def process_schedules(self, project_and_group, configuration):
+        existing_schedules = self.gl.get_all_pipeline_schedules(project_and_group)
+        schedule_ids_by_description = self.__group_schedule_ids_by_description(
+            existing_schedules
+        )
+
+        for schedule_description in sorted(configuration["schedules"]):
+            schedule_ids = schedule_ids_by_description.get(schedule_description)
+            if configuration.get("schedules|" + schedule_description + "|delete"):
+                if schedule_ids:
+                    logging.debug(
+                        "Deleting pipeline schedules '%s'", schedule_description
+                    )
+                    for schedule_id in schedule_ids:
+                        self.gl.delete_pipeline_schedule(project_and_group, schedule_id)
+                else:
+                    logging.debug(
+                        "Not deleting pipeline schedules '%s', because none exist",
+                        schedule_description,
+                    )
+            else:
+                if schedule_ids and len(schedule_ids) == 1:
+                    logging.debug(
+                        "Changing existing pipeline schedule '%s'", schedule_description
+                    )
+
+                    updated_schedule = self.gl.update_pipeline_schedule(
+                        project_and_group,
+                        schedule_ids[0],
+                        configuration.get("schedules|" + schedule_description),
+                    )
+                    self.gl.take_ownership(project_and_group, updated_schedule["id"])
+                    self.__set_schedule_variables(
+                        project_and_group,
+                        updated_schedule.get("id"),
+                        configuration.get(
+                            "schedules|" + schedule_description + "|variables"
+                        ),
+                    )
+                elif schedule_ids:
+                    logging.debug(
+                        "Replacing existing pipeline schedules '%s'",
+                        schedule_description,
+                    )
+
+                    for schedule_id in schedule_ids:
+                        self.gl.delete_pipeline_schedule(project_and_group, schedule_id)
+
+                    data = configuration.get("schedules|" + schedule_description)
+                    created_schedule = self.gl.create_pipeline_schedule(
+                        project_and_group,
+                        schedule_description,
+                        data.get("ref"),
+                        data.get("cron"),
+                        optional_data=data,
+                    )
+                    self.__set_schedule_variables(
+                        project_and_group,
+                        created_schedule.get("id"),
+                        configuration.get(
+                            "schedules|" + schedule_description + "|variables"
+                        ),
+                    )
+                else:
+                    logging.debug(
+                        "Creating pipeline schedule '%s'", schedule_description
+                    )
+
+                    data = configuration.get("schedules|" + schedule_description)
+                    created_schedule = self.gl.create_pipeline_schedule(
+                        project_and_group,
+                        schedule_description,
+                        data.get("ref"),
+                        data.get("cron"),
+                        optional_data=data,
+                    )
+
+                    self.__set_schedule_variables(
+                        project_and_group,
+                        created_schedule.get("id"),
+                        configuration.get(
+                            "schedules|" + schedule_description + "|variables"
+                        ),
+                    )
+
+    @staticmethod
+    def __group_schedule_ids_by_description(schedules) -> Dict[str, List[str]]:
+        schedule_ids_by_description: Dict[str, List[str]] = {}
+
+        for schedule in schedules:
+            description = schedule["description"]
+            if description in schedule_ids_by_description:
+                schedule_ids_by_description[description].append(schedule["id"])
+            else:
+                schedule_ids_by_description[description] = [schedule["id"]]
+
+        return schedule_ids_by_description
+
+    def __set_schedule_variables(self, project_and_group, schedule_id, variables):
+        schedule = self.gl.get_pipeline_schedule(project_and_group, schedule_id)
+
+        existing_variables = schedule.get("variables")
+        if existing_variables:
+            logging.debug(
+                "Deleting variables for pipeline schedule '%s'", schedule["description"]
+            )
+
+            for variable in existing_variables:
+                self.gl.delete_pipeline_schedule_variable(
+                    project_and_group, schedule_id, variable.get("key")
+                )
+
+        for variable_key, variable_data in variables.items():
+            self.gl.create_pipeline_schedule_variable(
+                project_and_group,
+                schedule_id,
+                variable_key,
+                variable_data.get("value"),
+                variable_data,
+            )
