@@ -54,9 +54,10 @@ def gitlab(request):
     )
 
     def fin():
-        # delete all pipeline schedules and created branch
+        # delete all created resources
         delete_pipeline_schedules_from_project(GROUP_AND_PROJECT_NAME)
         gl.delete_branch(GROUP_AND_PROJECT_NAME, another_branch)
+        gl.delete_project(GROUP_AND_PROJECT_NAME)
 
     request.addfinalizer(fin)
     return gl  # provide fixture value
