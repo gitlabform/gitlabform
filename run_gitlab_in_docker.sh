@@ -47,8 +47,8 @@ docker run --detach \
     --volume "$(pwd)/data:/var/opt/gitlab" \
     gitlab/gitlab-ee:latest
 
-cecho b "Waiting 10 minutes before starting to check if GitLab has started..."
-sleep 10m
+cecho b "Waiting 3 minutes before starting to check if GitLab has started..."
+sleep 3m
 until curl -X POST -s http://localhost/oauth/token | grep "The request is missing a required parameter" >/dev/null ; do
   cecho b "Waiting 5 more secs for GitLab to start..." ;
   sleep 5s ;
