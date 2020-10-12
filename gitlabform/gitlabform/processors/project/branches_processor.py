@@ -1,5 +1,3 @@
-import logging
-
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.gitlabform.processors.util.branch_protector import BranchProtector
@@ -15,6 +13,3 @@ class BranchesProcessor(AbstractProcessor):
             self.__branch_protector.protect_branch(
                 project_and_group, configuration, branch
             )
-
-    def _log_changes(self, project_and_group: str, branches):
-        logging.info("Diffing for branches section is not supported yet")

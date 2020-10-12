@@ -33,6 +33,3 @@ class ServicesProcessor(AbstractProcessor):
                 self.gitlab.set_service(
                     project_and_group, service, configuration["services"][service]
                 )
-
-    def _log_changes(self, project_and_group: str, services):
-        logging.info("Diffing for services section is not supported yet")

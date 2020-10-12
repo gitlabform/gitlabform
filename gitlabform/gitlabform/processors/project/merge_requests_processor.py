@@ -83,5 +83,5 @@ class MergeRequestsProcessor(AbstractProcessor):
         approvals = merge_requests.get("approvals")
         if approvals:
             DifferenceLogger.log_diff(
-                "Project %s approvals changes" % project_and_group, approvals, dict()
+                "Project %s approvals changes" % project_and_group, dict(), approvals
             )

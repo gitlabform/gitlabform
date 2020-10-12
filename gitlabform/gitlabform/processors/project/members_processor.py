@@ -44,6 +44,3 @@ class MembersProcessor(AbstractProcessor):
                 self.gitlab.add_member_to_project(
                     project_and_group, user, access, expiry
                 )
-
-    def _log_changes(self, project_and_group: str, groups):
-        logging.info("Diffing for members section is not supported yet")

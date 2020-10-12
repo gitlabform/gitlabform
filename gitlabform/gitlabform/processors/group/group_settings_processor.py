@@ -19,6 +19,3 @@ class GroupSettingsProcessor(AbstractProcessor):
         logging.info("Setting group settings: %s", group_settings)
         self.gitlab.put_group_settings(group, group_settings)
         logging.debug("Group settings AFTER: %s", self.gitlab.get_group_settings(group))
-
-    def _log_changes(self, group: str, group_settings):
-        logging.info("Diffing for group_settings section is not supported yet")

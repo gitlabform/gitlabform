@@ -197,6 +197,3 @@ class FilesProcessor(AbstractProcessor):
     @staticmethod
     def get_project(project_and_group):
         return re.match(".*/(.*)", project_and_group).group(1)
-
-    def _log_changes(self, project_and_group: str, files):
-        logging.info("Diffing for files section is not supported yet")

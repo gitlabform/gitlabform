@@ -57,6 +57,3 @@ class SecretVariablesProcessor(AbstractProcessor):
             "Secret variables AFTER: %s",
             self.gitlab.get_secret_variables(project_and_group),
         )
-
-    def _log_changes(self, project_and_group: str, secret_variables):
-        logging.info("Diffing for secret_variables section is not supported yet")

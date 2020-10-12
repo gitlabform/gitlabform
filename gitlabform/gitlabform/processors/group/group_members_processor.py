@@ -116,6 +116,3 @@ class GroupMembersProcessor(AbstractProcessor):
                 " to contain at least 1 member who is an Owner (access_level = 50)."
             )
             sys.exit(4)
-
-    def _log_changes(self, group: str, group_members):
-        logging.info("Diffing for group_members section is not supported yet")
