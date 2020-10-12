@@ -35,6 +35,3 @@ class HooksProcessor(AbstractProcessor):
                     self.gitlab.post_hook(
                         project_and_group, hook, configuration["hooks"][hook]
                     )
-
-    def _log_changes(self, project_and_group: str, hooks):
-        logging.info("Diffing for hooks section is not supported yet")

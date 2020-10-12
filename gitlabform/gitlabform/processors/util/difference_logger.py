@@ -7,7 +7,7 @@ from itertools import starmap
 class DifferenceLogger(object):
     @staticmethod
     def log_diff(
-        subject, from_config, from_server, only_changed=False, hide_entries=None
+        subject, current_config, config_to_apply, only_changed=False, hide_entries=None
     ):
         # Simple function to create strings for values which should be hidden
         # example: <secret b2c1a982>
@@ -17,8 +17,8 @@ class DifferenceLogger(object):
 
         # Compose values in list of `[key, from_config, from_server]``
         changes = [
-            [k, json.dumps(from_server.get(k, "???")), json.dumps(v)]
-            for k, v in from_config.items()
+            [k, json.dumps(current_config.get(k, "???")), json.dumps(v)]
+            for k, v in config_to_apply.items()
         ]
 
         # Remove unchanged if needed

@@ -21,6 +21,3 @@ class ProjectProcessor(AbstractProcessor):
                 else:
                     logging.info("Unarchiving project...")
                     self.gitlab.unarchive(project_and_group)
-
-    def _log_changes(self, project_and_group: str, project):
-        logging.info("Diffing for project section is not supported yet")

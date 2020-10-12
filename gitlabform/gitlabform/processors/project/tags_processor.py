@@ -37,6 +37,3 @@ class TagsProcessor(AbstractProcessor):
                 )
                 if self.strict:
                     exit(3)
-
-    def _log_changes(self, project_and_group: str, tags):
-        logging.info("Diffing for tags section is not supported yet")

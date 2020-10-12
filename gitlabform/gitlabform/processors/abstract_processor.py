@@ -41,6 +41,7 @@ class AbstractProcessor(ABC):
     ):
         pass
 
-    @abstractmethod
     def _log_changes(self, project_or_project_and_group: str, configuration_to_process):
-        pass
+        logging.info(
+            "Diffing for %s section is not supported yet" % self.__configuration_name
+        )

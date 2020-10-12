@@ -21,6 +21,3 @@ class DeployKeysProcessor(AbstractProcessor):
         logging.debug(
             "Deploy keys AFTER: %s", self.gitlab.get_deploy_keys(project_and_group)
         )
-
-    def _log_changes(self, project_and_group: str, deploy_keys):
-        logging.info("Diffing for deploy_keys section is not supported yet")
