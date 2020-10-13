@@ -51,21 +51,28 @@ and config should be taken into account, applies the effective config.
 The effective config contains what is called the "config sections", which are the YAML keys that can exist under projects
 in the config YAML, for example: `deploy_keys`, `secret_variables`, `group_secret_variables` and so on.
 
-Those config section are processed by the code in the methods with the `process_*` naming pattern.
+Those config sections are processed by the code in the classes inheriting from the `AbstractProcessor` class. This class
+should be reused when implementing new functionalities (such as supporting new configuration keys) as it holds the common 
+logic for skipping the configuration parts and running in dry-run mode. The processors has been grouped into two 
+packages - `group` where the processors applied to the group settings are implemented and `project` - where processors
+executed on project level are located.
 
 **This is where the key logic of the app is - how to translate YAML config parts into appropriate calls to the GitLab API.**
 
 #### How-tos
 
-If you want to **add/change/fix things under an existing config section** then you need to update the code in those
-`process_*` methods (for example: `process_deploy_keys`, `process_secret_variables` and so on).
-
+If you want to **add/change/fix things under an existing config section** then most likely you will need to update 
+the code in the processor classes (for example, in `BranchesProcessor`).
 
 If you want to **add support for a new config section** (= completely new feature) then you need to:
 
-1. add the method `process_<new_config_section_name>` method to `GitLabFormCore` class (note: this method name HAS TO
-   follow this pattern!)
-2. add calling the method to the `process_all()` method,
+1. Create a new class `group_<new_config_section_name>_processor` (if it applies to the group settings) or 
+`<new_config_section_name>_processor` (if it applies to project settings) and implement two methods:
+    - `_process_configuration` - which does the actual processing, by calling the API and apllying the changes in GitLab;
+    - `_log_changes` - which is optional but recommended to implement; by calling this method the effective changes 
+    to be applied should be logged (when running in dry-run mode). 
+2. Add the new processor to `GroupProcessors` in `group > __init__.py` (if group settings processor was created) or 
+to `ProjectProcessors` in `project > __init__.py`. 
 
 
 ### gitlabform.gitlab
