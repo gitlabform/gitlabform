@@ -35,6 +35,7 @@ GitLabForm enables you to manage:
 * (Project) Push Rules (**GitLab EE only**),
 * (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
 * Merge Requests approvals settings and approvers (**GitLab EE only**),
+* Pipeline schedules,
 
 ...for:
 
