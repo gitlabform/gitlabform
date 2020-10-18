@@ -252,7 +252,6 @@ class GitLabFormCore(object):
             logging.warning("> (%s/%s) Processing: %s", g, len(groups), group)
 
             if self.noop:
-                logging.warning("Not actually processing because running in noop mode.")
                 logging.debug(
                     "Configuration that would be applied: %s" % str(configuration)
                 )
@@ -293,7 +292,6 @@ class GitLabFormCore(object):
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
             if self.noop:
-                logging.warning("Not actually processing because running in noop mode.")
                 logging.debug(
                     "Configuration that would be applied: %s" % str(configuration)
                 )
