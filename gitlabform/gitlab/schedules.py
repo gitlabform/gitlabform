@@ -65,7 +65,7 @@ class GitLabPipelineSchedules(GitLabCore):
         pipeline_schedule_id,
         variable_key,
         variable_value,
-        optional_data={},
+        optional_data=None,
     ):
         if optional_data is None:
             optional_data = {}

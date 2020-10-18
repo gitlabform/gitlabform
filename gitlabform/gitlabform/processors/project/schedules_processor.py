@@ -119,9 +119,8 @@ class SchedulesProcessor(AbstractProcessor):
 
         for schedule in schedules:
             description = schedule["description"]
-            if description in schedule_ids_by_description:
-                schedule_ids_by_description[description].append(schedule["id"])
-            else:
-                schedule_ids_by_description[description] = [schedule["id"]]
+            schedule_ids_by_description.setdefault(description, []).append(
+                schedule["id"]
+            )
 
         return schedule_ids_by_description
