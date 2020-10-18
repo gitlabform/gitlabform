@@ -22,6 +22,9 @@ from gitlabform.gitlabform.processors.project.project_push_rules_processor impor
 from gitlabform.gitlabform.processors.project.project_settings_processor import (
     ProjectSettingsProcessor,
 )
+from gitlabform.gitlabform.processors.project.schedules_processor import (
+    SchedulesProcessor,
+)
 from gitlabform.gitlabform.processors.project.secret_variables_processor import (
     SecretVariablesProcessor,
 )
@@ -46,6 +49,7 @@ class ProjectProcessors(object):
             FilesProcessor(gitlab, config, strict),
             HooksProcessor(gitlab),
             MembersProcessor(gitlab),
+            SchedulesProcessor(gitlab),
         ]
 
     def process_project(self, project_and_group, configuration, dry_run=False):
