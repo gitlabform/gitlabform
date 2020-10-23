@@ -63,6 +63,12 @@ echo "http://localhost" > gitlab_url.txt
 
 cecho b 'Starting GitLab complete!'
 echo ''
+cecho b 'GitLab version:'
+curl -H "Authorization:Bearer $(cat gitlab_token.txt)" http://localhost/api/v4/version
+echo ''
+cecho b 'GitLab web UI URL (user: root, password: password)'
+echo 'http://localhost'
+echo ''
 cecho b 'Run these commands to set the env variables needed by the tests to use this GitLab instance:'
 # shellcheck disable=SC2016
 cecho g 'export GITLAB_URL=$(cat gitlab_url.txt)'
