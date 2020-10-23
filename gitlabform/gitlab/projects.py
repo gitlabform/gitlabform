@@ -57,6 +57,14 @@ class GitLabProjects(GitLabCore):
             "projects/%s/deploy_keys", project_and_group_name
         )
 
+    def delete_deploy_key(self, project_and_group_name, id):
+        return self._make_requests_to_api(
+            "projects/%s/deploy_keys/%s",
+            (project_and_group_name, id),
+            method="DELETE",
+            expected_codes=[204, 404],
+        )
+
     def get_deploy_key(self, project_and_group_name, id):
         return self._make_requests_to_api(
             "projects/%s/deploy_keys/%s", (project_and_group_name, id), "GET"
