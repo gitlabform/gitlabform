@@ -36,7 +36,7 @@ setup(
         "Jinja2==2.11.2",
         "MarkupSafe==1.1.1",
         "PyYAML==5.3.1",
-        "urllib3==1.25.10",
+        "urllib3==1.25.11",
         "luddite==1.0.1",
     ],
     tests_require=[
