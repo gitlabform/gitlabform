@@ -77,7 +77,7 @@ python setup.py develop
 
 #### How to implement things in GitLabForm?
 
-Please see the [implementation design article](IMPLEMENTATION_DESIGN.md).
+Please see the [implementation design article](docs/IMPLEMENTATION_DESIGN.md).
 
 #### Running unit tests locally
 
@@ -99,7 +99,7 @@ against a disposable GitLab instance running as a Docker container OR use your o
 1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
 
 ```
-./run_gitlab_in_docker.sh
+./dev/run_gitlab_in_docker.sh
 export GITLAB_URL=$(cat gitlab_url.txt)
 export GITLAB_TOKEN=$(cat gitlab_token.txt)
 ```
@@ -128,7 +128,6 @@ Similarly to the guidelines for making PRs with documentation improvements - ple
 * add tests along with the new code that prove that it works:
   * in case of non-trivial logic add/change please add unit tests,
   * for all bug fixes and new features using GitLab API please add integration tests
-   (after [#75](https://github.com/egnyte/gitlabform/pull/75) gets merged),
 * use [Black](https://github.com/psf/black) code formatter,
 * squash your commits (unless there is a reason not to),
 * try to write [good commit message(s)](https://chris.beams.io/posts/git-commit/),

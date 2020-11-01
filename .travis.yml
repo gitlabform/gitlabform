@@ -65,6 +65,7 @@ jobs:
           repo: egnyte/gitlabform
           tags: true
         before_deploy:
+        - mv ci/* .
         - bash build_docker_images.sh
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         script: PUSH_IMAGES=true bash build_docker_images.sh
