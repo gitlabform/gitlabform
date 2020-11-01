@@ -37,6 +37,7 @@ jobs:
     - name: "Integration tests"
       python: "3.8"
       before_script:
+      - mv dev/* .
       - bash run_gitlab_in_docker.sh
       - export GITLAB_URL=$(cat gitlab_url.txt)
       - export GITLAB_TOKEN=$(cat gitlab_token.txt)
@@ -65,7 +66,7 @@ jobs:
           repo: egnyte/gitlabform
           tags: true
         before_deploy:
-        - mv ci/* .
+        - mv dev/* .
         - bash build_docker_images.sh
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         script: PUSH_IMAGES=true bash build_docker_images.sh
