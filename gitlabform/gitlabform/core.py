@@ -28,6 +28,7 @@ class GitLabFormCore(object):
             self.noop = False
             self.set_log_level(tests=True)
             self.skip_version_check = True
+            self.show_version = False
         else:
             (
                 self.project_or_group,
@@ -38,9 +39,17 @@ class GitLabFormCore(object):
                 self.start_from,
                 self.noop,
                 self.skip_version_check,
+                self.show_version,
             ) = self.parse_args()
             self.set_log_level()
+
             print(self.get_version(self.skip_version_check))
+            if self.show_version:
+                sys.exit(0)
+
+            if not self.project_or_group:
+                print("project_or_group parameter is required.")
+                sys.exit(1)
 
         self.gl, self.c = self.initialize_configuration_and_gitlab()
 
@@ -57,9 +66,10 @@ class GitLabFormCore(object):
 
         parser.add_argument(
             "project_or_group",
-            help='Project name in "group/project" format'
+            nargs="?",
+            help='Project name in "group/project" format '
             "OR a single group name "
-            'OR "ALL_DEFINED" to run for all groups and projects defined the config'
+            'OR "ALL_DEFINED" to run for all groups and projects defined the config '
             'OR "ALL" to run for all projects that you have access to',
         )
 
@@ -102,7 +112,11 @@ class GitLabFormCore(object):
         )
 
         parser.add_argument(
-            "-V", "--version", action="version", version=self.get_version(False)
+            "-V",
+            "--version",
+            dest="show_version",
+            action="store_true",
+            help="Show the version and exit",
         )
 
         parser.add_argument(
@@ -124,6 +138,7 @@ class GitLabFormCore(object):
             args.start_from,
             args.noop,
             args.skip_version_check,
+            args.show_version,
         )
 
     def set_log_level(self, tests=False):
