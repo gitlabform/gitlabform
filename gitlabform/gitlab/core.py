@@ -3,6 +3,8 @@ import sys
 import logging
 import requests
 import os
+
+import urllib3
 from urllib3.util.retry import Retry
 from urllib import parse
 from requests.adapters import HTTPAdapter
@@ -43,7 +45,10 @@ class GitLabCore:
 
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
+
         self.session.verify = self.ssl_verify
+        if not self.ssl_verify:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         try:
             version = self._make_requests_to_api("version")
