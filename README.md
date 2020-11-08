@@ -45,8 +45,8 @@ GitLabForm enables you to manage:
 
 ...and a combination of them.
 
-GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration). GitLabForm is also
-using [passing the parameters as-is to GitLab APIs with PUT/POST requests](docs/FEATURES_DESIGN.md#raw-parameters-passing).
+GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/egnyte/gitlabform/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
+GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/egnyte/gitlabform/docs/FEATURES_DESIGN.md#raw-parameters-passing).
 
 ### Comparison to similar apps
 
@@ -54,7 +54,7 @@ GitLabForm has roughly the same purpose as [GitLab provider](https://www.terrafo
 for [Terraform](https://www.terraform.io/) (which is a tool that we love and which has inspired us to write this app),
 but it has a different set of features and uses a different configuration format.
 
-Please read more about [GitLab provider for Terraform vs GitLabForm](docs/GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
+Please read more about [GitLab provider for Terraform vs GitLabForm](https://github.com/egnyte/gitlabform/docs/GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
 
 To configure your GitLab instance itself (appearance, application settings, features, license) please check out
 the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-configuration-as-code) project!
@@ -91,7 +91,6 @@ gitlab:
   # You can also set in your environment GITLAB_TOKEN
   token: "<private token of an admin user>"
   api_version: 4
-  ssl_verify: true
 
 group_settings:
   my-group:
@@ -146,7 +145,7 @@ For example, you can run it:
 from the configuration (we recommend running it each night),
 * from a webhook after a new project is created in GitLab to initialize it with a shared config.
 
-An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](docs/.gitlab-ci.example.yml) 
+An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](https://github.com/egnyte/gitlabform/docs/.gitlab-ci.example.yml)
 file.
 
 Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is
@@ -156,17 +155,17 @@ For GitLab CI a secure place to set it would be a [Secret/Protected Variable in 
 
 ## Contributing
 
-Please see the [contribution guide](CONTRIBUTING.md) for info about all kinds of contributions, like:
+Please see the [contribution guide](https://github.com/egnyte/gitlabform/CONTRIBUTING.md) for info about all kinds of contributions, like:
 * questions, feature requests,
 * documentation and code contributions,
 * other.
 
-[Contribution guide](CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
+[Contribution guide](https://github.com/egnyte/gitlabform/CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
 build it, run the tests and learn about the code guidelines.
 
 
 For detailed info about how the app code has been organized, where is what and where and how to fix bugs and/or
-add new features, please see the [implementation design](docs/IMPLEMENTATION_DESIGN.md) article.
+add new features, please see the [implementation design](https://github.com/egnyte/gitlabform/docs/IMPLEMENTATION_DESIGN.md) article.
 
 ## History
 
