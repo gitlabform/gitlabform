@@ -29,7 +29,7 @@ class GitLabFormCore(object):
             self.set_log_level(tests=True)
             self.skip_version_check = True
             self.show_version = False
-            self.terminate_after_error = False
+            self.terminate_after_error = False  # Not sure if this should be false
         else:
             (
                 self.project_or_group,
