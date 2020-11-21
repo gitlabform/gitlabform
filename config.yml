@@ -2,6 +2,10 @@
 # Please remove it if you create your config as a copy of this file.
 example_config: true
 
+# This indicates that this config file is compatible with GitLabForm 2.0+.
+# You should add it to your config after you update it to make it 2.0+ compatible.
+config_version: 2
+
 # GitLab API access config
 gitlab:
   # You can also set in your environment GITLAB_URL
@@ -16,83 +20,107 @@ gitlab:
   # timeout, defaults to 10
   timeout: 10
 
+# GitLab allows configuring groups (and subgroups) separately from the projects within them, so the same distinction
+# exists here.
 #
-# You can define settings on 3 levels here:
-# * common - for ALL projects in ALL groups
-# * group/subgroup - for ALL projects in selected group/subgroup (recursively)
-# * project - for single projects
-#
-# Each level is optional.
-#
-# To generate effective settings to apply for a given project, if it is configured on more than one level
-# (for example you run it for "my-group/my-project" with the example configuration below, where this project will
-# take configuration from all 3 levels), GitLabForm will merge those configurations.
+# The configurations are inherited hierarchically, so f.e. if you define some config for "*" groups
+# and then some other for "my-group", then the effective config for "my-group" will be a merge of those config.
 #
 # Merging is additive, so for sections like `deploy_keys`, `secret_variables`, `hooks' on each lower level
 # the effective configuration will contain elements from higher levels plus elements from lower levels.
 #
 # Exception: when `skip: true` is set on a more specific level, given config section is not set AT ALL for given project.
 #
+#groups:
+#
+#  # On this indentation level you choose what *groups* you want to configure. Here are some of the options
+#  # (with empty configs, just as an example).
+#
+#  # Special entry that provides the config shared by all the groups.
+#  "*": {}
+#
+#  # Configuration for the "my-group" group (only, non-recursively!).
+#  "my-group": {}
+#
+#  # Configuration for all the *subgroups* within the "my-group" group (non-recursively!).
+#  "my-group/*": {}
+#
+#  # Configuration for "my-subgroup" subgroup within the "my-group" group.
+#  "my-group/my-subgroup": {}
+#
+#  # Configuration for all the groups that have names matching the '(foo)+' regexp.
+#  "~(foo)+": {}
+#
+#  # Configuration for all the subgroups of group "my-group" that have names matching the '(bar)+' regexp.
+#  "my-group/~(bar)+":
+#
+#projects:
+#
+#  # On this indentation level you choose what *projects* you want to configure. Here are some of the options
+#  # (with empty configs, just as an example).
+#
+#  # Special entry that provides the config shared by all the projects
+#  # within all the groups and subgroups EXCEPT the personal projects.
+#  "*/*": {}
+#
+#  # Special entry that provides the (optional) config shared by all the personal projects.
+#  "<all-users>/*": {}
+#
+#  # Configuration for all the projects within the "my-group" group (non-recursively!).
+#  "my-group/*": {}
+#
+#  # Configuration for "my-project" project within the "my-group" group.
+#  "my-group/my-project": {}
+#
+#  # Configuration for all the projects within the "my-group" group that have names matching the
+#  # 'foo-.*' regexp.
+#  "my-group/~foo-.*": {}
 
-common_settings:
+
+groups:
+
+  # common settings for ALL the groups
+  "*":
+    # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
+    group_secret_variables:
+      # the name in the line below is not actually used, it's just for you
+      a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
+        key: A_VERY_COMMONLY_USED_PASSWORD
+        value: "ThisIsAVerySecretPassword"
+        variable_type: env_var # or file
+        protected: true
+        delete: false  # Set to true to delete this variable
+
+    # this is for adding/changing the access level of group members - only users can be them
+    # for removing users please see the flag below.
+    #
+    # keys names are user names and values are as parameters described at
+    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
+    group_members:
+      my-user:
+        access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+
+    # if this flag is set to 'true', then removing a user the above config will remove the user from the group
+    # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
+    enforce_group_members: true  # default: false
+
+  # configures settings for the 'group-with-spammy-projects' group
+  "group-with-spammy-projects":
+    group_settings:
+      # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
+      emails_disabled: true
+
+projects:
+
   # common settings for ALL projects in ALL groups
-
-  # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
-  secret_variables:
-    # this name is not actually used, it's just for you
-    a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
-      key: A_VERY_COMMONLY_USED_PASSWORD
-      value: "ThisIsAVerySecretPassword"
-      delete: false  # Set to true to delete this variable
-
-  # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
-  group_secret_variables:
-    # this name is not actually used, it's just for you
-    a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
-      key: A_VERY_COMMONLY_USED_PASSWORD
-      value: "ThisIsAVerySecretPassword"
-      variable_type: env_var #or file
-      protected: false #
-      delete: false  # Set to true to delete this variable
-
-group_settings:
-  # settings for ALL projects in 'my-group' group
-  "my-group":
-    deploy_keys:
-      # this name is not actually used, it's just for you
-      a_friendly_deploy_key_name:
-        # you have to pass whole SSH key content here even if GitLab already has this key added and you just assign it
-        # to another project here
-        # this is a limitation of GitLab API
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL (...)"
-        title: ssh_key_name_that_is_shown_in_gitlab
-        # note that you can set this to `true` or `false` only on the first assignment of the key / its creation
-        # see https://gitlab.com/gitlab-org/gitlab-ce/issues/30021#note_39567845
-        # this is a limitation of GitLab API
-        can_push: false
-      # this name is not actually used, it's just for you
-      another_friendly_deploy_key_name:
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)"
-        title: other_ssh_key_name_that_is_shown_in_gitlab
-        can_push: false
-
+  "*":
     # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
     secret_variables:
-      # this name is not actually used, it's just for you
+      # the name in the line below is not actually used, it's just for you
       a_friendly_secret_variable_name:
         key: SSH_PRIVATE_KEY_BASE64
         value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
-
-    # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
-    group_secret_variables:
-      # this name is not actually used, it's just for you
-      a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
-        key: A_VERY_COMMONLY_USED_PASSWORD
-        value: "ThisIsAVerySecretPassword"
         protected: true
-        # note that there are extra requirements for variables to be "masked",
-        # see https://docs.gitlab.com/ee/ci/variables/#masked-variable-requirements
-        masked: true
 
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
@@ -168,18 +196,25 @@ group_settings:
         merge_access_level: 30 # Developer
         unprotect_access_level: 40 # Maintainer
 
-    # this is for adding/changing the access level of group members - only users can be them
-    # for removing users please see the flag below.
-    #
-    # keys names are user names and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
-    group_members:
-      my-user:
-        access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
-
-    # if this flag is set to 'true', then removing a user the above config will remove the user from the group
-    # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
-    enforce_group_members: true  # default: false
+  # settings for ALL projects in 'my-group' group
+  "my-group/*":
+    deploy_keys:
+      # the name in the line below is not actually used, it's just for you
+      a_friendly_deploy_key_name:
+        # you have to pass whole SSH key content here even if GitLab already has this key added and you just assign it
+        # to another project here
+        # this is a limitation of GitLab API
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL (...)"
+        title: ssh_key_name_that_is_shown_in_gitlab
+        # note that you can set this to `true` or `false` only on the first assignment of the key / its creation
+        # see https://gitlab.com/gitlab-org/gitlab-ce/issues/30021#note_39567845
+        # this is a limitation of GitLab API
+        can_push: false
+      # the name in the line below is not actually used, it's just for you
+      another_friendly_deploy_key_name:
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)"
+        title: other_ssh_key_name_that_is_shown_in_gitlab
+        can_push: false
 
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
@@ -270,19 +305,6 @@ group_settings:
         content: |
           This file will be added to all protected branches.
 
-  # settings for ALL projects in 'old-projects-group' group
-  old-projects-group:
-    # this will archive all the projects in the 'old-projects-group' group
-    project:
-      archive: true
-
-  group-with-spammy-projects:
-    # configures settings for the 'group-with-spammy-projects' group
-    group_settings:
-      # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
-      emails_disabled: true
-
-project_settings:
   # settings specific to 'my-group/my-project1' project
   "my-group/my-project1":
     project_settings:
@@ -371,11 +393,17 @@ project_settings:
           other_variable:
             value: another_value
 
-# this will skip these projects from being processed
-skip_projects:
-  - my-group/this-project-will-not-be-processed-with-gitlabform-when-running-for-my-group
-  - my-group/and-this-too
+  # settings for ALL projects in 'old-projects-group' group
+  "old-projects-group/*":
+    # this will archive all the projects in the 'old-projects-group' group
+    project:
+      archive: true
 
 # this will skip these groups from being processed
 skip_groups:
   - my-other-group
+
+# this will skip these projects from being processed
+skip_projects:
+  - my-group/this-project-will-not-be-processed-with-gitlabform-when-running-for-my-group
+  - my-group/and-this-too
