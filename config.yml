@@ -1,7 +1,3 @@
-# This key prevents GitLabForm from actually using this config.
-# Please remove it if you create your config as a copy of this file.
-example_config: true
-
 # GitLab API access config
 gitlab:
   # You can also set it in GITLAB_URL env var
@@ -9,80 +5,101 @@ gitlab:
   # You can also set it in GITLAB_TOKEN env var
   # this can be both private token OR OAuth2 access token
   token: "<private token of an admin user>"
-  # SSL will be verified by default, you can turn checks off by passing `ssl_verify: false`
+  # SSL will be verified by default, you can turn checks off by setting it to false
   ssl_verify: true
-  # timeout, defaults to 10
+  # Timeout before the first byte of response is received,
+  # see this for the details: https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
   timeout: 10
 
-# GitLab allows configuring groups (and subgroups) separately from the projects within them, so we distinguish sections
-# configuring groups by prefixing their names - with "group_" (f.e. "group_settings")
+# The main configuration of this app is a dict of dicts where:
+#
+# * the first level keys select which groups and projects is given configuration for,
+# * the second level keys and their contents provide the actual configuration.
+#
+# GitLab allows configuring groups (and subgroups) separately from the projects within them, so we also distinguish
+# configurations for groups by prefixing their names accordingly - with "group_" (f.e. "group_settings")
 # or "project_" (f.e. "project_hooks").
 #
-# The configurations are inherited hierarchically, so f.e. if you define some group-level config for "*" (f.e. "group_settings")
-# and then some other group-level for "my-group" ("groups_settings" with some other values), then the effective config
-# for "my-group" will be a merge of those 2 configs.
+# The configurations are inherited hierarchically. S f.e. if you define some group-level config for "*" (f.e. "group_settings")
+# and then some other group-level config for "my-group" ("groups_settings" with some other values), then the effective
+# config that the application will apply to "my-group" will be a merge of these 2 configs. Of course the more specific
+# (for "my-group") config overrides the more general one (for "*") whenever they differ.
 #
-# Merging is additive, so for sections like `project_deploy_keys`, `group_secret_variables`, `project_secret_variables`,
-# `project_hooks' on each lower level the effective configuration will contain elements from higher levels
-# plus elements from lower levels.
+# Merging is additive for sections with lists of things, like `project_deploy_keys`, `group_secret_variables`,
+# `project_secret_variables`, `project_hooks', so on each lower level the effective configuration will contain elements
+# from higher levels plus elements from lower levels. F.e. you can configure all of your projects ("*") to have some 2 deploy
+# key but a specific project (a-group/some-project) to have 1 *more*.
 #
-# Exception: when `skip: true` is set on a more specific level, given config section is not set AT ALL for given project
-# or group.
-
-
+# You can also add a configuration section in a lower-lever of the config with a single key and value: `skip: true`.
+# This will make this section completely omit this particular object. You can use this f.e. to provide some deploy keys
+# to all projects within some group EXCEPT a single project that should not get them.
+#
+# Many configuration sections support a special key and value: `delete: true`. This will make GitLabForm delete given
+# object. This may be needed because if you have added somethine with GitLabForm, f.e. a secret variable
+# to all the projects, then it's not enough to remove it from the config to make GitLabForm delete it! GitLabForm DOES
+# NOT touch things it doesn't have explicitly in its config! So to actually delete them you need to keep them in
+# the config but with `delete: true`.
+#
 # Best practices:
 #
 #  * For features which are configurable on both group and project levels, if you want to configure it the same way
 #    for all the projects in a group or groups, please use the group-level configuration. It will be more efficient.
 #
+#  * Delete the `delete: true` sections of the config after at least successful run of GitLabForm over the appropriate
+#    projects or groups. This will make GitLabForm will run faster as it won't try to remove those things over and over.
 
-# The main config starts here
+
+# The main config starts with this key
 projects_and_groups:
 
-  # On this indentation level you choose what groups and/or projects you want to configure. Here are some of the options
-  # (with empty configs, just as an example).
-
+  # On this indentation level you choose what groups and/or projects you want to configure.
+  #
+  # Here are examples of possible dict key.
+  #
   # This matches all the groups AND all the projects EXCEPT personal projects!
-  # "*": {}
-
+  # "*":
+  #
   # This matches all the personal projects.
-  # "<all-users>": {}
-
+  # "<all-users>":
+  #
   # This matches the "my-group" group AND projects in it.
-  # my-group: {}
-
+  # my-group:
+  #
   # This matches the "my-subgroup" subgroup within the "my-group" group AND projects in it.
-  # my-group/my-subgroup: {}
-
+  # my-group/my-subgroup:
+  #
   # This matches all the groups that have names matching the '(foo)+' regexp AND projects in it.
-  # "~(foo)+": {}
-
+  # "~(foo)+":
+  #
   # This matches all the subgroups of group "my-group" that have names matching the '(bar)+' regexp
   # AND projects in it.
   # "my-group/~(bar)+":
-
+  #
   # This matches a single "my-project" project within the "my-group" group.
-  # my-group/my-project: {}
-
+  # my-group/my-project:
+  #
   # This matches my personal project "my-project".
-  # username/my-project: {}
-
+  # username/my-project:
+  #
   # This matches Configuration for all the projects within the "my-group" group that have names matching the
   # 'foo-.*' regexp.
-  # "my-group/~foo-.*": {}
-
-
+  # "my-group/~foo-.*":
+  #
+  #
   # Ok, let's start choosing groups and projects!
 
 
-  # Under this key is the config for ALL groups and ALL projects EXCEPT personal projects
+  # As explained in detail above, under this key is basically the config for everything in your GitLab instance
   "*":
 
-    # On this indentation level you choose the "section" of configuration that you want to configure for matching groups
-    # and projects. Choose them from the ones listed as examples below. As mentioned above, there are group-level sections
-    # with names starting with "group_" and project-level sections - "project_". Remember that "skip: true" allows you
-    # to override some higher level config on a lower level, f.e. to provide some deploy key to all projects within
-    # a group EXCEPT a single project.
+    # On this indentation level you choose what you want to configure for the matching groups and projects.
+    #
+    # Choose by putting here the config sections from the examples below and configuring them as you wish.
+    #
+    # As mentioned above, there are group-level sections with names starting with "group_" and project-level sections
+    # - "project_".
+    #
+    # Remember about inheritance, about "skip: true" and "delete: true"!
 
     # keys and values here are as described at https://docs.gitlab.com/ce/api/group_level_variables.html#create-variable
     group_secret_variables:
@@ -92,14 +109,13 @@ projects_and_groups:
         value: "ThisIsAVerySecretPassword"
         variable_type: env_var # or file
         protected: true
-        delete: false  # Set to true to delete this variable
 
     # keys and values here are as described at https://docs.gitlab.com/ce/api/project_level_variables.html#create-variable
     project_secret_variables:
       # the name in the line below is not actually used, it's just for you
       a_secret_you_want_to_remove_from_project_level_because_it_added_to_all_groups:
         key: A_VERY_COMMONLY_USED_PASSWORD
-        delete: false  # this will delete this secret variable, if it is set
+        delete: true
 
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
@@ -143,39 +159,6 @@ projects_and_groups:
         key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)"
         title: other_ssh_key_name_that_is_shown_in_gitlab
         can_push: false
-
-    # *** This section requires GitLab Starter/Bronze+ ***
-    # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
-    project_push_rules:
-      commit_message_regex: 'Fixes \d +'
-      branch_name_regex: ""
-      deny_delete_tag: false
-      member_check: false
-      prevent_secrets: false
-      author_email_regex: ""
-      file_name_regex: ""
-      max_file_size: 0 # in MB, 0 means unlimited
-
-    # *** This section requires GitLab Starter/Bronze+ ***
-    project_merge_requests: # TODO: keyword change
-      # keys and values here are as described at
-      # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
-      # (note that some Merge Requests-related settings are set in project_settings! read linked gitlab API docs for details)
-      approvals:
-        approvals_before_merge: 2
-        reset_approvals_on_push: true
-        disable_overriding_approvers_per_merge_request: true
-      # below settings are using https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-allowed-approvers
-      # but instead of user and group ids ONLY use usernames and full groups/subgroup paths here
-      # if neither 'approvers' or 'approver_groups' below are set, approvers are NOT managed by gitlabform
-      # you DON'T have to provide both
-      approvers:
-        - user1
-        - user2
-      approver_groups:
-        - my-group
-        - my-group1/subgroup
-        - my-group2/subgroup/subsubgroup
 
     # keys names are branches names and values can be as shown below
     project_branches: # TODO: keyword change
@@ -302,6 +285,39 @@ projects_and_groups:
         content: |
           This file will be added to all protected branches.
 
+    # *** This section requires GitLab Starter/Bronze+ ***
+    # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
+    project_push_rules:
+      commit_message_regex: 'Fixes \d +'
+      branch_name_regex: ""
+      deny_delete_tag: false
+      member_check: false
+      prevent_secrets: false
+      author_email_regex: ""
+      file_name_regex: ""
+      max_file_size: 0 # in MB, 0 means unlimited
+
+    # *** This section requires GitLab Starter/Bronze+ ***
+    project_merge_requests: # TODO: keyword change
+      # keys and values here are as described at
+      # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
+      # (note that some Merge Requests-related settings are set in project_settings! read linked gitlab API docs for details)
+      approvals:
+        approvals_before_merge: 2
+        reset_approvals_on_push: true
+        disable_overriding_approvers_per_merge_request: true
+      # below settings are using https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-allowed-approvers
+      # but instead of user and group ids ONLY use usernames and full groups/subgroup paths here
+      # if neither 'approvers' or 'approver_groups' below are set, approvers are NOT managed by gitlabform
+      # you DON'T have to provide both
+      approvers:
+        - user1
+        - user2
+      approver_groups:
+        - my-group
+        - my-group1/subgroup
+        - my-group2/subgroup/subsubgroup
+
 
   # Config specific to 'my-group/my-project1' project starts here (but remember about the inheritance!)
   "my-group/my-project1":
@@ -379,13 +395,14 @@ projects_and_groups:
 
 
   # Here starts the config for the 'group-with-spammy-projects' group (note that there are no project-level sections here
-  # - this is perfectly fine)
+  # - this is perfectly fine) (+ remember about the inheritance!)
   group-with-spammy-projects:
     group_settings:
       # keys and values here are as described at https://docs.gitlab.com/ce/api/groups.html#update-group
       emails_disabled: true
 
-  # Finally we have configuration for ALL projects in the 'old-projects-group' group
+
+  # Finally we have configuration for ALL projects in the 'old-projects-group' group (+ you-know-what)
   "old-projects-group":
     # this will archive all the projects in the 'old-projects-group' group
     project:
