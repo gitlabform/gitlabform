@@ -8,9 +8,9 @@ config_version: 2
 
 # GitLab API access config
 gitlab:
-  # You can also set in your environment GITLAB_URL
+  # You can also set it in GITLAB_URL env var
   url: https://gitlab.yourcompany.com
-  # You can also set in your environment GITLAB_TOKEN
+  # You can also set it in GITLAB_TOKEN env var
   # this can be both private token OR OAuth2 access token
   token: "<private token of an admin user>"
   # GitLab API version. As of now only 4 is supported.
@@ -81,7 +81,7 @@ groups:
 
   # common settings for ALL the groups
   "*":
-    # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
+    # keys and values here are as described at https://docs.gitlab.com/ce/api/group_level_variables.html#create-variable
     group_secret_variables:
       # the name in the line below is not actually used, it's just for you
       a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
@@ -92,37 +92,37 @@ groups:
         delete: false  # Set to true to delete this variable
 
   # settings for the 'my-group' group
-  "my-group":
+  my-group:
     # this is for adding/changing the access level of group members - only users can be them
     # for removing users please see the flag below.
     #
     # keys names are user names and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
+    # https://docs.gitlab.com/ce/api/members.html#add-a-member-to-a-group-or-project
     group_members:
       my-user:
-        access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+        access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
 
     # if this flag is set to 'true', then removing a user the above config will remove the user from the group
     # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
     enforce_group_members: true  # default: false
 
   # settings for the 'group-with-spammy-projects' group
-  "group-with-spammy-projects":
+  group-with-spammy-projects:
     group_settings:
-      # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
+      # keys and values here are as described at https://docs.gitlab.com/ce/api/groups.html#update-group
       emails_disabled: true
 
 projects:
 
   # common settings for ALL projects in ALL groups
   "*":
-    # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
+
+    # keys and values here are as described at https://docs.gitlab.com/ce/api/project_level_variables.html#create-variable
     secret_variables:
       # the name in the line below is not actually used, it's just for you
-      a_friendly_secret_variable_name:
-        key: SSH_PRIVATE_KEY_BASE64
-        value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
-        protected: true
+      a_secret_you_want_to_remove_from_project_level_because_it_added_to_all_groups:
+        key: A_VERY_COMMONLY_USED_PASSWORD
+        delete: false  # this will delete this secret variable, if it is set
 
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
@@ -132,6 +132,35 @@ projects:
       only_allow_merge_if_pipeline_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
 
+  # settings for ALL projects in 'my-group' group
+  "my-group/*":
+    deploy_keys:
+      # the name in the line below is not actually used, it's just for you
+      a_friendly_deploy_key_name:
+        # you have to pass whole SSH key content here even if GitLab already has this key added and you just assign it
+        # to another project here
+        # this is a limitation of GitLab API
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL (...)"
+        title: ssh_key_name_that_is_shown_in_gitlab
+        # note that you can set this to `true` or `false` only on the first assignment of the key / its creation
+        # see https://gitlab.com/gitlab-org/gitlab-ce/issues/30021#note_39567845
+        # this is a limitation of GitLab API
+        can_push: false
+      # the name in the line below is not actually used, it's just for you
+      another_friendly_deploy_key_name:
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)"
+        title: other_ssh_key_name_that_is_shown_in_gitlab
+        can_push: false
+
+    # keys and values here are as described at https://docs.gitlab.com/ce/api/project_level_variables.html#create-variable
+    secret_variables:
+      # the name in the line below is not actually used, it's just for you
+      a_friendly_secret_variable_name:
+        key: SSH_PRIVATE_KEY_BASE64
+        value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
+        protected: true
+
+    # *** This section requires GitLab Starter/Bronze+ ***
     # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
     project_push_rules:
       commit_message_regex: 'Fixes \d +'
@@ -143,7 +172,7 @@ projects:
       file_name_regex: ""
       max_file_size: 0 # in MB, 0 means unlimited
 
-    # *** This section requires GitLab EE 10.6+ ***
+    # *** This section requires GitLab Starter/Bronze+ ***
     merge_requests:
       # keys and values here are as described at
       # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
@@ -169,6 +198,7 @@ projects:
       develop:
         # this will unprotect a branch if it is protected currently
         protected: false
+      # a) The old, simpler syntax (TODO: check when it will be deprecated and removed from GitLab!)
       branch_only_protected_from_deletion:
         protected: true
         developers_can_push: true
@@ -186,44 +216,25 @@ projects:
         protected: true
         developers_can_push: true
         developers_can_merge: false
+      # b) The new, more complex syntax
       branch_protected_from_direct_pushes_from_everyone_but_with_merges_allowed:
         protected: true
-        push_access_level: 0 # = No access, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+        push_access_level: 0 # = No access, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
         merge_access_level: 30 # Developer
         unprotect_access_level: 40 # Maintainer
-      # note: protecting using wildcards works only when using the new API, with the dict keys like below
+      # note: protecting using wildcards works only when using the new syntax, with the dict keys like below
       '*-branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed_configured_using_wildcard':
         protected: true
         push_access_level: 0 # No access
         merge_access_level: 30 # Developer
         unprotect_access_level: 40 # Maintainer
 
-  # settings for ALL projects in 'my-group' group
-  "my-group/*":
-    deploy_keys:
-      # the name in the line below is not actually used, it's just for you
-      a_friendly_deploy_key_name:
-        # you have to pass whole SSH key content here even if GitLab already has this key added and you just assign it
-        # to another project here
-        # this is a limitation of GitLab API
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL (...)"
-        title: ssh_key_name_that_is_shown_in_gitlab
-        # note that you can set this to `true` or `false` only on the first assignment of the key / its creation
-        # see https://gitlab.com/gitlab-org/gitlab-ce/issues/30021#note_39567845
-        # this is a limitation of GitLab API
-        can_push: false
-      # the name in the line below is not actually used, it's just for you
-      another_friendly_deploy_key_name:
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)"
-        title: other_ssh_key_name_that_is_shown_in_gitlab
-        can_push: false
-
     # keys names are tags names and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/protected_tags.html
+    # https://docs.gitlab.com/ce/api/protected_tags.html
     tags:
       "v*":
         protected: true
-        create_access_level: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+        create_access_level: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
 
     # service names are as in the endpoints described at https://docs.gitlab.com/ce/api/services.html
     # hashes under those name correspond to the parameters described for given service there
@@ -240,7 +251,7 @@ projects:
         password: bar
 
     # key names here are hook URLs and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/projects.html#edit-project-hook
+    # https://docs.gitlab.com/ce/api/projects.html#edit-project-hook
     # except where hooks are deleted with `delete: true`
     hooks:
       "http://host.domain.com/some-old-hook-you-want-to-remove-from-config":
@@ -253,7 +264,7 @@ projects:
     # with this configuration section you can ensure that some files with appropriate content are in some or all
     # branches (or that they are NOT there)
     # note that this is gitlabform-specific feature, it DOES NOT directly correspond to GitLab API like other sections
-    # (although it uses https://docs.gitlab.com/ee/api/repository_files.html)
+    # (although it uses https://docs.gitlab.com/ce/api/repository_files.html)
     files:
       "README.md":
         overwrite: false
@@ -354,12 +365,12 @@ projects:
     # note: removing members from the config DOES NOT remove their access!
     #
     # keys names are members/groups names and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/projects.html#share-project-with-group
-    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
+    # https://docs.gitlab.com/ce/api/projects.html#share-project-with-group
+    # https://docs.gitlab.com/ce/api/members.html#add-a-member-to-a-group-or-project
     members:
       groups:
         my-group:
-          group_access: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+          group_access: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
         my-other-group/subgroup:
           group_access: 40 # Maintainer
       users:
@@ -370,7 +381,7 @@ projects:
     # this is for adding/changing/deleting pipeline schedules
     #
     # keys names are schedule descriptions and values are parameters described at
-    # https://docs.gitlab.com/ee/api/pipeline_schedules.html
+    # https://docs.gitlab.com/ce/api/pipeline_schedules.html
     #
     # note: if there multiple pipeline schedules with the same description in GitLab project, corresponding entry
     # will cause those schedules to be DELETED and replaced with the one from the configuration
