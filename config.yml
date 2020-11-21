@@ -20,7 +20,7 @@ gitlab:
 # configurations for groups by prefixing their names accordingly - with "group_" (f.e. "group_settings")
 # or "project_" (f.e. "project_hooks").
 #
-# The configurations are inherited hierarchically. S f.e. if you define some group-level config for "*" (f.e. "group_settings")
+# The configurations are inherited hierarchically. So f.e. if you define some group-level config for "*" (f.e. "group_settings")
 # and then some other group-level config for "my-group" ("groups_settings" with some other values), then the effective
 # config that the application will apply to "my-group" will be a merge of these 2 configs. Of course the more specific
 # (for "my-group") config overrides the more general one (for "*") whenever they differ.
