@@ -2,10 +2,6 @@
 # Please remove it if you create your config as a copy of this file.
 example_config: true
 
-# This indicates that this config file is compatible with GitLabForm 2.0+.
-# You should add it to your config after you update it to make it 2.0+ compatible.
-config_version: 2
-
 # GitLab API access config
 gitlab:
   # You can also set it in GITLAB_URL env var
@@ -13,8 +9,6 @@ gitlab:
   # You can also set it in GITLAB_TOKEN env var
   # this can be both private token OR OAuth2 access token
   token: "<private token of an admin user>"
-  # GitLab API version. As of now only 4 is supported.
-  api_version: 4
   # SSL will be verified by default, you can turn checks off by passing `ssl_verify: false`
   ssl_verify: true
   # timeout, defaults to 10
