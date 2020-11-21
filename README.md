@@ -122,15 +122,11 @@ To apply settings for a single project, run:
 
 ```gitlabform my-group/my-project1```
 
-To apply settings for all the projects in a group, run:
-
-```gitlabform "my-group/*"```
-
-To apply settings for the group itself, run:
+To apply settings for a group and its projects, run:
 
 ```gitlabform my-group```
 
-To apply settings for all groups of projects and projects matched by the config, run:
+To apply settings for all groups and projects matched by the config selectors, run:
 
 ```gitlabform ALL_DEFINED```
 
