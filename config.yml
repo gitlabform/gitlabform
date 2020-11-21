@@ -91,6 +91,8 @@ groups:
         protected: true
         delete: false  # Set to true to delete this variable
 
+  # settings for the 'my-group' group
+  "my-group":
     # this is for adding/changing the access level of group members - only users can be them
     # for removing users please see the flag below.
     #
@@ -104,7 +106,7 @@ groups:
     # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
     enforce_group_members: true  # default: false
 
-  # configures settings for the 'group-with-spammy-projects' group
+  # settings for the 'group-with-spammy-projects' group
   "group-with-spammy-projects":
     group_settings:
       # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
