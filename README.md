@@ -93,14 +93,11 @@ If so then:
 1. Create example `config.yml`:
 
 ```yaml
-config_version: 2
-
 gitlab:
   url: https://gitlab.yourcompany.com
   token: "<private token of an admin user>"
-  api_version: 4
 
-project_settings:
+projects:
   "my-group/*":
     deploy_keys:
       a_friendly_deploy_key_name: # this name is only used in the config
