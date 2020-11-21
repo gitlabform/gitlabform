@@ -44,10 +44,10 @@ GitLabForm enables you to manage:
 ...for:
 
 * all projects in your GitLab instance, including or excluding personal projects,
-* a group/subgroup of projects,
+* a group/subgroup AND/OR the projects within,
 * a single project,
 
-...using exact names or regexps for unlimited possibilites.
+...using exact names or regexps for unlimited possibilities.
 
 GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/egnyte/gitlabform/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
 GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/egnyte/gitlabform/docs/FEATURES_DESIGN.md#raw-parameters-passing).
