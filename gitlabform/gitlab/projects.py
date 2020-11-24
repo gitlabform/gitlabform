@@ -123,7 +123,11 @@ class GitLabProjects(GitLabCore):
         # }
         # ..as documented at: https://docs.gitlab.com/ce/api/projects.html#edit-project
         self._make_requests_to_api(
-            "projects/%s", project_and_group_name, "PUT", project_settings
+            "projects/%s",
+            project_and_group_name,
+            "PUT",
+            data=None,
+            json=project_settings,
         )
 
     def get_project_push_rules(self, project_and_group_name: str):
