@@ -128,7 +128,10 @@ Similarly to the guidelines for making PRs with documentation improvements - ple
 * add tests along with the new code that prove that it works:
   * in case of non-trivial logic add/change please add unit tests,
   * for all bug fixes and new features using GitLab API please add integration tests
-* use [Black](https://github.com/psf/black) code formatter,
+* use [Black](https://github.com/psf/black) code formatter:
+  ```
+  black .
+  ```
 * squash your commits (unless there is a reason not to),
 * try to write [good commit message(s)](https://chris.beams.io/posts/git-commit/),
  
