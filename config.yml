@@ -120,7 +120,8 @@ projects_and_groups:
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
       jobs_enabled: true
-      public_jobs: false # "Public pipelines" checkbox in GitLab web UI
+      # "Public pipelines" checkbox in GitLab web UI
+      public_jobs: false
       visibility: internal
       only_allow_merge_if_pipeline_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
@@ -136,7 +137,8 @@ projects_and_groups:
     # https://docs.gitlab.com/ce/api/members.html#add-a-member-to-a-group-or-project
     group_members:
       my-user:
-        access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
+        # 50 = Owner, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
+        access_level: 50
 
     # if this flag is set to 'true', then removing a user the above config will remove the user from the group
     # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
@@ -186,22 +188,27 @@ projects_and_groups:
       # b) The new, more complex syntax
       branch_protected_from_direct_pushes_from_everyone_but_with_merges_allowed:
         protected: true
-        push_access_level: 0 # = No access, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
-        merge_access_level: 30 # Developer
-        unprotect_access_level: 40 # Maintainer
+        # 0 = No access, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
+        push_access_level: 0
+        # 30 = Developer
+        merge_access_level: 30
+        # 40 = Maintainer
+        unprotect_access_level: 40
       # note: protecting using wildcards works only when using the new syntax, with the dict keys like below
       '*-branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed_configured_using_wildcard':
         protected: true
-        push_access_level: 0 # No access
-        merge_access_level: 30 # Developer
-        unprotect_access_level: 40 # Maintainer
+        # See "valid access levels" explained above
+        push_access_level: 0
+        merge_access_level: 30
+        unprotect_access_level: 40
 
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ce/api/protected_tags.html
     project_tags: # TODO: keyword change
       "v*":
         protected: true
-        create_access_level: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
+        # 40 = Maintainer, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
+        create_access_level: 40
 
     # service names are as in the endpoints described at https://docs.gitlab.com/ce/api/services.html
     # hashes under those name correspond to the parameters described for given service there
@@ -224,7 +231,8 @@ projects_and_groups:
       "http://host.domain.com/some-old-hook-you-want-to-remove-from-config":
         delete: true
       "http://127.0.0.1:5000/hooks/merge-request":
-        push_events: false # this is set to true by GitLab API by default
+        # this is set to true by GitLab API by default
+        push_events: false
         merge_requests_events: true
         token: some_secret_auth_token
 
@@ -295,7 +303,8 @@ projects_and_groups:
       prevent_secrets: false
       author_email_regex: ""
       file_name_regex: ""
-      max_file_size: 0 # in MB, 0 means unlimited
+      # in MB, 0 means unlimited
+      max_file_size: 0
 
     # *** This section requires GitLab Starter/Bronze+ ***
     project_merge_requests: # TODO: keyword change
@@ -346,7 +355,8 @@ projects_and_groups:
           - master
         skip_ci: true
       "other-file":
-        skip: true # this will skip processing this *single file* in case it is configured on a group level
+        # this will skip processing this *single file* in case it is configured on a group level
+        skip: true
 
     # this is for adding/changing the access level of project members - groups or users
     # note: removing members from the config DOES NOT remove their access!
@@ -357,12 +367,13 @@ projects_and_groups:
     project_members: # TODO: keyword change
       groups:
         my-group:
-          group_access: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
+          # 40 = Maintainer, see "valid access levels" at https://docs.gitlab.com/ce/api/members.html
+          group_access: 40
         my-other-group/subgroup:
-          group_access: 40 # Maintainer
+          group_access: 40
       users:
         my-user:
-          access_level: 40 # Maintainer
+          access_level: 40
           expires_at: 2019-09-26
 
     # this is for adding/changing/deleting pipeline schedules
@@ -389,7 +400,8 @@ projects_and_groups:
         variables:
           some_variable:
             value: some_value
-            variable_type: file # optional parameter, defaults to 'env_var'
+            # optional parameter, defaults to 'env_var'
+            variable_type: file
           other_variable:
             value: another_value
 
