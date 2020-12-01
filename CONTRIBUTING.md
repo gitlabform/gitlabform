@@ -142,3 +142,20 @@ Additionally please follow these GitLabForm-specific guidelines:
 
 We are open to refactoring but in case of bigger efforts we suggest creating an issue first and discussing
 what you propose to do before doing it.
+
+## Releases
+
+### Versioning
+
+We try to follow [semantic versioning](https://semver.org/). When we need to re-release the same code for some reason
+(f.e. build of some package, like Docker images, has failed) then we add 4th version element, f.e. 1.18.1.2 is the
+3rd release of app code version 1.18.1 (1st was 1.18.1 and the 2nd - 1.18.1.1).
+
+### Procedure
+
+1. Uptick the version in `version` file. Commit message should preferably be sth like:
+   `Release v 1.18.1 with #133 and #134 fixed`.
+2. Create version tag with `v` prefix, f.e. `v1.18.1.2`.
+3. Push commit & tag. Pushing the tag should trigger a Travis pipeline that will make a release to PyPI and Dockerhub.
+4. Create a release in GitHub. See previous releases for the rough pattern of how we write about new features
+and fixes. Don't forget to give thanks to all the contributors! :)
