@@ -102,6 +102,17 @@ group_settings:
       only_allow_merge_if_pipeline_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
 
+      # Container Registry cleanup policies
+      # https://docs.gitlab.com/ee/user/packages/container_registry/#use-the-cleanup-policy-api
+      container_expiration_policy_attributes:
+        cadence: "1month"
+        enabled: true
+        keep_n: 1
+        older_than: "14d"
+        name_regex: ""
+        name_regex_delete: ".*"
+        name_regex_keep: ".*-master"
+
     # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
     project_push_rules:
       commit_message_regex: 'Fixes \d +'
