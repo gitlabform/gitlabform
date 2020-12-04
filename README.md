@@ -21,29 +21,33 @@ using hierarchical configuration written in YAML.
 
 GitLabForm enables you to manage:
 
-* Group settings,
-* Project settings,
-* Archive/unarchive project,
-* Project members (users and groups) {add/change access level, NO removal yet},
-* Group members (users) {add/remove user, change access level},
-* Deployment keys,
-* Secret variables (on project and group/subgroup level),
-* Branches (protect/unprotect),
-* Tags (protect/unprotect),
-* Services,
-* (Project) Hooks,
-* (Project) Push Rules (**GitLab EE only**),
-* (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
-* Merge Requests approvals settings and approvers (**GitLab EE only**),
-* Pipeline schedules,
+* Group:
+  * Settings,
+  * Members (users) {add/remove user, change access level},
+  * Secret variables,
+
+* Project:
+  * Settings,
+  * Members (users and groups) {add/change access level, NO removal yet},
+  * Secret variables,
+  * Deployment keys,
+  * Branches (protect/unprotect),
+  * Tags (protect/unprotect),
+  * Services,
+  * Hooks,
+  * (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
+  * Push Rules (**GitLab Starter/Bronze+ only**),
+  * Merge Requests approvals settings and approvers (**GitLab Starter/Bronze+ only**),
+  * Pipeline schedules,
+  * Archive/unarchive,
 
 ...for:
 
-* all projects in your GitLab instance/that you have access to,
-* a group/subgroup of projects,
+* all projects in your GitLab instance, including or excluding personal projects,
+* a group/subgroup AND/OR the projects within,
 * a single project,
 
-...and a combination of them.
+...using exact names or regexps for unlimited possibilities.
 
 GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/egnyte/gitlabform/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
 GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/egnyte/gitlabform/docs/FEATURES_DESIGN.md#raw-parameters-passing).
@@ -54,19 +58,23 @@ GitLabForm has roughly the same purpose as [GitLab provider](https://www.terrafo
 for [Terraform](https://www.terraform.io/) (which is a tool that we love and which has inspired us to write this app),
 but it has a different set of features and uses a different configuration format.
 
-Please read more about [GitLab provider for Terraform vs GitLabForm](https://github.com/egnyte/gitlabform/docs/GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
+Please read more about [GitLab provider for Terraform vs GitLabForm](https://github.com/egnyte/gitlabform/docs/GT_VS_GLF.md).
+This article includes a link to the feature matrix / comparison sheet between these two tools.
 
 To configure your GitLab instance itself (appearance, application settings, features, license) please check out
 the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-configuration-as-code) project!
 
 ### Limitations
 
-Some of the app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/egnyte/gitlabform/issues?q=is%3Aissue+is%3Aopen+label%3A%22gitlab+issue%22). Please check the links to the GitLab issue(s) in their comments and please upvote them if they are affecting you. Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
+Some of the app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/egnyte/gitlabform/issues?q=is%3Aissue+is%3Aopen+label%3A%22gitlab+issue%22).
+Please check the links to the GitLab issue(s) in their comments and please upvote them if they are affecting you.
+Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
 
 ## Requirements
 
 * Python 3.5+ or Docker
-* GitLab 11+, GitLab EE for Merge Requests & Push Rules management
+* GitLab 11+
+* GitLab Starter/Bronze+ (non-free) for Merge Requests & Push Rules management
 
 ## Installation
 
@@ -86,16 +94,13 @@ If so then:
 
 ```yaml
 gitlab:
-  # You can also set in your environment GITLAB_URL
   url: https://gitlab.yourcompany.com
-  # You can also set in your environment GITLAB_TOKEN
   token: "<private token of an admin user>"
-  api_version: 4
 
-group_settings:
-  my-group:
+projects_and_groups:
+  my-group":
     deploy_keys:
-      a_friendly_deploy_key_name:  # this name is only used in GitLabForm config
+      a_friendly_deploy_key_name: # this name is only used in the config
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3WiHAsm2UTz2dU1vKFYUGfHI1p5fIv84BbtV/9jAKvZhVHDqMa07PgVtkttjvDC8bA1kezhOBKcO0KNzVoDp0ENq7WLxFyLFMQ9USf8LmOY70uV/l8Gpcn1ZT7zRBdEzUUgF/PjZukqVtuHqf9TCO8Ekvjag9XRfVNadKs25rbL60oqpIpEUqAbmQ4j6GFcfBBBPuVlKfidI6O039dAnDUsmeafwCOhEvQmF+N5Diauw3Mk+9TMKNlOWM+pO2DKxX9LLLWGVA9Dqr6dWY0eHjWKUmk2B1h1HYW+aUyoWX2TGsVX9DlNY7CKiQGsL5MRH9IXKMQ8cfMweKoEcwSSXJ
         title: ssh_key_name_that_is_shown_in_gitlab
         can_push: false
@@ -117,18 +122,17 @@ To apply settings for a single project, run:
 
 ```gitlabform my-group/my-project1```
 
-To apply settings for a group of projects, run:
+To apply settings for a group and its projects, run:
 
 ```gitlabform my-group```
 
-To apply settings for all groups of projects and projects explicitly defined in the config, run:
+To apply settings for all groups and projects matched by the config selectors, run:
 
 ```gitlabform ALL_DEFINED```
 
-To apply settings for all projects, run:
+To apply settings for all projects in the GitLab instance, run:
 
 ```gitlabform ALL```
-
 
 Run:
 
