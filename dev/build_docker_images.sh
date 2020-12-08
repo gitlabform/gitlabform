@@ -11,7 +11,7 @@ do
     docker build \
         --build-arg PY_VERSION=$python_version \
         --build-arg OS_VERSION="${!effective_version}" \
-        --file "${os}.Dockerfile" \
+        --file "dev/${os}.Dockerfile" \
         --tag "${latest}" .
     tags="$tags ${latest}"
 
