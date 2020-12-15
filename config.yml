@@ -8,11 +8,11 @@ gitlab:
   url: https://gitlab.yourcompany.com
   # You can also set in your environment GITLAB_TOKEN
   # this can be both private token OR OAuth2 access token
-  token: "<private token of an admin user>"
+  token: '<private token of an admin user>'
   # GitLab API version. As of now only 4 is supported.
   api_version: 4
   # SSL will be verified by default, you can turn checks off by passing `ssl_verify: false`
-  ssl_verify: true
+  ssl_verify: false
   # timeout, defaults to 10
   timeout: 10
 
@@ -42,29 +42,29 @@ common_settings:
     # this name is not actually used, it's just for you
     a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
       key: A_VERY_COMMONLY_USED_PASSWORD
-      value: "ThisIsAVerySecretPassword"
-      delete: false  # Set to true to delete this variable
+      value: 'ThisIsAVerySecretPassword'
+      delete: false # Set to true to delete this variable
 
   # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
   group_secret_variables:
     # this name is not actually used, it's just for you
     a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
       key: A_VERY_COMMONLY_USED_PASSWORD
-      value: "ThisIsAVerySecretPassword"
+      value: 'ThisIsAVerySecretPassword'
       variable_type: env_var #or file
       protected: false #
-      delete: false  # Set to true to delete this variable
+      delete: false # Set to true to delete this variable
 
 group_settings:
   # settings for ALL projects in 'my-group' group
-  "my-group":
+  'my-group':
     deploy_keys:
       # this name is not actually used, it's just for you
       a_friendly_deploy_key_name:
         # you have to pass whole SSH key content here even if GitLab already has this key added and you just assign it
         # to another project here
         # this is a limitation of GitLab API
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL (...)"
+        key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL (...)'
         title: ssh_key_name_that_is_shown_in_gitlab
         # note that you can set this to `true` or `false` only on the first assignment of the key / its creation
         # see https://gitlab.com/gitlab-org/gitlab-ce/issues/30021#note_39567845
@@ -72,7 +72,7 @@ group_settings:
         can_push: false
       # this name is not actually used, it's just for you
       another_friendly_deploy_key_name:
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)"
+        key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)'
         title: other_ssh_key_name_that_is_shown_in_gitlab
         can_push: false
 
@@ -81,14 +81,14 @@ group_settings:
       # this name is not actually used, it's just for you
       a_friendly_secret_variable_name:
         key: SSH_PRIVATE_KEY_BASE64
-        value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
+        value: 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)'
 
     # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
     group_secret_variables:
       # this name is not actually used, it's just for you
       a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
         key: A_VERY_COMMONLY_USED_PASSWORD
-        value: "ThisIsAVerySecretPassword"
+        value: 'ThisIsAVerySecretPassword'
         protected: true
         # note that there are extra requirements for variables to be "masked",
         # see https://docs.gitlab.com/ee/ci/variables/#masked-variable-requirements
@@ -105,12 +105,12 @@ group_settings:
     # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
     project_push_rules:
       commit_message_regex: 'Fixes \d +'
-      branch_name_regex: ""
+      branch_name_regex: ''
       deny_delete_tag: false
       member_check: false
       prevent_secrets: false
-      author_email_regex: ""
-      file_name_regex: ""
+      author_email_regex: ''
+      file_name_regex: ''
       max_file_size: 0 # in MB, 0 means unlimited
 
     # *** This section requires GitLab EE 10.6+ ***
@@ -147,8 +147,8 @@ group_settings:
         protected: true
         developers_can_push: false
         developers_can_merge: false
-      brach_protected_from_direct_pushes_from_developers_but_with_merges_allowed:
-        protected: true
+      ? brach_protected_from_direct_pushes_from_developers_but_with_merges_allowed
+      : protected: true
         developers_can_push: false
         developers_can_merge: true
       # below setup is probably not very useful but we are adding it for completeness
@@ -162,8 +162,8 @@ group_settings:
         merge_access_level: 30 # Developer
         unprotect_access_level: 40 # Maintainer
       # note: protecting using wildcards works only when using the new API, with the dict keys like below
-      '*-branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed_configured_using_wildcard':
-        protected: true
+      ? '*-branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed_configured_using_wildcard'
+      : protected: true
         push_access_level: 0 # No access
         merge_access_level: 30 # Developer
         unprotect_access_level: 40 # Maintainer
@@ -179,12 +179,12 @@ group_settings:
 
     # if this flag is set to 'true', then removing a user the above config will remove the user from the group
     # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
-    enforce_group_members: true  # default: false
+    enforce_group_members: true # default: false
 
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
     tags:
-      "v*":
+      'v*':
         protected: true
         create_access_level: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
 
@@ -206,9 +206,9 @@ group_settings:
     # https://docs.gitlab.com/ee/api/projects.html#edit-project-hook
     # except where hooks are deleted with `delete: true`
     hooks:
-      "http://host.domain.com/some-old-hook-you-want-to-remove-from-config":
+      'http://host.domain.com/some-old-hook-you-want-to-remove-from-config':
         delete: true
-      "http://127.0.0.1:5000/hooks/merge-request":
+      'http://127.0.0.1:5000/hooks/merge-request':
         push_events: false # this is set to true by GitLab API by default
         merge_requests_events: true
         token: some_secret_auth_token
@@ -218,7 +218,7 @@ group_settings:
     # note that this is gitlabform-specific feature, it DOES NOT directly correspond to GitLab API like other sections
     # (although it uses https://docs.gitlab.com/ee/api/repository_files.html)
     files:
-      "README.md":
+      'README.md':
         overwrite: false
         branches:
           - develop
@@ -227,7 +227,7 @@ group_settings:
         skip_ci: true
         content: |
           This is a default README. Please replace it with a proper one!
-      ".gitlab-ci.yml":
+      '.gitlab-ci.yml':
         overwrite: true
         branches: all
         content: |
@@ -239,33 +239,33 @@ group_settings:
             stage: test
             script:
               - npm test
-      "other-file":
+      'other-file':
         overwrite: true
         branches: all
         # You can provide file contents with external file too. Both absolute and relative paths are supported.
         # Relative paths are interpreted as relative to `config.yml` file location.
         file: some-file.txt
-      "file-using-templating":
+      'file-using-templating':
         overwrite: true
         branches: all
         content: |
           Simple templating is supported via jinja2 with two default variables
           {{ project }} will be replaced by project name, while {{ group }} by a group name.
           All occurences will be replaced.
-      "file-escape-templating":
+      'file-escape-templating':
         branches: all
         template: no
         content: |
           {{ project }} will be rendered literally
-      "file-with-custom-variable":
+      'file-with-custom-variable':
         branches: all
         content: |
           {{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env.
           Group: {{ group }} and project: {{ project }} are always accessable by jinja.
         jinja_env:
-          foo: "fooz"
-          bar: "barz"
-      "file-to-set-in-protected-branches":
+          foo: 'fooz'
+          bar: 'barz'
+      'file-to-set-in-protected-branches':
         branches: protected
         content: |
           This file will be added to all protected branches.
@@ -284,7 +284,7 @@ group_settings:
 
 project_settings:
   # settings specific to 'my-group/my-project1' project
-  "my-group/my-project1":
+  'my-group/my-project1':
     project_settings:
       # this will make this project settings set to values defined on a group level, but with this single parameter
       # overriden
@@ -308,7 +308,7 @@ project_settings:
       skip: true # this will skip whole hooks config *section* for this project, although it is set on group level
 
     files:
-      "some-file":
+      'some-file':
         overwrite: true
         branches:
           - develop
@@ -317,13 +317,13 @@ project_settings:
         only_first_branch: true
         content: |
           We want this file to be set only in the first existing branch from the branch list above.
-      "some-path/garbage-file":
+      'some-path/garbage-file':
         delete: true
         branches:
           - develop
           - master
         skip_ci: true
-      "other-file":
+      'other-file':
         skip: true # this will skip processing this *single file* in case it is configured on a group level
 
     # this is for adding/changing the access level of project members - groups or users
@@ -356,14 +356,14 @@ project_settings:
     # timezone defaults to 'UTC', valid values must be supported by ActiveSupport::TimeZone and can be taken e.g.
     # from https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
     schedules:
-      "Some schedule":
+      'Some schedule':
         ref: master
-        cron: "0 * * * MON-FRI"
-        cron_timezone: "London"
+        cron: '0 * * * MON-FRI'
+        cron_timezone: 'London'
         active: false
-      "Another schedule":
+      'Another schedule':
         ref: develop
-        cron: "0 * * * *"
+        cron: '0 * * * *'
         variables:
           some_variable:
             value: some_value
