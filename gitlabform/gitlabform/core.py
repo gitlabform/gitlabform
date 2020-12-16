@@ -29,6 +29,7 @@ class GitLabFormCore(object):
             self.set_log_level(tests=True)
             self.skip_version_check = True
             self.show_version = False
+            self.terminate_after_error = False
         else:
             (
                 self.project_or_group,
@@ -40,6 +41,7 @@ class GitLabFormCore(object):
                 self.noop,
                 self.skip_version_check,
                 self.show_version,
+                self.terminate_after_error,
             ) = self.parse_args()
             self.set_log_level()
 
@@ -127,6 +129,14 @@ class GitLabFormCore(object):
             help="Skips checking if the latest version is used",
         )
 
+        parser.add_argument(
+            "-t",
+            "--terminate",
+            dest="terminate_after_error",
+            action="store_true",
+            help="Terminates the program from running after the first error",
+        )
+
         args = parser.parse_args()
 
         return (
@@ -139,6 +149,7 @@ class GitLabFormCore(object):
             args.noop,
             args.skip_version_check,
             args.show_version,
+            args.terminate_after_error,
         )
 
     def set_log_level(self, tests=False):
@@ -277,6 +288,12 @@ class GitLabFormCore(object):
                 )
 
             except Exception as e:
+                if self.terminate_after_error:
+                    print(
+                        "+++ Errors occurred while processing due to '%s' ... Exiting now...",
+                        e,
+                    )
+                    sys.exit(1)
                 logging.error("+++ Error while processing '%s'", group)
                 traceback.print_exc()
 
@@ -317,6 +334,12 @@ class GitLabFormCore(object):
                 )
 
             except Exception as e:
+                if self.terminate_after_error:
+                    print(
+                        "+++ Errors occurred while processing due to '%s' ... Exiting now...",
+                        e,
+                    )
+                    sys.exit(1)
                 logging.error("+++ Error while processing '%s'", project_and_group)
                 traceback.print_exc()
 
