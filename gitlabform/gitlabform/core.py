@@ -29,7 +29,7 @@ class GitLabFormCore(object):
             self.set_log_level(tests=True)
             self.skip_version_check = True
             self.show_version = False
-            self.terminate_after_error = False
+            self.terminate_after_error = False  # Not sure if this should be false
         else:
             (
                 self.project_or_group,
@@ -132,7 +132,7 @@ class GitLabFormCore(object):
         parser.add_argument(
             "-t",
             "--terminate",
-            dest="terminate_after_error",
+            dest="terminate_error",
             action="store_true",
             help="Terminates the program from running after the first error",
         )
@@ -182,6 +182,12 @@ class GitLabFormCore(object):
                 version += f" (the latest is {latest_version} - please update!)"
 
         return version
+
+    def terminate_error(self, terminate_after_error):
+        if self.terminate_after_error:
+            with Exception as e:
+                print("Exiting due to: %s", e)
+                sys.exit(1)
 
     def initialize_configuration_and_gitlab(self):
 
@@ -291,11 +297,6 @@ class GitLabFormCore(object):
                 logging.error("+++ Error while processing '%s'", group)
                 traceback.print_exc()
 
-            if self.terminate_after_error:
-                with Exception as e:
-                    print("+++ Exiting due to: %s", e)
-                    sys.exit(1)
-
             logging.debug("< (%s/%s) FINISHED Processing: %s", g, len(groups), group)
 
         p = 0
@@ -335,11 +336,6 @@ class GitLabFormCore(object):
             except Exception as e:
                 logging.error("+++ Error while processing '%s'", project_and_group)
                 traceback.print_exc()
-
-            if self.terminate_after_error:
-                with Exception as e:
-                    print("+++ Exiting due to: %s", e)
-                    sys.exit(1)
 
             logging.debug(
                 "@ [%s/%s] FINISHED Processing: %s",
