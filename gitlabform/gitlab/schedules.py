@@ -114,5 +114,5 @@ class GitLabPipelineSchedules(GitLabCore):
             "projects/%s/pipeline_schedules/%s/variables/%s",
             (project_and_group_name, pipeline_schedule_id, variable_key),
             method="DELETE",
-            expected_codes=[200, 201, 204, 404],
+            expected_codes=[200, 201, 202, 204, 404],
         )
