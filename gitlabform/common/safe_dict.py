@@ -1,6 +1,3 @@
-from functools import wraps
-
-
 class SafeDict(dict):
     """
     A dict that a "get" method that allows to use a path-like reference to its subdict values.
@@ -13,8 +10,14 @@ class SafeDict(dict):
     Code based on https://stackoverflow.com/a/44859638/2693875
     """
 
+    def __init__(self, seq=None, key_path_separator: str = "|", exclude_keys=[]):
+        super(SafeDict, self).__init__(seq)
+        for excluded_key in exclude_keys:
+            self.pop(excluded_key)
+        self.key_path_separator = key_path_separator
+
     def get(self, path, default=None):
-        keys = path.split("|")
+        keys = path.split(self.key_path_separator)
         val = None
 
         for key in keys:
@@ -30,15 +33,3 @@ class SafeDict(dict):
                 break
 
         return val
-
-
-def configuration_to_safe_dict(method):
-    """
-    This wrapper function calls the method with the configuration converted from a regular dict into a SafeDict
-    """
-
-    @wraps(method)
-    def method_wrapper(self, project_and_group, configuration, dry_run):
-        return method(self, project_and_group, SafeDict(configuration), dry_run)
-
-    return method_wrapper

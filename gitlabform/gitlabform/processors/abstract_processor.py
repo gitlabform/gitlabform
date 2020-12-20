@@ -1,7 +1,20 @@
 import logging
 from abc import ABC, abstractmethod
+from functools import wraps
 
-from gitlabform.gitlabform.processors.util.decorators import configuration_to_safe_dict
+from gitlabform.common.safe_dict import SafeDict
+
+
+def configuration_to_safe_dict(method):
+    """
+    This wrapper function calls the method with the configuration converted from a regular dict into a SafeDict
+    """
+
+    @wraps(method)
+    def method_wrapper(self, project_and_group, configuration, dry_run):
+        return method(self, project_and_group, SafeDict(configuration), dry_run)
+
+    return method_wrapper
 
 
 class AbstractProcessor(ABC):

@@ -1,8 +1,8 @@
 import logging
 
+from gitlabform.common.safe_dict import SafeDict
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.gitlabform.processors.util.decorators import SafeDict
 from gitlabform.gitlabform.processors.util.difference_logger import DifferenceLogger
 
 
