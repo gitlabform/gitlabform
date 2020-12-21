@@ -30,7 +30,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "certifi",  # we want the latest root certs for security
-        "requests==2.25.0",
+        "requests==2.25.1",
         "chardet==3.0.4",
         "idna==2.10",
         "Jinja2==2.11.2",
