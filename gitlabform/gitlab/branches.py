@@ -2,6 +2,8 @@ from gitlabform.gitlab.core import GitLabCore
 
 
 class GitLabBranches(GitLabCore):
+
+    # old API
     def protect_branch(
         self, project_and_group_name, branch, developers_can_push, developers_can_merge
     ):
@@ -19,6 +21,7 @@ class GitLabBranches(GitLabCore):
             expected_codes=[200, 201],
         )
 
+    # new API
     def branch_access_level(
         self,
         project_and_group_name,
@@ -38,7 +41,33 @@ class GitLabBranches(GitLabCore):
             ),
             method="POST",
             data={},
-            expected_codes=[200, 201, 409],
+            expected_codes=[
+                200,
+                201,
+                409,
+            ],  # TODO: check why is 409 Conflict accepted here :/
+        )
+
+    def branch_code_owner_approval_required(
+        self,
+        project_and_group_name,
+        branch,
+        code_owner_approval_required,
+    ):
+        data = {
+            "id": project_and_group_name,
+            "branch": branch,
+            "code_owner_approval_required": code_owner_approval_required,
+        }
+        return self._make_requests_to_api(
+            "projects/%s/protected_branches/%s",
+            (
+                project_and_group_name,
+                branch,
+            ),
+            method="PATCH",
+            data=data,
+            expected_codes=[200, 201],
         )
 
     def unprotect_branch(self, project_and_group_name, branch):
