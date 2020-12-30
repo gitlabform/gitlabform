@@ -42,6 +42,18 @@ class BranchProtector(object):
                         configuration["branches"][branch]["merge_access_level"],
                         configuration["branches"][branch]["unprotect_access_level"],
                     )
+                if "code_owner_approval_required" in configuration["branches"][branch]:
+                    logging.debug(
+                        "Setting branch '%s' \"code owner approval required\" option",
+                        branch,
+                    )
+                    self.gitlab.branch_code_owner_approval_required(
+                        project_and_group,
+                        branch,
+                        configuration["branches"][branch][
+                            "code_owner_approval_required"
+                        ],
+                    )
             else:
                 logging.debug("Setting branch '%s' as unprotected", branch)
                 self.gitlab.unprotect_branch_new_api(project_and_group, branch)
