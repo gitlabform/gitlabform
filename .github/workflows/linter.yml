@@ -1,0 +1,14 @@
+name: Linter (Black)
+
+on: [push]
+
+jobs:
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Black Code Formatter
+        uses: lgeiger/black-action@master
+        with:
+          args: ". --check"
