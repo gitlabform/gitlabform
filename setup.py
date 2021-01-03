@@ -1,14 +1,25 @@
-from setuptools import setup, find_packages
+import os
+
 from pypandoc import convert_file
+from setuptools import setup, find_packages
 
 
 def convert_markdown_to_rst(file):
     return convert_file(file, "rst")
 
 
+# we need this to make reading the version work in some CI envs (like GitHub actions)
+def get_version_file_path():
+    ci_path = "/home/runner/work/requests-extra/requests-extra"
+    if os.path.isfile(ci_path + "/version"):
+        return ci_path + "/version"
+    else:
+        return "version"
+
+
 setup(
     name="gitlabform",
-    version=open("version").read(),
+    version=open(get_version_file_path()).read(),
     description='Specialized "configuration as a code" tool for GitLab projects, groups and more'
     " using hierarchical configuration written in YAML",
     long_description=convert_markdown_to_rst("README.md"),
@@ -42,9 +53,10 @@ setup(
     tests_require=[
         "pytest",
     ],
-    setup_requires=[
-        "pypandoc",
-    ],
+    # TODO: consider migrating to PEP 517. for now install the below dependency by yourself / in the CI.
+    # setup_requires=[
+    #     "pypandoc",
+    # ],
     scripts=[
         "bin/gitlabform",
     ],
