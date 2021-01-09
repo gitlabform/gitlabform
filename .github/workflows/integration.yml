@@ -1,0 +1,28 @@
+name: Tests (integration)
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          sudo apt-get install pandoc
+          pip install pypandoc pytest
+          python setup.py develop
+      - name: Run integration tests
+        run: |
+          mv dev/* .
+          bash run_gitlab_in_docker_ci.sh
+          export GITLAB_URL=$(cat gitlab_url.txt)
+          export GITLAB_TOKEN=$(cat gitlab_token.txt)
+          py.test gitlabform/gitlabform/test
