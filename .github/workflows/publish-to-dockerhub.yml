@@ -1,0 +1,32 @@
+name: Publish 📦 to DockerHub
+
+#on:
+#  push:
+#    tags:
+#      - "v*"
+on: [push]
+
+env:
+  alpine_version: alpine3.12
+  debian_version: buster
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        os: [alpine, debian]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Publish to DockerHub
+        env:
+          os: ${{ matrix.os }}
+        run: |
+          bash dev/build_docker_images.sh
