@@ -61,8 +61,8 @@ cecho b "Waiting 3 minutes before starting to check if GitLab has started..."
 cecho b "(Run this in another terminal you want to follow the instance logs:"
 cecho y "docker logs -f ${container_id}"
 cecho b ")"
-
 sleep 3m
+
 until curl -X POST -s http://localhost/oauth/token | grep "Missing required parameter" >/dev/null ; do
   cecho b "Waiting 5 more secs for GitLab to start..." ;
   sleep 5s ;

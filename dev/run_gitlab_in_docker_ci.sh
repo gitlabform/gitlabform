@@ -40,6 +40,7 @@ docker run --detach \
 
 cecho b "Waiting 3 minutes before starting to check if GitLab has started..."
 sleep 3m
+
 until curl -X POST -s http://localhost/oauth/token | grep "Missing required parameter" >/dev/null ; do
   cecho b "Waiting 5 more secs for GitLab to start..." ;
   sleep 5s ;
