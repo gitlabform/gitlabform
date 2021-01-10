@@ -250,6 +250,7 @@ class TestBranches:
         )
         assert branch_access_levels["code_owner_approval_required"] is False
 
+    # this test will pass only on GitLab EE
     def test__protect_branch_with_code_owner_approval_required(self, gitlab):
         gf = GitLabForm(
             config_string=protect_branch_with_code_owner_approval_required,
