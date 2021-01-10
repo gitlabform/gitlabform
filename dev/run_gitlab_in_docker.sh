@@ -46,7 +46,7 @@ mkdir -p data
 
 cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
-docker run --detach \
+container_id=$(docker run --detach \
     --hostname gitlab.foobar.com \
     --env GITLAB_OMNIBUS_CONFIG="gitlab_rails['initial_root_password'] = 'password'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;" \
     --publish 443:443 --publish 80:80 --publish 2022:22 \
@@ -55,9 +55,13 @@ docker run --detach \
     --volume "$(pwd)/config:/etc/gitlab" \
     --volume "$(pwd)/logs:/var/log/gitlab" \
     --volume "$(pwd)/data:/var/opt/gitlab" \
-    gitlab/gitlab-ee:latest
+    gitlab/gitlab-ee:latest)
 
 cecho b "Waiting 3 minutes before starting to check if GitLab has started..."
+cecho b "(Run this in another terminal you want to follow the instance logs:"
+cecho y "docker logs -f ${container_id}"
+cecho b ")"
+
 sleep 3m
 until curl -X POST -s http://localhost/oauth/token | grep "Missing required parameter" >/dev/null ; do
   cecho b "Waiting 5 more secs for GitLab to start..." ;
