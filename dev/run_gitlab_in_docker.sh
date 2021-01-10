@@ -36,12 +36,9 @@ if [[ -n $existing_gitlab_container_id ]] ; then
 fi
 
 mkdir -p config
-if [[ -f company.gitlab-license ]] ; then
+if [[ -f Gitlab.gitlab-license ]] ; then
   cecho b "EE license file found - using it..."
-  cp company.gitlab-license config/
-  use_license_file=" gitlab_rails['initial_license_file'] = '/etc/gitlab/company.gitlab-license';"
-else
-  use_license_file=""
+  cp Gitlab.gitlab-license config/
 fi
 
 mkdir -p logs
@@ -51,7 +48,7 @@ cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
 docker run --detach \
     --hostname gitlab.foobar.com \
-    --env GITLAB_OMNIBUS_CONFIG="gitlab_rails['initial_root_password'] = 'password'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;${use_license_file}" \
+    --env GITLAB_OMNIBUS_CONFIG="gitlab_rails['initial_root_password'] = 'password'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;" \
     --publish 443:443 --publish 80:80 --publish 2022:22 \
     --name gitlab \
     --restart always \

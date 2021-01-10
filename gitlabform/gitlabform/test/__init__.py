@@ -86,20 +86,22 @@ def remove_users_from_group(group_name, usernames):
             pass
 
 
-def create_readme_in_project(project_and_group):
+def create_file_in_project(project_and_group, branch, path, content):
     try:
-        gl.get_file(project_and_group, "master", "README.md")
+        gl.get_file(project_and_group, branch, path)
         gl.set_file(
             project_and_group,
-            "master",
-            "README.md",
-            "Hello World!",
-            "Restore original content",
+            branch,
+            path,
+            content,
+            "Restore file content",
         )
     except:
-        gl.add_file(
-            project_and_group, "master", "README.md", "Hello World!", "Create README"
-        )
+        gl.add_file(project_and_group, branch, path, content, "Set file content")
+
+
+def create_readme_in_project(project_and_group):
+    create_file_in_project(project_and_group, "master", "README.md", "Hello World!")
 
 
 def delete_variables_from_group(group_name, variables):
