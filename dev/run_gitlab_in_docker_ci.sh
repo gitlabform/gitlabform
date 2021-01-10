@@ -17,10 +17,12 @@ cecho b "Starting GitLab..."
 docker pull gitlab/gitlab-ee:latest
 
 mkdir -p config
-if [[ -f company.gitlab-license ]] ; then
-  cecho b "EE license file found - using it..."
-  cp company.gitlab-license config/
+
+if [[ -n ${GITLAB_EE_LICENSE} ]] ; then
+  cecho b "EE license file provided as a secret - using it..."
+  echo "${GITLAB_EE_LICENSE}" > config/Gitlab.gitlab-license
 fi
+
 mkdir -p logs
 mkdir -p data
 

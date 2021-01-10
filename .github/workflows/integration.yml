@@ -20,6 +20,8 @@ jobs:
           pip install pypandoc pytest
           python setup.py develop
       - name: Run integration tests
+        env:
+          GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: |
           mv dev/* .
           ./run_gitlab_in_docker_ci.sh
