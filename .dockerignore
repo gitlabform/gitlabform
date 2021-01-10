@@ -2,7 +2,4 @@ config.yml
 .dockerignore
 .git
 docs
-ci
 .gitignore
-.travis.yml
-docker.sh
