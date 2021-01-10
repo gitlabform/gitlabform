@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# TODO: deduplicate the code by merging this and non "_ci" scripts together.
+# TODO: they have been separated during migration to GitHub Actions, because using 'tput' in GHA
+# TODO: resulted in "tput: No value for $TERM and no -T specified" error, even if we would set TERM="dumb" before
+
 set -euo pipefail
 
 # no tput at all
