@@ -1,10 +1,9 @@
 name: Publish 📦 to DockerHub
 
-#on:
-#  push:
-#    tags:
-#      - "v*"
-on: [push]
+on:
+  push:
+    tags:
+      - "v*"
 
 env:
   alpine_version: alpine3.12
@@ -25,8 +24,22 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+      - name: Skip if this is not a final release
+        shell: python
+        run: |
+          import sys
+          import pkg_resources
+          version_file = open("version", "r")
+          version = version_file.readline().strip()
+          parsed_version = pkg_resources.parse_version(version)
+          if parsed_version.pre or parsed_version.dev:
+              print("This is a pre- or dev- release - skipping push.")
+              sys.exit(1)
       - name: Publish to DockerHub
         env:
           os: ${{ matrix.os }}
+        with:
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          bash dev/build_docker_images.sh
+          ./dev/build_docker_images.sh

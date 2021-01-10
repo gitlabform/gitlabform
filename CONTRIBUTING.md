@@ -99,9 +99,7 @@ against a disposable GitLab instance running as a Docker container OR use your o
 1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
 
 ```
-./dev/run_gitlab_in_docker.sh
-export GITLAB_URL=$(cat gitlab_url.txt)
-export GITLAB_TOKEN=$(cat gitlab_token.txt)
+. ./dev/run_gitlab_in_docker.sh
 ```
 
 2. Run `py.test gitlabform/gitlabform/test` to start the tests
@@ -109,7 +107,7 @@ export GITLAB_TOKEN=$(cat gitlab_token.txt)
 ##### Running integration tests using your own GitLab instance
 
 **Note**: although GitLabForm integration tests operate own their own groups, projects and users, it should be safe
-to run them against your own GitLab instance, but we DO NOT take any format responsibility for it. Please review 
+to run them against your own GitLab instance, but we DO NOT take any form of responsibility for it. Please review 
 the code to ensure what it does and run it at your own risk!
 
 1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
