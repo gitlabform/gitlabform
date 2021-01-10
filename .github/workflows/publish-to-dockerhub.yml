@@ -28,12 +28,12 @@ jobs:
         shell: python
         run: |
           import sys
-          import pkg_resources
+          from packaging.version import parse
           version_file = open("version", "r")
           version = version_file.readline().strip()
-          parsed_version = pkg_resources.parse_version(version)
-          if parsed_version.pre or parsed_version.dev:
-              print("This is a pre- or dev- release - skipping push.")
+          parsed_version = parse(version)
+          if parsed_version.is_prerelease:
+              print("This is a pre- and/or dev- release - skipping push.")
               sys.exit(1)
       - name: Publish to DockerHub
         env:
