@@ -33,7 +33,6 @@ fi
 
 for image in ${tags}
 do
-#  echo "$docker_password" | docker login -u "$docker_username" --password-stdin
-#  docker push "${image}"
-   echo "${image}"
+  echo "$docker_password" | docker login -u "$docker_username" --password-stdin
+  docker push "${image}"
 done

@@ -43,14 +43,14 @@ until curl -X POST -s http://localhost/oauth/token | grep "Missing required para
   sleep 5s ;
 done
 
-# get a root API access token for further operations...
-echo 'grant_type=password&username=root&password=password' > auth.txt
-curl --data "@auth.txt" -X POST -s http://localhost/oauth/token | jq -r .access_token > gitlab_token.txt
+# set variables used by the tests to access GitLab
+export GITLAB_URL="http://localhost"
 
-# ...and the GitLab URL, to make the output complete
-echo "http://localhost" > gitlab_url.txt
+data='grant_type=password&username=root&password=password'
+GITLAB_TOKEN=$(curl --data "${data}" -X POST -s "${GITLAB_URL}/oauth/token" | jq -r .access_token)
+export GITLAB_TOKEN
+cecho b 'Starting GitLab complete!. GITLAB_URL and GITLAB_TOKEN variables are set. You are ready to go!'
 
-cecho b 'Starting GitLab complete!'
 echo ''
 cecho b 'GitLab version:'
 curl -H "Authorization:Bearer $(cat gitlab_token.txt)" http://localhost/api/v4/version
