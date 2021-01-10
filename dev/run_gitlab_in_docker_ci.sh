@@ -53,5 +53,5 @@ cecho b 'Starting GitLab complete!. GITLAB_URL and GITLAB_TOKEN variables are se
 
 echo ''
 cecho b 'GitLab version:'
-curl -H "Authorization:Bearer $(cat gitlab_token.txt)" http://localhost/api/v4/version
+curl -H "Authorization:Bearer ${GITLAB_TOKEN}" http://localhost/api/v4/version
 echo ''
