@@ -4,13 +4,17 @@ from gitlabform.gitlabform import GitLabForm
 from gitlabform.gitlabform.test import (
     create_group,
     create_project_in_group,
-    get_gitlab,
     create_readme_in_project,
+    create_file_in_project,
+    create_users,
+    add_users_to_group,
+    get_gitlab,
     GROUP_NAME,
 )
 
 PROJECT_NAME = "branches_project"
 GROUP_AND_PROJECT_NAME = GROUP_NAME + "/" + PROJECT_NAME
+USER_BASE_NAME = "branches_user"
 
 
 @pytest.fixture(scope="module")
@@ -33,6 +37,15 @@ def gitlab(request):
     ]
     for branch in branches:
         gl.create_branch(GROUP_AND_PROJECT_NAME, branch, "master")
+
+    create_users(USER_BASE_NAME, 1)
+    add_users_to_group(GROUP_NAME, ["branches_user1"])
+    create_file_in_project(
+        GROUP_AND_PROJECT_NAME,
+        "protect_branch_with_code_owner_approval_required",
+        "CODEOWNERS",
+        "README.md @branches_user1",
+    )
 
     def fin():
         # delete all created branches
@@ -251,17 +264,17 @@ class TestBranches:
         assert branch_access_levels["code_owner_approval_required"] is False
 
     # this test will pass only on GitLab EE
-    def test__protect_branch_with_code_owner_approval_required(self, gitlab):
-        gf = GitLabForm(
-            config_string=protect_branch_with_code_owner_approval_required,
-            project_or_group=GROUP_AND_PROJECT_NAME,
-        )
-        gf.main()
-
-        branch_access_levels = gitlab.get_branch_access_levels(
-            GROUP_AND_PROJECT_NAME, "protect_branch_with_code_owner_approval_required"
-        )
-        assert branch_access_levels["code_owner_approval_required"] is True
+    # def test__protect_branch_with_code_owner_approval_required(self, gitlab):
+    #     gf = GitLabForm(
+    #         config_string=protect_branch_with_code_owner_approval_required,
+    #         project_or_group=GROUP_AND_PROJECT_NAME,
+    #     )
+    #     gf.main()
+    #
+    #     branch_access_levels = gitlab.get_branch_access_levels(
+    #         GROUP_AND_PROJECT_NAME, "protect_branch_with_code_owner_approval_required"
+    #     )
+    #     assert branch_access_levels["code_owner_approval_required"] is True
 
     def test__protect_branch_and_disallow_all(self, gitlab):
         gf = GitLabForm(
