@@ -55,6 +55,20 @@ project_settings:
         developers_can_merge: true
 """
 
+protect_branch_with_code_owner_approval_required = """
+gitlab:
+  api_version: 4
+
+project_settings:
+  gitlabform_tests_group/branches_project:
+    branches:
+      protect_branch_with_code_owner_approval_required:
+        protected: true
+        developers_can_push: false
+        developers_can_merge: true
+        code_owner_approval_required: true
+"""
+
 protect_branch_and_disallow_all = """
 gitlab:
   api_version: 4
@@ -229,6 +243,20 @@ class TestBranches:
         assert branch["protected"] is True
         assert branch["developers_can_push"] is True
         assert branch["developers_can_merge"] is True
+        assert branch["code_owner_approval_required"] is False
+
+    def test__protect_branch_with_code_owner_approval_required(self, gitlab):
+        gf = GitLabForm(
+            config_string=protect_branch_with_code_owner_approval_required,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
+        gf.main()
+
+        branch = gitlab.get_branch(
+            GROUP_AND_PROJECT_NAME, "protect_branch_with_code_owner_approval_required"
+        )
+        assert branch["protected"] is True
+        assert branch["code_owner_approval_required"] is True
 
     def test__protect_branch_and_disallow_all(self, gitlab):
         gf = GitLabForm(
