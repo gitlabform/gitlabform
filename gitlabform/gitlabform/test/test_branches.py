@@ -5,7 +5,7 @@ from gitlabform.gitlabform.test import (
     create_group,
     create_project_in_group,
     create_readme_in_project,
-    create_file_in_project,
+    # create_file_in_project,
     create_users,
     add_users_to_group,
     get_gitlab,
@@ -38,14 +38,14 @@ def gitlab(request):
     for branch in branches:
         gl.create_branch(GROUP_AND_PROJECT_NAME, branch, "master")
 
-    create_users(USER_BASE_NAME, 1)
-    add_users_to_group(GROUP_NAME, ["branches_user1"])
-    create_file_in_project(
-        GROUP_AND_PROJECT_NAME,
-        "protect_branch_with_code_owner_approval_required",
-        "CODEOWNERS",
-        "README.md @branches_user1",
-    )
+    # create_users(USER_BASE_NAME, 1)
+    # add_users_to_group(GROUP_NAME, ["branches_user1"])
+    # create_file_in_project(
+    #     GROUP_AND_PROJECT_NAME,
+    #     "protect_branch_with_code_owner_approval_required",
+    #     "CODEOWNERS",
+    #     "README.md @branches_user1",
+    # )
 
     def fin():
         # delete all created branches
@@ -258,10 +258,10 @@ class TestBranches:
         assert branch["developers_can_push"] is True
         assert branch["developers_can_merge"] is True
 
-        branch_access_levels = gitlab.get_branch_access_levels(
-            GROUP_AND_PROJECT_NAME, "protect_branch_but_allow_all"
-        )
-        assert branch_access_levels["code_owner_approval_required"] is False
+        # branch_access_levels = gitlab.get_branch_access_levels(
+        #     GROUP_AND_PROJECT_NAME, "protect_branch_but_allow_all"
+        # )
+        # assert branch_access_levels["code_owner_approval_required"] is False
 
     # this test will pass only on GitLab EE
     # def test__protect_branch_with_code_owner_approval_required(self, gitlab):
