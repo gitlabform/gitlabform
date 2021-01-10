@@ -14,7 +14,7 @@ from gitlabform.gitlabform.test import (
 
 PROJECT_NAME = "branches_project"
 GROUP_AND_PROJECT_NAME = GROUP_NAME + "/" + PROJECT_NAME
-USER_BASE_NAME = "branches_user"
+# USER_BASE_NAME = "branches_user"
 
 
 @pytest.fixture(scope="module")
