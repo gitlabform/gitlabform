@@ -18,17 +18,21 @@ cecho() {
         w | white|*) color=7 ;; # white or invalid color
        esac
     fi
-    if [[ -z ${TERM} ]] ; then
-      TERM="dumb"
-    fi
     tput setaf $color
-    echo "$exp"
+    echo $exp
     tput sgr0
 }
 
-cecho b "Starting GitLab..."
-
+cecho b "Pulling new GitLab image..."
 docker pull gitlab/gitlab-ee:latest
+
+cecho b "Preparing to start GitLab..."
+existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}")
+if [[ -n $existing_gitlab_container_id ]] ; then
+  cecho b "Stopping and removing existing GitLab container..."
+  docker stop --time=30 "$existing_gitlab_container_id"
+  docker rm "$existing_gitlab_container_id"
+fi
 
 mkdir -p config
 if [[ -f company.gitlab-license ]] ; then
@@ -38,6 +42,7 @@ fi
 mkdir -p logs
 mkdir -p data
 
+cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
 docker run --detach \
     --hostname gitlab.foobar.com \
@@ -57,14 +62,14 @@ until curl -X POST -s http://localhost/oauth/token | grep "Missing required para
   sleep 5s ;
 done
 
-# get a root API access token for further operations...
-echo 'grant_type=password&username=root&password=password' > auth.txt
-curl --data "@auth.txt" -X POST -s http://localhost/oauth/token | jq -r .access_token > gitlab_token.txt
+# set variables used by the tests to access GitLab
+export GITLAB_URL="http://localhost"
 
-# ...and the GitLab URL, to make the output complete
-echo "http://localhost" > gitlab_url.txt
+data='grant_type=password&username=root&password=password'
+GITLAB_TOKEN=$(curl --data "${data}" -X POST -s "${GITLAB_URL}/oauth/token" | jq -r .access_token)
+export GITLAB_TOKEN
+cecho b 'Starting GitLab complete!. GITLAB_URL and GITLAB_TOKEN variables are set. You are ready to go!'
 
-cecho b 'Starting GitLab complete!'
 echo ''
 cecho b 'GitLab version:'
 curl -H "Authorization:Bearer $(cat gitlab_token.txt)" http://localhost/api/v4/version
@@ -72,17 +77,10 @@ echo ''
 cecho b 'GitLab web UI URL (user: root, password: password)'
 echo 'http://localhost'
 echo ''
-cecho b 'Run these commands to set the env variables needed by the tests to use this GitLab instance:'
-# shellcheck disable=SC2016
-cecho g 'export GITLAB_URL=$(cat gitlab_url.txt)'
-# shellcheck disable=SC2016
-cecho g 'export GITLAB_TOKEN=$(cat gitlab_token.txt)'
+alias stop_gitlab='existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}"); docker stop --time=30 $existing_gitlab_container_id ; docker rm $existing_gitlab_container_id'
+cecho b 'Run "stop_gitlab" alias to stop the GitLab container.'
 echo ''
-cecho b 'Run this command to stop GitLab container:'
-# shellcheck disable=SC2016
-cecho r 'docker stop --time=30 $(docker ps -f "ancestor=gitlab/gitlab-ee" --format "{{.ID}}")'
-echo ''
-cecho b 'To start GitLab container again run above commands again. Note that GitLab will reuse existing ./data, ./config'
+cecho b 'To start GitLab container again, re-run this script. Note that GitLab will reuse existing ./data, ./config'
 cecho b 'and ./logs dirs. To start new GitLab instance from scratch please delete them.'
 echo ''
 cecho b 'Run this to start the integration tests:'
