@@ -43,15 +43,17 @@ until curl -X POST -s http://localhost/oauth/token | grep "Missing required para
   sleep 5s ;
 done
 
-# set variables used by the tests to access GitLab
-export GITLAB_URL="http://localhost"
+# create files with params needed by the tests to access GitLab
+# (we are using these files to pass values from this script to the outside bash shell
+# - we cannot change its env variables from inside it)
+echo "http://localhost" > gitlab_url.txt
 
 data='grant_type=password&username=root&password=password'
-GITLAB_TOKEN=$(curl --data "${data}" -X POST -s "${GITLAB_URL}/oauth/token" | jq -r .access_token)
-export GITLAB_TOKEN
-cecho b 'Starting GitLab complete!. GITLAB_URL and GITLAB_TOKEN variables are set. You are ready to go!'
+curl --data "${data}" -X POST -s http://localhost/oauth/token | jq -r .access_token > gitlab_token.txt
+
+cecho b 'Starting GitLab complete!'
 
 echo ''
 cecho b 'GitLab version:'
-curl -H "Authorization:Bearer ${GITLAB_TOKEN}" http://localhost/api/v4/version
+curl -H "Authorization:Bearer $(cat gitlab_token.txt)" http://localhost/api/v4/version
 echo ''

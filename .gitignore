@@ -49,7 +49,6 @@ config-develop.yml
 data/
 config/
 logs/
-auth.txt
 gitlab_token.txt
 gitlab_url.txt
 *.gitlab-license
