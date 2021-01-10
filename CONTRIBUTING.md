@@ -99,7 +99,9 @@ against a disposable GitLab instance running as a Docker container OR use your o
 1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
 
 ```
-. ./dev/run_gitlab_in_docker.sh
+./dev/run_gitlab_in_docker.sh
+export GITLAB_URL=$(cat gitlab_url.txt)
+export GITLAB_TOKEN=$(cat gitlab_token.txt)
 ```
 
 2. Run `py.test gitlabform/gitlabform/test` to start the tests
