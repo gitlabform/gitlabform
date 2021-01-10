@@ -23,6 +23,7 @@ def gitlab(request):
 
     branches = [
         "protect_branch_but_allow_all",
+        "protect_branch_with_code_owner_approval_required",
         "protect_branch_and_disallow_all",
         "protect_branch_and_allow_merges",
         "protect_branch_and_allow_pushes",
@@ -243,7 +244,11 @@ class TestBranches:
         assert branch["protected"] is True
         assert branch["developers_can_push"] is True
         assert branch["developers_can_merge"] is True
-        assert branch["code_owner_approval_required"] is False
+
+        branch_access_levels = gitlab.get_branch_access_levels(
+            GROUP_AND_PROJECT_NAME, "protect_branch_but_allow_all"
+        )
+        assert branch_access_levels["code_owner_approval_required"] is False
 
     def test__protect_branch_with_code_owner_approval_required(self, gitlab):
         gf = GitLabForm(
@@ -252,11 +257,10 @@ class TestBranches:
         )
         gf.main()
 
-        branch = gitlab.get_branch(
+        branch_access_levels = gitlab.get_branch_access_levels(
             GROUP_AND_PROJECT_NAME, "protect_branch_with_code_owner_approval_required"
         )
-        assert branch["protected"] is True
-        assert branch["code_owner_approval_required"] is True
+        assert branch_access_levels["code_owner_approval_required"] is True
 
     def test__protect_branch_and_disallow_all(self, gitlab):
         gf = GitLabForm(
