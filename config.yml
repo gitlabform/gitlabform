@@ -111,7 +111,7 @@ group_settings:
         older_than: "14d"
         name_regex: ""
         name_regex_delete: ".*"
-        name_regex_keep: ".*-master"
+        name_regex_keep: ".*-main"
 
     # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
     project_push_rules:
@@ -323,7 +323,7 @@ project_settings:
         overwrite: true
         branches:
           - develop
-          - master
+          - main
         # setting below value to `true` will make this file be set only for the first *existing* branch in the list above
         only_first_branch: true
         content: |
@@ -332,7 +332,7 @@ project_settings:
         delete: true
         branches:
           - develop
-          - master
+          - main
         skip_ci: true
       "other-file":
         skip: true # this will skip processing this *single file* in case it is configured on a group level
@@ -368,7 +368,7 @@ project_settings:
     # from https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
     schedules:
       "Some schedule":
-        ref: master
+        ref: main
         cron: "0 * * * MON-FRI"
         cron_timezone: "London"
         active: false

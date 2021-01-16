@@ -60,7 +60,7 @@ common_settings:
       only_first_branch: true  # add the file only to the first branch in the below list 
       branches:
         - develop
-        - master
+        - main
       skip_ci: true  # this will prevent the commit that applies this file change triggering CI build
       content: |
         This is a default project README. Please replace it with a proper one!
@@ -78,7 +78,7 @@ group_settings:
         only_first_branch: true 
         branches:
           - develop
-          - master
+          - main
         skip_ci: true
         content: |
           *.swp

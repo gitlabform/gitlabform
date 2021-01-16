@@ -44,8 +44,8 @@ GitLabForm enables you to manage:
 
 ...and a combination of them.
 
-GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/egnyte/gitlabform/blob/master/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
-GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/egnyte/gitlabform/blob/master/docs/FEATURES_DESIGN.md#raw-parameters-passing).
+GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/egnyte/gitlabform/blob/main/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
+GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/egnyte/gitlabform/blob/main/docs/FEATURES_DESIGN.md#raw-parameters-passing).
 
 ### Comparison to similar apps
 
@@ -53,7 +53,7 @@ GitLabForm has roughly the same purpose as [GitLab provider](https://www.terrafo
 for [Terraform](https://www.terraform.io/) (which is a tool that we love and which has inspired us to write this app),
 but it has a different set of features and uses a different configuration format.
 
-Please read more about [GitLab provider for Terraform vs GitLabForm](https://github.com/egnyte/gitlabform/blob/master/docs/GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
+Please read more about [GitLab provider for Terraform vs GitLabForm](https://github.com/egnyte/gitlabform/blob/main/docs/GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
 
 To configure your GitLab instance itself (appearance, application settings, features, license) please check out
 the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-configuration-as-code) project!
@@ -107,7 +107,7 @@ group_settings:
 
 ## Full configuration syntax
 
-See [config.yml](https://github.com/egnyte/gitlabform/blob/master/config.yml) in this repo as a well documented example
+See [config.yml](https://github.com/egnyte/gitlabform/blob/main/config.yml) in this repo as a well documented example
 of all the features, including configuring all projects in all groups, projects in "my-group" group and specifically
 project "my-group/my-project1".
 
@@ -165,7 +165,7 @@ build it, run the tests and learn about the code guidelines.
 
 
 For detailed info about how the app code has been organized, where is what and where and how to fix bugs and/or
-add new features, please see the [implementation design](https://github.com/egnyte/gitlabform/blob/master/docs/IMPLEMENTATION_DESIGN.md) article.
+add new features, please see the [implementation design](https://github.com/egnyte/gitlabform/blob/main/docs/IMPLEMENTATION_DESIGN.md) article.
 
 ## History
 

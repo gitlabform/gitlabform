@@ -19,7 +19,7 @@ def gitlab(request):
 
     create_group(GROUP_NAME)
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
-    create_readme_in_project(GROUP_AND_PROJECT_NAME)  # in master branch
+    create_readme_in_project(GROUP_AND_PROJECT_NAME)  # in main branch
     branches_to_create = [
         "protected_branch1",
         "protected_branch2",
@@ -28,7 +28,7 @@ def gitlab(request):
         "regular_branch2",
     ]
     for branch in branches_to_create:
-        gl.create_branch(GROUP_AND_PROJECT_NAME, branch, "master")
+        gl.create_branch(GROUP_AND_PROJECT_NAME, branch, "main")
 
     def fin():
         # delete all created branches
@@ -49,8 +49,8 @@ project_settings:
       "README.md":
         overwrite: true
         branches:
-          - master
-        content: "Content for master only"
+          - main
+        content: "Content for main only"
 """
 
 set_file_all_branches = """
@@ -102,8 +102,8 @@ class TestFiles:
         )
         gf.main()
 
-        file_content = gitlab.get_file(GROUP_AND_PROJECT_NAME, "master", "README.md")
-        assert file_content == "Content for master only"
+        file_content = gitlab.get_file(GROUP_AND_PROJECT_NAME, "main", "README.md")
+        assert file_content == "Content for main only"
 
         other_branch_file_content = gitlab.get_file(
             GROUP_AND_PROJECT_NAME, "protected_branch1", "README.md"
@@ -117,7 +117,7 @@ class TestFiles:
         gf.main()
 
         for branch in [
-            "master",
+            "main",
             "protected_branch1",
             "protected_branch2",
             "protected_branch3",
@@ -134,9 +134,9 @@ class TestFiles:
         )
         gf.main()
 
-        # master branch is protected by default
+        # main branch is protected by default
         for branch in [
-            "master",
+            "main",
             "protected_branch1",
             "protected_branch2",
             "protected_branch3",

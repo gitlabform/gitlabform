@@ -23,7 +23,7 @@ def gitlab(request):
 
     create_group(GROUP_NAME)
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
-    create_readme_in_project(GROUP_AND_PROJECT_NAME)  # in master branch
+    create_readme_in_project(GROUP_AND_PROJECT_NAME)  # in main branch
 
     branches = [
         "protect_branch_but_allow_all",
@@ -36,7 +36,7 @@ def gitlab(request):
         "protect_branch",
     ]
     for branch in branches:
-        gl.create_branch(GROUP_AND_PROJECT_NAME, branch, "master")
+        gl.create_branch(GROUP_AND_PROJECT_NAME, branch, "main")
 
     # create_users(USER_BASE_NAME, 1)
     # add_users_to_group(GROUP_NAME, ["branches_user1"])

@@ -23,21 +23,21 @@ def gitlab(request):
     delete_pipeline_schedules_from_project(GROUP_AND_PROJECT_NAME)
 
     another_branch = "scheduled/new-feature"
-    gl.create_branch(GROUP_AND_PROJECT_NAME, another_branch, "master")
+    gl.create_branch(GROUP_AND_PROJECT_NAME, another_branch, "main")
 
     gl.create_pipeline_schedule(
         GROUP_AND_PROJECT_NAME,
         "Existing schedule",
-        "master",
+        "main",
         "0 * * * *",
         {"active": "true"},
     )
     gl.create_pipeline_schedule(
-        GROUP_AND_PROJECT_NAME, "Existing schedule with vars", "master", "30 * * * *"
+        GROUP_AND_PROJECT_NAME, "Existing schedule with vars", "main", "30 * * * *"
     )
 
     gl.create_pipeline_schedule(
-        GROUP_AND_PROJECT_NAME, "Existing schedule to replace", "master", "30 1 * * *"
+        GROUP_AND_PROJECT_NAME, "Existing schedule to replace", "main", "30 1 * * *"
     )
     gl.create_pipeline_schedule(
         GROUP_AND_PROJECT_NAME,
@@ -47,7 +47,7 @@ def gitlab(request):
     )
 
     redundant_schedule = gl.create_pipeline_schedule(
-        GROUP_AND_PROJECT_NAME, "Redundant schedule", "master", "0 * * * *"
+        GROUP_AND_PROJECT_NAME, "Redundant schedule", "main", "0 * * * *"
     )
     gl.create_pipeline_schedule_variable(
         GROUP_AND_PROJECT_NAME, redundant_schedule["id"], "test_variable", "test_value"
@@ -71,7 +71,7 @@ project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:
       "New schedule":
-        ref: master
+        ref: main
         cron: "0 * * * *"
         cron_timezone: "London"
         active: true
@@ -85,7 +85,7 @@ project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:
       "New schedule with mandatory fields":
-        ref: master
+        ref: main
         cron: "30 1 * * *"
 """
 
@@ -97,7 +97,7 @@ project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:
       "New schedule with variables":
-        ref: master
+        ref: main
         cron: "30 1 * * *"
         variables:
             var1: 
@@ -160,7 +160,7 @@ class TestSchedules:
         )
         assert schedule is not None
         assert schedule["description"] == "New schedule"
-        assert schedule["ref"] == "master"
+        assert schedule["ref"] == "main"
         assert schedule["cron"] == "0 * * * *"
         assert schedule["cron_timezone"] == "London"
         assert schedule["active"] is True
@@ -177,7 +177,7 @@ class TestSchedules:
         )
         assert schedule is not None
         assert schedule["description"] == "New schedule with mandatory fields"
-        assert schedule["ref"] == "master"
+        assert schedule["ref"] == "main"
         assert schedule["cron"] == "30 1 * * *"
         assert schedule["cron_timezone"] == "UTC"
         assert schedule["active"] is True
@@ -194,7 +194,7 @@ class TestSchedules:
         )
         assert schedule is not None
         assert schedule["description"] == "New schedule with variables"
-        assert schedule["ref"] == "master"
+        assert schedule["ref"] == "main"
         assert schedule["cron"] == "30 1 * * *"
         assert schedule["cron_timezone"] == "UTC"
         assert schedule["active"] is True
