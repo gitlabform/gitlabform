@@ -64,7 +64,8 @@ Some of the app features are limited because of the GitLab API issues. [Here is 
 
 ## Requirements
 
-* Python 3.5+ or Docker
+* Python 3.6-3.8 **or** Docker
+  * (Python 3.9 should be fine too, but it's not "officially" supported yet)
 * GitLab 11+, GitLab EE for Merge Requests & Push Rules management
 
 ## Installation

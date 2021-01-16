@@ -26,7 +26,6 @@ setup(
     author="Egnyte and GitHub Contributors",
     keywords=["gitlab", "configuration-as-code"],
     classifiers=[
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
@@ -34,7 +33,8 @@ setup(
         "Intended Audience :: Information Technology",
         "Intended Audience :: System Administrators",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS",
         "Topic :: Software Development :: Version Control :: Git",
     ],
     packages=find_packages(),
