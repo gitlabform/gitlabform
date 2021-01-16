@@ -1,10 +1,9 @@
 name: Publish 🐳 to DockerHub
 
-#on:
-#  push:
-#    tags:
-#      - "v*"
-on: [push]
+on:
+  push:
+    tags:
+      - "v*"
 
 env:
   alpine_version: alpine3.12
