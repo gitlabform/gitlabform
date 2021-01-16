@@ -37,8 +37,10 @@ jobs:
           version = version_file.readline().strip()
           parsed_version = parse(version)
           if parsed_version.is_prerelease:
-              print("This is a pre- and/or dev- release - skipping push.")
+              print("This is a pre- and/or dev- release - skipping publish!")
               sys.exit(1)
+          else:
+              print("This is a final release - continuing with publish.")
       - name: Publish to DockerHub
         env:
           os: ${{ matrix.os }}
