@@ -4,6 +4,7 @@ name: Publish 📦 to DockerHub
 #  push:
 #    tags:
 #      - "v*"
+on: [push]
 
 env:
   alpine_version: alpine3.12
