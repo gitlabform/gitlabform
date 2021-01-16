@@ -4,12 +4,14 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabProjects(GitLabCore):
-    def create_project(self, name, path, namespace_id):
+    def create_project(self, name, path, namespace_id, default_branch=None):
         data = {
             "name": name,
             "path": path,
             "namespace_id": namespace_id,
         }
+        if default_branch:
+            data["default_branch"] = default_branch
         return self._make_requests_to_api(
             "projects", data=data, method="POST", expected_codes=201
         )
