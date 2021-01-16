@@ -1,9 +1,9 @@
 name: Publish 📦 to DockerHub
 
-on:
-  push:
-    tags:
-      - "v*"
+#on:
+#  push:
+#    tags:
+#      - "v*"
 
 env:
   alpine_version: alpine3.12
@@ -38,7 +38,6 @@ jobs:
       - name: Publish to DockerHub
         env:
           os: ${{ matrix.os }}
-        with:
           docker_username: ${{ secrets.DOCKER_USERNAME }}
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
         run: |
