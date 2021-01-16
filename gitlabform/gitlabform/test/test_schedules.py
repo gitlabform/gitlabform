@@ -5,8 +5,9 @@ from gitlabform.gitlabform.test import (
     create_group,
     create_project_in_group,
     get_gitlab,
-    GROUP_NAME,
     delete_pipeline_schedules_from_project,
+    create_readme_in_project,
+    GROUP_NAME,
 )
 
 PROJECT_NAME = "schedules_project"
@@ -19,6 +20,7 @@ def gitlab(request):
 
     create_group(GROUP_NAME)
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
+    create_readme_in_project(GROUP_AND_PROJECT_NAME)  # in main branch
 
     delete_pipeline_schedules_from_project(GROUP_AND_PROJECT_NAME)
 

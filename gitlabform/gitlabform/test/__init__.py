@@ -31,7 +31,9 @@ def create_project_in_group(group_name, project_name):
         gl.get_project(group_name + "/" + project_name)
     except NotFoundException:
         group = gl.get_group(group_name)
-        gl.create_project(project_name, project_name, group["id"], "main")
+        gl.create_project(
+            project_name, project_name, group["id"], default_branch="main"
+        )
 
 
 def create_users_in_project(user_base_name, no_of_users, project_and_group):
