@@ -9,6 +9,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Black Code Formatter
-        uses: lgeiger/black-action@v1.0.2
+        uses: gdubicki/black-action@main
         with:
           args: ". --check"
