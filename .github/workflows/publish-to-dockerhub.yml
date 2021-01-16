@@ -10,7 +10,7 @@ env:
   debian_version: buster
 
 jobs:
-  build:
+  build-n-publish:
 
     runs-on: ubuntu-latest
     strategy:
