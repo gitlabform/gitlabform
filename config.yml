@@ -370,7 +370,7 @@ project_settings:
       "Some schedule":
         ref: main
         cron: "0 * * * MON-FRI"
-        cron_timezone: "London"
+        cron_timezone: "Warsaw"
         active: false
       "Another schedule":
         ref: develop
