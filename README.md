@@ -4,7 +4,7 @@
 ![docker pulls](https://img.shields.io/docker/pulls/egnyte/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-# GitLabForm
+<img src="https://raw.githubusercontent.com/egnyte/gitlabform/main/docs/gitlabform-logo.png" width="600px">
 
 GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
@@ -178,6 +178,13 @@ to move to a unified development flow (by managing branches protection and the P
 basic tests and deployment process (by managing secret variables, deployment keys and files, such as `.gitlab-ci.yml`),
 integrations (such as JIRA or Slack) and more.
 
-## License
+## Legal
 
-MIT
+The app code is licensed under the [MIT](https://github.com/egnyte/gitlabform/blob/main/LICENSE) license.
+
+
+GitLab is a registered trademark of GitLab, Inc. This application is not endorsed by GitLab and is not affiliated with GitLab in any way.
+
+The GitLabForm logo is based on the GitLab logos available [here](https://about.gitlab.com/press/),
+and as the original art is licensed under the
+[Creative Commons Attribution Non-Commercial ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
