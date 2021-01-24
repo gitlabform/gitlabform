@@ -3,7 +3,7 @@ name: Security tests
 on: [push]
 
 jobs:
-  test:
+  security-bandit:
 
     runs-on: ubuntu-latest
 

@@ -10,7 +10,7 @@ env:
   debian_version: buster
 
 jobs:
-  build-n-publish:
+  build-n-publish-dockerhub:
 
     runs-on: ubuntu-latest
     strategy:
@@ -20,6 +20,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Wait on all tests
+        uses: lewagon/wait-on-check-action@master
+        with:
+          ref: ${{ github.sha }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+          check-regexp: (test.*|black)
+
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:

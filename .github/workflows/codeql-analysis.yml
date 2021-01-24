@@ -10,8 +10,7 @@ on:
     - cron: '1 0 * * 6'
 
 jobs:
-  analyze:
-    name: Analyze
+  security-codeql:
     runs-on: ubuntu-latest
 
     strategy:

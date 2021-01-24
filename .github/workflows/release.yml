@@ -1,4 +1,4 @@
-name: Publish 🐍 to PyPI
+name: Create release 🐙+😸 in GitHub
 
 on:
   push:
@@ -6,36 +6,19 @@ on:
       - "v*"
 
 jobs:
-  build-n-publish-pypi:
+  release:
 
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Wait on all tests
+      - name: Wait on all publishes
         uses: lewagon/wait-on-check-action@master
         with:
           ref: ${{ github.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 10
-          check-regexp: (test.*|black)
+          check-regexp: build-and-publish.*
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-      - name: Install dependencies
-        run: |
-          sudo apt-get install pandoc
-          pip install pypandoc
-      - name: Build
-        run: |
-          python setup.py build sdist bdist_wheel
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.4.1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
       - name: Create release in GitHub
         id: create_release
         uses: actions/create-release@v1

@@ -3,7 +3,7 @@ name: Tests (unit)
 on: [push]
 
 jobs:
-  test:
+  test-unit:
 
     runs-on: ubuntu-latest
 
