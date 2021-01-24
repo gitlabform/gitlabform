@@ -19,13 +19,16 @@ jobs:
           wait-interval: 10
           check-regexp: build-and-publish.*
 
-      - name: Create release in GitHub
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
+#      - name: Create release in GitHub
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: ${{ github.ref }}
+#          draft: false
+#          prerelease: false
+      - name: Test
+        run: |
+          echo "This is a release test"
