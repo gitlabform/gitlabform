@@ -14,7 +14,7 @@ using hierarchical configuration written in YAML.
 * What you get? - [Features](#features) (with [Comparison to similar apps](#comparison-to-similar-apps) and [Limitations](#limitations))
 * Basic usage - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
 * Advanced usage - [Full configuration syntax](#full-configuration-syntax), [More cli usage examples](#more-cli-usage-examples), [Running in an automated pipeline](#running-in-an-automated-pipeline)
-* Join us! - [Contributing](#contributing), [History](#history), [License](#license)
+* Join us! - [Contributing](#contributing), [History](#history), [Legal](#legal)
 
 ## Features
 
