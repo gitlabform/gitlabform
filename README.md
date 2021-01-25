@@ -193,5 +193,5 @@ The app code is licensed under the [MIT](https://github.com/egnyte/gitlabform/bl
 GitLab is a registered trademark of GitLab, Inc. This application is not endorsed by GitLab and is not affiliated with GitLab in any way.
 
 The GitLabForm logo is based on the GitLab logos available [here](https://about.gitlab.com/press/),
-and as the original art is licensed under the
+and like the original art is licensed under the
 [Creative Commons Attribution Non-Commercial ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
