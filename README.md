@@ -13,7 +13,10 @@ using hierarchical configuration written in YAML.
 
 * What you get? - [Features](#features) (with [Comparison to similar apps](#comparison-to-similar-apps) and [Limitations](#limitations))
 * Basic usage - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
-* Advanced usage - [Full configuration syntax](#full-configuration-syntax), [More cli usage examples](#more-cli-usage-examples), [Running in an automated pipeline](#running-in-an-automated-pipeline)
+* Advanced usage - [Full configuration syntax](#full-configuration-syntax),
+  [More cli usage examples](#more-cli-usage-examples),
+  [Running in an automated pipeline](#running-in-an-automated-pipeline),
+  [Running automatically for new projects](#running-automatically-for-new-projects),
 * Join us! - [Contributing](#contributing), [History](#history), [Legal](#legal)
 
 ## Features
@@ -140,10 +143,9 @@ Run:
 
 You can use GitLabForm as a part of your [CCA (Continuous Configuration Automation)](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline.
 
-For example, you can run it:
-* with a schedule on `ALL_DEFINED` or `ALL` projects to unify your GitLab configuration, after it may have drifted
-from the configuration (we recommend running it each night),
-* from a webhook after a new project is created in GitLab to initialize it with a shared config.
+You can run it with a schedule on `ALL_DEFINED` or `ALL` projects to unify your GitLab configuration, after it may have drifted
+from the configuration. For example you may allow the users to reconfigure projects during their working hours
+but automate cleaning up the drift each night.
 
 An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](https://github.com/egnyte/gitlabform/docs/.gitlab-ci.example.yml)
 file.
@@ -152,6 +154,11 @@ Note that as a standard best practice you should not put your GitLab access toke
 encrypted) for security reasons - please set it in the `GITLAB_TOKEN` environment variable instead.
 
 For GitLab CI a secure place to set it would be a [Secret/Protected Variable in the project configuration](https://docs.gitlab.com/ee/ci/variables/#via-the-ui).
+
+## Running automatically for new projects
+
+We have documented some methods of automating running GitLabForm for newly created GitLab projects
+[here](https://github.com/egnyte/gitlabform/docs/AUTOMATE_FOR_NEW_PROJECTS.md).
 
 ## Contributing
 
