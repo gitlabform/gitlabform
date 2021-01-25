@@ -158,7 +158,7 @@ For GitLab CI a secure place to set it would be a [Secret/Protected Variable in 
 ## Running automatically for new projects
 
 We have documented some methods of automating running GitLabForm for newly created GitLab projects
-[here](https://github.com/egnyte/gitlabform/docs/AUTOMATE_FOR_NEW_PROJECTS.md).
+[here](https://github.com/egnyte/gitlabform/blob/main/docs/AUTOMATE_FOR_NEW_PROJECTS.md).
 
 ## Contributing
 
