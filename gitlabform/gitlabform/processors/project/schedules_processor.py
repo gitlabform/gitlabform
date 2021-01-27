@@ -104,14 +104,15 @@ class SchedulesProcessor(AbstractProcessor):
                     project_and_group, schedule_id, variable.get("key")
                 )
 
-        for variable_key, variable_data in variables.items():
-            self.gitlab.create_pipeline_schedule_variable(
-                project_and_group,
-                schedule_id,
-                variable_key,
-                variable_data.get("value"),
-                variable_data,
-            )
+        if variables:
+            for variable_key, variable_data in variables.items():
+                self.gitlab.create_pipeline_schedule_variable(
+                    project_and_group,
+                    schedule_id,
+                    variable_key,
+                    variable_data.get("value"),
+                    variable_data,
+                )
 
     @staticmethod
     def __group_schedule_ids_by_description(schedules) -> Dict[str, List[str]]:
