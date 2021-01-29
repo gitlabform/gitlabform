@@ -162,6 +162,12 @@ group_settings:
         merge_access_level: 30
         unprotect_access_level: 40
         code_owner_approval_required: true
+      branch_protected_from_changes:
+        # Disallow any changes to this branch
+        protected: true
+        push_access_level: 0
+        merge_access_level: 0
+        unprotect_access_level: 40
       branch_only_protected_from_deletion:
         protected: true
         developers_can_push: true
