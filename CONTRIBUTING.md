@@ -100,11 +100,10 @@ against a disposable GitLab instance running as a Docker container OR use your o
 
 ```
 ./dev/run_gitlab_in_docker.sh
-export GITLAB_URL=$(cat gitlab_url.txt)
-export GITLAB_TOKEN=$(cat gitlab_token.txt)
 ```
 
-2. Run `py.test gitlabform/gitlabform/test` to start the tests
+2. Run `py.test gitlabform/gitlabform/test` to start all tests.
+To run only a single class with tests run f.e. `py.test gitlabform/gitlabform/test -k "TestArchiveProject"`.
 
 ##### Running integration tests using your own GitLab instance
 
@@ -119,7 +118,8 @@ export GITLAB_URL="https://mygitlab.company.com"
 export GITLAB_TOKEN="<my admin user API token>"
 ```
 
-2. Run `py.test gitlabform/gitlabform/test` to start the tests
+2. Run `py.test gitlabform/gitlabform/test` to start all tests
+To run only a single class with tests run f.e. `py.test gitlabform/gitlabform/test -k "TestArchiveProject"`.
 
 #### General coding guidelines
 
