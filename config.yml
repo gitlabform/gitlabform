@@ -146,10 +146,22 @@ group_settings:
         - my-group2/subgroup/subsubgroup
 
     # keys names are branches names and values can be as shown below
+    # https://docs.gitlab.com/ee/api/protected_branches.html
+    # For access level numbers, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+    # No access: 0
+    # Developer: 30
+    # Maintainer: 40
     branches:
       develop:
         # this will unprotect a branch if it is protected currently
         protected: false
+      main:
+        # Configure "main" to require code approvals, merge for developers, no direct commits
+        protected: true
+        push_access_level: 0
+        merge_access_level: 30
+        unprotect_access_level: 40
+        code_owner_approval_required: true
       branch_only_protected_from_deletion:
         protected: true
         developers_can_push: true
@@ -169,15 +181,15 @@ group_settings:
         developers_can_merge: false
       branch_protected_from_direct_pushes_from_everyone_but_with_merges_allowed:
         protected: true
-        push_access_level: 0 # = No access, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
-        merge_access_level: 30 # Developer
-        unprotect_access_level: 40 # Maintainer
+        push_access_level: 0
+        merge_access_level: 30
+        unprotect_access_level: 40
       # note: protecting using wildcards works only when using the new API, with the dict keys like below
       '*-branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed_configured_using_wildcard':
         protected: true
-        push_access_level: 0 # No access
-        merge_access_level: 30 # Developer
-        unprotect_access_level: 40 # Maintainer
+        push_access_level: 0
+        merge_access_level: 30
+        unprotect_access_level: 40
 
     # this is for adding/changing the access level of group members - only users can be them
     # for removing users please see the flag below.
