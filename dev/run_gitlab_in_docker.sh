@@ -24,8 +24,14 @@ cecho() {
     tput sgr0
 }
 
-cecho b "Pulling new GitLab image..."
-docker pull gitlab/gitlab-ee:latest
+if [[ -n $1 ]] ; then
+  gitlab_version="$1"
+else
+  gitlab_version="latest"
+fi
+
+cecho b "Pulling GitLab image version '$gitlab_version'..."
+docker pull gitlab/gitlab-ee:$gitlab_version
 
 cecho b "Preparing to start GitLab..."
 existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}")
@@ -55,7 +61,7 @@ container_id=$(docker run --detach \
     --volume "$(pwd)/config:/etc/gitlab" \
     --volume "$(pwd)/logs:/var/log/gitlab" \
     --volume "$(pwd)/data:/var/opt/gitlab" \
-    gitlab/gitlab-ee:latest)
+    gitlab/gitlab-ee:$gitlab_version)
 
 cecho b "Waiting 3 minutes before starting to check if GitLab has started..."
 cecho b "(Run this in another terminal you want to follow the instance logs:"
