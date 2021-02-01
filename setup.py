@@ -41,7 +41,7 @@ setup(
     install_requires=[
         "certifi",  # we want the latest root certs for security
         "requests==2.25.1",
-        "Jinja2==2.11.2",
+        "Jinja2==2.11.3",
         "MarkupSafe==1.1.1",
         "PyYAML==5.4.1",
         "luddite==1.0.1",
