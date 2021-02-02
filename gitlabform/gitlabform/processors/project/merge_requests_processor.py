@@ -19,7 +19,7 @@ class MergeRequestsProcessor(AbstractProcessor):
 
         approvers = configuration.get("merge_requests|approvers")
         approver_groups = configuration.get("merge_requests|approver_groups")
-        approval_rules = configuration.get("merge_requests|approval_rules")
+        approval_rules = configuration.get("merge_requests|approval_rules") or {}
         approval_rules["Approvers (configured using GitLabForm)"] = {
             'approvers': approvers,
             'approver_groups': approver_groups,
