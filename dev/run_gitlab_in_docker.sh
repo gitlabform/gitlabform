@@ -24,7 +24,7 @@ cecho() {
     tput sgr0
 }
 
-if [[ -n $1 ]] ; then
+if [[ $# == 1 ]] ; then
   gitlab_version="$1"
 else
   gitlab_version="latest"
