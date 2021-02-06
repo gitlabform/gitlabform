@@ -42,9 +42,26 @@ project_settings:
       archive: true
 """
 
-try_to_edit_a_project = """
+unarchive_project = """
 gitlab:
   api_version: 4
+
+project_settings:
+  gitlabform_tests_group/archive_project:
+    project:
+      archive: false
+"""
+
+edit_archived_project = """
+gitlab:
+  api_version: 4
+
+# the project has to be configured as archived
+# for other configs for it to be ignored
+project_settings:
+  gitlabform_tests_group/archive_project:
+    project:
+      archive: true
 
 group_settings:
   gitlabform_tests_group:
@@ -55,16 +72,6 @@ group_settings:
           - main
         content: |
           Some other content that the default one
-"""
-
-unarchive_project = """
-gitlab:
-  api_version: 4
-
-project_settings:
-  gitlabform_tests_group/archive_project:
-    project:
-      archive: false
 """
 
 
@@ -113,7 +120,7 @@ class TestArchiveProject:
         assert project["archived"] is True
 
         gf = GitLabForm(
-            config_string=try_to_edit_a_project,
+            config_string=edit_archived_project,
             project_or_group=GROUP_NAME,
         )
         gf.main()
