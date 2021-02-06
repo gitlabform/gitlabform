@@ -29,6 +29,14 @@ class AbstractProcessor(ABC):
                     project_or_project_and_group,
                     configuration.get(self.__configuration_name),
                 )
+            elif (
+                configuration.get("project|archive")
+                and self.__configuration_name != "project"
+            ):
+                logging.info(
+                    "Skipping %s - it is configured to be archived."
+                    % self.__configuration_name
+                )
             else:
                 logging.info("Processing %s" % self.__configuration_name)
                 self._process_configuration(project_or_project_and_group, configuration)
