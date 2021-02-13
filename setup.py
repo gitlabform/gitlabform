@@ -1,11 +1,11 @@
 import os
+import codecs
 
-from pypandoc import convert_file
 from setuptools import setup, find_packages
 
 
-def convert_markdown_to_rst(file):
-    return convert_file(file, "rst")
+with codecs.open("README.md", encoding="utf-8") as f:
+    README = f.read()
 
 
 def get_version_file_path():
@@ -21,7 +21,8 @@ setup(
     version=open(get_version_file_path()).read(),
     description='Specialized "configuration as a code" tool for GitLab projects, groups and more'
     " using hierarchical configuration written in YAML",
-    long_description=convert_markdown_to_rst("README.md"),
+    long_description=README,
+    long_description_content_type="text/markdown",
     url="https://github.com/egnyte/gitlabform",
     author="Egnyte and GitHub Contributors",
     keywords=["gitlab", "configuration-as-code"],
@@ -49,10 +50,6 @@ setup(
     tests_require=[
         "pytest",
     ],
-    # TODO: consider migrating to PEP 517. for now install the below dependency by yourself / in the CI.
-    # setup_requires=[
-    #     "pypandoc",
-    # ],
     scripts=[
         "bin/gitlabform",
     ],
