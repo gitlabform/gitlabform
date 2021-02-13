@@ -20,8 +20,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          sudo apt-get install pandoc
-          pip install pypandoc pytest
+          pip install pytest
           python setup.py develop
       - name: Run integration tests
         env:

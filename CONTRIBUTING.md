@@ -63,14 +63,7 @@ virtualenv -p python3 venv
 . venv/bin/activate
 ```
 
-2. Install build requirements - `pandoc` binary package + `pypandoc` python package:
-```
-# for macOS:
-brew install pandoc  
-pip3 install pypandoc
-```
-
-3. Install GitLabForm in develop mode:
+2. Install GitLabForm in develop mode:
 ```
 python setup.py develop
 ```

@@ -7,7 +7,6 @@ RUN apk add --no-cache \
     gmp \
     lua5.3 \
     lua5.3-lpeg
-RUN pip3 install --no-cache-dir pypandoc
 COPY . /gitlabform
 RUN cd gitlabform && python setup.py develop
 WORKDIR /config
