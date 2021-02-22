@@ -96,6 +96,7 @@ group_settings:
 
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
+      default_branch: main
       jobs_enabled: true
       public_jobs: false # "Public pipelines" checkbox in GitLab web UI
       visibility: internal
