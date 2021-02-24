@@ -19,6 +19,9 @@ class MergeRequestsProcessor(AbstractProcessor):
 
         approvers = configuration.get("merge_requests|approvers")
         approver_groups = configuration.get("merge_requests|approver_groups")
+        remove_other_approval_rules = configuration.get(
+            "merge_requests|remove_other_approval_rules"
+        )
         # checking if "is not None" allows configs with empty array to work
         if (
             approvers is not None
@@ -44,7 +47,12 @@ class MergeRequestsProcessor(AbstractProcessor):
             for rule in rules:
                 if rule["name"] == approval_rule_name:
                     approval_rule_id = rule["id"]
-                    break
+                else:
+                    if remove_other_approval_rules:
+                        logging.debug(
+                            "Deleting extra approval rule '%s'" % rule["name"]
+                        )
+                        self.gitlab.delete_approvals_rule(project_and_group, rule["id"])
 
             if not approvers:
                 approvers = []
