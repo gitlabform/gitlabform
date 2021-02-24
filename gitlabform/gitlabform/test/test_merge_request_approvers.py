@@ -211,6 +211,27 @@ project_settings:
 """
 
 
+config__approvers_removing_preexisting_approvals = """
+gitlab:
+  api_version: 4
+
+project_settings:
+  gitlabform_tests_group/merge_requests_project:
+    project_settings:
+      merge_requests_access_level: "enabled"
+    merge_requests:
+      remove_other_approval_rules: true
+      approvals:
+        approvals_before_merge: 1
+        reset_approvals_on_push: true
+        disable_overriding_approvers_per_merge_request: true
+      approvers:
+        - merge_requests_user1
+      approver_groups:
+        - gitlabform_tests_group_with_user3
+"""
+
+
 class TestMergeRequestApprovers:
     def test__if_it_works__single_user(self, gitlab):
         gf = GitLabForm(
@@ -437,3 +458,32 @@ class TestMergeRequestApprovers:
         assert usernames_in_rule == {"merge_requests_user1", "merge_requests_user2"}
 
         assert len(rule["groups"]) == 0
+
+    def test__removing_preexisting_approvals(self, gitlab):
+        # add some preexisting approval rules
+        gitlab.create_approval_rule(
+            GROUP_AND_PROJECT_NAME,
+            "additional approval rule",
+            1,
+            ["merge_requests_user2"],
+            [GROUP_WITH_USER4],
+        )
+
+        gf = GitLabForm(
+            config_string=config__approvers_removing_preexisting_approvals,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
+        gf.main()
+
+        rules = gitlab.get_approvals_rules(GROUP_AND_PROJECT_NAME)
+        assert len(rules) == 1
+        rule = rules[0]
+        assert len(rule["users"]) == 1
+        usernames_in_rule = set([user["username"] for user in rule["users"]])
+        assert usernames_in_rule == {"merge_requests_user1"}
+
+        assert len(rule["groups"]) == 1
+        groupnames_in_rule = set([group["name"] for group in rule["groups"]])
+        assert groupnames_in_rule == {
+            "gitlabform_tests_group_with_user3",
+        }

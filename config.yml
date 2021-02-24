@@ -145,6 +145,8 @@ group_settings:
         - my-group
         - my-group1/subgroup
         - my-group2/subgroup/subsubgroup
+      # if true, it will delete any other preexisting approval rules
+      remove_other_approval_rules: false
 
     # keys names are branches names and values can be as shown below
     # https://docs.gitlab.com/ee/api/protected_branches.html
