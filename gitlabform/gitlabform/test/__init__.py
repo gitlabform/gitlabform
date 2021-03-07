@@ -13,8 +13,8 @@ gitlab:
 # (workaround for lack of this feature: https://youtrack.jetbrains.com/issue/PY-5543 )
 
 env_vars_and_file_paths = {
-    "GITLAB_URL": "dev/gitlab_url.txt",
-    "GITLAB_TOKEN": "dev/gitlab_token.txt",
+    "GITLAB_URL": "gitlab_url.txt",
+    "GITLAB_TOKEN": "gitlab_token.txt",
 }
 
 for env_var, file_path in env_vars_and_file_paths.items():

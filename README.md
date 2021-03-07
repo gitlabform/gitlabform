@@ -188,6 +188,7 @@ integrations (such as JIRA or Slack) and more.
 ## Legal
 
 The app code is licensed under the [MIT](https://github.com/egnyte/gitlabform/blob/main/LICENSE) license.
+A few scripts in `dev/` directory are licensed under the [MPL 2.0](http://mozilla.org/MPL/2.0/) license.
 
 
 GitLab is a registered trademark of GitLab, Inc. This application is not endorsed by GitLab and is not affiliated with GitLab in any way.

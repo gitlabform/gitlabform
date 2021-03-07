@@ -26,8 +26,5 @@ jobs:
         env:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: |
-          mv dev/* .
-          ./run_gitlab_in_docker_ci.sh
-          export GITLAB_URL=$(cat gitlab_url.txt)
-          export GITLAB_TOKEN=$(cat gitlab_token.txt)
+          ./dev/run_gitlab_in_docker.sh
           py.test gitlabform/gitlabform/test
