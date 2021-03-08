@@ -42,11 +42,11 @@ def get_gitlab():
     return gl
 
 
-def create_group(group_name):
+def create_group(group_name, visibility="private"):
     try:
         gl.get_group(group_name)
     except NotFoundException:
-        gl.create_group(group_name, group_name)
+        gl.create_group(group_name, group_name, visibility)
 
 
 def create_project_in_group(group_name, project_name):
