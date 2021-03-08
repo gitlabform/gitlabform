@@ -2,10 +2,11 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabGroups(GitLabCore):
-    def create_group(self, name, path):
+    def create_group(self, name, path, visibility="private"):
         data = {
             "name": name,
             "path": path,
+            "visibility": visibility,
         }
         return self._make_requests_to_api(
             "groups", data=data, method="POST", expected_codes=201
