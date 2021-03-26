@@ -53,9 +53,9 @@ class ConfigurationCore:
                 if self.config.get("example_config"):
                     cli_ui.fatal(
                         "Example config detected, aborting.\n"
-                        "Haven't you forgotten to use `-c <config_file` switch?\n"
-                        "If you created your config based on the example one then please remove "
-                        "'example_config' key."
+                        "Haven't you forgotten to use `-c <config_file>` parameter?\n"
+                        "If you created your config based on the example config.yml,"
+                        " then please remove 'example_config' key."
                     )
                     sys.exit(EXIT_INVALID_INPUT)
 
