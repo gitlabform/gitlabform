@@ -1,5 +1,7 @@
 import logging
 
+import cli_ui
+
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
@@ -15,7 +17,7 @@ class SecretVariablesProcessor(AbstractProcessor):
             self.gitlab.get_project_settings(project_and_group)["builds_access_level"]
             == "disabled"
         ):
-            logging.warning(
+            cli_ui.warning(
                 "Builds disabled in this project so I can't set secret variables here."
             )
             return
@@ -30,7 +32,7 @@ class SecretVariablesProcessor(AbstractProcessor):
             if "delete" in configuration["secret_variables"][secret_variable]:
                 key = configuration["secret_variables"][secret_variable]["key"]
                 if configuration["secret_variables"][secret_variable]["delete"]:
-                    logging.info(
+                    cli_ui.debug(
                         f"Deleting {secret_variable}: {key} in project {project_and_group}"
                     )
                     try:
@@ -41,7 +43,7 @@ class SecretVariablesProcessor(AbstractProcessor):
                         )
                     continue
 
-            logging.info("Setting secret variable: %s", secret_variable)
+            cli_ui.debug(f"Setting secret variable: {secret_variable}")
             try:
                 self.gitlab.put_secret_variable(
                     project_and_group,

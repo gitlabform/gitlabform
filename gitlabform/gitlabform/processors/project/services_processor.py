@@ -1,5 +1,7 @@
 import logging
 
+import cli_ui
+
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
 
@@ -21,11 +23,10 @@ class ServicesProcessor(AbstractProcessor):
                 ):
                     # support from this configuration key has been added in v1.13.4
                     # we will remove it here to avoid passing it to the GitLab API
-                    logging.warning(
-                        "Ignoring deprecated 'recreate' field in the '%s' service config. "
+                    cli_ui.warning(
+                        f"Ignoring deprecated 'recreate' field in the '{service}' service config. "
                         "Please remove it from the config file permanently as this workaround is not "
-                        "needed anymore.",
-                        service,
+                        "needed anymore."
                     )
                     del configuration["services"][service]["recreate"]
 

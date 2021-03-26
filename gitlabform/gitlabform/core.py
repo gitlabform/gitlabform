@@ -3,6 +3,7 @@ import logging.config
 import sys
 import traceback
 
+import cli_ui
 import luddite
 import pkg_resources
 from packaging import version as packaging_version
@@ -15,6 +16,7 @@ from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.gitlabform.processors.group import GroupProcessors
 from gitlabform.gitlabform.processors.project import ProjectProcessors
+from gitlabform.gitlabform.ui import info_group_count, info_project_count
 
 
 class Formatter(
@@ -27,6 +29,8 @@ class GitLabFormCore(object):
     def __init__(self, project_or_group=None, config_string=None):
 
         if project_or_group and config_string:
+            # this mode is basically only for testing
+
             self.project_or_group = project_or_group
             self.config_string = config_string
             self.verbose = False
@@ -35,11 +39,13 @@ class GitLabFormCore(object):
             self.start_from = 1
             self.start_from_group = 1
             self.noop = False
-            self.set_log_level(tests=True)
+            self.configure_output(tests=True)
             self.skip_version_check = True
             self.show_version = False
             self.terminate_after_error = True
         else:
+            # normal mode
+
             (
                 self.project_or_group,
                 self.config,
@@ -53,14 +59,15 @@ class GitLabFormCore(object):
                 self.show_version,
                 self.terminate_after_error,
             ) = self.parse_args()
-            self.set_log_level()
 
-            print(self.get_version(self.skip_version_check))
+            self.configure_output()
+
+            cli_ui.info(self.get_version(self.skip_version_check))
             if self.show_version:
                 sys.exit(0)
 
             if not self.project_or_group:
-                print("project_or_group parameter is required.")
+                cli_ui.error("project_or_group parameter is required.")
                 sys.exit(EXIT_INVALID_INPUT)
 
         self.gl, self.c = self.initialize_configuration_and_gitlab()
@@ -181,14 +188,26 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
             args.terminate_after_error,
         )
 
-    def set_log_level(self, tests=False):
+    def configure_output(self, tests=False):
+
+        # normal verbosity - print cli_ui.[info, warning, ...]
+
+        # verbose mode - like above plus cli_ui.debug
+
+        # debug mode - like above plus logging.debug
 
         logging.basicConfig()
-        level = logging.WARNING
-        if self.verbose:
-            level = logging.INFO
-        elif self.debug:
+
+        if not self.verbose and not self.debug:
+            cli_ui.setup()
+            level = logging.FATAL  # de facto disable
+        elif self.verbose:
+            cli_ui.setup(verbose=True)
+            level = logging.FATAL  # de facto disable
+        else:
+            cli_ui.setup(verbose=True)
             level = logging.DEBUG
+
         logging.getLogger().setLevel(level)
 
         if not tests:
@@ -220,17 +239,17 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
 
         try:
             if hasattr(self, "config_string"):
-                gl = GitLab(config_string=self.config_string)
                 c = Configuration(config_string=self.config_string)
+                gl = GitLab(configuration=c)
             else:
-                gl = GitLab(self.config.strip())
                 c = Configuration(self.config.strip())
+                gl = GitLab(configuration=c)
             return gl, c
         except ConfigFileNotFoundException as e:
-            logging.fatal("Aborting - config file not found at: %s", e)
+            cli_ui.error(f"Config file not found at: {e}")
             sys.exit(EXIT_INVALID_INPUT)
         except TestRequestFailedException as e:
-            logging.fatal("Aborting - GitLab test request failed, details: '%s'", e)
+            cli_ui.error(f"GitLab test request failed. Exception: '{e}'")
             sys.exit(EXIT_PROCESSING_ERROR)
 
     def main(self):
@@ -244,10 +263,10 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
 
         if self.project_or_group == "ALL":
             # all projects from all groups we have access to
-            logging.warning(">>> Processing ALL groups and and projects")
+            cli_ui.info(">>> Processing ALL groups and and projects")
             groups = self.gl.get_groups()
         elif self.project_or_group == "ALL_DEFINED":
-            logging.warning(">>> Processing ALL groups and projects defined in config")
+            cli_ui.info(">>> Processing ALL groups and projects defined in config")
             # all groups from config
             groups = self.c.get_groups()
             # and all projects from config
@@ -291,16 +310,15 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
         else:
             effective_projects_and_groups = projects_and_groups
 
-        logging.warning("*** # of groups to process: %s", str(len(groups)))
-        logging.warning(
-            "*** # of projects to process: %s", str(len(effective_projects_and_groups))
-        )
+        cli_ui.info_1(f"# of groups to process: {len(groups)}")
+        cli_ui.info_1(f"# of projects to process: {len(effective_projects_and_groups)}")
 
         return effective_projects_and_groups, effective_groups
 
     def process_all(self, projects_and_groups, groups):
 
         group_number = 0
+        successful_groups = 0
         failed_groups = {}
 
         for group in groups:
@@ -308,13 +326,18 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
             group_number += 1
 
             if group_number < self.start_from_group:
-                logging.warning(
-                    f"$$$ [{group_number}/{len(groups)}] Skipping group: {group}...",
+                info_group_count(
+                    "@",
+                    group_number,
+                    len(groups),
+                    cli_ui.yellow,
+                    f"Skipping group: {group}...",
+                    cli_ui.reset,
                 )
                 continue
 
-            logging.warning(
-                f"> ({group_number}/{len(groups)}) Processing group: {group}"
+            info_group_count(
+                "@", group_number, len(groups), f"Processing group: {group}"
             )
 
             configuration = self.c.get_effective_config_for_group(group)
@@ -324,22 +347,27 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
                     group, configuration, dry_run=self.noop
                 )
 
+                successful_groups += 1
+
             except Exception as e:
 
                 failed_groups[group_number] = group
 
-                print(
-                    f"+++ Errors occurred while processing group {group}, exception: '{e}'",
-                )
-                traceback.print_exc()
+                trace = traceback.format_exc()
+                message = f"Error occurred while processing group {group}, exception:\n\n{e}\n\n{trace}"
+
                 if self.terminate_after_error:
+                    cli_ui.error(message)
                     sys.exit(EXIT_PROCESSING_ERROR)
+                else:
+                    cli_ui.warning(message)
 
             logging.debug(
-                f"< ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
+                f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
             )
 
         project_number = 0
+        successful_projects = 0
         failed_projects = {}
 
         for project_and_group in projects_and_groups:
@@ -347,13 +375,21 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
             project_number += 1
 
             if project_number < self.start_from:
-                logging.warning(
-                    f"$$$ [{project_number}/{len(projects_and_groups)}] Skipping project: {project_and_group}...",
+                info_project_count(
+                    "*",
+                    project_number,
+                    len(projects_and_groups),
+                    cli_ui.yellow,
+                    f"Skipping project: {project_and_group}...",
+                    cli_ui.reset,
                 )
                 continue
 
-            logging.warning(
-                f"* [{project_number}/{len(projects_and_groups)}] Processing project: {project_and_group}",
+            info_project_count(
+                "*",
+                project_number,
+                len(projects_and_groups),
+                f"Processing project: {project_and_group}",
             )
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
@@ -363,30 +399,58 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
                     project_and_group, configuration, dry_run=self.noop
                 )
 
+                successful_projects += 1
+
             except Exception as e:
 
                 failed_projects[project_number] = project_and_group
 
-                print(
-                    f"--- Errors occurred while processing project {project_and_group}, exception: '{e}'",
-                )
-                traceback.print_exc()
+                trace = traceback.format_exc()
+                message = f"Error occurred while processing project {project_and_group}, exception:\n\n{e}\n\n{trace}"
+
                 if self.terminate_after_error:
+                    cli_ui.error(message)
                     sys.exit(EXIT_PROCESSING_ERROR)
+                else:
+                    cli_ui.warning(message)
 
             logging.debug(
-                f"@ [{project_number}/{len(projects_and_groups)}] FINISHED Processing project: {project_and_group}",
+                f"* ({project_number}/{len(projects_and_groups)}) FINISHED Processing project: {project_and_group}",
             )
 
+        cli_ui.info_1(f"# of groups processed successfully: {successful_groups}")
+        cli_ui.info_1(f"# of projects processed succesfully: {successful_projects}")
+
         if len(failed_groups) > 0:
+            cli_ui.info_1(
+                cli_ui.red, f"# of groups failed: {len(failed_groups)}", cli_ui.reset
+            )
             for group_number in failed_groups.keys():
-                print(
-                    f"+++ Failed group number {group_number}: {failed_groups[group_number]}"
+                cli_ui.info_1(
+                    cli_ui.red,
+                    f"Failed group {group_number}: {failed_groups[group_number]}",
+                    cli_ui.reset,
                 )
         if len(failed_projects) > 0:
+            cli_ui.info_1(
+                cli_ui.red,
+                f"# of projects failed: {len(failed_projects)}",
+                cli_ui.reset,
+            )
             for project_number in failed_projects.keys():
-                print(
-                    f"--- Failed project number {project_number}: {failed_projects[project_number]}"
+                cli_ui.info_1(
+                    cli_ui.red,
+                    f"Failed project {project_number}: {failed_projects[project_number]}",
+                    cli_ui.reset,
                 )
+
         if len(failed_groups) > 0 or len(failed_projects) > 0:
             sys.exit(EXIT_PROCESSING_ERROR)
+        else:
+            party = cli_ui.Symbol("🎉", "!!!")
+            cli_ui.info_1(
+                cli_ui.green,
+                f"All requested groups/projects processes successfully!",
+                cli_ui.reset,
+                party,
+            )
