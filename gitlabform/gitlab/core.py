@@ -9,6 +9,7 @@ from urllib3.util.retry import Retry
 from urllib import parse
 from requests.adapters import HTTPAdapter
 from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
+from gitlabform import EXIT_INVALID_INPUT
 
 
 class GitLabCore:
@@ -25,7 +26,7 @@ class GitLabCore:
             logging.fatal(
                 "Please initialize with either config_path or config_string, not both."
             )
-            sys.exit(1)
+            sys.exit(EXIT_INVALID_INPUT)
 
         if config_path:
             configuration = ConfigurationCore(config_path=config_path)
@@ -72,7 +73,7 @@ class GitLabCore:
                 "After updating your config.yml please add 'api_version' key to 'gitlab' section and set it "
                 "to 4 to indicate that your config is v4-compatible."
             )
-            sys.exit(3)
+            sys.exit(EXIT_INVALID_INPUT)
 
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)

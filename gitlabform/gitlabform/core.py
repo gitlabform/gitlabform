@@ -2,11 +2,12 @@ import argparse
 import logging.config
 import sys
 import traceback
-from packaging import version as packaging_version
 
 import luddite
 import pkg_resources
+from packaging import version as packaging_version
 
+from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import ConfigFileNotFoundException
 from gitlabform.gitlab import GitLab
@@ -14,6 +15,12 @@ from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.gitlabform.processors.group import GroupProcessors
 from gitlabform.gitlabform.processors.project import ProjectProcessors
+
+
+class Formatter(
+    argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter
+):
+    pass
 
 
 class GitLabFormCore(object):
@@ -26,6 +33,7 @@ class GitLabFormCore(object):
             self.debug = True
             self.strict = True
             self.start_from = 1
+            self.start_from_group = 1
             self.noop = False
             self.set_log_level(tests=True)
             self.skip_version_check = True
@@ -39,6 +47,7 @@ class GitLabFormCore(object):
                 self.debug,
                 self.strict,
                 self.start_from,
+                self.start_from_group,
                 self.noop,
                 self.skip_version_check,
                 self.show_version,
@@ -52,7 +61,7 @@ class GitLabFormCore(object):
 
             if not self.project_or_group:
                 print("project_or_group parameter is required.")
-                sys.exit(1)
+                sys.exit(EXIT_INVALID_INPUT)
 
         self.gl, self.c = self.initialize_configuration_and_gitlab()
 
@@ -62,9 +71,14 @@ class GitLabFormCore(object):
     def parse_args(self):
 
         parser = argparse.ArgumentParser(
-            description='Specialized "configuration as a code" tool for GitLab projects, groups and more'
-            " using hierarchical configuration written in YAML",
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+            description=f"""
+Specialized "configuration as a code" tool for GitLab projects, groups and more
+using hierarchical configuration written in YAML.
+
+Exits with code {EXIT_INVALID_INPUT} on invalid input errors (f.e. config file not found),
+and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitLab returns 400).
+            """,
+            formatter_class=Formatter,
         )
 
         parser.add_argument(
@@ -77,33 +91,32 @@ class GitLabFormCore(object):
         )
 
         parser.add_argument(
-            "-c", "--config", default="config.yml", help="Config file path and filename"
-        )
-
-        group_ex = parser.add_mutually_exclusive_group()
-
-        group_ex.add_argument(
-            "-v", "--verbose", action="store_true", help="Verbose mode"
-        )
-
-        group_ex.add_argument(
-            "-d", "--debug", action="store_true", help="Debug mode (most verbose)"
-        )
-
-        parser.add_argument(
-            "--strict",
-            "-s",
+            "-V",
+            "--version",
+            dest="show_version",
             action="store_true",
-            help="Stop on missing branches and tags",
+            help="show version and exit",
         )
 
         parser.add_argument(
-            "--start-from",
-            dest="start_from",
-            default=1,
-            type=int,
-            help="Start processing projects from the given one "
-            '(as numbered by "[x/y] Processing: group/project" messages)',
+            "-c", "--config", default="config.yml", help="config file path and filename"
+        )
+
+        verbosity_args = parser.add_mutually_exclusive_group()
+
+        verbosity_args.add_argument(
+            "-v", "--verbose", action="store_true", help="verbose mode"
+        )
+
+        verbosity_args.add_argument(
+            "-d", "--debug", action="store_true", help="debug mode (most verbose)"
+        )
+
+        parser.add_argument(
+            "-s",
+            "--strict",
+            action="store_true",
+            help="stop on missing branches and tags",
         )
 
         parser.add_argument(
@@ -111,15 +124,7 @@ class GitLabFormCore(object):
             "--noop",
             dest="noop",
             action="store_true",
-            help="Run in no-op (dry run) mode",
-        )
-
-        parser.add_argument(
-            "-V",
-            "--version",
-            dest="show_version",
-            action="store_true",
-            help="Show the version and exit",
+            help="run in no-op (dry run) mode",
         )
 
         parser.add_argument(
@@ -135,7 +140,29 @@ class GitLabFormCore(object):
             "--terminate",
             dest="terminate_after_error",
             action="store_true",
-            help="Terminates the program from running after the first error",
+            help=f"exit with {EXIT_PROCESSING_ERROR} after the first group/project processing error."
+            f" (default: process all the requested groups/projects and skip the failing ones."
+            f" At the end, if there were any groups/projects, exit with {EXIT_PROCESSING_ERROR}.)",
+        )
+
+        parser.add_argument(
+            "-sf",
+            "--start-from",
+            dest="start_from",
+            default=1,
+            type=int,
+            help="start processing projects from the given one"
+            ' (as numbered by "x/y Processing group/project" messages)',
+        )
+
+        parser.add_argument(
+            "-sfg",
+            "--start-from-group",
+            dest="start_from_group",
+            default=1,
+            type=int,
+            help="start processing groups from the given one "
+            '(as numbered by "x/y Processing group/project" messages)',
         )
 
         args = parser.parse_args()
@@ -147,6 +174,7 @@ class GitLabFormCore(object):
             args.debug,
             args.strict,
             args.start_from,
+            args.start_from_group,
             args.noop,
             args.skip_version_check,
             args.show_version,
@@ -200,10 +228,10 @@ class GitLabFormCore(object):
             return gl, c
         except ConfigFileNotFoundException as e:
             logging.fatal("Aborting - config file not found at: %s", e)
-            sys.exit(1)
+            sys.exit(EXIT_INVALID_INPUT)
         except TestRequestFailedException as e:
             logging.fatal("Aborting - GitLab test request failed, details: '%s'", e)
-            sys.exit(2)
+            sys.exit(EXIT_PROCESSING_ERROR)
 
     def main(self):
         projects_and_groups, groups = self.get_projects_list()
@@ -272,20 +300,24 @@ class GitLabFormCore(object):
 
     def process_all(self, projects_and_groups, groups):
 
-        g = 0
+        group_number = 0
+        failed_groups = {}
 
         for group in groups:
 
-            g += 1
+            group_number += 1
+
+            if group_number < self.start_from_group:
+                logging.warning(
+                    f"$$$ [{group_number}/{len(groups)}] Skipping group: {group}...",
+                )
+                continue
+
+            logging.warning(
+                f"> ({group_number}/{len(groups)}) Processing group: {group}"
+            )
 
             configuration = self.c.get_effective_config_for_group(group)
-
-            logging.warning("> (%s/%s) Processing: %s", g, len(groups), group)
-
-            if self.noop:
-                logging.debug(
-                    "Configuration that would be applied: %s" % str(configuration)
-                )
 
             try:
                 self.group_processors.process_group(
@@ -293,45 +325,38 @@ class GitLabFormCore(object):
                 )
 
             except Exception as e:
-                if self.terminate_after_error:
-                    print(
-                        "+++ Errors occurred while processing due to '%s' ... Exiting now...",
-                        e,
-                    )
-                    sys.exit(1)
-                logging.error("+++ Error while processing '%s'", group)
+
+                failed_groups[group_number] = group
+
+                print(
+                    f"+++ Errors occurred while processing group {group}, exception: '{e}'",
+                )
                 traceback.print_exc()
+                if self.terminate_after_error:
+                    sys.exit(EXIT_PROCESSING_ERROR)
 
-            logging.debug("< (%s/%s) FINISHED Processing: %s", g, len(groups), group)
+            logging.debug(
+                f"< ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
+            )
 
-        p = 0
+        project_number = 0
+        failed_projects = {}
 
         for project_and_group in projects_and_groups:
 
-            p += 1
+            project_number += 1
 
-            if p < self.start_from:
+            if project_number < self.start_from:
                 logging.warning(
-                    "$$$ [%s/%s] Skipping: %s...",
-                    p,
-                    len(projects_and_groups),
-                    project_and_group,
+                    f"$$$ [{project_number}/{len(projects_and_groups)}] Skipping project: {project_and_group}...",
                 )
                 continue
 
             logging.warning(
-                "* [%s/%s] Processing: %s",
-                p,
-                len(projects_and_groups),
-                project_and_group,
+                f"* [{project_number}/{len(projects_and_groups)}] Processing project: {project_and_group}",
             )
 
             configuration = self.c.get_effective_config_for_project(project_and_group)
-
-            if self.noop:
-                logging.debug(
-                    "Configuration that would be applied: %s" % str(configuration)
-                )
 
             try:
                 self.project_processors.process_project(
@@ -339,18 +364,29 @@ class GitLabFormCore(object):
                 )
 
             except Exception as e:
-                if self.terminate_after_error:
-                    print(
-                        "+++ Errors occurred while processing due to '%s' ... Exiting now...",
-                        e,
-                    )
-                    sys.exit(1)
-                logging.error("+++ Error while processing '%s'", project_and_group)
+
+                failed_projects[project_number] = project_and_group
+
+                print(
+                    f"--- Errors occurred while processing project {project_and_group}, exception: '{e}'",
+                )
                 traceback.print_exc()
+                if self.terminate_after_error:
+                    sys.exit(EXIT_PROCESSING_ERROR)
 
             logging.debug(
-                "@ [%s/%s] FINISHED Processing: %s",
-                p,
-                len(projects_and_groups),
-                project_and_group,
+                f"@ [{project_number}/{len(projects_and_groups)}] FINISHED Processing project: {project_and_group}",
             )
+
+        if len(failed_groups) > 0:
+            for group_number in failed_groups.keys():
+                print(
+                    f"+++ Failed group number {group_number}: {failed_groups[group_number]}"
+                )
+        if len(failed_projects) > 0:
+            for project_number in failed_projects.keys():
+                print(
+                    f"--- Failed project number {project_number}: {failed_projects[project_number]}"
+                )
+        if len(failed_groups) > 0 or len(failed_projects) > 0:
+            sys.exit(EXIT_PROCESSING_ERROR)

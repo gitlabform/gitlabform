@@ -5,6 +5,8 @@ import sys
 import yaml
 from pathlib import Path
 
+from gitlabform import EXIT_INVALID_INPUT
+
 
 class ConfigurationCore:
 
@@ -17,7 +19,7 @@ class ConfigurationCore:
             logging.fatal(
                 "Please initialize with either config_path or config_string, not both."
             )
-            sys.exit(1)
+            sys.exit(EXIT_INVALID_INPUT)
 
         try:
             if config_string:
@@ -54,7 +56,7 @@ class ConfigurationCore:
                         "If you created your config based on the example one then please remove "
                         "'example_config' key."
                     )
-                    sys.exit(1)
+                    sys.exit(EXIT_INVALID_INPUT)
 
         except (FileNotFoundError, IOError):
             raise ConfigFileNotFoundException(config_path)
