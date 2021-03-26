@@ -2,6 +2,7 @@ import argparse
 import logging.config
 import sys
 import traceback
+from packaging import version as packaging_version
 
 import luddite
 import pkg_resources
@@ -177,9 +178,13 @@ class GitLabFormCore(object):
         if not skip_version_check:
             latest_version = luddite.get_version_pypi("gitlabform")
             if local_version == latest_version:
-                version += " (the latest)"
+                version += " = the latest stable"
+            elif packaging_version.parse(local_version) < packaging_version.parse(
+                latest_version
+            ):
+                version += f" = outdated, please update! (the latest stable is {latest_version})"
             else:
-                version += f" (the latest is {latest_version} - please update!)"
+                version += f" = pre-release (the latest stable is {latest_version})"
 
         return version
 
