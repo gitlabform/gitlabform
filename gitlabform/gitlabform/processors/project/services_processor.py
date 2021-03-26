@@ -14,9 +14,10 @@ class ServicesProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for service in sorted(configuration["services"]):
             if configuration.get("services|" + service + "|delete"):
-                logging.debug("Deleting service '%s'", service)
+                cli_ui.debug(f"Deleting service: {service}")
                 self.gitlab.delete_service(project_and_group, service)
             else:
+
                 if (
                     "recreate" in configuration["services"][service]
                     and configuration["services"][service]["recreate"]
@@ -30,7 +31,7 @@ class ServicesProcessor(AbstractProcessor):
                     )
                     del configuration["services"][service]["recreate"]
 
-                logging.debug("Setting service '%s'", service)
+                cli_ui.debug(f"Setting service: {service}")
                 self.gitlab.set_service(
                     project_and_group, service, configuration["services"][service]
                 )
