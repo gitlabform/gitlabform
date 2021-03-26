@@ -1,6 +1,8 @@
 import json
 import sys
 import logging
+
+import cli_ui
 import requests
 import os
 
@@ -20,18 +22,25 @@ class GitLabCore:
     session = None
     timeout = None
 
-    def __init__(self, config_path=None, config_string=None):
+    def __init__(self, config_path=None, config_string=None, configuration=None):
 
         if config_path and config_string:
-            logging.fatal(
+            cli_ui.fatal(
                 "Please initialize with either config_path or config_string, not both."
             )
             sys.exit(EXIT_INVALID_INPUT)
 
-        if config_path:
-            configuration = ConfigurationCore(config_path=config_path)
-        else:
-            configuration = ConfigurationCore(config_string=config_string)
+        if not config_path and not config_string and not configuration:
+            cli_ui.fatal(
+                "Please initialize with one of: config_path, config_string, configuration"
+            )
+            sys.exit(EXIT_INVALID_INPUT)
+
+        if not configuration:
+            if config_path:
+                configuration = ConfigurationCore(config_path=config_path)
+            else:
+                configuration = ConfigurationCore(config_string=config_string)
 
         self.url = configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
         self.token = configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
@@ -53,9 +62,8 @@ class GitLabCore:
 
         try:
             version = self._make_requests_to_api("version")
-            logging.info(
-                "Connected to GitLab version: %s (%s)"
-                % (version["version"], version["revision"])
+            cli_ui.debug(
+                f"Connected to GitLab version: {version['version']} ({version['revision']})"
             )
         except Exception as e:
             raise TestRequestFailedException(e)
@@ -64,8 +72,8 @@ class GitLabCore:
             if api_version != 4:
                 raise ApiVersionIncorrectException()
         except KeyNotFoundException:
-            logging.fatal(
-                "Aborting. GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
+            cli_ui.fatal(
+                "GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
                 "names have changed. By its design GitLabForm reads some parameter names directly from "
                 "config.yml so you need to update those names by yourself. See changes in config.yml "
                 "in this diff to see what had to be changed there: "

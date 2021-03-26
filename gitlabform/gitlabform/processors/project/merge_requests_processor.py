@@ -1,5 +1,7 @@
 import logging
 
+import cli_ui
+
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.gitlabform.processors.util.decorators import SafeDict
@@ -14,7 +16,7 @@ class MergeRequestsProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         approvals = configuration.get("merge_requests|approvals")
         if approvals:
-            logging.info("Setting approvals settings: %s", approvals)
+            cli_ui.debug(f"Setting approvals settings: {approvals}")
             self.gitlab.post_approvals_settings(project_and_group, approvals)
 
         approvers = configuration.get("merge_requests|approvers")
@@ -61,9 +63,8 @@ class MergeRequestsProcessor(AbstractProcessor):
 
             if approval_rule_id:
                 # the rule exists, needs an update
-                logging.info(
-                    "Updating approvers rule to users %s and groups %s"
-                    % (approvers, approver_groups)
+                cli_ui.debug(
+                    f"Updating approvers rule to users {approvers} and groups {approver_groups}"
                 )
                 self.gitlab.update_approval_rule(
                     project_and_group,
@@ -75,9 +76,8 @@ class MergeRequestsProcessor(AbstractProcessor):
                 )
             else:
                 # the rule does not exist yet, let's create it
-                logging.info(
-                    "Creating approvers rule to users %s and groups %s"
-                    % (approvers, approver_groups)
+                cli_ui.debug(
+                    f"Creating approvers rule to users {approvers} and groups {approver_groups}"
                 )
                 self.gitlab.create_approval_rule(
                     project_and_group,

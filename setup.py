@@ -46,6 +46,7 @@ setup(
         "MarkupSafe==1.1.1",
         "PyYAML==5.4.1",
         "luddite==1.0.1",
+        "cli-ui==0.12.0",
     ],
     tests_require=[
         "pytest",

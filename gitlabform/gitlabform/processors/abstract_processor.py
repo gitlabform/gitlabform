@@ -1,6 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
 
+import cli_ui
+
 from gitlabform.gitlabform.processors.util.decorators import configuration_to_safe_dict
 
 
@@ -17,14 +19,11 @@ class AbstractProcessor(ABC):
     ):
         if self.__configuration_name in configuration:
             if configuration.get(self.__configuration_name + "|skip"):
-                logging.info(
-                    "Skipping %s - explicitly configured to do so."
-                    % self.__configuration_name
+                cli_ui.debug(
+                    f"Skipping {self.__configuration_name} - explicitly configured to do so."
                 )
             elif dry_run:
-                logging.info(
-                    "Processing %s in dry-run mode." % self.__configuration_name
-                )
+                cli_ui.debug(f"Processing {self.__configuration_name} in dry-run mode.")
                 self._log_changes(
                     project_or_project_and_group,
                     configuration.get(self.__configuration_name),
@@ -33,12 +32,11 @@ class AbstractProcessor(ABC):
                 configuration.get("project|archive")
                 and self.__configuration_name != "project"
             ):
-                logging.info(
-                    "Skipping %s - it is configured to be archived."
-                    % self.__configuration_name
+                cli_ui.debug(
+                    f"Skipping {self.__configuration_name} - it is configured to be archived."
                 )
             else:
-                logging.info("Processing %s" % self.__configuration_name)
+                cli_ui.debug(f"Processing {self.__configuration_name}")
                 self._process_configuration(project_or_project_and_group, configuration)
         else:
             logging.debug("Skipping %s - not in config." % self.__configuration_name)
@@ -50,6 +48,6 @@ class AbstractProcessor(ABC):
         pass
 
     def _log_changes(self, project_or_project_and_group: str, configuration_to_process):
-        logging.info(
-            "Diffing for %s section is not supported yet" % self.__configuration_name
+        cli_ui.debug(
+            f"Diffing for {self.__configuration_name} section is not supported yet"
         )

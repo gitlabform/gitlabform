@@ -2,6 +2,7 @@ import os
 import logging
 import sys
 
+import cli_ui
 import yaml
 from pathlib import Path
 
@@ -16,14 +17,14 @@ class ConfigurationCore:
     def __init__(self, config_path=None, config_string=None):
 
         if config_path and config_string:
-            logging.fatal(
+            cli_ui.fatal(
                 "Please initialize with either config_path or config_string, not both."
             )
             sys.exit(EXIT_INVALID_INPUT)
 
         try:
             if config_string:
-                logging.info("Reading config from provided string.")
+                cli_ui.debug("Reading config from provided string.")
                 self.config = yaml.safe_load(config_string)
                 self.config_dir = "."
             else:  # maybe config_path
@@ -40,7 +41,7 @@ class ConfigurationCore:
                     # provided points to config.yml in the app current working dir
                     config_path = os.path.join(os.getcwd(), "config.yml")
 
-                logging.info("Reading config from file: {}".format(config_path))
+                cli_ui.debug(f"Reading config from file: {config_path}")
 
                 with open(config_path, "r") as ymlfile:
                     self.config = yaml.safe_load(ymlfile)
@@ -50,7 +51,7 @@ class ConfigurationCore:
                 self.config_dir = os.path.dirname(config_path)
 
                 if self.config.get("example_config"):
-                    logging.fatal(
+                    cli_ui.fatal(
                         "Example config detected, aborting.\n"
                         "Haven't you forgotten to use `-c <config_file` switch?\n"
                         "If you created your config based on the example one then please remove "
