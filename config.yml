@@ -403,6 +403,28 @@ project_settings:
           other_variable:
             value: another_value
 
+    # https://docs.gitlab.com/ee/api/environments.html
+    # Create, Stop, Delete project environments
+    # Key names are arbitrary
+    # If you try and delete an available environment, it is stopped first
+    # stop/delete can be true or false although false is a total noop as you can't start or un-delete an environment
+    environments:
+      "Prod":
+        name: "Production"
+        external_url: "https://localhost"
+
+      "QA":
+        name: "Test"
+        external_url: "https://localhost"
+
+      "STOP":
+        name: "Development"
+        stop: true
+
+      "DELETE":
+        name: "OldEnvironment"
+        delete: true
+
 # this will skip these projects from being processed
 skip_projects:
   - my-group/this-project-will-not-be-processed-with-gitlabform-when-running-for-my-group

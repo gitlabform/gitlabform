@@ -1,5 +1,6 @@
 from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
+from gitlabform.gitlab.environments import GitLabEnvironments
 from gitlabform.gitlab.groups import GitLabGroups
 from gitlabform.gitlab.members import GitLabMembers
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
@@ -25,5 +26,6 @@ class GitLab(
     GitLabMembers,
     GitLabUsers,
     GitLabPipelineSchedules,
+    GitLabEnvironments,
 ):
     pass

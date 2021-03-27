@@ -32,6 +32,9 @@ from gitlabform.gitlabform.processors.project.services_processor import (
     ServicesProcessor,
 )
 from gitlabform.gitlabform.processors.project.tags_processor import TagsProcessor
+from gitlabform.gitlabform.processors.project.environments_processor import (
+    EnvironmentsProcessor,
+)
 
 
 class ProjectProcessors(object):
@@ -50,6 +53,7 @@ class ProjectProcessors(object):
             HooksProcessor(gitlab),
             MembersProcessor(gitlab),
             SchedulesProcessor(gitlab),
+            EnvironmentsProcessor(gitlab),
         ]
 
     def process_project(self, project_and_group, configuration, dry_run=False):

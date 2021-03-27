@@ -162,7 +162,7 @@ We have documented some methods of automating running GitLabForm for newly creat
 
 ## Contributing
 
-Please see the [contribution guide](https://github.com/egnyte/gitlabform/CONTRIBUTING.md) for info about all kinds of contributions, like:
+Please see the [contribution guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) for info about all kinds of contributions, like:
 * questions, feature requests,
 * documentation and code contributions,
 * other.
