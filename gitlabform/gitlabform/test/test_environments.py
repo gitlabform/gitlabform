@@ -1,6 +1,5 @@
 import operator
 import pytest
-import time
 
 from gitlabform.gitlabform import GitLabForm
 from gitlabform.gitlabform.test import (
@@ -20,13 +19,6 @@ def gitlab(request):
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
 
     gl = get_gitlab()
-
-    def fin():
-        gl.delete_project(GROUP_AND_PROJECT_NAME)
-        gl.delete_group(GROUP_NAME)
-        time.sleep(2)  # wait for group & group/project to be deleted
-
-    request.addfinalizer(fin)
     return gl  # provide fixture value
 
 
