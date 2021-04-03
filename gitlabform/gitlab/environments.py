@@ -12,10 +12,10 @@ class GitLabEnvironments(GitLabCore):
 
     def get_environment(self, project_and_group_name, env_name):
         # https://docs.gitlab.com/ee/api/environments.html#get-a-specific-environment
-        e = self._make_requests_to_api(
+        project_environments = self._make_requests_to_api(
             "projects/%s/environments", project_and_group_name
         )
-        for env in e:
+        for env in project_environments:
             if env["name"] == env_name:
                 eid = env["id"]
                 return self._make_requests_to_api(
@@ -34,7 +34,6 @@ class GitLabEnvironments(GitLabCore):
 
     def delete_environment(self, project_and_group_name, eid):
         # https://docs.gitlab.com/ee/api/environments.html#delete-an-environment
-        pid = self._get_project_id(project_and_group_name)
         self._make_requests_to_api(
             "projects/%s/environments/%s",
             (project_and_group_name, eid),
@@ -52,5 +51,13 @@ class GitLabEnvironments(GitLabCore):
         )
 
 
-#    def put_environment():
-# https://docs.gitlab.com/ee/api/environments.html#edit-an-existing-environment
+    def put_environment(self, project_and_group_name, data):
+      # https://docs.gitlab.com/ee/api/environments.html#edit-an-existing-environment
+        eid = data["id"]
+        self._make_requests_to_api(
+            "projects/%s/environments/%s",
+            (project_and_group_name, eid),
+            "PUT",
+            data,
+            expected_codes=200,
+        )

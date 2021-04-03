@@ -1,3 +1,4 @@
+import time
 import operator
 import pytest
 
@@ -9,7 +10,7 @@ from gitlabform.gitlabform.test import (
     GROUP_NAME,
 )
 
-PROJECT_NAME = "project_environments_project"
+PROJECT_NAME = "environments_project"
 GROUP_AND_PROJECT_NAME = GROUP_NAME + "/" + PROJECT_NAME
 
 
@@ -19,6 +20,11 @@ def gitlab(request):
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
 
     gl = get_gitlab()
+    def fin():
+        gl.delete_project(GROUP_AND_PROJECT_NAME)
+        time.sleep(5)
+
+    request.addfinalizer(fin)
     return gl  # provide fixture value
 
 
@@ -54,6 +60,26 @@ project_settings:
 """
 )
 
+config_update_environment = (
+    """
+gitlab:
+  api_version: 4
+
+project_settings:
+  """
+    + GROUP_AND_PROJECT_NAME
+    + """:
+        environments:
+            PROD:
+                name: PROD
+                external_url: https://localhost/prod
+                new_name: Production
+            TST:
+                name: TEST
+                new_external_url: https://localhost/test
+"""
+)
+
 config_create_environment = (
     """
 gitlab:
@@ -80,7 +106,6 @@ project_settings:
 """
 )
 
-
 class TestEnvironments:
     def test__get_all_environments(self, gitlab):
         gf = GitLabForm(
@@ -89,10 +114,10 @@ class TestEnvironments:
         )
         gf.main()
 
-        e = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
-        assert len(e) == 2
-        assert "TEST" in map(operator.itemgetter("name"), e)
-        assert "PROD" in map(operator.itemgetter("name"), e)
+        project_environments = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
+        assert len(project_environments) == 2
+        assert "TEST" in map(operator.itemgetter("name"), project_environments)
+        assert "PROD" in map(operator.itemgetter("name"), project_environments)
 
     def test__get_environment(self, gitlab):
         gf = GitLabForm(
@@ -100,10 +125,10 @@ class TestEnvironments:
             project_or_group=GROUP_AND_PROJECT_NAME,
         )
         gf.main()
-        e = gitlab.get_environment(GROUP_AND_PROJECT_NAME, "PROD")
-        assert e["name"] == "PROD"
-        assert e["state"] == "available"
-        assert e["external_url"] == "https://localhost"
+        environment = gitlab.get_environment(GROUP_AND_PROJECT_NAME, "PROD")
+        assert environment["name"] == "PROD"
+        assert environment["state"] == "available"
+        assert environment["external_url"] == "https://localhost"
 
     def test__stop_environment(self, gitlab):
         gf = GitLabForm(
@@ -112,19 +137,19 @@ class TestEnvironments:
         )
         gf.main()
 
-        e = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
-        assert len(e) == 2
-
+        environment = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
+        assert len(environment) == 2
+        
         gf = GitLabForm(
             config_string=config_stop_environment,
             project_or_group=GROUP_AND_PROJECT_NAME,
         )
         gf.main()
 
-        e = gitlab.get_environment(GROUP_AND_PROJECT_NAME, "PROD")
-        assert e["name"] == "PROD"
-        assert e["state"] == "stopped"
-
+        environment = gitlab.get_environment(GROUP_AND_PROJECT_NAME, "PROD")
+        assert environment["name"] == "PROD"
+        assert environment["state"] == "stopped"
+        
     def test__delete_environment(self, gitlab):
         gf = GitLabForm(
             config_string=config_create_environment,
@@ -132,14 +157,47 @@ class TestEnvironments:
         )
         gf.main()
 
-        e = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
-        assert len(e) == 2
+        project_environments = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
+        assert len(project_environments) == 2
 
         gf = GitLabForm(
             config_string=config_delete_environment,
             project_or_group=GROUP_AND_PROJECT_NAME,
         )
         gf.main()
-        e = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
-        assert len(e) == 1
-        assert "TEST" in map(operator.itemgetter("name"), e)
+        project_environments = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
+        assert len(project_environments) == 1
+        assert "TEST" in map(operator.itemgetter("name"), project_environments)
+
+    def test__put_environment(self, gitlab):
+        gf = GitLabForm(
+            config_string=config_create_environment,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
+        gf.main()
+
+        project_environments = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
+        assert len(project_environments) == 2
+        assert "TEST" in map(operator.itemgetter("name"), project_environments)
+        assert "PROD" in map(operator.itemgetter("name"), project_environments)
+
+        gf = GitLabForm(
+            config_string=config_update_environment,
+            project_or_group=GROUP_AND_PROJECT_NAME,
+        )
+        gf.main()
+
+        project_environments = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
+        assert len(project_environments) == 2
+        assert "TEST" in map(operator.itemgetter("name"), project_environments)
+        assert "Production" in map(operator.itemgetter("name"), project_environments)
+
+        environment = gitlab.get_environment(GROUP_AND_PROJECT_NAME, "Production")
+        assert environment["state"] == "available"
+        assert environment["external_url"] == "https://localhost/prod"
+
+        environment = gitlab.get_environment(GROUP_AND_PROJECT_NAME, "TEST")
+        assert environment["state"] == "available"
+        assert environment["external_url"] == "https://localhost/test"
+
+

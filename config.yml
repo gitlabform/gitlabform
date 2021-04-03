@@ -404,26 +404,49 @@ project_settings:
             value: another_value
 
     # https://docs.gitlab.com/ee/api/environments.html
-    # Create, Stop, Delete project environments
+    # Create, Stop, Delete, Update project environments
     # Key names are arbitrary
     # If you try and delete an available environment, it is stopped first
     # stop/delete can be true or false although false is a total noop as you can't start or un-delete an environment
+    # If you try to update an environment and stop or delete is true, it will not update but it will be
+    # stopped or deleted
     environments:
+
+      # Will create "Production"
       "Prod":
         name: "Production"
         external_url: "https://localhost"
 
+      # Will create "Test"
       "QA":
         name: "Test"
         external_url: "https://localhost"
 
+      # Will Stop existing environment "Development"
       "STOP":
         name: "Development"
         stop: true
 
+      # Will delete existing environment "OldEnvironment"
       "DELETE":
         name: "OldEnvironment"
         delete: true
+
+      # Updates must contain "name:" which must be an exsiting environment name
+      # If "new_name:" is specified, the name is changed
+      # One of "new_external_url:" or "external_url:" must be specified
+      # external_url will be set to "new_external_url" if it exists or "external_url" otherwise
+
+      # Will rename environment "Old_Name" to "New_Name", will set url to "https://localhost/new"
+      "UPDATE":
+        name: "Old_Name"
+        new_name: "New_Name"
+        external_url: "https://localhost/new"
+      
+      # Will change the url of "Existing_environment" to "https://localhost/changed"
+      "UPDATE1:"
+        name: "Existing_environment"
+        new_external_url: "https://localhost/changed"
 
 # this will skip these projects from being processed
 skip_projects:
