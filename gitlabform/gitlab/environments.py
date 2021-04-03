@@ -50,9 +50,8 @@ class GitLabEnvironments(GitLabCore):
             expected_codes=[200, 404],
         )
 
-
     def put_environment(self, project_and_group_name, data):
-      # https://docs.gitlab.com/ee/api/environments.html#edit-an-existing-environment
+        # https://docs.gitlab.com/ee/api/environments.html#edit-an-existing-environment
         eid = data["id"]
         self._make_requests_to_api(
             "projects/%s/environments/%s",

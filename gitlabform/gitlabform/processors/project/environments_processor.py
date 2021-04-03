@@ -14,7 +14,8 @@ class EnvironmentsProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project_environments = self.gitlab.get_all_environments(project_and_group)
         logging.debug(
-            "Environments BEFORE: %s", project_environments,
+            "Environments BEFORE: %s",
+            project_environments,
         )
         for environment in sorted(configuration["environments"]):
             logging.info("Selected environment: %s", environment)
@@ -25,28 +26,23 @@ class EnvironmentsProcessor(AbstractProcessor):
                 # env already defined - valid options are stop, delete, or update
                 if ("new_name" in data.keys()) or ("new_external_url" in data.keys()):
                     # Request to update an existing environment
-                    if (
-                          ("stop" in data.keys() and data["stop"]) or
-                          ("delete" in data.keys() and data["delete"])
-                        ):
+                    if ("stop" in data.keys() and data["stop"]) or (
+                        "delete" in data.keys() and data["delete"]
+                    ):
                         # Stop or delete is true, so do not update
-                        logging.info("Not updating %s because STOP or DELETE requested", env)
+                        logging.info(
+                            "Not updating %s because STOP or DELETE requested", env
+                        )
                     else:
                         # Update the environment
                         logging.info("Will update %s.", env)
                         for x in project_environments:
                             if x["name"] == env:
                                 data["id"] = x["id"]
-                                try:
-                                    # new_name may or may not be defined
+                                if "new_name" in data.keys():
                                     data["name"] = data["new_name"]
-                                except:
-                                    pass
-                                try:
-                                    # new_external_url may or may not be defined
+                                if "new_external_url" in data.keys():
                                     data["external_url"] = data["new_external_url"]
-                                except:
-                                    pass
                                 self.gitlab.put_environment(project_and_group, data)
                                 break
 

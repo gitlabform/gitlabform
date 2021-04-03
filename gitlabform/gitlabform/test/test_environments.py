@@ -20,6 +20,7 @@ def gitlab(request):
     create_project_in_group(GROUP_NAME, PROJECT_NAME)
 
     gl = get_gitlab()
+
     def fin():
         gl.delete_project(GROUP_AND_PROJECT_NAME)
         time.sleep(5)
@@ -106,6 +107,7 @@ project_settings:
 """
 )
 
+
 class TestEnvironments:
     def test__get_all_environments(self, gitlab):
         gf = GitLabForm(
@@ -139,7 +141,7 @@ class TestEnvironments:
 
         environment = gitlab.get_all_environments(GROUP_AND_PROJECT_NAME)
         assert len(environment) == 2
-        
+
         gf = GitLabForm(
             config_string=config_stop_environment,
             project_or_group=GROUP_AND_PROJECT_NAME,
@@ -149,7 +151,7 @@ class TestEnvironments:
         environment = gitlab.get_environment(GROUP_AND_PROJECT_NAME, "PROD")
         assert environment["name"] == "PROD"
         assert environment["state"] == "stopped"
-        
+
     def test__delete_environment(self, gitlab):
         gf = GitLabForm(
             config_string=config_create_environment,
@@ -199,5 +201,3 @@ class TestEnvironments:
         environment = gitlab.get_environment(GROUP_AND_PROJECT_NAME, "TEST")
         assert environment["state"] == "available"
         assert environment["external_url"] == "https://localhost/test"
-
-
