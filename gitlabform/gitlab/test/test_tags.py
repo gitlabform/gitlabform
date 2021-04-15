@@ -1,19 +1,19 @@
-import pytest
-
-import pdb 
-import logging
-
-import json
-
-logger = logging.getLogger(__name__)
-
-from gitlabform.gitlabform import GitLabForm
 from gitlabform.gitlabform.test import (
     create_group,
     create_project_in_group,
     get_gitlab,
     GROUP_NAME,
 )
+from gitlabform.gitlabform import GitLabForm
+import pytest
+
+import pdb
+import logging
+
+import json
+
+logger = logging.getLogger(__name__)
+
 
 PROJECT_NAME = "project_settings_project"
 GROUP_AND_PROJECT_NAME = GROUP_NAME + "/" + PROJECT_NAME
@@ -67,4 +67,3 @@ class TestTagPermissionNoAccess:
         project = gitlab.get_project(GROUP_AND_PROJECT_NAME)
 
         assert project["archived"] is False
-
