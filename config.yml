@@ -424,6 +424,9 @@ project_settings:
             variable_type: file # optional parameter, defaults to 'env_var'
           other_variable:
             value: another_value
+      # this one will be deleted if exists 
+      "Obsolete schedule":
+        delete: true
 
 # this will skip these projects from being processed
 skip_projects:
