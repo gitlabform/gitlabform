@@ -276,6 +276,10 @@ class NotFoundException(Exception):
     pass
 
 
+class TimeoutWaitingForDeletion(Exception):
+    pass
+
+
 class UnexpectedResponseException(Exception):
     def __init__(self, message, status_code):
         self.message = message

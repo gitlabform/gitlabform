@@ -1,10 +1,22 @@
 import json
+from time import sleep
 
-from gitlabform.gitlab.core import GitLabCore, NotFoundException
+from gitlabform.gitlab.core import (
+    GitLabCore,
+    NotFoundException,
+    TimeoutWaitingForDeletion,
+)
 
 
 class GitLabProjects(GitLabCore):
-    def create_project(self, name, path, namespace_id, default_branch=None):
+    def create_project(
+        self,
+        name,
+        path,
+        namespace_id,
+        default_branch=None,
+        wait_if_still_being_deleted=False,
+    ):
         data = {
             "name": name,
             "path": path,
@@ -12,18 +24,70 @@ class GitLabProjects(GitLabCore):
         }
         if default_branch:
             data["default_branch"] = default_branch
-        return self._make_requests_to_api(
-            "projects", data=data, method="POST", expected_codes=201
+
+        if wait_if_still_being_deleted:
+
+            # GitLab deletes the project asynchronously, it may take a few seconds.
+            # So if you are creating new project with the same name as the one
+            # that is still being deleted, GitLab returns code 400
+            # and "The project is still being deleted.". Let's retry a few times
+            # then to start creating when the deletion is done.
+            # (Note: this code DOES NOT support the "Delayed Project deletion" feature
+            # where the actual deletion can be postponed for days!)
+
+            max_retries = 10
+            wait_before_retry = 3
+            retry = 0
+
+            while True:
+                retry += 1
+
+                if retry > max_retries:
+                    raise TimeoutWaitingForDeletion
+
+                response = self._make_requests_to_api(
+                    "projects", data=data, method="POST", expected_codes=[201, 400]
+                )
+                if self._is_project_still_deleted(response):
+                    # wait & retry
+                    sleep(wait_before_retry)
+                    continue
+                else:
+                    return response
+
+        else:
+
+            return self._make_requests_to_api(
+                "projects", data=data, method="POST", expected_codes=201
+            )
+
+    @staticmethod
+    def _is_project_still_deleted(response):
+        # check if response looks like this:
+        # {'message': {'base': ['The project is still being deleted. Please try again later.'],
+        # 'limit_reached': []}}
+        return (
+            "message" in response
+            and "base" in response["message"]
+            and type(response["message"]["base"]) == list
+            and len(response["message"]["base"]) == 1
+            and "The project is still being deleted." in response["message"]["base"][0]
         )
 
     def delete_project(self, project_and_group_name):
+
         # 404 means that the project does not exist anymore, so let's accept it for idempotency
-        return self._make_requests_to_api(
+        self._make_requests_to_api(
             "projects/%s",
             project_and_group_name,
             method="DELETE",
             expected_codes=[202, 204, 404],
         )
+
+        # GitLab deletes the project asynchronously, it may take a few seconds
+        # BUT it doesn't return such not yet deleted project in GET calls, so
+        # there is no point in checking if it actually done here. :(
+        # See create_project() for the code that deals with that.
 
     def get_all_projects(self):
         """
