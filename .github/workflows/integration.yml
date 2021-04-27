@@ -27,4 +27,4 @@ jobs:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: |
           ./dev/run_gitlab_in_docker.sh
-          py.test gitlabform/gitlabform/test
+          py.test gitlabform/gitlabform/test/test_branches.py
