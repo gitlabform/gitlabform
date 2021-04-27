@@ -48,7 +48,8 @@ setup(
         "luddite==1.0.1",
     ],
     tests_require=[
-        "pytest",
+        "pytest==6.1.1",
+        "xkcdpass==1.17.6",
     ],
     scripts=[
         "bin/gitlabform",

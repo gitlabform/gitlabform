@@ -77,7 +77,7 @@ class GitLabProjects(GitLabCore):
     def delete_project(self, project_and_group_name):
 
         # 404 means that the project does not exist anymore, so let's accept it for idempotency
-        self._make_requests_to_api(
+        return self._make_requests_to_api(
             "projects/%s",
             project_and_group_name,
             method="DELETE",

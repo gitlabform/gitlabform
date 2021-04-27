@@ -45,40 +45,21 @@ gl = GitLab(config_string=CONFIG)
 
 
 def get_group_name(test_type):
-    random_suffix = get_random_suffix(test_type, True)
+    random_suffix = get_random_suffix()
     return f"{GROUP_NAME_PREFIX}__{test_type}__{random_suffix}"
 
 
 def get_project_name(test_type):
-    random_suffix = get_random_suffix(test_type, True)
+    random_suffix = get_random_suffix()
     return f"{test_type}_project__{random_suffix}"
 
 
-def get_group_and_project_names(test_type, unique):
-    random_suffix = get_random_suffix(test_type, unique)
-    group_name = f"{GROUP_NAME_PREFIX}__{random_suffix}"
-    project_name = f"{test_type}_project__{random_suffix}"
-    group_and_project_name = f"{group_name}/{project_name}"
-    return group_name, project_name, group_and_project_name
-
-
-random_suffixes_per_type = {}
 word_file = xp.locate_wordfile()
 my_words = xp.generate_wordlist(wordfile=word_file, min_length=5, max_length=8)
 
 
-def get_random_suffix(test_type, unique):
-    if unique:
-        return xp.generate_xkcdpassword(wordlist=my_words, numwords=2, delimiter="_")
-    else:
-        if test_type in random_suffixes_per_type:
-            return random_suffixes_per_type[test_type]
-        else:
-            random_suffix = xp.generate_xkcdpassword(
-                wordlist=my_words, numwords=2, delimiter="_"
-            )
-            random_suffixes_per_type[test_type] = random_suffix
-            return random_suffix
+def get_random_suffix():
+    return xp.generate_xkcdpassword(wordlist=my_words, numwords=2, delimiter="_")
 
 
 def get_gitlab():
