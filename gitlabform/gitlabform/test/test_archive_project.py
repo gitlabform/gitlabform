@@ -53,6 +53,10 @@ class TestArchiveProject:
               archive: true
         """
 
+        run_gitlabform(archive_project, group_and_project)
+        project = gitlab.get_project(group_and_project)
+        assert project["archived"] is True
+
         edit_archived_project = f"""
         # the project has to be configured as archived
         # for other configs for it to be ignored
@@ -72,8 +76,7 @@ class TestArchiveProject:
                   Some other content that the default one
         """
 
-        run_gitlabform(archive_project, group_and_project)
-        project = gitlab.get_project(group_and_project)
-        assert project["archived"] is True
-
         run_gitlabform(edit_archived_project, group_and_project)
+
+        # the fact that we are not getting an exception because of trying to edit
+        # an archived project means that the test is passing
