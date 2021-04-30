@@ -107,22 +107,18 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         :return: merge more general config with more specific configs.
                  More specific config values take precedence over more general ones.
         """
-        merged_config = {}
+        if isinstance(more_general_config, dict):
+            for key in more_specific_config:
+                if key in more_general_config:
+                    more_general_config[key] = self.merge_configs(
+                        more_general_config[key], more_specific_config[key]
+                    )
+                else:
+                    more_general_config[key] = more_specific_config[key]
+        else:
+            more_general_config = more_specific_config
 
-        for key in more_specific_config.keys() | more_general_config.keys():
-
-            if key in more_general_config and key not in more_specific_config:
-                merged_config[key] = more_general_config[key]
-            elif key in more_specific_config and key not in more_general_config:
-                merged_config[key] = more_specific_config[key]
-            else:
-                # overwrite more general config settings with more specific config
-                merged_config[key] = {
-                    **more_general_config[key],
-                    **more_specific_config[key],
-                }
-
-        return merged_config
+        return more_general_config
 
     def get_effective_config_for_group(self, group) -> dict:
         """
