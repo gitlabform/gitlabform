@@ -30,7 +30,7 @@ class GitLabGroups(GitLabCore):
         result = self._make_requests_to_api("groups?all_available=true", paginated=True)
         return sorted(map(lambda x: x["full_path"], result))
 
-    def get_projects(self, group):
+    def get_projects(self, group, ignore_archived=False):
         """
         :param group: group name
         :return: sorted list of strings "group/project_name". Note that only projects from "group" namespace are
@@ -38,8 +38,13 @@ class GitLabGroups(GitLabCore):
                  returned here.
         """
         try:
+            if ignore_archived:
+                query_string = "include_subgroups=true&archived=false"
+            else:
+                query_string = "include_subgroups=true"
+
             projects = self._make_requests_to_api(
-                "groups/%s/projects?include_subgroups=true", group, paginated=True
+                f"groups/%s/projects?{query_string}", group, paginated=True
             )
         except NotFoundException:
             projects = []
