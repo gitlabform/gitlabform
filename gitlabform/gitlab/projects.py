@@ -36,7 +36,7 @@ class GitLabProjects(GitLabCore):
             else:
                 query_string = "order_by=name&sort=asc"
             result = self._make_requests_to_api(
-               f"projects?{query_string}", paginated=True
+                f"projects?{query_string}", paginated=True
             )
             return sorted(map(lambda x: x["path_with_namespace"], result))
         except NotFoundException:

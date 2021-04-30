@@ -256,7 +256,9 @@ class GitLabFormCore(object):
         # gitlab can return single project in a few groups, so let's use a set for projects
         projects_and_groups = set(projects_and_groups)
         for group in effective_groups:
-            for project in self.gl.get_projects(group, ignore_archived=self.skip_archived_projects):
+            for project in self.gl.get_projects(
+                group, ignore_archived=self.skip_archived_projects
+            ):
                 projects_and_groups.add(project)
         projects_and_groups = sorted(list(projects_and_groups))
 
