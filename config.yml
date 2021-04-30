@@ -306,6 +306,8 @@ group_settings:
   old-projects-group:
     # this will archive all the projects in the 'old-projects-group' group
     project:
+      # note: you can lso unarchive a project by setting this to 'true' but then you need to run
+      # the app WITHOUT --skip-archived-projects flag
       archive: true
 
   group-with-spammy-projects:
