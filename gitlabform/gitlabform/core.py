@@ -28,6 +28,7 @@ class GitLabFormCore(object):
             self.noop = False
             self.set_log_level(tests=True)
             self.skip_version_check = True
+            self.skip_archived_projects = False
             self.show_version = False
             self.terminate_after_error = True
         else:
@@ -42,6 +43,7 @@ class GitLabFormCore(object):
                 self.skip_version_check,
                 self.show_version,
                 self.terminate_after_error,
+                self.skip_archived_projects,
             ) = self.parse_args()
             self.set_log_level()
 
@@ -137,6 +139,14 @@ class GitLabFormCore(object):
             help="Terminates the program from running after the first error",
         )
 
+        parser.add_argument(
+            "-i",
+            "--skip-archived-projects",
+            dest="skip_archived_projects",
+            action="store_true",
+            help="Skips the configuration of projects that have been archived",
+        )
+
         args = parser.parse_args()
 
         return (
@@ -150,6 +160,7 @@ class GitLabFormCore(object):
             args.skip_version_check,
             args.show_version,
             args.terminate_after_error,
+            args.skip_archived_projects,
         )
 
     def set_log_level(self, tests=False):
@@ -205,7 +216,6 @@ class GitLabFormCore(object):
         self.process_all(projects_and_groups, groups)
 
     def get_projects_list(self):
-
         groups = []
         projects_and_groups = []
 
@@ -246,7 +256,7 @@ class GitLabFormCore(object):
         # gitlab can return single project in a few groups, so let's use a set for projects
         projects_and_groups = set(projects_and_groups)
         for group in effective_groups:
-            for project in self.gl.get_projects(group):
+            for project in self.gl.get_projects(group, ignore_archived=self.skip_archived_projects):
                 projects_and_groups.add(project)
         projects_and_groups = sorted(list(projects_and_groups))
 

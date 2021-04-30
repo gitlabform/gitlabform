@@ -25,14 +25,18 @@ class GitLabProjects(GitLabCore):
             expected_codes=[202, 204, 404],
         )
 
-    def get_all_projects(self):
+    def get_all_projects(self, ignore_archived=False):
         """
         :param group: group name
         :return: sorted list of ALL projects you have access to, strings "group/project_name"
         """
         try:
+            if ignore_archived:
+                query_string = "order_by=name&sort=asc&archived=false"
+            else:
+                query_string = "order_by=name&sort=asc"
             result = self._make_requests_to_api(
-                "projects?order_by=name&sort=asc", paginated=True
+               f"projects?{query_string}", paginated=True
             )
             return sorted(map(lambda x: x["path_with_namespace"], result))
         except NotFoundException:
