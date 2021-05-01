@@ -60,6 +60,14 @@ class ConfigurationCore:
                     )
                     sys.exit(EXIT_INVALID_INPUT)
 
+                if self.config.get("config_version", 1) != 2:
+                    cli_ui.fatal(
+                        "GitLabForm 2.0.x requires 'config_version: 2' entry in the config.\n"
+                        " This ensures that when the application behavior changes"
+                        " you won't apply unexpected configuration to your GitLab instance."
+                    )
+                    sys.exit(EXIT_INVALID_INPUT)
+
         except (FileNotFoundError, IOError):
             raise ConfigFileNotFoundException(config_path)
 
