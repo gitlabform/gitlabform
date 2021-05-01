@@ -10,42 +10,21 @@ import urllib3
 from urllib3.util.retry import Retry
 from urllib import parse
 from requests.adapters import HTTPAdapter
-from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
+
+from gitlabform.configuration import Configuration
+from gitlabform.configuration.core import KeyNotFoundException
 from gitlabform import EXIT_INVALID_INPUT
 
 
 class GitLabCore:
+    def __init__(self, config_path=None, config_string=None):
 
-    url = None
-    token = None
-    ssl_verify = None
-    session = None
-    timeout = None
+        self.configuration = Configuration(config_path, config_string)
 
-    def __init__(self, config_path=None, config_string=None, configuration=None):
-
-        if config_path and config_string:
-            cli_ui.fatal(
-                "Please initialize with either config_path or config_string, not both."
-            )
-            sys.exit(EXIT_INVALID_INPUT)
-
-        if not config_path and not config_string and not configuration:
-            cli_ui.fatal(
-                "Please initialize with one of: config_path, config_string, configuration"
-            )
-            sys.exit(EXIT_INVALID_INPUT)
-
-        if not configuration:
-            if config_path:
-                configuration = ConfigurationCore(config_path=config_path)
-            else:
-                configuration = ConfigurationCore(config_string=config_string)
-
-        self.url = configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
-        self.token = configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
-        self.ssl_verify = configuration.get("gitlab|ssl_verify", True)
-        self.timeout = configuration.get("gitlab|timeout", 10)
+        self.url = self.configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
+        self.token = self.configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
+        self.ssl_verify = self.configuration.get("gitlab|ssl_verify", True)
+        self.timeout = self.configuration.get("gitlab|timeout", 10)
 
         self.session = requests.Session()
 
@@ -68,7 +47,7 @@ class GitLabCore:
         except Exception as e:
             raise TestRequestFailedException(e)
         try:
-            api_version = configuration.get("gitlab|api_version")
+            api_version = self.configuration.get("gitlab|api_version")
             if api_version != 4:
                 raise ApiVersionIncorrectException()
         except KeyNotFoundException:
@@ -82,6 +61,9 @@ class GitLabCore:
                 "to 4 to indicate that your config is v4-compatible."
             )
             sys.exit(EXIT_INVALID_INPUT)
+
+    def get_configuration(self):
+        return self.configuration
 
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
