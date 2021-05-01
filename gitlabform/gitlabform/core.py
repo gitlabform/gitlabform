@@ -41,7 +41,7 @@ class GitLabFormCore(object):
             self.noop = False
             self.configure_output(tests=True)
             self.skip_version_check = True
-            self.show_version = False
+            self.just_show_version = False
             self.terminate_after_error = True
         else:
             # normal mode
@@ -56,14 +56,14 @@ class GitLabFormCore(object):
                 self.start_from_group,
                 self.noop,
                 self.skip_version_check,
-                self.show_version,
+                self.just_show_version,
                 self.terminate_after_error,
             ) = self.parse_args()
 
             self.configure_output()
 
-            cli_ui.info(self.get_version(self.skip_version_check))
-            if self.show_version:
+            self.show_version(self.skip_version_check)
+            if self.just_show_version:
                 sys.exit(0)
 
             if not self.project_or_group:
@@ -100,7 +100,7 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
         parser.add_argument(
             "-V",
             "--version",
-            dest="show_version",
+            dest="just_show_version",
             action="store_true",
             help="show version and exit",
         )
@@ -184,7 +184,7 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
             args.start_from_group,
             args.noop,
             args.skip_version_check,
-            args.show_version,
+            args.just_show_version,
             args.terminate_after_error,
         )
 
@@ -218,22 +218,56 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
             handler = logging.getLogger().handlers[0]
             logging.getLogger().removeHandler(handler)
 
-    def get_version(self, skip_version_check):
+    def show_version(self, skip_version_check):
+
         local_version = pkg_resources.get_distribution("gitlabform").version
-        version = f"GitLabForm version: {local_version}"
+
+        tower_crane = cli_ui.Symbol("🏗", "")
+        tokens_to_show = [
+            cli_ui.reset,
+            tower_crane,
+            "GitLabForm version: ",
+            cli_ui.blue,
+            local_version,
+            cli_ui.reset,
+        ]
+
+        cli_ui.message(*tokens_to_show, sep="", end="")
 
         if not skip_version_check:
             latest_version = luddite.get_version_pypi("gitlabform")
             if local_version == latest_version:
-                version += " = the latest stable"
+                happy = cli_ui.Symbol("😊", "")
+                tokens_to_show = [
+                    " = the latest stable",
+                    happy,
+                ]
             elif packaging_version.parse(local_version) < packaging_version.parse(
                 latest_version
             ):
-                version += f" = outdated, please update! (the latest stable is {latest_version})"
+                sad = cli_ui.Symbol("😔", "")
+                tokens_to_show = [
+                    " = outdated ",
+                    sad,
+                    f", please update! (the latest stable is ",
+                    cli_ui.blue,
+                    latest_version,
+                    cli_ui.reset,
+                    ")",
+                ]
             else:
-                version += f" = pre-release (the latest stable is {latest_version})"
+                excited = cli_ui.Symbol("🤩", "")
+                tokens_to_show = [
+                    " = pre-release ",
+                    excited,
+                    f" (the latest stable is ",
+                    cli_ui.blue,
+                    latest_version,
+                    cli_ui.reset,
+                    ")",
+                ]
 
-        return version
+        cli_ui.message(*tokens_to_show, sep="")
 
     def initialize_configuration_and_gitlab(self):
 
@@ -447,10 +481,10 @@ and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitL
         if len(failed_groups) > 0 or len(failed_projects) > 0:
             sys.exit(EXIT_PROCESSING_ERROR)
         else:
-            party = cli_ui.Symbol("🎉", "!!!")
+            shine = cli_ui.Symbol("✨", "!!!")
             cli_ui.info_1(
                 cli_ui.green,
                 f"All requested groups/projects processes successfully!",
                 cli_ui.reset,
-                party,
+                shine,
             )
