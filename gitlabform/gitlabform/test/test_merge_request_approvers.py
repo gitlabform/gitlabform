@@ -398,7 +398,6 @@ class TestMergeRequestApprovers:
             "gitlabform_tests_group_with_user4",
         }
 
-        print(str(rule["eligible_approvers"]))
         assert len(rule["eligible_approvers"]) == 4
         eligibleapprovers_in_rule = set(
             [user["username"] for user in rule["eligible_approvers"]]
