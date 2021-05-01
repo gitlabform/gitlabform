@@ -82,6 +82,25 @@ project_settings:
     return ConfigurationProjectsAndGroups(config_string=config_yaml)
 
 
+@pytest.fixture
+def configuration_with_common_and_group():
+    config_yaml = """
+---
+common_settings:
+  merge_requests:
+    approvals:
+      approvals_before_merge: 3
+
+group_settings:
+  "group_name":
+    merge_requests:
+      approvals:
+        merge_requests_author_approval: true
+"""
+
+    return ConfigurationProjectsAndGroups(config_string=config_yaml)
+
+
 def test__get_effective_config_for_project__other_project(
     configuration_with_only_group_and_project,
 ):
@@ -148,3 +167,20 @@ def test__get_effective_config_for_project__project_from_config__level2(
 
     # project and only subgroup level 2
     assert additive__project_settings == {"foo": "bar3", "bar": "something_else3"}
+
+
+def test__get_effective_config_for_common_and_group(
+    configuration_with_common_and_group,
+):
+
+    x = configuration_with_common_and_group.get_effective_config_for_project(
+        "group_name/project_name"
+    )
+
+    assert "approvals" in x["merge_requests"]
+
+    assert "approvals_before_merge" in x["merge_requests"]["approvals"]
+    assert x["merge_requests"]["approvals"]["approvals_before_merge"] == 3
+
+    assert "merge_requests_author_approval" in x["merge_requests"]["approvals"]
+    assert x["merge_requests"]["approvals"]["merge_requests_author_approval"] is True
