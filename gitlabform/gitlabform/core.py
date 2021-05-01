@@ -1,6 +1,7 @@
 import argparse
 import logging.config
 import sys
+import textwrap
 import traceback
 
 import cli_ui
@@ -78,13 +79,15 @@ class GitLabFormCore(object):
     def parse_args(self):
 
         parser = argparse.ArgumentParser(
-            description=f"""
-Specialized "configuration as a code" tool for GitLab projects, groups and more
-using hierarchical configuration written in YAML.
+            description=textwrap.dedent(
+                f"""
+            Specialized "configuration as a code" tool for GitLab projects, groups and more
+            using hierarchical configuration written in YAML.
 
-Exits with code {EXIT_INVALID_INPUT} on invalid input errors (f.e. config file not found),
-and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitLab returns 400).
-            """,
+            Exits with code {EXIT_INVALID_INPUT} on invalid input errors (f.e. config file not found),
+            and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitLab returns 400).
+            """
+            ),
             formatter_class=Formatter,
         )
 
