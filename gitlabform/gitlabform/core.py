@@ -276,11 +276,10 @@ class GitLabFormCore(object):
 
         try:
             if hasattr(self, "config_string"):
-                c = Configuration(config_string=self.config_string)
-                gl = GitLab(configuration=c)
+                gl = GitLab(config_string=self.config_string)
             else:
-                c = Configuration(self.config.strip())
-                gl = GitLab(configuration=c)
+                gl = GitLab(config_path=self.config)
+            c = gl.get_configuration()
             return gl, c
         except ConfigFileNotFoundException as e:
             cli_ui.error(f"Config file not found at: {e}")
