@@ -12,15 +12,14 @@ logger = logging.getLogger(__name__)
 def configuration_with_only_group_and_project():
     config_yaml = """
     ---
-    group_settings:
-      some_group:
+    projects_and_groups:
+      some_group/*:
         project_settings:
           foo: bar
         hooks:
           a:
             foo: bar
     
-    project_settings:
       some_group/some_project:
         project_settings:
           bar: foo
@@ -36,29 +35,28 @@ def configuration_with_only_group_and_project():
 def configuration_with_subgroups():
     config_yaml = """
     ---
-    group_settings:
-      some_group:
+    projects_and_groups:
+      some_group/*:
         project_settings:
           foo: bar
         hooks:
           a:
             foo: bar
     
-      some_group/subgroup_level_1:
+      some_group/subgroup_level_1/*:
         project_settings:
           foo: bar2
         hooks:
           a:
             foo: bar2
     
-      some_group/subgroup_level_1/subgroup_level_2:
+      some_group/subgroup_level_1/subgroup_level_2/*:
         project_settings:
           foo: bar3
         hooks:
           a:
             foo: bar3
     
-    project_settings:
       some_group/some_project:
         project_settings:
           bar: something_else

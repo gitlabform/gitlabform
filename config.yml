@@ -23,8 +23,8 @@ gitlab:
 
 #
 # You can define settings on 3 levels here:
-# * common - for ALL projects in ALL groups
-# * group/subgroup - for ALL projects in selected group/subgroup (recursively)
+# * common - for ALL projects in ALL groups - under "*" key
+# * group/subgroup - for ALL projects in selected group/subgroup (recursively) - under keys ending with "/*"
 # * project - for single projects
 #
 # Each level is optional.
@@ -39,30 +39,30 @@ gitlab:
 # Exception: when `skip: true` is set on a more specific level, given config section is not set AT ALL for given project.
 #
 
-common_settings:
-  # common settings for ALL projects in ALL groups
+projects_and_groups:
+  "*":
+    # common settings for ALL projects in ALL groups
 
-  # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
-  secret_variables:
-    # this name is not actually used, it's just for you
-    a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
-      key: A_VERY_COMMONLY_USED_PASSWORD
-      value: "ThisIsAVerySecretPassword"
-      delete: false  # Set to true to delete this variable
+    # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
+    secret_variables:
+      # this name is not actually used, it's just for you
+      a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
+        key: A_VERY_COMMONLY_USED_PASSWORD
+        value: "ThisIsAVerySecretPassword"
+        delete: false  # Set to true to delete this variable
 
-  # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
-  group_secret_variables:
-    # this name is not actually used, it's just for you
-    a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
-      key: A_VERY_COMMONLY_USED_PASSWORD
-      value: "ThisIsAVerySecretPassword"
-      variable_type: env_var #or file
-      protected: false #
-      delete: false  # Set to true to delete this variable
+    # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
+    group_secret_variables:
+      # this name is not actually used, it's just for you
+      a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
+        key: A_VERY_COMMONLY_USED_PASSWORD
+        value: "ThisIsAVerySecretPassword"
+        variable_type: env_var #or file
+        protected: false #
+        delete: false  # Set to true to delete this variable
 
-group_settings:
   # settings for ALL projects in 'my-group' group
-  "my-group":
+  "my-group/*":
     deploy_keys:
       # this name is not actually used, it's just for you
       a_friendly_deploy_key_name:
@@ -308,20 +308,19 @@ group_settings:
           This file will be added to all protected branches.
 
   # settings for ALL projects in 'old-projects-group' group
-  old-projects-group:
+  old-projects-group/*:
     # this will archive all the projects in the 'old-projects-group' group
     project:
       # note: you can lso unarchive a project by setting this to 'true' but then you need to run
       # the app WITHOUT --skip-archived-projects flag
       archive: true
 
-  group-with-spammy-projects:
+  group-with-spammy-projects/*:
     # configures settings for the 'group-with-spammy-projects' group
     group_settings:
       # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
       emails_disabled: true
 
-project_settings:
   # settings specific to 'my-group/my-project1' project
   "my-group/my-project1":
     project_settings:
