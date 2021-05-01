@@ -149,6 +149,14 @@ class GitLabFormCore(object):
         )
 
         parser.add_argument(
+            "-i",
+            "--skip-archived-projects",
+            dest="skip_archived_projects",
+            action="store_true",
+            help="Skips the configuration of projects that have been archived",
+        )
+
+        parser.add_argument(
             "-t",
             "--terminate",
             dest="terminate_after_error",
@@ -176,14 +184,6 @@ class GitLabFormCore(object):
             type=int,
             help="start processing groups from the given one "
             '(as numbered by "x/y Processing group/project" messages)',
-        )
-
-        parser.add_argument(
-            "-i",
-            "--skip-archived-projects",
-            dest="skip_archived_projects",
-            action="store_true",
-            help="Skips the configuration of projects that have been archived",
         )
 
         args = parser.parse_args()
