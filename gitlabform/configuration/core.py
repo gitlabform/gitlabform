@@ -1,6 +1,7 @@
 import os
 import logging
 import sys
+import textwrap
 
 import cli_ui
 import yaml
@@ -25,7 +26,7 @@ class ConfigurationCore:
         try:
             if config_string:
                 cli_ui.debug("Reading config from provided string.")
-                self.config = yaml.safe_load(config_string)
+                self.config = yaml.safe_load(textwrap.dedent(config_string))
                 self.config_dir = "."
             else:  # maybe config_path
                 if "APP_HOME" in os.environ:
