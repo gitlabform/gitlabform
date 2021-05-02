@@ -15,7 +15,8 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
     def get_group_config(self, group) -> dict:
         """
         :param group: group/subgroup
-        :return: literal configuration for this group/subgroup or empty dict if not defined
+        :return: configuration for this group/subgroup or empty dict if not defined,
+                 ignoring the case
         """
         try:
             return self.get_case_insensitively(
@@ -27,7 +28,8 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
     def get_project_config(self, group_and_project) -> dict:
         """
         :param group_and_project: 'group/project'
-        :return: literal configuration for this project or empty dict if not defined
+        :return: configuration for this project or empty dict if not defined,
+                 ignoring the case
         """
         try:
             return self.get_case_insensitively(
@@ -38,7 +40,8 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
 
     def is_project_skipped(self, project) -> bool:
         """
-        :return: if project is defined in the key with projects to skip
+        :return: if project is defined in the key with projects to skip,
+                 ignoring the case
         """
         return self.is_in_array_case_insensitively(
             self.get("skip_projects", []), project
@@ -46,7 +49,8 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
 
     def is_group_skipped(self, group):
         """
-        :return: if group is defined in the key with groups to skip
+        :return: if group is defined in the key with groups to skip,
+                 ignoring the case
         """
         return self.is_in_array_case_insensitively(self.get("skip_groups", []), group)
 
@@ -123,7 +127,3 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
 
         else:
             return []
-
-
-class ConfigNotFoundException(Exception):
-    pass

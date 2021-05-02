@@ -160,46 +160,34 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         """
         :return: sorted list of groups with configs
         """
-        try:
-            groups = []
-            projects_and_groups = self.get("projects_and_groups", default={})
-            for element in projects_and_groups.keys():
-                if element.endswith("/*"):
-                    # cut off that "/*"
-                    group_name = element[:-2]
-                    groups.append(group_name)
-            return sorted(groups)
-        except KeyNotFoundException:
-            raise ConfigNotFoundException
+        groups = []
+        projects_and_groups = self.get("projects_and_groups")
+        for element in projects_and_groups.keys():
+            if element.endswith("/*"):
+                # cut off that "/*"
+                group_name = element[:-2]
+                groups.append(group_name)
+        return sorted(groups)
 
     def get_group_config(self, group) -> dict:
         """
         :param group: group/subgroup
         :return: literal configuration for this group/subgroup or empty dict if not defined
         """
-        try:
-            return self.get("projects_and_groups|%s/*" % group)
-        except KeyNotFoundException:
-            return {}
+        return self.get(f"projects_and_groups|{group}/*", {})
 
     def get_project_config(self, group_and_project) -> dict:
         """
         :param group_and_project: 'group/project'
         :return: literal configuration for this project or empty dict if not defined
         """
-        try:
-            return self.get("projects_and_groups|%s" % group_and_project)
-        except KeyNotFoundException:
-            return {}
+        return self.get(f"projects_and_groups|{group_and_project}", {})
 
     def get_config_common(self) -> dict:
         """
         :return: literal common configuration or empty dict if not defined
         """
-        try:
-            return self.get("projects_and_groups|*")
-        except KeyNotFoundException:
-            return {}
+        return self.get("projects_and_groups|*", {})
 
     def is_project_skipped(self, project) -> bool:
         """
