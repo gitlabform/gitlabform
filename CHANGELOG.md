@@ -10,8 +10,6 @@
 
 * **Exit with code != 0 when any group/project processing was failed (breaking change).** This will allow you to notice problems when running the app from CI. Note that you can restore the old behaviour by running the app with `(...) || true`. Fixes #153.
 
-* **Actually merge the dicts inside the dicts in the configs (breaking change).** GitLabForm did not work as advertised here in v1 - such dicts were overwritten, not merged. This is a breaking change as in may change the effective configs. PR #198, fixes #197.
-
 * Standardized exit codes. Exit with 1 in case of input error (f.e. config file does not exist), with 2 in case of processing error (f.e. GitLab returns HTTP 500).
 
 * New command line switch `--start-from-group`/`-sfg` allows starting to process groups from a given number (like projects with `--start-from`/`-sf`).
@@ -20,7 +18,7 @@
 
 * Remove the need to add the `gitlab.api_version` configuration key.
 
-Thanks to @amimas, @weakcamel and @kowpatryk for their contributions!
+Thanks to [@amimas](github.com/amimas), [@weakcamel](github.com/weakcamel) and [@kowpatryk](github.com/kowpatryk) for their contributions!
 
 ### before 2.0.0 RC1
 
