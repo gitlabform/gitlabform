@@ -198,6 +198,7 @@ class GitLabFormCore(object):
             args.start_from_group,
             args.noop,
             args.skip_version_check,
+            args.skip_archived_projects,
             args.just_show_version,
             args.terminate_after_error,
             args.skip_archived_projects,
