@@ -6,13 +6,16 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigurationProjectsAndGroups(ConfigurationCore):
+    def __init__(self, config_path=None, config_string=None):
+        super().__init__(config_path, config_string)
+
     def get_projects(self) -> list:
         """
-        :return: sorted list of projects with configs
+        :return: sorted list of projects names
         """
         try:
             projects = []
-            projects_and_groups = self.get("projects_and_groups", default={}).keys()
+            projects_and_groups = self.get("projects_and_groups", default={})
             for element in projects_and_groups.keys():
                 if element != "*" and not element.endswith("/*"):
                     projects.append(element)
@@ -159,11 +162,11 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         """
         try:
             groups = []
-            projects_and_groups = self.get("projects_and_groups", default={}).keys()
+            projects_and_groups = self.get("projects_and_groups", default={})
             for element in projects_and_groups.keys():
                 if element.endswith("/*"):
                     # cut off that "/*"
-                    group_name = element[:-3]
+                    group_name = element[:-2]
                     groups.append(group_name)
             return sorted(groups)
         except KeyNotFoundException:
@@ -198,23 +201,17 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         except KeyNotFoundException:
             return {}
 
-    def get_skip_projects(self) -> list:
+    def is_project_skipped(self, project) -> bool:
         """
-        :return: list of "project_name/project_group" to ignore
+        :return: if project is defined in the key with projects to skip
         """
-        try:
-            return self.get("skip_projects")
-        except KeyNotFoundException:
-            return []
+        return project in self.get("skip_projects", [])
 
-    def get_skip_groups(self) -> list:
+    def is_group_skipped(self, group):
         """
-        :return: list of "project_group" to ignore
+        :return: if group is defined in the key with groups to skip
         """
-        try:
-            return self.get("skip_groups")
-        except KeyNotFoundException:
-            return []
+        return group in self.get("skip_groups", [])
 
 
 class ConfigNotFoundException(Exception):

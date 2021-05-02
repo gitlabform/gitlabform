@@ -4,6 +4,30 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabProjects(GitLabCore):
+    def get_project_case_insensitive(self, some_string):
+
+        # maybe "some_string" is the project's path
+
+        try:
+            return self.get_project(some_string)
+        except NotFoundException:
+
+            # try searching by name - maybe "some_string" is project's name
+            # or path, but case insensitive
+
+            projects = self._make_requests_to_api(
+                f"projects?search=%s&simple=true",
+                some_string,
+                method="GET",
+            )
+            for project in projects:
+                if (
+                    project["path"].lower() == some_string.lower()
+                    or project["name"].lower() == some_string.lower()
+                ):
+                    return project
+            raise NotFoundException
+
     def create_project(self, name, path, namespace_id, default_branch=None):
         data = {
             "name": name,

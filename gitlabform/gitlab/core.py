@@ -1,5 +1,4 @@
 import json
-import sys
 import logging
 
 import cli_ui
@@ -12,8 +11,6 @@ from urllib import parse
 from requests.adapters import HTTPAdapter
 
 from gitlabform.configuration import Configuration
-from gitlabform.configuration.core import KeyNotFoundException
-from gitlabform import EXIT_INVALID_INPUT
 
 
 class GitLabCore:

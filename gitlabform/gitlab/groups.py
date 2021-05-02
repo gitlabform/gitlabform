@@ -2,6 +2,31 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabGroups(GitLabCore):
+    def get_group_case_insensitive(self, some_string):
+
+        # maybe "some_string" is the group's path
+
+        try:
+            return self.get_group(some_string)
+        except NotFoundException:
+
+            # try searching by name - maybe "some_string" is group's name
+            # or path, but case insensitive
+
+            groups = self._make_requests_to_api(
+                "groups?search=%s",
+                some_string,
+                method="GET",
+            )
+            print(f"search for {some_string} returned groups {groups}")
+            for group in groups:
+                if (
+                    group["path"].lower() == some_string.lower()
+                    or group["name"].lower() == some_string.lower()
+                ):
+                    return group
+            raise NotFoundException
+
     def create_group(self, name, path, visibility="private"):
         data = {
             "name": name,

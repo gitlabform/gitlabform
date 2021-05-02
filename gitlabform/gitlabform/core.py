@@ -11,7 +11,6 @@ from packaging import version as packaging_version
 from typing import TextIO
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
-from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import ConfigFileNotFoundException
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
@@ -41,7 +40,7 @@ class GitLabFormCore(object):
             self.start_from = 1
             self.start_from_group = 1
             self.noop = False
-            self.output_file = (None,)
+            self.output_file = None
             self.configure_output(tests=True)
             self.skip_version_check = True
             self.skip_archived_projects = False
@@ -77,10 +76,12 @@ class GitLabFormCore(object):
                 cli_ui.error("project_or_group parameter is required.")
                 sys.exit(EXIT_INVALID_INPUT)
 
-        self.gl, self.c = self.initialize_configuration_and_gitlab()
+        self.gitlab, self.configuration = self.initialize_configuration_and_gitlab()
 
-        self.group_processors = GroupProcessors(self.gl)
-        self.project_processors = ProjectProcessors(self.gl, self.c, self.strict)
+        self.group_processors = GroupProcessors(self.gitlab)
+        self.project_processors = ProjectProcessors(
+            self.gitlab, self.configuration, self.strict
+        )
 
     def parse_args(self):
 
@@ -254,13 +255,13 @@ class GitLabFormCore(object):
         tokens_to_show = [
             cli_ui.reset,
             tower_crane,
-            "GitLabForm version: ",
+            "GitLabForm version:",
             cli_ui.blue,
             local_version,
             cli_ui.reset,
         ]
 
-        cli_ui.message(*tokens_to_show, sep="", end="")
+        cli_ui.message(*tokens_to_show, end="")
 
         if not skip_version_check:
             latest_version = luddite.get_version_pypi("gitlabform")
@@ -301,11 +302,11 @@ class GitLabFormCore(object):
 
         try:
             if hasattr(self, "config_string"):
-                gl = GitLab(config_string=self.config_string)
+                gitlab = GitLab(config_string=self.config_string)
             else:
-                gl = GitLab(config_path=self.config)
-            c = gl.get_configuration()
-            return gl, c
+                gitlab = GitLab(config_path=self.config)
+            configuration = gitlab.get_configuration()
+            return gitlab, configuration
         except ConfigFileNotFoundException as e:
             cli_ui.error(f"Config file not found at: {e}")
             sys.exit(EXIT_INVALID_INPUT)
@@ -314,68 +315,113 @@ class GitLabFormCore(object):
             sys.exit(EXIT_PROCESSING_ERROR)
 
     def main(self):
-        projects_and_groups, groups = self.get_projects_list()
-        self.process_all(projects_and_groups, groups)
-
-    def get_projects_list(self):
-        groups = []
-        projects_and_groups = []
-
         if self.project_or_group == "ALL":
-            # all projects from all groups we have access to
-            cli_ui.info(">>> Processing ALL groups and and projects")
-            groups = self.gl.get_groups()
+            cli_ui.info(">>> Processing ALL groups and projects")
         elif self.project_or_group == "ALL_DEFINED":
             cli_ui.info(">>> Processing ALL groups and projects defined in config")
-            # all groups from config
-            groups = self.c.get_groups()
-            # and all projects from config
-            projects_and_groups = set(self.c.get_projects())
-        else:
-            if "/" in self.project_or_group:
-                try:
-                    self.gl._get_group_id(self.project_or_group)
-                    # it's a subgroup
-                    groups = [self.project_or_group]
-                except NotFoundException:
-                    # it's a single project
-                    projects_and_groups = [self.project_or_group]
-            else:
-                # it's a single group
-                groups = [self.project_or_group]
 
-        # skip groups before getting projects from gitlab to save time
-        if groups:
-            if self.c.get_skip_groups():
-                effective_groups = [
-                    x for x in groups if x not in self.c.get_skip_groups()
-                ]
-            else:
-                effective_groups = groups
-        else:
-            effective_groups = []
+        groups = self.get_groups(self.project_or_group)
+        projects = self.get_projects(self.project_or_group, groups)
 
-        # gitlab can return single project in a few groups, so let's use a set for projects
-        projects_and_groups = set(projects_and_groups)
-        for group in effective_groups:
-            for project in self.gl.get_projects(
-                group, ignore_archived=self.skip_archived_projects
-            ):
-                projects_and_groups.add(project)
-        projects_and_groups = sorted(list(projects_and_groups))
-
-        # skip projects after getting projects from gitlab
-        if self.c.get_skip_projects():
-            effective_projects_and_groups = [
-                x for x in projects_and_groups if x not in self.c.get_skip_projects()
-            ]
-        else:
-            effective_projects_and_groups = projects_and_groups
+        if len(groups) == 0 and len(projects) == 0:
+            cli_ui.error(f"Entity {self.project_or_group} cannot be found in GitLab!")
+            sys.exit(EXIT_INVALID_INPUT)
 
         cli_ui.info_1(f"# of groups to process: {len(groups)}")
-        cli_ui.info_1(f"# of projects to process: {len(effective_projects_and_groups)}")
+        cli_ui.info_1(f"# of projects to process: {len(projects)}")
 
-        return effective_projects_and_groups, effective_groups
+        self.process_all(projects, groups)
+
+    def get_groups(self, request_query) -> list:
+
+        if request_query == "ALL":
+
+            # get all groups from GitLab and then remove the skipped ones
+            requested_groups = self.gitlab.get_groups()
+            effective_groups = self._remove_skipped_groups(requested_groups)
+
+            return effective_groups
+
+        if request_query == "ALL_DEFINED":
+
+            # get all groups from configuration, but removed the skipped ones
+            # before replacing group names with proper case of groups' *paths*
+            # to do less requests to GitLab
+            requested_groups = self.configuration.get_groups()
+            effective_groups = self._remove_skipped_groups(requested_groups)
+            effective_groups_proper_case = []
+            for group in effective_groups:
+                # in the config group names may not be written with correct case
+                # so ensure that such group exists
+                try:
+                    group = self.gitlab.get_group_case_insensitive(group)
+                    effective_groups_proper_case.append(group["path"])
+                except NotFoundException:
+                    cli_ui.error(
+                        f"Configuration contains group {group} but it cannot be found in GitLab!"
+                    )
+                    sys.exit(EXIT_INVALID_INPUT)
+
+            return effective_groups_proper_case
+
+        try:
+            # it may be a subgroup or a single group
+            maybe_group = self.gitlab.get_group_case_insensitive(request_query)
+            return [maybe_group["path"]]
+        except NotFoundException:
+            return []
+
+    def get_projects(self, request_query, groups) -> list:
+
+        requested_projects = []
+
+        if request_query == "ALL":
+            # we already have all the groups
+            pass
+
+        if request_query == "ALL_DEFINED":
+            # get projects explicitly defined in the configuration,
+            # but add them to the projects from groups,
+            # and finally remove the skipped ones
+            requested_projects = self.configuration.get_projects()
+
+        else:
+            try:
+                # it may be a project or a subgroup
+                maybe_project = self.gitlab.get_project_case_insensitive(request_query)
+                requested_projects = [maybe_project["path_with_namespace"]]
+            except NotFoundException:
+                pass
+
+        projects_from_groups = self._get_projects_from_groups(groups)
+
+        return self._remove_skipped_projects(
+            sorted(requested_projects + projects_from_groups)
+        )
+
+    def _get_projects_from_groups(self, groups) -> list:
+        # use set to deduplicate project list
+        projects = set()
+        for group in groups:
+            for project in self.gitlab.get_projects(
+                group, include_archived=self.include_archived_projects
+            ):
+                projects.add(project)
+        return sorted(list(projects))
+
+    def _remove_skipped_groups(self, groups) -> list:
+        effective_groups = []
+        for group in groups:
+            if not self.configuration.is_group_skipped(group):
+                effective_groups.append(group)
+        return effective_groups
+
+    def _remove_skipped_projects(self, projects) -> list:
+        effective_projects = []
+        for project in projects:
+            if not self.configuration.is_project_skipped(project):
+                effective_projects.append(project)
+        return effective_projects
 
     def process_all(self, projects_and_groups, groups):
 
@@ -400,7 +446,7 @@ class GitLabFormCore(object):
                 )
                 continue
 
-            configuration = self.c.get_effective_config_for_group(group)
+            configuration = self.configuration.get_effective_config_for_group(group)
 
             if configuration:
                 info_group_count(
@@ -471,7 +517,9 @@ class GitLabFormCore(object):
                 )
                 continue
 
-            configuration = self.c.get_effective_config_for_project(project_and_group)
+            configuration = self.configuration.get_effective_config_for_project(
+                project_and_group
+            )
 
             if configuration:
                 info_project_count(
@@ -559,7 +607,7 @@ class GitLabFormCore(object):
 
         if len(failed_groups) > 0 or len(failed_projects) > 0:
             sys.exit(EXIT_PROCESSING_ERROR)
-        else:
+        elif successful_groups > 0 or successful_projects > 0:
             shine = cli_ui.Symbol("✨", "!!!")
             cli_ui.info_1(
                 cli_ui.green,
