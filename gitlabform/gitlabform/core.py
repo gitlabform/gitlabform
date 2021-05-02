@@ -5,6 +5,7 @@ import traceback
 
 import luddite
 import pkg_resources
+from typing import TextIO
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import ConfigFileNotFoundException
@@ -26,6 +27,7 @@ class GitLabFormCore(object):
             self.strict = True
             self.start_from = 1
             self.noop = False
+            self.output_file = (None,)
             self.set_log_level(tests=True)
             self.skip_version_check = True
             self.skip_archived_projects = False
@@ -40,6 +42,7 @@ class GitLabFormCore(object):
                 self.strict,
                 self.start_from,
                 self.noop,
+                self.output_file,
                 self.skip_version_check,
                 self.show_version,
                 self.terminate_after_error,
@@ -116,6 +119,14 @@ class GitLabFormCore(object):
         )
 
         parser.add_argument(
+            "-o",
+            "--output-file",
+            dest="output_file",
+            default=None,
+            help="name/path of a file to write the effective configs to",
+        )
+
+        parser.add_argument(
             "-V",
             "--version",
             dest="show_version",
@@ -157,6 +168,7 @@ class GitLabFormCore(object):
             args.strict,
             args.start_from,
             args.noop,
+            args.output_file,
             args.skip_version_check,
             args.show_version,
             args.terminate_after_error,
@@ -281,6 +293,8 @@ class GitLabFormCore(object):
 
         g = 0
 
+        maybe_output_file = self.try_to_get_output_file()
+
         for group in groups:
 
             g += 1
@@ -294,13 +308,19 @@ class GitLabFormCore(object):
                     "Configuration that would be applied: %s" % str(configuration)
                 )
 
+            self.try_to_write_header_to_output_file(group, maybe_output_file)
+
             try:
                 self.group_processors.process_group(
-                    group, configuration, dry_run=self.noop
+                    group,
+                    configuration,
+                    dry_run=self.noop,
+                    output_file=maybe_output_file,
                 )
 
             except Exception as e:
                 if self.terminate_after_error:
+                    self.try_to_close_output_file(maybe_output_file)
                     print(
                         "+++ Errors occurred while processing due to '%s' ... Exiting now...",
                         e,
@@ -340,13 +360,21 @@ class GitLabFormCore(object):
                     "Configuration that would be applied: %s" % str(configuration)
                 )
 
+            self.try_to_write_header_to_output_file(
+                project_and_group, maybe_output_file
+            )
+
             try:
                 self.project_processors.process_project(
-                    project_and_group, configuration, dry_run=self.noop
+                    project_and_group,
+                    configuration,
+                    dry_run=self.noop,
+                    output_file=maybe_output_file,
                 )
 
             except Exception as e:
                 if self.terminate_after_error:
+                    self.try_to_close_output_file(maybe_output_file)
                     print(
                         "+++ Errors occurred while processing due to '%s' ... Exiting now...",
                         e,
@@ -361,3 +389,43 @@ class GitLabFormCore(object):
                 len(projects_and_groups),
                 project_and_group,
             )
+
+    def try_to_get_output_file(self):
+        if self.output_file:
+            try:
+                output_file = open(self.output_file, "w")
+                logging.debug(
+                    f"Opened file {self.output_file} to write the effective configs to."
+                )
+                return output_file
+            except Exception as e:
+                logging.error(
+                    f"Error when trying to open {self.output_file} write the effective configs to: {e}"
+                )
+                sys.exit(2)
+        else:
+            return None
+
+    def try_to_write_header_to_output_file(
+        self,
+        project_or_project_and_group: str,
+        output_file: TextIO,
+    ):
+        """
+        Writes a shared key for the "_write_to_file" method which actually dumps the configurations.
+        """
+        if output_file:
+            try:
+                output_file.writelines(f"{project_or_project_and_group}:\n")
+            except Exception as e:
+                logging.error(f"Error when trying to write to {output_file.name}: {e}")
+                raise e
+
+    def try_to_close_output_file(self, output_file: TextIO):
+        if output_file:
+            try:
+                output_file.close()
+                logging.debug(f"Closed file {self.output_file}.")
+            except Exception as e:
+                logging.error(f"Error when trying to close {self.output_file}: {e}")
+                sys.exit(3)

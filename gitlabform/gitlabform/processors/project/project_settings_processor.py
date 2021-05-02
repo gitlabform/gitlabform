@@ -23,7 +23,7 @@ class ProjectSettingsProcessor(AbstractProcessor):
             self.gitlab.get_project_settings(project_and_group),
         )
 
-    def _log_changes(self, project_and_group: str, project_settings):
+    def _print_diff(self, project_and_group: str, project_settings):
         current_project_settings = self.gitlab.get_project_settings(project_and_group)
         DifferenceLogger.log_diff(
             "Project %s changes" % project_and_group,

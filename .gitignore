@@ -52,3 +52,5 @@ logs/
 gitlab_token.txt
 gitlab_url.txt
 *.gitlab-license
+
+output.yml
