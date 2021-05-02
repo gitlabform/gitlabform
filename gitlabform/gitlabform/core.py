@@ -301,35 +301,50 @@ class GitLabFormCore(object):
 
             configuration = self.c.get_effective_config_for_group(group)
 
-            logging.warning("> (%s/%s) Processing: %s", g, len(groups), group)
+            if configuration:
+                logging.warning("> (%s/%s) Processing: %s", g, len(groups), group)
 
-            if self.noop:
-                logging.debug(
-                    "Configuration that would be applied: %s" % str(configuration)
-                )
-
-            self.try_to_write_header_to_output_file(group, maybe_output_file)
-
-            try:
-                self.group_processors.process_group(
-                    group,
-                    configuration,
-                    dry_run=self.noop,
-                    output_file=maybe_output_file,
-                )
-
-            except Exception as e:
-                if self.terminate_after_error:
-                    self.try_to_close_output_file(maybe_output_file)
-                    print(
-                        "+++ Errors occurred while processing due to '%s' ... Exiting now...",
-                        e,
+                if self.noop:
+                    logging.debug(
+                        "Configuration that would be applied: %s" % str(configuration)
                     )
-                    sys.exit(1)
-                logging.error("+++ Error while processing '%s'", group)
-                traceback.print_exc()
 
-            logging.debug("< (%s/%s) FINISHED Processing: %s", g, len(groups), group)
+                self.try_to_write_header_to_output_file(group, maybe_output_file)
+
+                try:
+                    self.group_processors.process_group(
+                        group,
+                        configuration,
+                        dry_run=self.noop,
+                        output_file=maybe_output_file,
+                    )
+
+                except Exception as e:
+                    if self.terminate_after_error:
+                        self.try_to_close_output_file(maybe_output_file)
+                        print(
+                            "+++ Errors occurred while processing due to '%s' ... Exiting now...",
+                            e,
+                        )
+                        sys.exit(1)
+                    logging.error("+++ Error while processing '%s'", group)
+                    traceback.print_exc()
+                finally:
+                    logging.debug(
+                        "< (%s/%s) FINISHED Processing: %s", g, len(groups), group
+                    )
+
+            else:
+                self.try_to_write_header_to_output_file(
+                    group, maybe_output_file, empty_config=True
+                )
+
+                logging.warning(
+                    "> (%s/%s) Skipping group %s as it has empty effective config.",
+                    g,
+                    len(groups),
+                    group,
+                )
 
         p = 0
 
@@ -346,49 +361,60 @@ class GitLabFormCore(object):
                 )
                 continue
 
-            logging.warning(
-                "* [%s/%s] Processing: %s",
-                p,
-                len(projects_and_groups),
-                project_and_group,
-            )
-
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
-            if self.noop:
-                logging.debug(
-                    "Configuration that would be applied: %s" % str(configuration)
-                )
-
-            self.try_to_write_header_to_output_file(
-                project_and_group, maybe_output_file
-            )
-
-            try:
-                self.project_processors.process_project(
+            if configuration:
+                logging.warning(
+                    "* [%s/%s] Processing: %s",
+                    p,
+                    len(projects_and_groups),
                     project_and_group,
-                    configuration,
-                    dry_run=self.noop,
-                    output_file=maybe_output_file,
                 )
 
-            except Exception as e:
-                if self.terminate_after_error:
-                    self.try_to_close_output_file(maybe_output_file)
-                    print(
-                        "+++ Errors occurred while processing due to '%s' ... Exiting now...",
-                        e,
+                if self.noop:
+                    logging.debug(
+                        "Configuration that would be applied: %s" % str(configuration)
                     )
-                    sys.exit(1)
-                logging.error("+++ Error while processing '%s'", project_and_group)
-                traceback.print_exc()
 
-            logging.debug(
-                "@ [%s/%s] FINISHED Processing: %s",
-                p,
-                len(projects_and_groups),
-                project_and_group,
-            )
+                self.try_to_write_header_to_output_file(
+                    project_and_group, maybe_output_file
+                )
+
+                try:
+                    self.project_processors.process_project(
+                        project_and_group,
+                        configuration,
+                        dry_run=self.noop,
+                        output_file=maybe_output_file,
+                    )
+
+                except Exception as e:
+                    if self.terminate_after_error:
+                        self.try_to_close_output_file(maybe_output_file)
+                        print(
+                            "+++ Errors occurred while processing due to '%s' ... Exiting now...",
+                            e,
+                        )
+                        sys.exit(1)
+                    logging.error("+++ Error while processing '%s'", project_and_group)
+                    traceback.print_exc()
+                finally:
+                    logging.debug(
+                        "@ [%s/%s] FINISHED Processing: %s",
+                        p,
+                        len(projects_and_groups),
+                        project_and_group,
+                    )
+            else:
+                self.try_to_write_header_to_output_file(
+                    project_and_group, maybe_output_file, empty_config=True
+                )
+                logging.warning(
+                    "* [%s/%s] Skipping project %s as it has empty effective config.",
+                    p,
+                    len(projects_and_groups),
+                    project_and_group,
+                )
 
     def try_to_get_output_file(self):
         if self.output_file:
@@ -410,13 +436,17 @@ class GitLabFormCore(object):
         self,
         project_or_project_and_group: str,
         output_file: TextIO,
+        empty_config: bool = False,
     ):
         """
         Writes a shared key for the "_write_to_file" method which actually dumps the configurations.
         """
         if output_file:
             try:
-                output_file.writelines(f"{project_or_project_and_group}:\n")
+                if empty_config:
+                    output_file.writelines(f"{project_or_project_and_group}: {{}}\n")
+                else:
+                    output_file.writelines(f"{project_or_project_and_group}:\n")
             except Exception as e:
                 logging.error(f"Error when trying to write to {output_file.name}: {e}")
                 raise e
