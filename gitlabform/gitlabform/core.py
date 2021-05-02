@@ -395,47 +395,62 @@ class GitLabFormCore(object):
                     group_number,
                     len(groups),
                     cli_ui.yellow,
-                    f"Skipping group: {group}...",
+                    f"Skipping group {group} as requested to start from {self.start_from_group}...",
                     cli_ui.reset,
                 )
                 continue
 
-            info_group_count(
-                "@", group_number, len(groups), f"Processing group: {group}"
-            )
-
-            self.try_to_write_header_to_output_file(group, maybe_output_file)
-
             configuration = self.c.get_effective_config_for_group(group)
 
-            try:
-                self.group_processors.process_group(
-                    group,
-                    configuration,
-                    dry_run=self.noop,
-                    output_file=maybe_output_file,
+            if configuration:
+                info_group_count(
+                    "@", group_number, len(groups), f"Processing group: {group}"
                 )
 
-                successful_groups += 1
+                self.try_to_write_header_to_output_file(group, maybe_output_file)
 
-            except Exception as e:
+                try:
+                    self.group_processors.process_group(
+                        group,
+                        configuration,
+                        dry_run=self.noop,
+                        output_file=maybe_output_file,
+                    )
 
-                failed_groups[group_number] = group
+                    successful_groups += 1
 
-                trace = traceback.format_exc()
-                message = f"Error occurred while processing group {group}, exception:\n\n{e}\n\n{trace}"
+                except Exception as e:
 
-                if self.terminate_after_error:
-                    self.try_to_close_output_file(maybe_output_file)
+                    failed_groups[group_number] = group
 
-                    cli_ui.error(message)
-                    sys.exit(EXIT_PROCESSING_ERROR)
-                else:
-                    cli_ui.warning(message)
+                    trace = traceback.format_exc()
+                    message = f"Error occurred while processing group {group}, exception:\n\n{e}\n\n{trace}"
 
-            logging.debug(
-                f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
-            )
+                    if self.terminate_after_error:
+                        self.try_to_close_output_file(maybe_output_file)
+
+                        cli_ui.error(message)
+                        sys.exit(EXIT_PROCESSING_ERROR)
+                    else:
+                        cli_ui.warning(message)
+                finally:
+                    logging.debug(
+                        f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
+                    )
+
+            else:
+                self.try_to_write_header_to_output_file(
+                    group, maybe_output_file, empty_config=True
+                )
+
+                info_group_count(
+                    "@",
+                    group_number,
+                    len(groups),
+                    cli_ui.yellow,
+                    f"Skipping group {group} as it has empty effective config.",
+                    cli_ui.reset,
+                )
 
         project_number = 0
         successful_projects = 0
@@ -451,52 +466,68 @@ class GitLabFormCore(object):
                     project_number,
                     len(projects_and_groups),
                     cli_ui.yellow,
-                    f"Skipping project: {project_and_group}...",
+                    f"Skipping project {project_and_group} as requested to start from {self.start_from}...",
                     cli_ui.reset,
                 )
                 continue
 
-            info_project_count(
-                "*",
-                project_number,
-                len(projects_and_groups),
-                f"Processing project: {project_and_group}",
-            )
-
-            self.try_to_write_header_to_output_file(
-                project_and_group, maybe_output_file
-            )
-
             configuration = self.c.get_effective_config_for_project(project_and_group)
 
-            try:
-                self.project_processors.process_project(
-                    project_and_group,
-                    configuration,
-                    dry_run=self.noop,
-                    output_file=maybe_output_file,
+            if configuration:
+                info_project_count(
+                    "*",
+                    project_number,
+                    len(projects_and_groups),
+                    f"Processing project: {project_and_group}",
                 )
 
-                successful_projects += 1
+                self.try_to_write_header_to_output_file(
+                    project_and_group, maybe_output_file
+                )
 
-            except Exception as e:
+                try:
+                    self.project_processors.process_project(
+                        project_and_group,
+                        configuration,
+                        dry_run=self.noop,
+                        output_file=maybe_output_file,
+                    )
 
-                failed_projects[project_number] = project_and_group
+                    successful_projects += 1
 
-                trace = traceback.format_exc()
-                message = f"Error occurred while processing project {project_and_group}, exception:\n\n{e}\n\n{trace}"
+                except Exception as e:
 
-                if self.terminate_after_error:
-                    self.try_to_close_output_file(maybe_output_file)
+                    failed_projects[project_number] = project_and_group
 
-                    cli_ui.error(message)
-                    sys.exit(EXIT_PROCESSING_ERROR)
-                else:
-                    cli_ui.warning(message)
+                    trace = traceback.format_exc()
+                    message = f"Error occurred while processing project {project_and_group}, exception:\n\n{e}\n\n{trace}"
 
-            logging.debug(
-                f"* ({project_number}/{len(projects_and_groups)}) FINISHED Processing project: {project_and_group}",
-            )
+                    if self.terminate_after_error:
+                        self.try_to_close_output_file(maybe_output_file)
+
+                        cli_ui.error(message)
+                        sys.exit(EXIT_PROCESSING_ERROR)
+                    else:
+                        cli_ui.warning(message)
+
+                finally:
+
+                    logging.debug(
+                        f"* ({project_number}/{len(projects_and_groups)}) FINISHED Processing project: {project_and_group}",
+                    )
+            else:
+                self.try_to_write_header_to_output_file(
+                    project_and_group, maybe_output_file, empty_config=True
+                )
+
+                info_project_count(
+                    "*",
+                    project_number,
+                    len(projects_and_groups),
+                    cli_ui.yellow,
+                    f"Skipping project {project_and_group} as it has empty effective config.",
+                    cli_ui.reset,
+                )
 
         self.try_to_close_output_file(maybe_output_file)
 
@@ -557,13 +588,17 @@ class GitLabFormCore(object):
         self,
         project_or_project_and_group: str,
         output_file: TextIO,
+        empty_config: bool = False,
     ):
         """
         Writes a shared key for the "_write_to_file" method which actually dumps the configurations.
         """
         if output_file:
             try:
-                output_file.writelines(f"{project_or_project_and_group}:\n")
+                if empty_config:
+                    output_file.writelines(f"{project_or_project_and_group}: {{}}\n")
+                else:
+                    output_file.writelines(f"{project_or_project_and_group}:\n")
             except Exception as e:
                 logging.error(f"Error when trying to write to {output_file.name}: {e}")
                 raise e
