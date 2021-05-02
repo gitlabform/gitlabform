@@ -87,7 +87,7 @@ class MergeRequestsProcessor(AbstractProcessor):
                     approver_groups,
                 )
 
-    def _log_changes(self, project_and_group: str, merge_requests: SafeDict):
+    def _print_diff(self, project_and_group: str, merge_requests: SafeDict):
         approvals = merge_requests.get("approvals")
         if approvals:
             DifferenceLogger.log_diff(

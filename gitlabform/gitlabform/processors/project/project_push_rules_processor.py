@@ -27,7 +27,7 @@ class ProjectPushRulesProcessor(AbstractProcessor):
             self.gitlab.get_project_push_rules(project_and_group),
         )
 
-    def _log_changes(self, project_and_group: str, push_rules):
+    def _print_diff(self, project_and_group: str, push_rules):
         current_push_rules = self.gitlab.get_project_push_rules(project_and_group)
         DifferenceLogger.log_diff(
             "Project %s push rules changes" % project_and_group,

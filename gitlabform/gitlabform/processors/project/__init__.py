@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, TextIO
 
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
@@ -52,6 +52,12 @@ class ProjectProcessors(object):
             SchedulesProcessor(gitlab),
         ]
 
-    def process_project(self, project_and_group, configuration, dry_run=False):
+    def process_project(
+        self,
+        project_and_group: str,
+        configuration: dict,
+        dry_run: bool,
+        output_file: Optional[TextIO],
+    ):
         for processor in self.processors:
-            processor.process(project_and_group, configuration, dry_run)
+            processor.process(project_and_group, configuration, dry_run, output_file)
