@@ -1,5 +1,11 @@
 ## Changelog
 
+### 2.0.0 RC2
+
+* **Ignore archived projects by default (breaking change).** You can restore the previous behavior by adding `--include-archived-projects`/`-a` command line switch. Note that you have to do it if you want to unarchive archived projects! Fixes [#157](https://github.com/egnyte/gitlabform/issues/157) in (arguably) a more convenient way.
+
+* **Allow any case in groups and projects names (breaking change).** GitLab groups and projects names are case sensitive but you cannot create such entities that differ only in the case. There is also a distinction between a "name" and a "path" and they may differ in case... To make work with this easier GitLabForm now accepts any case for them in both config files as well as when provided as command line arguments. We also disallow such entities that differ only in case (f.e. `group/*` and `GROUP/*`) to avoid ambiguity. Fixes [#160](https://github.com/egnyte/gitlabform/issues/160).
+
 ### 2.0.0 RC1
 
 (Compared to v1)
