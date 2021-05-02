@@ -49,16 +49,18 @@ class GitLabProjects(GitLabCore):
             expected_codes=[202, 204, 404],
         )
 
-    def get_all_projects(self, ignore_archived=False):
+    def get_all_projects(self, include_archived=False):
         """
         :param group: group name
         :return: sorted list of ALL projects you have access to, strings "group/project_name"
         """
         try:
-            if ignore_archived:
-                query_string = "order_by=name&sort=asc&archived=false"
-            else:
+            # there are 3 states of the "archived" flag: true, false, undefined
+            # we use the last 2
+            if include_archived:
                 query_string = "order_by=name&sort=asc"
+            else:
+                query_string = "order_by=name&sort=asc&archived=false"
             result = self._make_requests_to_api(
                 f"projects?{query_string}", paginated=True
             )

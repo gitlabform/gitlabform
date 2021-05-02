@@ -56,7 +56,7 @@ class GitLabGroups(GitLabCore):
         result = self._make_requests_to_api("groups?all_available=true", paginated=True)
         return sorted(map(lambda x: x["full_path"], result))
 
-    def get_projects(self, group, ignore_archived=False):
+    def get_projects(self, group, include_archived=False):
         """
         :param group: group name
         :return: sorted list of strings "group/project_name". Note that only projects from "group" namespace are
@@ -64,10 +64,12 @@ class GitLabGroups(GitLabCore):
                  returned here.
         """
         try:
-            if ignore_archived:
-                query_string = "include_subgroups=true&archived=false"
-            else:
+            # there are 3 states of the "archived" flag: true, false, undefined
+            # we use the last 2
+            if include_archived:
                 query_string = "include_subgroups=true"
+            else:
+                query_string = "include_subgroups=true&archived=false"
 
             projects = self._make_requests_to_api(
                 f"groups/%s/projects?{query_string}", group, paginated=True

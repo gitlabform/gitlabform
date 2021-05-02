@@ -43,7 +43,7 @@ class GitLabFormCore(object):
             self.output_file = None
             self.configure_output(tests=True)
             self.skip_version_check = True
-            self.skip_archived_projects = False
+            self.include_archived_projects = False
             self.just_show_version = False
             self.terminate_after_error = True
         else:
@@ -60,10 +60,9 @@ class GitLabFormCore(object):
                 self.noop,
                 self.output_file,
                 self.skip_version_check,
-                self.skip_archived_projects,
+                self.include_archived_projects,
                 self.just_show_version,
                 self.terminate_after_error,
-                self.skip_archived_projects,
             ) = self.parse_args()
 
             self.configure_output()
@@ -161,11 +160,11 @@ class GitLabFormCore(object):
         )
 
         parser.add_argument(
-            "-i",
-            "--skip-archived-projects",
-            dest="skip_archived_projects",
+            "-a",
+            "--include-archived-projects",
+            dest="include_archived_projects",
             action="store_true",
-            help="Skips the configuration of projects that have been archived",
+            help="Includes processing projects that are archived",
         )
 
         parser.add_argument(
@@ -211,10 +210,9 @@ class GitLabFormCore(object):
             args.noop,
             args.output_file,
             args.skip_version_check,
-            args.skip_archived_projects,
+            args.include_archived_projects,
             args.just_show_version,
             args.terminate_after_error,
-            args.skip_archived_projects,
         )
 
     def configure_output(self, tests=False):
