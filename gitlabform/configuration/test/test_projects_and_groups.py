@@ -1,9 +1,8 @@
 import logging
-import textwrap
 
 import pytest
-from gitlabform.configuration import ConfigurationProjectsAndGroups
 
+from gitlabform.configuration.projects_and_groups import ConfigurationProjectsAndGroups
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +84,6 @@ def configuration_with_subgroups():
 def test__get_effective_config_for_project__other_project(
     configuration_with_only_group_and_project,
 ):
-
     effective_config = (
         configuration_with_only_group_and_project.get_effective_config_for_project(
             "project_not_in_config/group_not_in_config"
@@ -98,7 +96,6 @@ def test__get_effective_config_for_project__other_project(
 def test__get_effective_config_for_project__project_from_config__additive_project_settings(
     configuration_with_only_group_and_project,
 ):
-
     effective_config = (
         configuration_with_only_group_and_project.get_effective_config_for_project(
             "some_group/some_project"
@@ -114,7 +111,6 @@ def test__get_effective_config_for_project__project_from_config__additive_projec
 def test__get_effective_config_for_project__project_from_config__additive_hooks(
     configuration_with_only_group_and_project,
 ):
-
     effective_config = (
         configuration_with_only_group_and_project.get_effective_config_for_project(
             "some_group/some_project"
@@ -131,7 +127,6 @@ def test__get_effective_config_for_project__project_from_config__additive_hooks(
 def test__get_effective_config_for_project__project_from_config__level1(
     configuration_with_subgroups,
 ):
-
     effective_config = configuration_with_subgroups.get_effective_config_for_project(
         "some_group/subgroup_level_1/some_project"
     )
@@ -145,7 +140,6 @@ def test__get_effective_config_for_project__project_from_config__level1(
 def test__get_effective_config_for_project__project_from_config__level2(
     configuration_with_subgroups,
 ):
-
     effective_config = configuration_with_subgroups.get_effective_config_for_project(
         "some_group/subgroup_level_1/subgroup_level_2/some_project"
     )
