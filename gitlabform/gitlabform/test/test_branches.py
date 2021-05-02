@@ -57,9 +57,6 @@ def gitlab(request):
 
 
 protect_branch_but_allow_all = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -70,9 +67,6 @@ project_settings:
 """
 
 protect_branch_with_code_owner_approval_required = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -84,9 +78,6 @@ project_settings:
 """
 
 protect_branch_and_disallow_all = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -97,9 +88,6 @@ project_settings:
 """
 
 mixed_config = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -114,9 +102,6 @@ project_settings:
 """
 
 unprotect_branches = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -127,9 +112,6 @@ project_settings:
 """
 
 mixed_config_with_access_levels = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -146,9 +128,6 @@ project_settings:
 """
 
 mixed_config_with_access_levels_update = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -165,9 +144,6 @@ project_settings:
 """
 
 mixed_config_with_access_levels_unprotect_branches = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -178,9 +154,6 @@ project_settings:
 """
 
 config_protect_branch_with_old_api = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -191,9 +164,6 @@ project_settings:
 """
 
 config_protect_branch_with_new_api = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -205,9 +175,6 @@ project_settings:
 """
 
 config_protect_branch_unprotect = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -216,9 +183,6 @@ project_settings:
 """
 
 config_unprotect_branch_with_old_api = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:
@@ -229,9 +193,6 @@ project_settings:
 """
 
 config_unprotect_branch_with_new_api = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/branches_project:
     branches:

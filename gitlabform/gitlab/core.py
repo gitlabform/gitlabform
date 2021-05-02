@@ -46,21 +46,6 @@ class GitLabCore:
             )
         except Exception as e:
             raise TestRequestFailedException(e)
-        try:
-            api_version = self.configuration.get("gitlab|api_version")
-            if api_version != 4:
-                raise ApiVersionIncorrectException()
-        except KeyNotFoundException:
-            cli_ui.fatal(
-                "GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
-                "names have changed. By its design GitLabForm reads some parameter names directly from "
-                "config.yml so you need to update those names by yourself. See changes in config.yml "
-                "in this diff to see what had to be changed there: "
-                "https://github.com/egnyte/gitlabform/pull/28/files . "
-                "After updating your config.yml please add 'api_version' key to 'gitlab' section and set it "
-                "to 4 to indicate that your config is v4-compatible."
-            )
-            sys.exit(EXIT_INVALID_INPUT)
 
     def get_configuration(self):
         return self.configuration

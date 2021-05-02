@@ -35,9 +35,6 @@ def gitlab(request):
 
 
 deploy_key_to_all_projects = """
-gitlab:
-  api_version: 4
-
 common_settings:
   deploy_keys:
     foobar:

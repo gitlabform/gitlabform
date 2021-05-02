@@ -40,9 +40,6 @@ def gitlab(request):
 
 
 set_file_specific_branch = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/files_project:
     files:
@@ -54,9 +51,6 @@ project_settings:
 """
 
 set_file_all_branches = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/files_project:
     files:
@@ -67,9 +61,6 @@ project_settings:
 """
 
 set_file_protected_branches = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/files_project:
     branches:

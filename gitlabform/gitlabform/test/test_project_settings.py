@@ -26,20 +26,13 @@ def gitlab(request):
     return gl  # provide fixture value
 
 
-config_builds_for_private_projects = (
-    """
-gitlab:
-  api_version: 4
-
+config_builds_for_private_projects = f"""
 project_settings:
-  """
-    + GROUP_AND_PROJECT_NAME
-    + """:
+  {GROUP_AND_PROJECT_NAME}:
     project_settings:
       builds_access_level: private
       visibility: private
 """
-)
 
 
 class TestProjectSettings:

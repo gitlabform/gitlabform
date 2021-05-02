@@ -33,9 +33,6 @@ def gitlab(request):
 
 
 archive_project = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/archive_project:
     project:
@@ -43,9 +40,6 @@ project_settings:
 """
 
 unarchive_project = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/archive_project:
     project:
@@ -53,12 +47,8 @@ project_settings:
 """
 
 edit_archived_project = """
-gitlab:
-  api_version: 4
-
 # the project has to be configured as archived
-# for other configs for it to be ignored
-project_settings:
+# for other configs for it to be ignoredproject_settings:
   gitlabform_tests_group/archive_project:
     project:
       archive: true

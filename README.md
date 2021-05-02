@@ -93,7 +93,6 @@ gitlab:
   url: https://gitlab.yourcompany.com
   # You can also set in your environment GITLAB_TOKEN
   token: "<private token of an admin user>"
-  api_version: 4
 
 projects_and_groups:
   my-group/*:

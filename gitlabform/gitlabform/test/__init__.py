@@ -3,11 +3,6 @@ import os
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 
-CONFIG = """
-gitlab:
-  # GITLAB_URL and GITLAB_TOKEN should be in the env variables
-  api_version: 4
-    """
 
 # automate reading files created by run_gitlab_in_docker.sh to run tests in PyCharm / IntelliJ
 # (workaround for lack of this feature: https://youtrack.jetbrains.com/issue/PY-5543 )
@@ -35,7 +30,7 @@ GROUP_NAME = "gitlabform_tests_group"
 DEVELOPER_ACCESS = 30
 OWNER_ACCESS = 50
 
-gl = GitLab(config_string=CONFIG)
+gl = GitLab(config_string="")
 
 
 def get_gitlab():

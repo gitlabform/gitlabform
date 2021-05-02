@@ -14,8 +14,6 @@ gitlab:
   # You can also set in your environment GITLAB_TOKEN
   # this can be both private token OR OAuth2 access token
   token: "<private token of an admin user>"
-  # GitLab API version. As of now only 4 is supported.
-  api_version: 4
   # SSL will be verified by default, you can turn checks off by passing `ssl_verify: false`
   ssl_verify: true
   # timeout, defaults to 10
