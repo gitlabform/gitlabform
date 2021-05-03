@@ -7,7 +7,7 @@ from gitlabform.gitlabform.test import (
 )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="class")
 def branches(request, gitlab, group, project):
 
     branches = [

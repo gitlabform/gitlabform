@@ -17,7 +17,7 @@ def gitlab():
 
 @pytest.fixture(scope="class")
 def group():
-    group_name = get_group_name("archive")
+    group_name = get_group_name("")
     create_group(group_name)
 
     yield group_name
@@ -26,9 +26,9 @@ def group():
     gl.delete_group(group_name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="class")
 def project(group):
-    project_name = get_project_name("archive")
+    project_name = get_project_name("")
     create_project(group, project_name)
 
     yield project_name
