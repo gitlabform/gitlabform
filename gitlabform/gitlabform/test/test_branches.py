@@ -1,15 +1,12 @@
 import pytest
 
-from gitlabform.gitlabform import GitLabForm
 from gitlabform.gitlabform.test import (
-    delete_group_and_project,
     run_gitlabform,
 )
 
 
 @pytest.fixture(scope="class")
 def branches(request, gitlab, group, project):
-
     branches = [
         "protect_branch_but_allow_all",
         "protect_branch_with_code_owner_approval_required",
@@ -67,7 +64,7 @@ class TestBranches:
         #     group_and_project_name, "protect_branch_but_allow_all"
         # )
         # assert branch_access_levels["code_owner_approval_required"] is False
-
+        #
         # this test will pass only on GitLab EE
         # def test__protect_branch_with_code_owner_approval_required(self, gitlab):
         #     gf = GitLabForm(

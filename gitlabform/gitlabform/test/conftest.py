@@ -35,3 +35,14 @@ def project(group):
 
     gl = get_gitlab()
     gl.delete_project(f"{group}/{project_name}")
+
+
+@pytest.fixture(scope="class")
+def other_project(group):
+    project_name = get_project_name("")
+    create_project(group, project_name)
+
+    yield project_name
+
+    gl = get_gitlab()
+    gl.delete_project(f"{group}/{project_name}")
