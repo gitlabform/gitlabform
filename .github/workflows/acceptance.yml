@@ -29,3 +29,5 @@ jobs:
           ./dev/run_gitlab_in_docker.sh
           py.test gitlabform/gitlabform/test/test_archive_project.py
           py.test gitlabform/gitlabform/test/test_branches.py
+          py.test gitlabform/gitlabform/test/test_deploy_keys.py
+          py.test gitlabform/gitlabform/test/test_files.py
