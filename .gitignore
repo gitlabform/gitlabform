@@ -45,7 +45,7 @@ config-develop.yml
 # vscode
 .vscode/
 
-# GitLab integration tests
+# GitLab acceptance tests
 data/
 config/
 logs/

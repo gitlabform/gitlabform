@@ -1,4 +1,4 @@
-name: Tests (integration)
+name: Tests (acceptance)
 
 on: [push, pull_request]
 
@@ -22,7 +22,7 @@ jobs:
         run: |
           pip install pytest
           python setup.py develop
-      - name: Run integration tests
+      - name: Run acceptance tests
         env:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: |
