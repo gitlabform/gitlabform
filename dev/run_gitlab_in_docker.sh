@@ -64,9 +64,9 @@ container_id=$(docker run --detach \
     --publish 443:443 --publish 80:80 --publish 2022:22 \
     --name gitlab \
     --restart always \
-    --volume "$repo_root_directory/config:/etc/gitlab" \
-    --volume "$repo_root_directory/logs:/var/log/gitlab" \
-    --volume "$repo_root_directory/data:/var/opt/gitlab" \
+    --volume "gitlab-config:/etc/gitlab" \
+    --volume "gitlab-logs:/var/log/gitlab" \
+    --volume "gitlab-data:/var/opt/gitlab" \
     --volume "$repo_root_directory/dev/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
     --health-cmd '/healthcheck-and-setup.sh' \
     --health-interval 2s \
@@ -99,8 +99,8 @@ alias stop_gitlab='existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" 
 cecho b 'Run this command to stop GitLab container:'
 cecho r 'stop_gitlab'
 echo ''
-cecho b 'To start GitLab container again, re-run this script. Note that GitLab will reuse existing ./data, ./config'
-cecho b 'and ./logs dirs. To start new GitLab instance from scratch please delete them.'
+cecho b 'To start GitLab container again, re-run this script. Note that GitLab will reuse existing gitlab-data, gitlab-config'
+cecho b 'and gitlab-logs dirs. To start new GitLab instance from scratch please delete them with `docker volume rm gitlab-*`.
 echo ''
 cecho b 'Run this to start the integration tests (it will automatically load GITLAB_URL from gitlab_url.txt'
 cecho b 'and GITLAB_TOKEN from gitlab_token.txt created by this script):'
