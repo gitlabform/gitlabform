@@ -42,6 +42,7 @@ class AbstractProcessor(ABC):
                     project_or_project_and_group,
                     configuration.get(self.__configuration_name),
                 )
+            else:
                 cli_ui.debug(f"Processing {self.__configuration_name}")
                 self._process_configuration(project_or_project_and_group, configuration)
 
