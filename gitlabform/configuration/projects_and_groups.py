@@ -15,7 +15,7 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         """
         try:
             projects = []
-            projects_and_groups = self.get("projects_and_groups", default={})
+            projects_and_groups = self.get("projects_and_groups")
             for element in projects_and_groups.keys():
                 if element != "*" and not element.endswith("/*"):
                     projects.append(element)
