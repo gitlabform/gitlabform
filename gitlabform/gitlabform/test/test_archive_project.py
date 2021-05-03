@@ -48,7 +48,8 @@ project_settings:
 
 edit_archived_project = """
 # the project has to be configured as archived
-# for other configs for it to be ignoredproject_settings:
+# for other configs for it to be ignored
+project_settings:
   gitlabform_tests_group/archive_project:
     project:
       archive: true
