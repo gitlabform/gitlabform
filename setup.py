@@ -50,7 +50,8 @@ setup(
         "packaging==20.9",
     ],
     tests_require=[
-        "pytest",
+        "pytest==6.1.1",
+        "xkcdpass==1.17.6",
     ],
     scripts=[
         "bin/gitlabform",

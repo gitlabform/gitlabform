@@ -43,7 +43,7 @@ class GitLabFormCore(object):
             self.output_file = None
             self.configure_output(tests=True)
             self.skip_version_check = True
-            self.include_archived_projects = False
+            self.include_archived_projects = True  # for unarchive tests
             self.just_show_version = False
             self.terminate_after_error = True
         else:
