@@ -4,7 +4,7 @@
 
 * Fixed the bug that caused RC2 to have noop and op modes switched... 🤦‍♂️
 
-* **(For Contributors) Make writing tests easier and the tests more robust.** Deduplicate a lot of the boilerplate code, allow putting configs into the test methods and use pytest fixtures for easier setup and cleanup. This should fix issues with tests reported in [#190](https://github.com/egnyte/gitlabform/issues/190). Also stop storing any dockerized GitLab data permanently to avoid problems like [#196](https://github.com/egnyte/gitlabform/issues/196) and probably other related to failed dockerized GitLab upgrades.
+* (For Contributors) Make writing tests easier and the tests more robust. Deduplicate a lot of the boilerplate code, allow putting configs into the test methods and use pytest fixtures for easier setup and cleanup. This should fix issues with tests reported in [#190](https://github.com/egnyte/gitlabform/issues/190). Also stop storing any dockerized GitLab data permanently to avoid problems like [#196](https://github.com/egnyte/gitlabform/issues/196) and probably other related to failed dockerized GitLab upgrades.
 
 * Rename "integration tests" to "acceptance tests". Because they ARE in fact acceptance tests.
 
