@@ -80,14 +80,14 @@ GitLabForm uses py.test for tests. To run unit tests locally:
 
 2. `pip install pytest`
 
-3. Run `py.test --ignore gitlabform/gitlabform/test` to run all tests except the integration tests (see below).
+3. Run `py.test --ignore gitlabform/gitlabform/test` to run all tests except the acceptance tests (see below).
 
-#### Running integrations tests locally or on own GitLab instance
+#### Running acceptance tests locally or on own GitLab instance
 
 GitLabForm also comes with a set of tests that make real requests to a running GitLab instance. You can run them
 against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.
 
-##### Running integration tests using GitLab instance in Docker
+##### Running acceptance tests using GitLab instance in Docker
 
 1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
 
@@ -98,9 +98,9 @@ against a disposable GitLab instance running as a Docker container OR use your o
 2. Run `py.test gitlabform/gitlabform/test` to start all tests.
 To run only a single class with tests run f.e. `py.test gitlabform/gitlabform/test -k "TestArchiveProject"`.
 
-##### Running integration tests using your own GitLab instance
+##### Running acceptance tests using your own GitLab instance
 
-**Note**: although GitLabForm integration tests operate own their own groups, projects and users, it should be safe
+**Note**: although GitLabForm acceptance tests operate own their own groups, projects and users, it should be safe
 to run them against your own GitLab instance, but we DO NOT take any responsibility for it. Please review 
 the code to ensure what it does and run it at your own risk!
 
@@ -120,7 +120,7 @@ Similarly to the guidelines for making PRs with documentation improvements - ple
 
 * add tests along with the new code that prove that it works:
   * in case of non-trivial logic add/change please add unit tests,
-  * for all bug fixes and new features using GitLab API please add integration tests
+  * for all bug fixes and new features using GitLab API please add acceptance tests
 * use [Black](https://github.com/psf/black) code formatter:
   ```
   black .

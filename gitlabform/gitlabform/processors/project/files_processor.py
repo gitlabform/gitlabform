@@ -1,8 +1,12 @@
 import logging
 import os
 import re
+import sys
 from pathlib import Path
 
+import cli_ui
+
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
@@ -40,16 +44,15 @@ class FilesProcessor(AbstractProcessor):
                     if branch in all_branches:
                         branches.append(branch)
                     else:
-                        logging.warning(
-                            "! Branch '%s' not found, not processing file '%s' in it",
-                            branch,
-                            file,
-                        )
+                        message = f"! Branch '{branch}' not found, not processing file '{file}' in it"
                         if self.strict:
-                            exit(3)
+                            cli_ui.error(message)
+                            sys.exit(EXIT_INVALID_INPUT)
+                        else:
+                            cli_ui.warning(message)
 
             for branch in branches:
-                logging.info("Processing file '%s' in branch '%s'", file, branch)
+                cli_ui.debug(f"Processing file '{file}' in branch '{branch}'")
 
                 # unprotect protected branch temporarily for operations below
                 if configuration.get("branches|" + branch + "|protected"):
@@ -83,13 +86,11 @@ class FilesProcessor(AbstractProcessor):
                     if configuration.get(
                         "files|" + file + "|content"
                     ) and configuration.get("files|" + file + "|file"):
-                        logging.fatal(
-                            "File '%s' in '%s' has both `content` and `file` set - "
-                            "use only one of these keys.",
-                            file,
-                            project_and_group,
+                        cli_ui.error(
+                            f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
+                            "use only one of these keys."
                         )
-                        exit(4)
+                        sys.exit(EXIT_INVALID_INPUT)
                     elif configuration.get("files|" + file + "|content"):
                         new_content = configuration.get("files|" + file + "|content")
                     else:
@@ -166,7 +167,7 @@ class FilesProcessor(AbstractProcessor):
                         project_and_group, configuration, branch
                     )
                 if configuration.get("files|" + file + "|only_first_branch"):
-                    logging.info(
+                    cli_ui.debug(
                         "Skipping other branches for this file, as configured."
                     )
                     break

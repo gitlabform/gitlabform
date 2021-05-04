@@ -1,7 +1,8 @@
 import hashlib
 import json
-import logging
 from itertools import starmap
+
+import cli_ui
 
 
 class DifferenceLogger(object):
@@ -50,4 +51,4 @@ class DifferenceLogger(object):
         text = "{subject}:\n{diff}".format(
             subject=subject, diff="\n".join(starmap(pattern.format, changes))
         )
-        logging.info(text)
+        cli_ui.debug(text)

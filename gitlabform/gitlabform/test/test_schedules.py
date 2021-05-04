@@ -66,9 +66,6 @@ def gitlab(request):
 
 
 add_schedule = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:
@@ -80,9 +77,6 @@ project_settings:
 """
 
 add_schedule_mandatory_fields_only = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:
@@ -92,9 +86,6 @@ project_settings:
 """
 
 add_schedule_with_variables = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:
@@ -110,9 +101,6 @@ project_settings:
 """
 
 edit_schedule = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:
@@ -124,9 +112,6 @@ project_settings:
 """
 
 replace_schedules = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:
@@ -138,9 +123,6 @@ project_settings:
 """
 
 delete_schedule = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/schedules_project:
     schedules:

@@ -1,5 +1,7 @@
 import logging
 
+import cli_ui
+
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
 
@@ -12,24 +14,24 @@ class ServicesProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for service in sorted(configuration["services"]):
             if configuration.get("services|" + service + "|delete"):
-                logging.debug("Deleting service '%s'", service)
+                cli_ui.debug(f"Deleting service: {service}")
                 self.gitlab.delete_service(project_and_group, service)
             else:
+
                 if (
                     "recreate" in configuration["services"][service]
                     and configuration["services"][service]["recreate"]
                 ):
                     # support from this configuration key has been added in v1.13.4
                     # we will remove it here to avoid passing it to the GitLab API
-                    logging.warning(
-                        "Ignoring deprecated 'recreate' field in the '%s' service config. "
+                    cli_ui.warning(
+                        f"Ignoring deprecated 'recreate' field in the '{service}' service config. "
                         "Please remove it from the config file permanently as this workaround is not "
-                        "needed anymore.",
-                        service,
+                        "needed anymore."
                     )
                     del configuration["services"][service]["recreate"]
 
-                logging.debug("Setting service '%s'", service)
+                cli_ui.debug(f"Setting service: {service}")
                 self.gitlab.set_service(
                     project_and_group, service, configuration["services"][service]
                 )
