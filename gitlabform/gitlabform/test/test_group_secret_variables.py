@@ -22,15 +22,9 @@ def gitlab(request):
     return gl  # provide fixture value
 
 
-config_single_secret_variable = (
-    """
-gitlab:
-  api_version: 4
-
+config_single_secret_variable = f"""
 group_settings:
-  """
-    + GROUP_NAME
-    + """:
+  {GROUP_NAME}:
     project_settings:
       builds_access_level: enabled
     group_secret_variables:
@@ -38,17 +32,10 @@ group_settings:
         key: FOO
         value: 123
 """
-)
 
-config_delete_secret_variable = (
-    """
-gitlab:
-  api_version: 4
-
+config_delete_secret_variable = f"""
 group_settings:
-  """
-    + GROUP_NAME
-    + """:
+  {GROUP_NAME}:
     project_settings:
       builds_access_level: enabled
     group_secret_variables:
@@ -57,17 +44,10 @@ group_settings:
         value: 123
         delete: true
 """
-)
 
-config_single_secret_variable2 = (
-    """
-gitlab:
-  api_version: 4
-
+config_single_secret_variable2 = f"""
 group_settings:
-  """
-    + GROUP_NAME
-    + """:
+  {GROUP_NAME}:
     project_settings:
       builds_access_level: enabled
     group_secret_variables:
@@ -75,17 +55,10 @@ group_settings:
         key: FOO
         value: 123456
 """
-)
 
-config_more_secret_variables = (
-    """
-gitlab:
-  api_version: 4
-
+config_more_secret_variables = f"""
 group_settings:
-  """
-    + GROUP_NAME
-    + """:
+  {GROUP_NAME}:
     project_settings:
       builds_access_level: enabled
     group_secret_variables:
@@ -96,17 +69,10 @@ group_settings:
         key: BAR
         value: bleble
 """
-)
 
-config_masked_secret_variables = (
-    """
-gitlab:
-  api_version: 4
-
+config_masked_secret_variables = f"""
 group_settings:
-  """
-    + GROUP_NAME
-    + """:
+  {GROUP_NAME}:
     project_settings:
       builds_access_level: enabled
     group_secret_variables:
@@ -116,17 +82,10 @@ group_settings:
         value: 12345678
         masked: true
 """
-)
 
-config_protected_secret_variables = (
-    """
-gitlab:
-  api_version: 4
-
+config_protected_secret_variables = f"""
 group_settings:
-  """
-    + GROUP_NAME
-    + """:
+  {GROUP_NAME}:
     project_settings:
       builds_access_level: enabled
     group_secret_variables:
@@ -135,7 +94,6 @@ group_settings:
         value: 123
         protected: true
 """
-)
 
 
 class TestGroupSecretVariables:

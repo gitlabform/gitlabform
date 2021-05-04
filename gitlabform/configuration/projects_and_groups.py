@@ -6,12 +6,20 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigurationProjectsAndGroups(ConfigurationCore):
+    def __init__(self, config_path=None, config_string=None):
+        super().__init__(config_path, config_string)
+
     def get_projects(self) -> list:
         """
-        :return: sorted list of projects with configs
+        :return: sorted list of projects names
         """
         try:
-            return sorted(self.get("project_settings", {}).keys())
+            projects = []
+            projects_and_groups = self.get("projects_and_groups")
+            for element in projects_and_groups.keys():
+                if element != "*" and not element.endswith("/*"):
+                    projects.append(element)
+            return sorted(projects)
         except KeyNotFoundException:
             raise ConfigNotFoundException
 
@@ -121,19 +129,12 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         :param group: "group_name"
         :return: merged configuration for this group, from common, group. Merging is additive.
         """
-        try:
-            group_config = self.get_group_config(group)
-        except ConfigNotFoundException:
-            group_config = {}
 
-        logging.debug("Group config: %s" % group_config)
-
-        try:
-            common_config = self.get("common_settings")
-        except KeyNotFoundException:
-            common_config = {}
-
+        common_config = self.get_config_common()
         logging.debug("Common config: %s" % common_config)
+
+        group_config = self.get_group_config(group)
+        logging.debug("Group config: %s" % group_config)
 
         # this project is not in any config - return empty config
         if not group_config and not common_config:
@@ -159,57 +160,46 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         """
         :return: sorted list of groups with configs
         """
-        try:
-            return sorted(self.get("group_settings", default={}).keys())
-        except KeyNotFoundException:
-            raise ConfigNotFoundException
+        groups = []
+        projects_and_groups = self.get("projects_and_groups")
+        for element in projects_and_groups.keys():
+            if element.endswith("/*"):
+                # cut off that "/*"
+                group_name = element[:-2]
+                groups.append(group_name)
+        return sorted(groups)
 
     def get_group_config(self, group) -> dict:
         """
         :param group: group/subgroup
         :return: literal configuration for this group/subgroup or empty dict if not defined
         """
-        try:
-            return self.get("group_settings|%s" % group)
-        except KeyNotFoundException:
-            return {}
+        return self.get(f"projects_and_groups|{group}/*", {})
 
     def get_project_config(self, group_and_project) -> dict:
         """
         :param group_and_project: 'group/project'
         :return: literal configuration for this project or empty dict if not defined
         """
-        try:
-            return self.get("project_settings|%s" % group_and_project)
-        except KeyNotFoundException:
-            return {}
+        return self.get(f"projects_and_groups|{group_and_project}", {})
 
     def get_config_common(self) -> dict:
         """
         :return: literal common configuration or empty dict if not defined
         """
-        try:
-            return self.get("common_settings")
-        except KeyNotFoundException:
-            return {}
+        return self.get("projects_and_groups|*", {})
 
-    def get_skip_projects(self) -> list:
+    def is_project_skipped(self, project) -> bool:
         """
-        :return: list of "project_name/project_group" to ignore
+        :return: if project is defined in the key with projects to skip
         """
-        try:
-            return self.get("skip_projects")
-        except KeyNotFoundException:
-            return []
+        return project in self.get("skip_projects", [])
 
-    def get_skip_groups(self) -> list:
+    def is_group_skipped(self, group):
         """
-        :return: list of "project_group" to ignore
+        :return: if group is defined in the key with groups to skip
         """
-        try:
-            return self.get("skip_groups")
-        except KeyNotFoundException:
-            return []
+        return group in self.get("skip_groups", [])
 
 
 class ConfigNotFoundException(Exception):

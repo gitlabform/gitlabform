@@ -2,6 +2,11 @@
 # Please remove it if you create your config as a copy of this file.
 example_config: true
 
+# This key is required in configs for GitLabForm version 2.0.x
+# This ensures that when the application behavior changes
+# you won't apply unexpected configuration to your GitLab instance.
+config_version: 2
+
 # GitLab API access config
 gitlab:
   # You can also set in your environment GITLAB_URL
@@ -9,8 +14,6 @@ gitlab:
   # You can also set in your environment GITLAB_TOKEN
   # this can be both private token OR OAuth2 access token
   token: "<private token of an admin user>"
-  # GitLab API version. As of now only 4 is supported.
-  api_version: 4
   # SSL will be verified by default, you can turn checks off by passing `ssl_verify: false`
   ssl_verify: true
   # timeout, defaults to 10
@@ -18,8 +21,8 @@ gitlab:
 
 #
 # You can define settings on 3 levels here:
-# * common - for ALL projects in ALL groups
-# * group/subgroup - for ALL projects in selected group/subgroup (recursively)
+# * common - for ALL projects in ALL groups - under "*" key
+# * group/subgroup - for ALL projects in selected group/subgroup (recursively) - under keys ending with "/*"
 # * project - for single projects
 #
 # Each level is optional.
@@ -34,30 +37,30 @@ gitlab:
 # Exception: when `skip: true` is set on a more specific level, given config section is not set AT ALL for given project.
 #
 
-common_settings:
-  # common settings for ALL projects in ALL groups
+projects_and_groups:
+  "*":
+    # common settings for ALL projects in ALL groups
 
-  # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
-  secret_variables:
-    # this name is not actually used, it's just for you
-    a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
-      key: A_VERY_COMMONLY_USED_PASSWORD
-      value: "ThisIsAVerySecretPassword"
-      delete: false  # Set to true to delete this variable
+    # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
+    secret_variables:
+      # this name is not actually used, it's just for you
+      a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
+        key: A_VERY_COMMONLY_USED_PASSWORD
+        value: "ThisIsAVerySecretPassword"
+        delete: false  # Set to true to delete this variable
 
-  # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
-  group_secret_variables:
-    # this name is not actually used, it's just for you
-    a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
-      key: A_VERY_COMMONLY_USED_PASSWORD
-      value: "ThisIsAVerySecretPassword"
-      variable_type: env_var #or file
-      protected: false #
-      delete: false  # Set to true to delete this variable
+    # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
+    group_secret_variables:
+      # this name is not actually used, it's just for you
+      a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
+        key: A_VERY_COMMONLY_USED_PASSWORD
+        value: "ThisIsAVerySecretPassword"
+        variable_type: env_var #or file
+        protected: false #
+        delete: false  # Set to true to delete this variable
 
-group_settings:
   # settings for ALL projects in 'my-group' group
-  "my-group":
+  "my-group/*":
     deploy_keys:
       # this name is not actually used, it's just for you
       a_friendly_deploy_key_name:
@@ -303,18 +306,19 @@ group_settings:
           This file will be added to all protected branches.
 
   # settings for ALL projects in 'old-projects-group' group
-  old-projects-group:
+  old-projects-group/*:
     # this will archive all the projects in the 'old-projects-group' group
     project:
+      # note: you can lso unarchive a project by setting this to 'true' but then you need to run
+      # the app WITHOUT --skip-archived-projects flag
       archive: true
 
-  group-with-spammy-projects:
+  group-with-spammy-projects/*:
     # configures settings for the 'group-with-spammy-projects' group
     group_settings:
       # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
       emails_disabled: true
 
-project_settings:
   # settings specific to 'my-group/my-project1' project
   "my-group/my-project1":
     project_settings:
@@ -328,6 +332,28 @@ project_settings:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
         title: ssh_key_name_that_is_shown_in_gitlab_3
         can_push: false
+
+    secret_variables:
+      # CI CD variable for this project. Variables can be scoped to an "environment".
+      # Scoping to environment also allows using the same "key" name for multiple variables.
+      # This can simplify CI Config file because the appropriate variable will be exposed
+      # by GitLab to the job that is targetting a given environment. If the same "key" name
+      # is used for different environments, you'll need to add filter[environment_scope] to
+      # configuration as shown below.
+      aws_access_key_id_for_deploying_in_production:
+        key: APP_HOST_AWS_ACCESS_KEY_ID
+        value: "prod-value-1234"
+        protected: true
+        masked: true
+        environment_scope: production
+        filter[environment_scope]: production
+      aws_access_key_id_for_deploying_in_staging:
+        key: APP_HOST_AWS_ACCESS_KEY_ID
+        value: "staging-value-1234"
+        protected: true
+        masked: true
+        environment_scope: staging
+        filter[environment_scope]: staging
 
     branches:
       # see comment above - this branch config will be ADDED to the branches configured on a group level
@@ -402,6 +428,9 @@ project_settings:
             variable_type: file # optional parameter, defaults to 'env_var'
           other_variable:
             value: another_value
+      # this one will be deleted if exists 
+      "Obsolete schedule":
+        delete: true
 
     # https://docs.gitlab.com/ee/api/environments.html
     # Create, Stop, Delete, Update project environments

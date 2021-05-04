@@ -27,15 +27,9 @@ def gitlab(request):
     return gl  # provide fixture value
 
 
-config_builds_not_enabled = (
-    """
-gitlab:
-  api_version: 4
-
+config_builds_not_enabled = f"""
 project_settings:
-  """
-    + GROUP_AND_PROJECT_NAME
-    + """:
+  {GROUP_AND_PROJECT_NAME}:
     project_settings:
       builds_access_level: disabled
     secret_variables:
@@ -43,17 +37,10 @@ project_settings:
         key: FOO
         value: 123
 """
-)
 
-config_single_secret_variable = (
-    """
-gitlab:
-  api_version: 4
-
+config_single_secret_variable = f"""
 project_settings:
-  """
-    + GROUP_AND_PROJECT_NAME
-    + """:
+  {GROUP_AND_PROJECT_NAME}:
     project_settings:
       builds_access_level: enabled
     secret_variables:
@@ -61,17 +48,10 @@ project_settings:
         key: FOO
         value: 123
 """
-)
 
-config_delete_secret_variable = (
-    """
-gitlab:
-  api_version: 4
-
+config_delete_secret_variable = f"""
 project_settings:
-  """
-    + GROUP_AND_PROJECT_NAME
-    + """:
+  {GROUP_AND_PROJECT_NAME}:
     project_settings:
       builds_access_level: enabled
     secret_variables:
@@ -80,17 +60,10 @@ project_settings:
         value: 123
         delete: true
 """
-)
 
-config_single_secret_variable2 = (
-    """
-gitlab:
-  api_version: 4
-
+config_single_secret_variable2 = f"""
 project_settings:
-  """
-    + GROUP_AND_PROJECT_NAME
-    + """:
+  {GROUP_AND_PROJECT_NAME}:
     project_settings:
       builds_access_level: enabled
     secret_variables:
@@ -98,17 +71,10 @@ project_settings:
         key: FOO
         value: 123456
 """
-)
 
-config_more_secret_variables = (
-    """
-gitlab:
-  api_version: 4
-
+config_more_secret_variables = f"""
 project_settings:
-  """
-    + GROUP_AND_PROJECT_NAME
-    + """:
+  {GROUP_AND_PROJECT_NAME}:
     project_settings:
       builds_access_level: enabled
     secret_variables:
@@ -119,7 +85,6 @@ project_settings:
         key: BAR
         value: bleble
 """
-)
 
 
 class TestSecretVariables:

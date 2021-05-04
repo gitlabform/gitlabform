@@ -66,9 +66,6 @@ def gitlab(request):
 
 
 config__approvers_single_user = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -83,9 +80,6 @@ project_settings:
 """
 
 config__approvers_single_user_change = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -100,9 +94,6 @@ project_settings:
 """
 
 config__approvers_single_group = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -117,9 +108,6 @@ project_settings:
 """
 
 config__approvers_single_group_change = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -134,9 +122,6 @@ project_settings:
 """
 
 config__approvers_single_user_and_single_group = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -153,9 +138,6 @@ project_settings:
 """
 
 config__approvers_single_user_and_single_group_change = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -172,9 +154,6 @@ project_settings:
 """
 
 config__approvers_more_than_one_user = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -190,9 +169,6 @@ project_settings:
 """
 
 config__approvers_more_than_one_user_and_more_than_one_group = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -212,9 +188,6 @@ project_settings:
 
 
 config__approvers_removing_preexisting_approvals = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/merge_requests_project:
     project_settings:
@@ -398,7 +371,6 @@ class TestMergeRequestApprovers:
             "gitlabform_tests_group_with_user4",
         }
 
-        print(str(rule["eligible_approvers"]))
         assert len(rule["eligible_approvers"]) == 4
         eligibleapprovers_in_rule = set(
             [user["username"] for user in rule["eligible_approvers"]]

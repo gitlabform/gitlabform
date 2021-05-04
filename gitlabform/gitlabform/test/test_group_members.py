@@ -51,9 +51,6 @@ def gitlab(request):
 
 
 some_users = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     group_members:
@@ -66,9 +63,6 @@ group_settings:
 """
 
 add_users = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     group_members:
@@ -85,9 +79,6 @@ group_settings:
 """
 
 remove_users = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     enforce_group_members: true
@@ -99,9 +90,6 @@ group_settings:
 """
 
 not_remove_users_with_enforce_false = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     enforce_group_members: false
@@ -114,9 +102,6 @@ group_settings:
 """
 
 not_remove_users_without_enforce = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     group_members:
@@ -128,9 +113,6 @@ group_settings:
 """
 
 change_some_users_access = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     group_members:
@@ -145,9 +127,6 @@ group_settings:
 """
 
 one_owner = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     group_members:
@@ -156,9 +135,6 @@ group_settings:
 """
 
 change_owner = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     enforce_group_members: true
@@ -168,9 +144,6 @@ group_settings:
 """
 
 zero_owners = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     enforce_group_members: true
@@ -180,9 +153,6 @@ group_settings:
 """
 
 zero_users = """
-gitlab:
-  api_version: 4
-
 group_settings:
   gitlabform_tests_group:
     enforce_group_members: true

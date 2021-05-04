@@ -25,9 +25,6 @@
 #
 #
 # set_project_push_rules = """
-# gitlab:
-#   api_version: 4
-#
 # project_settings:
 #   gitlabform_tests_group/push_project:
 #     project_push_rules:

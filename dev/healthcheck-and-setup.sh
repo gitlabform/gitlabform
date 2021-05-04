@@ -21,7 +21,7 @@ curl --silent --show-error --fail --output /dev/null 127.0.0.1:80
 done=/var/gitlab-acctest-initialized
 
 test -f $done || {
-  echo 'Initializing GitLab for integration tests'
+  echo 'Initializing GitLab for acceptance tests'
 
   # As documented at https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#programmatically-creating-a-personal-access-token
   # the token has to be at least 20 characters long - thus "token-string-here123".
@@ -38,4 +38,4 @@ test -f $done || {
   touch $done
 }
 
-echo 'GitLab is ready for integration tests'
+echo 'GitLab is ready for acceptance tests'

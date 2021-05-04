@@ -1,6 +1,7 @@
 import json
-import sys
 import logging
+
+import cli_ui
 import requests
 import os
 
@@ -8,34 +9,19 @@ import urllib3
 from urllib3.util.retry import Retry
 from urllib import parse
 from requests.adapters import HTTPAdapter
-from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
+
+from gitlabform.configuration import Configuration
 
 
 class GitLabCore:
-
-    url = None
-    token = None
-    ssl_verify = None
-    session = None
-    timeout = None
-
     def __init__(self, config_path=None, config_string=None):
 
-        if config_path and config_string:
-            logging.fatal(
-                "Please initialize with either config_path or config_string, not both."
-            )
-            sys.exit(1)
+        self.configuration = Configuration(config_path, config_string)
 
-        if config_path:
-            configuration = ConfigurationCore(config_path=config_path)
-        else:
-            configuration = ConfigurationCore(config_string=config_string)
-
-        self.url = configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
-        self.token = configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
-        self.ssl_verify = configuration.get("gitlab|ssl_verify", True)
-        self.timeout = configuration.get("gitlab|timeout", 10)
+        self.url = self.configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
+        self.token = self.configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
+        self.ssl_verify = self.configuration.get("gitlab|ssl_verify", True)
+        self.timeout = self.configuration.get("gitlab|timeout", 10)
 
         self.session = requests.Session()
 
@@ -52,27 +38,14 @@ class GitLabCore:
 
         try:
             version = self._make_requests_to_api("version")
-            logging.info(
-                "Connected to GitLab version: %s (%s)"
-                % (version["version"], version["revision"])
+            cli_ui.debug(
+                f"Connected to GitLab version: {version['version']} ({version['revision']})"
             )
         except Exception as e:
             raise TestRequestFailedException(e)
-        try:
-            api_version = configuration.get("gitlab|api_version")
-            if api_version != 4:
-                raise ApiVersionIncorrectException()
-        except KeyNotFoundException:
-            logging.fatal(
-                "Aborting. GitLabForm 1.0.0 has switched from GitLab API v3 to v4 in which some parameter "
-                "names have changed. By its design GitLabForm reads some parameter names directly from "
-                "config.yml so you need to update those names by yourself. See changes in config.yml "
-                "in this diff to see what had to be changed there: "
-                "https://github.com/egnyte/gitlabform/pull/28/files . "
-                "After updating your config.yml please add 'api_version' key to 'gitlab' section and set it "
-                "to 4 to indicate that your config is v4-compatible."
-            )
-            sys.exit(3)
+
+    def get_configuration(self):
+        return self.configuration
 
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
@@ -273,6 +246,10 @@ class ApiVersionIncorrectException(Exception):
 
 
 class NotFoundException(Exception):
+    pass
+
+
+class TimeoutWaitingForDeletion(Exception):
     pass
 
 

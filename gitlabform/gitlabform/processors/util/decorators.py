@@ -38,7 +38,7 @@ def configuration_to_safe_dict(method):
     """
 
     @wraps(method)
-    def method_wrapper(self, project_and_group, configuration, dry_run):
-        return method(self, project_and_group, SafeDict(configuration), dry_run)
+    def method_wrapper(self, project_and_group, configuration, *args):
+        return method(self, project_and_group, SafeDict(configuration), *args)
 
     return method_wrapper

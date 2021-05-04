@@ -30,8 +30,6 @@ def gitlab(request):
 
 
 config_service_push_events_true = """
-gitlab:
-  api_version: 4
 project_settings:
   gitlabform_tests_group/services_project:
     services:
@@ -49,8 +47,6 @@ project_settings:
 """
 
 config_service_push_events_false = """
-gitlab:
-  api_version: 4
 project_settings:
   gitlabform_tests_group/services_project:
     services:
@@ -68,8 +64,6 @@ project_settings:
 """
 
 config_service_jira_commit_events_true = """
-gitlab:
-  api_version: 4
 project_settings:
   gitlabform_tests_group/services_project:
     services:
@@ -82,8 +76,6 @@ project_settings:
 """
 
 config_service_jira_commit_events_false = """
-gitlab:
-  api_version: 4
 project_settings:
   gitlabform_tests_group/services_project:
     services:
@@ -96,8 +88,6 @@ project_settings:
 """
 
 config_service_jira_delete = """
-gitlab:
-  api_version: 4
 project_settings:
   gitlabform_tests_group/services_project:
     services:
@@ -106,9 +96,6 @@ project_settings:
 """
 
 config_service_mattermost_confidential_issues_events = """
-gitlab:
-  api_version: 4
-
 project_settings:
   gitlabform_tests_group/services_project:
     services:

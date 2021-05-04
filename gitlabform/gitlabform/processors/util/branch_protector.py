@@ -1,5 +1,9 @@
 import logging
+import sys
 
+import cli_ui
+
+from gitlabform import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 
@@ -58,9 +62,9 @@ class BranchProtector(object):
                 logging.debug("Setting branch '%s' as unprotected", branch)
                 self.gitlab.unprotect_branch_new_api(project_and_group, branch)
         except NotFoundException:
-            logging.warning(
-                "! Branch '%s' not found when trying to set it as protected/unprotected",
-                branch,
-            )
+            message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
             if self.strict:
-                exit(3)
+                cli_ui.error(message)
+                sys.exit(EXIT_PROCESSING_ERROR)
+            else:
+                cli_ui.warning(message)
