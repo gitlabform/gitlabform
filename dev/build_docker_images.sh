@@ -4,35 +4,42 @@
 #   os
 #   docker_username
 #   docker_password
+#   GITHUB_REF
 
 python_version="3.8"
-tags=""
 version="$(cat version)"
 
+git_tag="${GITHUB_REF#refs/tags/*}"
+if [[ "${git_tag}" != "${version}" ]]; then
+  >&2 echo "ERROR: Mismatch between Git tag ${git_tag} and version file ${version}" 
+  exit 1
+fi
+
+image_name="egnyte/gitlabform:${version}-${suffix}"
 effective_version="${os}_version"
 suffix="${!effective_version}"
-latest="egnyte/gitlabform:latest-${suffix}"
+os_latest="egnyte/gitlabform:latest-${suffix}"
 
-docker pull "${latest}" || echo "no cache is available"
+docker pull "${os_latest}" || echo "no cache is available"
 docker build \
   --build-arg PY_VERSION="${python_version}" \
   --build-arg OS_VERSION="${!effective_version}" \
   --file "dev/${os}.Dockerfile" \
-  --tag "${latest}" .
-tags="$tags ${latest}"
+  --tag "${image_name}" .
 
-docker tag "${latest}" "egnyte/gitlabform:${version}-${suffix}"
-tags="$tags egnyte/gitlabform:${version}-${suffix}"
+tags=( "${image_name}" )
+
+docker tag "${image_name}" "${os_latest}" 
+tags+=( "${latest}" )
 
 # we treat alpine image as the main one, so it gets the plain "latest" tag
-if [ "${os}" = "alpine" ]
-then
-  docker tag "${latest}" "egnyte/gitlabform:latest"
-  tags="$tags egnyte/gitlabform:latest"
+if [[ "${os}" = "alpine" ]]; then
+  latest=egnyte/gitlabform:latest
+  docker tag "${image_name}" "${latest}"
+  tags+=( "${latest}" )
 fi
 
-for image in ${tags}
-do
+for image in "${tags[@]}"; do
   echo "$docker_password" | docker login -u "$docker_username" --password-stdin
   docker push "${image}"
 done
