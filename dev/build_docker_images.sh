@@ -29,14 +29,16 @@ docker build \
 
 tags=( "${image_name}" )
 
-docker tag "${image_name}" "${os_latest}" 
-tags+=( "${latest}" )
+if ! [[ "${version}" =~ v.+rc.+ ]]; then
+  docker tag "${image_name}" "${os_latest}" 
+  tags+=( "${os_latest}" )
 
-# we treat alpine image as the main one, so it gets the plain "latest" tag
-if [[ "${os}" = "alpine" ]]; then
-  latest=egnyte/gitlabform:latest
-  docker tag "${image_name}" "${latest}"
-  tags+=( "${latest}" )
+  # we treat alpine image as the main one, so it gets the plain "latest" tag
+  if [[ "${os}" = "alpine" ]]; then
+    latest=egnyte/gitlabform:latest
+    docker tag "${image_name}" "${latest}"
+    tags+=( "${latest}" )
+  fi
 fi
 
 for image in "${tags[@]}"; do
