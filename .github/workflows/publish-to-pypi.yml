@@ -3,7 +3,7 @@ name: Publish 🐍 to PyPI
 on:
   push:
     tags:
-      - "v*"
+      - "NOv*"
 
 jobs:
   build-n-publish:

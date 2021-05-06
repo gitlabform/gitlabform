@@ -9,15 +9,17 @@
 python_version="3.8"
 version="$(cat version)"
 
-git_tag="${GITHUB_REF#refs/tags/*}"
+set -ue
+
+git_tag="${GITHUB_REF#refs/tags/v*}"
 if [[ "${git_tag}" != "${version}" ]]; then
   >&2 echo "ERROR: Mismatch between Git tag ${git_tag} and version file ${version}" 
   exit 1
 fi
 
-image_name="egnyte/gitlabform:${version}-${suffix}"
 effective_version="${os}_version"
 suffix="${!effective_version}"
+image_name="egnyte/gitlabform:${version}-${suffix}"
 os_latest="egnyte/gitlabform:latest-${suffix}"
 
 docker pull "${os_latest}" || echo "no cache is available"
@@ -29,7 +31,9 @@ docker build \
 
 tags=( "${image_name}" )
 
-if ! [[ "${version}" =~ v.+rc.+ ]]; then
+# TODO: something more clever here maybe?
+# TODO: do we need to validate the version?
+if ! [[ "${version}" =~ .+rc.+ ]]; then
   docker tag "${image_name}" "${os_latest}" 
   tags+=( "${os_latest}" )
 
@@ -41,6 +45,7 @@ if ! [[ "${version}" =~ v.+rc.+ ]]; then
   fi
 fi
 
+echo "Images to be published: ${tags[*]}"
 for image in "${tags[@]}"; do
   echo "$docker_password" | docker login -u "$docker_username" --password-stdin
   docker push "${image}"
