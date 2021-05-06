@@ -27,19 +27,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install packaging
-      - name: Skip if this is not a final release
-        shell: python
-        run: |
-          import sys
-          from packaging.version import parse
-          version_file = open("version", "r")
-          version = version_file.readline().strip()
-          parsed_version = parse(version)
-          if parsed_version.is_prerelease:
-              print("This is a pre- and/or dev- release - skipping publish!")
-              sys.exit(1)
-          else:
-              print("This is a final release - continuing with publish.")
       - name: Publish to DockerHub
         env:
           os: ${{ matrix.os }}
