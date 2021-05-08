@@ -1,3 +1,4 @@
+---
 name: Publish 🐳 to DockerHub
 
 on:
@@ -33,4 +34,6 @@ jobs:
           docker_username: ${{ secrets.DOCKER_USERNAME }}
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
         run: |
+          release_type=$(dev/check_release_type.py)
+          export release_type
           ./dev/build_docker_images.sh
