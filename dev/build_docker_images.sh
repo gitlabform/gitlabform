@@ -4,18 +4,11 @@
 #   os
 #   docker_username
 #   docker_password
-#   GITHUB_REF
 
 python_version="3.8"
 version="$(cat version)"
 
 set -ue
-
-git_tag="${GITHUB_REF#refs/tags/v*}"
-if [[ "${git_tag}" != "${version}" ]]; then
-  >&2 echo "ERROR: Mismatch between Git tag ${git_tag} and version file ${version}" 
-  exit 1
-fi
 
 effective_version="${os}_version"
 suffix="${!effective_version}"
