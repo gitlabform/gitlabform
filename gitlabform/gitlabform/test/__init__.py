@@ -33,22 +33,15 @@ for env_var, file_paths in env_vars_and_file_paths.items():
             else:
                 print(f"{file_path} doesn't exist.")
 
-GROUP_NAME_PREFIX = "gitlabform_tests_group"
-
 DEVELOPER_ACCESS = 30
 OWNER_ACCESS = 50
 
 gl = GitLab(config_string=CONFIG)
 
 
-def get_group_name(test_type):
+def get_random_name():
     random_suffix = get_random_suffix()
-    return f"{GROUP_NAME_PREFIX}__{test_type}__{random_suffix}"
-
-
-def get_project_name(test_type):
-    random_suffix = get_random_suffix()
-    return f"{test_type}_project__{random_suffix}"
+    return f"gitlabform__{random_suffix}"
 
 
 word_file = xp.locate_wordfile()
@@ -86,11 +79,6 @@ def create_project(group_name, project_name):
     )
 
 
-def delete_group_and_project(group_name, project_name):
-    gl.delete_project(f"{group_name}/{project_name}")
-    gl.delete_group(group_name)
-
-
 def create_users_in_project(user_base_name, no_of_users, project_and_group):
     for user_no in range(1, no_of_users + 1):
         username = user_base_name + str(user_no)
@@ -109,6 +97,7 @@ def create_users_in_project(user_base_name, no_of_users, project_and_group):
 
 
 def create_users(user_base_name, no_of_users):
+    users = []
     for user_no in range(1, no_of_users + 1):
         username = user_base_name + str(user_no)
         try:
@@ -117,12 +106,20 @@ def create_users(user_base_name, no_of_users):
             gl.create_user(
                 username + "@example.com", username + " Example", username, "password"
             )
+        users.append(username)
+    return users
 
 
 def delete_users(user_base_name, no_of_users):
     for user_no in range(1, no_of_users + 1):
         username = user_base_name + str(user_no)
         gl.delete_user(username)
+
+
+def remove_users_from_project(user_base_name, no_of_users, project_and_group):
+    for user_no in range(1, no_of_users + 1):
+        username = user_base_name + str(user_no)
+        gl.remove_member_from_project(project_and_group, username)
 
 
 def add_users_to_group(group_name, usernames, access_level=DEVELOPER_ACCESS):

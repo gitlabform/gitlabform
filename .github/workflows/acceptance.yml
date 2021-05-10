@@ -32,3 +32,4 @@ jobs:
           py.test gitlabform/gitlabform/test/test_deploy_keys.py
           py.test gitlabform/gitlabform/test/test_files.py
           py.test gitlabform/gitlabform/test/test_group_members.py
+          py.test gitlabform/gitlabform/test/test_members.py

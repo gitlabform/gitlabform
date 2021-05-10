@@ -2,6 +2,21 @@ from gitlabform.gitlab.core import GitLabCore
 
 
 class GitLabMembers(GitLabCore):
+    def get_project_members(self, project_and_group_name, all=False):
+        url_template = "projects/%s/members"
+        if all:
+            url_template += "/all"
+
+        return self._make_requests_to_api(
+            url_template, project_and_group_name, paginated=True
+        )
+
+    def get_shared_with_groups(self, project_and_group_name):
+        # a dict with groups that this project has been shared with
+        return self._make_requests_to_api("projects/%s", project_and_group_name)[
+            "shared_with_groups"
+        ]
+
     def add_member_to_project(
         self, project_and_group_name, username, access_level, expires_at=None
     ):
