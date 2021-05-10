@@ -15,22 +15,23 @@ config_version: 2
 # (workaround for lack of this feature: https://youtrack.jetbrains.com/issue/PY-5543 )
 
 env_vars_and_file_paths = {
-    "GITLAB_URL": "gitlab_url.txt",
-    "GITLAB_TOKEN": "gitlab_token.txt",
+    "GITLAB_URL": ["gitlab_url.txt", "../../../gitlab_url.txt"],
+    "GITLAB_TOKEN": ["gitlab_token.txt", "../../../gitlab_token.txt"],
 }
 
-for env_var, file_path in env_vars_and_file_paths.items():
+for env_var, file_paths in env_vars_and_file_paths.items():
     if env_var not in os.environ:
-        print(f"{env_var} not set - trying to read it from {file_path} ...")
-        if os.path.isfile(file_path):
-            try:
-                with open(file_path, "r") as file:
-                    os.environ[env_var] = file.read().replace("\n", "")
-                    print(f"{env_var} set!")
-            except Exception as e:
-                print(f"Failed to read {file_path}: {e}")
-        else:
-            print(f"{file_path} doesn't exist.")
+        print(f"{env_var} not set - trying to read it from {file_paths} ...")
+        for file_path in file_paths:
+            if os.path.isfile(file_path):
+                try:
+                    with open(file_path, "r") as file:
+                        os.environ[env_var] = file.read().replace("\n", "")
+                        print(f"{env_var} set!")
+                except Exception as e:
+                    print(f"Failed to read {file_path}: {e}")
+            else:
+                print(f"{file_path} doesn't exist.")
 
 GROUP_NAME_PREFIX = "gitlabform_tests_group"
 
