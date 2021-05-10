@@ -1,8 +1,6 @@
 import os
-import re
 import textwrap
 
-import pytest
 from xkcdpass import xkcd_password as xp
 
 from gitlabform.gitlab import GitLab
