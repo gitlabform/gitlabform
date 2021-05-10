@@ -1,5 +1,9 @@
 import logging
+import sys
 
+import cli_ui
+
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
 
@@ -44,3 +48,10 @@ class MembersProcessor(AbstractProcessor):
                 self.gitlab.add_member_to_project(
                     project_and_group, user, access, expiry
                 )
+
+        if not groups and not users:
+            cli_ui.error(
+                "Project members configuration section has to contain"
+                " either 'users' or 'groups' non-empty keys."
+            )
+            sys.exit(EXIT_INVALID_INPUT)
