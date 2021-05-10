@@ -422,6 +422,18 @@ class GitLabProjects(GitLabCore):
 
         return data
 
+    def get_groups_from_project(self, project_and_group_name):
+        # couldn't find an API call that was giving me directly
+        # the shared groups, so I'm using directly the GET /projects/:id call
+        project_info = self._make_requests_to_api("projects/%s", project_and_group_name)
+
+        # it will return {group_name: {...api info about group_name...}, ...}
+        groups = {}
+        for group in project_info["shared_with_groups"]:
+            groups[group["group_name"]] = group
+
+        return groups
+
     def share_with_group(
         self, project_and_group_name, group_name, group_access, expires_at
     ):
