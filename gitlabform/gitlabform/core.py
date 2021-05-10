@@ -34,7 +34,7 @@ class GitLabFormCore(object):
 
             self.project_or_group = project_or_group
             self.config_string = config_string
-            self.verbose = False
+            self.verbose = True
             self.debug = True
             self.strict = True
             self.start_from = 1
