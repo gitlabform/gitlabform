@@ -1,14 +1,15 @@
 import argparse
 import logging.config
+import platform
 import sys
 import textwrap
 import traceback
+from typing import TextIO
 
 import cli_ui
 import luddite
 import pkg_resources
 from packaging import version as packaging_version
-from typing import TextIO
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration.core import ConfigFileNotFoundException
@@ -217,23 +218,32 @@ class GitLabFormCore(object):
 
     def configure_output(self, tests=False):
 
+        # although python-cli-ui advertises itsels as supporting color
+        # on Windows thanks to colorama, the latter project has a lot of issues
+        # and gets little maintenance as of writing these words
+        # (see https://github.com/tartley/colorama/issues/300)
+        # so in practice color in Windows often doesn't work. let's just
+        # disable it then for now.
+        if platform.system() == "Windows":
+            color = "never"
+        else:
+            color = "auto"
+
         # normal verbosity - print cli_ui.[info, warning, ...]
-
         # verbose mode - like above plus cli_ui.debug
-
         # debug mode - like above plus logging.debug
 
         logging.basicConfig()
 
         if not self.verbose and not self.debug:
-            cli_ui.setup()
-            level = logging.FATAL  # de facto disable
-        elif self.verbose:
-            cli_ui.setup(verbose=True)
+            cli_ui.setup(color=color)
             level = logging.FATAL  # de facto disable
         else:
-            cli_ui.setup(verbose=True)
-            level = logging.DEBUG
+            cli_ui.setup(color=color, verbose=True)
+            if self.verbose:
+                level = logging.FATAL  # de facto disable
+            else:  # debug
+                level = logging.DEBUG
 
         logging.getLogger().setLevel(level)
 
@@ -261,12 +271,15 @@ class GitLabFormCore(object):
 
         cli_ui.message(*tokens_to_show, end="")
 
-        if not skip_version_check:
+        if skip_version_check:
+            # just print end of the line
+            print()
+        else:
             latest_version = luddite.get_version_pypi("gitlabform")
             if local_version == latest_version:
                 happy = cli_ui.Symbol("😊", "")
                 tokens_to_show = [
-                    " = the latest stable",
+                    "= the latest stable",
                     happy,
                 ]
             elif packaging_version.parse(local_version) < packaging_version.parse(
@@ -274,7 +287,7 @@ class GitLabFormCore(object):
             ):
                 sad = cli_ui.Symbol("😔", "")
                 tokens_to_show = [
-                    " = outdated ",
+                    "= outdated ",
                     sad,
                     f", please update! (the latest stable is ",
                     cli_ui.blue,
@@ -285,7 +298,7 @@ class GitLabFormCore(object):
             else:
                 excited = cli_ui.Symbol("🤩", "")
                 tokens_to_show = [
-                    " = pre-release ",
+                    "= pre-release ",
                     excited,
                     f" (the latest stable is ",
                     cli_ui.blue,
@@ -294,7 +307,7 @@ class GitLabFormCore(object):
                     ")",
                 ]
 
-        cli_ui.message(*tokens_to_show, sep="")
+            cli_ui.message(*tokens_to_show, sep="")
 
     def initialize_configuration_and_gitlab(self):
 
@@ -333,7 +346,6 @@ class GitLabFormCore(object):
     def get_groups(self, request_query) -> list:
 
         if request_query == "ALL":
-
             # get all groups from GitLab and then remove the skipped ones
             requested_groups = self.gitlab.get_groups()
             effective_groups = self._remove_skipped_groups(requested_groups)

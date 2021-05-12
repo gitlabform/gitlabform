@@ -1,8 +1,7 @@
-import os
 import codecs
+import os
 
 from setuptools import setup, find_packages
-
 
 with codecs.open("README.md", encoding="utf-8") as f:
     README = f.read()
@@ -36,6 +35,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS",
+        "Microsoft :: Windows",
         "Topic :: Software Development :: Version Control :: Git",
     ],
     packages=find_packages(),
@@ -53,7 +53,9 @@ setup(
         "pytest==6.1.1",
         "xkcdpass==1.17.6",
     ],
-    scripts=[
-        "bin/gitlabform",
-    ],
+    entry_points={
+        "console_scripts": [
+            "gitlabform=gitlabform.gitlabform.run:run",
+        ],
+    },
 )
