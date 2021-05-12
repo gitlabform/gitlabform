@@ -1,5 +1,19 @@
 ## Changelog
 
+### 2.0.0 RC5
+
+* **Make deep merging of configuration actually work (breaking change).** Fixes [#197](https://github.com/egnyte/gitlabform/issues/197)
+
+* Start releasing pre-releases as Docker images. They have tags with specific versions, but not "latest" tag as it is reserved for new final releases. Implements [#201](https://github.com/egnyte/gitlabform/issues/201) 
+
+* Added Windows support. Fixes [#206](https://github.com/egnyte/gitlabform/issues/206)
+
+* Added checking for invalid syntax in "members" section. Defining groups or users directly under this key instead of under sub-keys "users" and "groups" will now trigger an immediate error.
+
+Thanks to [@Pigueiras](https://github.com/Pigueiras) and [@weakcamel](https://github.com/weakcamel) for their contributions!
+
+(2.0.0 RC4 was not completely released and therefore has been withdrawn.)
+
 ### 2.0.0 RC3
 
 * Fixed the bug that caused RC2 to have noop and op modes switched... 🤦‍♂️
