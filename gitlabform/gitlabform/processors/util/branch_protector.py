@@ -40,7 +40,7 @@ class BranchProtector(object):
                         branch_access_levels = self.gitlab.get_branch_access_levels(project_and_group, branch)
                         levels = ["push_access_levels", "merge_access_levels", "unprotect_access_levels"]
                         # Check each access type has the correct access level, if they do, not change is needed
-                        # Gitlabform uses access_levels with plural form, and gitlab uses singular form.
+                        # Gitlabform uses access_levels with singular form, and gitlab uses plural form.
                         # [0:-1] removes the plural
                         if all(configuration["branches"][branch][level[0:-1]] == branch_access_levels[level][0]["access_level"] for level in levels):
                             logging.debug("Skipping set branch '%s' access levels because they're already set")
