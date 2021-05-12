@@ -35,7 +35,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS",
-        "Microsoft :: Windows",
+        "Operating System :: Microsoft :: Windows",
         "Topic :: Software Development :: Version Control :: Git",
     ],
     packages=find_packages(),
