@@ -5,16 +5,17 @@ from itertools import starmap
 import cli_ui
 
 
+# Simple function to create strings for values which should be hidden
+# example: <secret b2c1a982>
+def hide(text: str):
+    return "<secret {}>".format(hashlib.sha256(text.encode("utf-8")).hexdigest()[:8]
+
+
 class DifferenceLogger(object):
     @staticmethod
     def log_diff(
         subject, current_config, config_to_apply, only_changed=False, hide_entries=None
     ):
-        # Simple function to create strings for values which should be hidden
-        # example: <secret b2c1a982>
-        hide = lambda s: "<secret {}>".format(
-            hashlib.sha256(s.encode("utf-8"), usedforsecurity=True).hexdigest()[:8]
-        )
 
         # Compose values in list of `[key, from_config, from_server]``
         changes = [
