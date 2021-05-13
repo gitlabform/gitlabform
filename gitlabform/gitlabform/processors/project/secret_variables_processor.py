@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import logging
 import textwrap
@@ -66,23 +67,30 @@ class SecretVariablesProcessor(AbstractProcessor):
 
     def _print_diff(self, project_and_group: str, configuration):
 
-        current_secret_variables = self.gitlab.get_secret_variables(project_and_group)
-
-        for secret_variable in current_secret_variables:
-            secret_variable["value"] = hide(secret_variable["value"])
-
-        cli_ui.debug(f"Secret variables for {project_and_group} in GitLab:")
-
-        cli_ui.debug(
-            textwrap.indent(
-                yaml.dump(current_secret_variables, default_flow_style=False),
-                "  ",
+        try:
+            current_secret_variables = self.gitlab.get_secret_variables(
+                project_and_group
             )
-        )
+
+            for secret_variable in current_secret_variables:
+                secret_variable["value"] = hide(secret_variable["value"])
+
+            cli_ui.debug(f"Secret variables for {project_and_group} in GitLab:")
+
+            cli_ui.debug(
+                textwrap.indent(
+                    yaml.dump(current_secret_variables, default_flow_style=False),
+                    "  ",
+                )
+            )
+        except:
+            cli_ui.debug(
+                f"Secret variables for {project_and_group} in GitLab cannot be checked."
+            )
 
         cli_ui.debug(f"Secret variables in {project_and_group} in configuration:")
 
-        configured_secret_variables = configuration
+        configured_secret_variables = copy.deepcopy(configuration)
         for key in configured_secret_variables.keys():
             configured_secret_variables[key]["value"] = hide(
                 configured_secret_variables[key]["value"]
