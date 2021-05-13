@@ -8,7 +8,7 @@ import cli_ui
 # Simple function to create strings for values which should be hidden
 # example: <secret b2c1a982>
 def hide(text: str):
-    return "<secret {}>".format(hashlib.sha256(text.encode("utf-8")).hexdigest()[:8]
+    return f"<secret {hashlib.sha256(text.encode('utf-8')).hexdigest()[:8]}>"
 
 
 class DifferenceLogger(object):
