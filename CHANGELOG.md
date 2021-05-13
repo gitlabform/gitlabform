@@ -1,5 +1,21 @@
 ## Changelog
 
+### 2.0.0 RC6
+
+* Fix deep merging of configuration. Fixes [#209](https://github.com/egnyte/gitlabform/issues/209)
+
+* Prevent multiple email notifications from being sent when adding members to project. Fixes [#101](https://github.com/egnyte/gitlabform/issues/101)
+
+* Prevent project's Audit Events being filled in with "Added protected branch". Fixes [#178](https://github.com/egnyte/gitlabform/issues/178)
+
+* Fixed using "expires_at" for users. Fixes [#207](https://github.com/egnyte/gitlabform/issues/207)
+
+* Add diffing feature for secret variables (with values shown as hashes to protect the secrets from leaking).
+
+* Fix diffing feature that did not really work for Python < 3.9.
+
+Thanks to [@Pigueiras](https://github.com/Pigueiras) and [@YuraBeznos](https://github.com/YuraBeznos) for their contributions!
+
 ### 2.0.0 RC5
 
 * **Make deep merging of configuration actually work (breaking change).** Fixes [#197](https://github.com/egnyte/gitlabform/issues/197)
