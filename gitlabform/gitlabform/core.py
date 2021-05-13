@@ -405,9 +405,10 @@ class GitLabFormCore(object):
 
         projects_from_groups = self._get_projects_from_groups(groups)
 
-        return self._remove_skipped_projects(
-            sorted(requested_projects + projects_from_groups)
-        )
+        # casting to set and back to list to deduplicate
+        projects = sorted(list(set(requested_projects + projects_from_groups)))
+
+        return self._remove_skipped_projects(projects)
 
     def _get_projects_from_groups(self, groups) -> list:
         # use set to deduplicate project list
@@ -590,7 +591,7 @@ class GitLabFormCore(object):
         self.try_to_close_output_file(maybe_output_file)
 
         cli_ui.info_1(f"# of groups processed successfully: {successful_groups}")
-        cli_ui.info_1(f"# of projects processed succesfully: {successful_projects}")
+        cli_ui.info_1(f"# of projects processed successfully: {successful_projects}")
 
         if len(failed_groups) > 0:
             cli_ui.info_1(
