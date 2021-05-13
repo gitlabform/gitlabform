@@ -1,5 +1,7 @@
 import logging
 
+from mergedeep import merge
+
 from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
 
 logger = logging.getLogger(__name__)
@@ -107,18 +109,7 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         :return: merge more general config with more specific configs.
                  More specific config values take precedence over more general ones.
         """
-        if isinstance(more_general_config, dict):
-            for key in more_specific_config:
-                if key in more_general_config:
-                    more_general_config[key] = self.merge_configs(
-                        more_general_config[key], more_specific_config[key]
-                    )
-                else:
-                    more_general_config[key] = more_specific_config[key]
-        else:
-            more_general_config = more_specific_config
-
-        return more_general_config
+        return dict(merge({}, more_general_config, more_specific_config))
 
     def get_effective_config_for_group(self, group) -> dict:
         """
@@ -132,25 +123,10 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         group_config = self.get_group_config(group)
         logging.debug("Group config: %s" % group_config)
 
-        # this project is not in any config - return empty config
         if not group_config and not common_config:
             return {}
 
-        # this is simplistic, but for our config format should be enough for additive merge
-        # of project, group and common configs
-
-        # first merge common config with group configs
-        for key in group_config.keys() | common_config.keys():
-
-            if key in common_config and key not in group_config:
-                group_config[key] = common_config[key]
-            elif key in group_config and key not in common_config:
-                group_config[key] = group_config[key]
-            else:
-                # overwrite common settings with group settings
-                group_config[key] = {**common_config[key], **group_config[key]}
-
-        return group_config
+        return self.merge_configs(common_config, group_config)
 
     def get_groups(self) -> list:
         """

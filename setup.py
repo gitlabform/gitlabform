@@ -48,6 +48,7 @@ setup(
         "luddite==1.0.1",
         "cli-ui==0.12.0",
         "packaging==20.9",
+        "mergedeep==1.3.4",
     ],
     tests_require=[
         "pytest==6.1.1",
