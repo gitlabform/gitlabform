@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.0.0 RC7
+
+* Fixed diffing feature for secret variables
+
 ### 2.0.0 RC6
 
 * Fix deep merging of configuration. Fixes [#209](https://github.com/egnyte/gitlabform/issues/209)
