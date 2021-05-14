@@ -18,7 +18,7 @@ class GitLabGroups(GitLabCore):
                 some_string,
                 method="GET",
             )
-            print(f"search for {some_string} returned groups {groups}")
+
             for group in groups:
                 if (
                     group["path"].lower() == some_string.lower()
