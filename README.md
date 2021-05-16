@@ -88,6 +88,8 @@ If so then:
 1. Create example `config.yml`:
 
 ```yaml
+config_version: 2
+
 gitlab:
   # You can also set in your environment GITLAB_URL
   url: https://gitlab.yourcompany.com
