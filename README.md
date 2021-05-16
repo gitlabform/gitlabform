@@ -4,10 +4,18 @@
 ![docker pulls](https://img.shields.io/docker/pulls/egnyte/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-<img src="https://raw.githubusercontent.com/egnyte/gitlabform/main/docs/gitlabform-logo.png" width="600px">
+<img src="https://raw.githubusercontent.com/egnyte/gitlabform/main/docs/gitlabform-logo.png" width="600px" alt="logo">
 
 GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
+
+## ✨ Version 2 is coming ✨
+
+A major new release that will contain [significant new features and bug fixes](https://github.com/egnyte/gitlabform/blob/main/CHANGELOG.md) will be released within a few days. We don't have the resources for maintaining v1 and v2 in parallel, so this means than v1 will stop being maintained soon.
+
+Please consider starting using [pre-release of v2](https://github.com/egnyte/gitlabform/releases) already by following [the docs and example config in the v2 branch](https://github.com/egnyte/gitlabform/tree/v2) or the [procedure for upgrading from v1](https://github.com/egnyte/gitlabform/blob/main/docs/UPGRADING.md).
+
+Do not hesitate to report any issues you may have encountered!
 
 ## Table of Contents
 

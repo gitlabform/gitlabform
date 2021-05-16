@@ -2,5 +2,5 @@
 
 from gitlabform.gitlabform import GitLabForm
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     GitLabForm().main()
