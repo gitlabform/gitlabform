@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.0.0 RC8
+
+* Add support for Python 3.9
+
 ### 2.0.0 RC7
 
 * Fixed diffing feature for secret variables
