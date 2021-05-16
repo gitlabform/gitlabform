@@ -57,7 +57,7 @@ Just use the common sense:
 
 #### Development environment setup how-to
 
-1. Create virtualenv with Python 3.6-3.8, for example in `venv` dir which is in `.gitignore` and activate it:
+1. Create virtualenv with Python 3.6-3.9, for example in `venv` dir which is in `.gitignore` and activate it:
 ```
 virtualenv -p python3 venv
 . venv/bin/activate
@@ -140,9 +140,7 @@ what you propose to do before doing it.
 
 ### Versioning
 
-We try to follow [semantic versioning](https://semver.org/). When we need to re-release the same code for some reason
-(f.e. build of some package, like Docker images, has failed) then we add 4th version element, f.e. 1.18.1.2 is the
-3rd release of app code version 1.18.1 (1st was 1.18.1 and the 2nd - 1.18.1.1).
+We try to follow [PEP 440]() versioning scheme, which is mostly based on [semantic versioning](https://semver.org/).
 
 ### Procedure
 

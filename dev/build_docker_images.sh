@@ -8,7 +8,7 @@
 
 set -ue
 
-python_version="3.8"
+python_version="3.9"
 version="$(< version)"
 
 effective_version="${os}_version"
