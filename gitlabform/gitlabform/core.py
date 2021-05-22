@@ -218,7 +218,7 @@ class GitLabFormCore(object):
 
     def configure_output(self, tests=False):
 
-        # although python-cli-ui advertises itsels as supporting color
+        # although python-cli-ui advertises itself as supporting color
         # on Windows thanks to colorama, the latter project has a lot of issues
         # and gets little maintenance as of writing these words
         # (see https://github.com/tartley/colorama/issues/300)
