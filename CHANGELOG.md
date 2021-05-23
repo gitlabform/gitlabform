@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.0.0 (final)
+
+For a complete list of changes between v1 and v2 please read all the below entries for v2 RC*.
+
 ### 2.0.0 RC8
 
 * Add support for Python 3.9
