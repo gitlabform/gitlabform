@@ -147,7 +147,7 @@ You can run it with a schedule on `ALL_DEFINED` or `ALL` projects to unify your 
 from the configuration. For example you may allow the users to reconfigure projects during their working hours
 but automate cleaning up the drift each night.
 
-An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](https://github.com/egnyte/gitlabform/docs/.gitlab-ci.example.yml)
+An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](https://github.com/egnyte/gitlabform/blob/main/docs/.gitlab-ci.example.yml)
 file.
 
 Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is
@@ -162,12 +162,12 @@ We have documented some methods of automating running GitLabForm for newly creat
 
 ## Contributing
 
-Please see the [contribution guide](https://github.com/egnyte/gitlabform/CONTRIBUTING.md) for info about all kinds of contributions, like:
+Please see the [contribution guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) for info about all kinds of contributions, like:
 * questions, feature requests,
 * documentation and code contributions,
 * other.
 
-[Contribution guide](https://github.com/egnyte/gitlabform/CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
+[Contribution guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
 build it, run the tests and learn about the code guidelines.
 
 
