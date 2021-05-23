@@ -62,9 +62,10 @@ class ConfigurationCore:
 
                 if self.config.get("config_version", 1) != 2:
                     cli_ui.fatal(
-                        "GitLabForm 2.0.x requires 'config_version: 2' entry in the config.\n"
-                        " This ensures that when the application behavior changes"
-                        " you won't apply unexpected configuration to your GitLab instance."
+                        "This version of GitLabForm requires 'config_version: 2' entry in the config.\n"
+                        "This ensures that when the application behavior changes in a backward incompatible way,"
+                        " you won't apply unexpected configuration to your GitLab instance.\n"
+                        "Please read the upgrading guide here: https://bit.ly/3ub1g5C\n"
                     )
                     sys.exit(EXIT_INVALID_INPUT)
 
@@ -72,7 +73,7 @@ class ConfigurationCore:
                     self.config.get("projects_and_groups")
                 except KeyNotFoundException:
                     cli_ui.fatal(
-                        "GitLabForm 2.0.x requires 'projects_and_groups' key in the config."
+                        "'projects_and_groups' key in the config is required."
                     )
                     sys.exit(EXIT_INVALID_INPUT)
 
