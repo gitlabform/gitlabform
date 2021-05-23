@@ -9,6 +9,10 @@
 GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
 
+## ✨ Version 2 has been released! ✨
+
+Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGELOG.md) for a complete list of new features and bug fixes in this release.
+
 ## Table of Contents
 
 * What you get? - [Features](#features) (with [Comparison to similar apps](#comparison-to-similar-apps) and [Limitations](#limitations))
