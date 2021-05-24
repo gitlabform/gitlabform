@@ -53,7 +53,7 @@ setup(
     ],
     tests_require=[
         "pytest==6.1.1",
-        "xkcdpass==1.17.6",
+        "xkcdpass==1.19.2",
     ],
     entry_points={
         "console_scripts": [
