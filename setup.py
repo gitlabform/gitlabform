@@ -52,7 +52,7 @@ setup(
         "mergedeep==1.3.4",
     ],
     tests_require=[
-        "pytest==6.1.1",
+        "pytest==6.2.4",
         "xkcdpass==1.19.2",
     ],
     entry_points={
