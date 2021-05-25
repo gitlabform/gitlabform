@@ -273,7 +273,7 @@ class GitLabFormCore(object):
             if local_version == latest_version:
                 happy = cli_ui.Symbol("😊", "")
                 tokens_to_show = [
-                    "= the latest stable",
+                    "= the latest stable ",
                     happy,
                 ]
             elif packaging_version.parse(local_version) < packaging_version.parse(
