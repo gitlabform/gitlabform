@@ -72,9 +72,7 @@ class ConfigurationCore:
                 try:
                     self.config.get("projects_and_groups")
                 except KeyNotFoundException:
-                    cli_ui.fatal(
-                        "'projects_and_groups' key in the config is required."
-                    )
+                    cli_ui.fatal("'projects_and_groups' key in the config is required.")
                     sys.exit(EXIT_INVALID_INPUT)
 
         except (FileNotFoundError, IOError):
