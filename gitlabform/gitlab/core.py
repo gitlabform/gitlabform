@@ -121,17 +121,26 @@ class GitLabCore:
                 path_as_format_string, args, method, data, expected_codes, json
             )
             results = first_response.json()
-            total_pages = int(first_response.headers["X-Total-Pages"])
-            for page in range(2, total_pages + 1):
-                response = self._make_request_to_api(
-                    path_as_format_string + "&page=" + str(page),
-                    args,
-                    method,
-                    data,
-                    expected_codes,
-                    json,
-                )
-                results += response.json()
+
+            # In newer versions of GitLab the 'X-Total-Pages' may not be available
+            # anymore, see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43159
+            # so let's switch to thew newer style.
+
+            response = first_response
+            while True:
+                if "x-next-page" in response.headers:
+                    next_page = response.headers["x-next-page"]
+                    response = self._make_request_to_api(
+                        path_as_format_string + "&page=" + str(next_page),
+                        args,
+                        method,
+                        data,
+                        expected_codes,
+                        json,
+                    )
+                    results += response.json()
+                else:
+                    break
 
         return results
 
