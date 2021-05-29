@@ -30,15 +30,25 @@ class GitLabBranches(GitLabCore):
         merge_access_level,
         unprotect_access_level,
     ):
+
+        url = "projects/%s/protected_branches?name=%s"
+        parameters_list = [
+            project_and_group_name,
+            branch,
+        ]
+        if push_access_level:
+            url += "&push_access_level=%s"
+            parameters_list.append(push_access_level)
+        if merge_access_level:
+            url += "&merge_access_level=%s"
+            parameters_list.append(merge_access_level)
+        if unprotect_access_level:
+            url += "&unprotect_access_level=%s"
+            parameters_list.append(unprotect_access_level)
+
         return self._make_requests_to_api(
-            "projects/%s/protected_branches?name=%s&push_access_level=%s&merge_access_level=%s&unprotect_access_level=%s",
-            (
-                project_and_group_name,
-                branch,
-                push_access_level,
-                merge_access_level,
-                unprotect_access_level,
-            ),
+            url,
+            tuple(parameters_list),
             method="POST",
             data={},
             expected_codes=[

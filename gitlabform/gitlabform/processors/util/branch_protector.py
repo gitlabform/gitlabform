@@ -30,6 +30,7 @@ class BranchProtector(object):
                 and requested_configuration["protected"]
             ):
 
+                # note that for old API *all* keys have to be defined...
                 if all(key in requested_configuration for key in self.old_api_keys):
 
                     # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
@@ -38,7 +39,8 @@ class BranchProtector(object):
                         requested_configuration, project_and_group, branch
                     )
 
-                elif all(key in requested_configuration for key in self.new_api_keys):
+                # ...while for the new one we need any new key
+                elif any(key in requested_configuration for key in self.new_api_keys):
 
                     if self.configuration_update_needed(
                         requested_configuration, project_and_group, branch
@@ -98,9 +100,9 @@ class BranchProtector(object):
         self.gitlab.branch_access_level(
             project_and_group,
             branch,
-            requested_configuration["push_access_level"],
-            requested_configuration["merge_access_level"],
-            requested_configuration["unprotect_access_level"],
+            requested_configuration.get("push_access_level", None),
+            requested_configuration.get("merge_access_level", None),
+            requested_configuration.get("unprotect_access_level", None),
         )
 
     def set_code_owner_approval_required(
@@ -130,9 +132,11 @@ class BranchProtector(object):
 
         requested_configuration_in_plural = {}
         for level in levels:
-            requested_configuration_in_plural[level] = requested_configuration[
-                level[0:-1]
-            ]
+            level_singular = level[0:-1]
+            if level_singular in requested_configuration:
+                requested_configuration_in_plural[level] = requested_configuration[
+                    level_singular
+                ]
 
         try:
             current_configuration = self.gitlab.get_branch_access_levels(
@@ -154,26 +158,45 @@ class BranchProtector(object):
             logging.debug("No access levels for this branch exist yet")
             return True
 
-        # The only type of new API configuration that we support is when all 3 levels are defined as a single value
-        # (level).
+        # We support providing any level, defined as a single value (level).
 
-        # So if any of the levels is not present in the current configuration from GitLab
-        # or it is something else than a single-element array (single level), then the configs are different.
+        # So if all of the levels are not present in the current configuration from GitLab
+        # or any of them is something else than a single-element array (single level), then the configs
+        # are different.
+        if all(level not in current_configuration for level in levels):
+            return True
+
         if any(
-            level not in current_configuration or len(current_configuration[level]) != 1
+            level in current_configuration and len(current_configuration[level]) != 1
             for level in levels
         ):
             return True
 
-        # If any of the requested access level does not match the level defined GitLab, then the configs are different.
+        for level in levels:
 
-        # (The [0] is for getting that single element - single level - from an array.)
-        if any(
-            requested_configuration_in_plural[level]
-            != current_configuration[level][0]["access_level"]
-            for level in levels
-        ):
-            return True
+            # If any level is defined on one side but not the other then the configs are different.
+            if (
+                level in current_configuration
+                and level not in requested_configuration_in_plural
+            ):
+                return True
+            if (
+                level not in current_configuration
+                and level in requested_configuration_in_plural
+            ):
+                return True
+
+            # If any of the requested access level does not match the level defined GitLab,
+            # then the configs are different.
+            if (
+                level in current_configuration
+                and level in requested_configuration_in_plural
+            ):
+                if (
+                    requested_configuration_in_plural[level]
+                    != current_configuration[level][0]["access_level"]
+                ):
+                    return True
 
         return False
 

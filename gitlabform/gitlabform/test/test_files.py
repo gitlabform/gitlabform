@@ -122,7 +122,7 @@ class TestFiles:
         assert branch["merge_access_levels"][0]["access_level"] is 30
         assert branch["unprotect_access_levels"][0]["access_level"] is 40
 
-    def test_unprotect_branch_new_api_bug(self, gitlab, group, project):
+    def test_set_file_protected_branches_new_api(self, gitlab, group, project):
         group_and_project_name = f"{group}/{project}"
 
         test_config = f"""
@@ -155,3 +155,37 @@ class TestFiles:
         assert branch["push_access_levels"][0]["access_level"] is 40
         assert branch["merge_access_levels"][0]["access_level"] is 40
         assert branch["unprotect_access_levels"][0]["access_level"] is 40
+
+    def test_set_file_protected_branches_new_api_not_all_levels(
+        self, gitlab, group, project
+    ):
+        group_and_project_name = f"{group}/{project}"
+
+        test_config = f"""
+            projects_and_groups:
+              {group_and_project_name}:
+                branches:
+                  main:
+                    protected: true
+                    push_access_level: 30
+                    merge_access_level: 30
+            
+                files:
+                  ".gitlab/merge_request_templates/MR.md":
+                    overwrite: true
+                    branches:
+                      - main
+                    skip_ci: true
+                    content: foobar
+            """
+
+        run_gitlabform(test_config, group_and_project_name)
+
+        file_content = gitlab.get_file(
+            group_and_project_name, "main", ".gitlab/merge_request_templates/MR.md"
+        )
+        assert file_content == "foobar"
+
+        branch = gitlab.get_branch_access_levels(group_and_project_name, "main")
+        assert branch["push_access_levels"][0]["access_level"] is 30
+        assert branch["merge_access_levels"][0]["access_level"] is 30
