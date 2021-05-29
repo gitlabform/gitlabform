@@ -25,10 +25,7 @@ class BranchProtector(object):
         try:
             requested_configuration = configuration["branches"][branch]
 
-            if (
-                "protected" in requested_configuration
-                and requested_configuration["protected"]
-            ):
+            if requested_configuration.get("protected"):
 
                 # note that for old API *all* keys have to be defined...
                 if all(key in requested_configuration for key in self.old_api_keys):
@@ -39,7 +36,7 @@ class BranchProtector(object):
                         requested_configuration, project_and_group, branch
                     )
 
-                # ...while for the new one we need any new key
+                # ...while for the new one we need ANY new key
                 elif any(key in requested_configuration for key in self.new_api_keys):
 
                     if self.configuration_update_needed(
