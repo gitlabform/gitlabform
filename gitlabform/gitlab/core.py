@@ -128,7 +128,10 @@ class GitLabCore:
 
             response = first_response
             while True:
-                if "x-next-page" in response.headers:
+                if (
+                    "x-next-page" in response.headers
+                    and response.headers["x-next-page"]
+                ):
                     next_page = response.headers["x-next-page"]
                     response = self._make_request_to_api(
                         path_as_format_string + "&page=" + str(next_page),
