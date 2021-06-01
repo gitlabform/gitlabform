@@ -13,6 +13,8 @@ from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.gitlabform.processors.util.branch_protector import BranchProtector
 
+from jinja2 import Environment, FileSystemLoader
+
 
 class FilesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
@@ -174,9 +176,8 @@ class FilesProcessor(AbstractProcessor):
 
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group
-        from jinja2 import Template
-
-        return Template(template).render(
+        rtemplate = Environment(loader=FileSystemLoader(".")).from_string(template)
+        return rtemplate.render(
             project=self.get_project(project_and_group),
             group=self.get_group(project_and_group),
             **kwargs,
