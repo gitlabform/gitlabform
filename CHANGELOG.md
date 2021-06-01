@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.0.0post1-3
+
+* Fixed issues with jinja loader
+* Fixed infinite loops and x-total-pages gitlab API requirements
+
 ### 2.0.0 (final)
 
 For a complete list of changes between v1 and v2 please read all the below entries for v2 RC*.
@@ -32,7 +37,7 @@ Thanks to [@Pigueiras](https://github.com/Pigueiras) and [@YuraBeznos](https://g
 
 * **Make deep merging of configuration actually work (breaking change).** Fixes [#197](https://github.com/egnyte/gitlabform/issues/197)
 
-* Start releasing pre-releases as Docker images. They have tags with specific versions, but not "latest" tag as it is reserved for new final releases. Implements [#201](https://github.com/egnyte/gitlabform/issues/201) 
+* Start releasing pre-releases as Docker images. They have tags with specific versions, but not "latest" tag as it is reserved for new final releases. Implements [#201](https://github.com/egnyte/gitlabform/issues/201)
 
 * Added Windows support. Fixes [#206](https://github.com/egnyte/gitlabform/issues/206)
 
