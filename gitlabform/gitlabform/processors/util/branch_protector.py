@@ -118,84 +118,28 @@ class BranchProtector(object):
     def configuration_update_needed(
         self, requested_configuration, project_and_group, branch
     ):
-        levels = [
-            "push_access_levels",
-            "merge_access_levels",
-            "unprotect_access_levels",
-        ]
 
-        # In GitLab API level names are plural, while in our config syntax we require singular.
-        # Let's convert our config to the same form as GitLab's to make the further processing easier.
+        requested_push_access_level = requested_configuration.get("push_access_level")
+        requested_merge_access_level = requested_configuration.get("merge_access_level")
+        requested_unprotect_access_level = requested_configuration.get(
+            "unprotect_access_level"
+        )
 
-        requested_configuration_in_plural = {}
-        for level in levels:
-            level_singular = level[0:-1]
-            if level_singular in requested_configuration:
-                requested_configuration_in_plural[level] = requested_configuration[
-                    level_singular
-                ]
+        (
+            current_push_access_level,
+            current_merge_access_level,
+            current_unprotect_access_level,
+        ) = self.gitlab.get_only_branch_access_levels(project_and_group, branch)
 
-        try:
-            current_configuration = self.gitlab.get_branch_access_levels(
-                project_and_group, branch
-            )
-
-            # Example output:
-
-            # {'id': 4, 'name': 'main',
-            # 'push_access_levels':
-            # [{'access_level': 40, 'access_level_description': 'Maintainers', 'user_id': None, 'group_id': None}],
-            # 'merge_access_levels':
-            # [{'access_level': 40, 'access_level_description': 'Maintainers', 'user_id': None, 'group_id': None}],
-            # 'unprotect_access_levels':
-            # [],
-            # 'code_owner_approval_required': False, 'allow_force_push': False, }
-
-        except NotFoundException:
-            logging.debug("No access levels for this branch exist yet")
-            return True
-
-        # We support providing any level, defined as a single value (level).
-
-        # So if all of the levels are not present in the current configuration from GitLab
-        # or any of them is something else than a single-element array (single level), then the configs
-        # are different.
-        if all(level not in current_configuration for level in levels):
-            return True
-
-        if any(
-            level in current_configuration and len(current_configuration[level]) != 1
-            for level in levels
-        ):
-            return True
-
-        for level in levels:
-
-            # If any level is defined on one side but not the other then the configs are different.
-            if (
-                level in current_configuration
-                and level not in requested_configuration_in_plural
-            ):
-                return True
-            if (
-                level not in current_configuration
-                and level in requested_configuration_in_plural
-            ):
-                return True
-
-            # If any of the requested access level does not match the level defined GitLab,
-            # then the configs are different.
-            if (
-                level in current_configuration
-                and level in requested_configuration_in_plural
-            ):
-                if (
-                    requested_configuration_in_plural[level]
-                    != current_configuration[level][0]["access_level"]
-                ):
-                    return True
-
-        return False
+        return (
+            requested_push_access_level,
+            requested_merge_access_level,
+            requested_unprotect_access_level,
+        ) != (
+            current_push_access_level,
+            current_merge_access_level,
+            current_unprotect_access_level,
+        )
 
     def unprotect(self, project_and_group, branch):
         logging.debug("Setting branch '%s' as unprotected", branch)

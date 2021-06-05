@@ -11,6 +11,8 @@ CONFIG = """
 config_version: 2
 """
 
+DEFAULT_README = "Default README content."
+
 # automate reading files created by run_gitlab_in_docker.sh to run tests in PyCharm / IntelliJ
 # (workaround for lack of this feature: https://youtrack.jetbrains.com/issue/PY-5543 )
 
@@ -74,7 +76,7 @@ def create_project(group_name, project_name):
         f"{group_name}/{project_name}",
         "main",
         "README.md",
-        "Hello World!",
+        DEFAULT_README,
         "Create README",
     )
 

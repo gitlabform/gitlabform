@@ -1,4 +1,4 @@
-from gitlabform.gitlab.core import GitLabCore
+from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabBranches(GitLabCore):
@@ -117,6 +117,35 @@ class GitLabBranches(GitLabCore):
         return self._make_requests_to_api(
             "projects/%s/protected_branches/%s", (project_and_group_name, branch)
         )
+
+    def get_only_branch_access_levels(self, project_and_group_name, branch):
+        try:
+            result = self._make_requests_to_api(
+                "projects/%s/protected_branches/%s", (project_and_group_name, branch)
+            )
+            push_access_levels = None
+            merge_access_level = None
+            unprotect_access_level = None
+            if (
+                "push_access_levels" in result
+                and len(result["push_access_levels"]) == 1
+            ):
+                push_access_levels = result["push_access_levels"][0]["access_level"]
+            if (
+                "merge_access_levels" in result
+                and len(result["merge_access_levels"]) == 1
+            ):
+                merge_access_level = result["merge_access_levels"][0]["access_level"]
+            if (
+                "unprotect_access_levels" in result
+                and len(result["unprotect_access_levels"]) == 1
+            ):
+                unprotect_access_level = result["unprotect_access_levels"][0][
+                    "access_level"
+                ]
+            return push_access_levels, merge_access_level, unprotect_access_level
+        except NotFoundException:
+            return None, None, None
 
     def create_branch(
         self, project_and_group_name, new_branch_name, create_branch_from_ref
