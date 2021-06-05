@@ -36,13 +36,13 @@ class GitLabBranches(GitLabCore):
             project_and_group_name,
             branch,
         ]
-        if push_access_level:
+        if push_access_level is not None:
             url += "&push_access_level=%s"
             parameters_list.append(push_access_level)
-        if merge_access_level:
+        if merge_access_level is not None:
             url += "&merge_access_level=%s"
             parameters_list.append(merge_access_level)
-        if unprotect_access_level:
+        if unprotect_access_level is not None:
             url += "&unprotect_access_level=%s"
             parameters_list.append(unprotect_access_level)
 
