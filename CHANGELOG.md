@@ -1,9 +1,13 @@
 ## Changelog
 
-### 2.0.0post1-3
+### 2.0.1
 
-* Fixed issues with jinja loader
-* Fixed infinite loops and x-total-pages gitlab API requirements
+* Fixed issues with Jinja loader.
+* Fixed calls to GitLab API that do not contain 'x-total-pages' header (gradually rolled out since [GitLab MR #23931](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/23931)).
+
+Thanks to [@mkjmdski](https://github.com/mkjmdski) for his contribution!
+
+(2.0.0post1-3 release is technically the same as 2.0.1 but was incorrectly versioned.)
 
 ### 2.0.0 (final)
 
