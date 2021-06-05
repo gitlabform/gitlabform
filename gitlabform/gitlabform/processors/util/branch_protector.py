@@ -25,11 +25,9 @@ class BranchProtector(object):
         try:
             requested_configuration = configuration["branches"][branch]
 
-            if (
-                "protected" in requested_configuration
-                and requested_configuration["protected"]
-            ):
+            if requested_configuration.get("protected"):
 
+                # note that for old API *all* keys have to be defined...
                 if all(key in requested_configuration for key in self.old_api_keys):
 
                     # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
@@ -38,7 +36,8 @@ class BranchProtector(object):
                         requested_configuration, project_and_group, branch
                     )
 
-                elif all(key in requested_configuration for key in self.new_api_keys):
+                # ...while for the new one we need ANY new key
+                elif any(key in requested_configuration for key in self.new_api_keys):
 
                     if self.configuration_update_needed(
                         requested_configuration, project_and_group, branch
@@ -98,9 +97,9 @@ class BranchProtector(object):
         self.gitlab.branch_access_level(
             project_and_group,
             branch,
-            requested_configuration["push_access_level"],
-            requested_configuration["merge_access_level"],
-            requested_configuration["unprotect_access_level"],
+            requested_configuration.get("push_access_level", None),
+            requested_configuration.get("merge_access_level", None),
+            requested_configuration.get("unprotect_access_level", None),
         )
 
     def set_code_owner_approval_required(
@@ -119,63 +118,28 @@ class BranchProtector(object):
     def configuration_update_needed(
         self, requested_configuration, project_and_group, branch
     ):
-        levels = [
-            "push_access_levels",
-            "merge_access_levels",
-            "unprotect_access_levels",
-        ]
 
-        # In GitLab API level names are plural, while in our config syntax we require singular.
-        # Let's convert our config to the same form as GitLab's to make the further processing easier.
+        requested_push_access_level = requested_configuration.get("push_access_level")
+        requested_merge_access_level = requested_configuration.get("merge_access_level")
+        requested_unprotect_access_level = requested_configuration.get(
+            "unprotect_access_level"
+        )
 
-        requested_configuration_in_plural = {}
-        for level in levels:
-            requested_configuration_in_plural[level] = requested_configuration[
-                level[0:-1]
-            ]
+        (
+            current_push_access_level,
+            current_merge_access_level,
+            current_unprotect_access_level,
+        ) = self.gitlab.get_only_branch_access_levels(project_and_group, branch)
 
-        try:
-            current_configuration = self.gitlab.get_branch_access_levels(
-                project_and_group, branch
-            )
-
-            # Example output:
-
-            # {'id': 4, 'name': 'main',
-            # 'push_access_levels':
-            # [{'access_level': 40, 'access_level_description': 'Maintainers', 'user_id': None, 'group_id': None}],
-            # 'merge_access_levels':
-            # [{'access_level': 40, 'access_level_description': 'Maintainers', 'user_id': None, 'group_id': None}],
-            # 'unprotect_access_levels':
-            # [],
-            # 'code_owner_approval_required': False, 'allow_force_push': False, }
-
-        except NotFoundException:
-            logging.debug("No access levels for this branch exist yet")
-            return True
-
-        # The only type of new API configuration that we support is when all 3 levels are defined as a single value
-        # (level).
-
-        # So if any of the levels is not present in the current configuration from GitLab
-        # or it is something else than a single-element array (single level), then the configs are different.
-        if any(
-            level not in current_configuration or len(current_configuration[level]) != 1
-            for level in levels
-        ):
-            return True
-
-        # If any of the requested access level does not match the level defined GitLab, then the configs are different.
-
-        # (The [0] is for getting that single element - single level - from an array.)
-        if any(
-            requested_configuration_in_plural[level]
-            != current_configuration[level][0]["access_level"]
-            for level in levels
-        ):
-            return True
-
-        return False
+        return (
+            requested_push_access_level,
+            requested_merge_access_level,
+            requested_unprotect_access_level,
+        ) != (
+            current_push_access_level,
+            current_merge_access_level,
+            current_unprotect_access_level,
+        )
 
     def unprotect(self, project_and_group, branch):
         logging.debug("Setting branch '%s' as unprotected", branch)

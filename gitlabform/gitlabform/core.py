@@ -246,14 +246,8 @@ class GitLabFormCore(object):
                 level = logging.DEBUG
 
         logging.getLogger().setLevel(level)
-
-        if not tests:
-            fmt = logging.Formatter("%(message)s")
-            logging.getLogger().handlers[0].setFormatter(fmt)
-        else:
-            # disable printing to stdout/err because pytest will catch it anyway
-            handler = logging.getLogger().handlers[0]
-            logging.getLogger().removeHandler(handler)
+        fmt = logging.Formatter("%(message)s")
+        logging.getLogger().handlers[0].setFormatter(fmt)
 
     def show_version(self, skip_version_check):
 
