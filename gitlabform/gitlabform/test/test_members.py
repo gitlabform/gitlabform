@@ -105,8 +105,6 @@ class TestMembers:
 
         members = gitlab.get_project_members(group_and_project, all=True)
 
-        # print(f"members after = {members}")
-
         # TODO: the +1 is for root, but actually why is that user inherited here?
         assert len(members) == no_of_members_before + no_of_members_of_group + 1
 
