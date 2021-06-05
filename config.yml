@@ -174,29 +174,7 @@ projects_and_groups:
         push_access_level: 0
         merge_access_level: 0
         unprotect_access_level: 40
-      branch_only_protected_from_deletion:
-        protected: true
-        developers_can_push: true
-        developers_can_merge: true
-      branch_completely_protected_from_developers:
-        protected: true
-        developers_can_push: false
-        developers_can_merge: false
-      brach_protected_from_direct_pushes_from_developers_but_with_merges_allowed:
-        protected: true
-        developers_can_push: false
-        developers_can_merge: true
-      # below setup is probably not very useful but we are adding it for completeness
-      branch_protected_from_but_with_direct_pushes_from_developers_allowed:
-        protected: true
-        developers_can_push: true
-        developers_can_merge: false
-      branch_protected_from_direct_pushes_from_everyone_but_with_merges_allowed:
-        protected: true
-        push_access_level: 0
-        merge_access_level: 30
-        unprotect_access_level: 40
-      # note: protecting using wildcards works only when using the new API, with the dict keys like below
+      # Protect branches with names matching wildcards
       '*-branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed_configured_using_wildcard':
         protected: true
         push_access_level: 0
@@ -354,13 +332,6 @@ projects_and_groups:
         masked: true
         environment_scope: staging
         filter[environment_scope]: staging
-
-    branches:
-      # see comment above - this branch config will be ADDED to the branches configured on a group level
-      special_branch:
-        protected: true
-        developers_can_push: false
-        developers_can_merge: true
 
     hooks:
       skip: true # this will skip whole hooks config *section* for this project, although it is set on group level
