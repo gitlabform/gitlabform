@@ -1,8 +1,12 @@
 ## Changelog
 
+### 2.0.3
+
+* Fixed issue with dry-run for Project Push Rules when the current config is empty (`None`). Fixes [#223](https://github.com/egnyte/gitlabform/issues/223)
+
 ### 2.0.2
 
-* Fixed issue with `unprotect_branch_new_api` [#219](https://github.com/egnyte/gitlabform/issues/219).
+* Fixed issue with `unprotect_branch_new_api`. Fixes [#219](https://github.com/egnyte/gitlabform/issues/219)
 
 ### 2.0.1
 
