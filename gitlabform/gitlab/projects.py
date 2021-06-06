@@ -231,9 +231,7 @@ class GitLabProjects(GitLabCore):
             # for this endpoint GitLab fails if project name contains ".", so lets use pid instead
             pid: str = self._get_project_id(project_and_group_name)
 
-            return self._make_requests_to_api(
-                "projects/%s/push_rule", pid
-            )
+            return self._make_requests_to_api("projects/%s/push_rule", pid)
         except NotFoundException:
             return dict()
 
