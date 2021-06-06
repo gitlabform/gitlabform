@@ -14,12 +14,25 @@ def hide(text: str):
 class DifferenceLogger(object):
     @staticmethod
     def log_diff(
-        subject, current_config, config_to_apply, only_changed=False, hide_entries=None, test=False
+        subject,
+        current_config,
+        config_to_apply,
+        only_changed=False,
+        hide_entries=None,
+        test=False,
     ):
 
         # Compose values in list of `[key, from_config, from_server]``
         changes = [
-            [k, json.dumps(current_config.get(k, "???")), json.dumps(v)]
+            [
+                k,
+                json.dumps(
+                    current_config.get(k, "???")
+                    if type(current_config) == dict
+                    else "???"
+                ),
+                json.dumps(v),
+            ]
             for k, v in config_to_apply.items()
         ]
 
