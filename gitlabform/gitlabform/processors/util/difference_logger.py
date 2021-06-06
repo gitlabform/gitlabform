@@ -14,7 +14,7 @@ def hide(text: str):
 class DifferenceLogger(object):
     @staticmethod
     def log_diff(
-        subject, current_config, config_to_apply, only_changed=False, hide_entries=None
+        subject, current_config, config_to_apply, only_changed=False, hide_entries=None, test=False
     ):
 
         # Compose values in list of `[key, from_config, from_server]``
@@ -52,4 +52,7 @@ class DifferenceLogger(object):
         text = "{subject}:\n{diff}".format(
             subject=subject, diff="\n".join(starmap(pattern.format, changes))
         )
-        cli_ui.debug(text)
+        if test:
+            return text
+        else:
+            cli_ui.debug(text)
