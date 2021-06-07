@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.0.4
+
+* Fixed issue with Push Rules when the the project name contains a dot. Fixes [#224](https://github.com/egnyte/gitlabform/issues/224)
+* Fixed calling to process a single subgroup (like: `gitlabform 'group/subgroup'`). Fixes [#221](https://github.com/egnyte/gitlabform/issues/221)
+
 ### 2.0.3
 
 * Fixed issue with dry-run for Project Push Rules when the current config is empty (`None`). Fixes [#223](https://github.com/egnyte/gitlabform/issues/223)
