@@ -332,8 +332,8 @@ class GitLabFormCore(object):
             cli_ui.error(f"Entity {self.project_or_group} cannot be found in GitLab!")
             sys.exit(EXIT_INVALID_INPUT)
         else:
-            cli_ui.debug(f'groups: {groups}')
-            cli_ui.debug(f'projects: {projects}')
+            cli_ui.debug(f"groups: {groups}")
+            cli_ui.debug(f"projects: {projects}")
 
         cli_ui.info_1(f"# of groups to process: {len(groups)}")
         cli_ui.info_1(f"# of projects to process: {len(projects)}")
