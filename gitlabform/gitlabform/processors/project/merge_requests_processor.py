@@ -1,6 +1,7 @@
 import logging
 
 import cli_ui
+from distutils.version import LooseVersion
 
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
@@ -38,8 +39,10 @@ class MergeRequestsProcessor(AbstractProcessor):
                 "approvers" in approvals_settings
                 or "approver_groups" in approvals_settings
             ):
-                logging.debug("Deleting legacy approvers setup")
-                self.gitlab.delete_legacy_approvers(project_and_group)
+                # /approvers endpoint has been removed in 13.11.x GitLab version
+                if LooseVersion(self.gitlab.version) < LooseVersion("13.11"):
+                    logging.debug("Deleting legacy approvers setup")
+                    self.gitlab.delete_legacy_approvers(project_and_group)
 
             approval_rule_name = "Approvers (configured using GitLabForm)"
 
