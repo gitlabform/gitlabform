@@ -22,62 +22,23 @@ class GitLabBranches(GitLabCore):
         )
 
     # new API
-    def branch_access_level(
-        self,
-        project_and_group_name,
-        branch,
-        push_access_level,
-        merge_access_level,
-        unprotect_access_level,
-    ):
+    def branch_access_level(self, project_and_group_name, branch, protect_settings):
 
         url = "projects/%s/protected_branches?name=%s"
         parameters_list = [
             project_and_group_name,
             branch,
         ]
-        if push_access_level is not None:
-            url += "&push_access_level=%s"
-            parameters_list.append(push_access_level)
-        if merge_access_level is not None:
-            url += "&merge_access_level=%s"
-            parameters_list.append(merge_access_level)
-        if unprotect_access_level is not None:
-            url += "&unprotect_access_level=%s"
-            parameters_list.append(unprotect_access_level)
-
         return self._make_requests_to_api(
             url,
             tuple(parameters_list),
             method="POST",
-            data={},
+            data=protect_settings,
             expected_codes=[
                 200,
                 201,
                 409,
             ],  # TODO: check why is 409 Conflict accepted here :/
-        )
-
-    def branch_code_owner_approval_required(
-        self,
-        project_and_group_name,
-        branch,
-        code_owner_approval_required,
-    ):
-        data = {
-            "id": project_and_group_name,
-            "branch": branch,
-            "code_owner_approval_required": code_owner_approval_required,
-        }
-        return self._make_requests_to_api(
-            "projects/%s/protected_branches/%s",
-            (
-                project_and_group_name,
-                branch,
-            ),
-            method="PATCH",
-            data=data,
-            expected_codes=[200, 201],
         )
 
     def unprotect_branch(self, project_and_group_name, branch):
@@ -117,35 +78,6 @@ class GitLabBranches(GitLabCore):
         return self._make_requests_to_api(
             "projects/%s/protected_branches/%s", (project_and_group_name, branch)
         )
-
-    def get_only_branch_access_levels(self, project_and_group_name, branch):
-        try:
-            result = self._make_requests_to_api(
-                "projects/%s/protected_branches/%s", (project_and_group_name, branch)
-            )
-            push_access_levels = None
-            merge_access_level = None
-            unprotect_access_level = None
-            if (
-                "push_access_levels" in result
-                and len(result["push_access_levels"]) == 1
-            ):
-                push_access_levels = result["push_access_levels"][0]["access_level"]
-            if (
-                "merge_access_levels" in result
-                and len(result["merge_access_levels"]) == 1
-            ):
-                merge_access_level = result["merge_access_levels"][0]["access_level"]
-            if (
-                "unprotect_access_levels" in result
-                and len(result["unprotect_access_levels"]) == 1
-            ):
-                unprotect_access_level = result["unprotect_access_levels"][0][
-                    "access_level"
-                ]
-            return push_access_levels, merge_access_level, unprotect_access_level
-        except NotFoundException:
-            return None, None, None
 
     def create_branch(
         self, project_and_group_name, new_branch_name, create_branch_from_ref
