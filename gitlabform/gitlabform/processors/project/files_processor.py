@@ -176,7 +176,9 @@ class FilesProcessor(AbstractProcessor):
 
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group
-        rtemplate = Environment(loader=FileSystemLoader(".")).from_string(template)
+        rtemplate = Environment(
+            loader=FileSystemLoader("."), autoescape=True
+        ).from_string(template)
         return rtemplate.render(
             project=self.get_project(project_and_group),
             group=self.get_group(project_and_group),
