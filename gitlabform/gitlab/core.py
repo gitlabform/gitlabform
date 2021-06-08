@@ -41,6 +41,7 @@ class GitLabCore:
             cli_ui.debug(
                 f"Connected to GitLab version: {version['version']} ({version['revision']})"
             )
+            self.version = version["version"]
         except Exception as e:
             raise TestRequestFailedException(e)
 
