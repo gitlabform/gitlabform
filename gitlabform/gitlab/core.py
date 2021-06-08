@@ -196,11 +196,11 @@ class GitLabCore:
             )
         logging.debug("response code=%s" % response.status_code)
 
-        if response.status_code == 204:
-            # code calling this function assumes that it can do response.json() so fake it to return empty dict
-            response.json = lambda: {}
-
-        if response.status_code not in expected_codes:
+        if response.status_code in expected_codes:
+            if response.status_code in [204, 404]:
+                logging.debug("faking response body to be {}")
+                response.json = lambda: {}
+        else:
             if response.status_code == 404:
                 raise NotFoundException("Resource path='%s' not found!" % url)
             else:
