@@ -197,7 +197,9 @@ class GitLabCore:
         logging.debug("response code=%s" % response.status_code)
 
         if response.status_code in expected_codes:
-            if response.status_code in [204, 404]:
+            # if we accept error responses then they will likely not contain a JSON body
+            # so fake it to fix further calls to response.json()
+            if 400 <= response.status_code <= 499:
                 logging.debug("faking response body to be {}")
                 response.json = lambda: {}
         else:
