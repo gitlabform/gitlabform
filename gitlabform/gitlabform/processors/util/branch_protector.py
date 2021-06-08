@@ -94,30 +94,39 @@ class BranchProtector(object):
         # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
         self.gitlab.unprotect_branch_new_api(project_and_group, branch)
 
+        protect_rules = {
+            key: value
+            for key, value in requested_configuration.items()
+            if key != "protected"
+        }
+
         self.gitlab.branch_access_level(
             project_and_group,
             branch,
-            requested_configuration.get("push_access_level", None),
-            requested_configuration.get("merge_access_level", None),
-            requested_configuration.get("unprotect_access_level", None),
-        )
-
-    def set_code_owner_approval_required(
-        self, requested_configuration, project_and_group, branch
-    ):
-        logging.debug(
-            "Setting branch '%s' \"code owner approval required\" option",
-            branch,
-        )
-        self.gitlab.branch_code_owner_approval_required(
-            project_and_group,
-            branch,
-            requested_configuration["code_owner_approval_required"],
+            protect_rules,
         )
 
     def configuration_update_needed(
         self, requested_configuration, project_and_group, branch
     ):
+        try:
+            result = self.gitlab.get_branch_access_levels(project_and_group, branch)
+        except NotFoundException:
+            return True
+
+        if "push_access_levels" in result and len(result["push_access_levels"]) == 1:
+            current_push_access_level = result["push_access_levels"][0]["access_level"]
+        if "merge_access_levels" in result and len(result["merge_access_levels"]) == 1:
+            current_merge_access_level = result["merge_access_levels"][0][
+                "access_level"
+            ]
+        if (
+            "unprotect_access_levels" in result
+            and len(result["unprotect_access_levels"]) == 1
+        ):
+            current_unprotect_access_level = result["unprotect_access_levels"][0][
+                "access_level"
+            ]
 
         requested_push_access_level = requested_configuration.get("push_access_level")
         requested_merge_access_level = requested_configuration.get("merge_access_level")
@@ -125,13 +134,7 @@ class BranchProtector(object):
             "unprotect_access_level"
         )
 
-        (
-            current_push_access_level,
-            current_merge_access_level,
-            current_unprotect_access_level,
-        ) = self.gitlab.get_only_branch_access_levels(project_and_group, branch)
-
-        return (
+        access_levels_are_different = (
             requested_push_access_level,
             requested_merge_access_level,
             requested_unprotect_access_level,
@@ -140,6 +143,24 @@ class BranchProtector(object):
             current_merge_access_level,
             current_unprotect_access_level,
         )
+
+        if access_levels_are_different:
+            return True
+
+        # after checking the levels, we check the rest of the parameters
+        extra_params = [
+            extra_param
+            for extra_param in requested_configuration.keys()
+            if extra_param != "protected"
+            and extra_param not in self.old_api_keys
+            and extra_param not in self.new_api_keys
+        ]
+
+        for param in extra_params:
+            if result[param] != requested_configuration[param]:
+                return True
+
+        return False
 
     def unprotect(self, project_and_group, branch):
         logging.debug("Setting branch '%s' as unprotected", branch)
