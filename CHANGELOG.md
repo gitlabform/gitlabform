@@ -2,7 +2,13 @@
 
 ### 2.0.4
 
-* Fixed issue with Push Rules when the the project name contains a dot. Fixes [#224](https://github.com/egnyte/gitlabform/issues/224)
+* *Really* fixed issue with `unprotect_branch_new_api`. Fixes [#219](https://github.com/egnyte/gitlabform/issues/219)
+* Fixed call to a Merge Requests Approvers API endpoint removed in GitLab 13.11.0. Fixes [#220](https://github.com/egnyte/gitlabform/issues/220)
+* Fixed potential security issue by enabling autoescaping when loading Jinja templates. (Bandit security tool issue [B701](https://bandit.readthedocs.io/en/latest/plugins/b701_jinja2_autoescape_false.html))
+
+### 2.0.4
+
+* Fixed issue with Push Rules when the project name contains a dot. Fixes [#224](https://github.com/egnyte/gitlabform/issues/224)
 * Fixed calling to process a single subgroup (like: `gitlabform 'group/subgroup'`). Fixes [#221](https://github.com/egnyte/gitlabform/issues/221)
 
 ### 2.0.3
@@ -12,6 +18,7 @@
 ### 2.0.2
 
 * Fixed issue with `unprotect_branch_new_api`. Fixes [#219](https://github.com/egnyte/gitlabform/issues/219)
+  (update: later it turned out that it was not really fixed in 2.0.2 but in 2.0.5 instead)
 
 ### 2.0.1
 
