@@ -110,6 +110,6 @@ Thanks to [@ss7548](https://github.com/ss7548) and [@houres](https://github.com/
 
 Thanks to [@amimas](https://github.com/amimas), [@weakcamel](https://github.com/weakcamel) and [@kowpatryk](https://github.com/kowpatryk) for their contributions!
 
-### before 2.0.0 RC1
+### before 2.0.0
 
-Please see [GitHub releases descriptions](https://github.com/egnyte/gitlabform/releases).
+Please see [GitHub pre-2.0 releases' descriptions](https://github.com/egnyte/gitlabform/releases?after=v2.0.0rc1).
