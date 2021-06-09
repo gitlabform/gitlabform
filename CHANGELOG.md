@@ -1,6 +1,6 @@
 ## Changelog
 
-### 2.0.4
+### 2.0.5
 
 * *Really* fixed issue with `unprotect_branch_new_api`. Fixes [#219](https://github.com/egnyte/gitlabform/issues/219)
 * Fixed call to a Merge Requests Approvers API endpoint removed in GitLab 13.11.0. Fixes [#220](https://github.com/egnyte/gitlabform/issues/220)
