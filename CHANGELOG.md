@@ -6,6 +6,8 @@
 * Fixed call to a Merge Requests Approvers API endpoint removed in GitLab 13.11.0. Fixes [#220](https://github.com/egnyte/gitlabform/issues/220)
 * Fixed potential security issue by enabling autoescaping when loading Jinja templates. (Bandit security tool issue [B701](https://bandit.readthedocs.io/en/latest/plugins/b701_jinja2_autoescape_false.html))
 
+Thanks to [@Pigueiras](https://github.com/Pigueiras) for his contribution!
+
 ### 2.0.4
 
 * Fixed issue with Push Rules when the project name contains a dot. Fixes [#224](https://github.com/egnyte/gitlabform/issues/224)
