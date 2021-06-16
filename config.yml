@@ -193,7 +193,11 @@ projects_and_groups:
       my-user:
         access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
 
-    # if this flag is set to 'true', then removing a user the above config will remove the user from the group
+    group_shared_with:
+      another-group:
+        group_access_level: 10
+
+    # if this flag is set to 'true', then removing a user or group from the above config will remove the user from the group
     # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
     enforce_group_members: true  # default: false
 
@@ -402,7 +406,7 @@ projects_and_groups:
             variable_type: file # optional parameter, defaults to 'env_var'
           other_variable:
             value: another_value
-      # this one will be deleted if exists 
+      # this one will be deleted if exists
       "Obsolete schedule":
         delete: true
 

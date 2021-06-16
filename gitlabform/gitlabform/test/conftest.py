@@ -3,6 +3,8 @@ import pytest
 from gitlabform.gitlabform.test import (
     get_gitlab,
     create_group,
+    create_groups,
+    delete_groups,
     create_project,
     get_random_name,
     create_users,
@@ -61,6 +63,19 @@ def other_project(group):
 
     gl = get_gitlab()
     gl.delete_project(f"{group}/{project_name}")
+
+
+@pytest.fixture(scope="class")
+def groups(users):
+    no_of_groups = 4
+
+    group_name_base = get_random_name()
+    print(f"groups {group_name_base} {no_of_groups}")
+    groups = create_groups(group_name_base, no_of_groups)
+
+    yield groups
+
+    delete_groups(group_name_base, no_of_groups)
 
 
 @pytest.fixture(scope="class")
