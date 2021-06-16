@@ -149,3 +149,31 @@ class GitLabGroups(GitLabCore):
             "DELETE",
             expected_codes=[200, 202, 204, 404],
         )
+
+    def get_group_shared_with(self, group):
+        group = self.get_group_case_insensitive(group)
+
+        return group["shared_with_groups"]
+
+    def add_share_to_group(
+        self, group, share_with_group_id, group_access, expires_at=None
+    ):
+        data = {"group_id": share_with_group_id, "expires_at": expires_at}
+        if group_access is not None:
+            data["group_access"] = group_access
+
+        return self._make_requests_to_api(
+            "groups/%s/share",
+            group,
+            method="POST",
+            data=data,
+            expected_codes=[200, 201],
+        )
+
+    def remove_share_from_group(self, group, share_with_group_id):
+        return self._make_requests_to_api(
+            "groups/%s/share/%s",
+            (group, share_with_group_id),
+            method="DELETE",
+            expected_codes=204,
+        )

@@ -62,6 +62,24 @@ def create_group(group_name):
     gl.create_group(group_name, group_name)
 
 
+def create_groups(group_base_name, no_of_groups):
+    groups = []
+    for group_no in range(1, no_of_groups + 1):
+        group_name = group_base_name + str(group_no)
+        try:
+            gl.get_group_case_insensitive(group_name)
+        except NotFoundException:
+            gl.create_group(group_name, group_name)
+        groups.append(group_name)
+    return groups
+
+
+def delete_groups(group_base_name, no_of_groups):
+    for group_no in range(1, no_of_groups + 1):
+        group_name = group_base_name + str(group_no)
+        gl.delete_group(group_name)
+
+
 def create_project(group_name, project_name):
     group = gl.get_group(group_name)
     gl.create_project(
