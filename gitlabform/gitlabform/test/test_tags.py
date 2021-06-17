@@ -1,7 +1,8 @@
 import pytest
 
 from gitlabform.gitlabform.test import (
-    run_gitlabform, MAINTAINER_ACCESS,
+    run_gitlabform,
+    MAINTAINER_ACCESS,
 )
 
 
@@ -50,7 +51,10 @@ class TestTags:
         protected_tags = gitlab.get_protected_tags(group_and_project)
         assert len(protected_tags) == 1
         assert protected_tags[0]["name"] == "tag1"
-        assert protected_tags[0]["create_access_levels"][0]["access_level"] == MAINTAINER_ACCESS
+        assert (
+            protected_tags[0]["create_access_levels"][0]["access_level"]
+            == MAINTAINER_ACCESS
+        )
 
     def test__protect_wildcard_tag(self, gitlab, group, project, tags):
         group_and_project = f"{group}/{project}"
@@ -73,7 +77,10 @@ class TestTags:
         protected_tags = gitlab.get_protected_tags(group_and_project)
         assert len(protected_tags) == 1
         assert protected_tags[0]["name"] == "tag*"
-        assert protected_tags[0]["create_access_levels"][0]["access_level"] == MAINTAINER_ACCESS
+        assert (
+            protected_tags[0]["create_access_levels"][0]["access_level"]
+            == MAINTAINER_ACCESS
+        )
 
     def test__unprotect_the_same_tag(self, gitlab, group, project, tags):
         group_and_project = f"{group}/{project}"
@@ -96,7 +103,10 @@ class TestTags:
         protected_tags = gitlab.get_protected_tags(group_and_project)
         assert len(protected_tags) == 1
         assert protected_tags[0]["name"] == "tag*"
-        assert protected_tags[0]["create_access_levels"][0]["access_level"] == MAINTAINER_ACCESS
+        assert (
+            protected_tags[0]["create_access_levels"][0]["access_level"]
+            == MAINTAINER_ACCESS
+        )
 
         config = f"""
         projects_and_groups:
