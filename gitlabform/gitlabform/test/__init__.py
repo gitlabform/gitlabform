@@ -36,6 +36,7 @@ for env_var, file_paths in env_vars_and_file_paths.items():
                 print(f"{file_path} doesn't exist.")
 
 DEVELOPER_ACCESS = 30
+MAINTAINER_ACCESS = 40
 OWNER_ACCESS = 50
 
 gl = GitLab(config_string=CONFIG)
