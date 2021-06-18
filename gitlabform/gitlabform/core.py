@@ -362,7 +362,7 @@ class GitLabFormCore(object):
                 # so ensure that such group exists
                 try:
                     group = self.gitlab.get_group_case_insensitive(group)
-                    effective_groups_proper_case.append(group["path"])
+                    effective_groups_proper_case.append(group["full_path"])
                 except NotFoundException:
                     cli_ui.error(
                         f"Configuration contains group {group} but it cannot be found in GitLab!"
@@ -388,8 +388,6 @@ class GitLabFormCore(object):
 
         if request_query == "ALL_DEFINED":
             # get projects explicitly defined in the configuration,
-            # but add them to the projects from groups,
-            # and finally remove the skipped ones
             requested_projects = self.configuration.get_projects()
 
         else:
@@ -400,6 +398,7 @@ class GitLabFormCore(object):
             except NotFoundException:
                 pass
 
+        # get the projects from the groups to process
         projects_from_groups = self._get_projects_from_groups(groups)
 
         # casting to set and back to list to deduplicate

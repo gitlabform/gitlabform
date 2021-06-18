@@ -4,25 +4,23 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 class GitLabGroups(GitLabCore):
     def get_group_case_insensitive(self, some_string):
 
-        # maybe "some_string" is the group's path
+        # maybe "foo/bar" is some group's path
 
         try:
+            # try with exact case
             return self.get_group(some_string)
         except NotFoundException:
 
-            # try searching by name - maybe "some_string" is group's name
-            # or path, but case insensitive
-
+            # try case insensitive
             groups = self._make_requests_to_api(
                 "groups?search=%s",
-                some_string,
+                some_string.lower(),
                 method="GET",
             )
 
             for group in groups:
                 if (
-                    group["path"].lower() == some_string.lower()
-                    or group["name"].lower() == some_string.lower()
+                    group["full_path"].lower() == some_string.lower()
                 ):
                     return group
             raise NotFoundException
