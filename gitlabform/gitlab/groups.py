@@ -6,6 +6,7 @@ import cli_ui
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
+
 class GitLabGroups(GitLabCore):
     @functools.lru_cache
     def get_group_id_case_insensitive(self, some_string):
@@ -165,7 +166,9 @@ class GitLabGroups(GitLabCore):
         self, group, share_with_group_name, group_access, expires_at=None
     ):
         try:
-            share_with_group_id = self.get_group_id_case_insensitive(share_with_group_name)
+            share_with_group_id = self.get_group_id_case_insensitive(
+                share_with_group_name
+            )
         except NotFoundException:
             cli_ui.error(f"Group {share_with_group_name} not found.")
             sys.exit(EXIT_INVALID_INPUT)
@@ -184,7 +187,9 @@ class GitLabGroups(GitLabCore):
 
     def remove_share_from_group(self, group, share_with_group_name):
         try:
-            share_with_group_id = self.get_group_id_case_insensitive(share_with_group_name)
+            share_with_group_id = self.get_group_id_case_insensitive(
+                share_with_group_name
+            )
         except NotFoundException:
             cli_ui.error(f"Group {share_with_group_name} not found.")
             sys.exit(EXIT_INVALID_INPUT)
