@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.0.6
+
+* Fixed incorrect subgroups list when requesting to process ALL_DEFINED. Completes the fix for [#221](https://github.com/egnyte/gitlabform/issues/221)
+
 ### 2.0.5
 
 * *Really* fixed issue with `unprotect_branch_new_api`. Fixes [#219](https://github.com/egnyte/gitlabform/issues/219)
