@@ -1,7 +1,17 @@
+import functools
+import sys
+
+import cli_ui
+
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
-
 class GitLabGroups(GitLabCore):
+    @functools.lru_cache
+    def get_group_id_case_insensitive(self, some_string):
+        # Cache the mapping from some_string -> id, as that won't change during our run.
+        return self.get_group_case_insensitive(some_string)["id"]
+
     def get_group_case_insensitive(self, some_string):
 
         # maybe "some_string" is the group's path
@@ -156,8 +166,14 @@ class GitLabGroups(GitLabCore):
         return group["shared_with_groups"]
 
     def add_share_to_group(
-        self, group, share_with_group_id, group_access, expires_at=None
+        self, group, share_with_group_name, group_access, expires_at=None
     ):
+        try:
+            share_with_group_id = self.get_group_id_case_insensitive(share_with_group_name)
+        except NotFoundException:
+            cli_ui.error(f"Group {share_with_group_name} not found.")
+            sys.exit(EXIT_INVALID_INPUT)
+
         data = {"group_id": share_with_group_id, "expires_at": expires_at}
         if group_access is not None:
             data["group_access"] = group_access
@@ -170,10 +186,17 @@ class GitLabGroups(GitLabCore):
             expected_codes=[200, 201],
         )
 
-    def remove_share_from_group(self, group, share_with_group_id):
+    def remove_share_from_group(self, group, share_with_group_name):
+        try:
+            share_with_group_id = self.get_group_id_case_insensitive(share_with_group_name)
+        except NotFoundException:
+            cli_ui.error(f"Group {share_with_group_name} not found.")
+            sys.exit(EXIT_INVALID_INPUT)
+
+        # 404 means that the user is already removed, so let's accept it for idempotency
         return self._make_requests_to_api(
             "groups/%s/share/%s",
             (group, share_with_group_id),
             method="DELETE",
-            expected_codes=204,
+            expected_codes=[204, 404],
         )
