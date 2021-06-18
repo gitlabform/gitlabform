@@ -6,7 +6,7 @@ from gitlabform.gitlabform.test import (
 
 
 @pytest.fixture(scope="function")
-def one_owner(gitlab, group, users):
+def one_owner(gitlab, group, groups, users):
 
     gitlab.add_member_to_group(group, users[0], 50)
     gitlab.remove_member_from_group(group, "root")
@@ -23,6 +23,9 @@ def one_owner(gitlab, group, users):
     # on purpose, as more may have been added in the tests
     for user in users:
         gitlab.remove_member_from_group(group, user)
+
+    for share_with in groups:
+        gitlab.remove_share_from_group(group, share_with)
 
 
 class TestGroupSharedWith:
@@ -52,10 +55,13 @@ class TestGroupSharedWith:
 
     def test__remove_group(self, gitlab, group, users, groups, one_owner):
 
+        gitlab.add_share_to_group(group, groups[0], 50)
+        gitlab.add_share_to_group(group, groups[1], 50)
+
         no_of_members_before = len(gitlab.get_group_members(group))
         no_of_shared_with_before = len(gitlab.get_group_shared_with(group))
 
-        remove_users = f"""
+        remove_group = f"""
         projects_and_groups:
           {group}/*:
             enforce_group_members: true
@@ -67,7 +73,7 @@ class TestGroupSharedWith:
                 group_access_level: 30
         """
 
-        run_gitlabform(remove_users, group)
+        run_gitlabform(remove_group, group)
 
         members = gitlab.get_group_members(group)
         assert len(members) == no_of_members_before
@@ -93,9 +99,7 @@ class TestGroupSharedWith:
                 group_members:
                   {users[0]}:
                     access_level: 50
-                group_shared_with:
-                  {groups[0]}:
-                    group_access_level: 30
+                group_shared_with: []
             """,
             # flag not set at all (but the default is false)
             f"""
@@ -104,9 +108,7 @@ class TestGroupSharedWith:
                 group_members:
                   {users[0]}:
                     access_level: 50
-                group_shared_with:
-                  {groups[0]}:
-                    group_access_level: 30
+                group_shared_with: []
             """,
         ]
         for setup in setups:
