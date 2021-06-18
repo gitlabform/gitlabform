@@ -25,9 +25,7 @@ class GitLabProjects(GitLabCore):
                 method="GET",
             )
             for project in projects:
-                if (
-                    project["path_with_namespace"].lower() == some_string.lower()
-                ):
+                if project["path_with_namespace"].lower() == some_string.lower():
                     return project
             raise NotFoundException
 

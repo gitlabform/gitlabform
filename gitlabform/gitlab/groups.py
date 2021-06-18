@@ -19,9 +19,7 @@ class GitLabGroups(GitLabCore):
             )
 
             for group in groups:
-                if (
-                    group["full_path"].lower() == some_string.lower()
-                ):
+                if group["full_path"].lower() == some_string.lower():
                     return group
             raise NotFoundException
 
