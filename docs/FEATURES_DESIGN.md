@@ -10,22 +10,22 @@ You want to configure all your GitLab instance projects to have JIRA integration
 ticket ids shown as links to JIRA in the web UI, but you DON'T want the integration that enables to close JIRA
 tickets from MRs that have "closes <ticket_id>" in their description, so you do this:
 ```yaml
-common_settings:
+groups_and_projects:
   # common settings for ALL projects in ALL groups
-  services:
-    jira:
-      url: https://jira.yourcompany.com
-      commit_events: false
-      merge_requests_events: true 
-      username: fake # this field is required by the GitLab API, but you can set it to any value
-      password: fake # this field is required by the GitLab API, but you can set it to any value
+  "*":
+    services:
+      jira:
+        url: https://jira.yourcompany.com
+        commit_events: false
+        merge_requests_events: true 
+        username: fake # this field is required by the GitLab API, but you can set it to any value
+        password: fake # this field is required by the GitLab API, but you can set it to any value
 ``` 
 ...but you DO want this feature for a group of projects, but without comments about each commit added to JIRA,
 so then you add this to your config:
 ```yaml
-group_settings:
   # settings for ALL projects in 'some_group_name' group
-  some_group_name:
+  "some_group_name/*":
     services:
       jira:
         username: real_username
@@ -36,7 +36,6 @@ group_settings:
 ...and finally you realize that for a single project in that group you also DO WANT those comments (for example for
 compliance reasons), so you add:
 ```yaml
-project_settings:
   # settings for a single project
   some_group_name/specific_project_name:
     services:
@@ -53,25 +52,25 @@ You want to add a default README file to all your projects that contains a conve
 in Confluence. So you add this to your config:
 
 ```yaml
-common_settings:
-  files:
-    "README.md":
-      overwrite: false  # do not overwrite if someone already added a real README
-      only_first_branch: true  # add the file only to the first branch in the below list 
-      branches:
-        - develop
-        - main
-      skip_ci: true  # this will prevent the commit that applies this file change triggering CI build
-      content: |
-        This is a default project README. Please replace it with a proper one!
-        Search for this project in Confluence with this [link](https://confluence.yourcompany.com/dosearchsite.action?cql=siteSearch%20~%20%22{{ project }}%22&includeArchivedSpaces=false).
+groups_and_projects:
+  "*":
+    files:
+      "README.md":
+        overwrite: false  # do not overwrite if someone already added a real README
+        only_first_branch: true  # add the file only to the first branch in the below list 
+        branches:
+          - develop
+          - main
+        skip_ci: true  # this will prevent the commit that applies this file change triggering CI build
+        content: |
+          This is a default project README. Please replace it with a proper one!
+          Search for this project in Confluence with this [link](https://confluence.yourcompany.com/dosearchsite.action?cql=siteSearch%20~%20%22{{ project }}%22&includeArchivedSpaces=false).
 ```
 
 Then you realize that for "app_1" group projects you also want to add a default `.gitignore` file, so you add this to your config:
 
 ```yaml
-group_settings:
-  app_1:
+  "app_1/*":
     files:
       ".gitignore":
         overwrite: false
@@ -91,8 +90,7 @@ the configs are additive for most "listed" elements.
 (Note that you can disable addivity selectively by using `skip: true` configuration expression, like this:
 
 ```yaml
-project_settings:
-  app_1/some_repo:
+  "app_1/some_repo":
     files:
       ".gitignore":
         skip: true  # thanks to this `app_1/some_repo` will NOT get `.gitignore` file from GitLabForm
