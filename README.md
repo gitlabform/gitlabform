@@ -27,21 +27,25 @@ Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGE
 
 GitLabForm enables you to manage:
 
-* Group settings,
-* Project settings,
-* Archive/unarchive project,
-* Project members (users and groups) {add/change access level, NO removal yet},
-* Group members (users) {add/remove user, change access level},
-* Deployment keys,
-* Secret variables (on project and group/subgroup level),
-* Branches (protect/unprotect),
-* Tags (protect/unprotect),
-* Services,
-* (Project) Hooks,
-* (Project) Push Rules (**GitLab EE only**),
-* (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
-* Merge Requests approvals settings and approvers (**GitLab EE only**),
-* Pipeline schedules,
+* Group:
+  * Members (users) {add/remove user, change access level},
+  * Secret variables,
+  * Settings,
+
+* Project:
+  * Archive/unarchive,
+  * Branches {protect/unprotect},
+  * Deployment keys,
+  * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
+  * Hooks,
+  * Members (users and groups) {add/change access level, NO removal yet},
+  * Merge Requests approvals settings and approvers (**GitLab Starter/Bronze/Premium+ (paid) only**),
+  * Pipeline schedules,
+  * Push Rules (**GitLab Starter/Bronze/Premium+ (paid) only**),
+  * Secret variables,
+  * Services,
+  * Settings,
+  * Tags {protect/unprotect},
 
 ...for:
 
@@ -72,7 +76,8 @@ Some of the app features are limited because of the GitLab API issues. [Here is 
 ## Requirements
 
 * Python 3.6-3.9 **or** Docker
-* GitLab 11+, GitLab EE for Merge Requests & Push Rules management
+* GitLab 11+
+* GitLab Starter/Bronze/Premium+ (paid) for Merge Requests & Push Rules management
 
 ## Installation
 

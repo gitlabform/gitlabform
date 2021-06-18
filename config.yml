@@ -117,8 +117,11 @@ projects_and_groups:
         name_regex_delete: ".*"
         name_regex_keep: ".*-main"
 
-    # See https://docs.gitlab.com/ee/push_rules/push_rules.html#enabling-push-rules
+    # *** This section requires GitLab Starter/Bronze/Premium+ (paid) ***
     project_push_rules:
+      # keys and values here are as described at
+      # https://docs.gitlab.com/ee/api/projects.html#add-project-push-rule
+      # ...except the id, as we allow managing only a single rule as of now
       commit_message_regex: 'Fixes \d +'
       branch_name_regex: ""
       deny_delete_tag: false
@@ -128,7 +131,7 @@ projects_and_groups:
       file_name_regex: ""
       max_file_size: 0 # in MB, 0 means unlimited
 
-    # *** This section requires GitLab EE 10.6+ ***
+    # *** This section requires GitLab Starter/Bronze/Premium+ (paid) ***
     merge_requests:
       # keys and values here are as described at
       # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
