@@ -10,7 +10,7 @@ You want to configure all your GitLab instance projects to have JIRA integration
 ticket ids shown as links to JIRA in the web UI, but you DON'T want the integration that enables to close JIRA
 tickets from MRs that have "closes <ticket_id>" in their description, so you do this:
 ```yaml
-groups_and_projects:
+projects_and_groups:
   # common settings for ALL projects in ALL groups
   "*":
     services:
@@ -52,7 +52,7 @@ You want to add a default README file to all your projects that contains a conve
 in Confluence. So you add this to your config:
 
 ```yaml
-groups_and_projects:
+projects_and_groups:
   "*":
     files:
       "README.md":
