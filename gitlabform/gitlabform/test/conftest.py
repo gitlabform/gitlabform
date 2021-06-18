@@ -70,7 +70,6 @@ def groups(users):
     no_of_groups = 4
 
     group_name_base = get_random_name()
-    print(f"groups {group_name_base} {no_of_groups}")
     groups = create_groups(group_name_base, no_of_groups)
 
     yield groups
