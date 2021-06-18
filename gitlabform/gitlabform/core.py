@@ -257,7 +257,7 @@ class GitLabFormCore(object):
         tokens_to_show = [
             cli_ui.reset,
             tower_crane,
-            "GitLabForm version:",
+            " GitLabForm version:",
             cli_ui.blue,
             local_version,
             cli_ui.reset,
