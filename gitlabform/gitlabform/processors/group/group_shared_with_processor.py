@@ -16,7 +16,6 @@ class GroupSharedWithProcessor(AbstractProcessor):
 
     def _process_configuration(self, group: str, configuration: dict):
         groups_to_set_by_groupname = configuration.get("group_shared_with")
-        print(groups_to_set_by_groupname)
         if groups_to_set_by_groupname is None:
             groups_to_set_by_groupname = {}
 
@@ -51,7 +50,6 @@ class GroupSharedWithProcessor(AbstractProcessor):
                 else None
             )
 
-            print(groups_before_by_group_id)
             if group_id in groups_before_by_group_id:
 
                 group_access_before = groups_before_by_group_id[group_id][
@@ -83,7 +81,6 @@ class GroupSharedWithProcessor(AbstractProcessor):
                 logging.debug(
                     "Adding group '%s' who previously was not a member.", groupname
                 )
-                print(f"Adding group '{groupname}' who previously was not a member.")
                 self.gitlab.add_share_to_group(
                     group, group_id, group_access_to_set, expires_at_to_set
                 )
