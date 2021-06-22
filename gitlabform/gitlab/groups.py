@@ -8,7 +8,7 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabGroups(GitLabCore):
-    @functools.lru_cache
+    @functools.lru_cache()
     def get_group_id_case_insensitive(self, some_string):
         # Cache the mapping from some_string -> id, as that won't change during our run.
         return self.get_group_case_insensitive(some_string)["id"]
