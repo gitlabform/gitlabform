@@ -43,10 +43,12 @@ class GroupSharedWithProcessor(AbstractProcessor):
 
             if share_with_group_name in groups_before_by_group_name:
 
-                group_access_before = groups_before_by_group_name[share_with_group_name][
-                    "group_access_level"
+                group_access_before = groups_before_by_group_name[
+                    share_with_group_name
+                ]["group_access_level"]
+                expires_at_before = groups_before_by_group_name[share_with_group_name][
+                    "expires_at"
                 ]
-                expires_at_before = groups_before_by_group_name[share_with_group_name]["expires_at"]
 
                 if (
                     group_access_before == group_access_to_set
@@ -65,12 +67,16 @@ class GroupSharedWithProcessor(AbstractProcessor):
                     # to ensure that the group has the expected access level
                     self.gitlab.remove_share_from_group(group, share_with_group_name)
                     self.gitlab.add_share_to_group(
-                        group, share_with_group_name, group_access_to_set, expires_at_to_set
+                        group,
+                        share_with_group_name,
+                        group_access_to_set,
+                        expires_at_to_set,
                     )
 
             else:
                 logging.debug(
-                    "Adding group '%s' who previously was not a member.", share_with_group_name
+                    "Adding group '%s' who previously was not a member.",
+                    share_with_group_name,
                 )
                 self.gitlab.add_share_to_group(
                     group, share_with_group_name, group_access_to_set, expires_at_to_set
@@ -78,8 +84,8 @@ class GroupSharedWithProcessor(AbstractProcessor):
 
         if configuration.get("enforce_group_members"):
             # remove groups not configured explicitly
-            groups_not_configured = (
-                set(groups_before_by_group_name) - set(groups_to_set_by_group_name)
+            groups_not_configured = set(groups_before_by_group_name) - set(
+                groups_to_set_by_group_name
             )
             for group_name in groups_not_configured:
                 logging.debug(
