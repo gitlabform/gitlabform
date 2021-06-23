@@ -1,5 +1,11 @@
 ## Changelog
 
+### 2.1.0
+
+* Added a feature to share groups with other groups, with optional enforcing. Implements [#150](https://github.com/egnyte/gitlabform/issues/150)
+
+Thanks to [@andrewjw](https://github.com/andrewjw) (Ocado Technology) for this contribution!
+
 ### 2.0.6
 
 * Fixed incorrect subgroups list when requesting to process ALL_DEFINED. Completes the fix for [#221](https://github.com/egnyte/gitlabform/issues/221)
