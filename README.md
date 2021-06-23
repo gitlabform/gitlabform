@@ -28,7 +28,8 @@ Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGE
 GitLabForm enables you to manage:
 
 * Group:
-  * Members (users) {add/remove user, change access level},
+  * Members (users) {add/remove user, change access level, optional enforce},
+  * Members (groups) {share/unshare with group, change access level, optional enforce},
   * Secret variables,
   * Settings,
 
@@ -38,7 +39,7 @@ GitLabForm enables you to manage:
   * Deployment keys,
   * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
   * Hooks,
-  * Members (users and groups) {add/change access level, NO removal yet},
+  * Members (users and groups) {add/remove user, change access level, NO removal or enforce yet!},
   * Merge Requests approvals settings and approvers (**GitLab Starter/Bronze/Premium+ (paid) only**),
   * Pipeline schedules,
   * Push Rules (**GitLab Starter/Bronze/Premium+ (paid) only**),
