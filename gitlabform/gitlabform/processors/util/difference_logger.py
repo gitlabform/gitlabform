@@ -1,23 +1,38 @@
 import hashlib
 import json
-import logging
 from itertools import starmap
+
+import cli_ui
+
+
+# Simple function to create strings for values which should be hidden
+# example: <secret b2c1a982>
+def hide(text: str):
+    return f"<secret {hashlib.sha256(text.encode('utf-8')).hexdigest()[:8]}>"
 
 
 class DifferenceLogger(object):
     @staticmethod
     def log_diff(
-        subject, current_config, config_to_apply, only_changed=False, hide_entries=None
+        subject,
+        current_config,
+        config_to_apply,
+        only_changed=False,
+        hide_entries=None,
+        test=False,
     ):
-        # Simple function to create strings for values which should be hidden
-        # example: <secret b2c1a982>
-        hide = lambda s: "<secret {}>".format(
-            hashlib.sha256(s.encode("utf-8"), usedforsecurity=True).hexdigest()[:8]
-        )
 
         # Compose values in list of `[key, from_config, from_server]``
         changes = [
-            [k, json.dumps(current_config.get(k, "???")), json.dumps(v)]
+            [
+                k,
+                json.dumps(
+                    current_config.get(k, "???")
+                    if type(current_config) == dict
+                    else "???"
+                ),
+                json.dumps(v),
+            ]
             for k, v in config_to_apply.items()
         ]
 
@@ -50,4 +65,7 @@ class DifferenceLogger(object):
         text = "{subject}:\n{diff}".format(
             subject=subject, diff="\n".join(starmap(pattern.format, changes))
         )
-        logging.info(text)
+        if test:
+            return text
+        else:
+            cli_ui.debug(text)

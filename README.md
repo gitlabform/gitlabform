@@ -4,10 +4,14 @@
 ![docker pulls](https://img.shields.io/docker/pulls/egnyte/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-<img src="https://raw.githubusercontent.com/egnyte/gitlabform/main/docs/gitlabform-logo.png" width="600px">
+<img src="https://raw.githubusercontent.com/egnyte/gitlabform/main/docs/gitlabform-logo.png" width="600px" alt="logo">
 
 GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
+
+## ✨ Version 2 has been released! ✨
+
+Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGELOG.md) for a complete list of new features and bug fixes in this release.
 
 ## Table of Contents
 
@@ -23,21 +27,26 @@ using hierarchical configuration written in YAML.
 
 GitLabForm enables you to manage:
 
-* Group settings,
-* Project settings,
-* Archive/unarchive project,
-* Project members (users and groups) {add/change access level, NO removal yet},
-* Group members (users) {add/remove user, change access level},
-* Deployment keys,
-* Secret variables (on project and group/subgroup level),
-* Branches (protect/unprotect),
-* Tags (protect/unprotect),
-* Services,
-* (Project) Hooks,
-* (Project) Push Rules (**GitLab EE only**),
-* (Add/edit or delete) Files, with templating based on Jinja2 (now supports custom variables!),
-* Merge Requests approvals settings and approvers (**GitLab EE only**),
-* Pipeline schedules,
+* Group:
+  * Members (users) {add/remove user, change access level, optional enforce},
+  * Members (groups) {share/unshare with group, change access level, optional enforce},
+  * Secret variables,
+  * Settings,
+
+* Project:
+  * Archive/unarchive,
+  * Branches {protect/unprotect},
+  * Deployment keys,
+  * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
+  * Hooks,
+  * Members (users and groups) {add/remove user, change access level, NO removal or enforce yet!},
+  * Merge Requests approvals settings and approvers (**GitLab Starter/Bronze/Premium+ (paid) only**),
+  * Pipeline schedules,
+  * Push Rules (**GitLab Starter/Bronze/Premium+ (paid) only**),
+  * Secret variables,
+  * Services,
+  * Settings,
+  * Tags {protect/unprotect},
 
 ...for:
 
@@ -67,9 +76,9 @@ Some of the app features are limited because of the GitLab API issues. [Here is 
 
 ## Requirements
 
-* Python 3.6-3.8 **or** Docker
-  * (Python 3.9 should be fine too, but it's not "officially" supported yet)
-* GitLab 11+, GitLab EE for Merge Requests & Push Rules management
+* Python 3.6-3.9 **or** Docker
+* GitLab 11+
+* GitLab Starter/Bronze/Premium+ (paid) for Merge Requests & Push Rules management
 
 ## Installation
 
@@ -88,15 +97,16 @@ If so then:
 1. Create example `config.yml`:
 
 ```yaml
+config_version: 2
+
 gitlab:
   # You can also set in your environment GITLAB_URL
   url: https://gitlab.yourcompany.com
   # You can also set in your environment GITLAB_TOKEN
   token: "<private token of an admin user>"
-  api_version: 4
 
-group_settings:
-  my-group:
+projects_and_groups:
+  my-group/*:
     deploy_keys:
       a_friendly_deploy_key_name:  # this name is only used in GitLabForm config
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3WiHAsm2UTz2dU1vKFYUGfHI1p5fIv84BbtV/9jAKvZhVHDqMa07PgVtkttjvDC8bA1kezhOBKcO0KNzVoDp0ENq7WLxFyLFMQ9USf8LmOY70uV/l8Gpcn1ZT7zRBdEzUUgF/PjZukqVtuHqf9TCO8Ekvjag9XRfVNadKs25rbL60oqpIpEUqAbmQ4j6GFcfBBBPuVlKfidI6O039dAnDUsmeafwCOhEvQmF+N5Diauw3Mk+9TMKNlOWM+pO2DKxX9LLLWGVA9Dqr6dWY0eHjWKUmk2B1h1HYW+aUyoWX2TGsVX9DlNY7CKiQGsL5MRH9IXKMQ8cfMweKoEcwSSXJ
@@ -147,7 +157,7 @@ You can run it with a schedule on `ALL_DEFINED` or `ALL` projects to unify your 
 from the configuration. For example you may allow the users to reconfigure projects during their working hours
 but automate cleaning up the drift each night.
 
-An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](https://github.com/egnyte/gitlabform/docs/.gitlab-ci.example.yml)
+An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](https://github.com/egnyte/gitlabform/blob/main/docs/.gitlab-ci.example.yml)
 file.
 
 Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is
@@ -162,12 +172,12 @@ We have documented some methods of automating running GitLabForm for newly creat
 
 ## Contributing
 
-Please see the [contribution guide](https://github.com/egnyte/gitlabform/CONTRIBUTING.md) for info about all kinds of contributions, like:
+Please see the [contribution guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) for info about all kinds of contributions, like:
 * questions, feature requests,
 * documentation and code contributions,
 * other.
 
-[Contribution guide](https://github.com/egnyte/gitlabform/CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
+[Contribution guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
 build it, run the tests and learn about the code guidelines.
 
 
@@ -188,6 +198,7 @@ integrations (such as JIRA or Slack) and more.
 ## Legal
 
 The app code is licensed under the [MIT](https://github.com/egnyte/gitlabform/blob/main/LICENSE) license.
+A few scripts in `dev/` directory are licensed under the [MPL 2.0](http://mozilla.org/MPL/2.0/) license.
 
 
 GitLab is a registered trademark of GitLab, Inc. This application is not endorsed by GitLab and is not affiliated with GitLab in any way.

@@ -4,8 +4,9 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.x.y   | :white_check_mark: |
-| < 1.0   | :x:                |
+| 2.x.y   | ✅                 |
+| 1.x.y   | ❌                 |
+| < 1.0   | ❌                 |
 
 ## Reporting a Vulnerability
 

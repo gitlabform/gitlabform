@@ -45,10 +45,12 @@ config-develop.yml
 # vscode
 .vscode/
 
-# GitLab integration tests
+# GitLab acceptance tests
 data/
 config/
 logs/
 gitlab_token.txt
 gitlab_url.txt
 *.gitlab-license
+
+output.yml

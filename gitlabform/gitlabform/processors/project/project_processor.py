@@ -1,5 +1,7 @@
 import logging
 
+import cli_ui
+
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
 
@@ -16,8 +18,8 @@ class ProjectProcessor(AbstractProcessor):
         if project:
             if "archive" in project:
                 if project["archive"]:
-                    logging.info("Archiving project...")
+                    cli_ui.debug("Archiving project...")
                     self.gitlab.archive(project_and_group)
                 else:
-                    logging.info("Unarchiving project...")
+                    cli_ui.debug("Unarchiving project...")
                     self.gitlab.unarchive(project_and_group)

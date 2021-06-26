@@ -1,5 +1,7 @@
 import logging
 
+import cli_ui
+
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
@@ -23,16 +25,14 @@ class GroupSecretVariablesProcessor(AbstractProcessor):
             if "delete" in configuration["group_secret_variables"][secret_variable]:
                 key = configuration["group_secret_variables"][secret_variable]["key"]
                 if configuration["group_secret_variables"][secret_variable]["delete"]:
-                    logging.info(f"Deleting {secret_variable}: {key} in group {group}")
+                    cli_ui.debug(f"Deleting {secret_variable}: {key} in group {group}")
                     try:
                         self.gitlab.delete_group_secret_variable(group, key)
                     except:
-                        logging.warning(
-                            f"Could not delete variable {key} in group {group}"
-                        )
+                        cli_ui.info(f"Could not delete variable {key} in group {group}")
                     continue
 
-            logging.info("Setting group secret variable: %s", secret_variable)
+            cli_ui.debug(f"Setting group secret variable: {secret_variable}")
             try:
                 self.gitlab.put_group_secret_variable(
                     group, configuration["group_secret_variables"][secret_variable]
