@@ -21,6 +21,21 @@ class GitLabTags(GitLabCore):
             expected_codes=201,
         )
 
+    def delete_tag(self, project_and_group_name, tag_name):
+        self._make_requests_to_api(
+            "projects/%s/repository/tags/%s",
+            (project_and_group_name, tag_name),
+            method="DELETE",
+            expected_codes=[200, 204],
+        )
+
+    def get_protected_tags(self, project_and_group_name):
+        return self._make_requests_to_api(
+            "projects/%s/protected_tags",
+            project_and_group_name,
+            paginated=True,
+        )
+
     def protect_tag(self, project_and_group_name, tag_name, create_access_level):
         data = {"name": tag_name}
         if create_access_level:

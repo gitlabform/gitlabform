@@ -1,27 +1,25 @@
+---
 name: Publish 🐍 to PyPI
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_run:
+    workflows: ["Linter and tests (for tags)"]
+    types:
+      - completed
 
 jobs:
   build-n-publish:
-
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.8
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
-      - name: Install dependencies
-        run: |
-          sudo apt-get install pandoc
-          pip install pypandoc
+          python-version: 3.9
       - name: Build
         run: |
+          pip install wheel
           python setup.py build sdist bdist_wheel
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@v1.4.1
@@ -31,7 +29,8 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}

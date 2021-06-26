@@ -1,5 +1,9 @@
 import logging
+import sys
 
+import cli_ui
+
+from gitlabform import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
@@ -31,9 +35,9 @@ class TagsProcessor(AbstractProcessor):
                     logging.debug("Setting tag '%s' as *unprotected*", tag)
                     self.gitlab.unprotect_tag(project_and_group, tag)
             except NotFoundException:
-                logging.warning(
-                    "! Tag '%s' not found when trying to set it as protected/unprotected",
-                    tag,
-                )
+                message = f"Tag '{tag}' not found when trying to set it as protected/unprotected!"
                 if self.strict:
-                    exit(3)
+                    cli_ui.error(message)
+                    sys.exit(EXIT_PROCESSING_ERROR)
+                else:
+                    cli_ui.warning(message)

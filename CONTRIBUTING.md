@@ -57,20 +57,13 @@ Just use the common sense:
 
 #### Development environment setup how-to
 
-1. Create virtualenv with Python 3.6-3.8, for example in `venv` dir which is in `.gitignore` and activate it:
+1. Create virtualenv with Python 3.6-3.9, for example in `venv` dir which is in `.gitignore` and activate it:
 ```
 virtualenv -p python3 venv
 . venv/bin/activate
 ```
 
-2. Install build requirements - `pandoc` binary package + `pypandoc` python package:
-```
-# for macOS:
-brew install pandoc  
-pip3 install pypandoc
-```
-
-3. Install GitLabForm in develop mode:
+2. Install GitLabForm in develop mode:
 ```
 python setup.py develop
 ```
@@ -87,28 +80,27 @@ GitLabForm uses py.test for tests. To run unit tests locally:
 
 2. `pip install pytest`
 
-3. Run `py.test --ignore gitlabform/gitlabform/test` to run all tests except the integration tests (see below).
+3. Run `py.test --ignore gitlabform/gitlabform/test` to run all tests except the acceptance tests (see below).
 
-#### Running integrations tests locally or on own GitLab instance
+#### Running acceptance tests locally or on own GitLab instance
 
 GitLabForm also comes with a set of tests that make real requests to a running GitLab instance. You can run them
 against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.
 
-##### Running integration tests using GitLab instance in Docker
+##### Running acceptance tests using GitLab instance in Docker
 
 1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
 
 ```
 ./dev/run_gitlab_in_docker.sh
-export GITLAB_URL=$(cat gitlab_url.txt)
-export GITLAB_TOKEN=$(cat gitlab_token.txt)
 ```
 
-2. Run `py.test gitlabform/gitlabform/test` to start the tests
+2. Run `py.test gitlabform/gitlabform/test` to start all tests.
+To run only a single class with tests run f.e. `py.test gitlabform/gitlabform/test -k "TestArchiveProject"`.
 
-##### Running integration tests using your own GitLab instance
+##### Running acceptance tests using your own GitLab instance
 
-**Note**: although GitLabForm integration tests operate own their own groups, projects and users, it should be safe
+**Note**: although GitLabForm acceptance tests operate own their own groups, projects and users, it should be safe
 to run them against your own GitLab instance, but we DO NOT take any responsibility for it. Please review 
 the code to ensure what it does and run it at your own risk!
 
@@ -119,7 +111,8 @@ export GITLAB_URL="https://mygitlab.company.com"
 export GITLAB_TOKEN="<my admin user API token>"
 ```
 
-2. Run `py.test gitlabform/gitlabform/test` to start the tests
+2. Run `py.test gitlabform/gitlabform/test` to start all tests
+To run only a single class with tests run f.e. `py.test gitlabform/gitlabform/test -k "TestArchiveProject"`.
 
 #### General coding guidelines
 
@@ -127,7 +120,7 @@ Similarly to the guidelines for making PRs with documentation improvements - ple
 
 * add tests along with the new code that prove that it works:
   * in case of non-trivial logic add/change please add unit tests,
-  * for all bug fixes and new features using GitLab API please add integration tests
+  * for all bug fixes and new features using GitLab API please add acceptance tests
 * use [Black](https://github.com/psf/black) code formatter:
   ```
   black .
@@ -147,9 +140,7 @@ what you propose to do before doing it.
 
 ### Versioning
 
-We try to follow [semantic versioning](https://semver.org/). When we need to re-release the same code for some reason
-(f.e. build of some package, like Docker images, has failed) then we add 4th version element, f.e. 1.18.1.2 is the
-3rd release of app code version 1.18.1 (1st was 1.18.1 and the 2nd - 1.18.1.1).
+We try to follow [PEP 440]() versioning scheme, which is mostly based on [semantic versioning](https://semver.org/).
 
 ### Procedure
 

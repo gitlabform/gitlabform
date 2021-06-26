@@ -4,6 +4,9 @@ set -euo pipefail
 
 # based on https://stackoverflow.com/a/28709668/2693875 and https://stackoverflow.com/a/23006365/2693875
 cecho() {
+  if [[ $TERM == "dumb" ]]; then
+    echo $2
+  else
     local color=$1
     local exp=$2
     if ! [[ $color =~ ^[0-9]$ ]] ; then
@@ -22,9 +25,13 @@ cecho() {
     # shellcheck disable=SC2086
     echo $exp
     tput sgr0
+  fi
 }
 
-if [[ -n $1 ]] ; then
+script_directory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+repo_root_directory="$script_directory/.."
+
+if [[ $# == 1 ]] ; then
   gitlab_version="$1"
 else
   gitlab_version="latest"
@@ -41,14 +48,13 @@ if [[ -n $existing_gitlab_container_id ]] ; then
   docker rm "$existing_gitlab_container_id"
 fi
 
-mkdir -p config
+mkdir -p $repo_root_directory/config
 if [[ -f Gitlab.gitlab-license ]] ; then
   cecho b "EE license file found - using it..."
-  cp Gitlab.gitlab-license config/
+  cp Gitlab.gitlab-license $repo_root_directory/config/
 fi
-
-mkdir -p logs
-mkdir -p data
+mkdir -p $repo_root_directory/logs
+mkdir -p $repo_root_directory/data
 
 cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
@@ -58,9 +64,10 @@ container_id=$(docker run --detach \
     --publish 443:443 --publish 80:80 --publish 2022:22 \
     --name gitlab \
     --restart always \
-    --volume "$(pwd)/config:/etc/gitlab" \
-    --volume "$(pwd)/logs:/var/log/gitlab" \
-    --volume "$(pwd)/data:/var/opt/gitlab" \
+    --volume "$repo_root_directory/dev/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
+    --health-cmd '/healthcheck-and-setup.sh' \
+    --health-interval 2s \
+    --health-timeout 2m \
     gitlab/gitlab-ee:$gitlab_version)
 
 cecho b "Waiting 3 minutes before starting to check if GitLab has started..."
@@ -69,40 +76,30 @@ cecho y "docker logs -f ${container_id}"
 cecho b ")"
 sleep 3m
 
-until curl -X POST -s http://localhost/oauth/token | grep "Missing required parameter" >/dev/null ; do
-  cecho b "Waiting 5 more secs for GitLab to start..." ;
-  sleep 5s ;
-done
+$script_directory/await-healthy.sh
 
 # create files with params needed by the tests to access GitLab
 # (we are using these files to pass values from this script to the outside bash shell
 # - we cannot change its env variables from inside it)
-echo "http://localhost" > gitlab_url.txt
-
-data='grant_type=password&username=root&password=password'
-curl --data "${data}" -X POST -s http://localhost/oauth/token | jq -r .access_token > gitlab_token.txt
+echo "http://localhost" > $repo_root_directory/gitlab_url.txt
+echo "token-string-here123" > $repo_root_directory/gitlab_token.txt
 
 cecho b 'Starting GitLab complete!'
 echo ''
 cecho b 'GitLab version:'
-curl -H "Authorization:Bearer $(cat gitlab_token.txt)" http://localhost/api/v4/version
+curl -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/version
 echo ''
 cecho b 'GitLab web UI URL (user: root, password: password)'
 echo 'http://localhost'
-echo ''
-cecho b 'Run these commands to set the env variables needed by the tests to use this GitLab instance:'
-# shellcheck disable=SC2016
-cecho g 'export GITLAB_URL=$(cat gitlab_url.txt)'
-# shellcheck disable=SC2016
-cecho g 'export GITLAB_TOKEN=$(cat gitlab_token.txt)'
 echo ''
 alias stop_gitlab='existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}"); docker stop --time=30 $existing_gitlab_container_id ; docker rm $existing_gitlab_container_id'
 cecho b 'Run this command to stop GitLab container:'
 cecho r 'stop_gitlab'
 echo ''
-cecho b 'To start GitLab container again, re-run this script. Note that GitLab will reuse existing ./data, ./config'
-cecho b 'and ./logs dirs. To start new GitLab instance from scratch please delete them.'
+cecho b 'To start GitLab container again, re-run this script. Note that GitLab will NOT existing any data'
+cecho b 'so the start will take a lot of time again. (But this is the only way to make GitLab in Docker stable.)'
 echo ''
-cecho b 'Run this to start the integration tests:'
+cecho b 'Run this to start the acceptance tests (it will automatically load GITLAB_URL from gitlab_url.txt'
+cecho b 'and GITLAB_TOKEN from gitlab_token.txt created by this script):'
 echo ''
 cecho y 'py.test gitlabform/gitlabform/test'

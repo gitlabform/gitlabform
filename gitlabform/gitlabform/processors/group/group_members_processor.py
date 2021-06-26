@@ -1,7 +1,10 @@
 import logging
 import sys
 
+import cli_ui
+
 from gitlabform.gitlab import GitLab
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlabform.processors.abstract_processor import AbstractProcessor
 
 
@@ -31,11 +34,11 @@ class GroupMembersProcessor(AbstractProcessor):
             if 50 not in users_to_set_by_access_level.keys() and configuration.get(
                 "enforce_group_members"
             ):
-                logging.fatal(
+                cli_ui.error(
                     "With 'enforce_group_members' flag you cannot have no Owners (access_level = 50) in your "
                     " group members config. GitLab requires at least 1 Owner per group."
                 )
-                sys.exit(4)
+                sys.exit(EXIT_INVALID_INPUT)
 
             # we HAVE TO start configuring access from Owners to prevent case when there is no Owner
             # in a group
@@ -111,8 +114,8 @@ class GroupMembersProcessor(AbstractProcessor):
 
         else:
 
-            logging.fatal(
+            cli_ui.error(
                 "You cannot configure a group to have no members. GitLab requires a group "
                 " to contain at least 1 member who is an Owner (access_level = 50)."
             )
-            sys.exit(4)
+            sys.exit(EXIT_INVALID_INPUT)

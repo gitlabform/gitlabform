@@ -1,11 +1,44 @@
+import functools
+import sys
+
+import cli_ui
+
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabGroups(GitLabCore):
-    def create_group(self, name, path):
+    @functools.lru_cache()
+    def get_group_id_case_insensitive(self, some_string):
+        # Cache the mapping from some_string -> id, as that won't change during our run.
+        return self.get_group_case_insensitive(some_string)["id"]
+
+    def get_group_case_insensitive(self, some_string):
+
+        # maybe "foo/bar" is some group's path
+
+        try:
+            # try with exact case
+            return self.get_group(some_string)
+        except NotFoundException:
+
+            # try case insensitive
+            groups = self._make_requests_to_api(
+                "groups?search=%s",
+                some_string.lower(),
+                method="GET",
+            )
+
+            for group in groups:
+                if group["full_path"].lower() == some_string.lower():
+                    return group
+            raise NotFoundException
+
+    def create_group(self, name, path, visibility="private"):
         data = {
             "name": name,
             "path": path,
+            "visibility": visibility,
         }
         return self._make_requests_to_api(
             "groups", data=data, method="POST", expected_codes=201
@@ -30,7 +63,7 @@ class GitLabGroups(GitLabCore):
         result = self._make_requests_to_api("groups?all_available=true", paginated=True)
         return sorted(map(lambda x: x["full_path"], result))
 
-    def get_projects(self, group):
+    def get_projects(self, group, include_archived=False):
         """
         :param group: group name
         :return: sorted list of strings "group/project_name". Note that only projects from "group" namespace are
@@ -38,8 +71,15 @@ class GitLabGroups(GitLabCore):
                  returned here.
         """
         try:
+            # there are 3 states of the "archived" flag: true, false, undefined
+            # we use the last 2
+            if include_archived:
+                query_string = "include_subgroups=true"
+            else:
+                query_string = "include_subgroups=true&archived=false"
+
             projects = self._make_requests_to_api(
-                "groups/%s/projects?include_subgroups=true", group, paginated=True
+                f"groups/%s/projects?{query_string}", group, paginated=True
             )
         except NotFoundException:
             projects = []
@@ -115,4 +155,49 @@ class GitLabGroups(GitLabCore):
             (group, secret_variable),
             "DELETE",
             expected_codes=[200, 202, 204, 404],
+        )
+
+    def get_group_shared_with(self, group):
+        group = self.get_group_case_insensitive(group)
+
+        return group["shared_with_groups"]
+
+    def add_share_to_group(
+        self, group, share_with_group_name, group_access, expires_at=None
+    ):
+        try:
+            share_with_group_id = self.get_group_id_case_insensitive(
+                share_with_group_name
+            )
+        except NotFoundException:
+            cli_ui.error(f"Group {share_with_group_name} not found.")
+            sys.exit(EXIT_INVALID_INPUT)
+
+        data = {"group_id": share_with_group_id, "expires_at": expires_at}
+        if group_access is not None:
+            data["group_access"] = group_access
+
+        return self._make_requests_to_api(
+            "groups/%s/share",
+            group,
+            method="POST",
+            data=data,
+            expected_codes=[200, 201],
+        )
+
+    def remove_share_from_group(self, group, share_with_group_name):
+        try:
+            share_with_group_id = self.get_group_id_case_insensitive(
+                share_with_group_name
+            )
+        except NotFoundException:
+            cli_ui.error(f"Group {share_with_group_name} not found.")
+            sys.exit(EXIT_INVALID_INPUT)
+
+        # 404 means that the user is already removed, so let's accept it for idempotency
+        return self._make_requests_to_api(
+            "groups/%s/share/%s",
+            (group, share_with_group_id),
+            method="DELETE",
+            expected_codes=[204, 404],
         )

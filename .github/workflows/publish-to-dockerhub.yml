@@ -1,9 +1,11 @@
+---
 name: Publish 🐳 to DockerHub
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_run:
+    workflows: ["Linter and tests (for tags)"]
+    types:
+      - completed
 
 env:
   alpine_version: alpine3.12
@@ -11,39 +13,27 @@ env:
 
 jobs:
   build-n-publish:
-
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
       matrix:
         os: [alpine, debian]
-
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.8
+      - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Install dependencies
         run: |
           pip install packaging
-      - name: Skip if this is not a final release
-        shell: python
-        run: |
-          import sys
-          from packaging.version import parse
-          version_file = open("version", "r")
-          version = version_file.readline().strip()
-          parsed_version = parse(version)
-          if parsed_version.is_prerelease:
-              print("This is a pre- and/or dev- release - skipping publish!")
-              sys.exit(1)
-          else:
-              print("This is a final release - continuing with publish.")
       - name: Publish to DockerHub
         env:
           os: ${{ matrix.os }}
           docker_username: ${{ secrets.DOCKER_USERNAME }}
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
         run: |
+          release_type=$(dev/check_release_type.py)
+          export release_type
           ./dev/build_docker_images.sh
