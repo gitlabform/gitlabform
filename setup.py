@@ -48,7 +48,7 @@ setup(
         "PyYAML==5.4.1",
         "luddite==1.0.1",
         "cli-ui==0.14.1",
-        "packaging==20.9",
+        "packaging==21.0",
         "mergedeep==1.3.4",
     ],
     tests_require=[
