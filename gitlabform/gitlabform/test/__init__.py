@@ -59,8 +59,8 @@ def get_gitlab():
     return gl
 
 
-def create_group(group_name):
-    gl.create_group(group_name, group_name)
+def create_group(group_name, parent_id=None):
+    gl.create_group(group_name, group_name, parent_id)
 
 
 def create_groups(group_base_name, no_of_groups):

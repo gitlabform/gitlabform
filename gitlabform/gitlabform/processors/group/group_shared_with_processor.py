@@ -15,9 +15,9 @@ class GroupSharedWithProcessor(AbstractProcessor):
         self.gitlab = gitlab
 
     def _process_configuration(self, group: str, configuration: dict):
-        groups_to_set_by_group_name = configuration.get("group_shared_with")
-        if groups_to_set_by_group_name is None:
-            groups_to_set_by_group_name = {}
+        groups_to_set_by_group_path = configuration.get("group_shared_with")
+        if groups_to_set_by_group_path is None:
+            groups_to_set_by_group_path = {}
 
         # group users before by group name
         groups_before = self.gitlab.get_group_case_insensitive(group)[
@@ -25,28 +25,30 @@ class GroupSharedWithProcessor(AbstractProcessor):
         ]
         logging.debug("Group shared with BEFORE: %s", groups_before)
 
-        groups_before_by_group_name = dict()
+        groups_before_by_group_path = dict()
         for share_details in groups_before:
-            groups_before_by_group_name[share_details["group_name"]] = share_details
+            groups_before_by_group_path[
+                share_details["group_full_path"]
+            ] = share_details
 
-        for share_with_group_name in groups_to_set_by_group_name:
+        for share_with_group_path in groups_to_set_by_group_path:
 
-            group_access_to_set = groups_to_set_by_group_name[share_with_group_name][
+            group_access_to_set = groups_to_set_by_group_path[share_with_group_path][
                 "group_access_level"
             ]
 
             expires_at_to_set = (
-                groups_to_set_by_group_name[share_with_group_name]["expires_at"]
-                if "expires_at" in groups_to_set_by_group_name[share_with_group_name]
+                groups_to_set_by_group_path[share_with_group_path]["expires_at"]
+                if "expires_at" in groups_to_set_by_group_path[share_with_group_path]
                 else None
             )
 
-            if share_with_group_name in groups_before_by_group_name:
+            if share_with_group_path in groups_before_by_group_path:
 
-                group_access_before = groups_before_by_group_name[
-                    share_with_group_name
+                group_access_before = groups_before_by_group_path[
+                    share_with_group_path
                 ]["group_access_level"]
-                expires_at_before = groups_before_by_group_name[share_with_group_name][
+                expires_at_before = groups_before_by_group_path[share_with_group_path][
                     "expires_at"
                 ]
 
@@ -56,19 +58,19 @@ class GroupSharedWithProcessor(AbstractProcessor):
                 ):
                     logging.debug(
                         "Nothing to change for group '%s' - same config now as to set.",
-                        share_with_group_name,
+                        share_with_group_path,
                     )
                 else:
                     logging.debug(
                         "Re-adding group '%s' to change their access level or expires at.",
-                        share_with_group_name,
+                        share_with_group_path,
                     )
                     # we will remove the group first and then re-add them,
                     # to ensure that the group has the expected access level
-                    self.gitlab.remove_share_from_group(group, share_with_group_name)
+                    self.gitlab.remove_share_from_group(group, share_with_group_path)
                     self.gitlab.add_share_to_group(
                         group,
-                        share_with_group_name,
+                        share_with_group_path,
                         group_access_to_set,
                         expires_at_to_set,
                     )
@@ -76,23 +78,23 @@ class GroupSharedWithProcessor(AbstractProcessor):
             else:
                 logging.debug(
                     "Adding group '%s' who previously was not a member.",
-                    share_with_group_name,
+                    share_with_group_path,
                 )
                 self.gitlab.add_share_to_group(
-                    group, share_with_group_name, group_access_to_set, expires_at_to_set
+                    group, share_with_group_path, group_access_to_set, expires_at_to_set
                 )
 
         if configuration.get("enforce_group_members"):
             # remove groups not configured explicitly
-            groups_not_configured = set(groups_before_by_group_name) - set(
-                groups_to_set_by_group_name
+            groups_not_configured = set(groups_before_by_group_path) - set(
+                groups_to_set_by_group_path
             )
-            for group_name in groups_not_configured:
+            for group_path in groups_not_configured:
                 logging.debug(
                     "Removing group '%s' who is not configured to be a member.",
-                    group_name,
+                    group_path,
                 )
-                self.gitlab.remove_share_from_group(group, group_name)
+                self.gitlab.remove_share_from_group(group, group_path)
         else:
             logging.debug("Not enforcing group members.")
 

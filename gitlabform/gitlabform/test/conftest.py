@@ -43,6 +43,19 @@ def other_group():
 
 
 @pytest.fixture(scope="class")
+def sub_group(group):
+    gl = get_gitlab()
+    parent_id = gl.get_group_id_case_insensitive(group)
+    group_name = get_random_name()
+    create_group(group_name, parent_id)
+
+    yield group + "/" + group_name
+
+    gl = get_gitlab()
+    gl.delete_group(group + "/" + group_name)
+
+
+@pytest.fixture(scope="class")
 def project(group):
     project_name = get_random_name()
     create_project(group, project_name)
