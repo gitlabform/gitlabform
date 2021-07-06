@@ -34,12 +34,14 @@ class GitLabGroups(GitLabCore):
                     return group
             raise NotFoundException
 
-    def create_group(self, name, path, visibility="private"):
+    def create_group(self, name, path, parent_id=None, visibility="private"):
         data = {
             "name": name,
             "path": path,
             "visibility": visibility,
         }
+        if parent_id is not None:
+            data["parent_id"] = parent_id
         return self._make_requests_to_api(
             "groups", data=data, method="POST", expected_codes=201
         )

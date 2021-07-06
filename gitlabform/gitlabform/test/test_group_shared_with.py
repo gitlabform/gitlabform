@@ -6,7 +6,7 @@ from gitlabform.gitlabform.test import (
 
 
 @pytest.fixture(scope="function")
-def one_owner(gitlab, group, groups, users):
+def one_owner(gitlab, group, groups, sub_group, users):
 
     gitlab.add_member_to_group(group, users[0], 50)
     gitlab.remove_member_from_group(group, "root")
@@ -24,6 +24,7 @@ def one_owner(gitlab, group, groups, users):
     for user in users:
         gitlab.remove_member_from_group(group, user)
 
+    gitlab.remove_share_from_group(group, sub_group)
     for share_with in groups:
         gitlab.remove_share_from_group(group, share_with)
 
@@ -52,6 +53,28 @@ class TestGroupSharedWith:
 
         shared_with = gitlab.get_group_shared_with(group)
         assert len(shared_with) == 2
+
+    def test__sub_group(self, gitlab, group, users, sub_group, one_owner):
+        no_of_members_before = len(gitlab.get_group_members(group))
+
+        add_shared_with = f"""
+        projects_and_groups:
+          {group}/*:
+            group_members:
+              {users[0]}:
+                access_level: 50
+            group_shared_with:
+              {sub_group}:
+                group_access_level: 30
+        """
+
+        run_gitlabform(add_shared_with, group)
+
+        members = gitlab.get_group_members(group)
+        assert len(members) == no_of_members_before, members
+
+        shared_with = gitlab.get_group_shared_with(group)
+        assert len(shared_with) == 1
 
     def test__remove_group(self, gitlab, group, users, groups, one_owner):
 
