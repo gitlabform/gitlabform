@@ -68,6 +68,7 @@ class GitLabGroups(GitLabCore):
     def get_projects(self, group, include_archived=False):
         """
         :param group: group name
+        :param include_archived: set to True if archived projects should also be returned
         :return: sorted list of strings "group/project_name". Note that only projects from "group" namespace are
                  returned, so if "group" (= members of this group) is also a member of some projects, they won't be
                  returned here.
@@ -111,14 +112,6 @@ class GitLabGroups(GitLabCore):
         # ..as documented at: https://docs.gitlab.com/ee/api/groups.html#update-group
         self._make_requests_to_api(
             "groups/%s", project_and_group_name, "PUT", group_settings
-        )
-
-    def delete_group_secret_variable(self, group, secret_variable_key):
-        self._make_requests_to_api(
-            "groups/%s/variables/%s",
-            (group, secret_variable_key),
-            method="DELETE",
-            expected_codes=[204, 404],
         )
 
     def post_group_secret_variable(self, group, secret_variable):
