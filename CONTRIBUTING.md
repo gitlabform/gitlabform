@@ -144,10 +144,11 @@ We try to follow [PEP 440]() versioning scheme, which is mostly based on [semant
 
 ### Procedure
 
-1. Uptick the version in `version` file. Commit message should preferably be sth like:
+1. Add an entry in `CHANGELOG.md`. Remember to give thanks to all the contributors!
+2. Uptick the version in `version` file.
+3. Commit the above changes. The commit message should preferably be sth like:
    `Release v 1.18.1 with #133 and #134 fixed`.
-2. Create version tag with `v` prefix, f.e. `v1.18.1.2`.
-3. Push commit & tag. Pushing the tag should trigger a GitHub Actions pipeline that will make a release in PyPI,
+4. Create the version tag with `v` prefix, f.e. `v1.18.1.2`.
+5. Push the commit and the tag. Pushing the tag should trigger a GitHub Actions pipeline that will make a release in PyPI,
 Dockerhub and GitHub.
-4. Edit the release in GitHub. See previous releases for the rough pattern of how we write about new features
-and fixes. Don't forget to give thanks to all the contributors! :)
+6. Edit the release in GitHub. Copy the changelog entry into its description

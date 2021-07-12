@@ -3,7 +3,7 @@ name: Publish 🐳 to DockerHub
 
 on:
   workflow_run:
-    workflows: ["Linter and tests (for tags)"]
+    workflows: ["Linter and tests (before release)"]
     types:
       - completed
 

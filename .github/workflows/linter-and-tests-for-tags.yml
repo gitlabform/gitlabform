@@ -1,9 +1,9 @@
-name: Linter and tests (for tags)
+name: Linter and tests (before release)
 
 on:
   push:
-    tags:
-      - "v*"
+    paths:
+      - 'version'
 
 jobs:
   black-formatting:
