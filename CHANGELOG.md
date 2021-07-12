@@ -1,5 +1,15 @@
 ## Changelog
 
+### 2.1.1
+
+* Fixed sharing group with a subgroup. Fixes [#236](https://github.com/egnyte/gitlabform/issues/236)
+* Better Docker images:
+  * Updated Alpine from 3.12 to 3.14,
+  * Started to build images in ARM64 architecture (apart from x86-64),
+  * Started to add tags <major_version>, <major_version>.<minor_version>. Note that Alpine-based image is the main one which gets these tags. For Debian-based images add "-buster" suffix. Implements [#173](https://github.com/egnyte/gitlabform/issues/173)
+
+Thanks to [@andrewjw](https://github.com/andrewjw) (Ocado Technology) for his contribution!
+
 ### 2.1.0
 
 * Added a feature to share groups with other groups, with optional enforcing. Implements [#150](https://github.com/egnyte/gitlabform/issues/150)
