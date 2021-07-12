@@ -1,6 +1,4 @@
-ARG PY_VERSION
-ARG OS_VERSION
-FROM python:${PY_VERSION}-${OS_VERSION}
+FROM python:3.9-buster
 RUN apt-get update \
     && apt-get install -y pandoc \
     && apt-get clean
