@@ -54,6 +54,7 @@ setup(
     tests_require=[
         "pytest==6.2.4",
         "xkcdpass==1.19.2",
+        "pre-commit==2.13.0",  # not really for tests, but for development
     ],
     entry_points={
         "console_scripts": [

@@ -122,9 +122,10 @@ Similarly to the guidelines for making PRs with documentation improvements - ple
   * in case of non-trivial logic add/change please add unit tests,
   * for all bug fixes and new features using GitLab API please add acceptance tests
 * use [Black](https://github.com/psf/black) code formatter:
-  ```
-  black .
-  ```
+```
+black .
+```
+We recommend and provide a config for [pre-commit](https://pre-commit.com) to generate a pre-commit hook that will automatically reformat your contributions with Black.
 * squash your commits (unless there is a reason not to),
 * try to write [good commit message(s)](https://chris.beams.io/posts/git-commit/),
  
