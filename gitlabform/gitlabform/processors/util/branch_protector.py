@@ -30,8 +30,6 @@ class BranchProtector(object):
                 # note that for old API *all* keys have to be defined...
                 if all(key in requested_configuration for key in self.old_api_keys):
 
-                    # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
-
                     self.protect_using_old_api(
                         requested_configuration, project_and_group, branch
                     )
