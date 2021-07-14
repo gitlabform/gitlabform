@@ -102,6 +102,7 @@ class FilesProcessor(AbstractProcessor):
                             configuration.get("files|" + file + "|file")
                         )
                         if path_in_config.is_absolute():
+                            # TODO: does this work? we are reading the content twice in this case...
                             path = path_in_config.read_text()
                         else:
                             # relative paths are relative to config file location
