@@ -71,7 +71,7 @@ class FilesProcessor(AbstractProcessor):
                     logging.debug(
                         "> Temporarily unprotecting the branch for managing files in it..."
                     )
-                    self.gitlab.unprotect_branch(project_and_group, branch)
+                    self.branch_protector.unprotect_branch(project_and_group, branch)
 
                 if configuration.get("files|" + file + "|delete"):
                     try:

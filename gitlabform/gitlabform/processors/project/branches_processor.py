@@ -10,6 +10,6 @@ class BranchesProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for branch in sorted(configuration["branches"]):
-            self.__branch_protector.protect_branch(
+            self.__branch_protector.apply_branch_protection_configuration(
                 project_and_group, configuration, branch
             )

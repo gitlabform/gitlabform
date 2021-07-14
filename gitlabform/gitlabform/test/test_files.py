@@ -36,6 +36,14 @@ def branches(request, gitlab, group, project):
             "Reset default content",
         )
 
+        gitlab.branch_access_level(
+            f"{group}/{project}",
+            "main",
+            AccessLevel.MAINTAINER.value,
+            AccessLevel.MAINTAINER.value,
+            AccessLevel.MAINTAINER.value,
+        )
+
     request.addfinalizer(fin)
 
 

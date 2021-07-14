@@ -3,7 +3,7 @@ import sys
 
 import cli_ui
 
-from gitlabform import EXIT_PROCESSING_ERROR
+from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 
@@ -21,44 +21,16 @@ class BranchProtector(object):
         self.gitlab = gitlab
         self.strict = strict
 
-    def protect_branch(self, project_and_group, configuration, branch):
+    def apply_branch_protection_configuration(
+        self, project_and_group, configuration, branch
+    ):
         try:
             requested_configuration = configuration["branches"][branch]
 
             if requested_configuration.get("protected"):
-
-                # note that for old API *all* keys have to be defined...
-                if all(key in requested_configuration for key in self.old_api_keys):
-
-                    self.protect_using_old_api(
-                        requested_configuration, project_and_group, branch
-                    )
-
-                # ...while for the new one we need ANY new key
-                elif any(key in requested_configuration for key in self.new_api_keys):
-
-                    if self.configuration_update_needed(
-                        requested_configuration, project_and_group, branch
-                    ):
-                        self.protect_using_new_api(
-                            requested_configuration, project_and_group, branch
-                        )
-                    else:
-                        logging.debug(
-                            "Skipping set branch '%s' access levels because they're already set"
-                        )
-                        return
-                        # TODO: is this ok that we skip below code in this case?
-
-                if "code_owner_approval_required" in requested_configuration:
-
-                    self.set_code_owner_approval_required(
-                        requested_configuration, project_and_group, branch
-                    )
-
+                self.protect_branch(project_and_group, configuration, branch)
             else:
-
-                self.unprotect(project_and_group, branch)
+                self.unprotect_branch(project_and_group, configuration, branch)
 
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
@@ -67,6 +39,89 @@ class BranchProtector(object):
                 sys.exit(EXIT_PROCESSING_ERROR)
             else:
                 cli_ui.warning(message)
+
+    def protect_branch(self, project_and_group, configuration, branch):
+        try:
+            requested_configuration = configuration["branches"][branch]
+
+            config_type = self.get_branch_protection_config_type(
+                project_and_group, requested_configuration, branch
+            )
+
+            if config_type == "old":
+
+                self.protect_using_old_api(
+                    requested_configuration, project_and_group, branch
+                )
+
+            elif config_type == "new":
+
+                if self.configuration_update_needed(
+                    requested_configuration, project_and_group, branch
+                ):
+                    self.protect_using_new_api(
+                        requested_configuration, project_and_group, branch
+                    )
+                else:
+                    logging.debug(
+                        "Skipping set branch '%s' access levels because they're already set"
+                    )
+
+            if "code_owner_approval_required" in requested_configuration:
+
+                self.set_code_owner_approval_required(
+                    requested_configuration, project_and_group, branch
+                )
+
+        except NotFoundException:
+            message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
+            if self.strict:
+                cli_ui.error(message)
+                sys.exit(EXIT_PROCESSING_ERROR)
+            else:
+                cli_ui.warning(message)
+
+    def unprotect_branch(self, project_and_group, configuration, branch):
+        try:
+            logging.debug("Setting branch '%s' as unprotected", branch)
+
+            requested_configuration = configuration["branches"][branch]
+
+            config_type = self.get_branch_protection_config_type(
+                project_and_group, requested_configuration, branch
+            )
+
+            if config_type == "new":
+                self.gitlab.unprotect_branch_new_api(project_and_group, branch)
+            else:  # old
+                self.gitlab.unprotect_branch(project_and_group, branch)
+
+        except NotFoundException:
+            message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
+            if self.strict:
+                cli_ui.error(message)
+                sys.exit(EXIT_PROCESSING_ERROR)
+            else:
+                cli_ui.warning(message)
+
+    def get_branch_protection_config_type(
+        self, project_and_group, requested_configuration, branch
+    ):
+
+        # for new API any keys needs to be defined...
+        if any(key in requested_configuration for key in self.new_api_keys):
+            return "new"
+
+        # ...while for the old API - *all* of them
+        if all(key in requested_configuration for key in self.old_api_keys):
+            return "old"
+
+        else:
+            cli_ui.error(
+                f"Invalid configuration for protecting branches in project '{project_and_group}',"
+                f" branch '{branch}' - missing keys."
+            )
+            sys.exit(EXIT_INVALID_INPUT)
 
     def protect_using_old_api(self, requested_configuration, project_and_group, branch):
         logging.warning(
@@ -138,7 +193,3 @@ class BranchProtector(object):
             current_merge_access_level,
             current_unprotect_access_level,
         )
-
-    def unprotect(self, project_and_group, branch):
-        logging.debug("Setting branch '%s' as unprotected", branch)
-        self.gitlab.unprotect_branch_new_api(project_and_group, branch)
