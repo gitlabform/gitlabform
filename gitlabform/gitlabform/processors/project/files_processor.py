@@ -32,8 +32,8 @@ class FilesProcessor(AbstractProcessor):
                 logging.debug("Skipping file '%s'", file)
                 continue
 
-            all_branches = self.gitlab.get_branches(project_and_group)
             if configuration["files"][file]["branches"] == "all":
+                all_branches = self.gitlab.get_branches(project_and_group)
                 branches = sorted(all_branches)
             elif configuration["files"][file]["branches"] == "protected":
                 protected_branches = self.gitlab.get_protected_branches(
@@ -41,6 +41,7 @@ class FilesProcessor(AbstractProcessor):
                 )
                 branches = sorted(protected_branches)
             else:
+                all_branches = self.gitlab.get_branches(project_and_group)
                 branches = []
                 for branch in configuration["files"][file]["branches"]:
                     if branch in all_branches:
@@ -55,6 +56,15 @@ class FilesProcessor(AbstractProcessor):
 
             for branch in branches:
                 cli_ui.debug(f"Processing file '{file}' in branch '{branch}'")
+
+                if configuration.get(
+                    "files|" + file + "|content"
+                ) and configuration.get("files|" + file + "|file"):
+                    cli_ui.error(
+                        f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
+                        "use only one of these keys."
+                    )
+                    sys.exit(EXIT_INVALID_INPUT)
 
                 # unprotect protected branch temporarily for operations below
                 if configuration.get("branches|" + branch + "|protected"):
@@ -85,15 +95,7 @@ class FilesProcessor(AbstractProcessor):
                 else:
                     # change or create file
 
-                    if configuration.get(
-                        "files|" + file + "|content"
-                    ) and configuration.get("files|" + file + "|file"):
-                        cli_ui.error(
-                            f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
-                            "use only one of these keys."
-                        )
-                        sys.exit(EXIT_INVALID_INPUT)
-                    elif configuration.get("files|" + file + "|content"):
+                    if configuration.get("files|" + file + "|content"):
                         new_content = configuration.get("files|" + file + "|content")
                     else:
                         path_in_config = Path(
