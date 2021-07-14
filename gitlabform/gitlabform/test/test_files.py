@@ -50,6 +50,11 @@ class TestFiles:
         set_file_specific_branch = f"""
         projects_and_groups:
           {group_and_project_name}:
+            branches:
+              main:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
             files:
               "README.md":
                 overwrite: true
@@ -78,6 +83,23 @@ class TestFiles:
         set_file_all_branches = f"""
         projects_and_groups:
           {group_and_project_name}:
+            branches:
+              main:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
+              protected_branch1:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
+              protected_branch2:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
+              protected_branch3:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
             files:
               "README.md":
                 overwrite: true
@@ -112,6 +134,23 @@ class TestFiles:
         set_file_protected_branches = f"""
         projects_and_groups:
           {group_and_project_name}:
+            branches:
+              main:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
+              protected_branch1:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
+              protected_branch2:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
+              protected_branch3:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
             branches:
               protected_branch1:
                 protected: true
