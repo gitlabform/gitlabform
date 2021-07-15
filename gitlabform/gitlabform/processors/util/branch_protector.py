@@ -30,7 +30,7 @@ class BranchProtector(object):
             if requested_configuration.get("protected"):
                 self.protect_branch(project_and_group, configuration, branch)
             else:
-                self.unprotect_branch(project_and_group, configuration, branch)
+                self.unprotect_branch(project_and_group, branch)
 
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
@@ -81,20 +81,18 @@ class BranchProtector(object):
             else:
                 cli_ui.warning(message)
 
-    def unprotect_branch(self, project_and_group, configuration, branch):
+    def unprotect_branch(self, project_and_group, branch):
         try:
             logging.debug("Setting branch '%s' as unprotected", branch)
 
-            requested_configuration = configuration["branches"][branch]
+            # we don't know if the old or new API was used to protect
+            # so use both when unprotecting
 
-            config_type = self.get_branch_protection_config_type(
-                project_and_group, requested_configuration, branch
-            )
-
-            if config_type == "new":
-                self.gitlab.unprotect_branch_new_api(project_and_group, branch)
-            else:  # old
+            # ...except for wildcard branch names - there are not supported by the old API
+            if "*" not in branch:
                 self.gitlab.unprotect_branch(project_and_group, branch)
+
+            self.gitlab.unprotect_branch_new_api(project_and_group, branch)
 
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
