@@ -3,6 +3,7 @@
 ### 2.1.1
 
 * Fixed sharing group with a subgroup. Fixes [#236](https://github.com/egnyte/gitlabform/issues/236)
+* Improved re-protecting branches after updating files in them. Fail fast if the config is invalid.
 * Better Docker images:
   * Updated Alpine from 3.12 to 3.14,
   * Started to build images in ARM64 architecture (apart from x86-64),
