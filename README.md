@@ -72,7 +72,7 @@ the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-confi
 
 ### Limitations
 
-Some of the app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/egnyte/gitlabform/issues?q=is%3Aissue+is%3Aopen+label%3A%22gitlab+issue%22). Please check the links to the GitLab issue(s) in their comments and please upvote them if they are affecting you. Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
+Some of the app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/egnyte/gitlabform/labels/🦊gitlab%20issue). Please check the links to the GitLab issue(s) in their comments and please upvote them if they are affecting you. Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
 
 ## Requirements
 
