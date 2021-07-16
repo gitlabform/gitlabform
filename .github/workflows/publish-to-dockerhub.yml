@@ -19,11 +19,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install packaging
-#      - name: Wait for PyPI release
-#        run: |
-#          pip download gitlabform==${{ env.version }} > /dev/null
-#          while [ $? -ne 0 ]; do sleep 10; pip3 download gitlabform==${{ env.version }} > /dev/null ; done
-#        shell: bash {0}
+      - name: Wait for PyPI release
+        run: |
+          pip download gitlabform==${{ github.ref }} > /dev/null
+          while [ $? -ne 0 ]; do sleep 10; pip3 download gitlabform==${{ github.ref }} > /dev/null ; done
+        shell: bash {0}
       - name: Docker meta for Alpine-based image
         id: meta-alpine
         uses: docker/metadata-action@v3

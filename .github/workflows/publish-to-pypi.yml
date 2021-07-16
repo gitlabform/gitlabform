@@ -24,14 +24,14 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.4.1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-#      - name: Create release in GitHub
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          # This token is provided by Actions, you do not need to create your own token
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ github.ref }}
-#          release_name: ${{ github.ref }}
-#          draft: false
-#          prerelease: false
+      - name: Create release in GitHub
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
