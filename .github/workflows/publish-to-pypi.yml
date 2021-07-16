@@ -2,10 +2,9 @@
 name: Publish 🐍 to PyPI
 
 on:
-  workflow_run:
-    workflows: ["Linter and tests (before release)"]
-    types:
-      - completed
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build-n-publish:

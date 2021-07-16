@@ -1,10 +1,6 @@
 name: Linter and tests
 
-on:
-  push:
-    paths-ignore:
-      - 'version'
-      - 'CHANGELOG.mg'
+on: [push, pull_request]
 
 jobs:
   black-formatting:
@@ -78,9 +74,6 @@ jobs:
 
   codeql-analysis:
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
 
     steps:
       - name: Checkout repository

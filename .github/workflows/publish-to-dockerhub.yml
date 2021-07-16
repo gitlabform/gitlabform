@@ -2,17 +2,14 @@
 name: Publish 🐳 to DockerHub
 
 on:
-  workflow_run:
-    workflows: ["Linter and tests (before release)"]
-    types:
-      - completed
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build-n-publish:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
