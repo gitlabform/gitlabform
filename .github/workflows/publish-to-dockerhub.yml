@@ -29,7 +29,7 @@ jobs:
 #        shell: bash {0}
       - name: Docker meta for Alpine-based image
         id: meta-alpine
-        uses: crazy-max/docker-metadata-action@v3.4.1
+        uses: docker/metadata-action@v3
         with:
           images: |
             egnyte/gitlabform
@@ -46,7 +46,7 @@ jobs:
             type=pep440,pattern={{major}}-alpine3.14
       - name: Docker meta for Debian-based image
         id: meta-debian
-        uses: crazy-max/docker-metadata-action@v3.4.1
+        uses: docker/metadata-action@v3
         with:
           images: |
             egnyte/gitlabform
