@@ -66,6 +66,7 @@ jobs:
       - name: Publish Debian-based image to DockerHub
         uses: docker/build-push-action@v2
         with:
+          push: true
           context: .
           file: ./dev/debian.Dockerfile
           platforms: linux/amd64,linux/arm64
@@ -74,6 +75,7 @@ jobs:
       - name: Publish Alpine-based image to DockerHub
         uses: docker/build-push-action@v2
         with:
+          push: true
           context: .
           file: ./dev/alpine.Dockerfile
           platforms: linux/amd64,linux/arm64
