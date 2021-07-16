@@ -18,10 +18,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install packaging
+      - name: Get the version from the tag
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
       - name: Wait for PyPI release
         run: |
-          pip download gitlabform==${{ github.ref }} > /dev/null
-          while [ $? -ne 0 ]; do sleep 10; pip3 download gitlabform==${{ github.ref }} > /dev/null ; done
+          pip download gitlabform==${{ env.VERSION }} > /dev/null
+          while [ $? -ne 0 ]; do sleep 10; pip3 download gitlabform==${{ env.VERSION }} > /dev/null ; done
         shell: bash {0}
       - name: Docker meta for Alpine-based image
         id: meta-alpine
