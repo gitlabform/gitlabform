@@ -42,7 +42,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "certifi",  # we want the latest root certs for security
-        "requests==2.25.1",
+        "requests==2.26.0",
         "Jinja2==2.11.3",
         "MarkupSafe==1.1.1",
         "PyYAML==5.4.1",
