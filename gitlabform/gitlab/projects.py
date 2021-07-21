@@ -427,7 +427,7 @@ class GitLabProjects(GitLabCore):
         # it will return {group_name: {...api info about group_name...}, ...}
         groups = {}
         for group in project_info["shared_with_groups"]:
-            groups[group["group_name"]] = group
+            groups[group["group_full_path"]] = group
 
         return groups
 
