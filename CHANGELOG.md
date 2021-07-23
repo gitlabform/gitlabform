@@ -2,7 +2,7 @@
 
 ### 2.1.2
 
-* Managing project members is not incredible slow anymore. Fixes [#240](https://github.com/egnyte/gitlabform/issues/240)
+* Managing project members is not incredibly slow anymore. Fixes [#240](https://github.com/egnyte/gitlabform/issues/240)
 
 Thanks to [@andrewjw](https://github.com/andrewjw) (Ocado Technology) for his contribution!
 
