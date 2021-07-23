@@ -1,5 +1,11 @@
 ## Changelog
 
+### 2.1.2
+
+* Managing project members is not incredible slow anymore. Fixes [#240](https://github.com/egnyte/gitlabform/issues/240)
+
+Thanks to [@andrewjw](https://github.com/andrewjw) (Ocado Technology) for his contribution!
+
 ### 2.1.1
 
 * Fixed sharing group with a subgroup. Fixes [#236](https://github.com/egnyte/gitlabform/issues/236)
