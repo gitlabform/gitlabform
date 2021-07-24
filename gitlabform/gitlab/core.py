@@ -2,6 +2,7 @@ import json
 import logging
 
 import cli_ui
+import pkg_resources
 import requests
 import os
 
@@ -35,6 +36,16 @@ class GitLabCore:
         self.session.verify = self.ssl_verify
         if not self.ssl_verify:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        self.gitlabform_version = pkg_resources.get_distribution("gitlabform").version
+        self.requests_version = pkg_resources.get_distribution("requests").version
+        self.session.headers.update(
+            {
+                "private-token": self.token,
+                "authorization": f"Bearer {self.token}",
+                "user-agent": f"GitLabForm/{self.gitlabform_version} (python-requests/{self.requests_version})",
+            }
+        )
 
         try:
             version = self._make_requests_to_api("version")
@@ -179,22 +190,16 @@ class GitLabCore:
             json.dumps(dict_data, sort_keys=True),
             json.dumps(json_data, sort_keys=True),
         )
-        headers = {
-            "PRIVATE-TOKEN": self.token,
-            "Authorization": "Bearer " + self.token,
-        }
         if dict_data:
             response = self.session.request(
-                method, url, headers=headers, data=dict_data, timeout=self.timeout
+                method, url, data=dict_data, timeout=self.timeout
             )
         elif json_data:
             response = self.session.request(
-                method, url, headers=headers, json=json_data, timeout=self.timeout
+                method, url, json=json_data, timeout=self.timeout
             )
         else:
-            response = self.session.request(
-                method, url, headers=headers, timeout=self.timeout
-            )
+            response = self.session.request(method, url, timeout=self.timeout)
         logging.debug("response code=%s" % response.status_code)
 
         if response.status_code in expected_codes:
