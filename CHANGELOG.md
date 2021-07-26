@@ -1,5 +1,9 @@
 ## Changelog
 
+### Unreleased
+
+* Change the User Agent to a custom `GitLabForm/<gitlabform_version> (python-requests/<requests_version>)`
+
 ### 2.1.2
 
 * Managing project members is not incredibly slow anymore. Fixes [#240](https://github.com/egnyte/gitlabform/issues/240)
