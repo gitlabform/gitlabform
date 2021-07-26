@@ -58,7 +58,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "gitlabform=gitlabform.gitlabform.run:run",
+            "gitlabform=gitlabform.run:run",
         ],
     },
 )
