@@ -6,19 +6,22 @@ import textwrap
 import traceback
 
 import cli_ui
-import luddite
-import pkg_resources
-from packaging import version as packaging_version
+
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration.core import ConfigFileNotFoundException
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException
-from gitlabform.helper import GroupsAndProjectsProvider
+from gitlabform.input import GroupsAndProjectsProvider
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
-from gitlabform.ui import info_group_count, info_project_count
+from gitlabform.ui import (
+    info_group_count,
+    info_project_count,
+    show_version,
+    show_summary,
+)
 
 
 class Formatter(
@@ -68,7 +71,7 @@ class GitLabForm(object):
 
             self.configure_output()
 
-            self.show_version(self.skip_version_check)
+            show_version(self.skip_version_check)
             if self.just_show_version:
                 sys.exit(0)
 
@@ -252,60 +255,6 @@ class GitLabForm(object):
         fmt = logging.Formatter("%(message)s")
         logging.getLogger().handlers[0].setFormatter(fmt)
 
-    def show_version(self, skip_version_check):
-
-        local_version = pkg_resources.get_distribution("gitlabform").version
-
-        tower_crane = cli_ui.Symbol("🏗", "")
-        tokens_to_show = [
-            cli_ui.reset,
-            tower_crane,
-            " GitLabForm version:",
-            cli_ui.blue,
-            local_version,
-            cli_ui.reset,
-        ]
-
-        cli_ui.message(*tokens_to_show, end="")
-
-        if skip_version_check:
-            # just print end of the line
-            print()
-        else:
-            latest_version = luddite.get_version_pypi("gitlabform")
-            if local_version == latest_version:
-                happy = cli_ui.Symbol("😊", "")
-                tokens_to_show = [
-                    "= the latest stable ",
-                    happy,
-                ]
-            elif packaging_version.parse(local_version) < packaging_version.parse(
-                latest_version
-            ):
-                sad = cli_ui.Symbol("😔", "")
-                tokens_to_show = [
-                    "= outdated ",
-                    sad,
-                    f", please update! (the latest stable is ",
-                    cli_ui.blue,
-                    latest_version,
-                    cli_ui.reset,
-                    ")",
-                ]
-            else:
-                excited = cli_ui.Symbol("🤩", "")
-                tokens_to_show = [
-                    "= pre-release ",
-                    excited,
-                    f" (the latest stable is ",
-                    cli_ui.blue,
-                    latest_version,
-                    cli_ui.reset,
-                    ")",
-                ]
-
-            cli_ui.message(*tokens_to_show, sep="")
-
     def initialize_configuration_and_gitlab(self):
 
         try:
@@ -488,39 +437,6 @@ class GitLabForm(object):
 
         effective_configuration.write_to_file()
 
-        cli_ui.info_1(f"# of groups processed successfully: {successful_groups}")
-        cli_ui.info_1(f"# of projects processed successfully: {successful_projects}")
-
-        if len(failed_groups) > 0:
-            cli_ui.info_1(
-                cli_ui.red, f"# of groups failed: {len(failed_groups)}", cli_ui.reset
-            )
-            for group_number in failed_groups.keys():
-                cli_ui.info_1(
-                    cli_ui.red,
-                    f"Failed group {group_number}: {failed_groups[group_number]}",
-                    cli_ui.reset,
-                )
-        if len(failed_projects) > 0:
-            cli_ui.info_1(
-                cli_ui.red,
-                f"# of projects failed: {len(failed_projects)}",
-                cli_ui.reset,
-            )
-            for project_number in failed_projects.keys():
-                cli_ui.info_1(
-                    cli_ui.red,
-                    f"Failed project {project_number}: {failed_projects[project_number]}",
-                    cli_ui.reset,
-                )
-
-        if len(failed_groups) > 0 or len(failed_projects) > 0:
-            sys.exit(EXIT_PROCESSING_ERROR)
-        elif successful_groups > 0 or successful_projects > 0:
-            shine = cli_ui.Symbol("✨", "!!!")
-            cli_ui.info_1(
-                cli_ui.green,
-                f"All requested groups/projects processes successfully!",
-                cli_ui.reset,
-                shine,
-            )
+        show_summary(
+            successful_groups, successful_projects, failed_groups, failed_projects
+        )
