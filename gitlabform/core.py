@@ -16,6 +16,7 @@ from gitlabform.configuration.core import ConfigFileNotFoundException
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab.core import TestRequestFailedException
+from gitlabform.input import GroupsAndProjectsProvider
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
 from gitlabform.ui import info_group_count, info_project_count
@@ -81,6 +82,9 @@ class GitLabForm(object):
         self.group_processors = GroupProcessors(self.gitlab)
         self.project_processors = ProjectProcessors(
             self.gitlab, self.configuration, self.strict
+        )
+        self.groups_and_projects_provider = GroupsAndProjectsProvider(
+            self.gitlab, self.configuration, self.include_archived_projects
         )
 
     def parse_args(self):
@@ -325,8 +329,9 @@ class GitLabForm(object):
         elif self.project_or_group == "ALL_DEFINED":
             cli_ui.info(">>> Processing ALL groups and projects defined in config")
 
-        groups = self.get_groups(self.project_or_group)
-        projects = self.get_projects(self.project_or_group, groups)
+        groups, projects = self.groups_and_projects_provider.get_groups_and_projects(
+            self.project_or_group
+        )
 
         if len(groups) == 0 and len(projects) == 0:
             cli_ui.error(f"Entity {self.project_or_group} cannot be found in GitLab!")
@@ -339,96 +344,6 @@ class GitLabForm(object):
         cli_ui.info_1(f"# of projects to process: {len(projects)}")
 
         self.process_all(projects, groups)
-
-    def get_groups(self, request_query) -> list:
-
-        if request_query == "ALL":
-            # get all groups from GitLab and then remove the skipped ones
-            requested_groups = self.gitlab.get_groups()
-            effective_groups = self._remove_skipped_groups(requested_groups)
-
-            return effective_groups
-
-        if request_query == "ALL_DEFINED":
-
-            # get all groups from configuration, but removed the skipped ones
-            # before replacing group names with proper case of groups' *paths*
-            # to do less requests to GitLab
-            requested_groups = self.configuration.get_groups()
-            effective_groups = self._remove_skipped_groups(requested_groups)
-            effective_groups_proper_case = []
-            for group in effective_groups:
-                # in the config group names may not be written with correct case
-                # so ensure that such group exists
-                try:
-                    group = self.gitlab.get_group_case_insensitive(group)
-                    effective_groups_proper_case.append(group["full_path"])
-                except NotFoundException:
-                    cli_ui.error(
-                        f"Configuration contains group {group} but it cannot be found in GitLab!"
-                    )
-                    sys.exit(EXIT_INVALID_INPUT)
-
-            return effective_groups_proper_case
-
-        try:
-            # it may be a subgroup or a single group
-            maybe_group = self.gitlab.get_group_case_insensitive(request_query)
-            return [maybe_group["full_path"]]
-        except NotFoundException:
-            return []
-
-    def get_projects(self, request_query, groups) -> list:
-
-        requested_projects = []
-
-        if request_query == "ALL":
-            # we already have all the groups
-            pass
-
-        if request_query == "ALL_DEFINED":
-            # get projects explicitly defined in the configuration,
-            requested_projects = self.configuration.get_projects()
-
-        else:
-            try:
-                # it may be a project or a subgroup
-                maybe_project = self.gitlab.get_project_case_insensitive(request_query)
-                requested_projects = [maybe_project["path_with_namespace"]]
-            except NotFoundException:
-                pass
-
-        # get the projects from the groups to process
-        projects_from_groups = self._get_projects_from_groups(groups)
-
-        # casting to set and back to list to deduplicate
-        projects = sorted(list(set(requested_projects + projects_from_groups)))
-
-        return self._remove_skipped_projects(projects)
-
-    def _get_projects_from_groups(self, groups) -> list:
-        # use set to deduplicate project list
-        projects = set()
-        for group in groups:
-            for project in self.gitlab.get_projects(
-                group, include_archived=self.include_archived_projects
-            ):
-                projects.add(project)
-        return sorted(list(projects))
-
-    def _remove_skipped_groups(self, groups) -> list:
-        effective_groups = []
-        for group in groups:
-            if not self.configuration.is_group_skipped(group):
-                effective_groups.append(group)
-        return effective_groups
-
-    def _remove_skipped_projects(self, projects) -> list:
-        effective_projects = []
-        for project in projects:
-            if not self.configuration.is_project_skipped(project):
-                effective_projects.append(project)
-        return effective_projects
 
     def process_all(self, projects_and_groups, groups):
 
