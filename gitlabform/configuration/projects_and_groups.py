@@ -1,7 +1,10 @@
 import logging
+import sys
 
+import cli_ui
 from mergedeep import merge
 
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration.core import ConfigurationCore, KeyNotFoundException
 
 logger = logging.getLogger(__name__)
@@ -18,12 +21,17 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         try:
             projects = []
             projects_and_groups = self.get("projects_and_groups")
+            if len(projects_and_groups) == 0:
+                raise EmptyConfigException
             for element in projects_and_groups.keys():
                 if element != "*" and not element.endswith("/*"):
                     projects.append(element)
             return sorted(projects)
-        except KeyNotFoundException:
-            raise ConfigNotFoundException
+        except:
+            cli_ui.fatal(
+                "Configuration has to contain non-empty 'projects_and_groups' key."
+            )
+            sys.exit(EXIT_INVALID_INPUT)
 
     def get_effective_config_for_project(self, group_and_project) -> dict:
         """
@@ -132,14 +140,22 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         """
         :return: sorted list of groups with configs
         """
-        groups = []
-        projects_and_groups = self.get("projects_and_groups")
-        for element in projects_and_groups.keys():
-            if element.endswith("/*"):
-                # cut off that "/*"
-                group_name = element[:-2]
-                groups.append(group_name)
-        return sorted(groups)
+        try:
+            groups = []
+            projects_and_groups = self.get("projects_and_groups")
+            if len(projects_and_groups) == 0:
+                raise EmptyConfigException
+            for element in projects_and_groups.keys():
+                if element.endswith("/*"):
+                    # cut off that "/*"
+                    group_name = element[:-2]
+                    groups.append(group_name)
+            return sorted(groups)
+        except:
+            cli_ui.fatal(
+                "Configuration has to contain non-empty 'projects_and_groups' key."
+            )
+            sys.exit(EXIT_INVALID_INPUT)
 
     def get_group_config(self, group) -> dict:
         """
@@ -174,5 +190,5 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
         return group in self.get("skip_groups", [])
 
 
-class ConfigNotFoundException(Exception):
+class EmptyConfigException(Exception):
     pass
