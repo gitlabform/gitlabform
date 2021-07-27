@@ -4,7 +4,6 @@ import platform
 import sys
 import textwrap
 import traceback
-from typing import TextIO
 
 import cli_ui
 import luddite
@@ -14,9 +13,9 @@ from packaging import version as packaging_version
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration.core import ConfigFileNotFoundException
 from gitlabform.gitlab import GitLab
-from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab.core import TestRequestFailedException
-from gitlabform.input import GroupsAndProjectsProvider
+from gitlabform.helper import GroupsAndProjectsProvider
+from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
 from gitlabform.ui import info_group_count, info_project_count
@@ -351,7 +350,7 @@ class GitLabForm(object):
         successful_groups = 0
         failed_groups = {}
 
-        maybe_output_file = self.try_to_get_output_file()
+        effective_configuration = EffectiveConfiguration(self.output_file)
 
         for group in groups:
 
@@ -370,19 +369,19 @@ class GitLabForm(object):
 
             configuration = self.configuration.get_effective_config_for_group(group)
 
+            effective_configuration.add_placeholder(group)
+
             if configuration:
                 info_group_count(
                     "@", group_number, len(groups), f"Processing group: {group}"
                 )
-
-                self.try_to_write_header_to_output_file(group, maybe_output_file)
 
                 try:
                     self.group_processors.process_group(
                         group,
                         configuration,
                         dry_run=self.noop,
-                        output_file=maybe_output_file,
+                        effective_configuration=effective_configuration,
                     )
 
                     successful_groups += 1
@@ -395,8 +394,7 @@ class GitLabForm(object):
                     message = f"Error occurred while processing group {group}, exception:\n\n{e}\n\n{trace}"
 
                     if self.terminate_after_error:
-                        self.try_to_close_output_file(maybe_output_file)
-
+                        effective_configuration.write_to_file()
                         cli_ui.error(message)
                         sys.exit(EXIT_PROCESSING_ERROR)
                     else:
@@ -407,10 +405,6 @@ class GitLabForm(object):
                     )
 
             else:
-                self.try_to_write_header_to_output_file(
-                    group, maybe_output_file, empty_config=True
-                )
-
                 info_group_count(
                     "@",
                     group_number,
@@ -443,6 +437,8 @@ class GitLabForm(object):
                 project_and_group
             )
 
+            effective_configuration.add_placeholder(project_and_group)
+
             if configuration:
                 info_project_count(
                     "*",
@@ -451,16 +447,12 @@ class GitLabForm(object):
                     f"Processing project: {project_and_group}",
                 )
 
-                self.try_to_write_header_to_output_file(
-                    project_and_group, maybe_output_file
-                )
-
                 try:
                     self.project_processors.process_project(
                         project_and_group,
                         configuration,
                         dry_run=self.noop,
-                        output_file=maybe_output_file,
+                        effective_configuration=effective_configuration,
                     )
 
                     successful_projects += 1
@@ -473,8 +465,7 @@ class GitLabForm(object):
                     message = f"Error occurred while processing project {project_and_group}, exception:\n\n{e}\n\n{trace}"
 
                     if self.terminate_after_error:
-                        self.try_to_close_output_file(maybe_output_file)
-
+                        effective_configuration.write_to_file()
                         cli_ui.error(message)
                         sys.exit(EXIT_PROCESSING_ERROR)
                     else:
@@ -486,10 +477,6 @@ class GitLabForm(object):
                         f"* ({project_number}/{len(projects_and_groups)}) FINISHED Processing project: {project_and_group}",
                     )
             else:
-                self.try_to_write_header_to_output_file(
-                    project_and_group, maybe_output_file, empty_config=True
-                )
-
                 info_project_count(
                     "*",
                     project_number,
@@ -499,7 +486,7 @@ class GitLabForm(object):
                     cli_ui.reset,
                 )
 
-        self.try_to_close_output_file(maybe_output_file)
+        effective_configuration.write_to_file()
 
         cli_ui.info_1(f"# of groups processed successfully: {successful_groups}")
         cli_ui.info_1(f"# of projects processed successfully: {successful_projects}")
@@ -537,47 +524,3 @@ class GitLabForm(object):
                 cli_ui.reset,
                 shine,
             )
-
-    def try_to_get_output_file(self):
-        if self.output_file:
-            try:
-                output_file = open(self.output_file, "w")
-                logging.debug(
-                    f"Opened file {self.output_file} to write the effective configs to."
-                )
-                return output_file
-            except Exception as e:
-                logging.error(
-                    f"Error when trying to open {self.output_file} write the effective configs to: {e}"
-                )
-                sys.exit(EXIT_INVALID_INPUT)
-        else:
-            return None
-
-    def try_to_write_header_to_output_file(
-        self,
-        project_or_project_and_group: str,
-        output_file: TextIO,
-        empty_config: bool = False,
-    ):
-        """
-        Writes a shared key for the "_write_to_file" method which actually dumps the configurations.
-        """
-        if output_file:
-            try:
-                if empty_config:
-                    output_file.writelines(f"{project_or_project_and_group}: {{}}\n")
-                else:
-                    output_file.writelines(f"{project_or_project_and_group}:\n")
-            except Exception as e:
-                logging.error(f"Error when trying to write to {output_file.name}: {e}")
-                raise e
-
-    def try_to_close_output_file(self, output_file: TextIO):
-        if output_file:
-            try:
-                output_file.close()
-                logging.debug(f"Closed file {self.output_file}.")
-            except Exception as e:
-                logging.error(f"Error when trying to close {self.output_file}: {e}")
-                sys.exit(EXIT_PROCESSING_ERROR)

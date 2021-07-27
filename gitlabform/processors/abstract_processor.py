@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 import cli_ui
 import yaml
 
+from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.util.decorators import configuration_to_safe_dict
 
 
@@ -19,7 +20,7 @@ class AbstractProcessor(ABC):
         project_or_project_and_group: str,
         configuration: dict,
         dry_run: bool,
-        output_file: Optional[TextIO],
+        effective_configuration: EffectiveConfiguration,
     ):
         if self.__configuration_name in configuration:
             if configuration.get(f"{self.__configuration_name}|skip"):
@@ -46,14 +47,14 @@ class AbstractProcessor(ABC):
                 cli_ui.debug(f"Processing {self.__configuration_name}")
                 self._process_configuration(project_or_project_and_group, configuration)
 
-            if output_file:
-                cli_ui.debug(
-                    f"Writing effective configuration for {self.__configuration_name} to the output file."
-                )
-                self._write_to_file(
-                    configuration.get(self.__configuration_name),
-                    output_file,
-                )
+            cli_ui.debug(
+                f"Adding effective configuration for {self.__configuration_name}."
+            )
+            effective_configuration.add_configuration(
+                project_or_project_and_group,
+                self.__configuration_name,
+                configuration.get(self.__configuration_name),
+            )
 
         else:
             logging.debug("Skipping %s - not in config." % self.__configuration_name)
@@ -68,27 +69,3 @@ class AbstractProcessor(ABC):
         cli_ui.debug(
             f"Diffing for {self.__configuration_name} section is not supported yet"
         )
-
-    def _write_to_file(
-        self,
-        configuration_to_process,
-        output_file: TextIO,
-    ):
-        """
-        Writes indented content of a dict under a key from "try_to_write_header_to_output_file" method.
-        """
-        try:
-            output_file.writelines(
-                f"  {self.__configuration_name}:\n",
-            )
-            indented_configuration = textwrap.indent(
-                yaml.dump(
-                    configuration_to_process,
-                    default_flow_style=False,
-                ),
-                "    ",
-            )
-            output_file.write(indented_configuration)
-        except Exception as e:
-            logging.error(f"Error when trying to write to {output_file.name}: {e}")
-            raise e

@@ -1,6 +1,7 @@
 from typing import List, Optional, TextIO
 
 from gitlabform.gitlab import GitLab
+from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.group.group_members_processor import (
     GroupMembersProcessor,
@@ -30,7 +31,7 @@ class GroupProcessors(object):
         group: str,
         configuration: dict,
         dry_run: bool,
-        output_file: Optional[TextIO],
+        effective_configuration: EffectiveConfiguration,
     ):
         for processor in self.processors:
-            processor.process(group, configuration, dry_run, output_file)
+            processor.process(group, configuration, dry_run, effective_configuration)
