@@ -2,10 +2,42 @@
 
 ### 2.2.0
 
-* Skip the groups and project with empty effective configs upfront and show their number if the UI,
+* **Fix detecting an "empty effective config" and improve the UI related to processing groups and projects with such.** Until now the "effective config" for anything included the whole merged common+group+project-level configuration. Now if we check the effective config for a project we only look for project-level processors' configuration entries and do the same for groups.
+
+Example: imagine you have a group "some_group" with only some `group_secret_variables` defined for it and run GitLabForm
+against it.
+
+This is what would happen before:
+```
+$ gitlabform --noop some_group
+🏗  GitLabForm version: 2.1.2 = the latest stable 😊
+:: # of groups to process: 1
+:: # of projects to process: 46
+@ (1/1) Processing group: some_group
+* ( 1/46) Processing project: some_group/some_project_a
+
+(... 44 more lines of output about in fact a skipped project! ...)
+
+* (46/46) Processing project: some_group/some_project_b
+:: # of groups processed successfully: 1
+:: # of projects processed successfully: 46
+:: All requested groups/projects processes successfully! ✨
+```
+And this is what will happen now:
+```
+$ gitlabform --noop some_group
+🏗  GitLabForm version: 2.2.0 = the latest stable 😊
+:: # of groups to process: 1
+:: # of projects to process: 0 (# projects with empty effective configs that will be skipped: 46)
+@ (1/1) Processing group: some_group
+:: # of groups processed successfully: 1
+:: # of projects processed successfully: 0
+:: All requested groups/projects processed successfully! ✨
+```
+
 * Exit on configuration missing `projects_and_groups` key. This will provide a helpful error message for typos like in [#242](https://github.com/egnyte/gitlabform/issues/242).
-* Change the User Agent that the app uses when making requests to GitLab to a custom `GitLabForm/<gitlabform_version> (python-requests/<requests_version>)`
-* Make the output of some processors a bit more consistent,
+* Change the User Agent that the app uses when making requests to GitLab to a custom `GitLabForm/<gitlabform_version> (python-requests/<requests_version>)`.
+* Make the output of some processors a bit more consistent.
 * Big refactoring and code documentation improvements that should make contributions easier!
 
 ### 2.1.2
@@ -27,7 +59,7 @@ Thanks to [@andrewjw](https://github.com/andrewjw) (Ocado Technology) for his co
 
 ### 2.1.0
 
-* Added a feature to share groups with other groups, with optional enforcing. Implements [#150](https://github.com/egnyte/gitlabform/issues/150)
+* **Added a feature to share groups with other groups, with optional enforcing.** Implements [#150](https://github.com/egnyte/gitlabform/issues/150)
 
 Thanks to [@andrewjw](https://github.com/andrewjw) (Ocado Technology) for this contribution!
 
