@@ -51,7 +51,7 @@ Just use the common sense:
 * try to use similar style as existing docs,
 * use tools to minimize spelling and grammar mistakes,
 
-..and so on.
+...and so on.
 
 ### Code improvements
 
@@ -78,9 +78,12 @@ GitLabForm uses py.test for tests. To run unit tests locally:
 
 1. Activate the virtualenv created above
 
-2. `pip install pytest`
+2. Install the dependencies for tests:
+```
+pip install -e .[test]
+```
 
-3. Run `py.test --ignore gitlabform/gitlabform/test` to run all tests except the acceptance tests (see below).
+3. Run `py.test --ignore gitlabform/test` to run all tests except the acceptance tests (see below).
 
 #### Running acceptance tests locally or on own GitLab instance
 
@@ -95,8 +98,8 @@ against a disposable GitLab instance running as a Docker container OR use your o
 ./dev/run_gitlab_in_docker.sh
 ```
 
-2. Run `py.test gitlabform/gitlabform/test` to start all tests.
-To run only a single class with tests run f.e. `py.test gitlabform/gitlabform/test -k "TestArchiveProject"`.
+2. Run `py.test gitlabform/test` to start all tests.
+To run only a single class with tests run f.e. `py.test gitlabform/test -k "TestArchiveProject"`.
 
 ##### Running acceptance tests using your own GitLab instance
 
@@ -111,8 +114,8 @@ export GITLAB_URL="https://mygitlab.company.com"
 export GITLAB_TOKEN="<my admin user API token>"
 ```
 
-2. Run `py.test gitlabform/gitlabform/test` to start all tests
-To run only a single class with tests run f.e. `py.test gitlabform/gitlabform/test -k "TestArchiveProject"`.
+2. Run `py.test gitlabform/test` to start all tests
+To run only a single class with tests run f.e. `py.test gitlabform/test -k "TestArchiveProject"`.
 
 #### General coding guidelines
 
