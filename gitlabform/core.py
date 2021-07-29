@@ -45,11 +45,12 @@ class GitLabForm(object):
             self.start_from_group = 1
             self.noop = False
             self.output_file = None
-            self.configure_output(tests=True)
             self.skip_version_check = True
             self.include_archived_projects = True  # for unarchive tests
             self.just_show_version = False
             self.terminate_after_error = True
+
+            self.configure_output(tests=True)
         else:
             # normal mode
 
@@ -224,32 +225,24 @@ class GitLabForm(object):
 
     def configure_output(self, tests=False):
 
-        # although python-cli-ui advertises itself as supporting color
-        # on Windows thanks to colorama, the latter project has a lot of issues
-        # and gets little maintenance as of writing these words
-        # (see https://github.com/tartley/colorama/issues/300)
-        # so in practice color in Windows often doesn't work. let's just
-        # disable it then for now.
-        if platform.system() == "Windows":
-            color = "never"
-        else:
-            color = "auto"
-
-        # normal verbosity - print cli_ui.[info, warning, ...]
-        # verbose mode - like above plus cli_ui.debug
-        # debug mode - like above plus logging.debug
+        # normal mode - print cli_ui.info+ + logging.fatal
+        # verbose mode - print cli_ui.* + logging.fatal
+        # debug / tests mode - like above + logging.debug
 
         logging.basicConfig()
 
-        if not self.verbose and not self.debug:
-            cli_ui.setup(color=color)
-            level = logging.FATAL  # de facto disable
+        if not self.verbose and not self.debug:  # normal
+            cli_ui.setup()
+            level = logging.FATAL
         else:
-            cli_ui.setup(color=color, verbose=True)
-            if self.verbose:
-                level = logging.FATAL  # de facto disable
-            else:  # debug
+            if (
+                self.debug or tests
+            ):  # debug (BUT verbose may also be set, that's why we check this first)
+                cli_ui.setup(verbose=True)
                 level = logging.DEBUG
+            elif self.verbose:  # verbose
+                cli_ui.setup(verbose=True)
+                level = logging.FATAL
 
         logging.getLogger().setLevel(level)
         fmt = logging.Formatter("%(message)s")
