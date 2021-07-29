@@ -51,11 +51,13 @@ setup(
         "packaging==21.0",
         "mergedeep==1.3.4",
     ],
-    tests_require=[
-        "pytest==6.2.4",
-        "xkcdpass==1.19.2",
-        "pre-commit==2.13.0",  # not really for tests, but for development
-    ],
+    extras_require={
+        "test": [
+            "pytest==6.2.4",
+            "xkcdpass==1.19.2",
+            "pre-commit==2.13.0",  # not really for tests, but for development
+        ],
+    },
     entry_points={
         "console_scripts": [
             "gitlabform=gitlabform.run:run",
