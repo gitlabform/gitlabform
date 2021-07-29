@@ -1,4 +1,3 @@
-import logging
 from abc import ABC, abstractmethod
 
 import cli_ui
