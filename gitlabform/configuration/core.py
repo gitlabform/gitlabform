@@ -18,7 +18,7 @@ class ConfigurationCore:
     def __init__(self, config_path=None, config_string=None):
 
         if config_path and config_string:
-            cli_ui.fatal(
+            logging.fatal(
                 "Please initialize with either config_path or config_string, not both."
             )
             sys.exit(EXIT_INVALID_INPUT)
@@ -52,7 +52,7 @@ class ConfigurationCore:
                 self.config_dir = os.path.dirname(config_path)
 
                 if self.config.get("example_config"):
-                    cli_ui.fatal(
+                    logging.fatal(
                         "Example config detected, aborting.\n"
                         "Haven't you forgotten to use `-c <config_file>` parameter?\n"
                         "If you created your config based on the example config.yml,"
@@ -61,7 +61,7 @@ class ConfigurationCore:
                     sys.exit(EXIT_INVALID_INPUT)
 
                 if self.config.get("config_version", 1) != 2:
-                    cli_ui.fatal(
+                    logging.fatal(
                         "This version of GitLabForm requires 'config_version: 2' entry in the config.\n"
                         "This ensures that when the application behavior changes in a backward incompatible way,"
                         " you won't apply unexpected configuration to your GitLab instance.\n"
@@ -72,7 +72,9 @@ class ConfigurationCore:
                 try:
                     self.config.get("projects_and_groups")
                 except KeyNotFoundException:
-                    cli_ui.fatal("'projects_and_groups' key in the config is required.")
+                    logging.fatal(
+                        "'projects_and_groups' key in the config is required."
+                    )
                     sys.exit(EXIT_INVALID_INPUT)
 
         except (FileNotFoundError, IOError):

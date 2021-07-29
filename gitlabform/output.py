@@ -16,7 +16,7 @@ class EffectiveConfiguration:
                 )
             except Exception as e:
                 logging.fatal(
-                    f"Error when trying to open {self.output_file} write the effective configs to: {e}"
+                    f"Error when trying to open {self.output_file} to write the effective configs to: {e}"
                 )
                 sys.exit(EXIT_INVALID_INPUT)
         else:
@@ -36,19 +36,15 @@ class EffectiveConfiguration:
 
     def write_to_file(self):
         if self.output_file:
-            yaml_configuration = yaml.dump(
-                self.config,
-                default_flow_style=False,
-            )
             try:
+                yaml_configuration = yaml.dump(
+                    self.config,
+                    default_flow_style=False,
+                )
                 self.output_file.write(yaml_configuration)
+                self.output_file.close()
             except Exception as e:
-                logging.error(f"Error when trying to write to {self.output_file}: {e}")
-                raise e
-
-        try:
-            self.output_file.write_to_file()
-            logging.debug(f"Closed file {self.output_file}.")
-        except Exception as e:
-            logging.error(f"Error when trying to close {self.output_file}: {e}")
-            sys.exit(EXIT_PROCESSING_ERROR)
+                logging.fatal(
+                    f"Error when trying to write or close {self.output_file}: {e}"
+                )
+                sys.exit(EXIT_PROCESSING_ERROR)
