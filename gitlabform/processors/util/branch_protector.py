@@ -122,7 +122,7 @@ class BranchProtector(object):
             sys.exit(EXIT_INVALID_INPUT)
 
     def protect_using_old_api(self, requested_configuration, project_and_group, branch):
-        logging.warning(
+        cli_ui.warning(
             f"Using keys {self.old_api_keys} for configuring protected"
             " branches is deprecated and will be removed in future versions of GitLabForm."
             f" Please start using new keys: {self.new_api_keys}"

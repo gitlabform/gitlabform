@@ -42,7 +42,7 @@ class SecretVariablesProcessor(AbstractProcessor):
                     try:
                         self.gitlab.delete_secret_variable(project_and_group, key)
                     except:
-                        logging.warn(
+                        cli_ui.warning(
                             f"Could not delete variable {key} in group {project_and_group}"
                         )
                     continue

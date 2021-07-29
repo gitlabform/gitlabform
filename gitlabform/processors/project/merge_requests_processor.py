@@ -32,6 +32,7 @@ class MergeRequestsProcessor(AbstractProcessor):
             and approvals
             and "approvals_before_merge" in approvals
         ):
+            cli_ui.debug(f"Setting approvers...")
 
             # in pre-12.3 API approvers (users and groups) were configured under the same endpoint as approvals settings
             approvals_settings = self.gitlab.get_approvals_settings(project_and_group)
