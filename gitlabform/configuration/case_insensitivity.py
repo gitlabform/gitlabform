@@ -1,6 +1,8 @@
 import logging
 import sys
+import cli_ui
 
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration.core import KeyNotFoundException
 from gitlabform.configuration.projects_and_groups import ConfigurationProjectsAndGroups
 
@@ -89,7 +91,7 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
                         f"They are: {', '.join(almost_duplicates)}\n"
                         f"This is not allowed as we ignore the case for group and project names."
                     )
-                    sys.exit(1)
+                    sys.exit(EXIT_INVALID_INPUT)
 
     def _find_almost_duplicates(self, configuration_path):
         """

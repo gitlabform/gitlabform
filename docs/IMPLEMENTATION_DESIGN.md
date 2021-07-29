@@ -6,7 +6,7 @@ It explains the "why"s of the two key design concepts of this app:
 * hierarchical configuration with inheritance, merging/overwriting and additivity,
 * raw parameters passing
 
-Please also read the usual [contributing guide](CONTRIBUTION.md) for the basics of how to create PRs,
+Please also read the usual [contributing guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) for the basics of how to create PRs,
 the expected style of your code etc. - the "general how"s.
 
 This article purpose is to explain "specific how"s - explain what is where in the code and how to add features
@@ -16,9 +16,8 @@ by example.
 
 ### Packages:
   
-* `gitlabform.gitlabform` - contains the main app logic that provides the CLI, parsing of the parameters,
-  uses below two packages (reads the config file, initializes the connection to GitLab) to apply the config
-  defined in `config.yml` to the requested set of projects.
+* `gitlabform` - contains the main app logic. It provides the CLI, parsing of the parameters,
+  uses below two packages to apply the config defined in `config.yml` to the requested set of projects.
 
 * `gitlabform.gitlab` - contains the GitLab API client code, grouped mostly by the GitLab API 
   [as documented at docs.gitlab.com](https://docs.gitlab.com/ee/api/api_resources.html).
@@ -27,18 +26,15 @@ by example.
   (the latter is only for testing) and getting an effective config per GitLab project by merging
   the config on these levels: common, group and project settings.
 
-...and a trivial `bin/gitlabform` file that just runs the `gitlabform.gitlabform.GitLabForm.main()`.
-
 ## Common pattern - multiple inheritance
 
-In all of the above packages (except `gitlabform.gitlabform`, but it's an exception that will be refactored soon)
-we are using the _multiple inheritance_.
+In many of the above packages we are using _multiple inheritance_.
  
 The basic features are implemented in the "core" class defined in `core.py`. Extensions to it are defined in all other
 files as "feature" classes that inherit the "core". Finally, there is an "everything" class that groups them all - it is
 defined in the `__init__.py` file.
 
-### gitlabform.gitlabform
+### gitlabform
 
 All of the code here is in a single `GitLabFormCore` class.
 

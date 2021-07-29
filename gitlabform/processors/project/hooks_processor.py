@@ -1,5 +1,4 @@
 import logging
-import cli_ui
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -18,21 +17,21 @@ class HooksProcessor(AbstractProcessor):
             if configuration.get("hooks|" + hook + "|delete"):
                 hook_id = self.gitlab.get_hook_id(project_and_group, hook)
                 if hook_id:
-                    logging.debug(f"Deleting hook '{hook}'")
+                    logging.debug("Deleting hook '%s'", hook)
                     self.gitlab.delete_hook(project_and_group, hook_id)
                 else:
                     logging.debug(
-                        f"Not deleting hook '{hook}', because it doesn't exist"
+                        "Not deleting hook '%s', because it doesn't exist", hook
                     )
             else:
                 hook_id = self.gitlab.get_hook_id(project_and_group, hook)
                 if hook_id:
-                    logging.debug(f"Changing existing hook '{hook}'")
+                    logging.debug("Changing existing hook '%s'", hook)
                     self.gitlab.put_hook(
                         project_and_group, hook_id, hook, configuration["hooks"][hook]
                     )
                 else:
-                    logging.debug(f"Creating hook '{hook}'")
+                    logging.debug("Creating hook '%s'", hook)
                     self.gitlab.post_hook(
                         project_and_group, hook, configuration["hooks"][hook]
                     )

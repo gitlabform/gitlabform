@@ -7,12 +7,22 @@ from gitlabform.gitlab.core import NotFoundException
 
 
 class GroupsAndProjectsProvider:
+    """
+    For a query like "project/group", "group", "group/subgroup", ALL or ALL_DEFINED this
+    class gets the effective lists of groups and project, taking into account skipped groups
+    and projects and the fact that the group and project names case are somewhat case-sensitive.
+    """
+
     def __init__(self, gitlab, configuration, include_archived_projects):
         self.gitlab = gitlab
         self.configuration = configuration
         self.include_archived_projects = include_archived_projects
 
     def get_groups_and_projects(self, target: str) -> (list, list):
+        """
+        :param target: "project/group", "group", "group/subgroup", ALL or ALL_DEFINED
+        :return: tuple with lists of groups and projects that match the target query
+        """
         groups = self._get_groups(target)
         projects = self._get_projects(target, groups)
         return groups, projects

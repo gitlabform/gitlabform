@@ -7,7 +7,7 @@ import pkg_resources
 from packaging import version as packaging_version
 from cli_ui import info, green, reset, Token, purple
 
-from gitlabform import EXIT_PROCESSING_ERROR
+from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
 
 
 def show_version(skip_version_check: bool):
@@ -64,14 +64,74 @@ def show_version(skip_version_check: bool):
         cli_ui.message(*tokens_to_show, sep="")
 
 
+def show_header(
+    project_or_group, groups_and_projects_provider, non_empty_configs_provider
+):
+    if project_or_group == "ALL":
+        cli_ui.info(">>> Processing ALL groups and projects")
+    elif project_or_group == "ALL_DEFINED":
+        cli_ui.info(">>> Processing ALL groups and projects defined in config")
+
+    groups, projects = groups_and_projects_provider.get_groups_and_projects(
+        project_or_group
+    )
+
+    if len(groups) == 0 and len(projects) == 0:
+        cli_ui.error(f"Entity {project_or_group} cannot be found in GitLab!")
+        sys.exit(EXIT_INVALID_INPUT)
+
+    (
+        groups_with_non_empty_configs,
+        projects_with_non_empty_configs,
+        groups_with_empty_configs,
+        projects_with_empty_configs,
+    ) = non_empty_configs_provider.get_groups_and_projects_with_non_empty_configs(
+        groups, projects
+    )
+
+    cli_ui.debug(f"groups: {groups_with_non_empty_configs}")
+    cli_ui.debug(
+        f"(groups with empty effective configs that will be skipped: {groups_with_empty_configs})"
+    )
+    cli_ui.debug(f"projects: {projects_with_non_empty_configs}")
+    cli_ui.debug(
+        f"(projects with empty effective configs that will be skipped: {projects_with_empty_configs})"
+    )
+
+    if len(groups_with_empty_configs) == 0:
+        cli_ui.info_1(f"# of groups to process: {len(groups_with_non_empty_configs)}")
+    else:
+        cli_ui.info_1(
+            f"# of groups to process: {len(groups_with_non_empty_configs)} "
+            f"(# groups with empty effective configs that will be skipped: {len(groups_with_empty_configs)})"
+        )
+    if len(projects_with_empty_configs) == 0:
+        cli_ui.info_1(
+            f"# of projects to process: {len(projects_with_non_empty_configs)}"
+        )
+    else:
+        cli_ui.info_1(
+            f"# of projects to process: {len(projects_with_non_empty_configs)} "
+            f"(# projects with empty effective configs that will be skipped: {len(projects_with_empty_configs)})"
+        )
+
+    return projects_with_non_empty_configs, groups_with_non_empty_configs
+
+
 def show_summary(
+    groups_with_non_empty_configs: list,
+    projects_with_non_empty_configs: list,
     successful_groups: int,
     successful_projects: int,
     failed_groups: dict,
     failed_projects: dict,
 ):
-    cli_ui.info_1(f"# of groups processed successfully: {successful_groups}")
-    cli_ui.info_1(f"# of projects processed successfully: {successful_projects}")
+    if (
+        len(groups_with_non_empty_configs) > 0
+        or len(projects_with_non_empty_configs) > 0
+    ):
+        cli_ui.info_1(f"# of groups processed successfully: {successful_groups}")
+        cli_ui.info_1(f"# of projects processed successfully: {successful_projects}")
 
     if len(failed_groups) > 0:
         cli_ui.info_1(
@@ -102,9 +162,15 @@ def show_summary(
         shine = cli_ui.Symbol("✨", "!!!")
         cli_ui.info_1(
             cli_ui.green,
-            f"All requested groups/projects processes successfully!",
+            f"All requested groups/projects processed successfully!",
             cli_ui.reset,
             shine,
+        )
+    else:
+        cli_ui.info_1(
+            cli_ui.yellow,
+            "Nothing to do.",
+            cli_ui.reset,
         )
 
 

@@ -1,8 +1,6 @@
 import logging
 from typing import Dict, List
 
-import cli_ui
-
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
