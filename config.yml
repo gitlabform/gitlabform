@@ -39,7 +39,7 @@ gitlab:
 
 projects_and_groups:
   "*":
-    # common settings for ALL projects in ALL groups
+    # common settings for ALL projects and ALL groups
 
     # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
     secret_variables:

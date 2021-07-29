@@ -7,6 +7,8 @@ import cli_ui
 import yaml
 from pathlib import Path
 
+from mergedeep import merge
+
 from gitlabform import EXIT_INVALID_INPUT
 
 
@@ -100,6 +102,8 @@ class ConfigurationCore:
 
         To get the dict under it use: get("group_settings|sddc|deploy_keys")
 
+        :param default: the value to return if the key is not found. The default 'None' means that an exception
+                        will be raised in such case.
         :return: element from YAML file (dict, array, string...)
         """
         tokens = path.split("|")
@@ -115,6 +119,45 @@ class ConfigurationCore:
                 raise KeyNotFoundException
 
         return current
+
+    def get_group_config(self, group) -> dict:
+        """
+        :param group: group/subgroup
+        :return: literal configuration for this group/subgroup or empty dict if not defined
+        """
+        return self.get(f"projects_and_groups|{group}/*", {})
+
+    def get_project_config(self, group_and_project) -> dict:
+        """
+        :param group_and_project: 'group/project'
+        :return: literal configuration for this project or empty dict if not defined
+        """
+        return self.get(f"projects_and_groups|{group_and_project}", {})
+
+    def get_common_config(self) -> dict:
+        """
+        :return: literal common configuration or empty dict if not defined
+        """
+        return self.get("projects_and_groups|*", {})
+
+    def is_project_skipped(self, project) -> bool:
+        """
+        :return: if project is defined in the key with projects to skip
+        """
+        return project in self.get("skip_projects", [])
+
+    def is_group_skipped(self, group) -> bool:
+        """
+        :return: if group is defined in the key with groups to skip
+        """
+        return group in self.get("skip_groups", [])
+
+    def merge_configs(self, more_general_config, more_specific_config) -> dict:
+        """
+        :return: merge more general config with more specific configs.
+                 More specific config values take precedence over more general ones.
+        """
+        return dict(merge({}, more_general_config, more_specific_config))
 
 
 class ConfigFileNotFoundException(Exception):

@@ -53,6 +53,9 @@ class ProjectProcessors(object):
             SchedulesProcessor(gitlab),
         ]
 
+    def get_configuration_names(self):
+        return [processor.get_configuration_name() for processor in self.processors]
+
     def process_project(
         self,
         project_and_group: str,

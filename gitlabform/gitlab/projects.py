@@ -111,8 +111,8 @@ class GitLabProjects(GitLabCore):
 
     def get_all_projects(self, include_archived=False):
         """
-        :param group: group name
-        :return: sorted list of ALL projects you have access to, strings "group/project_name"
+        :param include_archived: if the archived projects should be returned too
+        :return: sorted list of ALL projects you have access to, strings like: "group/project_name"
         """
         try:
             # there are 3 states of the "archived" flag: true, false, undefined

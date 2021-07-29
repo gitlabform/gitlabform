@@ -3,9 +3,9 @@ import textwrap
 
 from xkcdpass import xkcd_password as xp
 
+from gitlabform.core import GitLabForm
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
-from gitlabform import GitLabForm
 
 CONFIG = """
 config_version: 2
@@ -187,4 +187,4 @@ def run_gitlabform(config, group_and_project):
         config_string=config,
         project_or_group=group_and_project,
     )
-    gf.main()
+    gf.run()

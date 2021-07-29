@@ -2,4 +2,8 @@ from gitlabform.core import GitLabForm
 
 
 def run():
-    GitLabForm().main()
+    GitLabForm().run()
+
+
+if __name__ == "__main__":
+    run()

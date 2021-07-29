@@ -1,8 +1,12 @@
 ## Changelog
 
-### Unreleased
+### 2.2.0
 
-* Change the User Agent to a custom `GitLabForm/<gitlabform_version> (python-requests/<requests_version>)`
+* Skip the groups and project with empty effective configs upfront and show their number if the UI,
+* Exit on configuration missing `projects_and_groups` key. This will provide a helpful error message for typos like in [#242](https://github.com/egnyte/gitlabform/issues/242).
+* Change the User Agent that the app uses when making requests to GitLab to a custom `GitLabForm/<gitlabform_version> (python-requests/<requests_version>)`
+* Make the output of some processors a bit more consistent,
+* Big refactoring and code documentation improvements that should make contributions easier!
 
 ### 2.1.2
 

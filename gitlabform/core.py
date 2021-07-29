@@ -1,15 +1,14 @@
 import argparse
 import logging.config
-import platform
 import sys
 import textwrap
 import traceback
 
 import cli_ui
 
-
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration.core import ConfigFileNotFoundException
+from gitlabform.filter import NonEmptyConfigsProvider
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.input import GroupsAndProjectsProvider
@@ -21,6 +20,7 @@ from gitlabform.ui import (
     info_project_count,
     show_version,
     show_summary,
+    show_header,
 )
 
 
@@ -88,6 +88,10 @@ class GitLabForm(object):
         )
         self.groups_and_projects_provider = GroupsAndProjectsProvider(
             self.gitlab, self.configuration, self.include_archived_projects
+        )
+
+        self.non_empty_configs_provider = NonEmptyConfigsProvider(
+            self.configuration, self.group_processors, self.project_processors
         )
 
     def parse_args(self):
@@ -268,29 +272,13 @@ class GitLabForm(object):
             cli_ui.error(f"GitLab test request failed. Exception: '{e}'")
             sys.exit(EXIT_PROCESSING_ERROR)
 
-    def main(self):
-        if self.project_or_group == "ALL":
-            cli_ui.info(">>> Processing ALL groups and projects")
-        elif self.project_or_group == "ALL_DEFINED":
-            cli_ui.info(">>> Processing ALL groups and projects defined in config")
+    def run(self):
 
-        groups, projects = self.groups_and_projects_provider.get_groups_and_projects(
-            self.project_or_group
+        projects_with_non_empty_configs, groups_with_non_empty_configs = show_header(
+            self.project_or_group,
+            self.groups_and_projects_provider,
+            self.non_empty_configs_provider,
         )
-
-        if len(groups) == 0 and len(projects) == 0:
-            cli_ui.error(f"Entity {self.project_or_group} cannot be found in GitLab!")
-            sys.exit(EXIT_INVALID_INPUT)
-        else:
-            cli_ui.debug(f"groups: {groups}")
-            cli_ui.debug(f"projects: {projects}")
-
-        cli_ui.info_1(f"# of groups to process: {len(groups)}")
-        cli_ui.info_1(f"# of projects to process: {len(projects)}")
-
-        self.process_all(projects, groups)
-
-    def process_all(self, projects_and_groups, groups):
 
         group_number = 0
         successful_groups = 0
@@ -298,7 +286,7 @@ class GitLabForm(object):
 
         effective_configuration = EffectiveConfiguration(self.output_file)
 
-        for group in groups:
+        for group in groups_with_non_empty_configs:
 
             group_number += 1
 
@@ -306,7 +294,7 @@ class GitLabForm(object):
                 info_group_count(
                     "@",
                     group_number,
-                    len(groups),
+                    len(groups_with_non_empty_configs),
                     cli_ui.yellow,
                     f"Skipping group {group} as requested to start from {self.start_from_group}...",
                     cli_ui.reset,
@@ -317,54 +305,46 @@ class GitLabForm(object):
 
             effective_configuration.add_placeholder(group)
 
-            if configuration:
-                info_group_count(
-                    "@", group_number, len(groups), f"Processing group: {group}"
+            info_group_count(
+                "@",
+                group_number,
+                len(groups_with_non_empty_configs),
+                f"Processing group: {group}",
+            )
+
+            try:
+                self.group_processors.process_group(
+                    group,
+                    configuration,
+                    dry_run=self.noop,
+                    effective_configuration=effective_configuration,
                 )
 
-                try:
-                    self.group_processors.process_group(
-                        group,
-                        configuration,
-                        dry_run=self.noop,
-                        effective_configuration=effective_configuration,
-                    )
+                successful_groups += 1
 
-                    successful_groups += 1
+            except Exception as e:
 
-                except Exception as e:
+                failed_groups[group_number] = group
 
-                    failed_groups[group_number] = group
+                trace = traceback.format_exc()
+                message = f"Error occurred while processing group {group}, exception:\n\n{e}\n\n{trace}"
 
-                    trace = traceback.format_exc()
-                    message = f"Error occurred while processing group {group}, exception:\n\n{e}\n\n{trace}"
-
-                    if self.terminate_after_error:
-                        effective_configuration.write_to_file()
-                        cli_ui.error(message)
-                        sys.exit(EXIT_PROCESSING_ERROR)
-                    else:
-                        cli_ui.warning(message)
-                finally:
-                    logging.debug(
-                        f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
-                    )
-
-            else:
-                info_group_count(
-                    "@",
-                    group_number,
-                    len(groups),
-                    cli_ui.yellow,
-                    f"Skipping group {group} as it has empty effective config.",
-                    cli_ui.reset,
+                if self.terminate_after_error:
+                    effective_configuration.write_to_file()
+                    cli_ui.error(message)
+                    sys.exit(EXIT_PROCESSING_ERROR)
+                else:
+                    cli_ui.warning(message)
+            finally:
+                logging.debug(
+                    f"@ ({group_number}/{len(groups_with_non_empty_configs)}) FINISHED Processing group: {group}"
                 )
 
         project_number = 0
         successful_projects = 0
         failed_projects = {}
 
-        for project_and_group in projects_and_groups:
+        for project_and_group in projects_with_non_empty_configs:
 
             project_number += 1
 
@@ -372,7 +352,7 @@ class GitLabForm(object):
                 info_project_count(
                     "*",
                     project_number,
-                    len(projects_and_groups),
+                    len(projects_with_non_empty_configs),
                     cli_ui.yellow,
                     f"Skipping project {project_and_group} as requested to start from {self.start_from}...",
                     cli_ui.reset,
@@ -385,55 +365,50 @@ class GitLabForm(object):
 
             effective_configuration.add_placeholder(project_and_group)
 
-            if configuration:
-                info_project_count(
-                    "*",
-                    project_number,
-                    len(projects_and_groups),
-                    f"Processing project: {project_and_group}",
+            info_project_count(
+                "*",
+                project_number,
+                len(projects_with_non_empty_configs),
+                f"Processing project: {project_and_group}",
+            )
+
+            try:
+                self.project_processors.process_project(
+                    project_and_group,
+                    configuration,
+                    dry_run=self.noop,
+                    effective_configuration=effective_configuration,
                 )
 
-                try:
-                    self.project_processors.process_project(
-                        project_and_group,
-                        configuration,
-                        dry_run=self.noop,
-                        effective_configuration=effective_configuration,
-                    )
+                successful_projects += 1
 
-                    successful_projects += 1
+            except Exception as e:
 
-                except Exception as e:
+                failed_projects[project_number] = project_and_group
 
-                    failed_projects[project_number] = project_and_group
+                trace = traceback.format_exc()
+                message = f"Error occurred while processing project {project_and_group}, exception:\n\n{e}\n\n{trace}"
 
-                    trace = traceback.format_exc()
-                    message = f"Error occurred while processing project {project_and_group}, exception:\n\n{e}\n\n{trace}"
+                if self.terminate_after_error:
+                    effective_configuration.write_to_file()
+                    cli_ui.error(message)
+                    sys.exit(EXIT_PROCESSING_ERROR)
+                else:
+                    cli_ui.warning(message)
 
-                    if self.terminate_after_error:
-                        effective_configuration.write_to_file()
-                        cli_ui.error(message)
-                        sys.exit(EXIT_PROCESSING_ERROR)
-                    else:
-                        cli_ui.warning(message)
+            finally:
 
-                finally:
-
-                    logging.debug(
-                        f"* ({project_number}/{len(projects_and_groups)}) FINISHED Processing project: {project_and_group}",
-                    )
-            else:
-                info_project_count(
-                    "*",
-                    project_number,
-                    len(projects_and_groups),
-                    cli_ui.yellow,
-                    f"Skipping project {project_and_group} as it has empty effective config.",
-                    cli_ui.reset,
+                logging.debug(
+                    f"* ({project_number}/{len(projects_with_non_empty_configs)}) FINISHED Processing project: {project_and_group}",
                 )
 
         effective_configuration.write_to_file()
 
         show_summary(
-            successful_groups, successful_projects, failed_groups, failed_projects
+            groups_with_non_empty_configs,
+            projects_with_non_empty_configs,
+            successful_groups,
+            successful_projects,
+            failed_groups,
+            failed_projects,
         )

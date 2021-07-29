@@ -1,12 +1,19 @@
 import logging
 import sys
 
+import cli_ui
 import yaml
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 
 
 class EffectiveConfiguration:
+    """
+    For upgrades and configuration refactoring we want to be able to compare the effective configurations before
+    and after the code/app change. This class provides a feature to write the effective configuration into a YAML
+    file.
+    """
+
     def __init__(self, output_file):
         if output_file:
             try:
