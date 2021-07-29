@@ -21,38 +21,43 @@ class AbstractProcessor(ABC):
         dry_run: bool,
         effective_configuration: EffectiveConfiguration,
     ):
-        if configuration.get(f"{self.get_configuration_name()}|skip"):
-            cli_ui.debug(
-                f"Skipping {self.get_configuration_name()} - explicitly configured to do so."
-            )
-            return
-        elif (
-            configuration.get("project|archive")
-            and self.get_configuration_name() != "project"
-        ):
-            cli_ui.debug(
-                f"Skipping {self.get_configuration_name()} - it is configured to be archived."
-            )
-            return
+        if self.get_configuration_name() in configuration:
+            if configuration.get(f"{self.get_configuration_name()}|skip"):
+                cli_ui.debug(
+                    f"Skipping {self.get_configuration_name()} - explicitly configured to do so."
+                )
+                return
+            elif (
+                configuration.get("project|archive")
+                and self.get_configuration_name() != "project"
+            ):
+                cli_ui.debug(
+                    f"Skipping {self.get_configuration_name()} - it is configured to be archived."
+                )
+                return
 
-        if dry_run:
-            cli_ui.debug(f"Processing {self.get_configuration_name()} in dry-run mode.")
-            self._print_diff(
+            if dry_run:
+                cli_ui.debug(
+                    f"Processing {self.get_configuration_name()} in dry-run mode."
+                )
+                self._print_diff(
+                    project_or_project_and_group,
+                    configuration.get(self.get_configuration_name()),
+                )
+            else:
+                cli_ui.debug(f"Processing {self.get_configuration_name()}")
+                self._process_configuration(project_or_project_and_group, configuration)
+
+            cli_ui.debug(
+                f"Adding effective configuration for {self.get_configuration_name()}."
+            )
+            effective_configuration.add_configuration(
                 project_or_project_and_group,
+                self.get_configuration_name(),
                 configuration.get(self.get_configuration_name()),
             )
         else:
-            cli_ui.debug(f"Processing {self.get_configuration_name()}")
-            self._process_configuration(project_or_project_and_group, configuration)
-
-        cli_ui.debug(
-            f"Adding effective configuration for {self.get_configuration_name()}."
-        )
-        effective_configuration.add_configuration(
-            project_or_project_and_group,
-            self.get_configuration_name(),
-            configuration.get(self.get_configuration_name()),
-        )
+            cli_ui.debug("Skipping %s - not in config." % self.__configuration_name)
 
     @abstractmethod
     def _process_configuration(
