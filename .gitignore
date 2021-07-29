@@ -54,3 +54,5 @@ gitlab_url.txt
 *.gitlab-license
 
 output.yml
+
+.tox/

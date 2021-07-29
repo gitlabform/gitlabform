@@ -35,7 +35,7 @@ jobs:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: |
           ./dev/run_gitlab_in_docker.sh
-          py.test gitlabform/gitlabform/test
+          py.test gitlabform/test
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -52,7 +52,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pip install -e .[test]
           pip install tox tox-gh-actions
       - name: Test with tox
         run: |
