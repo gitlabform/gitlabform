@@ -51,10 +51,6 @@ class TestFiles:
     def test__set_file_specific_branch(self, gitlab, group, project, branches):
         group_and_project_name = f"{group}/{project}"
 
-        # main branch is protected by default
-        branch = gitlab.get_branch(group_and_project_name, "main")
-        assert branch["protected"] is True
-
         set_file_specific_branch = f"""
         projects_and_groups:
           {group_and_project_name}:
@@ -81,7 +77,7 @@ class TestFiles:
         )
         assert other_branch_file_content == DEFAULT_README
 
-        # check if main stays protected
+        # check if main stays protected after the file update
         branch = gitlab.get_branch(group_and_project_name, "main")
         assert branch["protected"] is True
 
