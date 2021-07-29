@@ -28,7 +28,7 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
                     projects.append(element)
             return sorted(projects)
         except:
-            logging.fatal(
+            cli_ui.error(
                 "Configuration has to contain non-empty 'projects_and_groups' key."
             )
             sys.exit(EXIT_INVALID_INPUT)
@@ -152,7 +152,7 @@ class ConfigurationProjectsAndGroups(ConfigurationCore):
                     groups.append(group_name)
             return sorted(groups)
         except:
-            logging.fatal(
+            cli_ui.error(
                 "Configuration has to contain non-empty 'projects_and_groups' key."
             )
             sys.exit(EXIT_INVALID_INPUT)

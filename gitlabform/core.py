@@ -225,15 +225,17 @@ class GitLabForm(object):
 
     def configure_output(self, tests=False):
 
-        # normal mode - print cli_ui.info+ + logging.fatal
-        # verbose mode - print cli_ui.* + logging.fatal
+        # normal mode - print cli_ui.info+
+        # verbose mode - print cli_ui.*
         # debug / tests mode - like above + logging.debug
 
         logging.basicConfig()
 
         if not self.verbose and not self.debug:  # normal
             cli_ui.setup()
-            level = logging.FATAL
+            level = (
+                logging.FATAL
+            )  # de facto disabled as we don't use logging different than debug in this project
         else:
             if (
                 self.debug or tests
@@ -242,7 +244,9 @@ class GitLabForm(object):
                 level = logging.DEBUG
             elif self.verbose:  # verbose
                 cli_ui.setup(verbose=True)
-                level = logging.FATAL
+                level = (
+                    logging.FATAL
+                )  # de facto disabled as we don't use logging different than debug in this project
 
         logging.getLogger().setLevel(level)
         fmt = logging.Formatter("%(message)s")

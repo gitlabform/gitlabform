@@ -15,7 +15,7 @@ class EffectiveConfiguration:
                     f"Opened file {self.output_file} to write the effective configs to."
                 )
             except Exception as e:
-                logging.fatal(
+                cli_ui.error(
                     f"Error when trying to open {self.output_file} to write the effective configs to: {e}"
                 )
                 sys.exit(EXIT_INVALID_INPUT)
@@ -44,7 +44,7 @@ class EffectiveConfiguration:
                 self.output_file.write(yaml_configuration)
                 self.output_file.close()
             except Exception as e:
-                logging.fatal(
+                cli_ui.error(
                     f"Error when trying to write or close {self.output_file}: {e}"
                 )
                 sys.exit(EXIT_PROCESSING_ERROR)

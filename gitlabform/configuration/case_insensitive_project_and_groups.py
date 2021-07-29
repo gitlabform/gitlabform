@@ -84,7 +84,7 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
             if self.get(path, 0):
                 almost_duplicates = self._find_almost_duplicates(path)
                 if almost_duplicates:
-                    logging.fatal(
+                    cli_ui.error(
                         f"There are almost duplicates in the keys of {path} - they differ only in case.\n"
                         f"They are: {', '.join(almost_duplicates)}\n"
                         f"This is not allowed as we ignore the case for group and project names."

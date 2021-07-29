@@ -141,14 +141,13 @@ class FilesProcessor(AbstractProcessor):
                                 )
                             else:
                                 logging.debug(
-                                    "Not changing file '%s' in branch '%s' "
-                                    "(overwrite flag not set)",
+                                    "Not changing file '%s' in branch '%s' - overwrite flag not set.",
                                     file,
                                     branch,
                                 )
                         else:
                             logging.debug(
-                                "Not changing file '%s' in branch '%s' (it's content is already"
+                                "Not changing file '%s' in branch '%s' - it's content is already"
                                 " as provided)",
                                 file,
                                 branch,

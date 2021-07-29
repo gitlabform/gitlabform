@@ -16,6 +16,9 @@ class MembersProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         groups = configuration.get("members|groups")
         if groups:
+
+            cli_ui.debug("Processing groups as members...")
+
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
             for group in groups:
                 expires_at = (
@@ -35,8 +38,10 @@ class MembersProcessor(AbstractProcessor):
                     and expires_at == current_groups[group]["expires_at"]
                     and access_level == current_groups[group]["group_access_level"]
                 ):
-                    logging.info("Ignoring group '%s' as it is already a member", group)
-                    logging.info(
+                    logging.debug(
+                        "Ignoring group '%s' as it is already a member", group
+                    )
+                    logging.debug(
                         "Current settings for '%s' are: %s"
                         % (group, current_groups[group])
                     )
@@ -54,6 +59,9 @@ class MembersProcessor(AbstractProcessor):
 
         users = configuration.get("members|users")
         if users:
+
+            cli_ui.debug("Processing users as members...")
+
             current_members = self.gitlab.get_members_from_project(project_and_group)
             for user in users:
                 expires_at = (
@@ -72,13 +80,13 @@ class MembersProcessor(AbstractProcessor):
                     and expires_at == current_members[user]["expires_at"]
                     and access_level == current_members[user]["access_level"]
                 ):
-                    logging.info("Ignoring user '%s' as it is already a member", user)
-                    logging.info(
+                    logging.debug("Ignoring user '%s' as it is already a member", user)
+                    logging.debug(
                         "Current settings for '%s' are: %s"
                         % (user, current_members[user])
                     )
                 else:
-                    logging.info("Setting user '%s' as a member", user)
+                    logging.debug("Setting user '%s' as a member", user)
                     access = access_level
                     expiry = expires_at
                     self.gitlab.remove_member_from_project(project_and_group, user)
