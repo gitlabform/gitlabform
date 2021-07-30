@@ -37,6 +37,7 @@ $ gitlabform --noop some_group
 
 * Exit on configuration missing `projects_and_groups` key. This will provide a helpful error message for typos like in [#242](https://github.com/egnyte/gitlabform/issues/242).
 * Change the User Agent that the app uses when making requests to GitLab to a custom `GitLabForm/<gitlabform_version> (python-requests/<requests_version>)`.
+* Allow 0 (no access) in Protected Tags. Fixes [#172](https://github.com/egnyte/gitlabform/issues/172).
 * Make the output of some processors a bit more consistent.
 * Big refactoring and code documentation improvements that should make contributions easier!
 
