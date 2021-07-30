@@ -4,7 +4,7 @@ import textwrap
 from xkcdpass import xkcd_password as xp
 
 from gitlabform.core import GitLabForm
-from gitlabform.gitlab import GitLab
+from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 
 CONFIG = """
@@ -34,10 +34,6 @@ for env_var, file_paths in env_vars_and_file_paths.items():
                     print(f"Failed to read {file_path}: {e}")
             else:
                 print(f"{file_path} doesn't exist.")
-
-DEVELOPER_ACCESS = 30
-MAINTAINER_ACCESS = 40
-OWNER_ACCESS = 50
 
 gl = GitLab(config_string=CONFIG)
 
@@ -111,7 +107,9 @@ def create_users_in_project(user_base_name, no_of_users, project_and_group):
             )
 
         try:
-            gl.add_member_to_project(project_and_group, username, DEVELOPER_ACCESS)
+            gl.add_member_to_project(
+                project_and_group, username, AccessLevel.DEVELOPER_ACCESS
+            )
         except UnexpectedResponseException:
             # this is fine - user is already in the project
             pass
@@ -143,7 +141,7 @@ def remove_users_from_project(user_base_name, no_of_users, project_and_group):
         gl.remove_member_from_project(project_and_group, username)
 
 
-def add_users_to_group(group_name, usernames, access_level=DEVELOPER_ACCESS):
+def add_users_to_group(group_name, usernames, access_level=AccessLevel.DEVELOPER):
     for username in usernames:
         try:
             gl.add_member_to_group(group_name, username, access_level)

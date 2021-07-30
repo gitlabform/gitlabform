@@ -1,5 +1,6 @@
 import pytest
 
+from gitlabform.gitlab import AccessLevel
 from gitlabform.test import (
     run_gitlabform,
 )
@@ -8,9 +9,9 @@ from gitlabform.test import (
 @pytest.fixture(scope="function")
 def one_owner_and_two_developers(gitlab, group, users):
 
-    gitlab.add_member_to_group(group, users[0], 50)
-    gitlab.add_member_to_group(group, users[1], 30)
-    gitlab.add_member_to_group(group, users[2], 30)
+    gitlab.add_member_to_group(group, users[0], AccessLevel.OWNER.value)
+    gitlab.add_member_to_group(group, users[1], AccessLevel.DEVELOPER.value)
+    gitlab.add_member_to_group(group, users[2], AccessLevel.DEVELOPER.value)
     gitlab.remove_member_from_group(group, "root")
 
     yield group
@@ -19,7 +20,7 @@ def one_owner_and_two_developers(gitlab, group, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    gitlab.add_member_to_group(group, "root", 50)
+    gitlab.add_member_to_group(group, "root", AccessLevel.OWNER.value)
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -38,13 +39,13 @@ class TestGroupMembers:
           {group}/*:
             group_members:
               {users[0]}:
-                access_level: 50
+                access_level: {AccessLevel.OWNER.value}
               {users[1]}:
-                access_level: 30
+                access_level: {AccessLevel.DEVELOPER.value}
               {users[2]}:
-                access_level: 30
+                access_level: {AccessLevel.DEVELOPER.value}
               {user_to_add}: # new user 1
-                access_level: 30
+                access_level: {AccessLevel.DEVELOPER.value}
         """
 
         run_gitlabform(add_users, group)
@@ -66,9 +67,9 @@ class TestGroupMembers:
             enforce_group_members: true
             group_members:
               {users[0]}:
-                access_level: 50
+                access_level: {AccessLevel.OWNER.value}
               {users[1]}:
-                access_level: 30
+                access_level: {AccessLevel.DEVELOPER.value}
         """
 
         run_gitlabform(remove_users, group)
@@ -93,9 +94,9 @@ class TestGroupMembers:
                 enforce_group_members: false
                 group_members:
                   {users[0]}:
-                    access_level: 50
+                    access_level: {AccessLevel.OWNER.value}
                   {users[1]}:
-                    access_level: 30
+                    access_level: {AccessLevel.DEVELOPER.value}
             """,
             # flag not set at all (but the default is false)
             f"""
@@ -103,9 +104,9 @@ class TestGroupMembers:
               {group}/*:
                 group_members:
                   {users[0]}:
-                    access_level: 50
+                    access_level: {AccessLevel.OWNER.value}
                   {users[1]}:
-                    access_level: 30
+                    access_level: {AccessLevel.DEVELOPER.value}
             """,
         ]
         for setup in setups:
@@ -125,14 +126,14 @@ class TestGroupMembers:
         self, gitlab, group, users, one_owner_and_two_developers
     ):
 
-        new_access_level = 40
+        new_access_level = {AccessLevel.MAINTAINER.value}
 
         change_some_users_access = f"""
         projects_and_groups:
           {group}/*:
             group_members:
               {users[0]}:
-                access_level: 50
+                access_level: {AccessLevel.OWNER.value}
               {users[1]}:
                 access_level: {new_access_level} # changed level
               {users[2]}:
@@ -144,7 +145,7 @@ class TestGroupMembers:
         members = gitlab.get_group_members(group)
         for member in members:
             if member["username"] == f"{users[0]}":
-                assert member["access_level"] == 50
+                assert member["access_level"] == AccessLevel.OWNER.value
             if member["username"] == f"{users[1]}":
                 assert member["access_level"] == new_access_level
             if member["username"] == f"{users[2]}":
@@ -157,11 +158,11 @@ class TestGroupMembers:
           {group}/*:
             group_members:
               {users[0]}:
-                access_level: 30 # only developer now
+                access_level: {AccessLevel.DEVELOPER.value} # only developer now
               {users[1]}:
-                access_level: 50 # new owner
+                access_level: {AccessLevel.OWNER.value} # new owner
               {users[2]}:
-                access_level: 30
+                access_level: {AccessLevel.DEVELOPER.value}
         """
 
         run_gitlabform(change_owner, group)
@@ -171,11 +172,13 @@ class TestGroupMembers:
 
         for member in members:
             if member["username"] == f"{users[0]}":
-                assert member["access_level"] == 30  # only developer now
+                assert (
+                    member["access_level"] == AccessLevel.DEVELOPER.value
+                )  # only developer now
             if member["username"] == f"{users[1]}":
-                assert member["access_level"] == 50  # new owner
+                assert member["access_level"] == AccessLevel.OWNER.value  # new owner
             if member["username"] == f"{users[2]}":
-                assert member["access_level"] == 30
+                assert member["access_level"] == AccessLevel.DEVELOPER.value
 
     def test__zero_owners(self, gitlab, group, users):
         zero_owners = f"""
@@ -184,7 +187,7 @@ class TestGroupMembers:
             enforce_group_members: true
             group_members:
               {users[3]}:
-                access_level: 40
+                access_level: {AccessLevel.MAINTAINER.value}
         """
 
         with pytest.raises(SystemExit):
