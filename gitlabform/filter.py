@@ -1,3 +1,10 @@
+import sys
+
+import cli_ui
+
+from gitlabform import EXIT_INVALID_INPUT
+
+
 class NonEmptyConfigsProvider(object):
     """
     To speed up the processing of possibly long groups and projects lists we want to quickly remove
@@ -20,6 +27,12 @@ class NonEmptyConfigsProvider(object):
         self.configuration = configuration
         self.group_processors = group_processors
         self.project_processors = project_processors
+
+        if not self.configuration.get("projects_and_groups", {}):
+            cli_ui.error(
+                "Configuration has to contain non-empty 'projects_and_groups' key."
+            )
+            sys.exit(EXIT_INVALID_INPUT)
 
     def get_groups_and_projects_with_non_empty_configs(
         self, groups: list, projects: list

@@ -17,20 +17,12 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
         """
         :return: sorted list of projects names, that are EXPLICITLY defined in the config
         """
-        try:
-            projects = []
-            projects_and_groups = self.get("projects_and_groups")
-            if len(projects_and_groups) == 0:
-                raise EmptyConfigException
-            for element in projects_and_groups.keys():
-                if element != "*" and not element.endswith("/*"):
-                    projects.append(element)
-            return sorted(projects)
-        except:
-            cli_ui.error(
-                "Configuration has to contain non-empty 'projects_and_groups' key."
-            )
-            sys.exit(EXIT_INVALID_INPUT)
+        projects = []
+        projects_and_groups = self.get("projects_and_groups")
+        for element in projects_and_groups.keys():
+            if element != "*" and not element.endswith("/*"):
+                projects.append(element)
+        return sorted(projects)
 
     def get_effective_config_for_project(self, group_and_project) -> dict:
         """

@@ -17,22 +17,14 @@ class ConfigurationGroups(ConfigurationCore):
         """
         :return: sorted list of groups that are EXPLICITLY defined in the config
         """
-        try:
-            groups = []
-            projects_and_groups = self.get("projects_and_groups")
-            if len(projects_and_groups) == 0:
-                raise EmptyConfigException
-            for element in projects_and_groups.keys():
-                if element.endswith("/*"):
-                    # cut off that "/*"
-                    group_name = element[:-2]
-                    groups.append(group_name)
-            return sorted(groups)
-        except:
-            cli_ui.error(
-                "Configuration has to contain non-empty 'projects_and_groups' key."
-            )
-            sys.exit(EXIT_INVALID_INPUT)
+        groups = []
+        projects_and_groups = self.get("projects_and_groups")
+        for element in projects_and_groups.keys():
+            if element.endswith("/*"):
+                # cut off that "/*"
+                group_name = element[:-2]
+                groups.append(group_name)
+        return sorted(groups)
 
     def get_effective_config_for_group(self, group) -> dict:
         """

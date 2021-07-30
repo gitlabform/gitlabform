@@ -71,11 +71,8 @@ class ConfigurationCore:
                     )
                     sys.exit(EXIT_INVALID_INPUT)
 
-                try:
-                    self.config.get("projects_and_groups")
-                except KeyNotFoundException:
-                    cli_ui.error("'projects_and_groups' key in the config is required.")
-                    sys.exit(EXIT_INVALID_INPUT)
+                # we are NOT checking for the existence of non-empty 'projects_and_groups' key here
+                # as it would break using GitLabForm as a library
 
         except (FileNotFoundError, IOError):
             raise ConfigFileNotFoundException(config_path)
