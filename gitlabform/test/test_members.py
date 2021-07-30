@@ -1,5 +1,6 @@
 import pytest
 
+from gitlabform.gitlab import AccessLevel
 from gitlabform.test import (
     run_gitlabform,
 )
@@ -9,9 +10,15 @@ from gitlabform.test import (
 def one_maintainer_and_two_developers(gitlab, group, project, users):
     group_and_project = f"{group}/{project}"
 
-    gitlab.add_member_to_project(group_and_project, users[0], 40)
-    gitlab.add_member_to_project(group_and_project, users[1], 30)
-    gitlab.add_member_to_project(group_and_project, users[2], 30)
+    gitlab.add_member_to_project(
+        group_and_project, users[0], AccessLevel.MAINTAINER.value
+    )
+    gitlab.add_member_to_project(
+        group_and_project, users[1], AccessLevel.DEVELOPER.value
+    )
+    gitlab.add_member_to_project(
+        group_and_project, users[2], AccessLevel.DEVELOPER.value
+    )
 
     yield group_and_project
 
@@ -23,8 +30,8 @@ def one_maintainer_and_two_developers(gitlab, group, project, users):
 
 @pytest.fixture(scope="function")
 def other_group_with_users(gitlab, other_group, other_users):
-    gitlab.add_member_to_group(other_group, other_users[0], 50)
-    gitlab.add_member_to_group(other_group, other_users[1], 30)
+    gitlab.add_member_to_group(other_group, other_users[0], AccessLevel.OWNER.value)
+    gitlab.add_member_to_group(other_group, other_users[1], AccessLevel.DEVELOPER.value)
     gitlab.remove_member_from_group(other_group, "root")
 
     # TODO: make it nicer than a duplicated list of users from above
@@ -33,7 +40,7 @@ def other_group_with_users(gitlab, other_group, other_users):
     # we are running tests with root's token, so every group is created
     # with a single user - root as owner. we restore the group to
     # this state here.
-    gitlab.add_member_to_group(other_group, "root", 50)
+    gitlab.add_member_to_group(other_group, "root", AccessLevel.OWNER.value)
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -59,7 +66,7 @@ class TestMembers:
             members:
               users:
                 {user_to_add}: # new user
-                  access_level: 30
+                  access_level: {AccessLevel.DEVELOPER.value}
         """
 
         run_gitlabform(add_users, group_and_project)
@@ -98,7 +105,7 @@ class TestMembers:
             members:
               groups:
                 {other_group}:
-                  group_access: 40
+                  group_access: {AccessLevel.MAINTAINER.value}
         """
 
         run_gitlabform(add_group, group_and_project)
@@ -112,7 +119,7 @@ class TestMembers:
             if member["username"] in other_group_users:
                 # "group_access" is the *maximum* access level,
                 # see https://docs.gitlab.com/ee/user/project/members/share_project_with_groups.html#maximum-access-level
-                assert member["access_level"] <= 40
+                assert member["access_level"] <= AccessLevel.MAINTAINER.value
 
         no_of_groups_shared = len(gitlab.get_shared_with_groups(group_and_project))
         assert no_of_groups_shared == 1
@@ -126,7 +133,7 @@ class TestMembers:
             members:
               # there should be a sub-key 'users' here, not directly a user
               {project}_user1: 
-                access_level: 30
+                access_level: {AccessLevel.DEVELOPER.value}
         """
 
         with pytest.raises(SystemExit):

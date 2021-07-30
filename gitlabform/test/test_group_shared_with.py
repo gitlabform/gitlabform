@@ -1,5 +1,6 @@
 import pytest
 
+from gitlabform.gitlab import AccessLevel
 from gitlabform.test import (
     run_gitlabform,
 )
@@ -8,7 +9,7 @@ from gitlabform.test import (
 @pytest.fixture(scope="function")
 def one_owner(gitlab, group, groups, sub_group, users):
 
-    gitlab.add_member_to_group(group, users[0], 50)
+    gitlab.add_member_to_group(group, users[0], AccessLevel.OWNER.value)
     gitlab.remove_member_from_group(group, "root")
 
     yield group
@@ -17,7 +18,7 @@ def one_owner(gitlab, group, groups, sub_group, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    gitlab.add_member_to_group(group, "root", 50)
+    gitlab.add_member_to_group(group, "root", AccessLevel.OWNER.value)
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -38,12 +39,12 @@ class TestGroupSharedWith:
           {group}/*:
             group_members:
               {users[0]}:
-                access_level: 50
+                access_level: {AccessLevel.OWNER.value}
             group_shared_with:
               {groups[0]}:
-                group_access_level: 30
+                group_access_level: {AccessLevel.DEVELOPER.value}
               {groups[1]}:
-                group_access_level: 30
+                group_access_level: {AccessLevel.DEVELOPER.value}
         """
 
         run_gitlabform(add_shared_with, group)
@@ -62,10 +63,10 @@ class TestGroupSharedWith:
           {group}/*:
             group_members:
               {users[0]}:
-                access_level: 50
+                access_level: {AccessLevel.OWNER.value}
             group_shared_with:
               {sub_group}:
-                group_access_level: 30
+                group_access_level: {AccessLevel.DEVELOPER.value}
         """
 
         run_gitlabform(add_shared_with, group)
@@ -78,8 +79,8 @@ class TestGroupSharedWith:
 
     def test__remove_group(self, gitlab, group, users, groups, one_owner):
 
-        gitlab.add_share_to_group(group, groups[0], 50)
-        gitlab.add_share_to_group(group, groups[1], 50)
+        gitlab.add_share_to_group(group, groups[0], AccessLevel.OWNER.value)
+        gitlab.add_share_to_group(group, groups[1], AccessLevel.OWNER.value)
 
         no_of_members_before = len(gitlab.get_group_members(group))
         no_of_shared_with_before = len(gitlab.get_group_shared_with(group))
@@ -90,10 +91,10 @@ class TestGroupSharedWith:
             enforce_group_members: true
             group_members:
               {users[0]}:
-                access_level: 50
+                access_level: {AccessLevel.OWNER.value}
             group_shared_with:
               {groups[0]}:
-                group_access_level: 30
+                group_access_level: {AccessLevel.DEVELOPER.value}
         """
 
         run_gitlabform(remove_group, group)
@@ -121,7 +122,7 @@ class TestGroupSharedWith:
                 enforce_group_members: false
                 group_members:
                   {users[0]}:
-                    access_level: 50
+                    access_level: {AccessLevel.OWNER.value}
                 group_shared_with: []
             """,
             # flag not set at all (but the default is false)
@@ -130,7 +131,7 @@ class TestGroupSharedWith:
               {group}/*:
                 group_members:
                   {users[0]}:
-                    access_level: 50
+                    access_level: {AccessLevel.OWNER.value}
                 group_shared_with: []
             """,
         ]
@@ -155,12 +156,12 @@ class TestGroupSharedWith:
           {group}/*:
             group_members:
               {users[0]}:
-                access_level: 50
+                access_level: {AccessLevel.OWNER.value}
             group_shared_with:
               {groups[0]}:
-                group_access_level: 30
+                group_access_level: {AccessLevel.DEVELOPER.value}
               {groups[1]}:
-                group_access_level: 50
+                group_access_level: {AccessLevel.OWNER.value}
         """
 
         run_gitlabform(change_some_users_access, group)
@@ -168,9 +169,14 @@ class TestGroupSharedWith:
         shared_with = gitlab.get_group_shared_with(group)
         for shared_with_group in shared_with:
             if shared_with_group["group_name"] == f"{groups[0]}":
-                assert shared_with_group["group_access_level"] == 30
+                assert (
+                    shared_with_group["group_access_level"]
+                    == AccessLevel.DEVELOPER.value
+                )
             if shared_with_group["group_name"] == f"{groups[1]}":
-                assert shared_with_group["group_access_level"] == 50
+                assert (
+                    shared_with_group["group_access_level"] == AccessLevel.OWNER.value
+                )
 
     def test__remove_all(self, gitlab, group, users, one_owner):
         no_shared_with = f"""
@@ -179,7 +185,7 @@ class TestGroupSharedWith:
             enforce_group_members: true
             group_members:
               {users[0]}:
-                access_level: 50
+                access_level: {AccessLevel.OWNER.value}
             group_shared_with: []
         """
 
