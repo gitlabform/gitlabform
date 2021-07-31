@@ -23,6 +23,7 @@ pip-selfcheck.json
 
 # coverage.py
 .coverage
+coverage.xml
 
 # Setuptools distribution folder.
 /dist

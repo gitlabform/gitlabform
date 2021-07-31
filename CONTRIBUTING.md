@@ -83,7 +83,7 @@ GitLabForm uses py.test for tests. To run unit tests locally:
 pip install -e .[test]
 ```
 
-3. Run `py.test --ignore gitlabform/test` to run all tests except the acceptance tests (see below).
+3. Run `pytest tests/unit` to run all the unit tests.
 
 #### Running acceptance tests locally or on own GitLab instance
 
@@ -98,13 +98,13 @@ against a disposable GitLab instance running as a Docker container OR use your o
 ./dev/run_gitlab_in_docker.sh
 ```
 
-2. Run `py.test gitlabform/test` to start all tests.
-To run only a single class with tests run f.e. `py.test gitlabform/test -k "TestArchiveProject"`.
+2. Run `pytest tests/acceptance` to start all tests.
+To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
 
 ##### Running acceptance tests using your own GitLab instance
 
-**Note**: although GitLabForm acceptance tests operate own their own groups, projects and users, it should be safe
-to run them against your own GitLab instance, but we DO NOT take any responsibility for it. Please review 
+**Note**: GitLabForm acceptance tests operate own their own groups, projects and users and it should be safe
+to run them on any GitLab instance. However we do not take any responsibility for it. Please review 
 the code to ensure what it does and run it at your own risk!
 
 1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
@@ -114,8 +114,8 @@ export GITLAB_URL="https://mygitlab.company.com"
 export GITLAB_TOKEN="<my admin user API token>"
 ```
 
-2. Run `py.test gitlabform/test` to start all tests
-To run only a single class with tests run f.e. `py.test gitlabform/test -k "TestArchiveProject"`.
+2. Run `pytest tests/acceptance` to start all tests
+To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
 
 #### General coding guidelines
 
