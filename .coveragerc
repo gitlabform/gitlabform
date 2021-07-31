@@ -1,0 +1,12 @@
+[run]
+source =
+    gitlabform
+
+omit =
+    # don't check the code that has (processors) or would rather need (gitlab) acceptance
+    # tests than unit tests
+
+    */gitlab/*
+    */processors/group/*
+    */processors/project/*
+
