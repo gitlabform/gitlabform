@@ -74,4 +74,4 @@ jobs:
           pip install bandit
       - name: Run bandit
         run: |
-          bandit -r gitlabform -x "*/test/*"
+          bandit -r gitlabform
