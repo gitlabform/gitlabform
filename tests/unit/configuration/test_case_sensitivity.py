@@ -1,5 +1,6 @@
 import pytest
 
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 
 
@@ -56,8 +57,9 @@ def test__config_with_different_case_duplicate_groups():
           visibility: public
     """
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as e:
         Configuration(config_string=config_yaml)
+    assert e.value.code == EXIT_INVALID_INPUT
 
 
 def test__config_with_different_case_duplicate_projects():
@@ -71,8 +73,9 @@ def test__config_with_different_case_duplicate_projects():
           visibility: public
     """
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as e:
         Configuration(config_string=config_yaml)
+    assert e.value.code == EXIT_INVALID_INPUT
 
 
 def test__config_with_different_case_duplicate_skip_groups():
@@ -82,8 +85,9 @@ def test__config_with_different_case_duplicate_skip_groups():
       - GROUPnameWITHvaryingCASE
     """
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as e:
         Configuration(config_string=config_yaml)
+    assert e.value.code == EXIT_INVALID_INPUT
 
 
 def test__config_with_different_case_duplicate_skip_projects():
@@ -93,5 +97,6 @@ def test__config_with_different_case_duplicate_skip_projects():
       - GroupNameWithVaryingCase/ProjectWithVaryingCase
     """
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as e:
         Configuration(config_string=config_yaml)
+    assert e.value.code == EXIT_INVALID_INPUT
