@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import cli_ui
 
@@ -94,8 +93,8 @@ class MembersProcessor(AbstractProcessor):
                         project_and_group, user, access, expiry
                     )
         if not groups and not users:
-            cli_ui.error(
+            cli_ui.fatal(
                 "Project members configuration section has to contain"
-                " either 'users' or 'groups' non-empty keys."
+                " either 'users' or 'groups' non-empty keys.",
+                exit_code=EXIT_INVALID_INPUT,
             )
-            sys.exit(EXIT_INVALID_INPUT)

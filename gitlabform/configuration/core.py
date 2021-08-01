@@ -1,6 +1,5 @@
 import os
 import logging
-import sys
 import textwrap
 
 import cli_ui
@@ -20,10 +19,10 @@ class ConfigurationCore:
     def __init__(self, config_path=None, config_string=None):
 
         if config_path and config_string:
-            cli_ui.error(
-                "Please initialize with either config_path or config_string, not both."
+            cli_ui.fatal(
+                "Please initialize with either config_path or config_string, not both.",
+                exit_code=EXIT_INVALID_INPUT,
             )
-            sys.exit(EXIT_INVALID_INPUT)
 
         try:
             if config_string:
@@ -54,22 +53,22 @@ class ConfigurationCore:
                 self.config_dir = os.path.dirname(config_path)
 
                 if self.config.get("example_config"):
-                    cli_ui.error(
+                    cli_ui.fatal(
                         "Example config detected, aborting.\n"
                         "Haven't you forgotten to use `-c <config_file>` parameter?\n"
                         "If you created your config based on the example config.yml,"
-                        " then please remove 'example_config' key."
+                        " then please remove 'example_config' key.",
+                        exit_code=EXIT_INVALID_INPUT,
                     )
-                    sys.exit(EXIT_INVALID_INPUT)
 
                 if self.config.get("config_version", 1) != 2:
-                    cli_ui.error(
+                    cli_ui.fatal(
                         "This version of GitLabForm requires 'config_version: 2' entry in the config.\n"
                         "This ensures that when the application behavior changes in a backward incompatible way,"
                         " you won't apply unexpected configuration to your GitLab instance.\n"
-                        "Please read the upgrading guide here: https://bit.ly/3ub1g5C\n"
+                        "Please read the upgrading guide here: https://bit.ly/3ub1g5C\n",
+                        exit_code=EXIT_INVALID_INPUT,
                     )
-                    sys.exit(EXIT_INVALID_INPUT)
 
                 # we are NOT checking for the existence of non-empty 'projects_and_groups' key here
                 # as it would break using GitLabForm as a library

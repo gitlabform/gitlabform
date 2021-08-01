@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import cli_ui
 
@@ -37,7 +36,9 @@ class TagsProcessor(AbstractProcessor):
             except NotFoundException:
                 message = f"Tag '{tag}' not found when trying to set it as protected/unprotected!"
                 if self.strict:
-                    cli_ui.error(message)
-                    sys.exit(EXIT_PROCESSING_ERROR)
+                    cli_ui.fatal(
+                        message,
+                        exit_code=EXIT_PROCESSING_ERROR,
+                    )
                 else:
                     cli_ui.warning(message)

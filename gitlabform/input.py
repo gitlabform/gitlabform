@@ -1,5 +1,3 @@
-import sys
-
 import cli_ui
 
 from gitlabform import EXIT_INVALID_INPUT
@@ -51,10 +49,10 @@ class GroupsAndProjectsProvider:
                     group = self.gitlab.get_group_case_insensitive(group)
                     effective_groups_proper_case.append(group["full_path"])
                 except NotFoundException:
-                    cli_ui.error(
-                        f"Configuration contains group {group} but it cannot be found in GitLab!"
+                    cli_ui.fatal(
+                        f"Configuration contains group {group} but it cannot be found in GitLab!",
+                        exit_code=EXIT_INVALID_INPUT,
                     )
-                    sys.exit(EXIT_INVALID_INPUT)
 
             return effective_groups_proper_case
 
@@ -74,7 +72,6 @@ class GroupsAndProjectsProvider:
             pass
 
         if target == "ALL_DEFINED":
-            # get projects explicitly defined in the configuration,
             requested_projects = self.configuration.get_projects()
 
         else:

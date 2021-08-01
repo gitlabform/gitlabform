@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import cli_ui
 
@@ -35,8 +34,10 @@ class BranchProtector(object):
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
             if self.strict:
-                cli_ui.error(message)
-                sys.exit(EXIT_PROCESSING_ERROR)
+                cli_ui.fatal(
+                    message,
+                    exit_code=EXIT_PROCESSING_ERROR,
+                )
             else:
                 cli_ui.warning(message)
 
@@ -76,8 +77,10 @@ class BranchProtector(object):
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
             if self.strict:
-                cli_ui.error(message)
-                sys.exit(EXIT_PROCESSING_ERROR)
+                cli_ui.fatal(
+                    message,
+                    exit_code=EXIT_PROCESSING_ERROR,
+                )
             else:
                 cli_ui.warning(message)
 
@@ -97,8 +100,10 @@ class BranchProtector(object):
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
             if self.strict:
-                cli_ui.error(message)
-                sys.exit(EXIT_PROCESSING_ERROR)
+                cli_ui.fatal(
+                    message,
+                    exit_code=EXIT_PROCESSING_ERROR,
+                )
             else:
                 cli_ui.warning(message)
 
@@ -115,11 +120,11 @@ class BranchProtector(object):
             return "old"
 
         else:
-            cli_ui.error(
+            cli_ui.fatal(
                 f"Invalid configuration for protecting branches in project '{project_and_group}',"
-                f" branch '{branch}' - missing keys."
+                f" branch '{branch}' - missing keys.",
+                exit_code=EXIT_INVALID_INPUT,
             )
-            sys.exit(EXIT_INVALID_INPUT)
 
     def protect_using_old_api(self, requested_configuration, project_and_group, branch):
         cli_ui.warning(

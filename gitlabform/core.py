@@ -77,8 +77,10 @@ class GitLabForm(object):
                 sys.exit(0)
 
             if not self.project_or_group:
-                cli_ui.error("project_or_group parameter is required.")
-                sys.exit(EXIT_INVALID_INPUT)
+                cli_ui.fatal(
+                    "project_or_group parameter is required.",
+                    exit_code=EXIT_INVALID_INPUT,
+                )
 
         self.gitlab, self.configuration = self.initialize_configuration_and_gitlab()
 
@@ -266,11 +268,15 @@ class GitLabForm(object):
             configuration = gitlab.get_configuration()
             return gitlab, configuration
         except ConfigFileNotFoundException as e:
-            cli_ui.error(f"Config file not found at: {e}")
-            sys.exit(EXIT_INVALID_INPUT)
+            cli_ui.fatal(
+                f"Config file not found at: {e}",
+                exit_code=EXIT_INVALID_INPUT,
+            )
         except TestRequestFailedException as e:
-            cli_ui.error(f"GitLab test request failed. Exception: '{e}'")
-            sys.exit(EXIT_PROCESSING_ERROR)
+            cli_ui.fatal(
+                f"GitLab test request failed. Exception: '{e}'",
+                EXIT_PROCESSING_ERROR,
+            )
 
     def run(self):
 
@@ -331,8 +337,10 @@ class GitLabForm(object):
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
-                    cli_ui.error(message)
-                    sys.exit(EXIT_PROCESSING_ERROR)
+                    cli_ui.fatal(
+                        message,
+                        exit_code=EXIT_PROCESSING_ERROR,
+                    )
                 else:
                     cli_ui.warning(message)
             finally:
@@ -391,8 +399,10 @@ class GitLabForm(object):
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
-                    cli_ui.error(message)
-                    sys.exit(EXIT_PROCESSING_ERROR)
+                    cli_ui.fatal(
+                        message,
+                        exit_code=EXIT_PROCESSING_ERROR,
+                    )
                 else:
                     cli_ui.warning(message)
 
