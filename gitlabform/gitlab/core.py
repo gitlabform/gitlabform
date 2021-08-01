@@ -6,7 +6,10 @@ import pkg_resources
 import requests
 import os
 
+# noinspection PyPackageRequirements
 import urllib3
+
+# noinspection PyPackageRequirements
 from urllib3.util.retry import Retry
 from urllib import parse
 from requests.adapters import HTTPAdapter

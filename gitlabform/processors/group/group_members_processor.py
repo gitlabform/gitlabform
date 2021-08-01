@@ -3,7 +3,7 @@ import sys
 
 import cli_ui
 
-from gitlabform.gitlab import GitLab
+from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
@@ -31,8 +31,9 @@ class GroupMembersProcessor(AbstractProcessor):
                 users_to_set_by_access_level.setdefault(access_level, []).append(user)
 
             # check if the configured users contain at least one Owner
-            if 50 not in users_to_set_by_access_level.keys() and configuration.get(
-                "enforce_group_members"
+            if (
+                AccessLevel.OWNER.value not in users_to_set_by_access_level.keys()
+                and configuration.get("enforce_group_members")
             ):
                 cli_ui.error(
                     "With 'enforce_group_members' flag you cannot have no Owners (access_level = 50) in your "
@@ -40,9 +41,9 @@ class GroupMembersProcessor(AbstractProcessor):
                 )
                 sys.exit(EXIT_INVALID_INPUT)
 
-            # we HAVE TO start configuring access from Owners to prevent case when there is no Owner
-            # in a group
-            for level in [50, 40, 30, 20, 10]:
+            # we HAVE TO start configuring access from the highest access level - in case of groups this is Owner
+            # - to prevent a case when there is no Owner in a group
+            for level in reversed(sorted(AccessLevel.group_levels())):
 
                 users_to_set_with_this_level = (
                     users_to_set_by_access_level[level]

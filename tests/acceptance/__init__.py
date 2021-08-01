@@ -108,7 +108,7 @@ def create_users_in_project(user_base_name, no_of_users, project_and_group):
 
         try:
             gl.add_member_to_project(
-                project_and_group, username, AccessLevel.DEVELOPER_ACCESS
+                project_and_group, username, AccessLevel.DEVELOPER_ACCESS.value
             )
         except UnexpectedResponseException:
             # this is fine - user is already in the project
@@ -141,7 +141,7 @@ def remove_users_from_project(user_base_name, no_of_users, project_and_group):
         gl.remove_member_from_project(project_and_group, username)
 
 
-def add_users_to_group(group_name, usernames, access_level=AccessLevel.DEVELOPER):
+def add_users_to_group(group_name, usernames, access_level=AccessLevel.DEVELOPER.value):
     for username in usernames:
         try:
             gl.add_member_to_group(group_name, username, access_level)

@@ -1,5 +1,6 @@
 import enum
-from enum import Enum
+
+from typing import List
 
 from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
@@ -16,7 +17,7 @@ from gitlabform.gitlab.users import GitLabUsers
 
 
 @enum.unique
-class AccessLevel(Enum):
+class AccessLevel(enum.IntEnum):
     NO_ACCESS = 0
     MINIMAL = 5  # introduced in GitLab 13.5
     GUEST = 10
@@ -25,6 +26,10 @@ class AccessLevel(Enum):
     MAINTAINER = 40
     OWNER = 50  # only for groups
     ADMIN = 60
+
+    @classmethod
+    def group_levels(cls) -> List[int]:
+        return [level.value for level in AccessLevel if level <= 50]
 
 
 class GitLab(
