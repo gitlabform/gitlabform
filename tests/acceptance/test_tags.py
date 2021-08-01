@@ -1,7 +1,7 @@
 import pytest
 
 from gitlabform.gitlab import AccessLevel
-from gitlabform.test import (
+from tests.acceptance import (
     run_gitlabform,
 )
 
