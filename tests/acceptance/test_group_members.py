@@ -126,7 +126,7 @@ class TestGroupMembers:
         self, gitlab, group, users, one_owner_and_two_developers
     ):
 
-        new_access_level = {AccessLevel.MAINTAINER.value}
+        new_access_level = AccessLevel.MAINTAINER.value
 
         change_some_users_access = f"""
         projects_and_groups:
