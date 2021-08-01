@@ -1,9 +1,5 @@
 import logging
-import sys
 
-import cli_ui
-
-from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration.core import ConfigurationCore
 
 logger = logging.getLogger(__name__)
