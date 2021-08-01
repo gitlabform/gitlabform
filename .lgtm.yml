@@ -1,0 +1,4 @@
+queries:
+  # we don't print any sensitive data by default and we are giving a loud warning about using
+  # flags that enable such output
+  - exclude: py/clear-text-logging-sensitive-data

@@ -6,3 +6,5 @@ omit =
     # don't check the test themselves, obviously
     tests/*
 
+    # no point in checking this
+    setup.py
