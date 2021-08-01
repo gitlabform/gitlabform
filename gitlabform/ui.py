@@ -1,11 +1,24 @@
 import sys
 from typing import Any
 
-import cli_ui
 import luddite
 import pkg_resources
+from cli_ui import (
+    message,
+    info,
+    fatal,
+    debug,
+    info_1,
+    reset,
+    green,
+    purple,
+    blue,
+    red,
+    yellow,
+    Symbol,
+    Token,
+)
 from packaging import version as packaging_version
-from cli_ui import info, green, reset, Token, purple
 
 from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
 
@@ -13,17 +26,17 @@ from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
 def show_version(skip_version_check: bool):
     local_version = pkg_resources.get_distribution("gitlabform").version
 
-    tower_crane = cli_ui.Symbol("🏗", "")
+    tower_crane = Symbol("🏗", "")
     tokens_to_show = [
-        cli_ui.reset,
+        reset,
         tower_crane,
         " GitLabForm version:",
-        cli_ui.blue,
+        blue,
         local_version,
-        cli_ui.reset,
+        reset,
     ]
 
-    cli_ui.message(*tokens_to_show, end="")
+    message(*tokens_to_show, end="")
 
     if skip_version_check:
         # just print end of the line
@@ -31,7 +44,7 @@ def show_version(skip_version_check: bool):
     else:
         latest_version = luddite.get_version_pypi("gitlabform")
         if local_version == latest_version:
-            happy = cli_ui.Symbol("😊", "")
+            happy = Symbol("😊", "")
             tokens_to_show = [
                 "= the latest stable ",
                 happy,
@@ -39,45 +52,45 @@ def show_version(skip_version_check: bool):
         elif packaging_version.parse(local_version) < packaging_version.parse(
             latest_version
         ):
-            sad = cli_ui.Symbol("😔", "")
+            sad = Symbol("😔", "")
             tokens_to_show = [
                 "= outdated ",
                 sad,
                 f", please update! (the latest stable is ",
-                cli_ui.blue,
+                blue,
                 latest_version,
-                cli_ui.reset,
+                reset,
                 ")",
             ]
         else:
-            excited = cli_ui.Symbol("🤩", "")
+            excited = Symbol("🤩", "")
             tokens_to_show = [
                 "= pre-release ",
                 excited,
                 f" (the latest stable is ",
-                cli_ui.blue,
+                blue,
                 latest_version,
-                cli_ui.reset,
+                reset,
                 ")",
             ]
 
-        cli_ui.message(*tokens_to_show, sep="")
+        message(*tokens_to_show, sep="")
 
 
 def show_header(
     project_or_group, groups_and_projects_provider, non_empty_configs_provider
 ):
     if project_or_group == "ALL":
-        cli_ui.info(">>> Processing ALL groups and projects")
+        info(">>> Processing ALL groups and projects")
     elif project_or_group == "ALL_DEFINED":
-        cli_ui.info(">>> Processing ALL groups and projects defined in config")
+        info(">>> Processing ALL groups and projects defined in config")
 
     groups, projects = groups_and_projects_provider.get_groups_and_projects(
         project_or_group
     )
 
     if len(groups) == 0 and len(projects) == 0:
-        cli_ui.fatal(
+        fatal(
             f"Entity {project_or_group} cannot be found in GitLab!",
             exit_code=EXIT_INVALID_INPUT,
         )
@@ -91,28 +104,26 @@ def show_header(
         groups, projects
     )
 
-    cli_ui.debug(f"groups: {groups_with_non_empty_configs}")
-    cli_ui.debug(
+    debug(f"groups: {groups_with_non_empty_configs}")
+    debug(
         f"(groups with empty effective configs that will be skipped: {groups_with_empty_configs})"
     )
-    cli_ui.debug(f"projects: {projects_with_non_empty_configs}")
-    cli_ui.debug(
+    debug(f"projects: {projects_with_non_empty_configs}")
+    debug(
         f"(projects with empty effective configs that will be skipped: {projects_with_empty_configs})"
     )
 
     if len(groups_with_empty_configs) == 0:
-        cli_ui.info_1(f"# of groups to process: {len(groups_with_non_empty_configs)}")
+        info_1(f"# of groups to process: {len(groups_with_non_empty_configs)}")
     else:
-        cli_ui.info_1(
+        info_1(
             f"# of groups to process: {len(groups_with_non_empty_configs)} "
             f"(# groups with empty effective configs that will be skipped: {len(groups_with_empty_configs)})"
         )
     if len(projects_with_empty_configs) == 0:
-        cli_ui.info_1(
-            f"# of projects to process: {len(projects_with_non_empty_configs)}"
-        )
+        info_1(f"# of projects to process: {len(projects_with_non_empty_configs)}")
     else:
-        cli_ui.info_1(
+        info_1(
             f"# of projects to process: {len(projects_with_non_empty_configs)} "
             f"(# projects with empty effective configs that will be skipped: {len(projects_with_empty_configs)})"
         )
@@ -132,47 +143,45 @@ def show_summary(
         len(groups_with_non_empty_configs) > 0
         or len(projects_with_non_empty_configs) > 0
     ):
-        cli_ui.info_1(f"# of groups processed successfully: {successful_groups}")
-        cli_ui.info_1(f"# of projects processed successfully: {successful_projects}")
+        info_1(f"# of groups processed successfully: {successful_groups}")
+        info_1(f"# of projects processed successfully: {successful_projects}")
 
     if len(failed_groups) > 0:
-        cli_ui.info_1(
-            cli_ui.red, f"# of groups failed: {len(failed_groups)}", cli_ui.reset
-        )
+        info_1(red, f"# of groups failed: {len(failed_groups)}", reset)
         for group_number in failed_groups.keys():
-            cli_ui.info_1(
-                cli_ui.red,
+            info_1(
+                red,
                 f"Failed group {group_number}: {failed_groups[group_number]}",
-                cli_ui.reset,
+                reset,
             )
     if len(failed_projects) > 0:
-        cli_ui.info_1(
-            cli_ui.red,
+        info_1(
+            red,
             f"# of projects failed: {len(failed_projects)}",
-            cli_ui.reset,
+            reset,
         )
         for project_number in failed_projects.keys():
-            cli_ui.info_1(
-                cli_ui.red,
+            info_1(
+                red,
                 f"Failed project {project_number}: {failed_projects[project_number]}",
-                cli_ui.reset,
+                reset,
             )
 
     if len(failed_groups) > 0 or len(failed_projects) > 0:
         sys.exit(EXIT_PROCESSING_ERROR)
     elif successful_groups > 0 or successful_projects > 0:
-        shine = cli_ui.Symbol("✨", "!!!")
-        cli_ui.info_1(
-            cli_ui.green,
+        shine = Symbol("✨", "!!!")
+        info_1(
+            green,
             f"All requested groups/projects processed successfully!",
-            cli_ui.reset,
+            reset,
             shine,
         )
     else:
-        cli_ui.info_1(
-            cli_ui.yellow,
+        info_1(
+            yellow,
             "Nothing to do.",
-            cli_ui.reset,
+            reset,
         )
 
 
