@@ -1,7 +1,7 @@
 # import pytest
 #
-# from gitlabform.gitlabform import GitLabForm
-# from gitlabform.gitlabform.test import (
+# from gitlabform import GitLabForm
+# from gitlabform.test import (
 #     create_group,
 #     get_gitlab,
 #     delete_variables_from_group,

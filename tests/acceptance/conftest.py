@@ -1,6 +1,6 @@
 import pytest
 
-from gitlabform.test import (
+from tests.acceptance import (
     get_gitlab,
     create_group,
     create_groups,

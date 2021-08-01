@@ -1,7 +1,7 @@
 import pytest
 
 from gitlabform.gitlab import AccessLevel
-from gitlabform.test import run_gitlabform, DEFAULT_README
+from tests.acceptance import run_gitlabform, DEFAULT_README
 
 
 @pytest.fixture(scope="function")

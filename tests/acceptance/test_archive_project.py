@@ -1,4 +1,4 @@
-from gitlabform.test import (
+from tests.acceptance import (
     run_gitlabform,
 )
 
