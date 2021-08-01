@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import cli_ui
 import yaml
@@ -22,10 +21,10 @@ class EffectiveConfiguration:
                     f"Opened file {self.output_file} to write the effective configs to."
                 )
             except Exception as e:
-                cli_ui.error(
-                    f"Error when trying to open {self.output_file} to write the effective configs to: {e}"
+                cli_ui.fatal(
+                    f"Error when trying to open {self.output_file} to write the effective configs to: {e}",
+                    exit_code=EXIT_INVALID_INPUT,
                 )
-                sys.exit(EXIT_INVALID_INPUT)
         else:
             self.output_file = None
 
@@ -51,7 +50,7 @@ class EffectiveConfiguration:
                 self.output_file.write(yaml_configuration)
                 self.output_file.close()
             except Exception as e:
-                cli_ui.error(
-                    f"Error when trying to write or close {self.output_file}: {e}"
+                cli_ui.fatal(
+                    f"Error when trying to write or close {self.output_file}: {e}",
+                    exit_code=EXIT_PROCESSING_ERROR,
                 )
-                sys.exit(EXIT_PROCESSING_ERROR)

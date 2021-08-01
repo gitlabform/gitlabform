@@ -1,5 +1,4 @@
 import functools
-import sys
 
 import cli_ui
 
@@ -165,8 +164,10 @@ class GitLabGroups(GitLabCore):
                 share_with_group_name
             )
         except NotFoundException:
-            cli_ui.error(f"Group {share_with_group_name} not found.")
-            sys.exit(EXIT_INVALID_INPUT)
+            cli_ui.fatal(
+                f"Group {share_with_group_name} not found.",
+                exit_code=EXIT_INVALID_INPUT,
+            )
 
         data = {"group_id": share_with_group_id, "expires_at": expires_at}
         if group_access is not None:
@@ -186,8 +187,10 @@ class GitLabGroups(GitLabCore):
                 share_with_group_name
             )
         except NotFoundException:
-            cli_ui.error(f"Group {share_with_group_name} not found.")
-            sys.exit(EXIT_INVALID_INPUT)
+            cli_ui.fatal(
+                f"Group {share_with_group_name} not found.",
+                exit_code=EXIT_INVALID_INPUT,
+            )
 
         # 404 means that the user is already removed, so let's accept it for idempotency
         return self._make_requests_to_api(

@@ -1,10 +1,10 @@
 import logging
 import os
 import re
-import sys
 from pathlib import Path
 
 import cli_ui
+from jinja2 import Environment, FileSystemLoader
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
@@ -12,8 +12,6 @@ from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.branch_protector import BranchProtector
-
-from jinja2 import Environment, FileSystemLoader
 
 
 class FilesProcessor(AbstractProcessor):
@@ -49,8 +47,10 @@ class FilesProcessor(AbstractProcessor):
                     else:
                         message = f"! Branch '{branch}' not found, not processing file '{file}' in it"
                         if self.strict:
-                            cli_ui.error(message)
-                            sys.exit(EXIT_INVALID_INPUT)
+                            cli_ui.fatal(
+                                message,
+                                exit_code=EXIT_INVALID_INPUT,
+                            )
                         else:
                             cli_ui.warning(message)
 
@@ -60,11 +60,11 @@ class FilesProcessor(AbstractProcessor):
                 if configuration.get(
                     "files|" + file + "|content"
                 ) and configuration.get("files|" + file + "|file"):
-                    cli_ui.error(
+                    cli_ui.fatal(
                         f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
-                        "use only one of these keys."
+                        "use only one of these keys.",
+                        exit_code=EXIT_INVALID_INPUT,
                     )
-                    sys.exit(EXIT_INVALID_INPUT)
 
                 # unprotect protected branch temporarily for operations below
                 if configuration.get("branches|" + branch + "|protected"):

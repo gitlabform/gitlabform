@@ -1,5 +1,4 @@
 import logging
-import sys
 import cli_ui
 
 from gitlabform import EXIT_INVALID_INPUT
@@ -86,12 +85,12 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
             if self.get(path, 0):
                 almost_duplicates = self._find_almost_duplicates(path)
                 if almost_duplicates:
-                    cli_ui.error(
+                    cli_ui.fatal(
                         f"There are almost duplicates in the keys of {path} - they differ only in case.\n"
                         f"They are: {', '.join(almost_duplicates)}\n"
-                        f"This is not allowed as we ignore the case for group and project names."
+                        f"This is not allowed as we ignore the case for group and project names.",
+                        exit_code=EXIT_INVALID_INPUT,
                     )
-                    sys.exit(EXIT_INVALID_INPUT)
 
     def _find_almost_duplicates(self, configuration_path):
         """
