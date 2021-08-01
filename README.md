@@ -3,6 +3,8 @@
 ![PyPI downloads](https://img.shields.io/pypi/dm/gitlabform?label=PyPI%20Downloads)
 ![docker pulls](https://img.shields.io/docker/pulls/egnyte/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/egnyte/gitlabform?label=code%20quality)
+[![codecov](https://codecov.io/gh/egnyte/gitlabform/branch/main/graph/badge.svg?token=NOMttkpB2A)](https://codecov.io/gh/egnyte/gitlabform)
 
 <img src="https://raw.githubusercontent.com/egnyte/gitlabform/main/docs/gitlabform-logo.png" width="600px" alt="logo">
 
