@@ -25,7 +25,8 @@ from gitlabform.ui import (
 
 
 class Formatter(
-    argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter
+    argparse.ArgumentDefaultsHelpFormatter,
+    argparse.RawTextHelpFormatter,
 ):
     pass
 
@@ -114,9 +115,9 @@ class GitLabForm(object):
         parser.add_argument(
             "project_or_group",
             nargs="?",
-            help='Project name in "group/project" format '
-            "OR a single group name "
-            'OR "ALL_DEFINED" to run for all groups and projects defined the config '
+            help='Project name in "group/project" format \n'
+            "OR a single group name \n"
+            'OR "ALL_DEFINED" to run for all groups and projects defined the config \n'
             'OR "ALL" to run for all projects that you have access to',
         )
 
@@ -129,17 +130,30 @@ class GitLabForm(object):
         )
 
         parser.add_argument(
+            "-k",
+            "--skip-version-check",
+            dest="skip_version_check",
+            action="store_true",
+            help="Skips checking if the latest version is used",
+        )
+
+        parser.add_argument(
             "-c", "--config", default="config.yml", help="config file path and filename"
         )
 
         verbosity_args = parser.add_mutually_exclusive_group()
 
         verbosity_args.add_argument(
-            "-v", "--verbose", action="store_true", help="verbose mode"
+            "-v", "--verbose", action="store_true", help="verbose output"
         )
 
         verbosity_args.add_argument(
-            "-d", "--debug", action="store_true", help="debug mode (most verbose)"
+            "-d",
+            "--debug",
+            action="store_true",
+            help="debug output (!!! WARNING !!!: sensitive data and secrets may"
+            " be printed in this mode - all the data sent to GitLab API"
+            " will be printed in plain-text.)",
         )
 
         parser.add_argument(
@@ -162,15 +176,9 @@ class GitLabForm(object):
             "--output-file",
             dest="output_file",
             default=None,
-            help="name/path of a file to write the effective configs to",
-        )
-
-        parser.add_argument(
-            "-k",
-            "--skip-version-check",
-            dest="skip_version_check",
-            action="store_true",
-            help="Skips checking if the latest version is used",
+            help="name/path of a file to write the effective configs to"
+            " (!!! WARNING !!!: if your config contains sensitive data or secrets, then this file will also"
+            " contain them.)",
         )
 
         parser.add_argument(
