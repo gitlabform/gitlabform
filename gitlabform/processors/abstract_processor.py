@@ -45,9 +45,6 @@ class AbstractProcessor(ABC):
                 cli_ui.debug(f"Processing {self.configuration_name}")
                 self._process_configuration(project_or_project_and_group, configuration)
 
-            cli_ui.debug(
-                f"Adding effective configuration for {self.configuration_name}."
-            )
             effective_configuration.add_configuration(
                 project_or_project_and_group,
                 self.configuration_name,

@@ -248,7 +248,7 @@ class GitLabCore:
                     url_encoded_args += (parse.quote_plus(str(arg)),)
             else:
                 # URL-encode single arg
-                url_encoded_args = parse.quote_plus(single_arg_or_args_tuple)
+                url_encoded_args = parse.quote_plus(str(single_arg_or_args_tuple))
 
             return format_string % url_encoded_args
 

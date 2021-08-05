@@ -201,32 +201,64 @@ class GitLabGroups(GitLabCore):
         )
 
     def get_ldap_group_links(self, group):
-        return self._make_requests_to_api("groups/%s/ldap_group_links", group)
+        self._validate_ldap_group_links_call(group)
+
+        group_id = self.get_group_id_case_insensitive(group)
+        return self._make_requests_to_api(
+            "groups/%s/ldap_group_links", group_id, expected_codes=[200, 404]
+        )
 
     def add_ldap_group_link(self, group, data):
-        if "cn" in data and "filter" in data:
-            raise Exception(
-                "Provide 'cn' or 'filter' for the LDAP group link, not both!"
+        self._validate_ldap_group_links_call(group, data)
+
+        group_id = self.get_group_id_case_insensitive(group)
+        data["id"] = group_id
+
+        # this is a GitLab API bug - it returns 404 here instead of 400 for bad requests...
+        try:
+            return self._make_requests_to_api(
+                "groups/%s/ldap_group_links",
+                group_id,
+                method="POST",
+                data=data,
+                expected_codes=[200, 201],
             )
-        return self._make_requests_to_api(
-            "groups/%s/ldap_group_links",
-            group,
-            method="POST",
-            data=data,
-            expected_codes=[200, 201],
-        )
+        except NotFoundException:
+            cli_ui.fatal(
+                f"Invalid parameters for LDAP group link for group {group} - {data} ",
+                exit_code=EXIT_INVALID_INPUT,
+            )
 
     def delete_ldap_group_link(self, group, data):
-        if "cn" in data and "filter" in data:
-            raise Exception(
-                "Provide 'cn' or 'filter' for the LDAP group link, not both!"
-            )
+        self._validate_ldap_group_links_call(group, data)
+
         if "group_access" in data:
             del data["group_access"]
+
+        group_id = self.get_group_id_case_insensitive(group)
+        data["id"] = group_id
+
+        # 404 means that the LDAP group link is already removed, so let's accept it for idempotency
         return self._make_requests_to_api(
             "groups/%s/ldap_group_links",
-            group,
+            group_id,
             method="DELETE",
             data=data,
-            expected_codes=[200, 201, 404],
+            expected_codes=[204, 404],
         )
+
+    def _validate_ldap_group_links_call(self, group, data=None):
+        try:
+            self.get_group_id_case_insensitive(group)
+        except NotFoundException:
+            cli_ui.fatal(
+                f"Group {group} not found.",
+                exit_code=EXIT_INVALID_INPUT,
+            )
+
+        if data:
+            if "cn" in data and "filter" in data:
+                cli_ui.fatal(
+                    f"Provide 'cn' or 'filter' for the LDAP group link, not both: {data}",
+                    exit_code=EXIT_INVALID_INPUT,
+                )

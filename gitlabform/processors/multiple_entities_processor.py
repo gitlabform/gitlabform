@@ -35,36 +35,40 @@ class MultipleEntitiesProcessor(AbstractProcessor):
         entities_in_gitlab = self.list_method(project_or_group)
         entities_in_configuration = configuration[self.configuration_name]
 
-        logging.debug(f"{self.configuration_name}s BEFORE: {entities_in_gitlab}")
+        logging.debug(f"{self.configuration_name} BEFORE: {entities_in_gitlab}")
 
         for entity_name, entity_config in entities_in_configuration.items():
 
-            if "delete" in entity_config and entity_config["delete"]:
-                cli_ui.debug(
-                    f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}"
-                )
-                self.delete_method(project_or_group, entity_config)
-            else:
-                equivalent_entity_in_gitlab = self._is_in_gitlab(
-                    entity_config, entities_in_gitlab
-                )
-                if equivalent_entity_in_gitlab:
-                    if self._needs_update(equivalent_entity_in_gitlab, entity_config):
-                        if self.edit_method:
-                            cli_ui.debug(
-                                f"Editing {entity_name} of {self.configuration_name} in {project_or_group}"
-                            )
-                            self.edit_method(project_or_group, entity_config)
-                        else:
-                            cli_ui.debug(
-                                f"Recreating {entity_name} of {self.configuration_name} in {project_or_group}"
-                            )
-                            self.delete_method(project_or_group, entity_config)
-                            self.add_method(project_or_group, entity_config)
+            equivalent_entity_in_gitlab = self._is_in_gitlab(
+                entity_config, entities_in_gitlab
+            )
+            if equivalent_entity_in_gitlab:
+                if "delete" in entity_config and entity_config["delete"]:
+                    cli_ui.debug(
+                        f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}"
+                    )
+                    self.delete_method(project_or_group, entity_config)
+                elif self._needs_update(equivalent_entity_in_gitlab, entity_config):
+                    if self.edit_method:
+                        cli_ui.debug(
+                            f"Editing {entity_name} of {self.configuration_name} in {project_or_group}"
+                        )
+                        self.edit_method(project_or_group, entity_config)
                     else:
                         cli_ui.debug(
-                            f"{entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update."
+                            f"Recreating {entity_name} of {self.configuration_name} in {project_or_group}"
                         )
+                        self.delete_method(project_or_group, entity_config)
+                        self.add_method(project_or_group, entity_config)
+                else:
+                    cli_ui.debug(
+                        f"{entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update."
+                    )
+            else:
+                if "delete" in entity_config and entity_config["delete"]:
+                    cli_ui.debug(
+                        f"{entity_name} of {self.configuration_name} in {project_or_group} already doesn't exist."
+                    )
                 else:
                     cli_ui.debug(
                         f"Adding {entity_name} of {self.configuration_name} in {project_or_group}"
@@ -72,7 +76,7 @@ class MultipleEntitiesProcessor(AbstractProcessor):
                     self.add_method(project_or_group, entity_config)
 
         logging.debug(
-            f"{self.configuration_name}s AFTER: %s", self.list_method(project_or_group)
+            f"{self.configuration_name} AFTER: %s", self.list_method(project_or_group)
         )
 
     def _is_in_gitlab(
@@ -87,7 +91,11 @@ class MultipleEntitiesProcessor(AbstractProcessor):
 
             keys_or_match = False
             for key in self.defining_keys_or:
-                if entity_in_configuration[key] == entity_in_gitlab[key]:
+                if (
+                    key in entity_in_configuration
+                    and key in entity_in_gitlab
+                    and entity_in_configuration[key] == entity_in_gitlab[key]
+                ):
                     keys_or_match = True
                     break
 
@@ -96,7 +104,11 @@ class MultipleEntitiesProcessor(AbstractProcessor):
 
             keys_and_match = True
             for key in self.defining_keys_and:
-                if entity_in_configuration[key] != entity_in_gitlab[key]:
+                if (
+                    key not in entity_in_configuration
+                    or key not in entity_in_gitlab
+                    or entity_in_configuration[key] != entity_in_gitlab[key]
+                ):
                     keys_and_match = False
                     break
 

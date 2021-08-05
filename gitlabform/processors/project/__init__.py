@@ -54,7 +54,7 @@ class ProjectProcessors(object):
         ]
 
     def get_configuration_names(self):
-        return [processor.get_configuration_name() for processor in self.processors]
+        return [processor.configuration_name for processor in self.processors]
 
     def process_project(
         self,

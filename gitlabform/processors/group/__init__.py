@@ -3,6 +3,7 @@ from typing import List
 from gitlabform.gitlab import GitLab
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.processors.group.group_ldap_links import GroupLDAPLinksProcessor
 from gitlabform.processors.group.group_members_processor import (
     GroupMembersProcessor,
 )
@@ -24,10 +25,11 @@ class GroupProcessors(object):
             GroupSettingsProcessor(gitlab),
             GroupMembersProcessor(gitlab),
             GroupSharedWithProcessor(gitlab),
+            GroupLDAPLinksProcessor(gitlab),
         ]
 
     def get_configuration_names(self):
-        return [processor.get_configuration_name() for processor in self.processors]
+        return [processor.configuration_name for processor in self.processors]
 
     def process_group(
         self,

@@ -38,6 +38,7 @@ class EffectiveConfiguration:
         self, project_or_group: str, configuration_name: str, configuration: dict
     ):
         if self.output_file:
+            cli_ui.debug(f"Adding effective configuration for {configuration_name}.")
             self.config[project_or_group][configuration_name] = configuration
 
     def write_to_file(self):
