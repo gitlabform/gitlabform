@@ -15,14 +15,16 @@ class MultipleEntitiesProcessor(AbstractProcessor):
         list_method_name: str,
         add_method_name: str,
         delete_method_name: str,
-        defining_keys: list[Any],
+        defining_keys_or: list[Any],
+        defining_keys_and: list[Any],
         edit_method_name: str = None,
     ):
         super().__init__(configuration_name, gitlab)
         self.list_method: Callable = getattr(self.gitlab, list_method_name)
         self.add_method: Callable = getattr(self.gitlab, add_method_name)
         self.delete_method: Callable = getattr(self.gitlab, delete_method_name)
-        self.defining_keys: list[Any] = defining_keys
+        self.defining_keys_or: list[Any] = defining_keys_or
+        self.defining_keys_and: list[Any] = defining_keys_and
 
         if edit_method_name:
             self.edit_method: Callable = getattr(self.gitlab, edit_method_name)
@@ -77,13 +79,29 @@ class MultipleEntitiesProcessor(AbstractProcessor):
         self, entity_in_configuration: dict, entities_in_gitlab: list[dict]
     ):
 
-        # we need to find an entity in GitLab that has at least one defining key the same
-        # as the entity from configuration
+        # we need to find an entity in GitLab that has *both*:
+        #   * ALL of the defining_keys_all matching
+        #   * at least one of the defining_keys_or matching
 
         for entity_in_gitlab in entities_in_gitlab:
-            for key in self.defining_keys:
+
+            keys_or_match = False
+            for key in self.defining_keys_or:
                 if entity_in_configuration[key] == entity_in_gitlab[key]:
-                    return entity_in_gitlab
+                    keys_or_match = True
+                    break
+
+            if not keys_or_match:
+                continue
+
+            keys_and_match = True
+            for key in self.defining_keys_and:
+                if entity_in_configuration[key] != entity_in_gitlab[key]:
+                    keys_and_match = False
+                    break
+
+            if keys_or_match and keys_and_match:
+                return entity_in_gitlab
 
         return False
 

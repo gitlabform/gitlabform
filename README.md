@@ -33,6 +33,7 @@ GitLabForm enables you to manage:
 * Group:
   * Members (users) {add/remove user, change access level, optional enforce},
   * Members (groups) {share/unshare with group, change access level, optional enforce},
+  * Members from LDAP sync,
   * Secret variables,
   * Settings,
 

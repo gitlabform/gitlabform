@@ -117,7 +117,7 @@ projects_and_groups:
         name_regex_delete: ".*"
         name_regex_keep: ".*-main"
 
-    # *** This section requires GitLab Starter/Bronze/Premium+ (paid) ***
+    # *** This section requires GitLab Premium (paid) ***
     project_push_rules:
       # keys and values here are as described at
       # https://docs.gitlab.com/ee/api/projects.html#add-project-push-rule
@@ -131,7 +131,7 @@ projects_and_groups:
       file_name_regex: ""
       max_file_size: 0 # in MB, 0 means unlimited
 
-    # *** This section requires GitLab Starter/Bronze/Premium+ (paid) ***
+    # *** This section requires GitLab Premium (paid) ***
     merge_requests:
       # keys and values here are as described at
       # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
@@ -200,6 +200,20 @@ projects_and_groups:
     # if this flag is set to 'true', then removing a user or group from the above config will remove the user from the group
     # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
     enforce_group_members: true  # default: false
+
+    # *** This section requires GitLab Premium (paid) ***
+    # configure members of groups by syncing them with LDAP
+    # keys are only used as labels in this config, values are as described at
+    # https://docs.gitlab.com/ee/api/groups.html#add-ldap-group-link-with-cn-or-filter
+    group_ldap_links:
+      devops_are_maintainers:
+        provider: "AD"
+        cn: "devops"
+        group_access: 40
+      developers_are_developers:
+        provider: "AD"
+        filter: "(employeeType=developer)"
+        group_access: 30
 
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html

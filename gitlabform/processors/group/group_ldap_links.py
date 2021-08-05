@@ -11,4 +11,5 @@ class GroupLDAPLinksProcessor(MultipleEntitiesProcessor):
             "add_ldap_group_link",
             "delete_ldap_group_link",
             ["cn", "filter"],
+            ["provider"],
         )
