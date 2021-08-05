@@ -9,8 +9,7 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 class GroupMembersProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("group_members")
-        self.gitlab = gitlab
+        super().__init__("group_members", gitlab)
 
     def _process_configuration(self, group: str, configuration: dict):
         users_to_set_by_username = configuration.get("group_members")

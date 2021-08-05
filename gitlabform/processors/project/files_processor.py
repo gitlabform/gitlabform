@@ -16,8 +16,7 @@ from gitlabform.processors.util.branch_protector import BranchProtector
 
 class FilesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
-        super().__init__("files")
-        self.gitlab = gitlab
+        super().__init__("files", gitlab)
         self.config = config
         self.strict = strict
         self.branch_protector = BranchProtector(gitlab, strict)

@@ -13,8 +13,7 @@ from gitlabform.processors.util.difference_logger import hide
 
 class SecretVariablesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("secret_variables")
-        self.gitlab = gitlab
+        super().__init__("secret_variables", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         if (

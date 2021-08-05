@@ -6,8 +6,7 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 class GroupSharedWithProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("group_shared_with")
-        self.gitlab = gitlab
+        super().__init__("group_shared_with", gitlab)
 
     def _process_configuration(self, group: str, configuration: dict):
         groups_to_set_by_group_path = configuration.get("group_shared_with")

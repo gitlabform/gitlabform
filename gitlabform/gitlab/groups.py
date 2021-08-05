@@ -199,3 +199,34 @@ class GitLabGroups(GitLabCore):
             method="DELETE",
             expected_codes=[204, 404],
         )
+
+    def get_ldap_group_links(self, group):
+        return self._make_requests_to_api("groups/%s/ldap_group_links", group)
+
+    def add_ldap_group_link(self, group, data):
+        if "cn" in data and "filter" in data:
+            raise Exception(
+                "Provide 'cn' or 'filter' for the LDAP group link, not both!"
+            )
+        return self._make_requests_to_api(
+            "groups/%s/ldap_group_links",
+            group,
+            method="POST",
+            data=data,
+            expected_codes=[200, 201],
+        )
+
+    def delete_ldap_group_link(self, group, data):
+        if "cn" in data and "filter" in data:
+            raise Exception(
+                "Provide 'cn' or 'filter' for the LDAP group link, not both!"
+            )
+        if "group_access" in data:
+            del data["group_access"]
+        return self._make_requests_to_api(
+            "groups/%s/ldap_group_links",
+            group,
+            method="DELETE",
+            data=data,
+            expected_codes=[200, 201, 404],
+        )

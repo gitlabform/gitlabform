@@ -6,12 +6,9 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 class HooksProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("hooks")
-        self.gitlab = gitlab
+        super().__init__("hooks", gitlab)
 
-    def _process_configuration(
-        self, project_and_group: str, configuration: dict, do_apply: bool = True
-    ):
+    def _process_configuration(self, project_and_group: str, configuration: dict):
         for hook in sorted(configuration["hooks"]):
 
             if configuration.get("hooks|" + hook + "|delete"):

@@ -7,8 +7,7 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 class SchedulesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("schedules")
-        self.gitlab = gitlab
+        super().__init__("schedules", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         existing_schedules = self.gitlab.get_all_pipeline_schedules(project_and_group)

@@ -9,12 +9,9 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 class GroupSecretVariablesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("group_secret_variables")
-        self.gitlab = gitlab
+        super().__init__("group_secret_variables", gitlab)
 
-    def _process_configuration(
-        self, group: str, configuration: dict, do_apply: bool = True
-    ):
+    def _process_configuration(self, group: str, configuration: dict):
         logging.debug(
             "Group secret variables BEFORE: %s",
             self.gitlab.get_group_secret_variables(group),

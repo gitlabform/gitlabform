@@ -10,8 +10,7 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 class TagsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
-        super().__init__("tags")
-        self.gitlab = gitlab
+        super().__init__("tags", gitlab)
         self.strict = strict
 
     def _process_configuration(self, project_and_group: str, configuration: dict):

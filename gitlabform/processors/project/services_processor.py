@@ -6,8 +6,7 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 class ServicesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("services")
-        self.gitlab = gitlab
+        super().__init__("services", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for service in sorted(configuration["services"]):

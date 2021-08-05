@@ -5,7 +5,7 @@ from gitlabform.processors.util.branch_protector import BranchProtector
 
 class BranchesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
-        super().__init__("branches")
+        super().__init__("branches", gitlab)
         self.__branch_protector = BranchProtector(gitlab, strict)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):

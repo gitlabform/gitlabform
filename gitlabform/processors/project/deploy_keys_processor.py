@@ -8,8 +8,7 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 class DeployKeysProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("deploy_keys")
-        self.gitlab = gitlab
+        super().__init__("deploy_keys", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         logging.debug(

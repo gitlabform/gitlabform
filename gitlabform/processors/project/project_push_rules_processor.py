@@ -9,8 +9,7 @@ from gitlabform.processors.util.difference_logger import DifferenceLogger
 
 class ProjectPushRulesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("project_push_rules")
-        self.gitlab = gitlab
+        super().__init__("project_push_rules", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         push_rules = configuration["project_push_rules"]
