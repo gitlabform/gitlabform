@@ -31,6 +31,7 @@ Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGE
 GitLabForm enables you to manage:
 
 * Group:
+  * Badges,
   * Members (users) {add/remove user, change access level, optional enforce},
   * Members (groups) {share/unshare with group, change access level, optional enforce},
   * Members from LDAP sync,
