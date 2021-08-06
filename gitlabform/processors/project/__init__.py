@@ -4,6 +4,7 @@ from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.processors.project.badges_processor import BadgesProcessor
 from gitlabform.processors.project.branches_processor import (
     BranchesProcessor,
 )
@@ -51,6 +52,7 @@ class ProjectProcessors(object):
             HooksProcessor(gitlab),
             MembersProcessor(gitlab),
             SchedulesProcessor(gitlab),
+            BadgesProcessor(gitlab),
         ]
 
     def get_configuration_names(self):

@@ -4,11 +4,11 @@ from typing import List
 
 from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
-from gitlabform.gitlab.groups import GitLabGroups
+from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
 from gitlabform.gitlab.members import GitLabMembers
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
-from gitlabform.gitlab.projects import GitLabProjects
+from gitlabform.gitlab.project_badges import GitLabProjectBadges
 from gitlabform.gitlab.repositories import GitLabRepositories
 from gitlabform.gitlab.schedules import GitLabPipelineSchedules
 from gitlabform.gitlab.services import GitLabServices
@@ -36,14 +36,14 @@ class GitLab(
     GitLabBranches,
     GitLabCommits,
     GitLabMergeRequests,
-    GitLabProjects,
     GitLabRepositories,
     GitLabServices,
     GitLabTags,
-    GitLabGroups,
+    GitLabGroupLDAPLinks,
     GitLabPipelines,
     GitLabMembers,
     GitLabUsers,
     GitLabPipelineSchedules,
+    GitLabProjectBadges,
 ):
     pass

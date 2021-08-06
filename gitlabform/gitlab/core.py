@@ -178,7 +178,7 @@ class GitLabCore:
 
         if dict_data and json_data:
             raise Exception(
-                "You need to pass the either as dict (dict_data) or JSON (json_data), not both!"
+                "You need to pass the data either as dict (dict_data) or JSON (json_data), not both!"
             )
 
         url = (
@@ -213,18 +213,13 @@ class GitLabCore:
                 response.json = lambda: {}
         else:
             if response.status_code == 404:
-                raise NotFoundException("Resource path='%s' not found!" % url)
+                raise NotFoundException(f"Resource with url='{url}' not found (404)!")
             else:
+                data_output = f"data={dict_data}" if dict_data else f"json={json_data}"
                 raise UnexpectedResponseException(
-                    "Request url='%s', method=%s, data='%s' failed - expected code(s) %s, got code %s & body: '%s'"
-                    % (
-                        url,
-                        method,
-                        dict_data,
-                        str(expected_codes),
-                        response.status_code,
-                        response.content,
-                    ),
+                    f"Request url='{url}', method={method}, {data_output} failed -"
+                    f" expected code(s) {str(expected_codes)},"
+                    f" got code {response.status_code} & body: '{response.content}'",
                     response.status_code,
                 )
 
@@ -273,6 +268,10 @@ class NotFoundException(Exception):
 
 
 class TimeoutWaitingForDeletion(Exception):
+    pass
+
+
+class InvalidParametersException(Exception):
     pass
 
 

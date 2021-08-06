@@ -247,6 +247,20 @@ projects_and_groups:
         merge_requests_events: true
         token: some_secret_auth_token
 
+    # key names here are just labels,
+    # values are as parameters described at
+    # https://docs.gitlab.com/ee/api/project_badges.html#add-a-badge-to-a-project
+    # except where badges are deleted with `delete: true`
+    # and that we REQUIRE to define the "name"
+    badges:
+      pipeline-status:
+        name: "Project Badge"
+        link_url: "https://gitlab.yourcompany.com/%{project_path}/-/commits/%{default_branch}"
+        image_url: "https://gitlab.yourcompany.com/%{project_path}/badges/%{default_branch}/pipeline.svg"
+      old-badge-to-delete:
+        name: "a-badge"
+        delete: true
+
     # with this configuration section you can ensure that some files with appropriate content are in some or all
     # branches (or that they are NOT there)
     # note that this is gitlabform-specific feature, it DOES NOT directly correspond to GitLab API like other sections
