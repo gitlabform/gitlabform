@@ -164,6 +164,7 @@ class GitLabGroups(GitLabCore):
                 share_with_group_name
             )
         except NotFoundException:
+            # TODO: raise an InvalidParameters instead and stop using cli_ui in gitlabform.gitlab
             cli_ui.fatal(
                 f"Group {share_with_group_name} not found.",
                 exit_code=EXIT_INVALID_INPUT,
@@ -187,6 +188,7 @@ class GitLabGroups(GitLabCore):
                 share_with_group_name
             )
         except NotFoundException:
+            # TODO: raise an InvalidParameters instead and stop using cli_ui in gitlabform.gitlab
             cli_ui.fatal(
                 f"Group {share_with_group_name} not found.",
                 exit_code=EXIT_INVALID_INPUT,

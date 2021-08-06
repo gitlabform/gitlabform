@@ -111,7 +111,8 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         if not self.required_to_create_or_update.contains(entity_dict):
             cli_ui.fatal(
                 f"Entity {entity_name} in {self.configuration_name} for {project_or_group}"
-                f" doesn't have some of its keys required to create or update: {self.required_to_create_or_update.explain()}",
+                f" doesn't have some of its keys required to create or update:"
+                f" {self.required_to_create_or_update.explain()}",
                 exit_code=EXIT_INVALID_INPUT,
             )
 
@@ -134,17 +135,16 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
 
         return False
 
+    @staticmethod
     def _needs_update(
-        self,
         entity_in_gitlab: dict,
         entity_in_configuration: dict,
     ):
         # in configuration we often don't define every key value because we rely on the defaults.
-        # that's why GitLab API often returns many more keys than
+        # that's why GitLab API often returns many more keys than we have in the configuration.
+        # so to decide if the entity should be update we are checking only the values of the ones
+        # that are in the configuration.
 
-        # when we get some entity from GitLab API we may get a lot of parameters that hold
-        # values equal to the default. if they are not defined at all in the configuration
-        # then we should ignore them.
         for key in entity_in_gitlab.keys():
             if key in entity_in_configuration.keys():
                 if entity_in_gitlab[key] != entity_in_configuration[key]:

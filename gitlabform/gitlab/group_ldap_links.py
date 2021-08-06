@@ -26,6 +26,7 @@ class GitLabGroupLDAPLinks(GitLabGroups):
                 expected_codes=[200, 201],
             )
         except NotFoundException:
+            # TODO: raise an InvalidParameters instead and stop using cli_ui in gitlabform.gitlab
             cli_ui.fatal(
                 f"Invalid parameters for LDAP group link for group {group} - {data} ",
                 exit_code=EXIT_INVALID_INPUT,
