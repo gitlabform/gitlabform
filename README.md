@@ -34,7 +34,7 @@ GitLabForm enables you to manage:
   * Badges,
   * Members (users) {add/remove user, change access level, optional enforce},
   * Members (groups) {share/unshare with group, change access level, optional enforce},
-  * Members from LDAP sync,
+  * Members using LDAP Group Links,
   * Secret variables,
   * Settings,
 
