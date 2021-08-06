@@ -2,7 +2,7 @@ import logging
 
 import abc
 import cli_ui
-from typing import Callable
+from typing import Callable, List
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
@@ -127,7 +127,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             )
 
     def _is_in_gitlab(
-        self, entity_in_configuration: dict, entities_in_gitlab: list[dict]
+        self, entity_in_configuration: dict, entities_in_gitlab: List[dict]
     ):
         for entity_in_gitlab in entities_in_gitlab:
             if self.defining.matches(entity_in_gitlab, entity_in_configuration):
