@@ -2,7 +2,7 @@
 
 ### 2.2.0
 
-* **Add LDAP Group Links support**. Implements [#140](https://github.com/egnyte/gitlabform/issues/140).
+* **Add LDAP Group Links support** (**GitLab Premium (paid) only**). Implements [#140](https://github.com/egnyte/gitlabform/issues/140).
 
 * **Add project and group badges support**. Implements [#59](https://github.com/egnyte/gitlabform/issues/59).
 

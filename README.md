@@ -34,7 +34,7 @@ GitLabForm enables you to manage:
   * Badges,
   * Members (users) {add/remove user, change access level, optional enforce},
   * Members (groups) {share/unshare with group, change access level, optional enforce},
-  * Members using LDAP Group Links,
+  * Members using LDAP Group Links (**GitLab Premium (paid) only**),
   * Secret variables,
   * Settings,
 
@@ -46,9 +46,9 @@ GitLabForm enables you to manage:
   * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
   * Hooks,
   * Members (users and groups) {add/remove user, change access level, NO removal or enforce yet!},
-  * Merge Requests approvals settings and approvers (**GitLab Starter/Bronze/Premium+ (paid) only**),
+  * Merge Requests approvals settings and approvers (**GitLab Premium (paid) only**),
   * Pipeline schedules,
-  * Push Rules (**GitLab Starter/Bronze/Premium+ (paid) only**),
+  * Push Rules (**GitLab Premium (paid) only**),
   * Secret variables,
   * Services,
   * Settings,
@@ -84,7 +84,7 @@ Some of the app features are limited because of the GitLab API issues. [Here is 
 
 * Python 3.6-3.9 **or** Docker
 * GitLab 11+
-* GitLab Starter/Bronze/Premium+ (paid) for Merge Requests & Push Rules management
+* GitLab Premium (paid) for some features
 
 ## Installation
 
