@@ -1,6 +1,9 @@
 name: Linter and tests
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+    types: [opened]
 
 jobs:
   black-formatting:
