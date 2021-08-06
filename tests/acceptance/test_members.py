@@ -117,8 +117,8 @@ class TestMembers:
 
         for member in members:
             if member["username"] in other_group_users:
-                # "group_access" is the *maximum* access level,
-                # see https://docs.gitlab.com/ee/user/project/members/share_project_with_groups.html#maximum-access-level
+                # "group_access" is the *maximum* access level, see
+                # https://docs.gitlab.com/ee/user/project/members/share_project_with_groups.html#maximum-access-level
                 assert member["access_level"] <= AccessLevel.MAINTAINER.value
 
         no_of_groups_shared = len(gitlab.get_shared_with_groups(group_and_project))

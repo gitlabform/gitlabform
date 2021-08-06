@@ -145,7 +145,8 @@ class ConfigurationCore:
         """
         return group in self.get("skip_groups", [])
 
-    def merge_configs(self, more_general_config, more_specific_config) -> dict:
+    @staticmethod
+    def merge_configs(more_general_config, more_specific_config) -> dict:
         """
         :return: merge more general config with more specific configs.
                  More specific config values take precedence over more general ones.

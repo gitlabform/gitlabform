@@ -7,7 +7,7 @@ from typing import Callable, List
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.defining_keys import Key
+from gitlabform.processors.defining_keys import AbstractKey
 
 
 class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
@@ -18,16 +18,16 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         list_method_name: str,
         add_method_name: str,
         delete_method_name: str,
-        defining: Key,
-        required_to_create_or_update: Key,
+        defining: AbstractKey,
+        required_to_create_or_update: AbstractKey,
         edit_method_name=None,
     ):
         super().__init__(configuration_name, gitlab)
         self.list_method: Callable = getattr(self.gitlab, list_method_name)
         self.add_method: Callable = getattr(self.gitlab, add_method_name)
         self.delete_method: Callable = getattr(self.gitlab, delete_method_name)
-        self.defining: Key = defining
-        self.required_to_create_or_update: Key = required_to_create_or_update
+        self.defining: AbstractKey = defining
+        self.required_to_create_or_update: AbstractKey = required_to_create_or_update
 
         if edit_method_name:
             self.edit_method: Callable = getattr(self.gitlab, edit_method_name)

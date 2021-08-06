@@ -5,6 +5,7 @@ from tests.acceptance import (
 
 class TestDeployKeys:
     def test__deploy_key_to_all_projects(self, gitlab, group, project, other_project):
+        # noinspection PyPep8
         deploy_key_to_all_projects = """
         projects_and_groups:
           "*":

@@ -1,7 +1,7 @@
 import cli_ui
 
 from gitlabform import EXIT_INVALID_INPUT
-from gitlabform.gitlab.core import NotFoundException, InvalidParametersException
+from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab.groups import GitLabGroups
 
 

@@ -157,7 +157,7 @@ class GitLabBranches(GitLabCore):
         }
         self._make_requests_to_api(
             "projects/%s/repository/branches",
-            (project_and_group_name),
+            project_and_group_name,
             method="POST",
             data=data,
             expected_codes=[200, 201],

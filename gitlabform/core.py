@@ -100,7 +100,8 @@ class GitLabForm(object):
             self.configuration, self.group_processors, self.project_processors
         )
 
-    def parse_args(self):
+    @staticmethod
+    def parse_args():
 
         parser = argparse.ArgumentParser(
             description=textwrap.dedent(
@@ -425,7 +426,8 @@ class GitLabForm(object):
             finally:
 
                 logging.debug(
-                    f"* ({project_number}/{len(projects_with_non_empty_configs)}) FINISHED Processing project: {project_and_group}",
+                    f"* ({project_number}/{len(projects_with_non_empty_configs)})"
+                    f" FINISHED Processing project: {project_and_group}",
                 )
 
         effective_configuration.write_to_file()

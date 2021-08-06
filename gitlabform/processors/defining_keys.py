@@ -1,4 +1,21 @@
-class Key:
+from abc import ABC, abstractmethod
+
+
+class AbstractKey(ABC):
+    @abstractmethod
+    def matches(self, e1, e2):
+        pass
+
+    @abstractmethod
+    def contains(self, entity):
+        pass
+
+    @abstractmethod
+    def explain(self) -> str:
+        pass
+
+
+class Key(AbstractKey):
     def __init__(self, value):
         self.value = value
 
@@ -14,8 +31,8 @@ class Key:
         return f"'{self.value}'"
 
 
-class And(Key):
-    def __init__(self, *arg: Key):
+class And(AbstractKey):
+    def __init__(self, *arg: AbstractKey):
         self.keys = arg
 
     def matches(self, e1, e2):
@@ -29,8 +46,8 @@ class And(Key):
         return f"({' and '.join(explains)})"
 
 
-class Or(Key):
-    def __init__(self, *arg: Key):
+class Or(AbstractKey):
+    def __init__(self, *arg: AbstractKey):
         self.keys = arg
 
     def matches(self, e1, e2):
@@ -44,8 +61,8 @@ class Or(Key):
         return f"({' or '.join(explains)})"
 
 
-class Xor(Key):
-    def __init__(self, *arg: Key):
+class Xor(AbstractKey):
+    def __init__(self, *arg: AbstractKey):
         self.keys = arg
 
     # copied from https://stackoverflow.com/a/16801336/2693875
