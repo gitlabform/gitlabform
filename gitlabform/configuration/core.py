@@ -76,11 +76,8 @@ class ConfigurationCore:
         except (FileNotFoundError, IOError):
             raise ConfigFileNotFoundException(config_path)
 
-        except Exception:
-            if config_path:
-                raise ConfigInvalidException(config_path)
-            else:
-                raise ConfigInvalidException(config_string)
+        except Exception as e:
+            raise ConfigInvalidException(e)
 
     def get(self, path, default=None):
         """
@@ -161,7 +158,8 @@ class ConfigFileNotFoundException(Exception):
 
 
 class ConfigInvalidException(Exception):
-    pass
+    def __init__(self, underlying: Exception):
+        self.underlying = underlying
 
 
 class KeyNotFoundException(Exception):

@@ -4,6 +4,7 @@ from typing import List
 
 from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
+from gitlabform.gitlab.group_badges import GitLabGroupBadges
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
 from gitlabform.gitlab.members import GitLabMembers
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
@@ -40,6 +41,7 @@ class GitLab(
     GitLabServices,
     GitLabTags,
     GitLabGroupLDAPLinks,
+    GitLabGroupBadges,
     GitLabPipelines,
     GitLabMembers,
     GitLabUsers,

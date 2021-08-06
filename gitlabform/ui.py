@@ -1,3 +1,4 @@
+import cli_ui
 import sys
 from typing import Any
 
@@ -19,6 +20,7 @@ from cli_ui import (
     Token,
 )
 from packaging import version as packaging_version
+from urllib.error import URLError
 
 from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
 
@@ -42,7 +44,14 @@ def show_version(skip_version_check: bool):
         # just print end of the line
         print()
     else:
-        latest_version = luddite.get_version_pypi("gitlabform")
+        try:
+            latest_version = luddite.get_version_pypi("gitlabform")
+        except URLError as e:
+            # end the line with current version
+            print()
+            cli_ui.error(f"Checking latest version failed:\n{e}")
+            return
+
         if local_version == latest_version:
             happy = Symbol("😊", "")
             tokens_to_show = [

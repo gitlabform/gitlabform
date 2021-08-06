@@ -7,7 +7,10 @@ import traceback
 import cli_ui
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
-from gitlabform.configuration.core import ConfigFileNotFoundException
+from gitlabform.configuration.core import (
+    ConfigFileNotFoundException,
+    ConfigInvalidException,
+)
 from gitlabform.filter import NonEmptyConfigsProvider
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException
@@ -280,10 +283,15 @@ class GitLabForm(object):
                 f"Config file not found at: {e}",
                 exit_code=EXIT_INVALID_INPUT,
             )
+        except ConfigInvalidException as e:
+            cli_ui.fatal(
+                f"Invalid config:\n{e.underlying}",
+                exit_code=EXIT_INVALID_INPUT,
+            )
         except TestRequestFailedException as e:
             cli_ui.fatal(
-                f"GitLab test request failed. Exception: '{e}'",
-                EXIT_PROCESSING_ERROR,
+                f"GitLab test request failed:\n{e.underlying}",
+                exit_code=EXIT_PROCESSING_ERROR,
             )
 
     def run(self):

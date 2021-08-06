@@ -249,17 +249,15 @@ projects_and_groups:
 
     # key names here are just labels,
     # values are as parameters described at
-    # https://docs.gitlab.com/ee/api/project_badges.html#add-a-badge-to-a-project
+    # https://docs.gitlab.com/ee/api/group_badges.html#add-a-badge-to-a-group
+    # and https://docs.gitlab.com/ee/api/group_badges.html#placeholder-tokens
     # except where badges are deleted with `delete: true`
-    # and that we REQUIRE to define the "name"
-    badges:
-      pipeline-status:
-        name: "Project Badge"
+    # and that we REQUIRE to define the "name" (to identify each badge)
+    group_badges:
+      group-pipeline-status:
+        name: "Group Badge"
         link_url: "https://gitlab.yourcompany.com/%{project_path}/-/commits/%{default_branch}"
         image_url: "https://gitlab.yourcompany.com/%{project_path}/badges/%{default_branch}/pipeline.svg"
-      old-badge-to-delete:
-        name: "a-badge"
-        delete: true
 
     # with this configuration section you can ensure that some files with appropriate content are in some or all
     # branches (or that they are NOT there)
@@ -436,6 +434,17 @@ projects_and_groups:
             value: another_value
       # this one will be deleted if exists
       "Obsolete schedule":
+        delete: true
+
+    # key names here are just labels,
+    # values are as parameters described at
+    # https://docs.gitlab.com/ee/api/project_badges.html#add-a-badge-to-a-project
+    # and https://docs.gitlab.com/ee/api/project_badges.html#placeholder-tokens
+    # except where badges are deleted with `delete: true`
+    # and that we REQUIRE to define the "name" (to identify each badge)
+    badges:
+      old-badge-to-delete:
+        name: "a-badge"
         delete: true
 
 # this will skip these projects from being processed

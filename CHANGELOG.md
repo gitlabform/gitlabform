@@ -2,8 +2,10 @@
 
 ### 2.2.0
 
-* **Add groups LDAP syncs support**. Implements [#140](https://github.com/egnyte/gitlabform/issues/140).
-* **Add project badges support**. Implements [#59](https://github.com/egnyte/gitlabform/issues/59).
+* **Add LDAP Group Links support**. Implements [#140](https://github.com/egnyte/gitlabform/issues/140).
+
+* **Add project and group badges support**. Implements [#59](https://github.com/egnyte/gitlabform/issues/59).
+
 * **Fix detecting an "empty effective config" and improve the UI related to processing groups and projects with such.** Until now the "effective config" for anything included the whole merged common+group+project-level configuration. Now if we check the effective config for a project we only look for project-level processors' configuration entries and do the same for groups.
 
 Example: imagine you have a group "some_group" with only some `group_secret_variables` defined for it and run GitLabForm
@@ -16,11 +18,11 @@ $ gitlabform --noop some_group
 :: # of groups to process: 1
 :: # of projects to process: 46
 @ (1/1) Processing group: some_group
-* ( 1/46) Processing project: some_group/some_project_a
+* ( 1/46) Processing project: some_group/a_project_1
 
-(... 44 more lines of output about in fact a skipped project! ...)
+(... 44 more lines of output about projects that are in fact skipped ...)
 
-* (46/46) Processing project: some_group/some_project_b
+* (46/46) Processing project: some_group/a_project_46
 :: # of groups processed successfully: 1
 :: # of projects processed successfully: 46
 :: All requested groups/projects processes successfully! ✨

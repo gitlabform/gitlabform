@@ -256,7 +256,8 @@ class GitLabCore:
 
 
 class TestRequestFailedException(Exception):
-    pass
+    def __init__(self, underlying: Exception):
+        self.underlying = underlying
 
 
 class ApiVersionIncorrectException(Exception):
