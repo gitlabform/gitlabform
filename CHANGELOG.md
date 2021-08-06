@@ -2,6 +2,8 @@
 
 ### 2.2.0
 
+* **Add groups LDAP syncs support**. Implements [#140](https://github.com/egnyte/gitlabform/issues/140).
+* **Add project badges support**. Implements [#59](https://github.com/egnyte/gitlabform/issues/59).
 * **Fix detecting an "empty effective config" and improve the UI related to processing groups and projects with such.** Until now the "effective config" for anything included the whole merged common+group+project-level configuration. Now if we check the effective config for a project we only look for project-level processors' configuration entries and do the same for groups.
 
 Example: imagine you have a group "some_group" with only some `group_secret_variables` defined for it and run GitLabForm

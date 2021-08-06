@@ -39,6 +39,7 @@ GitLabForm enables you to manage:
 
 * Project:
   * Archive/unarchive,
+  * Badges,
   * Branches {protect/unprotect},
   * Deployment keys,
   * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
