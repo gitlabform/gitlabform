@@ -1,4 +1,3 @@
-import cli_ui
 import sys
 from typing import Any
 
@@ -6,10 +5,11 @@ import luddite
 import pkg_resources
 from cli_ui import (
     message,
-    info,
-    fatal,
     debug,
+    info,
     info_1,
+    error,
+    fatal,
     reset,
     green,
     purple,
@@ -49,7 +49,7 @@ def show_version(skip_version_check: bool):
         except URLError as e:
             # end the line with current version
             print()
-            cli_ui.error(f"Checking latest version failed:\n{e}")
+            error(f"Checking latest version failed:\n{e}")
             return
 
         if local_version == latest_version:
