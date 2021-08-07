@@ -69,7 +69,7 @@ class TestBadges:
 
         badges = gitlab.get_project_badges(group_and_project_name)
         assert len(badges) == 1
-        assert badges[0]["link_url"].endwith("foo")
+        assert badges[0]["link_url"].endswith("foo")
 
         config = f"""
             projects_and_groups:
@@ -84,7 +84,7 @@ class TestBadges:
 
         badges = gitlab.get_project_badges(group_and_project_name)
         assert len(badges) == 1
-        assert badges[0]["link_url"].endwith("bar")
+        assert badges[0]["link_url"].endswith("bar")
 
     def test__badges_update_choose_the_right_one(self, gitlab, group, project):
         group_and_project_name = f"{group}/{project}"
@@ -126,8 +126,8 @@ class TestBadges:
 
         for badge in badges:
             if badge["name"] == "Project Badge 2":
-                assert badge["link_url"].endwith("foobar")
-                assert badge["image_url"].endwith("foobar")
+                assert badge["link_url"].endswith("foobar")
+                assert badge["image_url"].endswith("foobar")
             else:
-                assert not badge["link_url"].endwith("foobar")
-                assert not badge["image_url"].endwith("foobar")
+                assert not badge["link_url"].endswith("foobar")
+                assert not badge["image_url"].endswith("foobar")
