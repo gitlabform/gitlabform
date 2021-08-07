@@ -16,13 +16,13 @@ by example.
 
 ### Packages:
   
-* `gitlabform` - contains the main app logic. It provides the CLI, parsing of the parameters,
+* `gitlabform.*` and `gitlabform.processors.*` - contains the main app logic. It provides the CLI, parsing of the parameters,
   uses below two packages to apply the config defined in `config.yml` to the requested set of projects.
 
-* `gitlabform.gitlab` - contains the GitLab API client code, grouped mostly by the GitLab API 
+* `gitlabform.gitlab.*` - contains the GitLab API client code, grouped mostly by the GitLab API 
   [as documented at docs.gitlab.com](https://docs.gitlab.com/ee/api/api_resources.html).
 
-* `gitlabform.configuration` - contains the logic for reading the config from YAML file or a string
+* `gitlabform.configuration.*` - contains the logic for reading the config from YAML file or a string
   (the latter is only for testing) and getting an effective config per GitLab project by merging
   the config on these levels: common, group and project settings.
 
@@ -34,11 +34,11 @@ The basic features are implemented in the "core" class defined in `core.py`. Ext
 files as "feature" classes that inherit the "core". Finally, there is an "everything" class that groups them all - it is
 defined in the `__init__.py` file.
 
-### gitlabform
+### gitlabform.* and gitlabform.processors.*
 
-All of the code here is in a single `GitLabFormCore` class.
+The entry point for running the app is in `run.py` and the main logic is in the `GitLabForm` class.
 
-This code boils down to the `process_all()` method, which for each project that according to the app parameters 
+This code boils down to the `run()` method, which for each project that according to the app parameters
 and config should be taken into account, applies the effective config.
 
 The effective config contains what is called the "config sections", which are the YAML keys that can exist under projects
@@ -50,7 +50,9 @@ logic for skipping the configuration parts and running in dry-run mode. The proc
 packages - `group` where the processors applied to the group settings are implemented and `project` - where processors
 executed on the project level are located.
 
-**This is where the key logic of the app is - how to translate YAML config parts into appropriate calls to the GitLab API.**
+Since v2.2.0 there is a new way of implementing processors - by inheriting form `MultipleEntitiesProcessor` class.
+It should be applied for new features which manage 0-N entities of some kind under a group or a project.
+See `BadgesProcessor` as an example how to use it.
 
 #### Usage
 
@@ -59,6 +61,7 @@ the code in the processor classes (for example, in `BranchesProcessor`).
 
 If you want to **add support for a new config section** (= completely new feature), then you need to:
 
+0. (TODO: expand this sections) Consider writing a new processor using `MultipleEntitiesProcessor` class as a base.
 1. Create a new class `group_<new_config_section_name>_processor` (if it applies to the group settings) or 
 `<new_config_section_name>_processor` (if it applies to project settings) and implement two methods:
     - `_process_configuration` - which does the actual processing by calling the API and applying the changes in GitLab;
@@ -67,7 +70,7 @@ If you want to **add support for a new config section** (= completely new featur
 2. Add the new processor to `GroupProcessors` in `group > __init__.py` (if group settings processor was created) or 
 to `ProjectProcessors` in `project > __init__.py`. 
 
-### gitlabform.gitlab
+### gitlabform.gitlab.*
 
 With the basics for making requests to the GitLab API covered in the `GitLabCore` class in `core.py`, all other code
 is simple (most of the time).
@@ -80,11 +83,10 @@ Sometimes there is some logic in these methods if:
 * some GitLab APIs need some workarounds for their bugs or documentation inconsistencies, like:
   * some APIs declare in the docs that they accept both "group/project" string OR a project id while in fact only
 the latter works - see `GitLabProjects.post_approvals()` as an example,
-  * one API does not accept a proper JSON that in case of a field set to a null-value can be omitted, but GitLab 
-  requires it to explicitly included and set to an empty array - see `GitLabProjects.put_approvers()` as an example
-  (**TODO**: check if this hack is still needed with the current versions of GitLab!)
+  * some APIs return invalid HTTP error codes, like 404 instead of 400 - see `GitLabGroupLDAPLinks.add_ldap_group_link`
+    as an example.
 
-**Note**: A lot of the code here is **NOT used by the GitLabForm app**, but utilized by internal Egnyte
+**Note**: Some of the code here is **NOT used by the GitLabForm app**, but utilized by internal Egnyte
 applications that have not yet switched to the more standard `python-gitlab`.
 
 #### Usage
@@ -99,6 +101,6 @@ If you want to **add code that operates on the new GitLab API** you should:
 2. add the new feature class to the list of classes inherited by the "everything" `GitLab` class
    defined in `__init__.py`. 
 
-### gitlabform.configuration
+### gitlabform.configuration.*
 
 **TODO**: describe this part. Especially what an "effective project config" is, because that may not be clear.
