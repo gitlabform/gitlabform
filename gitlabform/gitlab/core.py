@@ -213,7 +213,9 @@ class GitLabCore:
                 response.json = lambda: {}
         else:
             if response.status_code == 404:
-                raise NotFoundException(f"Resource with url='{url}' not found (404)!")
+                raise NotFoundException(
+                    f"Resource with url='{url}' not found (HTTP 404)!"
+                )
             else:
                 data_output = f"data={dict_data}" if dict_data else f"json={json_data}"
                 raise UnexpectedResponseException(
@@ -258,10 +260,6 @@ class GitLabCore:
 class TestRequestFailedException(Exception):
     def __init__(self, underlying: Exception):
         self.underlying = underlying
-
-
-class ApiVersionIncorrectException(Exception):
-    pass
 
 
 class NotFoundException(Exception):

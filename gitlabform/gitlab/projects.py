@@ -27,7 +27,7 @@ class GitLabProjects(GitLabCore):
             for project in projects:
                 if project["path_with_namespace"].lower() == some_string.lower():
                     return project
-            raise NotFoundException
+            raise NotFoundException(f"Project with path '{some_string}' not found.")
 
     def create_project(
         self,

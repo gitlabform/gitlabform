@@ -1,7 +1,4 @@
-import cli_ui
-
-from gitlabform import EXIT_INVALID_INPUT
-from gitlabform.gitlab.core import NotFoundException
+from gitlabform.gitlab.core import NotFoundException, InvalidParametersException
 from gitlabform.gitlab.groups import GitLabGroups
 
 
@@ -16,7 +13,6 @@ class GitLabGroupLDAPLinks(GitLabGroups):
         group_id = self.get_group_id_case_insensitive(group)
         data["id"] = group_id
 
-        # this is a GitLab API bug - it returns 404 here instead of 400 for bad requests...
         try:
             return self._make_requests_to_api(
                 "groups/%s/ldap_group_links",
@@ -25,11 +21,10 @@ class GitLabGroupLDAPLinks(GitLabGroups):
                 data=data,
                 expected_codes=[200, 201],
             )
+        # this is a GitLab API bug - it returns 404 here instead of 400 for bad requests...
         except NotFoundException:
-            # TODO: raise an InvalidParameters instead and stop using cli_ui in gitlabform.gitlab
-            cli_ui.fatal(
-                f"Invalid parameters for LDAP group link for group {group} - {data} ",
-                exit_code=EXIT_INVALID_INPUT,
+            raise InvalidParametersException(
+                f"Invalid parameters for a Group LDAP link for group {group}: {data}"
             )
 
     def delete_ldap_group_link(self, group, data):

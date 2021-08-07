@@ -1,8 +1,5 @@
 import functools
 
-import cli_ui
-
-from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
@@ -31,7 +28,9 @@ class GitLabGroups(GitLabCore):
             for group in groups:
                 if group["full_path"].lower() == some_string.lower():
                     return group
-            raise NotFoundException
+            raise NotFoundException(
+                f"Group/subgroup with path '{some_string}' not found."
+            )
 
     def create_group(self, name, path, parent_id=None, visibility="private"):
         data = {
@@ -159,17 +158,7 @@ class GitLabGroups(GitLabCore):
     def add_share_to_group(
         self, group, share_with_group_name, group_access, expires_at=None
     ):
-        try:
-            share_with_group_id = self.get_group_id_case_insensitive(
-                share_with_group_name
-            )
-        except NotFoundException:
-            # TODO: raise an InvalidParameters instead and stop using cli_ui in gitlabform.gitlab
-            cli_ui.fatal(
-                f"Group {share_with_group_name} not found.",
-                exit_code=EXIT_INVALID_INPUT,
-            )
-
+        share_with_group_id = self.get_group_id_case_insensitive(share_with_group_name)
         data = {"group_id": share_with_group_id, "expires_at": expires_at}
         if group_access is not None:
             data["group_access"] = group_access
@@ -183,16 +172,7 @@ class GitLabGroups(GitLabCore):
         )
 
     def remove_share_from_group(self, group, share_with_group_name):
-        try:
-            share_with_group_id = self.get_group_id_case_insensitive(
-                share_with_group_name
-            )
-        except NotFoundException:
-            # TODO: raise an InvalidParameters instead and stop using cli_ui in gitlabform.gitlab
-            cli_ui.fatal(
-                f"Group {share_with_group_name} not found.",
-                exit_code=EXIT_INVALID_INPUT,
-            )
+        share_with_group_id = self.get_group_id_case_insensitive(share_with_group_name)
 
         # 404 means that the user is already removed, so let's accept it for idempotency
         return self._make_requests_to_api(
