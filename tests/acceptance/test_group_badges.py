@@ -9,7 +9,7 @@ class TestGroupBadges:
         config = f"""
         projects_and_groups:
           {group}/*:
-            group_group_badges:
+            group_badges:
               pipeline-status:
                 name: "Group Badge"
                 link_url: "https://gitlab.example.com/%{{project_path}}/-/commits/%{{default_branch}}/foo"
@@ -103,17 +103,17 @@ class TestGroupBadges:
         assert len(badges) == 2
 
         config = f"""
-            projects_and_groups:
-              {group}:
-                group_badges:
-                  a_different_key:
-                    name: "Group Badge 2"
-                    link_url: "https://gitlab.example.com/foobar"
-                    image_url: "https://gitlab.example.com/foobar"
-                  and_also_different_than_before:
-                    name: "Group Badge"
-                    delete: true
-            """
+        projects_and_groups:
+          {group}/*:
+            group_badges:
+              a_different_key:
+                name: "Group Badge 2"
+                link_url: "https://gitlab.example.com/foobar"
+                image_url: "https://gitlab.example.com/foobar"
+              and_also_different_than_before:
+                name: "Group Badge"
+                delete: true
+        """
         run_gitlabform(config, group)
 
         badges = gitlab.get_group_badges(group)
