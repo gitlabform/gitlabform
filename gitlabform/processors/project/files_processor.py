@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import ast
 from pathlib import Path
 
 import cli_ui
@@ -175,11 +176,34 @@ class FilesProcessor(AbstractProcessor):
                     )
                     break
 
+    def read_env_var(self, value):
+        # check if object from jinja_env is string
+        if isinstance(value, str):
+            # check if it starts with $ -> interpolation syntax
+            if value.startswith("$"):
+                # check if $ENV_VAR exists in the environment
+                env_var = os.environ.get(value[1:], None)
+                if env_var:
+                    try:
+                        # try to translate literal string into python object, for example  ['aaa','bbb','ccc'] into array
+                        env_var_object = ast.literal_eval(env_var)
+                        # return object on successfull translation
+                        return env_var_object
+                    except SyntaxError:
+                        pass
+                    except ValueError:
+                        pass
+                    # if env var is normal string, return its value from env
+                    return env_var
+        # if there was no value in env or value is not string then return it as it is
+        return value
+
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group
         rtemplate = Environment(
             loader=FileSystemLoader("."), autoescape=True
         ).from_string(template)
+        kwargs = {key: self.read_env_var(value) for key, value in kwargs.items()}
         return rtemplate.render(
             project=self.get_project(project_and_group),
             group=self.get_group(project_and_group),
