@@ -309,11 +309,14 @@ projects_and_groups:
       "file-with-custom-variable":
         branches: all
         content: |
-          {{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env.
+          {{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env. You can also read environment variables what comes handy when creating automated pipelines with gitlabform. For example gitlab-ci {{ commit }}. You can also pass objects in python ATL notification, like this {{ list }}.
           Group: {{ group }} and project: {{ project }} are always accessable by jinja.
         jinja_env:
           foo: "fooz"
           bar: "barz"
+          commit: $CI_COMMIT_SHA
+          list: $CI_COMMIT_BRANCHES # echo $CI_COMMIT_BRANCHES shows: '["aaa", "bbb", "ccc"]'
+
       "file-to-set-in-protected-branches":
         branches: protected
         content: |

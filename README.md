@@ -43,7 +43,7 @@ GitLabForm enables you to manage:
   * Badges,
   * Branches {protect/unprotect},
   * Deployment keys,
-  * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
+  * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables and environment variables!),
   * Hooks,
   * Members (users and groups) {add/remove user, change access level, NO removal or enforce yet!},
   * Merge Requests approvals settings and approvers (**GitLab Premium (paid) only**),
