@@ -83,3 +83,4 @@ jobs:
       - name: Run bandit
         run: |
           bandit -r gitlabform
+
