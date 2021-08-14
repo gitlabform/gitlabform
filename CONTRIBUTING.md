@@ -117,6 +117,20 @@ export GITLAB_TOKEN="<my admin user API token>"
 2. Run `pytest tests/acceptance` to start all tests
 To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
 
+#### Running test code in a Docker container
+
+If you have a problem with installing the test dependencies on your localhost, you can run the tests in Docker container
+too, like this:
+
+1. Build the image:
+```
+docker build . -f ./dev/tests.Dockerfile -t gitlabform-tests:latest
+```
+2. Use it to run the tests:
+```
+docker run -it -v $(pwd):/code gitlabform-tests:latest /bin/ash -c "cd /code && pytest tests/acceptance"
+```
+
 #### General coding guidelines
 
 Similarly to the guidelines for making PRs with documentation improvements - please use the common sense:
