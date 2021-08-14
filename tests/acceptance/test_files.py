@@ -1,5 +1,6 @@
 import pytest
-
+import pathlib
+import yaml
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform, DEFAULT_README
 
@@ -206,7 +207,7 @@ class TestFiles:
                 push_access_level: {AccessLevel.MAINTAINER.value}
                 merge_access_level: {AccessLevel.MAINTAINER.value}
                 unprotect_access_level: {AccessLevel.MAINTAINER.value}
-        
+
             files:
               anyfile1:
                 overwrite: true
@@ -271,3 +272,35 @@ class TestFiles:
         # the default value
         # according to https://docs.gitlab.com/ee/api/protected_branches.html#protect-repository-branches
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+    @pytest.mark.parametrize(
+        "file_config",
+        [
+            {
+                "config": {
+                    "test_file": {
+                        "skip_ci": True,
+                        "overwrite": True,
+                        "branches": ["master"],
+                        "template": False,
+                        "content": "this is {{ not }} a template",
+                        "jinja_env": {"not": ""},
+                    }
+                },
+                "expected_content": "this is {{ not }} a template",
+            }
+        ],
+    )
+    def test_file_templating(self, gitlab, group, project, branches, file_config):
+        group_and_project_name = f"{group}/{project}"
+        test_config = yaml.dump(
+            {
+                "projects_and_groups": {
+                    group_and_project_name: {"files": file_config["config"]}
+                }
+            }
+        )
+        run_gitlabform(test_config, group_and_project_name)
+        file_content = gitlab.get_file(group_and_project_name, "master", "test_file")
+        expected = file_config["expected_content"]
+        assert file_content == expected, f"render not correct, got: \n\n{file_content}\n\nexpected:\n\n{expected}"
