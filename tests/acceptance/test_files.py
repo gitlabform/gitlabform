@@ -1,5 +1,4 @@
 import pytest
-import pathlib
 import yaml
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform, DEFAULT_README
