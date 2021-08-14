@@ -5,7 +5,7 @@ All contributions are welcome!
 You can:
 * ask questions, report issues, ask for features or write anything message to the app authors - use **Issues** for all
 of these,
-* contribute to the documentation and example configuration - with **Pull Requests**, 
+* contribute to the documentation and example configuration - with **Pull Requests**,
 * contribute your bug fixes, new features, refactoring and other code improvements - with **Pull Requests**,
 
 ...and probably more! If you want to help in any way but don't know how - create an **Issue**.
@@ -17,8 +17,8 @@ and should be very common sense ones.
 
 ### Questions
 
-Before asking a question please make sure that you have read the docs, especially the example 
-[config.yml](https://github.com/egnyte/gitlabform/blob/main/config.yml).  
+Before asking a question please make sure that you have read the docs, especially the example
+[config.yml](https://github.com/egnyte/gitlabform/blob/main/config.yml).
 
 
 ### Problems
@@ -104,7 +104,7 @@ To run only a single class with tests run f.e. `py.test tests/acceptance -k "Tes
 ##### Running acceptance tests using your own GitLab instance
 
 **Note**: GitLabForm acceptance tests operate own their own groups, projects and users and it should be safe
-to run them on any GitLab instance. However we do not take any responsibility for it. Please review 
+to run them on any GitLab instance. However we do not take any responsibility for it. Please review
 the code to ensure what it does and run it at your own risk!
 
 1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
@@ -126,7 +126,7 @@ too, like this:
 ```
 docker build . -f ./dev/tests.Dockerfile -t gitlabform-tests:latest
 ```
-2. Use it to run the tests:
+2. Use it to run the tests (please note that you still need to have gitlab container running in the background like in the non-docker case):
 ```
 docker run -it -v $(pwd):/code gitlabform-tests:latest /bin/ash -c "cd /code && pytest tests/acceptance"
 ```
@@ -145,7 +145,7 @@ black .
 We recommend and provide a config for [pre-commit](https://pre-commit.com) to generate a pre-commit hook that will automatically reformat your contributions with Black.
 * squash your commits (unless there is a reason not to),
 * try to write [good commit message(s)](https://chris.beams.io/posts/git-commit/),
- 
+
 ...and so on.
 
 Additionally please follow these GitLabForm-specific guidelines:

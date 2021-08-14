@@ -45,7 +45,7 @@ setup(
         "requests==2.26.0",
         "Jinja2==2.11.3",
         "MarkupSafe==1.1.1",
-        "PyYAML==5.4.1",
+        "PyYAML==5.3.1",
         "luddite==1.0.2",
         "cli-ui==0.15.0",
         "packaging==21.0",
