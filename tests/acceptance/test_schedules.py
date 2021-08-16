@@ -11,17 +11,14 @@ def schedules(gitlab, group, project):
     another_branch = "scheduled/new-feature"
     gitlab.create_branch(group_and_project_name, another_branch, "main")
 
+    # fmt: off
     schedules = [
-        (
-            "Existing schedule",
-            "main",
-            "0 * * * *",
-            {"active": "true"},
-        ),
+        ("Existing schedule", "main", "0 * * * *", {"active": "true"}),
         ("Existing schedule with vars", "main", "30 * * * *", {}),
         ("Existing schedule to replace", "main", "30 1 * * *", {}),
         ("Existing schedule to replace", another_branch, "30 2 * * *", {}),
     ]
+    # fmt: on
 
     for schedule in schedules:
         gitlab.create_pipeline_schedule(
