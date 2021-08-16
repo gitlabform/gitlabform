@@ -43,11 +43,11 @@ def schedules(gitlab, group, project):
 
 class TestSchedules:
     def test__add_new_schedule(self, gitlab, group, project, schedules):
-        group_and_project = f"{group}/{project}"
+        group_and_project_name = f"{group}/{project}"
 
         add_schedule = f"""
         projects_and_groups:
-          {group_and_project}:
+          {group_and_project_name}:
             schedules:
               "New schedule":
                 ref: main
@@ -56,10 +56,10 @@ class TestSchedules:
                 active: true
         """
 
-        run_gitlabform(add_schedule, group_and_project)
+        run_gitlabform(add_schedule, group_and_project_name)
 
         schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            gitlab, group_and_project, "New schedule"
+            gitlab, group_and_project_name, "New schedule"
         )
         assert schedule is not None
         assert schedule["description"] == "New schedule"
@@ -71,21 +71,21 @@ class TestSchedules:
     def test__add_new_schedule_with_mandatory_fields_only(
         self, gitlab, group, project, schedules
     ):
-        group_and_project = f"{group}/{project}"
+        group_and_project_name = f"{group}/{project}"
 
         add_schedule_mandatory_fields_only = f"""
         projects_and_groups:
-          {group}/{project}:
+          {group_and_project_name}:
             schedules:
               "New schedule with mandatory fields":
                 ref: main
                 cron: "30 1 * * *"
         """
 
-        run_gitlabform(add_schedule_mandatory_fields_only, group_and_project)
+        run_gitlabform(add_schedule_mandatory_fields_only, group_and_project_name)
 
         schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            gitlab, group_and_project, "New schedule with mandatory fields"
+            gitlab, group_and_project_name, "New schedule with mandatory fields"
         )
         assert schedule is not None
         assert schedule["description"] == "New schedule with mandatory fields"
@@ -95,11 +95,11 @@ class TestSchedules:
         assert schedule["active"] is True
 
     def test__set_schedule_variables(self, gitlab, group, project, schedules):
-        group_and_project = f"{group}/{project}"
+        group_and_project_name = f"{group}/{project}"
 
         add_schedule_with_variables = f"""
         projects_and_groups:
-          {group}/{project}:
+          {group_and_project_name}:
             schedules:
               "New schedule with variables":
                 ref: main
@@ -112,10 +112,10 @@ class TestSchedules:
                         variable_type: file
         """
 
-        run_gitlabform(add_schedule_with_variables, group_and_project)
+        run_gitlabform(add_schedule_with_variables, group_and_project_name)
 
         schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            gitlab, group_and_project, "New schedule with variables"
+            gitlab, group_and_project_name, "New schedule with variables"
         )
         assert schedule is not None
         assert schedule["description"] == "New schedule with variables"
@@ -135,11 +135,11 @@ class TestSchedules:
         assert schedule["variables"][1]["value"] == "value987"
 
     def test__update_existing_schedule(self, gitlab, group, project, schedules):
-        group_and_project = f"{group}/{project}"
+        group_and_project_name = f"{group}/{project}"
 
         edit_schedule = f"""
         projects_and_groups:
-          {group}/{project}:
+          {group_and_project_name}:
             schedules:
               "Existing schedule":
                 ref: scheduled/new-feature
@@ -148,10 +148,10 @@ class TestSchedules:
                 active: false
         """
 
-        run_gitlabform(edit_schedule, group_and_project)
+        run_gitlabform(edit_schedule, group_and_project_name)
 
         schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            gitlab, group_and_project, "Existing schedule"
+            gitlab, group_and_project_name, "Existing schedule"
         )
         assert schedule is not None
         assert schedule["description"] == "Existing schedule"
@@ -161,11 +161,11 @@ class TestSchedules:
         assert schedule["active"] is False
 
     def test__replace_existing_schedules(self, gitlab, group, project, schedules):
-        group_and_project = f"{group}/{project}"
+        group_and_project_name = f"{group}/{project}"
 
         replace_schedules = f"""
         projects_and_groups:
-          {group}/{project}:
+          {group_and_project_name}:
             schedules:
               "Existing schedule to replace":
                 ref: scheduled/new-feature
@@ -174,10 +174,10 @@ class TestSchedules:
                 active: true
         """
 
-        run_gitlabform(replace_schedules, group_and_project)
+        run_gitlabform(replace_schedules, group_and_project_name)
 
         schedules = self.__find_pipeline_schedules_by_description(
-            gitlab, group_and_project, "Existing schedule to replace"
+            gitlab, group_and_project_name, "Existing schedule to replace"
         )
         assert schedules is not None
         assert len(schedules) == 1
@@ -188,20 +188,20 @@ class TestSchedules:
         assert schedules[0]["active"] is True
 
     def test__delete_schedule(self, gitlab, group, project, schedules):
-        group_and_project = f"{group}/{project}"
+        group_and_project_name = f"{group}/{project}"
 
         delete_schedule = f"""
         projects_and_groups:
-          {group}/{project}:
+          {group_and_project_name}:
             schedules:
               "Redundant schedule":
                 delete: True
         """
 
-        run_gitlabform(delete_schedule, group_and_project)
+        run_gitlabform(delete_schedule, group_and_project_name)
 
         schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            gitlab, group_and_project, "Redundant schedule"
+            gitlab, group_and_project_name, "Redundant schedule"
         )
         assert schedule is None
 
