@@ -4,7 +4,7 @@ import pytest
 from tests.acceptance import run_gitlabform
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="class")
 def schedules(gitlab, group, project):
     group_and_project_name = f"{group}/{project}"
 
