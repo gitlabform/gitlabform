@@ -1,8 +1,6 @@
 name: CodeQL
 
-on:
-  pull_request:
-    types: [opened]
+on: [pull_request]
 
 jobs:
   codeql-analysis:
