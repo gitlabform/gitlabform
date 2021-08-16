@@ -1,5 +1,6 @@
 import pytest
 
+from gitlabform.gitlab.core import NotFoundException
 from tests.acceptance import run_gitlabform
 
 
@@ -7,7 +8,7 @@ from tests.acceptance import run_gitlabform
 def services(request, gitlab, group, project):
     group_and_project_name = f"{group}/{project}"
 
-    services = ["asana", "hipchat", "redmine", "jira", "mattermost"]
+    services = ["asana", "slack", "redmine", "jira", "mattermost"]
 
     def fin():
         # disable test integrations
@@ -22,12 +23,57 @@ class TestServices:
     def test__if_they_are_not_set_by_default(self, gitlab, group, project):
         group_and_project_name = f"{group}/{project}"
 
-        services = []
-        for service_name in ["asana", "hipchat", "redmine"]:
-            service = gitlab.get_service(group_and_project_name, service_name)
-            services.append(service)
+        for service_name in ["asana", "slack", "redmine", "jira"]:
+            with pytest.raises(NotFoundException):
+                gitlab.get_service(group_and_project_name, service_name)
 
-        assert not any([service["active"] for service in services]) is True
+    def test__if_delete_works(self, gitlab, group, project):
+        group_and_project_name = f"{group}/{project}"
+
+        config_services = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            services:
+              jira:
+                url: http://foo.bar.com
+                username: foo
+                password: bar
+                active: true
+                commit_events: true
+              asana:
+                api_key: foo
+                push_events: true
+              slack:
+                webhook: http://foo.bar.com
+                push_events: true
+              redmine:
+                new_issue_url: http://foo.bar.com
+                project_url: http://foo.bar.com
+                issues_url: http://foo.bar.com
+                push_events: true
+        """
+
+        run_gitlabform(config_services, group_and_project_name)
+
+        for service_name in ["jira", "asana", "slack", "redmine"]:
+            service = gitlab.get_service(group_and_project_name, service_name)
+            assert service["active"] is True
+
+        config_services_delete = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            services:
+              jira:
+                delete: true
+              slack:
+                delete: true
+        """
+
+        run_gitlabform(config_services_delete, group_and_project_name)
+
+        for service_name in ["jira", "slack"]:
+            service = gitlab.get_service(group_and_project_name, service_name)
+            assert service["active"] is False
 
     def test__if_push_events_true_works(self, gitlab, group, project):
         group_and_project_name = f"{group}/{project}"
@@ -39,8 +85,8 @@ class TestServices:
               asana:
                 api_key: foo
                 push_events: true
-              hipchat:
-                token: foobar
+              slack:
+                webhook: http://foo.bar.com
                 push_events: true
               redmine:
                 new_issue_url: http://foo.bar.com
@@ -52,7 +98,7 @@ class TestServices:
         run_gitlabform(config_service_push_events_true, group_and_project_name)
 
         services = []
-        for service_name in ["asana", "hipchat", "redmine"]:
+        for service_name in ["asana", "slack", "redmine"]:
             service = gitlab.get_service(group_and_project_name, service_name)
             services.append(service)
 
@@ -69,8 +115,8 @@ class TestServices:
               asana:
                 api_key: foo
                 push_events: false # changed
-              hipchat:
-                token: foobar
+              slack:
+                webhook: http://foo.bar.com
                 push_events: false # changed
               redmine:
                 new_issue_url: http://foo.bar.com
@@ -82,7 +128,7 @@ class TestServices:
         run_gitlabform(config_service_push_events_false, group_and_project_name)
 
         services = []
-        for service_name in ["asana", "hipchat", "redmine"]:
+        for service_name in ["asana", "slack", "redmine"]:
             service = gitlab.get_service(group_and_project_name, service_name)
             services.append(service)
 
@@ -99,8 +145,8 @@ class TestServices:
               asana:
                 api_key: foo
                 push_events: true
-              hipchat:
-                token: foobar
+              slack:
+                webhook: http://foo.bar.com
                 push_events: true
               redmine:
                 new_issue_url: http://foo.bar.com
@@ -112,7 +158,7 @@ class TestServices:
         run_gitlabform(config_service_push_events_true, group_and_project_name)
 
         services = []
-        for service_name in ["asana", "hipchat", "redmine"]:
+        for service_name in ["asana", "slack", "redmine"]:
             service = gitlab.get_service(group_and_project_name, service_name)
             services.append(service)
 
@@ -126,8 +172,8 @@ class TestServices:
               asana:
                 api_key: foo
                 push_events: false # changed
-              hipchat:
-                token: foobar
+              slack:
+                webhook: http://foo.bar.com
                 push_events: false # changed
               redmine:
                 new_issue_url: http://foo.bar.com
@@ -139,7 +185,7 @@ class TestServices:
         run_gitlabform(config_service_push_events_false, group_and_project_name)
 
         services = []
-        for service_name in ["asana", "hipchat", "redmine"]:
+        for service_name in ["asana", "slack", "redmine"]:
             service = gitlab.get_service(group_and_project_name, service_name)
             services.append(service)
 
@@ -149,8 +195,8 @@ class TestServices:
     def test__if_jira_is_not_active_by_default(self, gitlab, group, project):
         group_and_project_name = f"{group}/{project}"
 
-        service = gitlab.get_service(group_and_project_name, "jira")
-        assert service["active"] is False
+        with pytest.raises(NotFoundException):
+            gitlab.get_service(group_and_project_name, "jira")
 
     def test__if_jira_commit_events_true_works(self, gitlab, group, project):
         group_and_project_name = f"{group}/{project}"
@@ -232,40 +278,6 @@ class TestServices:
         service = gitlab.get_service(group_and_project_name, "jira")
         assert service["active"] is True
         assert service["commit_events"] is False
-
-    def test__if_delete_works(self, gitlab, group, project):
-        group_and_project_name = f"{group}/{project}"
-
-        config_service_jira_commit_events_true = f"""
-        projects_and_groups:
-          {group_and_project_name}:
-            services:
-              jira:
-                url: http://foo.bar.com
-                username: foo
-                password: bar
-                active: true
-                commit_events: true
-        """
-
-        run_gitlabform(config_service_jira_commit_events_true, group_and_project_name)
-
-        service = gitlab.get_service(group_and_project_name, "jira")
-        assert service["active"] is True
-        assert service["commit_events"] is True
-
-        config_service_jira_delete = f"""
-        projects_and_groups:
-          {group_and_project_name}:
-            services:
-              jira:
-                delete: true
-        """
-
-        run_gitlabform(config_service_jira_delete, group_and_project_name)
-
-        service = gitlab.get_service(group_and_project_name, "jira")
-        assert service["active"] is False
 
     def test__mattermost_confidential_issues_events(self, gitlab, group, project):
         group_and_project_name = f"{group}/{project}"
