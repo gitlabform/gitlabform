@@ -280,7 +280,7 @@ class TestFiles:
                     "test_file": {
                         "skip_ci": True,
                         "overwrite": True,
-                        "branches": ["master"],
+                        "branches": ["main"],
                         "template": False,
                         "content": "this is {{ not }} a template",
                         "jinja_env": {"not": ""},
@@ -300,6 +300,8 @@ class TestFiles:
             }
         )
         run_gitlabform(test_config, group_and_project_name)
-        file_content = gitlab.get_file(group_and_project_name, "master", "test_file")
+        file_content = gitlab.get_file(group_and_project_name, "main", "test_file")
         expected = file_config["expected_content"]
-        assert file_content == expected, f"render not correct, got: \n\n{file_content}\n\nexpected:\n\n{expected}"
+        assert (
+            file_content == expected
+        ), f"render not correct, got: \n\n{file_content}\n\nexpected:\n\n{expected}"
