@@ -14,7 +14,7 @@ using hierarchical configuration written in YAML.
 
 ## ✨ Version 2 has been released! ✨
 
-Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGELOG.md) for a complete list of new features and bug fixes in this release.
+Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGELOG.md#200) for a complete list of new features and bug fixes in this release.
 
 ## Table of Contents
 
