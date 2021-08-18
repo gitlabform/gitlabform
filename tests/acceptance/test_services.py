@@ -20,8 +20,12 @@ def services(request, gitlab, group, project):
 
 
 class TestServices:
-    def test__if_they_are_not_set_by_default(self, gitlab, group, project):
-        group_and_project_name = f"{group}/{project}"
+    # we use "other_project" here on purpose because if we would reuse the "project"
+    # then we could end up with running this test after another, and a service created
+    # and then deleted is a different entity in GitLab than a never created one (!).
+    # the first one exists but has "active" field set to False, the other throws 404
+    def test__if_they_are_not_set_by_default(self, gitlab, group, other_project):
+        group_and_project_name = f"{group}/{other_project}"
 
         for service_name in ["asana", "slack", "redmine", "jira"]:
             with pytest.raises(NotFoundException):
@@ -191,12 +195,6 @@ class TestServices:
 
         assert all([service["active"] for service in services]) is True
         assert all([service["push_events"] for service in services]) is False
-
-    def test__if_jira_is_not_active_by_default(self, gitlab, group, project):
-        group_and_project_name = f"{group}/{project}"
-
-        with pytest.raises(NotFoundException):
-            gitlab.get_service(group_and_project_name, "jira")
 
     def test__if_jira_commit_events_true_works(self, gitlab, group, project):
         group_and_project_name = f"{group}/{project}"
