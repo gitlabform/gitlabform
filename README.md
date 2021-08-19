@@ -82,7 +82,7 @@ Some of the app features are limited because of the GitLab API issues. [Here is 
 
 ## Requirements
 
-* Python 3.6-3.9 **or** Docker
+* Python 3.6-3.10 or Docker
 * GitLab 11+
 * GitLab Premium (paid) for some features
 
