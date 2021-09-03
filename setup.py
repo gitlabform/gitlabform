@@ -46,7 +46,7 @@ setup(
         "requests==2.26.0",
         "Jinja2==2.11.3",
         "MarkupSafe==1.1.1",
-        "PyYAML==5.3.1",
+        "PyYAML==5.4.1",
         "luddite==1.0.2",
         "cli-ui==0.15.1",
         "packaging==21.0",
@@ -59,7 +59,7 @@ setup(
             "pre-commit==2.14.1",  # not really for tests, but for development
             "coverage==5.5",
             "pytest-cov==2.12.1",
-            "PyYAML==5.3.1",
+            "PyYAML==5.4.1",
             "wheel",
         ],
     },
