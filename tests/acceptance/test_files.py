@@ -1,5 +1,6 @@
 import pytest
 import yaml
+import os
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform, DEFAULT_README
 
@@ -287,6 +288,35 @@ class TestFiles:
                     }
                 },
                 "expected_content": "this is {{ not }} a template",
+            },
+            {
+                "config": {
+                    "test_file": {
+                        "skip_ci": True,
+                        "overwrite": True,
+                        "branches": ["main"],
+                        "template": True,
+                        "content": "this is {{ not }} a template",
+                        "jinja_env": {"not": ""},
+                    }
+                },
+                "expected_content": "this is  a template",
+            },
+            {
+                "config": {
+                    "test_file": {
+                        "skip_ci": True,
+                        "overwrite": True,
+                        "branches": ["main"],
+                        "template": True,
+                        "content": "this is a {{ not }} template",
+                        "jinja_env": {"not": "$ENV_VAR"},
+                    }
+                },
+                "expected_content": "this is a working in env template",
+                "env": {
+                  'ENV_VAR': 'working in env'
+                }
             }
         ],
     )
@@ -299,6 +329,9 @@ class TestFiles:
                 }
             }
         )
+        if 'env' in file_config:
+          for key, value in file_config['env'].items():
+            os.environ[key] = str(value)
         run_gitlabform(test_config, group_and_project_name)
         file_content = gitlab.get_file(group_and_project_name, "main", "test_file")
         expected = file_config["expected_content"]
