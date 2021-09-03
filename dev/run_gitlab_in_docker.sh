@@ -41,20 +41,28 @@ cecho b "Pulling GitLab image version '$gitlab_version'..."
 docker pull gitlab/gitlab-ee:$gitlab_version
 
 cecho b "Preparing to start GitLab..."
-existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}")
-if [[ -n $existing_gitlab_container_id ]] ; then
-  cecho b "Stopping and removing existing GitLab container..."
-  docker stop --time=30 "$existing_gitlab_container_id"
-  docker rm "$existing_gitlab_container_id"
-fi
+stop_gitlab() {
+  existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}")
+  if [[ -n $existing_gitlab_container_id ]] ; then
+    cecho b "Stopping and removing GitLab container..."
+    docker stop --time=30 "$existing_gitlab_container_id"
+    docker rm "$existing_gitlab_container_id"
+    rm -rf "$repo_root_directory"/config
+    rm -rf "$repo_root_directory"/logs
+    rm -rf "$repo_root_directory"/data
+  else
+    cecho b "No existing GitLab container running."
+  fi
+}
+stop_gitlab
 
-mkdir -p $repo_root_directory/config
+mkdir -p "$repo_root_directory"/config
 if [[ -f Gitlab.gitlab-license ]] ; then
   cecho b "EE license file found - using it..."
-  cp Gitlab.gitlab-license $repo_root_directory/config/
+  cp Gitlab.gitlab-license "$repo_root_directory"/config/
 fi
-mkdir -p $repo_root_directory/logs
-mkdir -p $repo_root_directory/data
+mkdir -p "$repo_root_directory"/logs
+mkdir -p "$repo_root_directory"/data
 
 cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
@@ -76,30 +84,30 @@ cecho y "docker logs -f ${container_id}"
 cecho b ")"
 sleep 3m
 
-$script_directory/await-healthy.sh
+"$script_directory"/await-healthy.sh
 
 # create files with params needed by the tests to access GitLab
 # (we are using these files to pass values from this script to the outside bash shell
 # - we cannot change its env variables from inside it)
-echo "http://localhost" > $repo_root_directory/gitlab_url.txt
-echo "token-string-here123" > $repo_root_directory/gitlab_token.txt
+echo "http://localhost" > "$repo_root_directory"/gitlab_url.txt
+echo "token-string-here123" > "$repo_root_directory"/gitlab_token.txt
 
 cecho b 'Starting GitLab complete!'
 echo ''
 cecho b 'GitLab version:'
-curl -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/version
+curl -H "Authorization:Bearer $(cat "$repo_root_directory"/gitlab_token.txt)" http://localhost/api/v4/version
 echo ''
 cecho b 'GitLab web UI URL (user: root, password: password)'
 echo 'http://localhost'
 echo ''
-alias stop_gitlab='existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}"); docker stop --time=30 $existing_gitlab_container_id ; docker rm $existing_gitlab_container_id'
-cecho b 'Run this command to stop GitLab container:'
+
+cecho b 'Run this command to stop GitLab container and DELETE the data in it:'
 cecho r 'stop_gitlab'
 echo ''
-cecho b 'To start GitLab container again, re-run this script. Note that GitLab will NOT existing any data'
-cecho b 'so the start will take a lot of time again. (But this is the only way to make GitLab in Docker stable.)'
+
+cecho b 'To restart GitLab container again, re-run this script.'
 echo ''
-cecho b 'Run this to start the acceptance tests (it will automatically load GITLAB_URL from gitlab_url.txt'
-cecho b 'and GITLAB_TOKEN from gitlab_token.txt created by this script):'
+
+cecho b 'Run this to start the acceptance tests:'
 echo ''
 cecho y 'pytest tests/acceptance'
