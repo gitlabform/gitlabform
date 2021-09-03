@@ -296,10 +296,11 @@ class TestFiles:
                         "overwrite": True,
                         "branches": ["main"],
                         "template": True,
-                        "content": "this is a {{ not }} template",
+                        "file": "test_file",
                         "jinja_env": {"not": "real"},
                     }
                 },
+                "test_file": "this is a {{ not }} template",
                 "expected_content": "this is a real template",
             },
             # {
@@ -327,6 +328,9 @@ class TestFiles:
                 }
             }
         )
+        if "test_file" in file_config:
+            with open("test_file", "w") as _f:
+                _f.write(file_config["test_file"])
         if "env" in file_config:
             for key, value in file_config["env"].items():
                 os.environ[key] = str(value)
