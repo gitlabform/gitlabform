@@ -314,10 +314,8 @@ class TestFiles:
                     }
                 },
                 "expected_content": "this is a working in env template",
-                "env": {
-                  'ENV_VAR': 'working in env'
-                }
-            }
+                "env": {"ENV_VAR": "working in env"},
+            },
         ],
     )
     def test_file_templating(self, gitlab, group, project, branches, file_config):
@@ -329,9 +327,9 @@ class TestFiles:
                 }
             }
         )
-        if 'env' in file_config:
-          for key, value in file_config['env'].items():
-            os.environ[key] = str(value)
+        if "env" in file_config:
+            for key, value in file_config["env"].items():
+                os.environ[key] = str(value)
         run_gitlabform(test_config, group_and_project_name)
         file_content = gitlab.get_file(group_and_project_name, "main", "test_file")
         expected = file_config["expected_content"]
