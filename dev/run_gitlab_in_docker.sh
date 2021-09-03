@@ -94,9 +94,6 @@ echo "token-string-here123" > "$repo_root_directory"/gitlab_token.txt
 
 cecho b 'Starting GitLab complete!'
 echo ''
-cecho b 'GitLab version:'
-curl -H "Authorization:Bearer $(cat "$repo_root_directory"/gitlab_token.txt)" http://localhost/api/v4/version
-echo ''
 cecho b 'GitLab web UI URL (user: root, password: password)'
 echo 'http://localhost'
 echo ''
