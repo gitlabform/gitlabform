@@ -296,26 +296,26 @@ class TestFiles:
                         "overwrite": True,
                         "branches": ["main"],
                         "template": True,
-                        "content": "this is {{ not }} a template",
-                        "jinja_env": {"not": ""},
-                    }
-                },
-                "expected_content": "this is  a template",
-            },
-            {
-                "config": {
-                    "test_file": {
-                        "skip_ci": True,
-                        "overwrite": True,
-                        "branches": ["main"],
-                        "template": True,
                         "content": "this is a {{ not }} template",
-                        "jinja_env": {"not": "$ENV_VAR"},
+                        "jinja_env": {"not": "real"},
                     }
                 },
-                "expected_content": "this is a working in env template",
-                "env": {"ENV_VAR": "working in env"},
+                "expected_content": "this is a real template",
             },
+            # {
+            #     "config": {
+            #         "test_file": {
+            #             "skip_ci": True,
+            #             "overwrite": True,
+            #             "branches": ["main"],
+            #             "template": True,
+            #             "content": "this is a {{ not }} template",
+            #             "jinja_env": {"not": "$ENV_VAR"},
+            #         }
+            #     },
+            #     "expected_content": "this is a working in env template",
+            #     "env": {"ENV_VAR": "working in env"},
+            # },
         ],
     )
     def test_file_templating(self, gitlab, group, project, branches, file_config):
