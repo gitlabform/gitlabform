@@ -204,3 +204,32 @@ class TestGroupMembers:
 
         with pytest.raises(SystemExit):
             run_gitlabform(zero_users, group)
+
+    def test__add_user_with_access_level_name(
+        self, gitlab, group, users, one_owner_and_two_developers
+    ):
+
+        no_of_members_before = len(gitlab.get_group_members(group))
+        user_to_add = f"{users[3]}"
+
+        add_users = f"""
+        projects_and_groups:
+          {group}/*:
+            group_members:
+              {users[0]}:
+                access_level: {AccessLevel.OWNER.value}
+              {users[1]}:
+                access_level: {AccessLevel.DEVELOPER.value}
+              {users[2]}:
+                access_level: {AccessLevel.DEVELOPER.value}
+              {user_to_add}: # new user 1
+                access_level: developer
+        """
+
+        run_gitlabform(add_users, group)
+
+        members = gitlab.get_group_members(group)
+        assert len(members) == no_of_members_before + 1
+
+        members_usernames = [member["username"] for member in members]
+        assert members_usernames.count(user_to_add) == 1

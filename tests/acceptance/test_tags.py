@@ -153,3 +153,34 @@ class TestTags:
             protected_tags[0]["create_access_levels"][0]["access_level"]
             == AccessLevel.NO_ACCESS.value
         )
+
+    def test__protect_single_tag_with_access_level_names(
+        self, gitlab, group, project, tags
+    ):
+        group_and_project = f"{group}/{project}"
+
+        config = f"""
+            projects_and_groups:
+              {group_and_project}:
+                tags:
+                  tag1:
+                    protected: true
+                    create_access_level: Maintainer
+            """
+
+        run_gitlabform(config, group_and_project)
+
+        tags = gitlab.get_tags(group_and_project)
+        for tag in tags:
+            if tag["name"] == "tag1":
+                assert tag["protected"]
+            else:
+                assert not tag["protected"]
+
+        protected_tags = gitlab.get_protected_tags(group_and_project)
+        assert len(protected_tags) == 1
+        assert protected_tags[0]["name"] == "tag1"
+        assert (
+            protected_tags[0]["create_access_levels"][0]["access_level"]
+            == AccessLevel.MAINTAINER.value
+        )
