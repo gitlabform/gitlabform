@@ -19,6 +19,8 @@ from cli_ui import (
     Symbol,
     Token,
 )
+from cli_ui import debug as verbose
+
 from packaging import version as packaging_version
 from urllib.error import URLError
 
@@ -113,12 +115,12 @@ def show_header(
         groups, projects
     )
 
-    debug(f"groups: {groups_with_non_empty_configs}")
-    debug(
+    verbose(f"groups: {groups_with_non_empty_configs}")
+    verbose(
         f"(groups with empty effective configs that will be skipped: {groups_with_empty_configs})"
     )
-    debug(f"projects: {projects_with_non_empty_configs}")
-    debug(
+    verbose(f"projects: {projects_with_non_empty_configs}")
+    verbose(
         f"(projects with empty effective configs that will be skipped: {projects_with_empty_configs})"
     )
 

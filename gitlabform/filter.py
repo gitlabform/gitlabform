@@ -1,4 +1,4 @@
-import cli_ui
+from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
 
@@ -27,7 +27,7 @@ class NonEmptyConfigsProvider(object):
         self.project_processors = project_processors
 
         if not self.configuration.get("projects_and_groups", {}):
-            cli_ui.fatal(
+            fatal(
                 "Configuration has to contain non-empty 'projects_and_groups' key.",
                 exit_code=EXIT_INVALID_INPUT,
             )

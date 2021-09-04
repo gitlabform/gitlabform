@@ -1,6 +1,5 @@
-import logging
-
-import cli_ui
+from logging import debug
+from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -12,9 +11,7 @@ class GroupSettingsProcessor(AbstractProcessor):
 
     def _process_configuration(self, group: str, configuration: dict):
         group_settings = configuration["group_settings"]
-        logging.debug(
-            "Group settings BEFORE: %s", self.gitlab.get_group_settings(group)
-        )
-        cli_ui.debug(f"Setting group settings: {group_settings}")
+        debug("Group settings BEFORE: %s", self.gitlab.get_group_settings(group))
+        verbose(f"Setting group settings: {group_settings}")
         self.gitlab.put_group_settings(group, group_settings)
-        logging.debug("Group settings AFTER: %s", self.gitlab.get_group_settings(group))
+        debug("Group settings AFTER: %s", self.gitlab.get_group_settings(group))

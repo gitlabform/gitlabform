@@ -1,4 +1,4 @@
-import logging
+from logging import debug
 from typing import Dict, List
 
 from gitlabform.gitlab import GitLab
@@ -19,21 +19,19 @@ class SchedulesProcessor(AbstractProcessor):
             schedule_ids = schedule_ids_by_description.get(schedule_description)
             if configuration.get("schedules|" + schedule_description + "|delete"):
                 if schedule_ids:
-                    logging.debug(
-                        "Deleting pipeline schedules '%s'", schedule_description
-                    )
+                    debug("Deleting pipeline schedules '%s'", schedule_description)
                     for schedule_id in schedule_ids:
                         self.gitlab.delete_pipeline_schedule(
                             project_and_group, schedule_id
                         )
                 else:
-                    logging.debug(
+                    debug(
                         "Not deleting pipeline schedules '%s', because none exist",
                         schedule_description,
                     )
             else:
                 if schedule_ids and len(schedule_ids) == 1:
-                    logging.debug(
+                    debug(
                         "Changing existing pipeline schedule '%s'", schedule_description
                     )
 
@@ -53,7 +51,7 @@ class SchedulesProcessor(AbstractProcessor):
                         ),
                     )
                 elif schedule_ids:
-                    logging.debug(
+                    debug(
                         "Replacing existing pipeline schedules '%s'",
                         schedule_description,
                     )
@@ -65,9 +63,7 @@ class SchedulesProcessor(AbstractProcessor):
                         configuration, project_and_group, schedule_description
                     )
                 else:
-                    logging.debug(
-                        "Creating pipeline schedule '%s'", schedule_description
-                    )
+                    debug("Creating pipeline schedule '%s'", schedule_description)
                     self.create_schedule_with_variables(
                         configuration, project_and_group, schedule_description
                     )
@@ -94,7 +90,7 @@ class SchedulesProcessor(AbstractProcessor):
 
         existing_variables = schedule.get("variables")
         if existing_variables:
-            logging.debug(
+            debug(
                 "Deleting variables for pipeline schedule '%s'", schedule["description"]
             )
 

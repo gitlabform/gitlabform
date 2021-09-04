@@ -1,8 +1,9 @@
-import copy
-import logging
-import textwrap
+from logging import debug
+from cli_ui import debug as verbose
+from cli_ui import warning
 
-import cli_ui
+import copy
+import textwrap
 import yaml
 
 from gitlabform.gitlab import GitLab
@@ -20,12 +21,12 @@ class SecretVariablesProcessor(AbstractProcessor):
             self.gitlab.get_project_settings(project_and_group)["builds_access_level"]
             == "disabled"
         ):
-            cli_ui.warning(
+            warning(
                 "Builds disabled in this project so I can't set secret variables here."
             )
             return
 
-        logging.debug(
+        debug(
             "Secret variables BEFORE: %s",
             self.gitlab.get_secret_variables(project_and_group),
         )
@@ -35,18 +36,18 @@ class SecretVariablesProcessor(AbstractProcessor):
             if "delete" in configuration["secret_variables"][secret_variable]:
                 key = configuration["secret_variables"][secret_variable]["key"]
                 if configuration["secret_variables"][secret_variable]["delete"]:
-                    cli_ui.debug(
+                    verbose(
                         f"Deleting {secret_variable}: {key} in project {project_and_group}"
                     )
                     try:
                         self.gitlab.delete_secret_variable(project_and_group, key)
                     except:
-                        cli_ui.warning(
+                        warning(
                             f"Could not delete variable {key} in group {project_and_group}"
                         )
                     continue
 
-            cli_ui.debug(f"Setting secret variable: {secret_variable}")
+            verbose(f"Setting secret variable: {secret_variable}")
             try:
                 self.gitlab.put_secret_variable(
                     project_and_group,
@@ -58,7 +59,7 @@ class SecretVariablesProcessor(AbstractProcessor):
                     configuration["secret_variables"][secret_variable],
                 )
 
-        logging.debug(
+        debug(
             "Secret variables AFTER: %s",
             self.gitlab.get_secret_variables(project_and_group),
         )
@@ -73,20 +74,20 @@ class SecretVariablesProcessor(AbstractProcessor):
             for secret_variable in current_secret_variables:
                 secret_variable["value"] = hide(secret_variable["value"])
 
-            cli_ui.debug(f"Secret variables for {project_and_group} in GitLab:")
+            verbose(f"Secret variables for {project_and_group} in GitLab:")
 
-            cli_ui.debug(
+            verbose(
                 textwrap.indent(
                     yaml.dump(current_secret_variables, default_flow_style=False),
                     "  ",
                 )
             )
         except:
-            cli_ui.debug(
+            verbose(
                 f"Secret variables for {project_and_group} in GitLab cannot be checked."
             )
 
-        cli_ui.debug(f"Secret variables in {project_and_group} in configuration:")
+        verbose(f"Secret variables in {project_and_group} in configuration:")
 
         configured_secret_variables = copy.deepcopy(configuration)
         for key in configured_secret_variables.keys():
@@ -94,7 +95,7 @@ class SecretVariablesProcessor(AbstractProcessor):
                 configured_secret_variables[key]["value"]
             )
 
-        cli_ui.debug(
+        verbose(
             textwrap.indent(
                 yaml.dump(configured_secret_variables, default_flow_style=False),
                 "  ",

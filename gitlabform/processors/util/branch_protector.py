@@ -1,6 +1,5 @@
-import logging
-
-import cli_ui
+from logging import debug
+from cli_ui import warning, fatal
 
 from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
@@ -34,12 +33,12 @@ class BranchProtector(object):
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
             if self.strict:
-                cli_ui.fatal(
+                fatal(
                     message,
                     exit_code=EXIT_PROCESSING_ERROR,
                 )
             else:
-                cli_ui.warning(message)
+                warning(message)
 
     def protect_branch(self, project_and_group, configuration, branch):
         try:
@@ -64,7 +63,7 @@ class BranchProtector(object):
                         requested_configuration, project_and_group, branch
                     )
                 else:
-                    logging.debug(
+                    debug(
                         "Skipping set branch '%s' access levels because they're already set"
                     )
 
@@ -77,16 +76,16 @@ class BranchProtector(object):
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
             if self.strict:
-                cli_ui.fatal(
+                fatal(
                     message,
                     exit_code=EXIT_PROCESSING_ERROR,
                 )
             else:
-                cli_ui.warning(message)
+                warning(message)
 
     def unprotect_branch(self, project_and_group, branch):
         try:
-            logging.debug("Setting branch '%s' as unprotected", branch)
+            debug("Setting branch '%s' as unprotected", branch)
 
             # we don't know if the old or new API was used to protect
             # so use both when unprotecting
@@ -100,12 +99,12 @@ class BranchProtector(object):
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
             if self.strict:
-                cli_ui.fatal(
+                fatal(
                     message,
                     exit_code=EXIT_PROCESSING_ERROR,
                 )
             else:
-                cli_ui.warning(message)
+                warning(message)
 
     def get_branch_protection_config_type(
         self, project_and_group, requested_configuration, branch
@@ -120,19 +119,19 @@ class BranchProtector(object):
             return "old"
 
         else:
-            cli_ui.fatal(
+            fatal(
                 f"Invalid configuration for protecting branches in project '{project_and_group}',"
                 f" branch '{branch}' - missing keys.",
                 exit_code=EXIT_INVALID_INPUT,
             )
 
     def protect_using_old_api(self, requested_configuration, project_and_group, branch):
-        cli_ui.warning(
+        warning(
             f"Using keys {self.old_api_keys} for configuring protected"
             " branches is deprecated and will be removed in future versions of GitLabForm."
             f" Please start using new keys: {self.new_api_keys}"
         )
-        logging.debug("Setting branch '%s' as *protected*", branch)
+        debug("Setting branch '%s' as *protected*", branch)
 
         # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
         self.gitlab.unprotect_branch_new_api(project_and_group, branch)
@@ -145,7 +144,7 @@ class BranchProtector(object):
         )
 
     def protect_using_new_api(self, requested_configuration, project_and_group, branch):
-        logging.debug("Setting branch '%s' access level", branch)
+        debug("Setting branch '%s' access level", branch)
 
         # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
         self.gitlab.unprotect_branch_new_api(project_and_group, branch)
@@ -161,7 +160,7 @@ class BranchProtector(object):
     def set_code_owner_approval_required(
         self, requested_configuration, project_and_group, branch
     ):
-        logging.debug(
+        debug(
             "Setting branch '%s' \"code owner approval required\" option",
             branch,
         )

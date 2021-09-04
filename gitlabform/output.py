@@ -1,6 +1,7 @@
-import logging
+from logging import debug
+from cli_ui import debug as verbose
+from cli_ui import fatal
 
-import cli_ui
 import yaml
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
@@ -17,11 +18,11 @@ class EffectiveConfiguration:
         if output_file:
             try:
                 self.output_file = open(output_file, "w")
-                logging.debug(
+                debug(
                     f"Opened file {self.output_file} to write the effective configs to."
                 )
             except Exception as e:
-                cli_ui.fatal(
+                fatal(
                     f"Error when trying to open {self.output_file} to write the effective configs to: {e}",
                     exit_code=EXIT_INVALID_INPUT,
                 )
@@ -38,7 +39,7 @@ class EffectiveConfiguration:
         self, project_or_group: str, configuration_name: str, configuration: dict
     ):
         if self.output_file:
-            cli_ui.debug(f"Adding effective configuration for {configuration_name}.")
+            verbose(f"Adding effective configuration for {configuration_name}.")
             self.config[project_or_group][configuration_name] = configuration
 
     def write_to_file(self):
@@ -51,7 +52,7 @@ class EffectiveConfiguration:
                 self.output_file.write(yaml_configuration)
                 self.output_file.close()
             except Exception as e:
-                cli_ui.fatal(
+                fatal(
                     f"Error when trying to write or close {self.output_file}: {e}",
                     exit_code=EXIT_PROCESSING_ERROR,
                 )

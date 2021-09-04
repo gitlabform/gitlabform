@@ -1,11 +1,9 @@
-import logging
-import cli_ui
+from logging import debug
+from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration.core import KeyNotFoundException
 from gitlabform.configuration.projects_and_groups import ConfigurationProjectsAndGroups
-
-logger = logging.getLogger(__name__)
 
 
 class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGroups):
@@ -85,7 +83,7 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
             if self.get(path, 0):
                 almost_duplicates = self._find_almost_duplicates(path)
                 if almost_duplicates:
-                    cli_ui.fatal(
+                    fatal(
                         f"There are almost duplicates in the keys of {path} - they differ only in case.\n"
                         f"They are: {', '.join(almost_duplicates)}\n"
                         f"This is not allowed as we ignore the case for group and project names.",

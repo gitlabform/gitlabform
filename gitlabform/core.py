@@ -1,9 +1,12 @@
 import argparse
 import logging.config
+import logging
 import sys
 import textwrap
 import traceback
 
+from logging import debug
+from cli_ui import warning, fatal
 import cli_ui
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
@@ -81,7 +84,7 @@ class GitLabForm(object):
                 sys.exit(0)
 
             if not self.project_or_group:
-                cli_ui.fatal(
+                fatal(
                     "project_or_group parameter is required.",
                     exit_code=EXIT_INVALID_INPUT,
                 )
@@ -243,9 +246,9 @@ class GitLabForm(object):
 
     def configure_output(self, tests=False):
 
-        # normal mode - print cli_ui.info+
-        # verbose mode - print cli_ui.*
-        # debug / tests mode - like above + logging.debug
+        # normal mode - print cli_ui.* except debug as verbose
+        # verbose mode - print all cli_ui.*, including debug as verbose
+        # debug / tests mode - like above + (logging.)debug
 
         logging.basicConfig()
 
@@ -280,17 +283,17 @@ class GitLabForm(object):
             configuration = gitlab.get_configuration()
             return gitlab, configuration
         except ConfigFileNotFoundException as e:
-            cli_ui.fatal(
+            fatal(
                 f"Config file not found at: {e}",
                 exit_code=EXIT_INVALID_INPUT,
             )
         except ConfigInvalidException as e:
-            cli_ui.fatal(
+            fatal(
                 f"Invalid config:\n{e.underlying}",
                 exit_code=EXIT_INVALID_INPUT,
             )
         except TestRequestFailedException as e:
-            cli_ui.fatal(
+            fatal(
                 f"GitLab test request failed:\n{e.underlying}",
                 exit_code=EXIT_PROCESSING_ERROR,
             )
@@ -354,14 +357,14 @@ class GitLabForm(object):
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
-                    cli_ui.fatal(
+                    fatal(
                         message,
                         exit_code=EXIT_PROCESSING_ERROR,
                     )
                 else:
-                    cli_ui.warning(message)
+                    warning(message)
             finally:
-                logging.debug(
+                debug(
                     f"@ ({group_number}/{len(groups_with_non_empty_configs)}) FINISHED Processing group: {group}"
                 )
 
@@ -416,16 +419,16 @@ class GitLabForm(object):
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
-                    cli_ui.fatal(
+                    fatal(
                         message,
                         exit_code=EXIT_PROCESSING_ERROR,
                     )
                 else:
-                    cli_ui.warning(message)
+                    warning(message)
 
             finally:
 
-                logging.debug(
+                debug(
                     f"* ({project_number}/{len(projects_with_non_empty_configs)})"
                     f" FINISHED Processing project: {project_and_group}",
                 )

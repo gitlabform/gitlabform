@@ -1,6 +1,5 @@
-import logging
-
-import cli_ui
+from logging import debug
+from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
@@ -17,7 +16,7 @@ class GroupMembersProcessor(AbstractProcessor):
 
             # group users before by username
             users_before = self.gitlab.get_group_members(group)
-            logging.debug("Group members BEFORE: %s", users_before)
+            debug("Group members BEFORE: %s", users_before)
             users_before_by_username = dict()
             for user in users_before:
                 users_before_by_username[user["username"]] = user
@@ -33,7 +32,7 @@ class GroupMembersProcessor(AbstractProcessor):
                 AccessLevel.OWNER.value not in users_to_set_by_access_level.keys()
                 and configuration.get("enforce_group_members")
             ):
-                cli_ui.fatal(
+                fatal(
                     "With 'enforce_group_members' flag you cannot have no Owners (access_level = 50) in your "
                     " group members config. GitLab requires at least 1 Owner per group.",
                     exit_code=EXIT_INVALID_INPUT,
@@ -69,12 +68,12 @@ class GroupMembersProcessor(AbstractProcessor):
                             access_level_before == access_level_to_set
                             and expires_at_before == expires_at_to_set
                         ):
-                            logging.debug(
+                            debug(
                                 "Nothing to change for user '%s' - same config now as to set.",
                                 user,
                             )
                         else:
-                            logging.debug(
+                            debug(
                                 "Re-adding user '%s' to change their access level or expires at.",
                                 user,
                             )
@@ -86,9 +85,7 @@ class GroupMembersProcessor(AbstractProcessor):
                             )
 
                     else:
-                        logging.debug(
-                            "Adding user '%s' who previously was not a member.", user
-                        )
+                        debug("Adding user '%s' who previously was not a member.", user)
                         self.gitlab.add_member_to_group(
                             group, user, access_level_to_set, expires_at_to_set
                         )
@@ -100,20 +97,18 @@ class GroupMembersProcessor(AbstractProcessor):
                     [user["username"] for user in users_before]
                 ) - set(users_to_set_by_username.keys())
                 for user in users_not_configured:
-                    logging.debug(
+                    debug(
                         "Removing user '%s' who is not configured to be a member.", user
                     )
                     self.gitlab.remove_member_from_group(group, user)
             else:
-                logging.debug("Not enforcing group members.")
+                debug("Not enforcing group members.")
 
-            logging.debug(
-                "Group members AFTER: %s", self.gitlab.get_group_members(group)
-            )
+            debug("Group members AFTER: %s", self.gitlab.get_group_members(group))
 
         else:
 
-            cli_ui.fatal(
+            fatal(
                 "You cannot configure a group to have no members. GitLab requires a group "
                 " to contain at least 1 member who is an Owner (access_level = 50).",
                 exit_code=EXIT_INVALID_INPUT,

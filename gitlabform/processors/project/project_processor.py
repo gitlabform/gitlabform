@@ -1,4 +1,4 @@
-import cli_ui
+from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -13,8 +13,8 @@ class ProjectProcessor(AbstractProcessor):
         if project:
             if "archive" in project:
                 if project["archive"]:
-                    cli_ui.debug("Archiving project...")
+                    verbose("Archiving project...")
                     self.gitlab.archive(project_and_group)
                 else:
-                    cli_ui.debug("Unarchiving project...")
+                    verbose("Unarchiving project...")
                     self.gitlab.unarchive(project_and_group)

@@ -1,4 +1,4 @@
-import cli_ui
+from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab.core import NotFoundException
@@ -49,7 +49,7 @@ class GroupsAndProjectsProvider:
                     group = self.gitlab.get_group_case_insensitive(group)
                     effective_groups_proper_case.append(group["full_path"])
                 except NotFoundException:
-                    cli_ui.fatal(
+                    fatal(
                         f"Configuration contains group {group} but it cannot be found in GitLab!",
                         exit_code=EXIT_INVALID_INPUT,
                     )

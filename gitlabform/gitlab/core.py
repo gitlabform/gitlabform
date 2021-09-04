@@ -1,7 +1,7 @@
 import json
-import logging
+from logging import debug
+from cli_ui import debug as verbose
 
-import cli_ui
 import pkg_resources
 import requests
 import os
@@ -52,7 +52,7 @@ class GitLabCore:
 
         try:
             version = self._make_requests_to_api("version")
-            cli_ui.debug(
+            verbose(
                 f"Connected to GitLab version: {version['version']} ({version['revision']})"
             )
             self.version = version["version"]
@@ -186,7 +186,7 @@ class GitLabCore:
             + "/api/v4/"
             + self._format_with_url_encoding(path_as_format_string, args)
         )
-        logging.debug(
+        debug(
             "url = %s , method = %s , data = %s, json = %s",
             url,
             method,
@@ -203,13 +203,13 @@ class GitLabCore:
             )
         else:
             response = self.session.request(method, url, timeout=self.timeout)
-        logging.debug("response code=%s" % response.status_code)
+        debug("response code=%s" % response.status_code)
 
         if response.status_code in expected_codes:
             # if we accept error responses then they will likely not contain a JSON body
             # so fake it to fix further calls to response.json()
             if response.status_code == 204 or (400 <= response.status_code <= 499):
-                logging.debug("faking response body to be {}")
+                debug("faking response body to be {}")
                 response.json = lambda: {}
         else:
             if response.status_code == 404:
@@ -225,7 +225,7 @@ class GitLabCore:
                     response.status_code,
                 )
 
-        logging.debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
+        debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
         return response
 
     @staticmethod

@@ -1,6 +1,6 @@
-import logging
-
-import cli_ui
+from logging import debug
+from cli_ui import debug as verbose
+from cli_ui import warning
 
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
@@ -12,7 +12,7 @@ class GroupSecretVariablesProcessor(AbstractProcessor):
         super().__init__("group_secret_variables", gitlab)
 
     def _process_configuration(self, group: str, configuration: dict):
-        logging.debug(
+        debug(
             "Group secret variables BEFORE: %s",
             self.gitlab.get_group_secret_variables(group),
         )
@@ -22,14 +22,14 @@ class GroupSecretVariablesProcessor(AbstractProcessor):
             if "delete" in configuration["group_secret_variables"][secret_variable]:
                 key = configuration["group_secret_variables"][secret_variable]["key"]
                 if configuration["group_secret_variables"][secret_variable]["delete"]:
-                    cli_ui.debug(f"Deleting {secret_variable}: {key} in group {group}")
+                    verbose(f"Deleting {secret_variable}: {key} in group {group}")
                     try:
                         self.gitlab.delete_group_secret_variable(group, key)
                     except:
-                        cli_ui.info(f"Could not delete variable {key} in group {group}")
+                        warning(f"Could not delete variable {key} in group {group}")
                     continue
 
-            cli_ui.debug(f"Setting group secret variable: {secret_variable}")
+            verbose(f"Setting group secret variable: {secret_variable}")
             try:
                 self.gitlab.put_group_secret_variable(
                     group, configuration["group_secret_variables"][secret_variable]
@@ -39,7 +39,7 @@ class GroupSecretVariablesProcessor(AbstractProcessor):
                     group, configuration["group_secret_variables"][secret_variable]
                 )
 
-        logging.debug(
+        debug(
             "Groups secret variables AFTER: %s",
             self.gitlab.get_group_secret_variables(group),
         )

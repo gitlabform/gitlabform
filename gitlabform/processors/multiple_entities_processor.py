@@ -1,7 +1,8 @@
-import logging
+from logging import debug
+from cli_ui import debug as verbose
+from cli_ui import fatal
 
 import abc
-import cli_ui
 from typing import Callable, List
 
 from gitlabform import EXIT_INVALID_INPUT
@@ -41,7 +42,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         self._find_duplicates(project_or_group, entities_in_configuration)
 
         entities_in_gitlab = self.list_method(project_or_group)
-        logging.debug(f"{self.configuration_name} BEFORE: {entities_in_gitlab}")
+        debug(f"{self.configuration_name} BEFORE: {entities_in_gitlab}")
 
         for entity_name, entity_config in entities_in_configuration.items():
 
@@ -51,7 +52,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                     self._validate_required_to_delete(
                         project_or_group, entity_name, entity_config
                     )
-                    cli_ui.debug(
+                    verbose(
                         f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}"
                     )
                     self.delete_method(project_or_group, entity_in_gitlab)
@@ -60,37 +61,37 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                         project_or_group, entity_name, entity_config
                     )
                     if self.edit_method:
-                        cli_ui.debug(
+                        verbose(
                             f"Editing {entity_name} of {self.configuration_name} in {project_or_group}"
                         )
                         self.edit_method(
                             project_or_group, entity_in_gitlab, entity_config
                         )
                     else:
-                        cli_ui.debug(
+                        verbose(
                             f"Recreating {entity_name} of {self.configuration_name} in {project_or_group}"
                         )
                         self.delete_method(project_or_group, entity_in_gitlab)
                         self.add_method(project_or_group, entity_config)
                 else:
-                    cli_ui.debug(
+                    verbose(
                         f"{entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update."
                     )
             else:
                 if "delete" in entity_config and entity_config["delete"]:
-                    cli_ui.debug(
+                    verbose(
                         f"{entity_name} of {self.configuration_name} in {project_or_group} already doesn't exist."
                     )
                 else:
                     self._validate_required_to_create_or_update(
                         project_or_group, entity_name, entity_config
                     )
-                    cli_ui.debug(
+                    verbose(
                         f"Adding {entity_name} of {self.configuration_name} in {project_or_group}"
                     )
                     self.add_method(project_or_group, entity_config)
 
-        logging.debug(
+        debug(
             f"{self.configuration_name} AFTER: %s", self.list_method(project_or_group)
         )
 
@@ -99,7 +100,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             for second_key, second_value in entities_in_configuration.items():
                 if first_key != second_key:
                     if self.defining.matches(first_value, second_value):
-                        cli_ui.fatal(
+                        fatal(
                             f"Entities {first_key} and {second_key} in {self.configuration_name} for {project_or_group}"
                             f" are the same in terms of their defining keys: {self.defining.explain()}",
                             exit_code=EXIT_INVALID_INPUT,
@@ -109,7 +110,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         self, project_or_group: str, entity_name: str, entity_dict: dict
     ):
         if not self.required_to_create_or_update.contains(entity_dict):
-            cli_ui.fatal(
+            fatal(
                 f"Entity {entity_name} in {self.configuration_name} for {project_or_group}"
                 f" doesn't have some of its keys required to create or update:"
                 f" {self.required_to_create_or_update.explain()}",
@@ -120,7 +121,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         self, project_or_group: str, entity_name: str, entity_dict: dict
     ):
         if not self.defining.contains(entity_dict):
-            cli_ui.fatal(
+            fatal(
                 f"Entity {entity_name} in {self.configuration_name} for {project_or_group}"
                 f" doesn't have some of its defining keys required to delete it: {self.defining.explain()}",
                 exit_code=EXIT_INVALID_INPUT,
