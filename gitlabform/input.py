@@ -71,9 +71,9 @@ class GroupsAndProjectsProvider:
             # we already have all the groups
             pass
 
-        if target == "ALL_DEFINED":
+        elif target == "ALL_DEFINED":
             requested_projects = self.configuration.get_projects()
-
+            requested_projects = self._remove_archived_projects(requested_projects)
         else:
             try:
                 # it may be a project or a subgroup
@@ -89,6 +89,13 @@ class GroupsAndProjectsProvider:
         projects = sorted(list(set(requested_projects + projects_from_groups)))
 
         return self._remove_skipped_projects(projects)
+
+    def _remove_archived_projects(self, projects):
+        if self.include_archived_projects:
+            return projects
+        else:
+            non_archived_projects = self.gitlab.get_all_projects(include_archived=False)
+            return [project for project in projects if project in non_archived_projects]
 
     def _get_projects_from_groups(self, groups: list) -> list:
         # use set to deduplicate project list
