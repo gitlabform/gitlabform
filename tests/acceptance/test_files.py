@@ -271,3 +271,24 @@ class TestFiles:
         # the default value
         # according to https://docs.gitlab.com/ee/api/protected_branches.html#protect-repository-branches
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+    def test__set_file_with_chinese_characters(self, gitlab, group, project, branches):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_chinese_characters = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            files:
+              "README.md":
+                overwrite: true
+                branches:
+                  - main
+                content: |
+                    Hanzi (Traditional): 丕不丈丁
+                    Hanzi (Simplified): 丏丅丙两
+        """
+
+        run_gitlabform(set_file_chinese_characters, group_and_project_name)
+
+        file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
+        assert file_content == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两"
