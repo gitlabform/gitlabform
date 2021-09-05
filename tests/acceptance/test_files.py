@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from gitlabform.gitlab import AccessLevel
@@ -43,6 +44,18 @@ def branches(request, gitlab, group, project):
             AccessLevel.MAINTAINER.value,
             AccessLevel.MAINTAINER.value,
         )
+
+    request.addfinalizer(fin)
+
+
+@pytest.fixture(scope="class")
+def file(request):
+    f = open("file.txt", "a")
+    f.write("Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁")
+    f.close()
+
+    def fin():
+        os.remove("file.txt")
 
     request.addfinalizer(fin)
 
@@ -292,3 +305,24 @@ class TestFiles:
 
         file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
         assert file_content == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两"
+
+    def test__set_external_file_with_chinese_characters(
+        self, gitlab, group, project, branches, file
+    ):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_chinese_characters = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            files:
+              "README.md":
+                overwrite: true
+                branches:
+                  - main
+                file: file.txt
+        """
+
+        run_gitlabform(set_file_chinese_characters, group_and_project_name)
+
+        file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
+        assert file_content == "Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁"
