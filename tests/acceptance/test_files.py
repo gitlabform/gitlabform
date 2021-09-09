@@ -60,6 +60,18 @@ def file(request):
     request.addfinalizer(fin)
 
 
+@pytest.fixture(scope="class")
+def file2(request):
+    f = open("file2.txt", "a")
+    f.write("LICENSE\n\n“This is a license file”\n")
+    f.close()
+
+    def fin():
+        os.remove("file2.txt")
+
+    request.addfinalizer(fin)
+
+
 class TestFiles:
     def test__set_file_specific_branch(self, gitlab, group, project, branches):
         group_and_project_name = f"{group}/{project}"
@@ -326,3 +338,24 @@ class TestFiles:
 
         file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
         assert file_content == "Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁"
+
+    def test__set_external_file_with_utf8_characters(
+        self, gitlab, group, project, branches, file2
+    ):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_chinese_characters = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            files:
+              "README.md":
+                overwrite: true
+                branches:
+                  - main
+                file: file2.txt
+        """
+
+        run_gitlabform(set_file_chinese_characters, group_and_project_name)
+
+        file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
+        assert file_content == "LICENSE\n\n“This is a license file”"
