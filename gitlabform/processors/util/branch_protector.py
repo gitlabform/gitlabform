@@ -58,34 +58,28 @@ class BranchProtector(object):
                 )
 
             elif config_type == "new":
+                # when congiguration contains at least one of  allowed_to_push and allowed_to_merge
+                if any(extra_key in requested_configuration for extra_key in self.extra_param_keys):
+                    for extra_param_key in self.extra_param_keys:
+                        # check if an extra_param is in config and it contain user parameter
+                        if extra_param_key in requested_configuration \
+                                and any("user" in d for d in requested_configuration[extra_param_key]):
+                            for extra_config in requested_configuration[extra_param_key]:
+                                # loop over the array of extra param and get the user_id related to user
+                                if "user" in extra_config.keys():
+                                    user_id = self.gitlab.get_user_to_protect_branch(extra_config.pop("user"))
+                                    extra_config["user_id"] = user_id
 
                 if self.configuration_update_needed(
-                    requested_configuration, project_and_group, branch
+                        requested_configuration, project_and_group, branch
                 ):
-                    # when congiguration contains at least one of  allowed_to_push and allowed_to_merge
-                    if any(extra_key in requested_configuration for extra_key in self.extra_param_keys):
-
-                        for extra_param_key in self.extra_param_keys:
-                            # check if an extra_param is in config and it contain user parameter
-                            if extra_param_key in requested_configuration \
-                                    and any("user" in d for d in requested_configuration[extra_param_key]):
-                                for extra_config in requested_configuration[extra_param_key]:
-                                    # loop over the array of extra param and get the user_id related to user
-                                    if "user" in extra_config.keys():
-                                        user_id = self.gitlab.get_user_to_protect_branch(extra_config.pop("user"))
-                                        extra_config["user_id"] = user_id
-
-                    if self.configuration_update_needed(
-                            requested_configuration, project_and_group, branch
-                    ):
-                        self.protect_using_new_api(
-                            requested_configuration, project_and_group, branch
-                        )
-                    else:
-                        debug(
-                            "Skipping set branch '%s' access levels because they're already set"
-                        )
-
+                    self.protect_using_new_api(
+                        requested_configuration, project_and_group, branch
+                    )
+                else:
+                    debug(
+                        "Skipping set branch '%s' access levels because they're already set"
+                    )
 
             if "code_owner_approval_required" in requested_configuration:
 
