@@ -119,20 +119,20 @@ class GitLabBranches(GitLabCore):
             if "push_access_levels" in result:
                 for push_access in result["push_access_levels"]:
                     if not push_access["user_id"]:
-                        push_access_levels.append(push_access['access_level'])
+                        push_access_levels.append(push_access["access_level"])
                     else:
-                        push_access_user_ids.append(push_access['user_id'])
+                        push_access_user_ids.append(push_access["user_id"])
 
             if "merge_access_levels" in result:
                 for merge_access in result["merge_access_levels"]:
                     if not merge_access["user_id"]:
-                        merge_access_levels.append(merge_access['access_level'])
+                        merge_access_levels.append(merge_access["access_level"])
                     else:
-                        merge_access_user_ids.append(merge_access['user_id'])
+                        merge_access_user_ids.append(merge_access["user_id"])
 
             if (
-                    "unprotect_access_levels" in result
-                    and len(result["unprotect_access_levels"]) == 1
+                "unprotect_access_levels" in result
+                and len(result["unprotect_access_levels"]) == 1
             ):
                 unprotect_access_level = result["unprotect_access_levels"][0][
                     "access_level"
@@ -142,8 +142,13 @@ class GitLabBranches(GitLabCore):
             merge_access_levels.sort()
             merge_access_user_ids.sort()
 
-            return push_access_levels, merge_access_levels, push_access_user_ids, \
-                merge_access_user_ids, unprotect_access_level
+            return (
+                push_access_levels,
+                merge_access_levels,
+                push_access_user_ids,
+                merge_access_user_ids,
+                unprotect_access_level,
+            )
         except NotFoundException:
             return None, None, None, None, None
 
