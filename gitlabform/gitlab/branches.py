@@ -139,7 +139,7 @@ class GitLabBranches(GitLabCore):
                 ]
             push_access_levels.sort()
             push_access_user_ids.sort()
-            merge_access_user_ids.sort()
+            merge_access_levels.sort()
             merge_access_user_ids.sort()
 
             return push_access_levels, merge_access_levels, push_access_user_ids, \
