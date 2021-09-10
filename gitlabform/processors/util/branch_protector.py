@@ -58,7 +58,7 @@ class BranchProtector(object):
                 )
 
             elif config_type == "new":
-                # when congiguration contains at least one of  allowed_to_push and allowed_to_merge
+                # when congiguration contains at least one of allowed_to_push and allowed_to_merge
                 if any(
                     extra_key in requested_configuration
                     for extra_key in self.extra_param_keys
