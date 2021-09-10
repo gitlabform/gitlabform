@@ -59,19 +59,28 @@ class BranchProtector(object):
 
             elif config_type == "new":
                 # when congiguration contains at least one of  allowed_to_push and allowed_to_merge
-                if any(extra_key in requested_configuration for extra_key in self.extra_param_keys):
+                if any(
+                    extra_key in requested_configuration
+                    for extra_key in self.extra_param_keys
+                ):
                     for extra_param_key in self.extra_param_keys:
                         # check if an extra_param is in config and it contain user parameter
-                        if extra_param_key in requested_configuration \
-                                and any("user" in d for d in requested_configuration[extra_param_key]):
-                            for extra_config in requested_configuration[extra_param_key]:
+                        if extra_param_key in requested_configuration and any(
+                            "user" in d
+                            for d in requested_configuration[extra_param_key]
+                        ):
+                            for extra_config in requested_configuration[
+                                extra_param_key
+                            ]:
                                 # loop over the array of extra param and get the user_id related to user
                                 if "user" in extra_config.keys():
-                                    user_id = self.gitlab.get_user_to_protect_branch(extra_config.pop("user"))
+                                    user_id = self.gitlab.get_user_to_protect_branch(
+                                        extra_config.pop("user")
+                                    )
                                     extra_config["user_id"] = user_id
 
                 if self.configuration_update_needed(
-                        requested_configuration, project_and_group, branch
+                    requested_configuration, project_and_group, branch
                 ):
                     self.protect_using_new_api(
                         requested_configuration, project_and_group, branch
@@ -189,7 +198,7 @@ class BranchProtector(object):
         )
 
     def configuration_update_needed(
-            self, requested_configuration, project_and_group, branch
+        self, requested_configuration, project_and_group, branch
     ):
         # get current configuration of branch access level
         (
@@ -197,10 +206,12 @@ class BranchProtector(object):
             current_merge_access_levels,  # merge access level array only
             current_push_access_user_ids,  # push allowed user array
             current_merge_access_user_ids,  # merge allowed user array
-            current_unprotect_access_level
+            current_unprotect_access_level,
         ) = self.gitlab.get_only_branch_access_levels(project_and_group, branch)
 
-        requested_push_access_levels = [requested_configuration.get("push_access_level")]
+        requested_push_access_levels = [
+            requested_configuration.get("push_access_level")
+        ]
         requested_push_access_user_ids = []
         if "allowed_to_push" in requested_configuration:
             for config in requested_configuration["allowed_to_push"]:
@@ -212,12 +223,16 @@ class BranchProtector(object):
                     requested_push_access_user_ids.append(config["user_id"])
                 elif "user" in config:
                     # complete push allowed user arrays with the allowed_to_push array data if user is defined
-                    requested_push_access_user_ids.append(self.gitlab.get_user_to_protect_branch(config["user"]))
+                    requested_push_access_user_ids.append(
+                        self.gitlab.get_user_to_protect_branch(config["user"])
+                    )
 
         requested_push_access_levels.sort()
         requested_push_access_user_ids.sort()
 
-        requested_merge_access_levels = [requested_configuration.get("merge_access_level")]
+        requested_merge_access_levels = [
+            requested_configuration.get("merge_access_level")
+        ]
         requested_merge_access_user_ids = []
         if "allowed_to_merge" in requested_configuration:
             for config in requested_configuration["allowed_to_merge"]:
@@ -229,7 +244,9 @@ class BranchProtector(object):
                     requested_merge_access_user_ids.append(config["user_id"])
                 elif "user" in config:
                     # complete merge allowed user arrays with the allowed_to_push array data if user is defined
-                    requested_merge_access_user_ids.append(self.gitlab.get_user_to_protect_branch(config["user"]))
+                    requested_merge_access_user_ids.append(
+                        self.gitlab.get_user_to_protect_branch(config["user"])
+                    )
 
         requested_merge_access_levels.sort()
         requested_merge_access_user_ids.sort()
@@ -239,18 +256,18 @@ class BranchProtector(object):
         )
 
         access_levels_are_different = (
-                                          requested_push_access_levels,
-                                          requested_merge_access_levels,
-                                          requested_push_access_user_ids,
-                                          requested_merge_access_user_ids,
-                                          requested_unprotect_access_level,
-                                      ) != (
-                                          current_push_access_levels,
-                                          current_merge_access_levels,
-                                          current_push_access_user_ids,
-                                          current_merge_access_user_ids,
-                                          current_unprotect_access_level,
-                                      )
+            requested_push_access_levels,
+            requested_merge_access_levels,
+            requested_push_access_user_ids,
+            requested_merge_access_user_ids,
+            requested_unprotect_access_level,
+        ) != (
+            current_push_access_levels,
+            current_merge_access_levels,
+            current_push_access_user_ids,
+            current_merge_access_user_ids,
+            current_unprotect_access_level,
+        )
 
         if access_levels_are_different:
             return True
