@@ -255,7 +255,7 @@ class BranchProtector(object):
             "unprotect_access_level"
         )
 
-        access_levels_are_different = (
+        return (
             requested_push_access_levels,
             requested_merge_access_levels,
             requested_push_access_user_ids,
@@ -269,10 +269,6 @@ class BranchProtector(object):
             current_unprotect_access_level,
         )
 
-        if access_levels_are_different:
-            return True
-
-        return False
 
     def unprotect(self, project_and_group, branch):
         debug("Setting branch '%s' as unprotected", branch)
