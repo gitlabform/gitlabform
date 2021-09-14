@@ -269,7 +269,6 @@ class BranchProtector(object):
             current_unprotect_access_level,
         )
 
-
     def unprotect(self, project_and_group, branch):
         debug("Setting branch '%s' as unprotected", branch)
         self.gitlab.unprotect_branch_new_api(project_and_group, branch)

@@ -222,12 +222,16 @@ class TestFiles:
         assert file_content == "foobar"
 
         (
-            push_access_level,
-            merge_access_level,
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
             unprotect_access_level,
         ) = gitlab.get_only_branch_access_levels(group_and_project_name, "main")
-        assert push_access_level is AccessLevel.MAINTAINER.value
-        assert merge_access_level is AccessLevel.MAINTAINER.value
+        assert push_access_levels is [AccessLevel.MAINTAINER.value]
+        assert merge_access_levels is [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids is []
+        assert merge_access_user_ids is []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
     def test_set_file_protected_branches_new_api_not_all_levels(
@@ -260,14 +264,18 @@ class TestFiles:
         assert file_content == "barfoo"
 
         (
-            push_access_level,
-            merge_access_level,
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
             unprotect_access_level,
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "regular_branch1"
         )
-        assert push_access_level is AccessLevel.DEVELOPER.value
-        assert merge_access_level is AccessLevel.DEVELOPER.value
+        assert push_access_levels is [AccessLevel.DEVELOPER.value]
+        assert merge_access_levels is [AccessLevel.DEVELOPER.value]
+        assert push_access_user_ids is []
+        assert merge_access_user_ids is []
         # the default value
         # according to https://docs.gitlab.com/ee/api/protected_branches.html#protect-repository-branches
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
