@@ -19,9 +19,11 @@ def branches(request, gitlab, group, project):
             gitlab.branch_access_level(
                 f"{group}/{project}",
                 branch,
-                AccessLevel.MAINTAINER.value,
-                AccessLevel.MAINTAINER.value,
-                AccessLevel.MAINTAINER.value,
+                {
+                    "push_access_level": AccessLevel.MAINTAINER.value,
+                    "merge_access_level": AccessLevel.MAINTAINER.value,
+                    "unprotect_access_level": AccessLevel.MAINTAINER.value,
+                },
             )
 
     def fin():
@@ -39,9 +41,11 @@ def branches(request, gitlab, group, project):
         gitlab.branch_access_level(
             f"{group}/{project}",
             "main",
-            AccessLevel.MAINTAINER.value,
-            AccessLevel.MAINTAINER.value,
-            AccessLevel.MAINTAINER.value,
+            {
+                "push_access_level": AccessLevel.MAINTAINER.value,
+                "merge_access_level": AccessLevel.MAINTAINER.value,
+                "unprotect_access_level": AccessLevel.MAINTAINER.value,
+            },
         )
 
     request.addfinalizer(fin)
