@@ -187,10 +187,10 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "protect_branch_and_allow_merges_access_levels"
         )
-        assert push_access_levels is [AccessLevel.NO_ACCESS.value]
-        assert merge_access_levels is [AccessLevel.DEVELOPER.value]
-        assert push_access_user_ids is []
-        assert merge_access_user_ids is []
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.DEVELOPER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         (
@@ -202,10 +202,10 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "*_allow_pushes_access_levels"
         )
-        assert push_access_levels is [AccessLevel.DEVELOPER.value]
-        assert merge_access_levels is [AccessLevel.DEVELOPER.value]
-        assert push_access_user_ids is []
-        assert merge_access_user_ids is []
+        assert push_access_levels == [AccessLevel.DEVELOPER.value]
+        assert merge_access_levels == [AccessLevel.DEVELOPER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         mixed_config_with_access_levels_update = f"""
@@ -235,10 +235,10 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "protect_branch_and_allow_merges_access_levels"
         )
-        assert push_access_levels is [AccessLevel.NO_ACCESS.value]
-        assert merge_access_levels is [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids is []
-        assert merge_access_user_ids is []
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         (
@@ -250,10 +250,10 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "*_allow_pushes_access_levels"
         )
-        assert push_access_levels is [AccessLevel.MAINTAINER.value]
-        assert merge_access_levels is [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids is []
-        assert merge_access_user_ids is []
+        assert push_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         mixed_config_with_access_levels_unprotect_branches = f"""
@@ -321,10 +321,10 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "protect_branch"
         )
-        assert push_access_levels is [AccessLevel.NO_ACCESS.value]
-        assert merge_access_levels is [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids is []
-        assert merge_access_user_ids is []
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         config_protect_branch_unprotect = f"""
@@ -367,10 +367,10 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "protect_branch"
         )
-        assert push_access_levels is [AccessLevel.NO_ACCESS.value]
-        assert merge_access_levels is [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids is []
-        assert merge_access_user_ids is []
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         config_protect_branch_with_old_api = f"""
@@ -470,10 +470,10 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "protect_branch"
         )
-        assert push_access_levels is [AccessLevel.NO_ACCESS.value]
-        assert merge_access_levels is [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids is []
-        assert merge_access_user_ids is []
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         config_unprotect_branch_with_new_api = f"""
@@ -503,8 +503,8 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "protect_branch"
         )
-        assert push_access_levels is []
-        assert merge_access_levels is []
-        assert push_access_user_ids is []
-        assert merge_access_user_ids is []
+        assert push_access_levels == []
+        assert merge_access_levels == []
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
         assert unprotect_access_level is None
