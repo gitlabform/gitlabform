@@ -33,11 +33,12 @@ class GitLabBranches(GitLabCore):
             url,
             tuple(parameters_list),
             method="POST",
+            # TODO: check why is 409 Conflict accepted here :/
             expected_codes=[
                 200,
                 201,
                 409,
-            ],  # TODO: check why is 409 Conflict accepted here :/
+            ],
             json=protect_settings,
         )
 
