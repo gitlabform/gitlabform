@@ -310,7 +310,7 @@ class TestBranches:
             gitlab.get_user_to_protect_branch(users[2])
         )
 
-        ## testing only allow to push and allow_to_merge
+        # testing allowed_to_push  and allowed_to_merge for user support on protect branch (gitlab premium feature)
         mixed_config_with_allowed_to_push_and_merge = f"""
                         projects_and_groups:
                           {group_and_project_name}:
@@ -470,6 +470,8 @@ class TestBranches:
         assert merge_access_user_ids == current_merge_access_user_ids
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
+        # testing mixed push_access_level,merge_access_level, allowed_to_push  and allowed_to_merge for user
+        # support on protect branch (gitlab premium feature)
         mixed_config_with_allow_access_levels_with_user_ids = f"""
                                projects_and_groups:
                                  {group_and_project_name}:
@@ -657,6 +659,8 @@ class TestBranches:
         branch = gitlab.get_branch(group_and_project_name, "protect_branch")
         assert branch["protected"] is False
 
+    # testing protect branch with old_api update to new api with  allowed_to_push  and allowed_to_merge for user
+    # support (gitlab premium feature)
     def test_protect_branch_with_old_api_next_update_with_new_api_and_userid_and_unprotect(
         self, gitlab, group, project, branches, users, one_maintainer_and_two_developers
     ):
