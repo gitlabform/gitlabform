@@ -209,9 +209,12 @@ class BranchProtector(object):
             current_unprotect_access_level,
         ) = self.gitlab.get_only_branch_access_levels(project_and_group, branch)
 
-        requested_push_access_levels = [
-            requested_configuration.get("push_access_level")
-        ]
+        requested_push_access_levels = []
+        if "push_access_level" in requested_configuration:
+            requested_push_access_levels.append(
+                requested_configuration.get("push_access_level")
+            )
+
         requested_push_access_user_ids = []
         if "allowed_to_push" in requested_configuration:
             for config in requested_configuration["allowed_to_push"]:
@@ -230,9 +233,12 @@ class BranchProtector(object):
         requested_push_access_levels.sort()
         requested_push_access_user_ids.sort()
 
-        requested_merge_access_levels = [
-            requested_configuration.get("merge_access_level")
-        ]
+        requested_merge_access_levels = []
+        if "requested_merge_access_levels" in requested_configuration:
+            requested_merge_access_levels.append(
+                requested_configuration.get("requested_merge_access_levels")
+            )
+
         requested_merge_access_user_ids = []
         if "allowed_to_merge" in requested_configuration:
             for config in requested_configuration["allowed_to_merge"]:
