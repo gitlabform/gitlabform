@@ -87,36 +87,36 @@ class TestBranches:
         assert branch["developers_can_push"] is True
         assert branch["developers_can_merge"] is True
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
-    def test__code_owners_approval(self, gitlab, group, project, branches):
-        group_and_project_name = f"{group}/{project}"
-
-        branch_access_levels = gitlab.get_branch_access_levels(
-            group_and_project_name, "protect_branch_but_allow_all"
-        )
-        assert branch_access_levels["code_owner_approval_required"] is False
-
-        protect_branch_with_code_owner_approval_required = f"""
-        projects_and_groups:
-          {group_and_project_name}:
-            branches:
-              protect_branch_with_code_owner_approval_required:
-                protected: true
-                developers_can_push: false
-                developers_can_merge: true
-                code_owner_approval_required: true
-        """
-
-        run_gitlabform(
-            protect_branch_with_code_owner_approval_required, group_and_project_name
-        )
-
-        branch_access_levels = gitlab.get_branch_access_levels(
-            group_and_project_name, "protect_branch_with_code_owner_approval_required"
-        )
-        assert branch_access_levels["code_owner_approval_required"] is True
+    # @pytest.mark.skipif(
+    #     gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    # )
+    # def test__code_owners_approval(self, gitlab, group, project, branches):
+    #     group_and_project_name = f"{group}/{project}"
+    #
+    #     branch_access_levels = gitlab.get_branch_access_levels(
+    #         group_and_project_name, "protect_branch_but_allow_all"
+    #     )
+    #     assert branch_access_levels["code_owner_approval_required"] is False
+    #
+    #     protect_branch_with_code_owner_approval_required = f"""
+    #     projects_and_groups:
+    #       {group_and_project_name}:
+    #         branches:
+    #           protect_branch_with_code_owner_approval_required:
+    #             protected: true
+    #             developers_can_push: false
+    #             developers_can_merge: true
+    #             code_owner_approval_required: true
+    #     """
+    #
+    #     run_gitlabform(
+    #         protect_branch_with_code_owner_approval_required, group_and_project_name
+    #     )
+    #
+    #     branch_access_levels = gitlab.get_branch_access_levels(
+    #         group_and_project_name, "protect_branch_with_code_owner_approval_required"
+    #     )
+    #     assert branch_access_levels["code_owner_approval_required"] is True
 
     def test__protect_branch_and_disallow_all(self, gitlab, group, project, branches):
         group_and_project_name = f"{group}/{project}"
