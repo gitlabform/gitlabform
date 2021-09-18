@@ -1,5 +1,13 @@
 ## Changelog
 
+### 2.3.0
+
+* **Add Protected branches - users allowed to push/merge** (**GitLab Premium (paid) only**), PR [#273](https://github.com/egnyte/gitlabform/pull/273).
+* For `ALL_DEFINED` also skip archived projects even if they are explicitly defined in the config, unless -a flag is added - for consistency.
+* **For Contributors** Add docs for running the test themselves in a Docker container and for running GitLab in Docker using a license file, for testing paid-only features.
+
+Thanks to [@florentio](https://github.com/florentio), [@barryib](https://github.com/barryib) and [@Pigueiras](https://github.com/Pigueiras) for their contribution!
+
 ### 2.2.0
 
 * **Add LDAP Group Links support** (**GitLab Premium (paid) only**). Implements [#140](https://github.com/egnyte/gitlabform/issues/140).
