@@ -183,6 +183,14 @@ projects_and_groups:
         push_access_level: 0
         merge_access_level: 30
         unprotect_access_level: 40
+      special:
+        # Allow specific users to push and merge to this branch - *** this syntax requires GitLab Premium (paid) ***
+        protected: true
+        allowed_to_push:
+          - user: jsmith # you can use usernames...
+          - user: bdoe
+        allowed_to_merge:
+          - user_id: 15 # ...or user ids, if you know them
 
     # this is for adding/changing the access level of group members - only users can be them
     # for removing users please see the flag below.
