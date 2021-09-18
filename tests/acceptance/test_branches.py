@@ -4,7 +4,11 @@ from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
     run_gitlabform,
     DEFAULT_README,
+    get_gitlab,
 )
+
+
+gl = get_gitlab()
 
 
 @pytest.fixture(scope="function")
@@ -62,18 +66,6 @@ def one_maintainer_and_two_developers(gitlab, group, project, users):
         gitlab.remove_member_from_project(group_and_project, user)
 
 
-# protect_branch_with_code_owner_approval_required = f"""
-# projects_and_groups:
-#   {group_and_project_name}:
-#     branches:
-#       protect_branch_with_code_owner_approval_required:
-#         protected: true
-#         developers_can_push: false
-#         developers_can_merge: true
-#         code_owner_approval_required: true
-# """
-
-
 class TestBranches:
     def test__protect_branch_but_allow_all(self, gitlab, group, project, branches):
         group_and_project_name = f"{group}/{project}"
@@ -95,23 +87,36 @@ class TestBranches:
         assert branch["developers_can_push"] is True
         assert branch["developers_can_merge"] is True
 
-        # branch_access_levels = gitlab.get_branch_access_levels(
-        #     group_and_project_name, "protect_branch_but_allow_all"
-        # )
-        # assert branch_access_levels["code_owner_approval_required"] is False
-        #
-        # this test will pass only on GitLab Premium (paid)
-        # def test__protect_branch_with_code_owner_approval_required(self, gitlab):
-        #     gf = GitLabForm(
-        #         config_string=protect_branch_with_code_owner_approval_required,
-        #         project_or_group=group_and_project_name,
-        #     )
-        #     gf.main()
-        #
-        #     branch_access_levels = gitlab.get_branch_access_levels(
-        #         group_and_project_name, "protect_branch_with_code_owner_approval_required"
-        #     )
-        #     assert branch_access_levels["code_owner_approval_required"] is True
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
+    def test__code_owners_approval(self, gitlab, group, project, branches):
+        group_and_project_name = f"{group}/{project}"
+
+        branch_access_levels = gitlab.get_branch_access_levels(
+            group_and_project_name, "protect_branch_but_allow_all"
+        )
+        assert branch_access_levels["code_owner_approval_required"] is False
+
+        protect_branch_with_code_owner_approval_required = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            branches:
+              protect_branch_with_code_owner_approval_required:
+                protected: true
+                developers_can_push: false
+                developers_can_merge: true
+                code_owner_approval_required: true
+        """
+
+        run_gitlabform(
+            protect_branch_with_code_owner_approval_required, group_and_project_name
+        )
+
+        branch_access_levels = gitlab.get_branch_access_levels(
+            group_and_project_name, "protect_branch_with_code_owner_approval_required"
+        )
+        assert branch_access_levels["code_owner_approval_required"] is True
 
     def test__protect_branch_and_disallow_all(self, gitlab, group, project, branches):
         group_and_project_name = f"{group}/{project}"
@@ -304,6 +309,14 @@ class TestBranches:
             branch = gitlab.get_branch(group_and_project_name, branch)
             assert branch["protected"] is False
 
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
+    def test__allow_user_ids(
+        self, gitlab, group, project, branches, users, one_maintainer_and_two_developers
+    ):
+        group_and_project_name = f"{group}/{project}"
+
         user_allowed_to_push_id = gitlab.get_user_to_protect_branch(users[0])
         user_allowed_to_merge_id = gitlab.get_user_to_protect_branch(users[1])
         user_allowed_to_push_and_allowed_to_merge_id = (
@@ -312,29 +325,29 @@ class TestBranches:
 
         # testing allowed_to_push  and allowed_to_merge for user support on protect branch (gitlab premium feature)
         mixed_config_with_allowed_to_push_and_merge = f"""
-                        projects_and_groups:
-                          {group_and_project_name}:
-                            branches:
-                              protect_branch_and_allowed_to_merge:
-                                protected: true
-                                allowed_to_push:
-                                  - access_level: {AccessLevel.NO_ACCESS.value} 
-                                allowed_to_merge:
-                                  - access_level: {AccessLevel.DEVELOPER.value} 
-                                  - user_id: {user_allowed_to_merge_id}
-                                  - user: {users[2]}
-                                unprotect_access_level: {AccessLevel.MAINTAINER.value}
-                              '*_and_allowed_to_push':
-                                protected: true
-                                allowed_to_push:
-                                  - access_level: {AccessLevel.DEVELOPER.value} 
-                                  - user_id: {user_allowed_to_push_id}
-                                  - user: {users[1]} 
-                                allowed_to_merge:
-                                  - access_level: {AccessLevel.MAINTAINER.value}
-                                unprotect_access_level: {AccessLevel.DEVELOPER.value}
-       
-      """
+        projects_and_groups:
+          {group_and_project_name}:
+            branches:
+              protect_branch_and_allowed_to_merge:
+                protected: true
+                allowed_to_push:
+                  - access_level: {AccessLevel.NO_ACCESS.value} 
+                allowed_to_merge:
+                  - access_level: {AccessLevel.DEVELOPER.value} 
+                  - user_id: {user_allowed_to_merge_id}
+                  - user: {users[2]}
+                unprotect_access_level: {AccessLevel.MAINTAINER.value}
+              '*_and_allowed_to_push':
+                protected: true
+                allowed_to_push:
+                  - access_level: {AccessLevel.DEVELOPER.value} 
+                  - user_id: {user_allowed_to_push_id}
+                  - user: {users[1]} 
+                allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+                unprotect_access_level: {AccessLevel.DEVELOPER.value}
+        """
+
         run_gitlabform(
             mixed_config_with_allowed_to_push_and_merge, group_and_project_name
         )
@@ -392,28 +405,27 @@ class TestBranches:
         assert unprotect_access_level is AccessLevel.DEVELOPER.value
 
         mixed_config_with_allowed_to_push_and_merge_update = f"""
-                        projects_and_groups:
-                          {group_and_project_name}:
-                            branches:
-                              protect_branch_and_allowed_to_merge:
-                                protected: true
-                                allowed_to_push:
-                                  - access_level: {AccessLevel.NO_ACCESS.value} 
-                                allowed_to_merge:
-                                  - access_level: {AccessLevel.MAINTAINER.value} 
-                                  - user_id: {user_allowed_to_merge_id}
-                                unprotect_access_level: {AccessLevel.MAINTAINER.value}
-                              '*_and_allowed_to_push':
-                                protected: true
-                                allowed_to_push:
-                                  - access_level: {AccessLevel.MAINTAINER.value} 
-                                  - user_id: {user_allowed_to_push_id}
-                                  - user: {users[2]}
-                                  - user: {users[1]} 
-                                allowed_to_merge:
-                                  - access_level: {AccessLevel.MAINTAINER.value}
-                                unprotect_access_level: {AccessLevel.MAINTAINER.value}
-       
+        projects_and_groups:
+          {group_and_project_name}:
+            branches:
+              protect_branch_and_allowed_to_merge:
+                protected: true
+                allowed_to_push:
+                  - access_level: {AccessLevel.NO_ACCESS.value} 
+                allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value} 
+                  - user_id: {user_allowed_to_merge_id}
+                unprotect_access_level: {AccessLevel.MAINTAINER.value}
+              '*_and_allowed_to_push':
+                protected: true
+                allowed_to_push:
+                  - access_level: {AccessLevel.MAINTAINER.value} 
+                  - user_id: {user_allowed_to_push_id}
+                  - user: {users[2]}
+                  - user: {users[1]} 
+                allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+                unprotect_access_level: {AccessLevel.MAINTAINER.value}
         """
 
         run_gitlabform(
@@ -470,28 +482,24 @@ class TestBranches:
         assert merge_access_user_ids == current_merge_access_user_ids
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-        # testing mixed push_access_level,merge_access_level, allowed_to_push  and allowed_to_merge for user
-        # support on protect branch (gitlab premium feature)
         mixed_config_with_allow_access_levels_with_user_ids = f"""
-                               projects_and_groups:
-                                 {group_and_project_name}:
-                                   branches:
-                                     protect_branch_and_allow_access_levels_with_user_ids:
-                                       protected: true
-                                       push_access_level: {AccessLevel.DEVELOPER.value}
-                                       merge_access_level: {AccessLevel.MAINTAINER.value}
-                                       allowed_to_push:
-                                         - access_level: {AccessLevel.MAINTAINER.value} 
-                                         - user_id: {user_allowed_to_push_id}
-                                         - user: {users[2]}
-                                       allowed_to_merge:
-                                         - access_level: {AccessLevel.DEVELOPER.value} 
-                                         - user_id: {user_allowed_to_merge_id}
-                                         - user: {users[0]}
-                                       unprotect_access_level: {AccessLevel.MAINTAINER.value}
-                                     
-
-               """
+        projects_and_groups:
+          {group_and_project_name}:
+            branches:
+              protect_branch_and_allow_access_levels_with_user_ids:
+                protected: true
+                push_access_level: {AccessLevel.DEVELOPER.value}
+                merge_access_level: {AccessLevel.MAINTAINER.value}
+                allowed_to_push:
+                  - access_level: {AccessLevel.MAINTAINER.value} 
+                  - user_id: {user_allowed_to_push_id}
+                  - user: {users[2]}
+                allowed_to_merge:
+                  - access_level: {AccessLevel.DEVELOPER.value} 
+                  - user_id: {user_allowed_to_merge_id}
+                  - user: {users[0]}
+                unprotect_access_level: {AccessLevel.MAINTAINER.value}
+        """
 
         run_gitlabform(
             mixed_config_with_allow_access_levels_with_user_ids, group_and_project_name
@@ -659,8 +667,9 @@ class TestBranches:
         branch = gitlab.get_branch(group_and_project_name, "protect_branch")
         assert branch["protected"] is False
 
-    # testing protect branch with old_api update to new api with  allowed_to_push  and allowed_to_merge for user
-    # support (gitlab premium feature)
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
     def test_protect_branch_with_old_api_next_update_with_new_api_and_userid_and_unprotect(
         self, gitlab, group, project, branches, users, one_maintainer_and_two_developers
     ):
