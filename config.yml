@@ -214,9 +214,8 @@ projects_and_groups:
     # keys are only used as labels in this config, values are as described at
     # https://docs.gitlab.com/ee/api/groups.html#add-ldap-group-link-with-cn-or-filter
     group_ldap_links:
-      # "provider" field contain the value of the "label" field from LDAP config
-      # as defined in your GitLab config,
-      # f.e. https://docs.gitlab.com/ee/administration/auth/ldap/#example-configurations
+      # "provider" field should contain a value that you can find in the GitLab web UI,
+      # see https://github.com/egnyte/gitlabform/issues/261
       devops_are_maintainers:
         provider: "AD"
         cn: "devops"
