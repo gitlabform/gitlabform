@@ -63,7 +63,7 @@ if [[ -f Gitlab.gitlab-license || -n "$GITLAB_EE_LICENSE" ]] ; then
   fi
 
   gitlab_omnibus_config="$gitlab_omnibus_config gitlab_rails['initial_license_file'] = '/etc/gitlab/Gitlab.gitlab-license';"
-  config_volume="--volume $repo_root_directory/config:/etc/config"
+  config_volume="--volume $repo_root_directory/config:/etc/gitlab"
 else
   config_volume=""
 fi
