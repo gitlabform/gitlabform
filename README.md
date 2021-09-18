@@ -41,7 +41,8 @@ GitLabForm enables you to manage:
 * Project:
   * Archive/unarchive,
   * Badges,
-  * Branches {protect/unprotect},
+  * Protected branches {protect/unprotect, access levels (roles) allowed to push/merge},
+  * Protected branches {users allowed to push/merge} (**GitLab Premium (paid) only**),
   * Deployment keys,
   * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
   * Hooks,
