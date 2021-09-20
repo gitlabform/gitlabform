@@ -137,13 +137,30 @@ class ConfigurationCore:
         """
         :return: if project is defined in the key with projects to skip
         """
-        return project in self.get("skip_projects", [])
+        return self.is_skipped(project, self.get("skip_projects", []))
 
     def is_group_skipped(self, group) -> bool:
         """
         :return: if group is defined in the key with groups to skip
         """
-        return group in self.get("skip_groups", [])
+        return self.is_skipped(group, self.get("skip_groups", []))
+
+    def is_skipped(self, an_array: list, item: str) -> bool:
+        """
+        :return: if item is defined in the list to be skipped
+        """
+        for list_element in an_array:
+            if list_element == item:
+                return True
+
+            if (
+                list_element.endswith("/*")
+                and item.startswith(list_element[:-2])
+                and len(item) >= len(list_element[:-2])
+            ):
+                return True
+
+        return False
 
     @staticmethod
     def merge_configs(more_general_config, more_specific_config) -> dict:

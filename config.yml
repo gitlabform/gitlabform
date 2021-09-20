@@ -461,7 +461,9 @@ projects_and_groups:
 skip_projects:
   - my-group/this-project-will-not-be-processed-with-gitlabform-when-running-for-my-group
   - my-group/and-this-too
+  - my-group/everything-under/*
 
 # this will skip these groups from being processed
 skip_groups:
   - my-other-group
+  - this-group-and-all-sub-groups/*
