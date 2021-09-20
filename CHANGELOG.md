@@ -2,7 +2,7 @@
 
 ### 2.4.0
 
-* Add wildcard support for `skip_groups` and `skip_projects`. Implements [#275](https://github.com/egnyte/gitlabform/issues/275) and [#276](https://github.com/egnyte/gitlabform/issues/276).
+* **Add wildcard support for `skip_groups` and `skip_projects`.** Implements [#275](https://github.com/egnyte/gitlabform/issues/275) and [#276](https://github.com/egnyte/gitlabform/issues/276).
 
 Thanks to [@chris-workingmouse](https://github.com/chris-workingmouse) for his contribution!
 
