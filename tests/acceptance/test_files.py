@@ -69,9 +69,13 @@ class TestFiles:
                 branches:
                   - main
                 content: "Content for main only"
+                commit_message: "Preconfigured commit message"
         """
 
         run_gitlabform(set_file_specific_branch, group_and_project_name)
+
+        commit = gitlab.get_last_commit(group_and_project_name, "main")
+        assert commit["message"] == "Preconfigured commit message"
 
         file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
         assert file_content == "Content for main only"

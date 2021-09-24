@@ -186,7 +186,7 @@ class FilesProcessor(AbstractProcessor):
     def get_commit_message_for_file_change(operation, file, configuration: dict):
         commit_message = configuration.get(
             "files|" + file + "|commit_message",
-            "Automated %s made by gitlabform" % operation
+            "Automated %s made by gitlabform" % operation,
         )
 
         # add '[skip ci]' to commit message to skip CI job, as documented at
