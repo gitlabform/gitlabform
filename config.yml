@@ -170,6 +170,7 @@ projects_and_groups:
         push_access_level: 0
         merge_access_level: 30
         unprotect_access_level: 40
+        # *** Below key requires GitLab Premium (paid) ***
         code_owner_approval_required: true
       branch_protected_from_changes:
         # Disallow any changes to this branch
