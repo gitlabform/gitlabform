@@ -23,7 +23,7 @@ class AbstractProcessor(ABC):
         if self.configuration_name in configuration:
             if configuration.get(f"{self.configuration_name}|skip"):
                 verbose(
-                    f"Skipping {self.configuration_name} - explicitly configured to do so."
+                    f"Skipping section '{self.configuration_name}' - explicitly configured to do so."
                 )
                 return
             elif (
@@ -31,18 +31,20 @@ class AbstractProcessor(ABC):
                 and self.configuration_name != "project"
             ):
                 verbose(
-                    f"Skipping {self.configuration_name} - it is configured to be archived."
+                    f"Skipping section '{self.configuration_name}' - it is configured to be archived."
                 )
                 return
 
             if dry_run:
-                verbose(f"Processing {self.configuration_name} in dry-run mode.")
+                verbose(
+                    f"Processing section '{self.configuration_name}' in dry-run mode."
+                )
                 self._print_diff(
                     project_or_project_and_group,
                     configuration.get(self.configuration_name),
                 )
             else:
-                verbose(f"Processing {self.configuration_name}")
+                verbose(f"Processing section '{self.configuration_name}'")
                 self._process_configuration(project_or_project_and_group, configuration)
 
             effective_configuration.add_configuration(
@@ -51,7 +53,7 @@ class AbstractProcessor(ABC):
                 configuration.get(self.configuration_name),
             )
         else:
-            verbose(f"Skipping {self.configuration_name} - not in config.")
+            verbose(f"Skipping section '{self.configuration_name}' - not in config.")
 
     @abstractmethod
     def _process_configuration(
@@ -60,4 +62,4 @@ class AbstractProcessor(ABC):
         pass
 
     def _print_diff(self, project_or_project_and_group: str, configuration_to_process):
-        verbose(f"Diffing for {self.configuration_name} section is not supported yet")
+        verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
