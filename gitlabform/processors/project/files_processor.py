@@ -83,8 +83,7 @@ class FilesProcessor(AbstractProcessor):
                             branch,
                             file,
                             self.get_commit_message_for_file_change(
-                                "delete",
-                                configuration.get("files|" + file + "|skip_ci"),
+                                "delete", file, configuration
                             ),
                         )
                     except NotFoundException:
@@ -134,8 +133,7 @@ class FilesProcessor(AbstractProcessor):
                                     file,
                                     new_content,
                                     self.get_commit_message_for_file_change(
-                                        "change",
-                                        configuration.get("files|" + file + "|skip_ci"),
+                                        "change", file, configuration
                                     ),
                                 )
                             else:
@@ -159,7 +157,7 @@ class FilesProcessor(AbstractProcessor):
                             file,
                             new_content,
                             self.get_commit_message_for_file_change(
-                                "add", configuration.get("files|" + file + "|skip_ci")
+                                "add", file, configuration
                             ),
                         )
 
@@ -185,13 +183,18 @@ class FilesProcessor(AbstractProcessor):
         )
 
     @staticmethod
-    def get_commit_message_for_file_change(operation, skip_build):
+    def get_commit_message_for_file_change(operation, file, configuration: dict):
+        commit_message = configuration.get(
+            "files|" + file + "|commit_message",
+            "Automated %s made by gitlabform" % operation,
+        )
 
         # add '[skip ci]' to commit message to skip CI job, as documented at
         # https://docs.gitlab.com/ee/ci/yaml/README.html#skipping-jobs
+        skip_build = configuration.get("files|" + file + "|skip_ci")
         skip_build_str = " [skip ci]" if skip_build else ""
 
-        return "Automated %s made by gitlabform%s" % (operation, skip_build_str)
+        return "%s%s" % (commit_message, skip_build_str)
 
     @staticmethod
     def get_group(project_and_group):

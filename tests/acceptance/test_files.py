@@ -73,6 +73,9 @@ class TestFiles:
 
         run_gitlabform(set_file_specific_branch, group_and_project_name)
 
+        commit = gitlab.get_last_commit(group_and_project_name, "main")
+        assert commit["message"] == "Automated change made by gitlabform"
+
         file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
         assert file_content == "Content for main only"
 
@@ -84,6 +87,30 @@ class TestFiles:
         # check if main stays protected after the file update
         branch = gitlab.get_branch(group_and_project_name, "main")
         assert branch["protected"] is True
+
+    def test__custom_commit_message(self, gitlab, group, project, branches):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_specific_branch = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            branches:
+              main:
+                protected: false
+            files:
+              "README.md":
+                overwrite: true
+                branches:
+                  - main
+                skip_ci: true
+                content: "Hello world!"
+                commit_message: "Preconfigured commit message"
+        """
+
+        run_gitlabform(set_file_specific_branch, group_and_project_name)
+
+        commit = gitlab.get_last_commit(group_and_project_name, "main")
+        assert commit["message"] == "Preconfigured commit message [skip ci]"
 
     def test__set_file_all_branches(self, gitlab, group, project, branches):
         group_and_project_name = f"{group}/{project}"
