@@ -74,7 +74,7 @@ class TestFiles:
         run_gitlabform(set_file_specific_branch, group_and_project_name)
 
         commit = gitlab.get_last_commit(group_and_project_name, "main")
-        assert commit["message"] == "Automated add made by gitlabform"
+        assert commit["message"] == "Automated change made by gitlabform"
 
         file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
         assert file_content == "Content for main only"
@@ -110,7 +110,7 @@ class TestFiles:
         run_gitlabform(set_file_specific_branch, group_and_project_name)
 
         commit = gitlab.get_last_commit(group_and_project_name, "main")
-        assert commit["message"] == "Preconfigured commit message [skip_ci]"
+        assert commit["message"] == "Preconfigured commit message [skip ci]"
 
     def test__set_file_all_branches(self, gitlab, group, project, branches):
         group_and_project_name = f"{group}/{project}"
