@@ -1,5 +1,11 @@
 ## Changelog
 
+### 2.5.0
+
+* **Make commit messages for file operations configurable.** Implements [#278](https://github.com/egnyte/gitlabform/issues/278).
+
+Thanks to [@aleung](https://github.com/aleung) for his contribution!
+
 ### 2.4.0
 
 * **Add wildcard support for `skip_groups` and `skip_projects`.** Implements [#275](https://github.com/egnyte/gitlabform/issues/275) and [#276](https://github.com/egnyte/gitlabform/issues/276).
