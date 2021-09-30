@@ -5,7 +5,6 @@ import luddite
 import pkg_resources
 from cli_ui import (
     message,
-    debug,
     info,
     info_1,
     error,
@@ -101,10 +100,16 @@ def show_header(
     )
 
     if len(groups) == 0 and len(projects) == 0:
-        fatal(
-            f"Entity {project_or_group} cannot be found in GitLab!",
-            exit_code=EXIT_INVALID_INPUT,
-        )
+        if project_or_group not in ["ALL", "ALL_DEFINED"]:
+            fatal(
+                f"Entity {project_or_group} cannot be found in GitLab!",
+                exit_code=EXIT_INVALID_INPUT,
+            )
+        else:
+            fatal(
+                f"Configuration does have any groups or projects defined!",
+                exit_code=EXIT_INVALID_INPUT,
+            )
 
     (
         groups_with_non_empty_configs,
