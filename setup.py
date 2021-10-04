@@ -58,7 +58,7 @@ setup(
             "xkcdpass==1.19.3",
             "pre-commit==2.15.0",  # not really for tests, but for development
             "coverage==5.5",
-            "pytest-cov==2.12.1",
+            "pytest-cov==3.0.0",
         ],
     },
     entry_points={
