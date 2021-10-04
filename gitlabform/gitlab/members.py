@@ -50,7 +50,7 @@ class GitLabMembers(GitLabCore):
 
     def get_members_from_project(self, project_and_group_name):
         members = self._make_requests_to_api(
-            "projects/%s/members", project_and_group_name
+            "projects/%s/members", project_and_group_name, paginated=True
         )
         # it will return {username1: {...api info about username1...}, username2: {...}}
         # otherwise it can get very long to iterate when checking if a user
