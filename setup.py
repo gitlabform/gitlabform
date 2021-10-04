@@ -57,7 +57,7 @@ setup(
             "pytest==6.2.5",
             "xkcdpass==1.19.3",
             "pre-commit==2.15.0",  # not really for tests, but for development
-            "coverage==5.5",
+            "coverage==6.0",
             "pytest-cov==3.0.0",
         ],
     },
