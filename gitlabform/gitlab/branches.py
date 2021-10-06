@@ -119,14 +119,14 @@ class GitLabBranches(GitLabCore):
 
             if "push_access_levels" in result:
                 for push_access in result["push_access_levels"]:
-                    if "user_id" not in push_access:
+                    if not push_access.get("user_id"):
                         push_access_levels.add(push_access["access_level"])
                     else:
                         push_access_user_ids.add(push_access["user_id"])
 
             if "merge_access_levels" in result:
                 for merge_access in result["merge_access_levels"]:
-                    if "user_id" not in push_access:
+                    if not merge_access.get("user_id"):
                         merge_access_levels.add(merge_access["access_level"])
                     else:
                         merge_access_user_ids.add(merge_access["user_id"])
