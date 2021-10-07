@@ -16,6 +16,7 @@ def branches(request, gitlab, group, project):
     for branch in branches:
         gitlab.create_branch(f"{group}/{project}", branch, "main")
         if branch.startswith("protected"):
+            gitlab.unprotect_branch(f"{group}/{project}", branch)
             gitlab.branch_access_level(
                 f"{group}/{project}",
                 branch,
@@ -38,6 +39,7 @@ def branches(request, gitlab, group, project):
             "Reset default content",
         )
 
+        gitlab.unprotect_branch(f"{group}/{project}", "main")
         gitlab.branch_access_level(
             f"{group}/{project}",
             "main",

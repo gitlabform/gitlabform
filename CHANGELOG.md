@@ -1,5 +1,14 @@
 ## Changelog
 
+### 2.6.0
+
+* **Complete support for Protected branches - access levels / users / groups allowed to push/merge/unprotect** (**GitLab Premium (paid) only**). PR [#289](https://github.com/egnyte/gitlabform/pull/289).
+* **Add option to allow push force in protected branches**. Implements [#227](https://github.com/egnyte/gitlabform/issues/227).
+* Fix a bug causing the app to get HTTP 502 from GitLab when protecting branches in some cases.
+* Fix getting members list to include usernames of all direct members not just the first page. PR [#284](https://github.com/egnyte/gitlabform/pull/284).
+
+Big thanks to the contributors of this release: [@trissanen](https://github.com/trissanen)
+
 ### 2.5.0
 
 * **Make commit messages for file operations configurable.** Implements [#278](https://github.com/egnyte/gitlabform/issues/278).
