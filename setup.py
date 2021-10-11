@@ -59,7 +59,7 @@ setup(
         "MarkupSafe==1.1.1",
         "PyYAML==5.4.1",
         "luddite==1.0.2",
-        "cli-ui==0.15.1",
+        "cli-ui==0.15.2",
         "packaging==21.0",
         "mergedeep==1.3.4",
     ],
