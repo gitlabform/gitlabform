@@ -56,6 +56,7 @@ class GitLabForm(object):
             self.include_archived_projects = True  # for unarchive tests
             self.just_show_version = False
             self.terminate_after_error = True
+            self.only_sections = "all"
 
             self.configure_output(tests=True)
         else:
@@ -75,6 +76,7 @@ class GitLabForm(object):
                 self.include_archived_projects,
                 self.just_show_version,
                 self.terminate_after_error,
+                self.only_sections,
             ) = self.parse_args()
 
             self.configure_output()
@@ -91,7 +93,9 @@ class GitLabForm(object):
 
         self.gitlab, self.configuration = self.initialize_configuration_and_gitlab()
 
-        self.group_processors = GroupProcessors(self.gitlab)
+        self.group_processors = GroupProcessors(
+            self.gitlab, self.configuration, self.strict
+        )
         self.project_processors = ProjectProcessors(
             self.gitlab, self.configuration, self.strict
         )
@@ -226,7 +230,19 @@ class GitLabForm(object):
             '(as numbered by "x/y Processing group/project" messages)',
         )
 
+        parser.add_argument(
+            "-os",
+            "--only-sections",
+            dest="only_sections",
+            default="all",
+            type=str,
+            help="process only section with these names (comma-delimited)",
+        )
+
         args = parser.parse_args()
+
+        if args.only_sections != "all":
+            args.only_sections = args.only_sections.split(",")
 
         return (
             args.project_or_group,
@@ -242,6 +258,7 @@ class GitLabForm(object):
             args.include_archived_projects,
             args.just_show_version,
             args.terminate_after_error,
+            args.only_sections,
         )
 
     def configure_output(self, tests=False):
@@ -339,11 +356,12 @@ class GitLabForm(object):
             )
 
             try:
-                self.group_processors.process_group(
+                self.group_processors.process_entity(
                     group,
                     configuration,
                     dry_run=self.noop,
                     effective_configuration=effective_configuration,
+                    only_sections=self.only_sections,
                 )
 
                 successful_groups += 1
@@ -401,11 +419,12 @@ class GitLabForm(object):
             )
 
             try:
-                self.project_processors.process_project(
+                self.project_processors.process_entity(
                     project_and_group,
                     configuration,
                     dry_run=self.noop,
                     effective_configuration=effective_configuration,
+                    only_sections=self.only_sections,
                 )
 
                 successful_projects += 1
