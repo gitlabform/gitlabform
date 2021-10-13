@@ -8,7 +8,7 @@ from cli_ui import warning, fatal
 
 from jinja2 import Environment, FileSystemLoader
 
-from gitlabform import EXIT_INVALID_INPUT
+from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
@@ -67,24 +67,16 @@ class FilesProcessor(AbstractProcessor):
                         exit_code=EXIT_INVALID_INPUT,
                     )
 
-                # unprotect protected branch temporarily for operations below
-                if configuration.get("branches|" + branch + "|protected"):
-                    debug(
-                        "> Temporarily unprotecting the branch for managing files in it..."
-                    )
-                    self.branch_protector.unprotect_branch(project_and_group, branch)
-
                 if configuration.get("files|" + file + "|delete"):
                     try:
                         self.gitlab.get_file(project_and_group, branch, file)
                         debug("Deleting file '%s' in branch '%s'", file, branch)
-                        self.gitlab.delete_file(
+                        self.modify_file(
                             project_and_group,
                             branch,
                             file,
-                            self.get_commit_message_for_file_change(
-                                "delete", file, configuration
-                            ),
+                            "delete",
+                            configuration,
                         )
                     except NotFoundException:
                         debug(
@@ -127,14 +119,13 @@ class FilesProcessor(AbstractProcessor):
                         if current_content != new_content:
                             if configuration.get("files|" + file + "|overwrite"):
                                 debug("Changing file '%s' in branch '%s'", file, branch)
-                                self.gitlab.set_file(
+                                self.modify_file(
                                     project_and_group,
                                     branch,
                                     file,
+                                    "modify",
+                                    configuration,
                                     new_content,
-                                    self.get_commit_message_for_file_change(
-                                        "change", file, configuration
-                                    ),
                                 )
                             else:
                                 debug(
@@ -151,25 +142,78 @@ class FilesProcessor(AbstractProcessor):
                             )
                     except NotFoundException:
                         debug("Creating file '%s' in branch '%s'", file, branch)
-                        self.gitlab.add_file(
+                        self.modify_file(
                             project_and_group,
                             branch,
                             file,
+                            "add",
+                            configuration,
                             new_content,
-                            self.get_commit_message_for_file_change(
-                                "add", file, configuration
-                            ),
                         )
 
-                # protect branch back after above operations
-                if configuration.get("branches|" + branch + "|protected"):
-                    debug("> Protecting the branch again.")
-                    self.branch_protector.protect_branch(
-                        project_and_group, configuration, branch
-                    )
                 if configuration.get("files|" + file + "|only_first_branch"):
                     verbose("Skipping other branches for this file, as configured.")
                     break
+
+    def modify_file(
+        self,
+        project_and_group,
+        branch,
+        file,
+        operation,
+        configuration,
+        new_content=None,
+    ):
+        # unprotect protected branch temporarily for operations below
+        if configuration.get("branches|" + branch + "|protected"):
+            debug(
+                f"> Temporarily unprotecting the branch to {operation} a file in it..."
+            )
+            self.branch_protector.unprotect_branch(project_and_group, branch)
+
+        try:
+
+            if operation == "modify":
+                self.gitlab.set_file(
+                    project_and_group,
+                    branch,
+                    file,
+                    new_content,
+                    self.get_commit_message_for_file_change(
+                        "change", file, configuration
+                    ),
+                )
+            elif operation == "add":
+                self.gitlab.add_file(
+                    project_and_group,
+                    branch,
+                    file,
+                    new_content,
+                    self.get_commit_message_for_file_change("add", file, configuration),
+                )
+            elif operation == "delete":
+                self.gitlab.delete_file(
+                    project_and_group,
+                    branch,
+                    file,
+                    self.get_commit_message_for_file_change(
+                        "delete", file, configuration
+                    ),
+                )
+
+        except Exception as e:
+            fatal(
+                f"Error while performing {operation} on file {file} in {branch}: {e}",
+                EXIT_PROCESSING_ERROR,
+            )
+
+        finally:
+            # protect branch back after above operations
+            if configuration.get("branches|" + branch + "|protected"):
+                debug("> Protecting the branch again.")
+                self.branch_protector.protect_branch(
+                    project_and_group, configuration, branch
+                )
 
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group
