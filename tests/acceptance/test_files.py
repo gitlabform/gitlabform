@@ -1,6 +1,7 @@
 import pytest
 
 from gitlabform.gitlab import AccessLevel
+from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 from tests.acceptance import run_gitlabform, DEFAULT_README
 
 
@@ -31,13 +32,17 @@ def branches(request, gitlab, group, project):
         for branch in branches:
             gitlab.delete_branch(f"{group}/{project}", branch)
 
-        gitlab.set_file(
+        params = (
             f"{group}/{project}",
             "main",
             "README.md",
             DEFAULT_README,
             "Reset default content",
         )
+        try:
+            gitlab.set_file(*params)
+        except UnexpectedResponseException:
+            gitlab.add_file(*params)
 
         gitlab.unprotect_branch(f"{group}/{project}", "main")
         gitlab.branch_access_level(
@@ -49,6 +54,26 @@ def branches(request, gitlab, group, project):
                 "unprotect_access_level": AccessLevel.MAINTAINER.value,
             },
         )
+
+    request.addfinalizer(fin)
+
+
+@pytest.fixture(scope="function")
+def no_access_branch(request, gitlab, group, project):
+    gitlab.create_branch(f"{group}/{project}", "no_access_branch", "main")
+    gitlab.branch_access_level(
+        f"{group}/{project}",
+        "no_access_branch",
+        {
+            "push_access_level": AccessLevel.NO_ACCESS.value,
+            "merge_access_level": AccessLevel.NO_ACCESS.value,
+            "unprotect_access_level": AccessLevel.MAINTAINER.value,
+        },
+    )
+
+    def fin():
+        gitlab.unprotect_branch(f"{group}/{project}", "no_access_branch")
+        gitlab.delete_branch(f"{group}/{project}", "no_access_branch")
 
     request.addfinalizer(fin)
 
@@ -87,6 +112,77 @@ class TestFiles:
         assert other_branch_file_content == DEFAULT_README
 
         # check if main stays protected after the file update
+        branch = gitlab.get_branch(group_and_project_name, "main")
+        assert branch["protected"] is True
+
+    def test__set_file_strongly_protected_branch(
+        self, gitlab, group, project, no_access_branch
+    ):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_specific_branch = f"""
+            projects_and_groups:
+              {group_and_project_name}:
+                branches:
+                  no_access_branch:
+                    protected: true
+                    push_access_level: 0 # no one
+                    merge_access_level: 0 # no one
+                    unprotect_access_level: 40
+                files:
+                  "README.md":
+                    overwrite: true
+                    branches:
+                      - no_access_branch
+                    content: "Content for no_access_branch only"
+            """
+
+        run_gitlabform(set_file_specific_branch, group_and_project_name)
+
+        commit = gitlab.get_last_commit(group_and_project_name, "no_access_branch")
+        assert commit["message"] == "Automated change made by gitlabform"
+
+        file_content = gitlab.get_file(
+            group_and_project_name, "no_access_branch", "README.md"
+        )
+        assert file_content == "Content for no_access_branch only"
+
+        other_branch_file_content = gitlab.get_file(
+            group_and_project_name, "main", "README.md"
+        )
+        assert other_branch_file_content == DEFAULT_README
+
+        # check if no_access_branch stays protected after the file update
+        branch = gitlab.get_branch(group_and_project_name, "no_access_branch")
+        assert branch["protected"] is True
+
+    def test__delete_file_specific_branch(self, gitlab, group, project, branches):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_specific_branch = f"""
+            projects_and_groups:
+              {group_and_project_name}:
+                branches:
+                  main:
+                    protected: true
+                    developers_can_push: false
+                    developers_can_merge: true
+                files:
+                  "README.md":
+                    branches:
+                      - main
+                    delete: true
+            """
+
+        run_gitlabform(set_file_specific_branch, group_and_project_name)
+
+        commit = gitlab.get_last_commit(group_and_project_name, "main")
+        assert commit["message"] == "Automated delete made by gitlabform"
+
+        with pytest.raises(NotFoundException):
+            gitlab.get_file(group_and_project_name, "main", "README.md")
+
+        # check if main stays protected after the file delete
         branch = gitlab.get_branch(group_and_project_name, "main")
         assert branch["protected"] is True
 
@@ -278,8 +374,10 @@ class TestFiles:
                 branches:
                   regular_branch1:
                     protected: true
-                    push_access_level: {AccessLevel.DEVELOPER.value}
-                    merge_access_level: {AccessLevel.DEVELOPER.value}
+                    # use a level that will require unprotecting the branch
+                    # to change the file value
+                    push_access_level: {AccessLevel.MAINTAINER.value}
+                    merge_access_level: {AccessLevel.MAINTAINER.value}
 
                 files:
                   anyfile2:
@@ -305,8 +403,8 @@ class TestFiles:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project_name, "regular_branch1"
         )
-        assert push_access_levels == [AccessLevel.DEVELOPER.value]
-        assert merge_access_levels == [AccessLevel.DEVELOPER.value]
+        assert push_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
         # the default value
