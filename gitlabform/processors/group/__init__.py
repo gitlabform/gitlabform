@@ -1,7 +1,8 @@
 from typing import List
 
+from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
-from gitlabform.output import EffectiveConfiguration
+from gitlabform.processors import AbstractProcessors
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.group.group_badges_processor import GroupBadgesProcessor
 from gitlabform.processors.group.group_ldap_links_processor import (
@@ -21,8 +22,9 @@ from gitlabform.processors.group.group_shared_with_processor import (
 )
 
 
-class GroupProcessors(object):
-    def __init__(self, gitlab: GitLab):
+class GroupProcessors(AbstractProcessors):
+    def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
+        super().__init__(gitlab, config, strict)
         self.processors: List[AbstractProcessor] = [
             GroupSecretVariablesProcessor(gitlab),
             GroupSettingsProcessor(gitlab),
@@ -31,16 +33,3 @@ class GroupProcessors(object):
             GroupLDAPLinksProcessor(gitlab),
             GroupBadgesProcessor(gitlab),
         ]
-
-    def get_configuration_names(self):
-        return [processor.configuration_name for processor in self.processors]
-
-    def process_group(
-        self,
-        group: str,
-        configuration: dict,
-        dry_run: bool,
-        effective_configuration: EffectiveConfiguration,
-    ):
-        for processor in self.processors:
-            processor.process(group, configuration, dry_run, effective_configuration)
