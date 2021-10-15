@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.7.0
+
+* **Allow processing only requested configuration sections** using a new cli argument `-os / --only-sections`.
+* Minimize the number of unnecessary audit branch unprotect/protect events. Up to now every apply of the `files` section for protected branch resulted in unprotect and then (re)protect event for each protected branches and each file. Now this will only happen with the user running GitLabForm actually needs to do that, which should not happen often if you are using an admin account. Completely fixes [#178](https://github.com/egnyte/gitlabform/issues/178).
+
 ### 2.6.0
 
 * **Complete support for Protected branches - access levels / users / groups allowed to push/merge/unprotect** (**GitLab Premium (paid) only**). PR [#289](https://github.com/egnyte/gitlabform/pull/289).
