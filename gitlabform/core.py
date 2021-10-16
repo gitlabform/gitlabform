@@ -14,7 +14,7 @@ from gitlabform.configuration.core import (
     ConfigFileNotFoundException,
     ConfigInvalidException,
 )
-from gitlabform.filter import NonEmptyConfigsProvider
+from gitlabform.filter import NonEmptyConfigsProvider, NonArchivedProjectsProvider
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.input import GroupsAndProjectsProvider
@@ -100,11 +100,17 @@ class GitLabForm(object):
             self.gitlab, self.configuration, self.strict
         )
         self.groups_and_projects_provider = GroupsAndProjectsProvider(
-            self.gitlab, self.configuration, self.include_archived_projects
+            self.gitlab,
+            self.configuration,
         )
 
         self.non_empty_configs_provider = NonEmptyConfigsProvider(
             self.configuration, self.group_processors, self.project_processors
+        )
+
+        self.non_archived_projects_provider = NonArchivedProjectsProvider(
+            self.gitlab,
+            self.include_archived_projects,
         )
 
     @staticmethod
@@ -317,10 +323,11 @@ class GitLabForm(object):
 
     def run(self):
 
-        projects_with_non_empty_configs, groups_with_non_empty_configs = show_header(
+        projects, groups = show_header(
             self.project_or_group,
             self.groups_and_projects_provider,
             self.non_empty_configs_provider,
+            self.non_archived_projects_provider,
         )
 
         group_number = 0
@@ -329,7 +336,7 @@ class GitLabForm(object):
 
         effective_configuration = EffectiveConfiguration(self.output_file)
 
-        for group in groups_with_non_empty_configs:
+        for group in groups:
 
             group_number += 1
 
@@ -337,7 +344,7 @@ class GitLabForm(object):
                 info_group_count(
                     "@",
                     group_number,
-                    len(groups_with_non_empty_configs),
+                    len(groups),
                     cli_ui.yellow,
                     f"Skipping group {group} as requested to start from {self.start_from_group}...",
                     cli_ui.reset,
@@ -351,7 +358,7 @@ class GitLabForm(object):
             info_group_count(
                 "@",
                 group_number,
-                len(groups_with_non_empty_configs),
+                len(groups),
                 f"Processing group: {group}",
             )
 
@@ -383,14 +390,14 @@ class GitLabForm(object):
                     warning(message)
             finally:
                 debug(
-                    f"@ ({group_number}/{len(groups_with_non_empty_configs)}) FINISHED Processing group: {group}"
+                    f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
                 )
 
         project_number = 0
         successful_projects = 0
         failed_projects = {}
 
-        for project_and_group in projects_with_non_empty_configs:
+        for project_and_group in projects:
 
             project_number += 1
 
@@ -398,7 +405,7 @@ class GitLabForm(object):
                 info_project_count(
                     "*",
                     project_number,
-                    len(projects_with_non_empty_configs),
+                    len(projects),
                     cli_ui.yellow,
                     f"Skipping project {project_and_group} as requested to start from {self.start_from}...",
                     cli_ui.reset,
@@ -414,7 +421,7 @@ class GitLabForm(object):
             info_project_count(
                 "*",
                 project_number,
-                len(projects_with_non_empty_configs),
+                len(projects),
                 f"Processing project: {project_and_group}",
             )
 
@@ -448,15 +455,15 @@ class GitLabForm(object):
             finally:
 
                 debug(
-                    f"* ({project_number}/{len(projects_with_non_empty_configs)})"
+                    f"* ({project_number}/{len(projects)})"
                     f" FINISHED Processing project: {project_and_group}",
                 )
 
         effective_configuration.write_to_file()
 
         show_summary(
-            groups_with_non_empty_configs,
-            projects_with_non_empty_configs,
+            groups,
+            projects,
             successful_groups,
             successful_projects,
             failed_groups,

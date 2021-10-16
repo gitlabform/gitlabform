@@ -11,10 +11,9 @@ class GroupsAndProjectsProvider:
     and projects and the fact that the group and project names case are somewhat case-sensitive.
     """
 
-    def __init__(self, gitlab, configuration, include_archived_projects):
+    def __init__(self, gitlab, configuration):
         self.gitlab = gitlab
         self.configuration = configuration
-        self.include_archived_projects = include_archived_projects
 
     def get_groups_and_projects(self, target: str) -> (list, list):
         """
@@ -73,7 +72,6 @@ class GroupsAndProjectsProvider:
 
         elif target == "ALL_DEFINED":
             requested_projects = self.configuration.get_projects()
-            requested_projects = self._remove_archived_projects(requested_projects)
         else:
             try:
                 # it may be a project or a subgroup
@@ -90,20 +88,12 @@ class GroupsAndProjectsProvider:
 
         return self._remove_skipped_projects(projects)
 
-    def _remove_archived_projects(self, projects):
-        if self.include_archived_projects:
-            return projects
-        else:
-            non_archived_projects = self.gitlab.get_all_projects(include_archived=False)
-            return [project for project in projects if project in non_archived_projects]
-
     def _get_projects_from_groups(self, groups: list) -> list:
         # use set to deduplicate project list
         projects = set()
         for group in groups:
-            for project in self.gitlab.get_projects(
-                group, include_archived=self.include_archived_projects
-            ):
+            # archived projects are filtered in the NonArchivedProjectsProvider class
+            for project in self.gitlab.get_projects(group, include_archived=True):
                 projects.add(project)
         return sorted(list(projects))
 

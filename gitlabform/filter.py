@@ -1,6 +1,7 @@
 from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.gitlab.core import ENTITIES_PER_PAGE
 
 
 class NonEmptyConfigsProvider(object):
@@ -92,3 +93,47 @@ class NonEmptyConfigsProvider(object):
             if configuration_name in self.project_processors.get_configuration_names():
                 return True
         return False
+
+
+class NonArchivedProjectsProvider(object):
+    """
+    To make the output shorter, speed up the processing and to avoid errors when trying to change an archived project,
+    this class splits the projects list into archived ones and non-archived (active) ones.
+    """
+
+    def __init__(self, gitlab, include_archived_projects):
+        self.gitlab = gitlab
+        self.include_archived_projects = include_archived_projects
+
+    def get_archived_and_non_archived_projects(self, projects):
+        if self.include_archived_projects:
+
+            # this is sort of a hack: as we treat all projects as non-archived
+            # and pretend that there are no archived projects in this case
+
+            return [], projects
+        else:
+            archived_projects = []
+            non_archived_projects = []
+
+            # for a relatively small number of projects it should be faster to check each one
+            # instead of getting all of the projects from the gitlab instances
+
+            if len(projects) < ENTITIES_PER_PAGE:
+                for project in projects:
+                    project_object = self.gitlab.get_project(project)
+                    if not project_object["archived"]:
+                        non_archived_projects.append(project)
+                    else:
+                        archived_projects.append(project)
+            else:
+                all_non_archived_projects = self.gitlab.get_all_projects(
+                    include_archived=False
+                )
+                for project in projects:
+                    if project in all_non_archived_projects:
+                        non_archived_projects.append(project)
+                    else:
+                        archived_projects.append(project)
+
+            return archived_projects, non_archived_projects

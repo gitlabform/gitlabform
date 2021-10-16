@@ -88,28 +88,40 @@ def show_version(skip_version_check: bool):
 
 
 def show_header(
-    project_or_group, groups_and_projects_provider, non_empty_configs_provider
+    project_or_group,
+    groups_and_projects_provider,
+    non_empty_configs_provider,
+    non_archived_projects_provider,
 ):
     if project_or_group == "ALL":
-        info(">>> Processing ALL groups and projects")
+        info(">>> Getting ALL groups and projects...")
     elif project_or_group == "ALL_DEFINED":
-        info(">>> Processing ALL groups and projects defined in config")
+        info(">>> Getting ALL groups and projects defined in config...")
+    else:
+        info(">>> Getting the list of groups/projects...")
 
     groups, projects = groups_and_projects_provider.get_groups_and_projects(
         project_or_group
     )
 
     if len(groups) == 0 and len(projects) == 0:
-        if project_or_group not in ["ALL", "ALL_DEFINED"]:
-            fatal(
-                f"Entity {project_or_group} cannot be found in GitLab!",
-                exit_code=EXIT_INVALID_INPUT,
+        if project_or_group == "ALL":
+            error_message = "GitLab has no projects and groups!"
+        elif project_or_group == "ALL_DEFINED":
+            error_message = (
+                "Configuration does not have any groups or projects defined!"
             )
         else:
-            fatal(
-                f"Configuration does have any groups or projects defined!",
-                exit_code=EXIT_INVALID_INPUT,
-            )
+            error_message = f"Entity {project_or_group} cannot be found in GitLab!"
+        fatal(
+            error_message,
+            exit_code=EXIT_INVALID_INPUT,
+        )
+
+    (
+        archived_projects,
+        projects,
+    ) = non_archived_projects_provider.get_archived_and_non_archived_projects(projects)
 
     (
         groups_with_non_empty_configs,
@@ -120,29 +132,28 @@ def show_header(
         groups, projects
     )
 
-    verbose(f"groups: {groups_with_non_empty_configs}")
-    verbose(
-        f"(groups with empty effective configs that will be skipped: {groups_with_empty_configs})"
-    )
-    verbose(f"projects: {projects_with_non_empty_configs}")
-    verbose(
-        f"(projects with empty effective configs that will be skipped: {projects_with_empty_configs})"
-    )
+    groups_info = f"# of groups to process: {len(groups_with_non_empty_configs)}"
+    groups_verbose = f"groups: {groups_with_non_empty_configs}"
+    if len(groups_with_empty_configs) > 0:
+        groups_info += f" (# groups with empty effective configs that will be skipped: {len(groups_with_empty_configs)})"
+        groups_verbose += f"\n(groups with empty effective configs that will be skipped: {groups_with_empty_configs})"
+    info_1(groups_info)
+    verbose(groups_verbose)
 
-    if len(groups_with_empty_configs) == 0:
-        info_1(f"# of groups to process: {len(groups_with_non_empty_configs)}")
-    else:
-        info_1(
-            f"# of groups to process: {len(groups_with_non_empty_configs)} "
-            f"(# groups with empty effective configs that will be skipped: {len(groups_with_empty_configs)})"
+    projects_info = f"# of projects to process: {len(projects_with_non_empty_configs)}"
+    projects_verbose = f"projects: {projects_with_non_empty_configs}"
+    if len(projects_with_empty_configs) > 0:
+        projects_info += f" (# projects with empty effective configs that will be skipped: {len(projects_with_empty_configs)})"
+        projects_verbose += f"\n(projects with empty effective configs that will be skipped: {projects_with_empty_configs})"
+    if len(archived_projects) > 0:
+        projects_info += (
+            f" (# of archived projects that will be skipped: {len(archived_projects)})"
         )
-    if len(projects_with_empty_configs) == 0:
-        info_1(f"# of projects to process: {len(projects_with_non_empty_configs)}")
-    else:
-        info_1(
-            f"# of projects to process: {len(projects_with_non_empty_configs)} "
-            f"(# projects with empty effective configs that will be skipped: {len(projects_with_empty_configs)})"
+        projects_verbose += (
+            f"\n(archived projects that will be skipped: {archived_projects})"
         )
+    info_1(projects_info)
+    verbose(projects_verbose)
 
     return projects_with_non_empty_configs, groups_with_non_empty_configs
 
