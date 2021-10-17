@@ -96,9 +96,9 @@ def show_header(
     if project_or_group == "ALL":
         info(">>> Getting ALL groups and projects...")
     elif project_or_group == "ALL_DEFINED":
-        info(">>> Getting ALL groups and projects defined in config...")
+        info(">>> Getting ALL_DEFINED groups and projects...")
     else:
-        info(">>> Getting the list of groups/projects...")
+        info(">>> Getting requested groups/projects...")
 
     groups, projects = groups_and_projects_provider.get_groups_and_projects(
         project_or_group
