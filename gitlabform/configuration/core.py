@@ -2,6 +2,8 @@ import os
 import textwrap
 
 from logging import debug
+
+from abc import ABC
 from cli_ui import debug as verbose
 from cli_ui import fatal
 
@@ -11,7 +13,7 @@ from mergedeep import merge
 from gitlabform import EXIT_INVALID_INPUT
 
 
-class ConfigurationCore:
+class ConfigurationCore(ABC):
 
     config = None
     config_dir = None
@@ -114,18 +116,10 @@ class ConfigurationCore:
         return current
 
     def get_group_config(self, group) -> dict:
-        """
-        :param group: group/subgroup
-        :return: literal configuration for this group/subgroup or empty dict if not defined
-        """
-        return self.get(f"projects_and_groups|{group}/*", {})
+        pass
 
     def get_project_config(self, group_and_project) -> dict:
-        """
-        :param group_and_project: 'group/project'
-        :return: literal configuration for this project or empty dict if not defined
-        """
-        return self.get(f"projects_and_groups|{group_and_project}", {})
+        pass
 
     def get_common_config(self) -> dict:
         """
@@ -134,33 +128,13 @@ class ConfigurationCore:
         return self.get("projects_and_groups|*", {})
 
     def is_project_skipped(self, project) -> bool:
-        """
-        :return: if project is defined in the key with projects to skip
-        """
-        return self.is_skipped(project, self.get("skip_projects", []))
+        pass
 
     def is_group_skipped(self, group) -> bool:
-        """
-        :return: if group is defined in the key with groups to skip
-        """
-        return self.is_skipped(group, self.get("skip_groups", []))
+        pass
 
     def is_skipped(self, an_array: list, item: str) -> bool:
-        """
-        :return: if item is defined in the list to be skipped
-        """
-        for list_element in an_array:
-            if list_element == item:
-                return True
-
-            if (
-                list_element.endswith("/*")
-                and item.startswith(list_element[:-2])
-                and len(item) >= len(list_element[:-2])
-            ):
-                return True
-
-        return False
+        pass
 
     @staticmethod
     def merge_configs(more_general_config, more_specific_config) -> dict:
