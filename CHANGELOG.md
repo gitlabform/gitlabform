@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.7.1a1
+
+* Fix the slow start on GitLab instances with a big total number of projects when requesting to process a relatively small number of groups/projects. Additionally show the number of skipped archived projects in more cases. Fixes [#285](https://github.com/egnyte/gitlabform/issues/285).
+
 ### 2.7.0
 
 * **Allow processing only requested configuration sections** using a new cli argument `-os / --only-sections`.
