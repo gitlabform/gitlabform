@@ -91,7 +91,6 @@ def show_header(
     project_or_group,
     groups_and_projects_provider,
     non_empty_configs_provider,
-    # non_archived_projects_provider,
 ):
     if project_or_group == "ALL":
         info(">>> Getting ALL groups and projects...")
@@ -118,14 +117,12 @@ def show_header(
             exit_code=EXIT_INVALID_INPUT,
         )
 
-    # (
-    #     groups_with_non_empty_configs,
-    #     projects_with_non_empty_configs,
-    #     groups_with_empty_configs,
-    #     projects_with_empty_configs,
-    # ) = non_empty_configs_provider.get_groups_and_projects_with_non_empty_configs(
-    #     groups, projects
-    # )
+    (
+        groups,
+        projects,
+    ) = non_empty_configs_provider.omit_groups_and_projects_with_empty_configs(
+        groups, projects
+    )
 
     groups_info = f"# of groups to process: {len(groups.get_effective())}"
     groups_verbose = f"groups: {groups.get_effective()}"
@@ -134,13 +131,14 @@ def show_header(
         groups_info += "\n(# of omitted groups:"
         first = True
         for reason in groups.omitted:
-            if not first:
-                groups_info += ","
-            groups_info += f" {reason} - {len(groups.omitted[reason])}"
-            groups_verbose += (
-                f"\nomitted groups - {reason}: {groups.get_omitted(reason)}"
-            )
-            first = False
+            if len(groups.omitted[reason]) > 0:
+                if not first:
+                    groups_info += ","
+                groups_info += f" {reason} - {len(groups.omitted[reason])}"
+                groups_verbose += (
+                    f"\nomitted groups - {reason}: {groups.get_omitted(reason)}"
+                )
+                first = False
         groups_info += ")"
 
     info_1(groups_info)
@@ -153,12 +151,13 @@ def show_header(
         projects_info += "\n(# of omitted projects:"
         first = True
         for reason in projects.omitted:
-            if not first:
-                projects_info += ","
-            projects_info += f" {reason} - {len(projects.omitted[reason])}"
-            projects_verbose += (
-                f"\nomitted projects - {reason}: {projects.get_omitted(reason)}"
-            )
+            if len(projects.omitted[reason]) > 0:
+                if not first:
+                    projects_info += ","
+                projects_info += f" {reason} - {len(projects.omitted[reason])}"
+                projects_verbose += (
+                    f"\nomitted projects - {reason}: {projects.get_omitted(reason)}"
+                )
             first = False
         projects_info += ")"
 

@@ -108,12 +108,6 @@ class GitLabForm(object):
             self.configuration, self.group_processors, self.project_processors
         )
 
-        # self.non_archived_projects_provider = NonArchivedProjectsProvider(
-        #     self.gitlab,
-        #     self.project_or_group,
-        #     self.include_archived_projects,
-        # )
-
     @staticmethod
     def parse_args():
 
@@ -328,9 +322,8 @@ class GitLabForm(object):
             self.project_or_group,
             self.groups_and_projects_provider,
             self.non_empty_configs_provider,
-            # self.non_archived_projects_provider,
         )
-        sys.exit(3)
+
         group_number = 0
         successful_groups = 0
         failed_groups = {}
