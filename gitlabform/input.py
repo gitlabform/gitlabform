@@ -1,6 +1,6 @@
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT, Groups, Projects, Entities
+from gitlabform import EXIT_INVALID_INPUT, Groups, Projects
 from gitlabform.gitlab.core import NotFoundException
 
 
