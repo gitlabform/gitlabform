@@ -56,14 +56,14 @@ class GitLabGroups(GitLabCore):
     def get_group(self, name):
         return self._make_requests_to_api("groups/%s", name)
 
-    def get_groups(self):
+    def get_groups(self) -> list:
         """
         :return: sorted list of groups
         """
         result = self._make_requests_to_api("groups?all_available=true", paginated=True)
         return sorted(map(lambda x: x["full_path"], result))
 
-    def get_projects(self, group, include_archived=False):
+    def get_projects(self, group, include_archived=False, only_names=True):
         """
         :param group: group name
         :param include_archived: set to True if archived projects should also be returned
@@ -85,15 +85,24 @@ class GitLabGroups(GitLabCore):
         except NotFoundException:
             projects = []
 
-        all_project_and_groups = sorted(
-            map(lambda x: x["path_with_namespace"], projects)
-        )
-
         project_and_groups_in_group_namespace = [
-            x for x in all_project_and_groups if x.startswith(group + "/")
+            project
+            for project in projects
+            if project["path_with_namespace"].startswith(group + "/")
         ]
 
-        return project_and_groups_in_group_namespace
+        if only_names:
+            return sorted(
+                map(
+                    lambda x: x["path_with_namespace"],
+                    project_and_groups_in_group_namespace,
+                )
+            )
+        else:
+            return sorted(
+                project_and_groups_in_group_namespace,
+                key=lambda x: x["path_with_namespace"],
+            )
 
     def get_group_settings(self, project_and_group_name):
         try:

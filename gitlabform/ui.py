@@ -91,7 +91,7 @@ def show_header(
     project_or_group,
     groups_and_projects_provider,
     non_empty_configs_provider,
-    non_archived_projects_provider,
+    # non_archived_projects_provider,
 ):
     if project_or_group == "ALL":
         info(">>> Getting ALL groups and projects...")
@@ -104,7 +104,7 @@ def show_header(
         project_or_group
     )
 
-    if len(groups) == 0 and len(projects) == 0:
+    if len(groups.get_effective()) == 0 and len(projects.get_effective()) == 0:
         if project_or_group == "ALL":
             error_message = "GitLab has no projects and groups!"
         elif project_or_group == "ALL_DEFINED":
@@ -118,44 +118,54 @@ def show_header(
             exit_code=EXIT_INVALID_INPUT,
         )
 
-    (
-        archived_projects,
-        projects,
-    ) = non_archived_projects_provider.get_archived_and_non_archived_projects(projects)
+    # (
+    #     groups_with_non_empty_configs,
+    #     projects_with_non_empty_configs,
+    #     groups_with_empty_configs,
+    #     projects_with_empty_configs,
+    # ) = non_empty_configs_provider.get_groups_and_projects_with_non_empty_configs(
+    #     groups, projects
+    # )
 
-    (
-        groups_with_non_empty_configs,
-        projects_with_non_empty_configs,
-        groups_with_empty_configs,
-        projects_with_empty_configs,
-    ) = non_empty_configs_provider.get_groups_and_projects_with_non_empty_configs(
-        groups, projects
-    )
+    groups_info = f"# of groups to process: {len(groups.get_effective())}"
+    groups_verbose = f"groups: {groups.get_effective()}"
 
-    groups_info = f"# of groups to process: {len(groups_with_non_empty_configs)}"
-    groups_verbose = f"groups: {groups_with_non_empty_configs}"
-    if len(groups_with_empty_configs) > 0:
-        groups_info += f" (# groups with empty effective configs that will be skipped: {len(groups_with_empty_configs)})"
-        groups_verbose += f"\n(groups with empty effective configs that will be skipped: {groups_with_empty_configs})"
+    if groups.any_omitted():
+        groups_info += "\n(# of omitted groups:"
+        first = True
+        for reason in groups.omitted:
+            if not first:
+                groups_info += ","
+            groups_info += f" {reason} - {len(groups.omitted[reason])}"
+            groups_verbose += (
+                f"\nomitted groups - {reason}: {groups.get_omitted(reason)}"
+            )
+            first = False
+        groups_info += ")"
+
     info_1(groups_info)
     verbose(groups_verbose)
 
-    projects_info = f"# of projects to process: {len(projects_with_non_empty_configs)}"
-    projects_verbose = f"projects: {projects_with_non_empty_configs}"
-    if len(projects_with_empty_configs) > 0:
-        projects_info += f" (# projects with empty effective configs that will be skipped: {len(projects_with_empty_configs)})"
-        projects_verbose += f"\n(projects with empty effective configs that will be skipped: {projects_with_empty_configs})"
-    if len(archived_projects) > 0:
-        projects_info += (
-            f" (# of archived projects that will be skipped: {len(archived_projects)})"
-        )
-        projects_verbose += (
-            f"\n(archived projects that will be skipped: {archived_projects})"
-        )
+    projects_info = f"# of projects to process: {len(projects.get_effective())}"
+    projects_verbose = f"projects: {projects.get_effective()}"
+
+    if projects.any_omitted():
+        projects_info += "\n(# of omitted projects:"
+        first = True
+        for reason in projects.omitted:
+            if not first:
+                projects_info += ","
+            projects_info += f" {reason} - {len(projects.omitted[reason])}"
+            projects_verbose += (
+                f"\nomitted projects - {reason}: {projects.get_omitted(reason)}"
+            )
+            first = False
+        projects_info += ")"
+
     info_1(projects_info)
     verbose(projects_verbose)
 
-    return projects_with_non_empty_configs, groups_with_non_empty_configs
+    return projects.get_effective(), groups.get_effective()
 
 
 def show_summary(
