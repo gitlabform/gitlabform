@@ -1,6 +1,7 @@
 import logging
 
 import pytest
+from gitlabform.configuration import Configuration
 
 from gitlabform.configuration.projects_and_groups import ConfigurationProjectsAndGroups
 
@@ -34,7 +35,7 @@ def configuration_with_multiple_levels_and_lists():
           approvers:
             - project_approvers
     """
-    return ConfigurationProjectsAndGroups(config_string=config_yaml)
+    return Configuration(config_string=config_yaml)
 
 
 @pytest.fixture
@@ -54,7 +55,7 @@ def configuration_for_other_project():
             key: foo
             value: bar
     """
-    return ConfigurationProjectsAndGroups(config_string=config_yaml)
+    return Configuration(config_string=config_yaml)
 
 
 @pytest.fixture
@@ -77,7 +78,7 @@ def configuration_with_only_group_and_project():
             bar: foo
     """
 
-    return ConfigurationProjectsAndGroups(config_string=config_yaml)
+    return Configuration(config_string=config_yaml)
 
 
 def test__get_effective_config_for_project__other_project(
