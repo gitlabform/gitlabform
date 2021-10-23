@@ -14,7 +14,7 @@ from gitlabform.configuration.core import (
     ConfigFileNotFoundException,
     ConfigInvalidException,
 )
-from gitlabform.filter import NonEmptyConfigsProvider, NonArchivedProjectsProvider
+from gitlabform.filter import NonEmptyConfigsProvider
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.input import GroupsAndProjectsProvider
@@ -106,11 +106,6 @@ class GitLabForm(object):
 
         self.non_empty_configs_provider = NonEmptyConfigsProvider(
             self.configuration, self.group_processors, self.project_processors
-        )
-
-        self.non_archived_projects_provider = NonArchivedProjectsProvider(
-            self.gitlab,
-            self.include_archived_projects,
         )
 
     @staticmethod
@@ -327,7 +322,6 @@ class GitLabForm(object):
             self.project_or_group,
             self.groups_and_projects_provider,
             self.non_empty_configs_provider,
-            self.non_archived_projects_provider,
         )
 
         group_number = 0
