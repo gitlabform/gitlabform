@@ -17,9 +17,6 @@ from requests.adapters import HTTPAdapter
 from gitlabform.configuration import Configuration
 
 
-ENTITIES_PER_PAGE = 100
-
-
 class GitLabCore:
     def __init__(self, config_path=None, config_string=None):
 
@@ -135,9 +132,9 @@ class GitLabCore:
             return response.json()
         else:
             if "?" in path_as_format_string:
-                path_as_format_string += "&per_page=" + str(ENTITIES_PER_PAGE)
+                path_as_format_string += "&per_page=100"
             else:
-                path_as_format_string += "?per_page=" + str(ENTITIES_PER_PAGE)
+                path_as_format_string += "?per_page=100"
 
             first_response = self._make_request_to_api(
                 path_as_format_string, args, method, data, expected_codes, json
