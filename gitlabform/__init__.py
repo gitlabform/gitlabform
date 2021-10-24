@@ -1,16 +1,19 @@
 from collections import defaultdict
-from typing import Dict, DefaultDict
+from typing import DefaultDict
+
+from abc import ABC
 
 EXIT_INVALID_INPUT = 1
 EXIT_PROCESSING_ERROR = 2
 
 
-class Entities:
-    def __init__(self):
+class Entities(ABC):
+    def __init__(self, name: str):
         self.requested: set = set()
         self.omitted: DefaultDict[str, set] = defaultdict(set)
         self.effective: list = []
         self.recalculate_effective = True
+        self.name = name
 
     def add_requested(self, more_requested: list):
         self.requested = self.requested | set(more_requested)
@@ -40,9 +43,9 @@ class Entities:
 
 class Groups(Entities):
     def __init__(self):
-        super().__init__()
+        super().__init__("groups")
 
 
 class Projects(Entities):
     def __init__(self):
-        super().__init__()
+        super().__init__("projects")
