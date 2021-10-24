@@ -23,7 +23,7 @@ from cli_ui import debug as verbose
 from packaging import version as packaging_version
 from urllib.error import URLError
 
-from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
+from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT, Entities
 
 
 def show_version(skip_version_check: bool):
@@ -124,47 +124,33 @@ def show_header(
         groups, projects
     )
 
-    groups_info = f"# of groups to process: {len(groups.get_effective())}"
-    groups_verbose = f"groups: {groups.get_effective()}"
-
-    if groups.any_omitted():
-        groups_info += "\n(# of omitted groups:"
-        first = True
-        for reason in groups.omitted:
-            if len(groups.omitted[reason]) > 0:
-                if not first:
-                    groups_info += ","
-                groups_info += f" {reason} - {len(groups.omitted[reason])}"
-                groups_verbose += (
-                    f"\nomitted groups - {reason}: {groups.get_omitted(reason)}"
-                )
-                first = False
-        groups_info += ")"
-
-    info_1(groups_info)
-    verbose(groups_verbose)
-
-    projects_info = f"# of projects to process: {len(projects.get_effective())}"
-    projects_verbose = f"projects: {projects.get_effective()}"
-
-    if projects.any_omitted():
-        projects_info += "\n(# of omitted projects:"
-        first = True
-        for reason in projects.omitted:
-            if len(projects.omitted[reason]) > 0:
-                if not first:
-                    projects_info += ","
-                projects_info += f" {reason} - {len(projects.omitted[reason])}"
-                projects_verbose += (
-                    f"\nomitted projects - {reason}: {projects.get_omitted(reason)}"
-                )
-            first = False
-        projects_info += ")"
-
-    info_1(projects_info)
-    verbose(projects_verbose)
+    show_input_entities(groups)
+    show_input_entities(projects)
 
     return projects.get_effective(), groups.get_effective()
+
+
+def show_input_entities(entities: Entities):
+    info_1(f"# of {entities.name} to process: {len(entities.get_effective())}")
+
+    entities_omitted = ""
+    entities_verbose = f"{entities.name}: {entities.get_effective()}"
+    if entities.any_omitted():
+        entities_omitted += f"(# of omitted {entities.name} -"
+        first = True
+        for reason in entities.omitted:
+            if len(entities.omitted[reason]) > 0:
+                if not first:
+                    entities_omitted += ","
+                entities_omitted += f" {reason}: {len(entities.omitted[reason])}"
+                entities_verbose += f"\nomitted {entities.name} - {reason}: {entities.get_omitted(reason)}"
+                first = False
+        entities_omitted += ")"
+
+    if entities_omitted:
+        info_1(entities_omitted)
+
+    verbose(entities_verbose)
 
 
 def show_summary(
@@ -219,6 +205,10 @@ def show_summary(
             "Nothing to do.",
             reset,
         )
+
+
+def info_group_count(prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
+    info_count(purple, prefix, i, n, *rest, **kwargs)
 
 
 def info_group_count(prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
