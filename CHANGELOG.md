@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.7.1a2
+
+* Fix the slow start on GitLab instances with a big total number of projects when requesting to process a relatively small number of groups/projects. Additionally **always** show the number of omitted groups and projects for any reasons (no config, archived, skipped) . Fixes [#285](https://github.com/egnyte/gitlabform/issues/285).
+
 ### 2.7.1a1
 
 * Fix the slow start on GitLab instances with a big total number of projects when requesting to process a relatively small number of groups/projects. Additionally show the number of skipped archived projects in more cases. Fixes [#285](https://github.com/egnyte/gitlabform/issues/285).
