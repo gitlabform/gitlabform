@@ -38,7 +38,7 @@ class Formatter(
 
 
 class GitLabForm(object):
-    def __init__(self, target=None, config_string=None):
+    def __init__(self, include_archived_projects=True, target=None, config_string=None):
 
         if target and config_string:
             # this mode is basically only for testing
@@ -53,7 +53,7 @@ class GitLabForm(object):
             self.noop = False
             self.output_file = None
             self.skip_version_check = True
-            self.include_archived_projects = True  # for unarchive tests
+            self.include_archived_projects = include_archived_projects
             self.just_show_version = False
             self.terminate_after_error = True
             self.only_sections = "all"
