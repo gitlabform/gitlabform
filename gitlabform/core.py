@@ -38,12 +38,12 @@ class Formatter(
 
 
 class GitLabForm(object):
-    def __init__(self, project_or_group=None, config_string=None):
+    def __init__(self, target=None, config_string=None):
 
-        if project_or_group and config_string:
+        if target and config_string:
             # this mode is basically only for testing
 
-            self.project_or_group = project_or_group
+            self.target = target
             self.config_string = config_string
             self.verbose = True
             self.debug = True
@@ -63,7 +63,7 @@ class GitLabForm(object):
             # normal mode
 
             (
-                self.project_or_group,
+                self.target,
                 self.config,
                 self.verbose,
                 self.debug,
@@ -85,9 +85,9 @@ class GitLabForm(object):
             if self.just_show_version:
                 sys.exit(0)
 
-            if not self.project_or_group:
+            if not self.target:
                 fatal(
-                    "project_or_group parameter is required.",
+                    "target parameter is required.",
                     exit_code=EXIT_INVALID_INPUT,
                 )
 
@@ -126,7 +126,7 @@ class GitLabForm(object):
         )
 
         parser.add_argument(
-            "project_or_group",
+            "target",
             nargs="?",
             help='Project name in "group/project" format \n'
             "OR a single group name \n"
@@ -247,7 +247,7 @@ class GitLabForm(object):
             args.only_sections = args.only_sections.split(",")
 
         return (
-            args.project_or_group,
+            args.target,
             args.config,
             args.verbose,
             args.debug,
@@ -320,7 +320,7 @@ class GitLabForm(object):
     def run(self):
 
         projects, groups = show_header(
-            self.project_or_group,
+            self.target,
             self.groups_and_projects_provider,
             self.non_empty_configs_provider,
         )

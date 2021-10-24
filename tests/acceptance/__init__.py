@@ -174,7 +174,7 @@ def delete_pipeline_schedules_from_project(project_and_group):
         gl.delete_pipeline_schedule(project_and_group, schedule["id"])
 
 
-def run_gitlabform(config, group_and_project):
+def run_gitlabform(config, target):
     # f-strings with """ used as configs have the disadvantage of having indentation in them - let's remove it here
     config = textwrap.dedent(config)
 
@@ -183,6 +183,6 @@ def run_gitlabform(config, group_and_project):
 
     gf = GitLabForm(
         config_string=config,
-        project_or_group=group_and_project,
+        target=target,
     )
     gf.run()
