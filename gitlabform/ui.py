@@ -88,30 +88,28 @@ def show_version(skip_version_check: bool):
 
 
 def show_header(
-    project_or_group,
+    target,
     groups_and_projects_provider,
     non_empty_configs_provider,
 ):
-    if project_or_group == "ALL":
+    if target == "ALL":
         info(">>> Getting ALL groups and projects...")
-    elif project_or_group == "ALL_DEFINED":
+    elif target == "ALL_DEFINED":
         info(">>> Getting ALL_DEFINED groups and projects...")
     else:
         info(">>> Getting requested groups/projects...")
 
-    groups, projects = groups_and_projects_provider.get_groups_and_projects(
-        project_or_group
-    )
+    groups, projects = groups_and_projects_provider.get_groups_and_projects(target)
 
     if len(groups.get_effective()) == 0 and len(projects.get_effective()) == 0:
-        if project_or_group == "ALL":
+        if target == "ALL":
             error_message = "GitLab has no projects and groups!"
-        elif project_or_group == "ALL_DEFINED":
+        elif target == "ALL_DEFINED":
             error_message = (
                 "Configuration does not have any groups or projects defined!"
             )
         else:
-            error_message = f"Entity {project_or_group} cannot be found in GitLab!"
+            error_message = f"Project or group {target} cannot be found in GitLab!"
         fatal(
             error_message,
             exit_code=EXIT_INVALID_INPUT,
