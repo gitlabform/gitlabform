@@ -11,9 +11,10 @@ class GroupsAndProjectsProvider:
     and projects and the fact that the group and project names case are somewhat case-sensitive.
     """
 
-    def __init__(self, gitlab, configuration):
+    def __init__(self, gitlab, configuration, include_archived_projects):
         self.gitlab = gitlab
         self.configuration = configuration
+        self.include_archived_projects = include_archived_projects
 
     def get_groups_and_projects(self, target: str) -> (Groups, Projects):
         """
@@ -147,14 +148,17 @@ class GroupsAndProjectsProvider:
         all = []
         archived = []
         for group in groups:
-            project_objects = self.gitlab.get_projects(
-                group, include_archived=True, only_names=False
-            )
-            for project_object in project_objects:
-                project = project_object["path_with_namespace"]
-                all.append(project)
-                if project_object["archived"]:
-                    archived.append(project)
+            if self.include_archived_projects:
+                all += self.gitlab.get_projects(group, include_archived=True)
+            else:
+                project_objects = self.gitlab.get_projects(
+                    group, include_archived=True, only_names=False
+                )
+                for project_object in project_objects:
+                    project = project_object["path_with_namespace"]
+                    all.append(project)
+                    if project_object["archived"]:
+                        archived.append(project)
 
         # deduplicate as we may have a group X and its subgroup X/Y in the groups list so the effective projects
         # may occur more than once
