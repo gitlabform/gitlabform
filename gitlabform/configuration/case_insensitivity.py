@@ -1,4 +1,3 @@
-from logging import debug
 from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT

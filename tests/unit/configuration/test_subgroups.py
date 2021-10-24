@@ -1,9 +1,7 @@
 import logging
-
 import pytest
-from gitlabform.configuration import Configuration
 
-from gitlabform.configuration.projects_and_groups import ConfigurationProjectsAndGroups
+from gitlabform.configuration import Configuration
 
 logger = logging.getLogger(__name__)
 
