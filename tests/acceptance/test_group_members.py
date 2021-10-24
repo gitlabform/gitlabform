@@ -181,6 +181,7 @@ class TestGroupMembers:
                 assert member["access_level"] == AccessLevel.DEVELOPER.value
 
     def test__zero_owners(self, gitlab, group, users):
+
         zero_owners = f"""
         projects_and_groups:
           {group}/*:

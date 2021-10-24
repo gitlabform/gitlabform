@@ -7,8 +7,7 @@ from tests.acceptance import (
 
 
 @pytest.fixture(scope="function")
-def one_maintainer_and_two_developers(gitlab, group, project, users):
-    group_and_project = f"{group}/{project}"
+def one_maintainer_and_two_developers(gitlab, group_and_project, users):
 
     gitlab.add_member_to_project(
         group_and_project, users[0], AccessLevel.MAINTAINER.value
@@ -50,9 +49,8 @@ def other_group_with_users(gitlab, other_group, other_users):
 
 class TestMembers:
     def test__add_user(
-        self, gitlab, group, project, users, one_maintainer_and_two_developers
+        self, gitlab, group_and_project, users, one_maintainer_and_two_developers
     ):
-        group_and_project = f"{group}/{project}"
         members_before = gitlab.get_project_members(group_and_project)
         no_of_members_before = len(members_before)
         members_usernames_before = [member["username"] for member in members_before]
@@ -62,7 +60,7 @@ class TestMembers:
 
         add_users = f"""
         projects_and_groups:
-          {group}/{project}:
+          {group_and_project}:
             members:
               users:
                 {user_to_add}: # new user
@@ -82,12 +80,10 @@ class TestMembers:
     def test__add_group(
         self,
         gitlab,
-        group,
-        project,
+        group_and_project,
         one_maintainer_and_two_developers,
         other_group_with_users,
     ):
-        group_and_project = f"{group}/{project}"
         other_group, other_group_users = other_group_with_users
 
         no_of_members_before = len(gitlab.get_project_members(group_and_project))
@@ -103,7 +99,7 @@ class TestMembers:
 
         add_group = f"""
         projects_and_groups:
-          {group}/{project}:
+          {group_and_project}:
             members:
               groups:
                 {other_group}:
@@ -127,7 +123,6 @@ class TestMembers:
         assert no_of_groups_shared == 1
 
     def test__no_groups_and_no_users(self, gitlab, group, project):
-        group_and_project = f"{group}/{project}"
 
         config_with_error = f"""
         projects_and_groups:
@@ -139,4 +134,4 @@ class TestMembers:
         """
 
         with pytest.raises(SystemExit):
-            run_gitlabform(config_with_error, group_and_project)
+            run_gitlabform(config_with_error, f"{group}/{project}")

@@ -7,28 +7,27 @@ from tests.acceptance import (
 
 
 @pytest.fixture(scope="function")
-def tags(request, gitlab, group, project):
+def tags(request, gitlab, group_and_project):
     tags = [
         "tag1",
         "tag2",
         "tag3",
     ]
     for tag in tags:
-        gitlab.create_tag(f"{group}/{project}", tag, "main")
+        gitlab.create_tag(group_and_project, tag, "main")
 
     def fin():
-        protected_tags = gitlab.get_protected_tags(f"{group}/{project}")
+        protected_tags = gitlab.get_protected_tags(group_and_project)
         for protected_tag in protected_tags:
-            gitlab.unprotect_tag(f"{group}/{project}", protected_tag["name"])
+            gitlab.unprotect_tag(group_and_project, protected_tag["name"])
         for tag in tags:
-            gitlab.delete_tag(f"{group}/{project}", tag)
+            gitlab.delete_tag(group_and_project, tag)
 
     request.addfinalizer(fin)
 
 
 class TestTags:
-    def test__protect_single_tag(self, gitlab, group, project, tags):
-        group_and_project = f"{group}/{project}"
+    def test__protect_single_tag(self, gitlab, group_and_project, tags):
 
         config = f"""
         projects_and_groups:
@@ -56,8 +55,7 @@ class TestTags:
             == AccessLevel.MAINTAINER.value
         )
 
-    def test__protect_wildcard_tag(self, gitlab, group, project, tags):
-        group_and_project = f"{group}/{project}"
+    def test__protect_wildcard_tag(self, gitlab, group_and_project, tags):
 
         config = f"""
         projects_and_groups:
@@ -82,8 +80,7 @@ class TestTags:
             == AccessLevel.MAINTAINER.value
         )
 
-    def test__unprotect_the_same_tag(self, gitlab, group, project, tags):
-        group_and_project = f"{group}/{project}"
+    def test__unprotect_the_same_tag(self, gitlab, group_and_project, tags):
 
         config = f"""
         projects_and_groups:
@@ -125,8 +122,7 @@ class TestTags:
         protected_tags = gitlab.get_protected_tags(group_and_project)
         assert len(protected_tags) == 0
 
-    def test__protect_single_tag_no_access(self, gitlab, group, project, tags):
-        group_and_project = f"{group}/{project}"
+    def test__protect_single_tag_no_access(self, gitlab, group_and_project, tags):
 
         config = f"""
             projects_and_groups:
