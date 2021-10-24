@@ -1,5 +1,4 @@
 import logging
-
 import pytest
 
 from gitlabform.configuration import Configuration
