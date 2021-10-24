@@ -211,10 +211,6 @@ def info_group_count(prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> Non
     info_count(purple, prefix, i, n, *rest, **kwargs)
 
 
-def info_group_count(prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
-    info_count(purple, prefix, i, n, *rest, **kwargs)
-
-
 def info_project_count(prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
     info_count(green, prefix, i, n, *rest, **kwargs)
 
