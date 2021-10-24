@@ -6,7 +6,7 @@ from tests.acceptance import run_gitlabform, DEFAULT_README
 
 
 @pytest.fixture(scope="function")
-def branches(request, gitlab, group, project):
+def branches(request, gitlab, group_and_project):
     branches = [
         "protected_branch1",
         "protected_branch2",
@@ -15,11 +15,11 @@ def branches(request, gitlab, group, project):
         "regular_branch2",
     ]
     for branch in branches:
-        gitlab.create_branch(f"{group}/{project}", branch, "main")
+        gitlab.create_branch(group_and_project, branch, "main")
         if branch.startswith("protected"):
-            gitlab.unprotect_branch(f"{group}/{project}", branch)
+            gitlab.unprotect_branch(group_and_project, branch)
             gitlab.branch_access_level(
-                f"{group}/{project}",
+                group_and_project,
                 branch,
                 {
                     "push_access_level": AccessLevel.MAINTAINER.value,
@@ -30,10 +30,10 @@ def branches(request, gitlab, group, project):
 
     def fin():
         for branch in branches:
-            gitlab.delete_branch(f"{group}/{project}", branch)
+            gitlab.delete_branch(group_and_project, branch)
 
         params = (
-            f"{group}/{project}",
+            group_and_project,
             "main",
             "README.md",
             DEFAULT_README,
@@ -44,9 +44,9 @@ def branches(request, gitlab, group, project):
         except UnexpectedResponseException:
             gitlab.add_file(*params)
 
-        gitlab.unprotect_branch(f"{group}/{project}", "main")
+        gitlab.unprotect_branch(group_and_project, "main")
         gitlab.branch_access_level(
-            f"{group}/{project}",
+            group_and_project,
             "main",
             {
                 "push_access_level": AccessLevel.MAINTAINER.value,
@@ -59,10 +59,10 @@ def branches(request, gitlab, group, project):
 
 
 @pytest.fixture(scope="function")
-def no_access_branch(request, gitlab, group, project):
-    gitlab.create_branch(f"{group}/{project}", "no_access_branch", "main")
+def no_access_branch(request, gitlab, group_and_project):
+    gitlab.create_branch(group_and_project, "no_access_branch", "main")
     gitlab.branch_access_level(
-        f"{group}/{project}",
+        group_and_project,
         "no_access_branch",
         {
             "push_access_level": AccessLevel.NO_ACCESS.value,
@@ -72,19 +72,18 @@ def no_access_branch(request, gitlab, group, project):
     )
 
     def fin():
-        gitlab.unprotect_branch(f"{group}/{project}", "no_access_branch")
-        gitlab.delete_branch(f"{group}/{project}", "no_access_branch")
+        gitlab.unprotect_branch(group_and_project, "no_access_branch")
+        gitlab.delete_branch(group_and_project, "no_access_branch")
 
     request.addfinalizer(fin)
 
 
 class TestFiles:
-    def test__set_file_specific_branch(self, gitlab, group, project, branches):
-        group_and_project_name = f"{group}/{project}"
+    def test__set_file_specific_branch(self, gitlab, group_and_project, branches):
 
         set_file_specific_branch = f"""
         projects_and_groups:
-          {group_and_project_name}:
+          {group_and_project}:
             branches:
               main:
                 protected: true
@@ -98,31 +97,30 @@ class TestFiles:
                 content: "Content for main only"
         """
 
-        run_gitlabform(set_file_specific_branch, group_and_project_name)
+        run_gitlabform(set_file_specific_branch, group_and_project)
 
-        commit = gitlab.get_last_commit(group_and_project_name, "main")
+        commit = gitlab.get_last_commit(group_and_project, "main")
         assert commit["message"] == "Automated change made by gitlabform"
 
-        file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
+        file_content = gitlab.get_file(group_and_project, "main", "README.md")
         assert file_content == "Content for main only"
 
         other_branch_file_content = gitlab.get_file(
-            group_and_project_name, "protected_branch1", "README.md"
+            group_and_project, "protected_branch1", "README.md"
         )
         assert other_branch_file_content == DEFAULT_README
 
         # check if main stays protected after the file update
-        branch = gitlab.get_branch(group_and_project_name, "main")
+        branch = gitlab.get_branch(group_and_project, "main")
         assert branch["protected"] is True
 
     def test__set_file_strongly_protected_branch(
-        self, gitlab, group, project, no_access_branch
+        self, gitlab, group_and_project, no_access_branch
     ):
-        group_and_project_name = f"{group}/{project}"
 
         set_file_specific_branch = f"""
             projects_and_groups:
-              {group_and_project_name}:
+              {group_and_project}:
                 branches:
                   no_access_branch:
                     protected: true
@@ -137,31 +135,30 @@ class TestFiles:
                     content: "Content for no_access_branch only"
             """
 
-        run_gitlabform(set_file_specific_branch, group_and_project_name)
+        run_gitlabform(set_file_specific_branch, group_and_project)
 
-        commit = gitlab.get_last_commit(group_and_project_name, "no_access_branch")
+        commit = gitlab.get_last_commit(group_and_project, "no_access_branch")
         assert commit["message"] == "Automated change made by gitlabform"
 
         file_content = gitlab.get_file(
-            group_and_project_name, "no_access_branch", "README.md"
+            group_and_project, "no_access_branch", "README.md"
         )
         assert file_content == "Content for no_access_branch only"
 
         other_branch_file_content = gitlab.get_file(
-            group_and_project_name, "main", "README.md"
+            group_and_project, "main", "README.md"
         )
         assert other_branch_file_content == DEFAULT_README
 
         # check if no_access_branch stays protected after the file update
-        branch = gitlab.get_branch(group_and_project_name, "no_access_branch")
+        branch = gitlab.get_branch(group_and_project, "no_access_branch")
         assert branch["protected"] is True
 
-    def test__delete_file_specific_branch(self, gitlab, group, project, branches):
-        group_and_project_name = f"{group}/{project}"
+    def test__delete_file_specific_branch(self, gitlab, group_and_project, branches):
 
         set_file_specific_branch = f"""
             projects_and_groups:
-              {group_and_project_name}:
+              {group_and_project}:
                 branches:
                   main:
                     protected: true
@@ -174,24 +171,23 @@ class TestFiles:
                     delete: true
             """
 
-        run_gitlabform(set_file_specific_branch, group_and_project_name)
+        run_gitlabform(set_file_specific_branch, group_and_project)
 
-        commit = gitlab.get_last_commit(group_and_project_name, "main")
+        commit = gitlab.get_last_commit(group_and_project, "main")
         assert commit["message"] == "Automated delete made by gitlabform"
 
         with pytest.raises(NotFoundException):
-            gitlab.get_file(group_and_project_name, "main", "README.md")
+            gitlab.get_file(group_and_project, "main", "README.md")
 
         # check if main stays protected after the file delete
-        branch = gitlab.get_branch(group_and_project_name, "main")
+        branch = gitlab.get_branch(group_and_project, "main")
         assert branch["protected"] is True
 
-    def test__custom_commit_message(self, gitlab, group, project, branches):
-        group_and_project_name = f"{group}/{project}"
+    def test__custom_commit_message(self, gitlab, group_and_project, branches):
 
         set_file_specific_branch = f"""
         projects_and_groups:
-          {group_and_project_name}:
+          {group_and_project}:
             branches:
               main:
                 protected: false
@@ -205,17 +201,16 @@ class TestFiles:
                 commit_message: "Preconfigured commit message"
         """
 
-        run_gitlabform(set_file_specific_branch, group_and_project_name)
+        run_gitlabform(set_file_specific_branch, group_and_project)
 
-        commit = gitlab.get_last_commit(group_and_project_name, "main")
+        commit = gitlab.get_last_commit(group_and_project, "main")
         assert commit["message"] == "Preconfigured commit message [skip ci]"
 
-    def test__set_file_all_branches(self, gitlab, group, project, branches):
-        group_and_project_name = f"{group}/{project}"
+    def test__set_file_all_branches(self, gitlab, group_and_project, branches):
 
         set_file_all_branches = f"""
         projects_and_groups:
-          {group_and_project_name}:
+          {group_and_project}:
             branches:
               main:
                 protected: true
@@ -239,7 +234,7 @@ class TestFiles:
                 branches: all
                 content: "Content for all branches"
         """
-        run_gitlabform(set_file_all_branches, group_and_project_name)
+        run_gitlabform(set_file_all_branches, group_and_project)
 
         for branch in [
             "main",
@@ -249,7 +244,7 @@ class TestFiles:
             "regular_branch1",
             "regular_branch2",
         ]:
-            file_content = gitlab.get_file(group_and_project_name, branch, "README.md")
+            file_content = gitlab.get_file(group_and_project, branch, "README.md")
             assert file_content == "Content for all branches"
 
         # check if these remain unprotected
@@ -258,15 +253,14 @@ class TestFiles:
             "regular_branch1",
             "regular_branch2",
         ]:
-            branch = gitlab.get_branch(group_and_project_name, branch)
+            branch = gitlab.get_branch(group_and_project, branch)
             assert branch["protected"] is False
 
-    def test__set_file_protected_branches(self, gitlab, group, project, branches):
-        group_and_project_name = f"{group}/{project}"
+    def test__set_file_protected_branches(self, gitlab, group_and_project, branches):
 
         set_file_protected_branches = f"""
         projects_and_groups:
-          {group_and_project_name}:
+          {group_and_project}:
             branches:
               main:
                 protected: true
@@ -304,7 +298,7 @@ class TestFiles:
                 content: "Content for protected branches only"
         """
 
-        run_gitlabform(set_file_protected_branches, group_and_project_name)
+        run_gitlabform(set_file_protected_branches, group_and_project)
 
         for branch in [
             "main",  # main branch is protected by default
@@ -312,23 +306,22 @@ class TestFiles:
             "protected_branch2",
             "protected_branch3",
         ]:
-            file_content = gitlab.get_file(group_and_project_name, branch, "README.md")
+            file_content = gitlab.get_file(group_and_project, branch, "README.md")
             assert file_content == "Content for protected branches only"
-            branch = gitlab.get_branch(group_and_project_name, branch)
+            branch = gitlab.get_branch(group_and_project, branch)
             assert branch["protected"] is True
 
         for branch in ["regular_branch1", "regular_branch2"]:
-            file_content = gitlab.get_file(group_and_project_name, branch, "README.md")
+            file_content = gitlab.get_file(group_and_project, branch, "README.md")
             assert file_content == DEFAULT_README
-            branch = gitlab.get_branch(group_and_project_name, branch)
+            branch = gitlab.get_branch(group_and_project, branch)
             assert branch["protected"] is False
 
-    def test_set_file_protected_branches_new_api(self, gitlab, group, project):
-        group_and_project_name = f"{group}/{project}"
+    def test_set_file_protected_branches_new_api(self, gitlab, group_and_project):
 
         test_config = f"""
         projects_and_groups:
-          {group_and_project_name}:
+          {group_and_project}:
             branches:
               main:
                 protected: true
@@ -345,9 +338,9 @@ class TestFiles:
                 content: foobar
         """
 
-        run_gitlabform(test_config, group_and_project_name)
+        run_gitlabform(test_config, group_and_project)
 
-        file_content = gitlab.get_file(group_and_project_name, "main", "anyfile1")
+        file_content = gitlab.get_file(group_and_project, "main", "anyfile1")
         assert file_content == "foobar"
 
         (
@@ -356,7 +349,7 @@ class TestFiles:
             push_access_user_ids,
             merge_access_user_ids,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(group_and_project_name, "main")
+        ) = gitlab.get_only_branch_access_levels(group_and_project, "main")
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
@@ -364,13 +357,12 @@ class TestFiles:
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
     def test_set_file_protected_branches_new_api_not_all_levels(
-        self, gitlab, group, project, branches
+        self, gitlab, group_and_project, branches
     ):
-        group_and_project_name = f"{group}/{project}"
 
         test_config = f"""
             projects_and_groups:
-              {group_and_project_name}:
+              {group_and_project}:
                 branches:
                   regular_branch1:
                     protected: true
@@ -387,11 +379,9 @@ class TestFiles:
                     content: barfoo
             """
 
-        run_gitlabform(test_config, group_and_project_name)
+        run_gitlabform(test_config, group_and_project)
 
-        file_content = gitlab.get_file(
-            group_and_project_name, "regular_branch1", "anyfile2"
-        )
+        file_content = gitlab.get_file(group_and_project, "regular_branch1", "anyfile2")
         assert file_content == "barfoo"
 
         (
@@ -400,9 +390,7 @@ class TestFiles:
             push_access_user_ids,
             merge_access_user_ids,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(
-            group_and_project_name, "regular_branch1"
-        )
+        ) = gitlab.get_only_branch_access_levels(group_and_project, "regular_branch1")
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []

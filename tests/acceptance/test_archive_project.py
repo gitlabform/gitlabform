@@ -4,8 +4,7 @@ from tests.acceptance import (
 
 
 class TestArchiveProject:
-    def test__archive_project(self, gitlab, group, project):
-        group_and_project = f"{group}/{project}"
+    def test__archive_project(self, gitlab, group_and_project):
 
         config = f"""
         projects_and_groups:
@@ -18,8 +17,7 @@ class TestArchiveProject:
         project = gitlab.get_project(group_and_project)
         assert project["archived"] is True
 
-    def test__unarchive_project(self, gitlab, group, project):
-        group_and_project = f"{group}/{project}"
+    def test__unarchive_project(self, gitlab, group_and_project):
 
         archive_project = f"""
         projects_and_groups:
