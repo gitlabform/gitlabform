@@ -102,6 +102,7 @@ class GitLabForm(object):
         self.groups_and_projects_provider = GroupsAndProjectsProvider(
             self.gitlab,
             self.configuration,
+            self.include_archived_projects,
         )
 
         self.non_empty_configs_provider = NonEmptyConfigsProvider(
