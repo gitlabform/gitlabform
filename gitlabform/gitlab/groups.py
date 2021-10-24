@@ -56,7 +56,7 @@ class GitLabGroups(GitLabCore):
     def get_group(self, name):
         return self._make_requests_to_api("groups/%s", name)
 
-    def get_groups(self) -> list:
+    def get_groups(self):
         """
         :return: sorted list of groups
         """
@@ -67,6 +67,7 @@ class GitLabGroups(GitLabCore):
         """
         :param group: group name
         :param include_archived: set to True if archived projects should also be returned
+        :param only_names: set to False to get the whole project objects
         :return: sorted list of strings "group/project_name". Note that only projects from "group" namespace are
                  returned, so if "group" (= members of this group) is also a member of some projects, they won't be
                  returned here.
