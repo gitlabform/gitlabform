@@ -1,9 +1,12 @@
 import argparse
 import logging.config
+import logging
 import sys
 import textwrap
 import traceback
 
+from logging import debug
+from cli_ui import warning, fatal
 import cli_ui
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
@@ -35,12 +38,12 @@ class Formatter(
 
 
 class GitLabForm(object):
-    def __init__(self, project_or_group=None, config_string=None):
+    def __init__(self, include_archived_projects=True, target=None, config_string=None):
 
-        if project_or_group and config_string:
+        if target and config_string:
             # this mode is basically only for testing
 
-            self.project_or_group = project_or_group
+            self.target = target
             self.config_string = config_string
             self.verbose = True
             self.debug = True
@@ -50,16 +53,17 @@ class GitLabForm(object):
             self.noop = False
             self.output_file = None
             self.skip_version_check = True
-            self.include_archived_projects = True  # for unarchive tests
+            self.include_archived_projects = include_archived_projects
             self.just_show_version = False
             self.terminate_after_error = True
+            self.only_sections = "all"
 
             self.configure_output(tests=True)
         else:
             # normal mode
 
             (
-                self.project_or_group,
+                self.target,
                 self.config,
                 self.verbose,
                 self.debug,
@@ -72,6 +76,7 @@ class GitLabForm(object):
                 self.include_archived_projects,
                 self.just_show_version,
                 self.terminate_after_error,
+                self.only_sections,
             ) = self.parse_args()
 
             self.configure_output()
@@ -80,20 +85,24 @@ class GitLabForm(object):
             if self.just_show_version:
                 sys.exit(0)
 
-            if not self.project_or_group:
-                cli_ui.fatal(
-                    "project_or_group parameter is required.",
+            if not self.target:
+                fatal(
+                    "target parameter is required.",
                     exit_code=EXIT_INVALID_INPUT,
                 )
 
         self.gitlab, self.configuration = self.initialize_configuration_and_gitlab()
 
-        self.group_processors = GroupProcessors(self.gitlab)
+        self.group_processors = GroupProcessors(
+            self.gitlab, self.configuration, self.strict
+        )
         self.project_processors = ProjectProcessors(
             self.gitlab, self.configuration, self.strict
         )
         self.groups_and_projects_provider = GroupsAndProjectsProvider(
-            self.gitlab, self.configuration, self.include_archived_projects
+            self.gitlab,
+            self.configuration,
+            self.include_archived_projects,
         )
 
         self.non_empty_configs_provider = NonEmptyConfigsProvider(
@@ -117,7 +126,7 @@ class GitLabForm(object):
         )
 
         parser.add_argument(
-            "project_or_group",
+            "target",
             nargs="?",
             help='Project name in "group/project" format \n'
             "OR a single group name \n"
@@ -223,10 +232,22 @@ class GitLabForm(object):
             '(as numbered by "x/y Processing group/project" messages)',
         )
 
+        parser.add_argument(
+            "-os",
+            "--only-sections",
+            dest="only_sections",
+            default="all",
+            type=str,
+            help="process only section with these names (comma-delimited)",
+        )
+
         args = parser.parse_args()
 
+        if args.only_sections != "all":
+            args.only_sections = args.only_sections.split(",")
+
         return (
-            args.project_or_group,
+            args.target,
             args.config,
             args.verbose,
             args.debug,
@@ -239,13 +260,14 @@ class GitLabForm(object):
             args.include_archived_projects,
             args.just_show_version,
             args.terminate_after_error,
+            args.only_sections,
         )
 
     def configure_output(self, tests=False):
 
-        # normal mode - print cli_ui.info+
-        # verbose mode - print cli_ui.*
-        # debug / tests mode - like above + logging.debug
+        # normal mode - print cli_ui.* except debug as verbose
+        # verbose mode - print all cli_ui.*, including debug as verbose
+        # debug / tests mode - like above + (logging.)debug
 
         logging.basicConfig()
 
@@ -280,25 +302,25 @@ class GitLabForm(object):
             configuration = gitlab.get_configuration()
             return gitlab, configuration
         except ConfigFileNotFoundException as e:
-            cli_ui.fatal(
+            fatal(
                 f"Config file not found at: {e}",
                 exit_code=EXIT_INVALID_INPUT,
             )
         except ConfigInvalidException as e:
-            cli_ui.fatal(
+            fatal(
                 f"Invalid config:\n{e.underlying}",
                 exit_code=EXIT_INVALID_INPUT,
             )
         except TestRequestFailedException as e:
-            cli_ui.fatal(
+            fatal(
                 f"GitLab test request failed:\n{e.underlying}",
                 exit_code=EXIT_PROCESSING_ERROR,
             )
 
     def run(self):
 
-        projects_with_non_empty_configs, groups_with_non_empty_configs = show_header(
-            self.project_or_group,
+        projects, groups = show_header(
+            self.target,
             self.groups_and_projects_provider,
             self.non_empty_configs_provider,
         )
@@ -309,7 +331,7 @@ class GitLabForm(object):
 
         effective_configuration = EffectiveConfiguration(self.output_file)
 
-        for group in groups_with_non_empty_configs:
+        for group in groups:
 
             group_number += 1
 
@@ -317,7 +339,7 @@ class GitLabForm(object):
                 info_group_count(
                     "@",
                     group_number,
-                    len(groups_with_non_empty_configs),
+                    len(groups),
                     cli_ui.yellow,
                     f"Skipping group {group} as requested to start from {self.start_from_group}...",
                     cli_ui.reset,
@@ -331,16 +353,17 @@ class GitLabForm(object):
             info_group_count(
                 "@",
                 group_number,
-                len(groups_with_non_empty_configs),
+                len(groups),
                 f"Processing group: {group}",
             )
 
             try:
-                self.group_processors.process_group(
+                self.group_processors.process_entity(
                     group,
                     configuration,
                     dry_run=self.noop,
                     effective_configuration=effective_configuration,
+                    only_sections=self.only_sections,
                 )
 
                 successful_groups += 1
@@ -354,22 +377,22 @@ class GitLabForm(object):
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
-                    cli_ui.fatal(
+                    fatal(
                         message,
                         exit_code=EXIT_PROCESSING_ERROR,
                     )
                 else:
-                    cli_ui.warning(message)
+                    warning(message)
             finally:
-                logging.debug(
-                    f"@ ({group_number}/{len(groups_with_non_empty_configs)}) FINISHED Processing group: {group}"
+                debug(
+                    f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
                 )
 
         project_number = 0
         successful_projects = 0
         failed_projects = {}
 
-        for project_and_group in projects_with_non_empty_configs:
+        for project_and_group in projects:
 
             project_number += 1
 
@@ -377,7 +400,7 @@ class GitLabForm(object):
                 info_project_count(
                     "*",
                     project_number,
-                    len(projects_with_non_empty_configs),
+                    len(projects),
                     cli_ui.yellow,
                     f"Skipping project {project_and_group} as requested to start from {self.start_from}...",
                     cli_ui.reset,
@@ -393,16 +416,17 @@ class GitLabForm(object):
             info_project_count(
                 "*",
                 project_number,
-                len(projects_with_non_empty_configs),
+                len(projects),
                 f"Processing project: {project_and_group}",
             )
 
             try:
-                self.project_processors.process_project(
+                self.project_processors.process_entity(
                     project_and_group,
                     configuration,
                     dry_run=self.noop,
                     effective_configuration=effective_configuration,
+                    only_sections=self.only_sections,
                 )
 
                 successful_projects += 1
@@ -416,25 +440,25 @@ class GitLabForm(object):
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
-                    cli_ui.fatal(
+                    fatal(
                         message,
                         exit_code=EXIT_PROCESSING_ERROR,
                     )
                 else:
-                    cli_ui.warning(message)
+                    warning(message)
 
             finally:
 
-                logging.debug(
-                    f"* ({project_number}/{len(projects_with_non_empty_configs)})"
+                debug(
+                    f"* ({project_number}/{len(projects)})"
                     f" FINISHED Processing project: {project_and_group}",
                 )
 
         effective_configuration.write_to_file()
 
         show_summary(
-            groups_with_non_empty_configs,
-            projects_with_non_empty_configs,
+            groups,
+            projects,
             successful_groups,
             successful_projects,
             failed_groups,

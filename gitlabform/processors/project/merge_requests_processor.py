@@ -1,6 +1,6 @@
-import logging
+from logging import debug
+from cli_ui import debug as verbose
 
-import cli_ui
 from distutils.version import LooseVersion
 
 from gitlabform.gitlab import GitLab
@@ -16,7 +16,7 @@ class MergeRequestsProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         approvals = configuration.get("merge_requests|approvals")
         if approvals:
-            cli_ui.debug(f"Setting approvals settings: {approvals}")
+            verbose(f"Setting approvals settings: {approvals}")
             self.gitlab.post_approvals_settings(project_and_group, approvals)
 
         approvers = configuration.get("merge_requests|approvers")
@@ -31,7 +31,7 @@ class MergeRequestsProcessor(AbstractProcessor):
             and approvals
             and "approvals_before_merge" in approvals
         ):
-            cli_ui.debug(f"Setting approvers...")
+            verbose(f"Setting approvers...")
 
             # in pre-12.3 API approvers (users and groups) were configured under the same endpoint as approvals settings
             approvals_settings = self.gitlab.get_approvals_settings(project_and_group)
@@ -41,7 +41,7 @@ class MergeRequestsProcessor(AbstractProcessor):
             ):
                 # /approvers endpoint has been removed in 13.11.x GitLab version
                 if LooseVersion(self.gitlab.version) < LooseVersion("13.11"):
-                    logging.debug("Deleting legacy approvers setup")
+                    debug("Deleting legacy approvers setup")
                     self.gitlab.delete_legacy_approvers(project_and_group)
 
             approval_rule_name = "Approvers (configured using GitLabForm)"
@@ -54,9 +54,7 @@ class MergeRequestsProcessor(AbstractProcessor):
                     approval_rule_id = rule["id"]
                 else:
                     if remove_other_approval_rules:
-                        logging.debug(
-                            "Deleting extra approval rule '%s'" % rule["name"]
-                        )
+                        debug("Deleting extra approval rule '%s'" % rule["name"])
                         self.gitlab.delete_approvals_rule(project_and_group, rule["id"])
 
             if not approvers:
@@ -66,7 +64,7 @@ class MergeRequestsProcessor(AbstractProcessor):
 
             if approval_rule_id:
                 # the rule exists, needs an update
-                cli_ui.debug(
+                verbose(
                     f"Updating approvers rule to users {approvers} and groups {approver_groups}"
                 )
                 self.gitlab.update_approval_rule(
@@ -79,7 +77,7 @@ class MergeRequestsProcessor(AbstractProcessor):
                 )
             else:
                 # the rule does not exist yet, let's create it
-                cli_ui.debug(
+                verbose(
                     f"Creating approvers rule to users {approvers} and groups {approver_groups}"
                 )
                 self.gitlab.create_approval_rule(

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-import cli_ui
+from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
 from gitlabform.output import EffectiveConfiguration
@@ -22,27 +22,29 @@ class AbstractProcessor(ABC):
     ):
         if self.configuration_name in configuration:
             if configuration.get(f"{self.configuration_name}|skip"):
-                cli_ui.debug(
-                    f"Skipping {self.configuration_name} - explicitly configured to do so."
+                verbose(
+                    f"Skipping section '{self.configuration_name}' - explicitly configured to do so."
                 )
                 return
             elif (
                 configuration.get("project|archive")
                 and self.configuration_name != "project"
             ):
-                cli_ui.debug(
-                    f"Skipping {self.configuration_name} - it is configured to be archived."
+                verbose(
+                    f"Skipping section '{self.configuration_name}' - it is configured to be archived."
                 )
                 return
 
             if dry_run:
-                cli_ui.debug(f"Processing {self.configuration_name} in dry-run mode.")
+                verbose(
+                    f"Processing section '{self.configuration_name}' in dry-run mode."
+                )
                 self._print_diff(
                     project_or_project_and_group,
                     configuration.get(self.configuration_name),
                 )
             else:
-                cli_ui.debug(f"Processing {self.configuration_name}")
+                verbose(f"Processing section '{self.configuration_name}'")
                 self._process_configuration(project_or_project_and_group, configuration)
 
             effective_configuration.add_configuration(
@@ -51,7 +53,7 @@ class AbstractProcessor(ABC):
                 configuration.get(self.configuration_name),
             )
         else:
-            cli_ui.debug(f"Skipping {self.configuration_name} - not in config.")
+            verbose(f"Skipping section '{self.configuration_name}' - not in config.")
 
     @abstractmethod
     def _process_configuration(
@@ -60,6 +62,4 @@ class AbstractProcessor(ABC):
         pass
 
     def _print_diff(self, project_or_project_and_group: str, configuration_to_process):
-        cli_ui.debug(
-            f"Diffing for {self.configuration_name} section is not supported yet"
-        )
+        verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")

@@ -1,11 +1,8 @@
-import logging
-import cli_ui
+from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration.core import KeyNotFoundException
 from gitlabform.configuration.projects_and_groups import ConfigurationProjectsAndGroups
-
-logger = logging.getLogger(__name__)
 
 
 class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGroups):
@@ -44,7 +41,7 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
         :return: if project is defined in the key with projects to skip,
                  ignoring the case
         """
-        return self.is_in_array_case_insensitively(
+        return self.is_skipped_case_insensitively(
             self.get("skip_projects", []), project
         )
 
@@ -53,7 +50,7 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
         :return: if group is defined in the key with groups to skip,
                  ignoring the case
         """
-        return self.is_in_array_case_insensitively(self.get("skip_groups", []), group)
+        return self.is_skipped_case_insensitively(self.get("skip_groups", []), group)
 
     @staticmethod
     def get_case_insensitively(a_dict: dict, a_key: str):
@@ -63,10 +60,25 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
         raise KeyNotFoundException()
 
     @staticmethod
-    def is_in_array_case_insensitively(an_array: list, element: str):
+    def is_skipped_case_insensitively(an_array: list, item: str) -> bool:
+        """
+        :return: if item is defined in the list to be skipped
+        """
+        item = item.lower()
+
         for list_element in an_array:
-            if list_element.lower() == element.lower():
+            list_element = list_element.lower()
+
+            if list_element == item:
                 return True
+
+            if (
+                list_element.endswith("/*")
+                and item.startswith(list_element[:-2])
+                and len(item) >= len(list_element[:-2])
+            ):
+                return True
+
         return False
 
     def find_almost_duplicates(self):
@@ -85,7 +97,7 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
             if self.get(path, 0):
                 almost_duplicates = self._find_almost_duplicates(path)
                 if almost_duplicates:
-                    cli_ui.fatal(
+                    fatal(
                         f"There are almost duplicates in the keys of {path} - they differ only in case.\n"
                         f"They are: {', '.join(almost_duplicates)}\n"
                         f"This is not allowed as we ignore the case for group and project names.",

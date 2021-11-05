@@ -1,4 +1,4 @@
-import logging
+from logging import debug
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -17,7 +17,7 @@ class GroupSharedWithProcessor(AbstractProcessor):
         groups_before = self.gitlab.get_group_case_insensitive(group)[
             "shared_with_groups"
         ]
-        logging.debug("Group shared with BEFORE: %s", groups_before)
+        debug("Group shared with BEFORE: %s", groups_before)
 
         groups_before_by_group_path = dict()
         for share_details in groups_before:
@@ -50,12 +50,12 @@ class GroupSharedWithProcessor(AbstractProcessor):
                     group_access_before == group_access_to_set
                     and expires_at_before == expires_at_to_set
                 ):
-                    logging.debug(
+                    debug(
                         "Nothing to change for group '%s' - same config now as to set.",
                         share_with_group_path,
                     )
                 else:
-                    logging.debug(
+                    debug(
                         "Re-adding group '%s' to change their access level or expires at.",
                         share_with_group_path,
                     )
@@ -70,7 +70,7 @@ class GroupSharedWithProcessor(AbstractProcessor):
                     )
 
             else:
-                logging.debug(
+                debug(
                     "Adding group '%s' who previously was not a member.",
                     share_with_group_path,
                 )
@@ -84,14 +84,12 @@ class GroupSharedWithProcessor(AbstractProcessor):
                 groups_to_set_by_group_path
             )
             for group_path in groups_not_configured:
-                logging.debug(
+                debug(
                     "Removing group '%s' who is not configured to be a member.",
                     group_path,
                 )
                 self.gitlab.remove_share_from_group(group, group_path)
         else:
-            logging.debug("Not enforcing group members.")
+            debug("Not enforcing group members.")
 
-        logging.debug(
-            "Group shared with AFTER: %s", self.gitlab.get_group_members(group)
-        )
+        debug("Group shared with AFTER: %s", self.gitlab.get_group_members(group))

@@ -1,6 +1,5 @@
-import logging
-
-import cli_ui
+from logging import debug
+from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -13,13 +12,13 @@ class ProjectSettingsProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project_settings = configuration["project_settings"]
-        logging.debug(
+        debug(
             "Project settings BEFORE: %s",
             self.gitlab.get_project_settings(project_and_group),
         )
-        cli_ui.debug(f"Setting project settings: {project_settings}")
+        verbose(f"Setting project settings: {project_settings}")
         self.gitlab.put_project_settings(project_and_group, project_settings)
-        logging.debug(
+        debug(
             "Project settings AFTER: %s",
             self.gitlab.get_project_settings(project_and_group),
         )

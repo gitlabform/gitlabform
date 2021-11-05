@@ -1,7 +1,7 @@
 import json
-import logging
+from logging import debug
+from cli_ui import debug as verbose
 
-import cli_ui
 import pkg_resources
 import requests
 import os
@@ -52,7 +52,7 @@ class GitLabCore:
 
         try:
             version = self._make_requests_to_api("version")
-            cli_ui.debug(
+            verbose(
                 f"Connected to GitLab version: {version['version']} ({version['revision']})"
             )
             self.version = version["version"]
@@ -90,6 +90,10 @@ class GitLabCore:
         # This is a NEW workaround for https://github.com/gitlabhq/gitlabhq/issues/8290
         result = self.get_project(project_and_group)
         return str(result["id"])
+
+    def has_no_license(self):
+        license = self._make_requests_to_api("license")
+        return not license or license["expired"]
 
     def _make_requests_to_api(
         self,
@@ -186,7 +190,7 @@ class GitLabCore:
             + "/api/v4/"
             + self._format_with_url_encoding(path_as_format_string, args)
         )
-        logging.debug(
+        debug(
             "url = %s , method = %s , data = %s, json = %s",
             url,
             method,
@@ -203,13 +207,13 @@ class GitLabCore:
             )
         else:
             response = self.session.request(method, url, timeout=self.timeout)
-        logging.debug("response code=%s" % response.status_code)
+        debug("response code=%s" % response.status_code)
 
         if response.status_code in expected_codes:
             # if we accept error responses then they will likely not contain a JSON body
             # so fake it to fix further calls to response.json()
             if response.status_code == 204 or (400 <= response.status_code <= 499):
-                logging.debug("faking response body to be {}")
+                debug("faking response body to be {}")
                 response.json = lambda: {}
         else:
             if response.status_code == 404:
@@ -221,11 +225,12 @@ class GitLabCore:
                 raise UnexpectedResponseException(
                     f"Request url='{url}', method={method}, {data_output} failed -"
                     f" expected code(s) {str(expected_codes)},"
-                    f" got code {response.status_code} & body: '{response.content}'",
+                    f" got code {response.status_code} & body: '{response.text}'",
                     response.status_code,
+                    response.text,
                 )
 
-        logging.debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
+        debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
         return response
 
     @staticmethod
@@ -275,9 +280,10 @@ class InvalidParametersException(Exception):
 
 
 class UnexpectedResponseException(Exception):
-    def __init__(self, message, status_code):
-        self.message = message
-        self.status_code = status_code
+    def __init__(self, message: str, response_status_code: int, response_text: str):
+        self.message: str = message
+        self.response_status_code: int = response_status_code
+        self.response_text: str = response_text
 
     def __str__(self):
         return self.message

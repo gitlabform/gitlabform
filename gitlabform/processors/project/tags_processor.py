@@ -1,6 +1,5 @@
-import logging
-
-import cli_ui
+from logging import debug
+from cli_ui import warning, fatal
 
 from gitlabform import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
@@ -22,7 +21,7 @@ class TagsProcessor(AbstractProcessor):
                         if "create_access_level" in configuration["tags"][tag]
                         else None
                     )
-                    logging.debug("Setting tag '%s' as *protected*", tag)
+                    debug("Setting tag '%s' as *protected*", tag)
                     try:
                         # try to unprotect first
                         self.gitlab.unprotect_tag(project_and_group, tag)
@@ -30,14 +29,14 @@ class TagsProcessor(AbstractProcessor):
                         pass
                     self.gitlab.protect_tag(project_and_group, tag, create_access_level)
                 else:
-                    logging.debug("Setting tag '%s' as *unprotected*", tag)
+                    debug("Setting tag '%s' as *unprotected*", tag)
                     self.gitlab.unprotect_tag(project_and_group, tag)
             except NotFoundException:
                 message = f"Tag '{tag}' not found when trying to set it as protected/unprotected!"
                 if self.strict:
-                    cli_ui.fatal(
+                    fatal(
                         message,
                         exit_code=EXIT_PROCESSING_ERROR,
                     )
                 else:
-                    cli_ui.warning(message)
+                    warning(message)

@@ -1,6 +1,5 @@
-import logging
-
-import cli_ui
+from logging import debug
+from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -14,14 +13,14 @@ class ProjectPushRulesProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         push_rules = configuration["project_push_rules"]
         old_project_push_rules = self.gitlab.get_project_push_rules(project_and_group)
-        logging.debug("Project push rules settings BEFORE: %s", old_project_push_rules)
+        debug("Project push rules settings BEFORE: %s", old_project_push_rules)
         if old_project_push_rules:
-            cli_ui.debug(f"Updating project push rules: {push_rules}")
+            verbose(f"Updating project push rules: {push_rules}")
             self.gitlab.put_project_push_rules(project_and_group, push_rules)
         else:
-            cli_ui.debug(f"Creating project push rules: {push_rules}")
+            verbose(f"Creating project push rules: {push_rules}")
             self.gitlab.post_project_push_rules(project_and_group, push_rules)
-        logging.debug(
+        debug(
             "Project push rules AFTER: %s",
             self.gitlab.get_project_push_rules(project_and_group),
         )

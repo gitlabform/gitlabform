@@ -84,6 +84,7 @@ class TestGroupBadges:
         assert badges[0]["link_url"].endswith("bar")
 
     def test__badges_update_choose_the_right_one(self, gitlab, group):
+
         config = f"""
         projects_and_groups:
           {group}/*:

@@ -77,6 +77,9 @@ class TestGroupSharedWith:
         shared_with = gitlab.get_group_shared_with(group)
         assert len(shared_with) == 1
 
+        # test second run (issue #236)
+        run_gitlabform(add_shared_with, group)
+
     def test__remove_group(self, gitlab, group, users, groups, one_owner):
 
         gitlab.add_share_to_group(group, groups[0], AccessLevel.OWNER.value)

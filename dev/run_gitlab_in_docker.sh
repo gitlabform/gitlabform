@@ -48,23 +48,36 @@ if [[ -n $existing_gitlab_container_id ]] ; then
   docker rm "$existing_gitlab_container_id"
 fi
 
-mkdir -p $repo_root_directory/config
-if [[ -f Gitlab.gitlab-license ]] ; then
-  cecho b "EE license file found - using it..."
-  cp Gitlab.gitlab-license $repo_root_directory/config/
+gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'password'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;"
+if [[ -f Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
+
+  mkdir -p $repo_root_directory/config
+  rm -rf $repo_root_directory/config/*
+
+  if [[ -f Gitlab.gitlab-license ]]; then
+    cecho b "EE license file found - using it..."
+    cp Gitlab.gitlab-license $repo_root_directory/config/
+  else
+    cecho b "EE license env variable found - using it..."
+    echo "$GITLAB_EE_LICENSE" | base64 -d > $repo_root_directory/config/Gitlab.gitlab-license
+  fi
+
+  gitlab_omnibus_config="$gitlab_omnibus_config gitlab_rails['initial_license_file'] = '/etc/gitlab/Gitlab.gitlab-license';"
+  config_volume="--volume $repo_root_directory/config:/etc/gitlab"
+else
+  config_volume=""
 fi
-mkdir -p $repo_root_directory/logs
-mkdir -p $repo_root_directory/data
 
 cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
 container_id=$(docker run --detach \
     --hostname gitlab.foobar.com \
-    --env GITLAB_OMNIBUS_CONFIG="gitlab_rails['initial_root_password'] = 'password'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;" \
+    --env GITLAB_OMNIBUS_CONFIG="$gitlab_omnibus_config" \
     --publish 443:443 --publish 80:80 --publish 2022:22 \
     --name gitlab \
     --restart always \
     --volume "$repo_root_directory/dev/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
+    $config_volume \
     --health-cmd '/healthcheck-and-setup.sh' \
     --health-interval 2s \
     --health-timeout 2m \

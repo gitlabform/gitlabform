@@ -4,8 +4,7 @@ from tests.acceptance import (
 
 
 class TestArchiveProject:
-    def test__archive_project(self, gitlab, group, project):
-        group_and_project = f"{group}/{project}"
+    def test__archive_project(self, gitlab, group_and_project):
 
         config = f"""
         projects_and_groups:
@@ -18,8 +17,9 @@ class TestArchiveProject:
         project = gitlab.get_project(group_and_project)
         assert project["archived"] is True
 
-    def test__unarchive_project(self, gitlab, group, project):
-        group_and_project = f"{group}/{project}"
+    def test__unarchive_project(
+        self, gitlab, group_and_project, other_group, other_project
+    ):
 
         archive_project = f"""
         projects_and_groups:
@@ -28,6 +28,10 @@ class TestArchiveProject:
               archive: true
         """
 
+        run_gitlabform(archive_project, group_and_project)
+        project = gitlab.get_project(group_and_project)
+        assert project["archived"] is True
+
         unarchive_project = f"""
         projects_and_groups:
           {group_and_project}:
@@ -35,11 +39,18 @@ class TestArchiveProject:
               archive: false
         """
 
-        run_gitlabform(archive_project, group_and_project)
+        # 1. if you run gitlabform ALL, but without '--include-archived-projects',
+        # then nothing will happen here as the archived project will be omitted when in
+        # the effective list of groups and projects
+
+        run_gitlabform(unarchive_project, "ALL", False)
         project = gitlab.get_project(group_and_project)
         assert project["archived"] is True
 
-        run_gitlabform(unarchive_project, group_and_project)
+        # 2. only after you run gitlabform ALL, with '--include-archived-projects'
+        # (OR pointing to it that project)
+        # the target project will be unarchived
+        run_gitlabform(unarchive_project, "ALL")
         project = gitlab.get_project(group_and_project)
         assert project["archived"] is False
 

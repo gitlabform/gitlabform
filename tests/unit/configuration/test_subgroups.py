@@ -1,8 +1,7 @@
 import logging
-
 import pytest
 
-from gitlabform.configuration.projects_and_groups import ConfigurationProjectsAndGroups
+from gitlabform.configuration import Configuration
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ def configuration_with_subgroups_and_projects():
             b:
               bar: something_else3
     """
-    return ConfigurationProjectsAndGroups(config_string=config_yaml)
+    return Configuration(config_string=config_yaml)
 
 
 @pytest.fixture
@@ -74,7 +73,7 @@ def configuration_with_subgroups():
             access_level: 20
         enforce_group_members: true
     """
-    return ConfigurationProjectsAndGroups(config_string=config_yaml)
+    return Configuration(config_string=config_yaml)
 
 
 def test__get_effective_config_for_project__project_from_config__level1(

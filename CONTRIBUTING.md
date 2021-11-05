@@ -92,13 +92,18 @@ against a disposable GitLab instance running as a Docker container OR use your o
 
 ##### Running acceptance tests using GitLab instance in Docker
 
-1. Run below commands to start GitLab in a container. Note that it may take a few minutes!
+1. (optional) If you have it, put your GitLab license into the `Gitlab.gitlab-license` file. According to the license
+agreement (as of now and IANAL) you are allowed to use it for testing and development purposes such as this. This will
+make the following script use it to be able to test Premium (paid) features. Of course this license will not leave your
+machine.
+
+2. Run below commands to start GitLab in a container. Note that it may take a few minutes!
 
 ```
 ./dev/run_gitlab_in_docker.sh
 ```
 
-2. Run `pytest tests/acceptance` to start all tests.
+3. Run `pytest tests/acceptance` to start all tests.
 To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
 
 ##### Running acceptance tests using your own GitLab instance

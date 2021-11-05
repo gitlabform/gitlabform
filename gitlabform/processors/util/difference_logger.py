@@ -2,7 +2,7 @@ import hashlib
 import json
 from itertools import starmap
 
-import cli_ui
+from cli_ui import debug as verbose
 
 
 # Simple function to create strings for values which should be hidden
@@ -68,4 +68,4 @@ class DifferenceLogger(object):
         if test:
             return text
         else:
-            cli_ui.debug(text)
+            verbose(text)
