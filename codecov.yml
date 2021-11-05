@@ -6,6 +6,7 @@ codecov:
 # adding Flags to your `layout` configuration to show up in the PR comment
 comment:
   layout: "reach, diff, flags, files"
+  show_carryforward_flags: true
 
 coverage:
   status:
@@ -13,13 +14,16 @@ coverage:
       default:
         target: 70% # overall project coverage
       premium_features:
-        target: 40%
+        target: 60%
         flags:
           - premium
 
 flags:
-  premium:
+  premium_features:
     paths:
       - gitlabform/processors/util/branch_protector.py
       - gitlabform/processors/project/project_push_rules_processor.py
+      - gitlabform/gitlab/projects.py
+      - gitlabform/gitlab/branches.py
+      - gitlabform/gitlab/core.py
     carryforward: true
