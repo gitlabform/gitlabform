@@ -91,6 +91,10 @@ class GitLabCore:
         result = self.get_project(project_and_group)
         return str(result["id"])
 
+    def has_no_license(self):
+        license = self._make_requests_to_api("license")
+        return not license or license["expired"]
+
     def _make_requests_to_api(
         self,
         path_as_format_string,
@@ -221,8 +225,9 @@ class GitLabCore:
                 raise UnexpectedResponseException(
                     f"Request url='{url}', method={method}, {data_output} failed -"
                     f" expected code(s) {str(expected_codes)},"
-                    f" got code {response.status_code} & body: '{response.content}'",
+                    f" got code {response.status_code} & body: '{response.text}'",
                     response.status_code,
+                    response.text,
                 )
 
         debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
@@ -275,9 +280,10 @@ class InvalidParametersException(Exception):
 
 
 class UnexpectedResponseException(Exception):
-    def __init__(self, message, status_code):
-        self.message = message
-        self.status_code = status_code
+    def __init__(self, message: str, response_status_code: int, response_text: str):
+        self.message: str = message
+        self.response_status_code: int = response_status_code
+        self.response_text: str = response_text
 
     def __str__(self):
         return self.message

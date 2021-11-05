@@ -22,40 +22,22 @@ class GitLabBranches(GitLabCore):
         )
 
     # new API
-    def branch_access_level(
-        self,
-        project_and_group_name,
-        branch,
-        push_access_level,
-        merge_access_level,
-        unprotect_access_level,
-    ):
+    def branch_access_level(self, project_and_group_name, branch, protect_settings):
 
         url = "projects/%s/protected_branches?name=%s"
         parameters_list = [
             project_and_group_name,
             branch,
         ]
-        if push_access_level is not None:
-            url += "&push_access_level=%s"
-            parameters_list.append(push_access_level)
-        if merge_access_level is not None:
-            url += "&merge_access_level=%s"
-            parameters_list.append(merge_access_level)
-        if unprotect_access_level is not None:
-            url += "&unprotect_access_level=%s"
-            parameters_list.append(unprotect_access_level)
-
         return self._make_requests_to_api(
             url,
             tuple(parameters_list),
             method="POST",
-            data={},
             expected_codes=[
                 200,
                 201,
-                409,
-            ],  # TODO: check why is 409 Conflict accepted here :/
+            ],
+            json=protect_settings,
         )
 
     def branch_code_owner_approval_required(
@@ -118,24 +100,35 @@ class GitLabBranches(GitLabCore):
             "projects/%s/protected_branches/%s", (project_and_group_name, branch)
         )
 
+    def get_user_to_protect_branch(self, user_name):
+        return self._get_user_id(user_name)
+
     def get_only_branch_access_levels(self, project_and_group_name, branch):
         try:
             result = self._make_requests_to_api(
                 "projects/%s/protected_branches/%s", (project_and_group_name, branch)
             )
-            push_access_levels = None
-            merge_access_level = None
+
+            push_access_levels = set()
+            merge_access_levels = set()
+            push_access_user_ids = set()
+            merge_access_user_ids = set()
             unprotect_access_level = None
-            if (
-                "push_access_levels" in result
-                and len(result["push_access_levels"]) == 1
-            ):
-                push_access_levels = result["push_access_levels"][0]["access_level"]
-            if (
-                "merge_access_levels" in result
-                and len(result["merge_access_levels"]) == 1
-            ):
-                merge_access_level = result["merge_access_levels"][0]["access_level"]
+
+            if "push_access_levels" in result:
+                for push_access in result["push_access_levels"]:
+                    if not push_access["user_id"]:
+                        push_access_levels.add(push_access["access_level"])
+                    else:
+                        push_access_user_ids.add(push_access["user_id"])
+
+            if "merge_access_levels" in result:
+                for merge_access in result["merge_access_levels"]:
+                    if not merge_access["user_id"]:
+                        merge_access_levels.add(merge_access["access_level"])
+                    else:
+                        merge_access_user_ids.add(merge_access["user_id"])
+
             if (
                 "unprotect_access_levels" in result
                 and len(result["unprotect_access_levels"]) == 1
@@ -143,9 +136,16 @@ class GitLabBranches(GitLabCore):
                 unprotect_access_level = result["unprotect_access_levels"][0][
                     "access_level"
                 ]
-            return push_access_levels, merge_access_level, unprotect_access_level
+
+            return (
+                sorted(push_access_levels),
+                sorted(merge_access_levels),
+                sorted(push_access_user_ids),
+                sorted(merge_access_user_ids),
+                unprotect_access_level,
+            )
         except NotFoundException:
-            return None, None, None
+            return None, None, None, None, None
 
     def create_branch(
         self, project_and_group_name, new_branch_name, create_branch_from_ref

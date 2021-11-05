@@ -1,4 +1,3 @@
-from logging import debug
 from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
@@ -42,7 +41,7 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
         :return: if project is defined in the key with projects to skip,
                  ignoring the case
         """
-        return self.is_in_array_case_insensitively(
+        return self.is_skipped_case_insensitively(
             self.get("skip_projects", []), project
         )
 
@@ -51,7 +50,7 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
         :return: if group is defined in the key with groups to skip,
                  ignoring the case
         """
-        return self.is_in_array_case_insensitively(self.get("skip_groups", []), group)
+        return self.is_skipped_case_insensitively(self.get("skip_groups", []), group)
 
     @staticmethod
     def get_case_insensitively(a_dict: dict, a_key: str):
@@ -61,10 +60,25 @@ class ConfigurationCaseInsensitiveProjectsAndGroups(ConfigurationProjectsAndGrou
         raise KeyNotFoundException()
 
     @staticmethod
-    def is_in_array_case_insensitively(an_array: list, element: str):
+    def is_skipped_case_insensitively(an_array: list, item: str) -> bool:
+        """
+        :return: if item is defined in the list to be skipped
+        """
+        item = item.lower()
+
         for list_element in an_array:
-            if list_element.lower() == element.lower():
+            list_element = list_element.lower()
+
+            if list_element == item:
                 return True
+
+            if (
+                list_element.endswith("/*")
+                and item.startswith(list_element[:-2])
+                and len(item) >= len(list_element[:-2])
+            ):
+                return True
+
         return False
 
     def find_almost_duplicates(self):

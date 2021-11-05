@@ -2,7 +2,7 @@ from typing import List
 
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
-from gitlabform.output import EffectiveConfiguration
+from gitlabform.processors import AbstractProcessors
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.project.badges_processor import BadgesProcessor
 from gitlabform.processors.project.branches_processor import (
@@ -36,8 +36,9 @@ from gitlabform.processors.project.services_processor import (
 from gitlabform.processors.project.tags_processor import TagsProcessor
 
 
-class ProjectProcessors(object):
+class ProjectProcessors(AbstractProcessors):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
+        super().__init__(gitlab, config, strict)
         self.processors: List[AbstractProcessor] = [
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab),
@@ -54,18 +55,3 @@ class ProjectProcessors(object):
             SchedulesProcessor(gitlab),
             BadgesProcessor(gitlab),
         ]
-
-    def get_configuration_names(self):
-        return [processor.configuration_name for processor in self.processors]
-
-    def process_project(
-        self,
-        project_and_group: str,
-        configuration: dict,
-        dry_run: bool,
-        effective_configuration: EffectiveConfiguration,
-    ):
-        for processor in self.processors:
-            processor.process(
-                project_and_group, configuration, dry_run, effective_configuration
-            )

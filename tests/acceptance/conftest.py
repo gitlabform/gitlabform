@@ -19,6 +19,11 @@ def gitlab():
 
 
 @pytest.fixture(scope="class")
+def group_and_project(group, project):
+    return f"{group}/{project}"
+
+
+@pytest.fixture(scope="class")
 def group():
     group_name = get_random_name()
     create_group(group_name)

@@ -1,10 +1,21 @@
 import codecs
 import os
-
+import re
 from setuptools import setup, find_packages
 
 with codecs.open("README.md", encoding="utf-8") as f:
-    README = f.read()
+    readme = f.read()
+
+# ToC doesn't work when viewed in PyPI :(
+# it also contains link to changelog which for PyPI is added to the end of the readme
+# so let's remove the ToC here
+regexp = re.compile(r"## Table of Contents(.*)## Features", re.MULTILINE + re.DOTALL)
+readme = re.sub(regexp, "## Features", readme)
+
+with codecs.open("CHANGELOG.md", encoding="utf-8") as f:
+    changelog = f.read()
+
+long_description = readme + "\n" + changelog
 
 
 def get_version_file_path():
@@ -20,7 +31,7 @@ setup(
     version=open(get_version_file_path()).read(),
     description='Specialized "configuration as a code" tool for GitLab projects, groups and more'
     " using hierarchical configuration written in YAML",
-    long_description=README,
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/egnyte/gitlabform",
     author="Egnyte and GitHub Contributors",
@@ -46,10 +57,10 @@ setup(
         "requests==2.26.0",
         "Jinja2==2.11.3",
         "MarkupSafe==1.1.1",
-        "PyYAML==5.4.1",
+        "PyYAML==6.0",
         "luddite==1.0.2",
-        "cli-ui==0.15.1",
-        "packaging==21.0",
+        "cli-ui==0.15.2",
+        "packaging==21.2",
         "mergedeep==1.3.4",
     ],
     extras_require={
@@ -57,8 +68,8 @@ setup(
             "pytest==6.2.5",
             "xkcdpass==1.19.3",
             "pre-commit==2.15.0",  # not really for tests, but for development
-            "coverage==5.5",
-            "pytest-cov==2.12.1",
+            "coverage==6.0.2",
+            "pytest-cov==3.0.0",
         ],
     },
     entry_points={

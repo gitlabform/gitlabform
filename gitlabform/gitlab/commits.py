@@ -29,17 +29,15 @@ class GitLabCommits(GitLabCore):
 
         return ahead, behind
 
-    def get_last_commit_attributes(self, project_and_group_name, branch):
+    def get_last_commit(self, project_and_group_name, branch_name):
         branch = self._make_requests_to_api(
-            "projects/%s/repository/branches/%s", (project_and_group_name, branch)
+            "projects/%s/repository/branches/%s", (project_and_group_name, branch_name)
         )
-
         last_commit_hash = branch["commit"]["id"]
+        return self.get_commit(project_and_group_name, last_commit_hash)
 
-        commit = self._make_requests_to_api(
-            "projects/%s/repository/commits/%s",
-            (project_and_group_name, last_commit_hash),
-        )
+    def get_last_commit_attributes(self, project_and_group_name, branch):
+        commit = self.get_last_commit(project_and_group_name, branch)
 
         # we want to read git's *commit date* instead of *author date*, so that "touching" the branch will invalidate
         # its "getting older" counter

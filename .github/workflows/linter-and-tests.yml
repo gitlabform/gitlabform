@@ -1,11 +1,16 @@
 name: Linter and tests
 
+# trigger only on pushes to main OR PRs to main
+# to prevent double tests on my own
+# PRs within egnyte/gitlabform repo from a feature
+# branch to main
 on:
   push:
     branches:
-      - '**'
+      - main
   pull_request:
-    types: [opened]
+    branches:
+      - main
 
 jobs:
   black-formatting:
@@ -23,7 +28,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10-dev]
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
       fail-fast : false
     steps:
       - uses: actions/checkout@v2
@@ -50,7 +55,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10-dev]
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
       fail-fast : false
     steps:
       - uses: actions/checkout@v2

@@ -1,0 +1,29 @@
+codecov:
+  notify:
+    # 5 unit tests + at least one acceptance test
+    after_n_builds: 6
+
+# adding Flags to your `layout` configuration to show up in the PR comment
+comment:
+  layout: "reach, diff, flags, files"
+  show_carryforward_flags: true
+
+coverage:
+  status:
+    project:
+      default:
+        target: 70% # overall project coverage
+      premium_features:
+        target: 60%
+        flags:
+          - premium
+
+flags:
+  premium_features:
+    paths:
+      - gitlabform/processors/util/branch_protector.py
+      - gitlabform/processors/project/project_push_rules_processor.py
+      - gitlabform/gitlab/projects.py
+      - gitlabform/gitlab/branches.py
+      - gitlabform/gitlab/core.py
+    carryforward: true

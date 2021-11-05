@@ -12,10 +12,6 @@
 GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
 
-## ✨ Version 2 has been released! ✨
-
-Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGELOG.md#200) for a complete list of new features and bug fixes in this release.
-
 ## Table of Contents
 
 * What you get? - [Features](#features) (with [Comparison to similar apps](#comparison-to-similar-apps) and [Limitations](#limitations))
@@ -24,7 +20,8 @@ Please see the [changelog](https://github.com/egnyte/gitlabform/blob/main/CHANGE
   [More cli usage examples](#more-cli-usage-examples),
   [Running in an automated pipeline](#running-in-an-automated-pipeline),
   [Running automatically for new projects](#running-automatically-for-new-projects),
-* Join us! - [Contributing](#contributing), [History](#history), [Legal](#legal)
+* History - [Changelog (external file)](https://github.com/egnyte/gitlabform/blob/main/CHANGELOG.md), [Origins](#origins)
+* Join us! - [Contributing](#contributing), [Legal](#legal),
 
 ## Features
 
@@ -41,7 +38,9 @@ GitLabForm enables you to manage:
 * Project:
   * Archive/unarchive,
   * Badges,
-  * Branches {protect/unprotect},
+  * Protected branches:
+    * access levels (roles) allowed to push/merge/unprotect, allow force push flag,
+    * users/groups allowed to push/merge/unprotect, code owner approval required flag (**GitLab Premium (paid) only**),
   * Deployment keys,
   * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
   * Hooks,
@@ -190,7 +189,7 @@ build it, run the tests and learn about the code guidelines.
 For detailed info about how the app code has been organized, where is what and where and how to fix bugs and/or
 add new features, please see the [implementation design](https://github.com/egnyte/gitlabform/blob/main/docs/IMPLEMENTATION_DESIGN.md) article.
 
-## History
+## Origins
 
 This tool has been originally created as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890)
 but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729)

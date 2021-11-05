@@ -7,12 +7,15 @@ from gitlabform.gitlab.core import NotFoundException
 
 
 class BranchProtector(object):
-
     old_api_keys = ["developers_can_push", "developers_can_merge"]
     new_api_keys = [
         "push_access_level",
         "merge_access_level",
         "unprotect_access_level",
+    ]
+    extra_param_keys = [
+        "allowed_to_push",
+        "allowed_to_merge",
     ]
 
     def __init__(self, gitlab: GitLab, strict: bool):
@@ -55,6 +58,26 @@ class BranchProtector(object):
                 )
 
             elif config_type == "new":
+                # when configuration contains at least one of allowed_to_push and allowed_to_merge
+                if any(
+                    extra_key in requested_configuration
+                    for extra_key in self.extra_param_keys
+                ):
+                    for extra_param_key in self.extra_param_keys:
+                        # check if an extra_param is in config and it contain user parameter
+                        if extra_param_key in requested_configuration and any(
+                            "user" in d
+                            for d in requested_configuration[extra_param_key]
+                        ):
+                            for extra_config in requested_configuration[
+                                extra_param_key
+                            ]:
+                                # loop over the array of extra param and get the user_id related to user
+                                if "user" in extra_config.keys():
+                                    user_id = self.gitlab.get_user_to_protect_branch(
+                                        extra_config.pop("user")
+                                    )
+                                    extra_config["user_id"] = user_id
 
                 if self.configuration_update_needed(
                     requested_configuration, project_and_group, branch
@@ -64,7 +87,8 @@ class BranchProtector(object):
                     )
                 else:
                     debug(
-                        "Skipping set branch '%s' access levels because they're already set"
+                        "Skipping setting branch '%s' protection configuration because it's already as requested.",
+                        branch,
                     )
 
             if "code_owner_approval_required" in requested_configuration:
@@ -86,13 +110,6 @@ class BranchProtector(object):
     def unprotect_branch(self, project_and_group, branch):
         try:
             debug("Setting branch '%s' as unprotected", branch)
-
-            # we don't know if the old or new API was used to protect
-            # so use both when unprotecting
-
-            # ...except for wildcard branch names - there are not supported by the old API
-            if "*" not in branch:
-                self.gitlab.unprotect_branch(project_and_group, branch)
 
             self.gitlab.unprotect_branch_new_api(project_and_group, branch)
 
@@ -133,7 +150,10 @@ class BranchProtector(object):
         )
         debug("Setting branch '%s' as *protected*", branch)
 
-        # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
+        # Protected Branches API is one of those that do not support editing entities
+        # (PUT is not documented for it, at least). so you need to delete existing
+        # branch protection (DELETE) and recreate it (POST) to perform an update
+        # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
         self.gitlab.unprotect_branch_new_api(project_and_group, branch)
 
         self.gitlab.protect_branch(
@@ -146,15 +166,35 @@ class BranchProtector(object):
     def protect_using_new_api(self, requested_configuration, project_and_group, branch):
         debug("Setting branch '%s' access level", branch)
 
-        # unprotect first to reset 'allowed to merge' and 'allowed to push' fields
+        # Protected Branches API is one of those that do not support editing entities
+        # (PUT is not documented for it, at least). so you need to delete existing
+        # branch protection (DELETE) and recreate it (POST) to perform an update
+        # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
         self.gitlab.unprotect_branch_new_api(project_and_group, branch)
+
+        # replace in our config our custom "user" and "group" entries with supported by
+        # the Protected Branches API "user_id" and "group_id"
+        for extra_param_key in self.extra_param_keys:
+
+            for element in requested_configuration.get(extra_param_key, []):
+
+                if "user" in element.keys():
+                    user_id = self.gitlab._get_user_id(element.pop("user"))
+                    element["user_id"] = user_id
+                elif "group" in element.keys():
+                    group_id = self.gitlab._get_group_id(element.pop("group"))
+                    element["group_id"] = group_id
+
+        protect_rules = {
+            key: value
+            for key, value in requested_configuration.items()
+            if key != "protected"
+        }
 
         self.gitlab.branch_access_level(
             project_and_group,
             branch,
-            requested_configuration.get("push_access_level", None),
-            requested_configuration.get("merge_access_level", None),
-            requested_configuration.get("unprotect_access_level", None),
+            protect_rules,
         )
 
     def set_code_owner_approval_required(
@@ -173,25 +213,180 @@ class BranchProtector(object):
     def configuration_update_needed(
         self, requested_configuration, project_and_group, branch
     ):
+        # get current configuration of branch access level
+        current = self.get_current_branch_configuration(project_and_group, branch)
 
-        requested_push_access_level = requested_configuration.get("push_access_level")
-        requested_merge_access_level = requested_configuration.get("merge_access_level")
-        requested_unprotect_access_level = requested_configuration.get(
-            "unprotect_access_level"
-        )
+        # get requested configuration of branch access level
+        requested = self.get_requested_branch_configuration(requested_configuration)
 
-        (
-            current_push_access_level,
-            current_merge_access_level,
-            current_unprotect_access_level,
-        ) = self.gitlab.get_only_branch_access_levels(project_and_group, branch)
+        debug("Current branch '%s' access levels: %s", branch, current)
+        debug("Requested branch '%s' access levels: %s", branch, requested)
+        return current != requested
+
+    def get_current_branch_configuration(self, project_and_group_name, branch):
+        # from a response for a request to Protected Branches API GET request
+        # (https://docs.gitlab.com/ee/api/protected_branches.html#get-a-single-protected-branch-or-wildcard-protected-branch)
+        # like:
+        #
+        # {
+        #     "id": 1,
+        #     "name": "master",
+        #     "push_access_levels": [
+        #         {
+        #             "access_level": 40,
+        #             "access_level_description": "Maintainers"
+        #         }
+        #     ],
+        #     "merge_access_levels": [
+        #         {
+        #             "access_level": 40,
+        #             "access_level_description": "Maintainers"
+        #         }
+        #     ],
+        #     "allow_force_push":false,
+        #     "code_owner_approval_required": false
+        # }
+        #
+        # ...gets flat tuple of the permissions to perform each kind of 3 actions (push/merge/unprotect) and
+        # the other extra settings that can be applied using Protected Branches API POST request
+        #
+        try:
+            protected_branches_response = self.gitlab.get_branch_access_levels(
+                project_and_group_name, branch
+            )
+
+            return (
+                *(
+                    self.get_current_permissions(protected_branches_response, "push")
+                ),  # tuple of 3
+                *(
+                    self.get_current_permissions(protected_branches_response, "merge")
+                ),  # tuple of 3
+                *(
+                    self.get_current_permissions(
+                        protected_branches_response, "unprotect"
+                    )
+                ),  # tuple of 3
+                protected_branches_response.get("allow_force_push"),
+                # code_owner_approval_required has to use PATCH request, see set_code_owner_approval_required()
+            )
+        except NotFoundException:
+            return tuple([None] * 10)  # = 3 * 3 + 1
+
+    def get_current_permissions(self, protected_branches_response, action):
+        # from a response for a request to Protected Branches API GET request
+        # (https://docs.gitlab.com/ee/api/protected_branches.html#get-a-single-protected-branch-or-wildcard-protected-branch)
+        # like:
+        #
+        # {
+        #     "id": 1,
+        #     "name": "master",
+        #     "push_access_levels": [
+        #         {
+        #             "access_level": 40,
+        #             "access_level_description": "Maintainers"
+        #         }
+        #     ],
+        #     "merge_access_levels": [
+        #         {
+        #             "access_level": 40,
+        #             "access_level_description": "Maintainers"
+        #         }
+        #     ],
+        #     "allow_force_push":false,
+        #     "code_owner_approval_required": false
+        # }
+        #
+        # ...gets a tuple of sorted lists, for a given permission in ["push", "merge", "unprotect"],
+        # for example for "push":
+        #
+        # ([40], [], [])
+        #
+
+        levels = set()
+        user_ids = set()
+        group_ids = set()
+        # we ignore the description
+
+        # we use the safe .get() everywhere below as those elements may not exist
+        for array_element in protected_branches_response.get(
+            f"{action}_access_levels", []
+        ):
+            if array_element.get("access_level"):
+                levels.add(array_element.get("access_level"))
+            elif array_element.get("user_id"):
+                user_ids.add(array_element.get("user_id"))
+            elif array_element.get("group_id"):
+                group_ids.add(array_element.get("group_id"))
+
+        return sorted(levels), sorted(user_ids), sorted(group_ids)
+
+    def get_requested_branch_configuration(self, requested_configuration):
+        # from a configuration entry like:
+        #
+        #   # Allow specific users to push and merge to this branch - *** this syntax requires GitLab Premium (paid) ***
+        #   protected: true
+        #   allowed_to_push:
+        #     - user: jsmith # you can use usernames...
+        #     - user: bdoe
+        #   allowed_to_merge:
+        #     - user_id: 15 # ...or user ids, if you know them
+        #
+        # ...gets a flat tuple exactly like get_current_branch_protection_settings(), so they can be compared.
+        #
 
         return (
-            requested_push_access_level,
-            requested_merge_access_level,
-            requested_unprotect_access_level,
-        ) != (
-            current_push_access_level,
-            current_merge_access_level,
-            current_unprotect_access_level,
+            *(
+                self.get_requested_permissions(requested_configuration, "push")
+            ),  # tuple of 3
+            *(
+                self.get_requested_permissions(requested_configuration, "merge")
+            ),  # tuple of 3
+            *(
+                self.get_requested_permissions(requested_configuration, "unprotect")
+            ),  # tuple of 3
+            requested_configuration.get("allow_force_push", False),
+            # code_owner_approval_required has to use PATCH request, see set_code_owner_approval_required()
         )
+
+    def get_requested_permissions(self, requested_configuration, action):
+        # from a configuration entry like:
+        #
+        #   protected: true
+        #   allowed_to_push:
+        #     - user: jsmith # you can use usernames...
+        #     - user: bdoe
+        #   allowed_to_merge:
+        #     - user_id: 15 # ...or user ids, if you know them
+        #
+        # ...gets a tuple of sorted lists of entities (levels, users, groups) having the permissions
+        # to do the specific action (push/merge/unprotect).
+        #
+        # for example for "push" action for the config above the return value would be:
+        #
+        # ([], [123, 456], [])
+        #
+        # ...where 123, 456 are ids of users jsmith and bdoe
+
+        levels = set()
+        user_ids = set()
+        group_ids = set()
+        # we ignore the description
+
+        if f"{action}_access_level" in requested_configuration:
+            levels.add(requested_configuration.get(f"{action}_access_level"))
+
+        if f"allowed_to_{action}" in requested_configuration:
+            for config in requested_configuration[f"allowed_to_{action}"]:
+                if "access_level" in config:
+                    levels.add(config["access_level"])
+                elif "user_id" in config:
+                    user_ids.add(config["user_id"])
+                elif "user" in config:
+                    user_ids.add(self.gitlab._get_user_id(config["user"]))
+                elif "group_id" in config:
+                    group_ids.add(config["group_id"])
+                elif "group" in config:
+                    group_ids.add(self.gitlab._get_group_id(config["group"]))
+
+        return sorted(levels), sorted(user_ids), sorted(group_ids)

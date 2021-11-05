@@ -1,5 +1,43 @@
 ## Changelog
 
+### 2.7.1
+
+* Speed up running for `ALL_DEFINED`, when the defined groups and projects for just a small part of all the GitLab instance's groups and projects. Additionally **always** show the number of omitted groups and projects for any reasons (no config, archived, skipped). Fixes [#285](https://github.com/egnyte/gitlabform/issues/285).
+
+### 2.7.0
+
+* **Allow processing only requested configuration sections** using a new cli argument `-os / --only-sections`.
+* Minimize the number of unnecessary audit branch unprotect/protect events. Up to now every apply of the `files` section for protected branch resulted in unprotect and then (re)protect event for each protected branches and each file. Now this will only happen when the user running GitLabForm actually needs to do that, which should not happen often if you are using an admin account. Completely fixes [#178](https://github.com/egnyte/gitlabform/issues/178).
+
+### 2.6.0
+
+* **Complete support for Protected branches - access levels / users / groups allowed to push/merge/unprotect** (**GitLab Premium (paid) only**). PR [#289](https://github.com/egnyte/gitlabform/pull/289).
+* **Add option to allow push force in protected branches**. Implements [#227](https://github.com/egnyte/gitlabform/issues/227).
+* Fix a bug causing the app to get HTTP 502 from GitLab when protecting branches in some cases.
+* Fix getting members list to include usernames of all direct members not just the first page. PR [#284](https://github.com/egnyte/gitlabform/pull/284).
+
+Big thanks to the contributors of this release: [@trissanen](https://github.com/trissanen)
+
+### 2.5.0
+
+* **Make commit messages for file operations configurable.** Implements [#278](https://github.com/egnyte/gitlabform/issues/278).
+
+Thanks to [@aleung](https://github.com/aleung) for his contribution!
+
+### 2.4.0
+
+* **Add wildcard support for `skip_groups` and `skip_projects`.** Implements [#275](https://github.com/egnyte/gitlabform/issues/275) and [#276](https://github.com/egnyte/gitlabform/issues/276).
+
+Thanks to [@chris-workingmouse](https://github.com/chris-workingmouse) for his contribution!
+
+### 2.3.0
+
+* **Add Protected branches - users allowed to push/merge** (**GitLab Premium (paid) only**), PR [#273](https://github.com/egnyte/gitlabform/pull/273).
+* For `ALL_DEFINED` also skip archived projects even if they are explicitly defined in the config, unless -a flag is added - for consistency.
+* **For Contributors** Add docs for running the test themselves in a Docker container and for running GitLab in Docker using a license file, for testing paid-only features.
+
+Thanks to [@florentio](https://github.com/florentio), [@barryib](https://github.com/barryib) and [@Pigueiras](https://github.com/Pigueiras) for their contribution!
+
 ### 2.2.0
 
 * **Add LDAP Group Links support** (**GitLab Premium (paid) only**). Implements [#140](https://github.com/egnyte/gitlabform/issues/140).

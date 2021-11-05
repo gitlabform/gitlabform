@@ -5,7 +5,6 @@ import luddite
 import pkg_resources
 from cli_ui import (
     message,
-    debug,
     info,
     info_1,
     error,
@@ -24,7 +23,7 @@ from cli_ui import debug as verbose
 from packaging import version as packaging_version
 from urllib.error import URLError
 
-from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
+from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT, Entities
 
 
 def show_version(skip_version_check: bool):
@@ -89,57 +88,67 @@ def show_version(skip_version_check: bool):
 
 
 def show_header(
-    project_or_group, groups_and_projects_provider, non_empty_configs_provider
+    target,
+    groups_and_projects_provider,
+    non_empty_configs_provider,
 ):
-    if project_or_group == "ALL":
-        info(">>> Processing ALL groups and projects")
-    elif project_or_group == "ALL_DEFINED":
-        info(">>> Processing ALL groups and projects defined in config")
+    if target == "ALL":
+        info(">>> Getting ALL groups and projects...")
+    elif target == "ALL_DEFINED":
+        info(">>> Getting ALL_DEFINED groups and projects...")
+    else:
+        info(">>> Getting requested groups/projects...")
 
-    groups, projects = groups_and_projects_provider.get_groups_and_projects(
-        project_or_group
-    )
+    groups, projects = groups_and_projects_provider.get_groups_and_projects(target)
 
-    if len(groups) == 0 and len(projects) == 0:
+    if len(groups.get_effective()) == 0 and len(projects.get_effective()) == 0:
+        if target == "ALL":
+            error_message = "GitLab has no projects and groups!"
+        elif target == "ALL_DEFINED":
+            error_message = (
+                "Configuration does not have any groups or projects defined!"
+            )
+        else:
+            error_message = f"Project or group {target} cannot be found in GitLab!"
         fatal(
-            f"Entity {project_or_group} cannot be found in GitLab!",
+            error_message,
             exit_code=EXIT_INVALID_INPUT,
         )
 
     (
-        groups_with_non_empty_configs,
-        projects_with_non_empty_configs,
-        groups_with_empty_configs,
-        projects_with_empty_configs,
-    ) = non_empty_configs_provider.get_groups_and_projects_with_non_empty_configs(
+        groups,
+        projects,
+    ) = non_empty_configs_provider.omit_groups_and_projects_with_empty_configs(
         groups, projects
     )
 
-    verbose(f"groups: {groups_with_non_empty_configs}")
-    verbose(
-        f"(groups with empty effective configs that will be skipped: {groups_with_empty_configs})"
-    )
-    verbose(f"projects: {projects_with_non_empty_configs}")
-    verbose(
-        f"(projects with empty effective configs that will be skipped: {projects_with_empty_configs})"
-    )
+    show_input_entities(groups)
+    show_input_entities(projects)
 
-    if len(groups_with_empty_configs) == 0:
-        info_1(f"# of groups to process: {len(groups_with_non_empty_configs)}")
-    else:
-        info_1(
-            f"# of groups to process: {len(groups_with_non_empty_configs)} "
-            f"(# groups with empty effective configs that will be skipped: {len(groups_with_empty_configs)})"
-        )
-    if len(projects_with_empty_configs) == 0:
-        info_1(f"# of projects to process: {len(projects_with_non_empty_configs)}")
-    else:
-        info_1(
-            f"# of projects to process: {len(projects_with_non_empty_configs)} "
-            f"(# projects with empty effective configs that will be skipped: {len(projects_with_empty_configs)})"
-        )
+    return projects.get_effective(), groups.get_effective()
 
-    return projects_with_non_empty_configs, groups_with_non_empty_configs
+
+def show_input_entities(entities: Entities):
+    info_1(f"# of {entities.name} to process: {len(entities.get_effective())}")
+
+    entities_omitted = ""
+    entities_verbose = f"{entities.name}: {entities.get_effective()}"
+    if entities.any_omitted():
+        entities_omitted += f"(# of omitted {entities.name} -"
+        first = True
+        for reason in entities.omitted:
+            if len(entities.omitted[reason]) > 0:
+                if not first:
+                    entities_omitted += ","
+                entities_omitted += f" {reason}: {len(entities.omitted[reason])}"
+                entities_verbose += f"\nomitted {entities.name} - {reason}: {entities.get_omitted(reason)}"
+                first = False
+        entities_omitted += ")"
+
+    if entities_omitted:
+        info_1(entities_omitted)
+
+    verbose(entities_verbose)
 
 
 def show_summary(
