@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from gitlabform.gitlab import AccessLevel
@@ -74,6 +75,30 @@ def no_access_branch(request, gitlab, group_and_project):
     def fin():
         gitlab.unprotect_branch(group_and_project, "no_access_branch")
         gitlab.delete_branch(group_and_project, "no_access_branch")
+
+    request.addfinalizer(fin)
+
+
+@pytest.fixture(scope="class")
+def file(request):
+    f = open("file.txt", "a")
+    f.write("Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁")
+    f.close()
+
+    def fin():
+        os.remove("file.txt")
+
+    request.addfinalizer(fin)
+
+
+@pytest.fixture(scope="class")
+def file2(request):
+    f = open("file2.txt", "a")
+    f.write("LICENSE\n\n“This is a license file”\n")
+    f.close()
+
+    def fin():
+        os.remove("file2.txt")
 
     request.addfinalizer(fin)
 
@@ -398,3 +423,66 @@ class TestFiles:
         # the default value
         # according to https://docs.gitlab.com/ee/api/protected_branches.html#protect-repository-branches
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+    def test__set_file_with_chinese_characters(self, gitlab, group, project, branches):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_chinese_characters = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            files:
+              "README.md":
+                overwrite: true
+                branches:
+                  - main
+                content: |
+                    Hanzi (Traditional): 丕不丈丁
+                    Hanzi (Simplified): 丏丅丙两
+        """
+
+        run_gitlabform(set_file_chinese_characters, group_and_project_name)
+
+        file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
+        assert file_content == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两"
+
+    def test__set_external_file_with_chinese_characters(
+        self, gitlab, group, project, branches, file
+    ):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_chinese_characters = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            files:
+              "README.md":
+                overwrite: true
+                branches:
+                  - main
+                file: file.txt
+        """
+
+        run_gitlabform(set_file_chinese_characters, group_and_project_name)
+
+        file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
+        assert file_content == "Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁"
+
+    def test__set_external_file_with_utf8_characters(
+        self, gitlab, group, project, branches, file2
+    ):
+        group_and_project_name = f"{group}/{project}"
+
+        set_file_chinese_characters = f"""
+        projects_and_groups:
+          {group_and_project_name}:
+            files:
+              "README.md":
+                overwrite: true
+                branches:
+                  - main
+                file: file2.txt
+        """
+
+        run_gitlabform(set_file_chinese_characters, group_and_project_name)
+
+        file_content = gitlab.get_file(group_and_project_name, "main", "README.md")
+        assert file_content == "LICENSE\n\n“This is a license file”"
