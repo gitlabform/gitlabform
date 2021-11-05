@@ -58,7 +58,7 @@ def branches(request, gitlab, group_and_project):
 
     request.addfinalizer(fin)
 
-        
+
 @pytest.fixture(scope="function")
 def no_access_branch(request, gitlab, group_and_project):
     gitlab.create_branch(group_and_project, "no_access_branch", "main")
