@@ -80,5 +80,5 @@ class GitLabMembers(GitLabCore):
             "groups/%s/members/%s",
             (group_name, self._get_user_id(user)),
             method="DELETE",
-            expected_codes=[204, 403, 404],
+            expected_codes=[204, 404],
         )
