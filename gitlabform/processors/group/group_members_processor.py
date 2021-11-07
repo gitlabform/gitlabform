@@ -1,4 +1,4 @@
-from logging import debug
+from logging import debug, warning
 from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
@@ -32,10 +32,9 @@ class GroupMembersProcessor(AbstractProcessor):
                 AccessLevel.OWNER.value not in users_to_set_by_access_level.keys()
                 and configuration.get("enforce_group_members")
             ):
-                fatal(
-                    "With 'enforce_group_members' flag you cannot have no Owners (access_level = 50) in your "
-                    " group members config. GitLab requires at least 1 Owner per group.",
-                    exit_code=EXIT_INVALID_INPUT,
+                warning(
+                    "With 'enforce_group_members' you need to have at least 1 Owner per group"
+                    " (another group or a user). This is a GitLab's internal requirement."
                 )
 
             # we HAVE TO start configuring access from the highest access level - in case of groups this is Owner
