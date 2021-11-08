@@ -15,7 +15,8 @@ class GroupMembersProcessor(AbstractProcessor):
         if users_to_set_by_username:
 
             # group users before by username
-            users_before = self.gitlab.get_group_members(group)
+            # (note: we DON'T get inherited users as we don't manage them at this level anyway)
+            users_before = self.gitlab.get_group_members(group, with_inherited=False)
             debug("Group members BEFORE: %s", users_before)
             users_before_by_username = dict()
             for user in users_before:

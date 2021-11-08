@@ -41,9 +41,9 @@ class GitLabMembers(GitLabCore):
             expected_codes=[204, 404],
         )
 
-    def get_group_members(self, group_name, all=False):
+    def get_group_members(self, group_name, with_inherited=False):
         url_template = "groups/%s/members"
-        if all:
+        if with_inherited:
             url_template += "/all"
 
         return self._make_requests_to_api(url_template, group_name, paginated=True)
