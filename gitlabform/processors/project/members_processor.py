@@ -12,7 +12,7 @@ class MembersProcessor(AbstractProcessor):
         super().__init__("members", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-        groups = configuration.get("members|groups")
+        groups = configuration.get("members|groups", {})
         if groups:
 
             verbose("Processing groups as members...")
@@ -53,7 +53,23 @@ class MembersProcessor(AbstractProcessor):
                         project_and_group, group, access, expiry
                     )
 
-        users = configuration.get("members|users")
+        if configuration.get("members|enforce"):
+
+            current_groups = self.gitlab.get_groups_from_project(project_and_group)
+
+            groups_in_config = groups.keys()
+            groups_in_gitlab = current_groups.keys()
+            groups_not_in_config = set(groups_in_gitlab) - set(groups_in_config)
+
+            for group_not_in_config in groups_not_in_config:
+                debug(
+                    f"Removing group '{group_not_in_config}' that is not configured to be a member."
+                )
+                self.gitlab.unshare_with_group(project_and_group, group_not_in_config)
+        else:
+            debug("Not enforcing group members.")
+
+        users = configuration.get("members|users", {})
         if users:
 
             verbose("Processing users as members...")
@@ -89,9 +105,29 @@ class MembersProcessor(AbstractProcessor):
                     self.gitlab.add_member_to_project(
                         project_and_group, user, access, expiry
                     )
-        if not groups and not users:
+
+        if configuration.get("members|enforce"):
+
+            current_members = self.gitlab.get_members_from_project(project_and_group)
+
+            users_in_config = users.keys()
+            users_in_gitlab = current_members.keys()
+            users_not_in_config = set(users_in_gitlab) - set(users_in_config)
+
+            for user_not_in_config in users_not_in_config:
+                debug(
+                    f"Removing user '{user_not_in_config}' that is not configured to be a member."
+                )
+                self.gitlab.remove_member_from_project(
+                    project_and_group, user_not_in_config
+                )
+        else:
+            debug("Not enforcing user members.")
+
+        if not groups and not users and not configuration.get("members|enforce"):
             fatal(
                 "Project members configuration section has to contain"
-                " either 'users' or 'groups' non-empty keys.",
+                " either 'users' or 'groups' non-empty keys"
+                " (unless you want to enforce no direct members).",
                 exit_code=EXIT_INVALID_INPUT,
             )
