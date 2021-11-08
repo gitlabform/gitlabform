@@ -49,6 +49,7 @@ class GitLabMembers(GitLabCore):
         return self._make_requests_to_api(url_template, group_name, paginated=True)
 
     def get_members_from_project(self, project_and_group_name):
+        # note that this DOES NOT return inherited users
         members = self._make_requests_to_api(
             "projects/%s/members", project_and_group_name, paginated=True
         )

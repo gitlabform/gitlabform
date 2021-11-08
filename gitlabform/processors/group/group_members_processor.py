@@ -1,5 +1,5 @@
-from logging import debug, warning
-from cli_ui import fatal
+from logging import debug
+from cli_ui import warning, fatal
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
@@ -27,16 +27,6 @@ class GroupMembersProcessor(AbstractProcessor):
             for user in users_to_set_by_username:
                 access_level = users_to_set_by_username[user]["access_level"]
                 users_to_set_by_access_level.setdefault(access_level, []).append(user)
-
-            # check if the configured users contain at least one Owner
-            if (
-                AccessLevel.OWNER.value not in users_to_set_by_access_level.keys()
-                and configuration.get("enforce_group_members")
-            ):
-                warning(
-                    "With 'enforce_group_members' you need to have at least 1 Owner per group"
-                    " (another group or a user). This is a GitLab's internal requirement."
-                )
 
             # we HAVE TO start configuring access from the highest access level - in case of groups this is Owner
             # - to prevent a case when there is no Owner in a group
@@ -91,6 +81,13 @@ class GroupMembersProcessor(AbstractProcessor):
                         )
 
             if configuration.get("enforce_group_members"):
+                warning(
+                    "Using `enforce_group_members: true` is deprecated and will be removed in future versions "
+                    "of GitLabForm. Please use `enforce: true` key under `group_members` instead."
+                )
+            if configuration.get("enforce_group_members") or configuration.get(
+                "group_members|enforce"
+            ):
                 # remove users not configured explicitly
                 # note: only direct members are removed - inherited are left
                 users_not_configured = set(

@@ -1,4 +1,5 @@
 from logging import debug
+from cli_ui import warning
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -79,6 +80,13 @@ class GroupSharedWithProcessor(AbstractProcessor):
                 )
 
         if configuration.get("enforce_group_members"):
+            warning(
+                "Using `enforce_group_members: true` is deprecated and will be removed in future versions "
+                "of GitLabForm. Please use `enforce: true` key under `group_members` instead."
+            )
+        if configuration.get("enforce_group_members") or configuration.get(
+            "group_members|enforce"
+        ):
             # remove groups not configured explicitly
             groups_not_configured = set(groups_before_by_group_path) - set(
                 groups_to_set_by_group_path
