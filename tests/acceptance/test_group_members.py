@@ -179,29 +179,3 @@ class TestGroupMembers:
                 assert member["access_level"] == AccessLevel.OWNER.value  # new owner
             if member["username"] == f"{users[2]}":
                 assert member["access_level"] == AccessLevel.DEVELOPER.value
-
-    def test__zero_owners(self, gitlab, group, users):
-
-        zero_owners = f"""
-        projects_and_groups:
-          {group}/*:
-            enforce_group_members: true
-            group_members:
-              {users[3]}:
-                access_level: {AccessLevel.MAINTAINER.value}
-        """
-
-        with pytest.raises(SystemExit):
-            run_gitlabform(zero_owners, group)
-
-    def test__zero_users(self, gitlab, group):
-
-        zero_users = f"""
-        projects_and_groups:
-          {group}/*:
-            enforce_group_members: true
-            group_members: {{}}
-        """
-
-        with pytest.raises(SystemExit):
-            run_gitlabform(zero_users, group)
