@@ -204,22 +204,21 @@ projects_and_groups:
         allowed_to_unprotect:
           - access_level: 40 # ...or the whole access levels, like in the other syntax
 
-    # this is for adding/changing the access level of group members - only users can be them
-    # for removing users please see the flag below.
+    # this is for adding/changing the access level of group members (under `groups`) AND users (under `users`)
     #
-    # keys names are user names and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
+    # keys names are group paths or user names, respectively, and values are as parameters described at
+    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project for users
+    # or https://docs.gitlab.com/ee/api/groups.html#create-a-link-to-share-a-group-with-another-group for groups
     group_members:
-      my-user:
-        access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
-
-    group_shared_with:
-      another-group:
-        group_access_level: 10
-
-    # if this flag is set to 'true', then removing a user or group from the above config will remove the user from the group
-    # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
-    enforce_group_members: true  # default: false
+      groups:
+        another-group:
+          group_access: 10
+      users:
+        my-user:
+          access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+      # if this flag is set to 'true', then removing a user or group from the above config will remove the user from the group
+      # note: you have to keep at least 1 user with Owner level (50) - it's required by GitLab
+      enforce: true  # default: false
 
     # *** This section requires GitLab Premium (paid) ***
     # configure members of groups by syncing them with LDAP

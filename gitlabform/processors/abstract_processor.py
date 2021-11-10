@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from cli_ui import debug as verbose
 
+from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.util.decorators import configuration_to_safe_dict

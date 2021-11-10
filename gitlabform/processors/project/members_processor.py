@@ -12,7 +12,32 @@ class MembersProcessor(AbstractProcessor):
         super().__init__("members", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
+
+        enforce_members = configuration.get("members|enforce")
+
         groups = configuration.get("members|groups", {})
+
+        users = configuration.get("members|users", {})
+
+        if not groups and not users and not enforce_members:
+            fatal(
+                "Project members configuration section has to contain"
+                " either 'users' or 'groups' non-empty keys"
+                " (unless you want to enforce no direct members).",
+                exit_code=EXIT_INVALID_INPUT,
+            )
+
+        self._process_groups(project_and_group, groups, enforce_members)
+        self._process_users(project_and_group, users, enforce_members)
+
+    @staticmethod
+    def _is_enforce_enabled(configuration: dict) -> bool:
+        # this is a new feature in project members, so it has a single, simple syntax
+        return configuration.get("members|enforce")
+
+    def _process_groups(
+        self, project_and_group: str, groups: dict, enforce_members: bool
+    ):
         if groups:
 
             verbose("Processing groups as members...")
@@ -53,7 +78,7 @@ class MembersProcessor(AbstractProcessor):
                         project_and_group, group, access, expiry
                     )
 
-        if configuration.get("members|enforce"):
+        if enforce_members:
 
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
 
@@ -69,7 +94,9 @@ class MembersProcessor(AbstractProcessor):
         else:
             debug("Not enforcing group members.")
 
-        users = configuration.get("members|users", {})
+    def _process_users(
+        self, project_and_group: str, users: dict, enforce_members: bool
+    ):
         if users:
 
             verbose("Processing users as members...")
@@ -106,7 +133,7 @@ class MembersProcessor(AbstractProcessor):
                         project_and_group, user, access, expiry
                     )
 
-        if configuration.get("members|enforce"):
+        if enforce_members:
 
             current_members = self.gitlab.get_members_from_project(project_and_group)
 
@@ -123,11 +150,3 @@ class MembersProcessor(AbstractProcessor):
                 )
         else:
             debug("Not enforcing user members.")
-
-        if not groups and not users and not configuration.get("members|enforce"):
-            fatal(
-                "Project members configuration section has to contain"
-                " either 'users' or 'groups' non-empty keys"
-                " (unless you want to enforce no direct members).",
-                exit_code=EXIT_INVALID_INPUT,
-            )
