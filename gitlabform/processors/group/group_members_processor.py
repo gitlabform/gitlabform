@@ -12,6 +12,7 @@ class GroupMembersProcessor(AbstractProcessor):
 
     def _process_configuration(self, group: str, configuration: dict):
         users_to_set_by_username = configuration.get("group_members")
+        users_to_set_by_username.pop("enforce", None)
         if users_to_set_by_username:
 
             # group users before by username
