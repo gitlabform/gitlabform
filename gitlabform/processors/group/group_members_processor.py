@@ -19,10 +19,15 @@ class GroupMembersProcessor(AbstractProcessor):
             users_to_set_by_username,
         ) = self._get_groups_and_users_to_set(configuration)
 
-        if not enforce_group_members and not groups_to_set_by_group_path:
+        if (
+            enforce_group_members
+            and not groups_to_set_by_group_path
+            and not users_to_set_by_username
+        ):
             fatal(
                 "Group members configuration section has to contain"
-                " either 'users' or 'groups' non-empty keys.",
+                " some 'users' or 'groups' defined as Owners,"
+                " if you want to enforce them (GitLab requires it).",
                 exit_code=EXIT_INVALID_INPUT,
             )
 
