@@ -81,9 +81,6 @@ class ConfigurationCore(ABC):
         except Exception as e:
             raise ConfigInvalidException(e)
 
-    def __getitem__(self, item):
-        return self.get(item)
-
     def get(self, path, default=None):
         """
         :param path: "path" to given element in YAML file, for example for:
