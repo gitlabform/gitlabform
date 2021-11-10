@@ -20,7 +20,7 @@ class ConfigurationGroups(ConfigurationCore):
                 groups.append(group_name)
         return sorted(groups)
 
-    def get_effective_config_for_group(self, group) -> Configuration:
+    def get_effective_config_for_group(self, group) -> dict:
         """
         :param group: "group_name"
         :return: merged configuration for this group, from common, group. Merging is additive.
