@@ -81,18 +81,30 @@ Some of the app features are limited because of the GitLab API issues. [Here is 
 
 ## Requirements
 
-* Python 3.6-3.10 or Docker
+* Docker or Python 3.6-3.10 with [pipx](https://github.com/pypa/pipx) (recommended) or pip,
 * GitLab 11+
 * GitLab Premium (paid) for some features
 
 ## Installation
 
-A. Pip: `pip3 install gitlabform`
+Run the latest stable version with:
 
-B. Docker: run GitLabForm in a Docker container with this oneliner:
-`docker run -it -v $(pwd):/config egnyte/gitlabform:latest gitlabform`.
-Instead of "latest" you can also use a specific version and choose from Alpine and Debian-based images.
-See the [GitLabForm's DockerHub page](https://hub.docker.com/r/egnyte/gitlabform/tags) for a list of available tags.
+* Docker: `docker run -it -v $(pwd):/config egnyte/gitlabform:latest gitlabform`.
+* [pipx](https://github.com/pypa/pipx): `pipx run gitlabform`
+
+
+Run the latest 2.* version with:
+
+* Docker: `docker run -it -v $(pwd):/config egnyte/gitlabform:2 gitlabform`.
+* [pipx](https://github.com/pypa/pipx): `pipx run --spec gitlabform~=2.2.0 gitlabform`
+
+See [this](https://hub.docker.com/r/egnyte/gitlabform) for all available Docker tags.
+
+
+Installing with:
+
+* [pipx](https://github.com/pypa/pipx): `pipx install gitlabform` (recommended)
+* plain `pip`: `pip3 install gitlabform`
 
 ## Quick start
 
