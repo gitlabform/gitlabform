@@ -1,5 +1,52 @@
 ## Changelog
 
+### 2.8.0
+
+* **Complete support for managing groups and projecs members**:
+  * Add enforcing (direct) project members - groups and users, including being able to remove all direct members and keep only the members inherited from the group. Implements [#100](https://github.com/egnyte/gitlabform/issues/100).
+  * Unify the configuration syntax for group and project level membership.
+
+✨ **New** ✨ config syntax example:
+```yaml
+projects_and_groups:
+  foo/*:
+    # below key now includes what used to be under 
+    # `group_shared_with` and `enforce_group_members` keys
+    group_members:
+      # there are only up to 3 direct keys below
+      groups:
+        another-group:
+          # below key's name been changed to the name used in projects `members`
+          # for groups (and the same as in the API to share group with group)
+          group_access: 30
+      users:
+        my-user:
+          access_level: 50 # owner
+      # this will enforce group-level users to be ONLY as defined above
+      enforce: true
+
+    # this will make the projects in `foo` group not contain any **direct** users or groups other
+    # (so it will make it contain only the ones inherited from the group `foo`)
+    members:
+      enforce: true
+```
+The 🏚 old and deprecated 🏚 syntax for a similar* config would be:
+```yaml
+projects_and_groups:
+  foo/*:
+    group_shared_with:
+      groups:
+        another-group:
+          group_access_level: 30
+    group_members:
+      my-user:
+        access_level: 50 # owner
+    enforce_group_members: true
+
+    # !!! * - there was no enforce project members support before v2.8.0 !!!
+```
+The old syntax works but will generate warnings. Support for it will be removed in one the future major GitLabForm versions.
+
 ### 2.7.1
 
 * Speed up running for `ALL_DEFINED`, when the defined groups and projects for just a small part of all the GitLab instance's groups and projects. Additionally **always** show the number of omitted groups and projects for any reasons (no config, archived, skipped). Fixes [#285](https://github.com/egnyte/gitlabform/issues/285).
