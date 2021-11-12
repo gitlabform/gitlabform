@@ -11,6 +11,9 @@ from gitlabform.processors.group.group_ldap_links_processor import (
 from gitlabform.processors.group.group_members_processor import (
     GroupMembersProcessor,
 )
+from gitlabform.processors.group.group_shared_with_processor import (
+    GroupSharedWithProcessor,
+)
 from gitlabform.processors.group.group_secret_variables_processor import (
     GroupSecretVariablesProcessor,
 )
@@ -26,6 +29,7 @@ class GroupProcessors(AbstractProcessors):
             GroupSecretVariablesProcessor(gitlab),
             GroupSettingsProcessor(gitlab),
             GroupMembersProcessor(gitlab),
+            GroupSharedWithProcessor(gitlab),
             GroupLDAPLinksProcessor(gitlab),
             GroupBadgesProcessor(gitlab),
         ]
