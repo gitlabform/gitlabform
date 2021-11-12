@@ -135,3 +135,29 @@ class TestMembers:
 
         with pytest.raises(SystemExit):
             run_gitlabform(config_with_error, f"{group}/{project}")
+
+    def test__enforce(
+        self, gitlab, group_and_project, users, one_maintainer_and_two_developers
+    ):
+        members_before = gitlab.get_project_members(group_and_project)
+        members_usernames_before = [member["username"] for member in members_before]
+
+        user_to_add = users[3]
+        assert user_to_add not in members_usernames_before
+
+        enforce_users = f"""
+            projects_and_groups:
+              {group_and_project}:
+                members:
+                  users:
+                    {user_to_add}: # new user
+                      access_level: {AccessLevel.MAINTAINER.value}
+                  enforce: true
+            """
+
+        run_gitlabform(enforce_users, group_and_project)
+
+        members = gitlab.get_project_members(group_and_project)
+
+        assert len(members) == 1
+        assert members[0]["username"] == user_to_add
