@@ -20,7 +20,7 @@ class AbstractProcessor(ABC):
         dry_run: bool,
         effective_configuration: EffectiveConfiguration,
     ):
-        if self.configuration_name in configuration:
+        if self._section_is_in_config(configuration):
             if configuration.get(f"{self.configuration_name}|skip"):
                 verbose(
                     f"Skipping section '{self.configuration_name}' - explicitly configured to do so."
@@ -54,6 +54,9 @@ class AbstractProcessor(ABC):
             )
         else:
             verbose(f"Skipping section '{self.configuration_name}' - not in config.")
+
+    def _section_is_in_config(self, configuration: dict):
+        return self.configuration_name in configuration
 
     @abstractmethod
     def _process_configuration(

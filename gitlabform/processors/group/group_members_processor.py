@@ -10,6 +10,16 @@ class GroupMembersProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_members", gitlab)
 
+    def _section_is_in_config(self, configuration: dict):
+        return any(
+            section_name in configuration
+            for section_name in [
+                "group_members",
+                "group_shared_with",
+                "enforce_group_members",
+            ]
+        )
+
     def _process_configuration(self, group: str, configuration: dict):
 
         enforce_group_members = self._is_enforce_enabled(configuration)
@@ -48,7 +58,7 @@ class GroupMembersProcessor(AbstractProcessor):
                 "of GitLabForm. Please use `group_members.enforce` key instead."
             )
         else:
-            enforce_group_members = configuration.get("group_members|enforce")
+            enforce_group_members = configuration.get("group_members|enforce", False)
         return enforce_group_members
 
     @staticmethod
@@ -66,18 +76,23 @@ class GroupMembersProcessor(AbstractProcessor):
         else:
             groups_to_set_by_group_path = configuration.get("group_members|groups", {})
 
-        users_to_set_by_username = configuration.get("group_members")
-        users_to_set_by_username.pop("enforce", None)
-        users_to_set_by_username.pop("users", None)
-        users_to_set_by_username.pop("groups", None)
+        users_to_set_by_username = configuration.get("group_members", {})
         if users_to_set_by_username:
-            warning(
-                "Putting users as target members of the groups directly under `group_members` key is deprecated "
-                "and will be removed in future versions of GitLabForm. Please put them under `group_members.users` key "
-                "instead."
+            proper_users_to_set_by_username = configuration.get(
+                "group_members|users", {}
             )
-        else:
-            users_to_set_by_username = configuration.get("group_members|users")
+            if proper_users_to_set_by_username:
+                users_to_set_by_username = proper_users_to_set_by_username
+            else:
+                users_to_set_by_username.pop("enforce", None)
+                users_to_set_by_username.pop("users", None)
+                users_to_set_by_username.pop("groups", None)
+                if users_to_set_by_username:
+                    warning(
+                        "Putting users as target members of the groups directly under `group_members` key is deprecated "
+                        "and will be removed in future versions of GitLabForm. "
+                        "Please put them under `group_members.users` key instead."
+                    )
 
         return groups_to_set_by_group_path, users_to_set_by_username
 
