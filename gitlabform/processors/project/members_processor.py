@@ -13,7 +13,7 @@ class MembersProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
 
-        enforce_members = configuration.get("members|enforce")
+        enforce_members = configuration.get("members|enforce", False)
 
         groups = configuration.get("members|groups", {})
 
@@ -29,11 +29,6 @@ class MembersProcessor(AbstractProcessor):
 
         self._process_groups(project_and_group, groups, enforce_members)
         self._process_users(project_and_group, users, enforce_members)
-
-    @staticmethod
-    def _is_enforce_enabled(configuration: dict) -> bool:
-        # this is a new feature in project members, so it has a single, simple syntax
-        return configuration.get("members|enforce")
 
     def _process_groups(
         self, project_and_group: str, groups: dict, enforce_members: bool
