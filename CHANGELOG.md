@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.8.1
+
+* Don't show "Warning: Using group_shared_with: is deprecated" although the user is not really using this config syntax.
+
 ### 2.8.0
 
 * **Complete support for managing groups and projecs members**:
