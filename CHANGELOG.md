@@ -6,7 +6,7 @@
 
 ### 2.8.0
 
-* **Complete support for managing groups and projecs members**:
+* **Complete support for managing groups and projects members**:
   * Add enforcing (direct) project members - groups and users, including being able to remove all direct members and keep only the members inherited from the group. Implements [#100](https://github.com/egnyte/gitlabform/issues/100).
   * Unify the configuration syntax for group and project level membership.
 
