@@ -22,10 +22,7 @@ class GroupSharedWithProcessor(AbstractProcessor):
         dry_run: bool,
         effective_configuration: EffectiveConfiguration,
     ):
-        warning(
-            "Using `group_shared_with:` is deprecated and will be removed in future versions "
-            "of GitLabForm. Please move its contents to `group_members.groups`."
-        )
+        pass
 
     def _process_configuration(self, group: str, configuration: dict):
         pass
