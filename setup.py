@@ -60,7 +60,7 @@ setup(
         "PyYAML==6.0",
         "luddite==1.0.2",
         "cli-ui==0.15.2",
-        "packaging==21.2",
+        "packaging==21.3",
         "mergedeep==1.3.4",
     ],
     extras_require={
