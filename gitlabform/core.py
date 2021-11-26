@@ -21,6 +21,7 @@ from gitlabform.input import GroupsAndProjectsProvider
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
+from gitlabform.transform import AccessLevelsTransformer
 from gitlabform.ui import (
     info_group_count,
     info_project_count,
@@ -90,6 +91,8 @@ class GitLabForm(object):
                     "target parameter is required.",
                     exit_code=EXIT_INVALID_INPUT,
                 )
+
+        self.access_levels_transformer = AccessLevelsTransformer
 
         self.gitlab, self.configuration = self.initialize_configuration_and_gitlab()
 
@@ -300,6 +303,7 @@ class GitLabForm(object):
             else:
                 gitlab = GitLab(config_path=self.config)
             configuration = gitlab.get_configuration()
+            self.access_levels_transformer.transform(configuration)
             return gitlab, configuration
         except ConfigFileNotFoundException as e:
             fatal(

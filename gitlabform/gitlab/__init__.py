@@ -32,6 +32,11 @@ class AccessLevel(enum.IntEnum):
     def group_levels(cls) -> List[int]:
         return [level.value for level in AccessLevel if level <= 50]
 
+    @classmethod
+    def get_value(cls, name: str) -> int:
+        # for the above set of key names this is enough for an effectively fuzzy name matching
+        return AccessLevel[name.strip().upper().replace(" ", "_")].value
+
 
 class GitLab(
     GitLabBranches,

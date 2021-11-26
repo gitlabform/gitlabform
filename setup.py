@@ -62,6 +62,7 @@ setup(
         "cli-ui==0.15.2",
         "packaging==21.2",
         "mergedeep==1.3.4",
+        "yamlpath==3.5.0",
     ],
     extras_require={
         "test": [
@@ -70,6 +71,7 @@ setup(
             "pre-commit==2.15.0",  # not really for tests, but for development
             "coverage==6.1.2",
             "pytest-cov==3.0.0",
+            "deepdiff",
         ],
     },
     entry_points={
