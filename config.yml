@@ -156,10 +156,7 @@ projects_and_groups:
 
     # keys names are branches names and values can be as shown below
     # https://docs.gitlab.com/ee/api/protected_branches.html
-    # For access level numbers, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
-    # No access: 0
-    # Developer: 30
-    # Maintainer: 40
+    # the access level are as their names listed in https://docs.gitlab.com/ee/api/members.html
     branches:
       develop:
         # this will unprotect a branch if it is protected currently
@@ -167,29 +164,29 @@ projects_and_groups:
       main:
         # Configure "main" to require code approvals, merge for developers, no direct commits
         protected: true
-        push_access_level: 0
-        merge_access_level: 30
-        unprotect_access_level: 40
+        push_access_level: no access
+        merge_access_level: developer
+        unprotect_access_level: maintainer
         # *** Below key requires GitLab Premium (paid) ***
         code_owner_approval_required: true
       branch_protected_from_changes:
         # Disallow any changes to this branch
         protected: true
-        push_access_level: 0
-        merge_access_level: 0
-        unprotect_access_level: 40
+        push_access_level: no access
+        merge_access_level: no access
+        unprotect_access_level: maintainer
       # Protect branches with names matching wildcards
       '*-branch_protected_from_direct_pushes_from_no_one_but_with_merges_allowed_configured_using_wildcard':
         protected: true
-        push_access_level: 0
-        merge_access_level: 30
-        unprotect_access_level: 40
+        push_access_level: no access
+        merge_access_level: developer
+        unprotect_access_level: maintainer
       # Make the branch protected but allow force pushes to this branch
       allow_to_force_push:
         protected: true
-        push_access_levels: 30
-        merge_access_level: 30
-        unprotect_access_level: 40
+        push_access_level: developer
+        merge_access_level: developer
+        unprotect_access_level: maintainer
         allow_force_push: true
       # Allow specific users and groups to operate on this branch - *** this syntax requires GitLab Premium (paid) ***
       special:
@@ -202,7 +199,7 @@ projects_and_groups:
           - user_id: 15 # ...or user ids, if you know them...
           - group_id: 456 # ...or group ids, if you know them...
         allowed_to_unprotect:
-          - access_level: 40 # ...or the whole access levels, like in the other syntax
+          - access_level: maintainer # ...or the whole access levels, like in the other syntax
 
     # this is for adding/changing the access level of group members and/or users
     # note: removing members from the config DOES NOT remove their access unless "enforce" flag is set to true!
@@ -213,13 +210,13 @@ projects_and_groups:
     group_members:
       groups:
         another-group:
-          group_access: 10
+          group_access: no access
       users:
         my-user:
-          access_level: 50 # = Owner, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+          access_level: owner
       # if this flag is set to 'true', then removing a user or group from the above config will remove the user
       # from the group
-      # note: you have to keep at least 1 user with Owner level (50) per group - it's required by GitLab
+      # note: you have to keep at least 1 user with "owner" access level group - it's required by GitLab
       enforce: true  # default: false
 
     # *** This section requires GitLab Premium (paid) ***
@@ -232,18 +229,18 @@ projects_and_groups:
       devops_are_maintainers:
         provider: "AD"
         cn: "devops"
-        group_access: 40
+        group_access: maintainer
       developers_are_developers:
         provider: "AD"
         filter: "(employeeType=developer)"
-        group_access: 30
+        group_access: developer
 
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
     tags:
       "v*":
         protected: true
-        create_access_level: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+        create_access_level: maintainer
 
     # service names are as in the endpoints described at https://docs.gitlab.com/ce/api/services.html
     # hashes under those name correspond to the parameters described for given service there
@@ -423,16 +420,16 @@ projects_and_groups:
     members:
       groups:
         my-group:
-          group_access: 40 # = Maintainer, see "valid access levels" at https://docs.gitlab.com/ee/api/members.html
+          group_access: maintainer
         my-other-group/subgroup:
-          group_access: 40 # Maintainer
+          group_access: maintainer
       users:
         my-user:
-          access_level: 40 # Maintainer
-          expires_at: 2019-09-26
+          access_level: maintainer
+          expires_at: 2025-09-26
       # if this flag is set to 'true', then this project will have only the users and groups listed above as the *direct*
       # members (so this setting will NOT affect the members inherited f.e. from a group that contains this project)
-      # note: there has to be at least 1 user/group with Owner level (50) per project - it's required by GitLab
+      # note: there has to be at least 1 user/group with "owner" access level per project - it's required by GitLab
       enforce: true
 
     # this is for adding/changing/deleting pipeline schedules

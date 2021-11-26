@@ -38,11 +38,8 @@ class NonEmptyConfigsProvider(object):
         """
         :param groups: list of groups (and possibly subgroups)
         :param projects: list of projects
-        :return: a tuple with lists of:
-          * groups that have configs that can be processed by some group-level processors
-          * projects that have configs that can be processed by some project-level processors
-          * groups that DON'T have configs that can be processed by some group-level processors
-          * projects that DON'T have configs that can be processed by some project-level processors
+        :return: Groups object, that contains both the list of all the groups and the non-omitted groups,
+                 and a similar object with Projects
         """
 
         groups_with_empty_configs = []

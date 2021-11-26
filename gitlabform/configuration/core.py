@@ -7,17 +7,18 @@ from abc import ABC
 from cli_ui import debug as verbose
 from cli_ui import fatal
 
-import yaml
 from pathlib import Path
 from mergedeep import merge
+
+from types import SimpleNamespace
+from yamlpath.common import Parsers
+from yamlpath.wrappers import ConsolePrinter
+
+
 from gitlabform import EXIT_INVALID_INPUT
 
 
 class ConfigurationCore(ABC):
-
-    config = None
-    config_dir = None
-
     def __init__(self, config_path=None, config_string=None):
 
         if config_path and config_string:
@@ -25,33 +26,13 @@ class ConfigurationCore(ABC):
                 "Please initialize with either config_path or config_string, not both.",
                 exit_code=EXIT_INVALID_INPUT,
             )
-
         try:
             if config_string:
-                verbose("Reading config from provided string.")
-                self.config = yaml.safe_load(textwrap.dedent(config_string))
+                self.config = self._parse_yaml(config_string, config_string=True)
                 self.config_dir = "."
             else:  # maybe config_path
-                if "APP_HOME" in os.environ:
-                    # using this env var should be considered unofficial, we need this temporarily
-                    # for backwards compatibility. support for it may be removed without notice, do not use it!
-                    config_path = os.path.join(os.environ["APP_HOME"], "config.yml")
-                elif not config_path:
-                    # this case is only meant for using gitlabform as a library
-                    config_path = os.path.join(
-                        str(Path.home()), ".gitlabform", "config.yml"
-                    )
-                elif config_path in [os.path.join(".", "config.yml"), "config.yml"]:
-                    # provided points to config.yml in the app current working dir
-                    config_path = os.path.join(os.getcwd(), "config.yml")
-
-                verbose(f"Reading config from file: {config_path}")
-
-                with open(config_path, "r") as ymlfile:
-                    self.config = yaml.safe_load(ymlfile)
-                    debug("Config parsed successfully as YAML.")
-
-                # we need config path for accessing files for relative paths
+                config_path = self._get_config_path(config_path)
+                self.config = self._parse_yaml(config_path, config_string=False)
                 self.config_dir = os.path.dirname(config_path)
 
                 if self.config.get("example_config"):
@@ -80,6 +61,49 @@ class ConfigurationCore(ABC):
 
         except Exception as e:
             raise ConfigInvalidException(e)
+
+    @staticmethod
+    def _get_config_path(config_path):
+
+        if "APP_HOME" in os.environ:
+            # using this env var should be considered unofficial, we need this temporarily
+            # for backwards compatibility. support for it may be removed without notice, do not use it!
+            config_path = os.path.join(os.environ["APP_HOME"], "config.yml")
+        elif not config_path:
+            # this case is only meant for using gitlabform as a library
+            config_path = os.path.join(str(Path.home()), ".gitlabform", "config.yml")
+        elif config_path in [os.path.join(".", "config.yml"), "config.yml"]:
+            # provided points to config.yml in the app current working dir
+            config_path = os.path.join(os.getcwd(), "config.yml")
+
+        return config_path
+
+    @staticmethod
+    def _parse_yaml(source: str, config_string: bool):
+
+        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
+        log = ConsolePrinter(logging_args)
+
+        yaml = Parsers.get_yaml_editor()
+
+        if config_string:
+            config_string = textwrap.dedent(source)
+            verbose("Reading config from the provided string.")
+            (yaml_data, doc_loaded) = Parsers.get_yaml_data(
+                yaml, log, config_string, literal=True
+            )
+        else:
+            config_path = source
+            verbose(f"Reading config from file: {config_path}")
+            (yaml_data, doc_loaded) = Parsers.get_yaml_data(yaml, log, config_path)
+
+        if doc_loaded:
+            debug("Config parsed successfully as YAML.")
+        else:
+            # an error message has already been printed via ConsolePrinter
+            exit(EXIT_INVALID_INPUT)
+
+        return yaml_data
 
     def get(self, path, default=None):
         """
