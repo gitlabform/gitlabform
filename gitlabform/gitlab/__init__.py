@@ -37,6 +37,10 @@ class AccessLevel(enum.IntEnum):
         # for the above set of key names this is enough for an effectively fuzzy name matching
         return AccessLevel[name.strip().upper().replace(" ", "_")].value
 
+    @classmethod
+    def get_canonical_names(cls) -> List[str]:
+        return [level.name.lower().replace("_", " ") for level in AccessLevel]
+
 
 class GitLab(
     GitLabBranches,

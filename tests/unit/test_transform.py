@@ -1,5 +1,7 @@
+import pytest
 from deepdiff import DeepDiff
 
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.transform import AccessLevelsTransformer
 
@@ -77,6 +79,47 @@ def test__config__with_access_level_names():
     assert not ddiff
 
 
+def test__config__with_access_level_names_2():
+    config_yaml = f"""
+    projects_and_groups:
+      foobar/*:
+        group_ldap_links:
+          # "provider" field should contain a value that you can find in the GitLab web UI,
+          # see https://github.com/egnyte/gitlabform/issues/261
+          devops_are_maintainers:
+            provider: "AD"
+            cn: "devops"
+            group_access: maintainer
+          developers_are_developers:
+            provider: "AD"
+            filter: "(employeeType=developer)"
+            group_access: developer
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    AccessLevelsTransformer.transform(configuration)
+
+    config_with_numbers = f"""
+    projects_and_groups:
+      foobar/*:
+        group_ldap_links:
+          # "provider" field should contain a value that you can find in the GitLab web UI,
+          # see https://github.com/egnyte/gitlabform/issues/261
+          devops_are_maintainers:
+            provider: "AD"
+            cn: "devops"
+            group_access: 40
+          developers_are_developers:
+            provider: "AD"
+            filter: "(employeeType=developer)"
+            group_access: 30
+    """
+    configuration_with_numbers = Configuration(config_string=config_with_numbers)
+
+    ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
+    assert not ddiff
+
+
 def test__config__with_access_level_names_array():
     config_yaml = f"""
     projects_and_groups:
@@ -122,42 +165,26 @@ def test__config__with_access_level_names_array():
     assert not ddiff
 
 
-def test__config__with_access_level_names_2():
+def test__config__with_access_level_names__invalid():
     config_yaml = f"""
     projects_and_groups:
       foobar/*:
-        group_ldap_links:
-          # "provider" field should contain a value that you can find in the GitLab web UI,
-          # see https://github.com/egnyte/gitlabform/issues/261
-          devops_are_maintainers:
-            provider: "AD"
-            cn: "devops"
-            group_access: maintainer
-          developers_are_developers:
-            provider: "AD"
-            filter: "(employeeType=developer)"
-            group_access: developer
+        branches:
+          special:
+            protected: true
+            allowed_to_push:
+              - user: jsmith # you can use usernames...
+              - user: bdoe
+              - group: another-group # ...or group names (paths)...
+            allowed_to_merge:
+              - user_id: 15 # ...or user ids, if you know them...
+              - access_level: developers # <-------------------------- this is invalid, it's plural
+              - group_id: 456 # ...or group ids, if you know them...
+            allowed_to_unprotect:
+              - access_level: maintainer # ...or the whole access levels, like in the other syntax
     """
     configuration = Configuration(config_string=config_yaml)
 
-    AccessLevelsTransformer.transform(configuration)
-
-    config_with_numbers = f"""
-    projects_and_groups:
-      foobar/*:
-        group_ldap_links:
-          # "provider" field should contain a value that you can find in the GitLab web UI,
-          # see https://github.com/egnyte/gitlabform/issues/261
-          devops_are_maintainers:
-            provider: "AD"
-            cn: "devops"
-            group_access: 40
-          developers_are_developers:
-            provider: "AD"
-            filter: "(employeeType=developer)"
-            group_access: 30
-    """
-    configuration_with_numbers = Configuration(config_string=config_with_numbers)
-
-    ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
-    assert not ddiff
+    with pytest.raises(SystemExit) as e:
+        AccessLevelsTransformer.transform(configuration)
+    assert e.value.code == EXIT_INVALID_INPUT
