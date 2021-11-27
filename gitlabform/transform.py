@@ -43,6 +43,8 @@ class AccessLevelsTransformer(ConfigurationTransformer):
             # members & group members
             "**.access_level[.!<100]",
             "**.group_access[.!<100]",
+            # old syntax
+            "**.group_access_level[.!<100]",
             # tags
             "**.create_access_level[.!<100]",
         ]
