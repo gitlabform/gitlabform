@@ -293,19 +293,6 @@ class TestFiles:
                 developers_can_merge: true
               protected_branch1:
                 protected: true
-                developers_can_push: false
-                developers_can_merge: true
-              protected_branch2:
-                protected: true
-                developers_can_push: false
-                developers_can_merge: true
-              protected_branch3:
-                protected: true
-                developers_can_push: false
-                developers_can_merge: true
-            branches:
-              protected_branch1:
-                protected: true
                 developers_can_push: true
                 developers_can_merge: true
               protected_branch2:
