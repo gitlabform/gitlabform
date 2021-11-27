@@ -6,7 +6,7 @@ from gitlabform.configuration import Configuration
 from gitlabform.transform import AccessLevelsTransformer
 
 
-def test__config__with_access_level_names():
+def test__config__with_access_level_names__branches():
     config_yaml = f"""
     projects_and_groups:
       foobar/*:
@@ -79,7 +79,7 @@ def test__config__with_access_level_names():
     assert not ddiff
 
 
-def test__config__with_access_level_names_2():
+def test__config__with_access_level_names__group_ldap_links():
     config_yaml = f"""
     projects_and_groups:
       foobar/*:
@@ -120,7 +120,7 @@ def test__config__with_access_level_names_2():
     assert not ddiff
 
 
-def test__config__with_access_level_names_array():
+def test__config__with_access_level_names__branches_premium_syntax():
     config_yaml = f"""
     projects_and_groups:
       foobar/*:
@@ -165,7 +165,7 @@ def test__config__with_access_level_names_array():
     assert not ddiff
 
 
-def test__config__with_access_level_names__invalid():
+def test__config__with_access_level_names__invalid_name():
     config_yaml = f"""
     projects_and_groups:
       foobar/*:

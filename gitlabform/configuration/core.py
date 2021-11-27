@@ -1,19 +1,15 @@
 import os
 import textwrap
-
-from logging import debug
-
 from abc import ABC
+from logging import debug
+from pathlib import Path
+from types import SimpleNamespace
+
 from cli_ui import debug as verbose
 from cli_ui import fatal
-
-from pathlib import Path
 from mergedeep import merge
-
-from types import SimpleNamespace
 from yamlpath.common import Parsers
 from yamlpath.wrappers import ConsolePrinter
-
 
 from gitlabform import EXIT_INVALID_INPUT
 

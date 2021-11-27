@@ -1,15 +1,13 @@
 from abc import ABC, abstractmethod
+from types import SimpleNamespace
 
 from cli_ui import fatal
+from yamlpath import Processor
+from yamlpath.exceptions import YAMLPathException
+from yamlpath.wrappers import ConsolePrinter
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
-
-from types import SimpleNamespace
-from yamlpath.wrappers import ConsolePrinter
-from yamlpath import Processor
-from yamlpath.exceptions import YAMLPathException
-
 from gitlabform.gitlab import AccessLevel
 
 
