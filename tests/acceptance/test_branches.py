@@ -847,3 +847,33 @@ class TestBranches:
         assert push_access_user_ids is None
         assert merge_access_user_ids is None
         assert unprotect_access_level is None
+
+    def test__config_with_access_level_names(self, gitlab, group_and_project, branches):
+
+        config_with_access_levels_names = f"""
+        projects_and_groups:
+          {group_and_project}:
+            branches:
+              protect_branch_and_allow_merges_access_levels:
+                protected: true
+                push_access_level: no_access        # note "_" or " " and the various
+                merge_access_level: Developer       # case in each line. it should not
+                unprotect_access_level: MAINTAINER  # matter as we allow any case.
+        """
+
+        run_gitlabform(config_with_access_levels_names, group_and_project)
+
+        (
+            push_access_level,
+            merge_access_level,
+            push_access_user_ids,
+            merge_access_user_ids,
+            unprotect_access_level,
+        ) = gitlab.get_only_branch_access_levels(
+            group_and_project, "protect_branch_and_allow_merges_access_levels"
+        )
+        assert push_access_level is [AccessLevel.NO_ACCESS.value]
+        assert merge_access_level is [AccessLevel.DEVELOPER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
+        assert unprotect_access_level is AccessLevel.MAINTAINER.value

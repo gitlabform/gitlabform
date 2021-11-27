@@ -368,3 +368,29 @@ class TestGroupMembersGroups:
 
         shared_with = gitlab.get_group_shared_with(group)
         assert len(shared_with) == 0
+
+    def test__add_group_with_access_level_names(
+        self, gitlab, group, users, groups, one_owner
+    ):
+        no_of_members_before = len(gitlab.get_group_members(group))
+
+        add_shared_with = f"""
+            projects_and_groups:
+              {group}/*:
+                group_members:
+                  {users[0]}:
+                    access_level: developer
+                group_shared_with:
+                  {groups[0]}:
+                    group_access_level: owner
+                  {groups[1]}:
+                    group_access_level: developer
+            """
+
+        run_gitlabform(add_shared_with, group)
+
+        members = gitlab.get_group_members(group)
+        assert len(members) == no_of_members_before, members
+
+        shared_with = gitlab.get_group_shared_with(group)
+        assert len(shared_with) == 2
