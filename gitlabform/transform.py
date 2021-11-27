@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 
+from cli_ui import fatal
+
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 
 from types import SimpleNamespace
@@ -47,9 +50,17 @@ class AccessLevelsTransformer(ConfigurationTransformer):
         for path in paths_to_hashes:
             try:
                 for node_coordinate in processor.get_nodes(path):
-                    node_coordinate.parent[
-                        node_coordinate.parentref
-                    ] = AccessLevel.get_value(str(node_coordinate.node))
+                    try:
+                        access_level_string = str(node_coordinate.node)
+                        node_coordinate.parent[
+                            node_coordinate.parentref
+                        ] = AccessLevel.get_value(access_level_string)
+                    except KeyError:
+                        fatal(
+                            f"Configuration string '{access_level_string}' is not one of the valid access levels:"
+                            f" {', '.join(AccessLevel.get_canonical_names())}",
+                            exit_code=EXIT_INVALID_INPUT,
+                        )
             except YAMLPathException:
                 pass
 
@@ -67,8 +78,16 @@ class AccessLevelsTransformer(ConfigurationTransformer):
             try:
                 for node_coordinate in processor.get_nodes(path):
                     if node_coordinate.parentref == "access_level":
-                        node_coordinate.parent[
-                            node_coordinate.parentref
-                        ] = AccessLevel.get_value(str(node_coordinate.node))
+                        try:
+                            access_level_string = str(node_coordinate.node)
+                            node_coordinate.parent[
+                                node_coordinate.parentref
+                            ] = AccessLevel.get_value(access_level_string)
+                        except KeyError:
+                            fatal(
+                                f"Configuration string '{access_level_string}' is not one of the valid access levels:"
+                                f" {', '.join(AccessLevel.get_canonical_names())}",
+                                exit_code=EXIT_INVALID_INPUT,
+                            )
             except YAMLPathException:
                 pass
