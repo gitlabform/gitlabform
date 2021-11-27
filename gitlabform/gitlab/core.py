@@ -1,18 +1,18 @@
 import json
+import os
 from logging import debug
-from cli_ui import debug as verbose
+from urllib import parse
 
 import pkg_resources
 import requests
-import os
 
 # noinspection PyPackageRequirements
 import urllib3
+from cli_ui import debug as verbose
+from requests.adapters import HTTPAdapter
 
 # noinspection PyPackageRequirements
 from urllib3.util.retry import Retry
-from urllib import parse
-from requests.adapters import HTTPAdapter
 
 from gitlabform.configuration import Configuration
 
