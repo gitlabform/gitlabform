@@ -30,9 +30,3 @@ class ProjectSettingsProcessor(AbstractProcessor):
             current_project_settings,
             project_settings,
         )
-
-    def foobar(self):
-        try:
-            print()
-        except Exception as e:
-            pass
