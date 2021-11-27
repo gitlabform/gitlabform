@@ -35,6 +35,8 @@ class ConfigurationCore(ABC):
                 self.config = self._parse_yaml(config_path, config_string=False)
                 self.config_dir = os.path.dirname(config_path)
 
+                # below checks are only needed in the non-test mode, when the config is read from file
+
                 if self.config.get("example_config"):
                     fatal(
                         "Example config detected, aborting.\n"

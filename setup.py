@@ -57,12 +57,12 @@ setup(
         "requests==2.26.0",
         "Jinja2==2.11.3",
         "MarkupSafe==1.1.1",
-        "PyYAML==6.0",
+        "ruamel.yaml==0.17.17",
         "luddite==1.0.2",
         "cli-ui==0.15.2",
         "packaging==21.3",
         "mergedeep==1.3.4",
-        "yamlpath==3.5.0",
+        "yamlpath==3.6.3",
     ],
     extras_require={
         "test": [
@@ -71,7 +71,7 @@ setup(
             "pre-commit==2.15.0",  # not really for tests, but for development
             "coverage==6.1.2",
             "pytest-cov==3.0.0",
-            "deepdiff",
+            "deepdiff==5.6.0",
         ],
     },
     entry_points={
