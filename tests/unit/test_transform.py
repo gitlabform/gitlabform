@@ -120,3 +120,44 @@ def test__config__with_access_level_names_array():
 
     ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
     assert not ddiff
+
+
+def test__config__with_access_level_names_2():
+    config_yaml = f"""
+    projects_and_groups:
+      foobar/*:
+        group_ldap_links:
+          # "provider" field should contain a value that you can find in the GitLab web UI,
+          # see https://github.com/egnyte/gitlabform/issues/261
+          devops_are_maintainers:
+            provider: "AD"
+            cn: "devops"
+            group_access: maintainer
+          developers_are_developers:
+            provider: "AD"
+            filter: "(employeeType=developer)"
+            group_access: developer
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    AccessLevelsTransformer.transform(configuration)
+
+    config_with_numbers = f"""
+    projects_and_groups:
+      foobar/*:
+        group_ldap_links:
+          # "provider" field should contain a value that you can find in the GitLab web UI,
+          # see https://github.com/egnyte/gitlabform/issues/261
+          devops_are_maintainers:
+            provider: "AD"
+            cn: "devops"
+            group_access: 40
+          developers_are_developers:
+            provider: "AD"
+            filter: "(employeeType=developer)"
+            group_access: 30
+    """
+    configuration_with_numbers = Configuration(config_string=config_with_numbers)
+
+    ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
+    assert not ddiff
