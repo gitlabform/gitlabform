@@ -34,39 +34,41 @@ class AccessLevelsTransformer(ConfigurationTransformer):
         # [.!<100] effectively means that the value is non-numerical
         paths_to_hashes = [
             # # branches, old syntax
-            f"**.push_access_level[.!<100]",
-            f"**.merge_access_level[.!<100]",
-            f"**.unprotect_access_level[.!<100]",
+            "**.push_access_level[.!<100]",
+            "**.merge_access_level[.!<100]",
+            "**.unprotect_access_level[.!<100]",
             # members & group members
-            f"**.access_level[.!<100]",
-            f"**.group_access[.!<100]",
+            "**.access_level[.!<100]",
+            "**.group_access[.!<100]",
             # tags
-            f"**.create_access_level[.!<100]",
+            "**.create_access_level[.!<100]",
         ]
 
-        try:
-            for path in paths_to_hashes:
+        for path in paths_to_hashes:
+            try:
                 for node_coordinate in processor.get_nodes(path):
                     node_coordinate.parent[
                         node_coordinate.parentref
                     ] = AccessLevel.get_value(str(node_coordinate.node))
-        except YAMLPathException:
-            pass
+            except YAMLPathException:
+                pass
 
-        #
+        # there are different than the above, as they are elements of arrays
+        # so we need different search query and an extra condition for
+        # transformation
         paths_to_arrays = [
             # # branches, new GitLab Premium syntax
-            f"**.allowed_to_push.*.[access_level!<100]",
-            f"**.allowed_to_merge.*.[access_level!<100]",
-            f"**.allowed_to_unprotect.*.[access_level!<100]",
+            "**.allowed_to_push.*.[access_level!<100]",
+            "**.allowed_to_merge.*.[access_level!<100]",
+            "**.allowed_to_unprotect.*.[access_level!<100]",
         ]
 
-        try:
-            for path in paths_to_arrays:
+        for path in paths_to_arrays:
+            try:
                 for node_coordinate in processor.get_nodes(path):
                     if node_coordinate.parentref == "access_level":
                         node_coordinate.parent[
                             node_coordinate.parentref
                         ] = AccessLevel.get_value(str(node_coordinate.node))
-        except YAMLPathException:
-            pass
+            except YAMLPathException:
+                pass
