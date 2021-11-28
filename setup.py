@@ -56,7 +56,7 @@ setup(
         "certifi",  # we want the latest root certs for security
         "requests==2.26.0",
         "Jinja2==3.0.3",
-        "MarkupSafe==1.1.1",
+        "MarkupSafe==2.0.1",
         "ruamel.yaml==0.17.10",
         "luddite==1.0.2",
         "cli-ui==0.15.2",
