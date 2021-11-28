@@ -379,10 +379,10 @@ class TestGroupMembersGroups:
               {group}/*:
                 group_members:
                   {users[0]}:
-                    access_level: developer
+                    access_level: owner
                 group_shared_with:
                   {groups[0]}:
-                    group_access_level: owner
+                    group_access_level: developer
                   {groups[1]}:
                     group_access_level: developer
             """
