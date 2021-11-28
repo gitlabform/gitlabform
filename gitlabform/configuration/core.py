@@ -84,6 +84,10 @@ class ConfigurationCore(ABC):
 
         yaml = Parsers.get_yaml_editor()
 
+        # for better backward compatibility with PyYAML (that supports only YAML 1.1) used in the previous
+        # GitLabForm versions, let's force ruamel.yaml to use YAML version 1.1 by default too
+        yaml.version = (1, 1)
+
         if config_string:
             config_string = textwrap.dedent(source)
             verbose("Reading config from the provided string.")
