@@ -1,5 +1,10 @@
 ## Changelog
 
+### 2.9.0
+
+* **Access level names (not only their numbers) are now accepted in the configuration**.
+* More strictness in parsing configuration YAML and better error messages thanks to a switch to different libraries. F.e. hash keys overwriting is not accepted anymore.
+
 ### 2.8.1
 
 * Don't show "Warning: Using group_shared_with: is deprecated" although the user is not really using this config syntax.
