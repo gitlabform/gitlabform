@@ -872,8 +872,8 @@ class TestBranches:
         ) = gitlab.get_only_branch_access_levels(
             group_and_project, "protect_branch_and_allow_merges_access_levels"
         )
-        assert push_access_level is [AccessLevel.NO_ACCESS.value]
-        assert merge_access_level is [AccessLevel.DEVELOPER.value]
+        assert push_access_level == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_level == [AccessLevel.DEVELOPER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
