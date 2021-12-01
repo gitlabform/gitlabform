@@ -95,16 +95,16 @@ Some of the app features are limited because of the GitLab API issues. [Here is 
 
 Run the latest stable version with:
 
-* Docker: `docker run -it -v $(pwd):/config gdubicki/gitlabform:latest gitlabform`.
+* Docker: `docker run -it -v $(pwd):/config ghcr.io/gdubicki/gitlabform:latest gitlabform`.
 * [pipx](https://github.com/pypa/pipx): `pipx run gitlabform`
 
 
 Run the latest 2.* version with:
 
-* Docker: `docker run -it -v $(pwd):/config gdubicki/gitlabform:2 gitlabform`.
+* Docker: `docker run -it -v $(pwd):/config ghcr.io/gdubicki/gitlabform:2 gitlabform`.
 * [pipx](https://github.com/pypa/pipx): `pipx run --spec gitlabform~=2.2.0 gitlabform`
 
-See [this](https://hub.docker.com/r/gdubicki/gitlabform) for all available Docker tags.
+See [this](https://github.com/gdubicki/gitlabform/pkgs/container/gitlabform) for all available Docker tags.
 
 
 Installing with:
