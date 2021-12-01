@@ -1,5 +1,5 @@
 [![version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
-![release date](https://img.shields.io/github/release-date/egnyte/gitlabform)
+![release date](https://img.shields.io/github/release-date/gdubicki/gitlabform)
 ![PyPI downloads](https://img.shields.io/pypi/dm/gitlabform?label=PyPI%20Downloads)
 ![docker pulls](https://img.shields.io/docker/pulls/egnyte/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -7,10 +7,15 @@
 [![codecov](https://codecov.io/gh/egnyte/gitlabform/branch/main/graph/badge.svg?token=NOMttkpB2A)](https://codecov.io/gh/egnyte/gitlabform)
 [![gitlabform](https://snyk.io/advisor/python/gitlabform/badge.svg)](https://snyk.io/advisor/python/gitlabform)
 
-<img src="https://raw.githubusercontent.com/egnyte/gitlabform/main/docs/gitlabform-logo.png" width="600px" alt="logo">
+<img src="https://raw.githubusercontent.com/gdubicki/gitlabform/main/docs/gitlabform-logo.png" width="600px" alt="logo">
 
 GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
+
+### Note
+
+This project was originally hosted on the [Egnyte](https://github.com/Egnyte) organization who is my employer and where
+I developed the initial version of the app. They kindly agreed to give back ownership of this project to me. Thanks!
 
 ## Table of Contents
 
@@ -20,7 +25,7 @@ using hierarchical configuration written in YAML.
   [More cli usage examples](#more-cli-usage-examples),
   [Running in an automated pipeline](#running-in-an-automated-pipeline),
   [Running automatically for new projects](#running-automatically-for-new-projects),
-* History - [Changelog (external file)](https://github.com/egnyte/gitlabform/blob/main/CHANGELOG.md), [Origins](#origins)
+* History - [Changelog (external file)](https://github.com/gdubicki/gitlabform/blob/main/CHANGELOG.md), [Origins](#origins)
 * Join us! - [Contributing](#contributing), [Legal](#legal),
 
 ## Features
@@ -62,8 +67,8 @@ GitLabForm enables you to manage:
 
 ...and a combination of them.
 
-GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/egnyte/gitlabform/blob/main/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
-GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/egnyte/gitlabform/blob/main/docs/FEATURES_DESIGN.md#raw-parameters-passing).
+GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/gdubicki/gitlabform/blob/main/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
+GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/gdubicki/gitlabform/blob/main/docs/FEATURES_DESIGN.md#raw-parameters-passing).
 
 ### Comparison to similar apps
 
@@ -71,14 +76,14 @@ GitLabForm has roughly the same purpose as [GitLab provider](https://www.terrafo
 for [Terraform](https://www.terraform.io/) (which is a tool that we love and which has inspired us to write this app),
 but it has a different set of features and uses a different configuration format.
 
-Please read more about [GitLab provider for Terraform vs GitLabForm](https://github.com/egnyte/gitlabform/blob/main/docs/GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
+Please read more about [GitLab provider for Terraform vs GitLabForm](https://github.com/gdubicki/gitlabform/blob/main/docs/GT_VS_GLF.md). This article includes a link to the feature matrix / comparison sheet between these two tools.
 
 To configure your GitLab instance itself (appearance, application settings, features, license) please check out
 the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-configuration-as-code) project!
 
 ### Limitations
 
-Some of the app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/egnyte/gitlabform/labels/🦊gitlab%20issue). Please check the links to the GitLab issue(s) in their comments and please upvote them if they are affecting you. Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
+Some of the app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/gdubicki/gitlabform/labels/🦊gitlab%20issue). Please check the links to the GitLab issue(s) in their comments and please upvote them if they are affecting you. Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
 
 ## Requirements
 
@@ -90,16 +95,16 @@ Some of the app features are limited because of the GitLab API issues. [Here is 
 
 Run the latest stable version with:
 
-* Docker: `docker run -it -v $(pwd):/config egnyte/gitlabform:latest gitlabform`.
+* Docker: `docker run -it -v $(pwd):/config gdubicki/gitlabform:latest gitlabform`.
 * [pipx](https://github.com/pypa/pipx): `pipx run gitlabform`
 
 
 Run the latest 2.* version with:
 
-* Docker: `docker run -it -v $(pwd):/config egnyte/gitlabform:2 gitlabform`.
+* Docker: `docker run -it -v $(pwd):/config gdubicki/gitlabform:2 gitlabform`.
 * [pipx](https://github.com/pypa/pipx): `pipx run --spec gitlabform~=2.2.0 gitlabform`
 
-See [this](https://hub.docker.com/r/egnyte/gitlabform) for all available Docker tags.
+See [this](https://hub.docker.com/r/gdubicki/gitlabform) for all available Docker tags.
 
 
 Installing with:
@@ -138,7 +143,7 @@ projects_and_groups:
 
 ## Full configuration syntax
 
-See [config.yml](https://github.com/egnyte/gitlabform/blob/main/config.yml) in this repo as a well documented example
+See [config.yml](https://github.com/gdubicki/gitlabform/blob/main/config.yml) in this repo as a well documented example
 of all the features, including configuring all projects in all groups, projects in "my-group" group and specifically
 project "my-group/my-project1".
 
@@ -175,7 +180,7 @@ You can run it with a schedule on `ALL_DEFINED` or `ALL` projects to unify your 
 from the configuration. For example you may allow the users to reconfigure projects during their working hours
 but automate cleaning up the drift each night.
 
-An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](https://github.com/egnyte/gitlabform/blob/main/docs/.gitlab-ci.example.yml)
+An example for running GitLabForm using GitLab CI is provided in the [.gitlab-ci.example.yml](https://github.com/gdubicki/gitlabform/blob/main/docs/.gitlab-ci.example.yml)
 file.
 
 Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is
@@ -186,21 +191,21 @@ For GitLab CI a secure place to set it would be a [Secret/Protected Variable in 
 ## Running automatically for new projects
 
 We have documented some methods of automating running GitLabForm for newly created GitLab projects
-[here](https://github.com/egnyte/gitlabform/blob/main/docs/AUTOMATE_FOR_NEW_PROJECTS.md).
+[here](https://github.com/gdubicki/gitlabform/blob/main/docs/AUTOMATE_FOR_NEW_PROJECTS.md).
 
 ## Contributing
 
-Please see the [contribution guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) for info about all kinds of contributions, like:
+Please see the [contribution guide](https://github.com/gdubicki/gitlabform/blob/main/CONTRIBUTING.md) for info about all kinds of contributions, like:
 * questions, feature requests,
 * documentation and code contributions,
 * other.
 
-[Contribution guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
+[Contribution guide](https://github.com/gdubicki/gitlabform/blob/main/CONTRIBUTING.md) is also the place to look for info how to develop the app locally,
 build it, run the tests and learn about the code guidelines.
 
 
 For detailed info about how the app code has been organized, where is what and where and how to fix bugs and/or
-add new features, please see the [implementation design](https://github.com/egnyte/gitlabform/blob/main/docs/IMPLEMENTATION_DESIGN.md) article.
+add new features, please see the [implementation design](https://github.com/gdubicki/gitlabform/blob/main/docs/IMPLEMENTATION_DESIGN.md) article.
 
 ## Origins
 
@@ -215,7 +220,7 @@ integrations (such as JIRA or Slack) and more.
 
 ## Legal
 
-The app code is licensed under the [MIT](https://github.com/egnyte/gitlabform/blob/main/LICENSE) license.
+The app code is licensed under the [MIT](https://github.com/gdubicki/gitlabform/blob/main/LICENSE) license.
 A few scripts in `dev/` directory are licensed under the [MPL 2.0](http://mozilla.org/MPL/2.0/) license.
 
 

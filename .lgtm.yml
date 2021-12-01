@@ -3,5 +3,5 @@ queries:
   # flags that enable such output
   - exclude: py/clear-text-logging-sensitive-data
   # we import functions for output using "from X import Y" to shorten these calls
-  # to *improve* maintainability (see https://github.com/egnyte/gitlabform/pull/267)
+  # to *improve* maintainability (see https://github.com/gdubicki/gitlabform/pull/267)
   - exclude: py/import-and-import-from

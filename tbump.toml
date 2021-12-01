@@ -1,5 +1,5 @@
 # Uncomment this if your project is hosted on GitHub:
-github_url = "https://github.com/egnyte/gitlabform/"
+github_url = "https://github.com/gdubicki/gitlabform/"
 
 [version]
 current = "2.9.0a1"

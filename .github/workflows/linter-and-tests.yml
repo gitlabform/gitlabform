@@ -2,7 +2,7 @@ name: Linter and tests
 
 # trigger only on pushes to main OR PRs to main
 # to prevent double tests on my own
-# PRs within egnyte/gitlabform repo from a feature
+# PRs within gdubicki/gitlabform repo from a feature
 # branch to main
 on:
   push:

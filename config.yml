@@ -225,7 +225,7 @@ projects_and_groups:
     # https://docs.gitlab.com/ee/api/groups.html#add-ldap-group-link-with-cn-or-filter
     group_ldap_links:
       # "provider" field should contain a value that you can find in the GitLab web UI,
-      # see https://github.com/egnyte/gitlabform/issues/261
+      # see https://github.com/gdubicki/gitlabform/issues/261
       devops_are_maintainers:
         provider: "AD"
         cn: "devops"

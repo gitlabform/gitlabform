@@ -30,7 +30,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            egnyte/gitlabform
+            gdubicki/gitlabform
           # Alpine-based images is the main one, so only it gets the 'latest' tag for public releases
           flavor: |
             latest=auto
@@ -47,7 +47,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            egnyte/gitlabform
+            gdubicki/gitlabform
           flavor: |
             latest=false
           tags: |

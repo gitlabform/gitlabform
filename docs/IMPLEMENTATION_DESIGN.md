@@ -6,7 +6,7 @@ It explains the "why"s of the two key design concepts of this app:
 * hierarchical configuration with inheritance, merging/overwriting and additivity,
 * raw parameters passing
 
-Please also read the usual [contributing guide](https://github.com/egnyte/gitlabform/blob/main/CONTRIBUTING.md) for the basics of how to create PRs,
+Please also read the usual [contributing guide](https://github.com/gdubicki/gitlabform/blob/main/CONTRIBUTING.md) for the basics of how to create PRs,
 the expected style of your code etc. - the "general how"s.
 
 This article purpose is to explain "specific how"s - explain what is where in the code and how to add features
