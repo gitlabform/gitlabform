@@ -35,6 +35,6 @@ You can read more about the last two points in the GitLabForm key features desig
 
 ## Feature matrix/comparison sheet
 
-For your convenience we have prepared [GitLab provider for Terraform vs GitLabForm feature matrix / comparion sheet](http://bit.ly/36LXpRx).
+For your convenience we have prepared [GitLab provider for Terraform vs GitLabForm feature matrix / comparion sheet](https://docs.google.com/spreadsheets/d/1RenC5OoLW_bt8QYrijNP42w8SGBw8JTg1-7RKWgStrQ/edit?usp=sharing).
 Note: this sheet **MAY** contain errors and **WILL** get outdated. Please report these issues in it using comments.
 Thank you!
