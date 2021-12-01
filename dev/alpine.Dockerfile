@@ -7,5 +7,10 @@ RUN apk add --no-cache \
     lua5.3-lpeg
 RUN mkdir gitlabform
 COPY . /gitlabform
-RUN cd gitlabform && python setup.py develop
+
+RUN cd gitlabform \
+    && apk add --no-cache build-base \
+    && python setup.py develop \
+    && apk --purge del build-base
+
 WORKDIR /config
