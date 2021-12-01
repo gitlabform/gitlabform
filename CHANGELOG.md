@@ -4,6 +4,7 @@
 
 * **Access level names (not only their numbers) are now accepted in the configuration**.
 * More strictness in parsing configuration YAML and better error messages thanks to a switch to different libraries. F.e. hash keys overwriting is not accepted anymore.
+* Moved the project from `egnyte/gitlabform` to `gdubicki/gitlabform` and switch to GitHub Registry as the new main Docker registry. 
 
 ### 2.8.1
 
