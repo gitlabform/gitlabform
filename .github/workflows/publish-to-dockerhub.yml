@@ -30,7 +30,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            gdubicki/gitlabform
+            ghcr.io/gdubicki/gitlabform
+            egnyte/gitlabform
           # Alpine-based images is the main one, so only it gets the 'latest' tag for public releases
           flavor: |
             latest=auto
@@ -47,7 +48,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            gdubicki/gitlabform
+            ghcr.io/gdubicki/gitlabform
+            egnyte/gitlabform
           flavor: |
             latest=false
           tags: |
@@ -58,12 +60,21 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      # the legacy egnyte/gitlabform image lands here
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Publish Debian-based image to DockerHub
+      # gdubicki/gitlabform image is going to be here
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          # This token is provided by Actions, you do not need to create your own token
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish Debian-based image to registries
         uses: docker/build-push-action@v2
         with:
           push: true
@@ -72,7 +83,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-debian.outputs.tags }}
           labels: ${{ steps.meta-debian.outputs.labels }}
-      - name: Publish Alpine-based image to DockerHub
+      - name: Publish Alpine-based image to registries
         uses: docker/build-push-action@v2
         with:
           push: true
