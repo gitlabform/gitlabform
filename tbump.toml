@@ -2,7 +2,7 @@
 github_url = "https://github.com/gdubicki/gitlabform/"
 
 [version]
-current = "2.9.0"
+current = "2.9.1"
 
 # Example of a semver regexp.
 # Make sure this matches current_version before
