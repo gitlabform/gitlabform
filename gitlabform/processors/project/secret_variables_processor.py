@@ -4,7 +4,7 @@ from cli_ui import warning
 
 import copy
 import textwrap
-import yaml
+import ez_yaml
 
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
@@ -78,7 +78,7 @@ class SecretVariablesProcessor(AbstractProcessor):
 
             verbose(
                 textwrap.indent(
-                    yaml.dump(current_secret_variables, default_flow_style=False),
+                    ez_yaml.to_string(current_secret_variables),
                     "  ",
                 )
             )
@@ -97,7 +97,7 @@ class SecretVariablesProcessor(AbstractProcessor):
 
         verbose(
             textwrap.indent(
-                yaml.dump(configured_secret_variables, default_flow_style=False),
+                ez_yaml.to_string(configured_secret_variables),
                 "  ",
             )
         )

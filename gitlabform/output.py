@@ -1,8 +1,8 @@
 from logging import debug
+
+import ez_yaml
 from cli_ui import debug as verbose
 from cli_ui import fatal
-
-import yaml
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 
@@ -45,10 +45,7 @@ class EffectiveConfiguration:
     def write_to_file(self):
         if self.output_file:
             try:
-                yaml_configuration = yaml.dump(
-                    self.config,
-                    default_flow_style=False,
-                )
+                yaml_configuration = ez_yaml.to_string(self.config)
                 self.output_file.write(yaml_configuration)
                 self.output_file.close()
             except Exception as e:
