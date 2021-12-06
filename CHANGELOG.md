@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.9.1
+
+* Fix version 2.9.0 not even starting. 🤦‍♂️ Add test to prevent this from happening again.
+
 ### 2.9.0
 
 * **Access level names (not only their numbers) are now accepted in the configuration**.
