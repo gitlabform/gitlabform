@@ -52,6 +52,8 @@ setup(
         "Topic :: Software Development :: Version Control :: Git",
     ],
     packages=find_packages(),
+    package_data={"": ["LICENSE", "version", "*.md", "config.yml"]},
+    include_package_data=True,
     install_requires=[
         "certifi",  # we want the latest root certs for security
         "requests==2.26.0",
