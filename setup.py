@@ -74,7 +74,7 @@ setup(
             "pre-commit==2.16.0",  # not really for tests, but for development
             "coverage==6.2",
             "pytest-cov==3.0.0",
-            "deepdiff==5.6.0",
+            "deepdiff==5.7.0",
         ],
     },
     entry_points={
