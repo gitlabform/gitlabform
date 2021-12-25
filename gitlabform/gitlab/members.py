@@ -18,9 +18,16 @@ class GitLabMembers(GitLabCore):
         ]
 
     def add_member_to_project(
-        self, project_and_group_name, username, access_level, expires_at=None
+        self,
+        project_and_group_name,
+        username,
+        access_level,
+        expires_at=None,
+        user_id=None,
     ):
-        data = {"user_id": self._get_user_id(username), "expires_at": expires_at}
+        if not user_id:
+            user_id = self._get_user_id(username)
+        data = {"user_id": user_id, "expires_at": expires_at}
         if access_level is not None:
             data["access_level"] = access_level
 
@@ -32,11 +39,15 @@ class GitLabMembers(GitLabCore):
             expected_codes=201,
         )
 
-    def remove_member_from_project(self, project_and_group_name, user):
+    def remove_member_from_project(
+        self, project_and_group_name, username, user_id=None
+    ):
+        if not user_id:
+            user_id = self._get_user_id(username)
         # 404 means that the user is already not a member of the project, so let's accept it for idempotency
         return self._make_requests_to_api(
             "projects/%s/members/%s",
-            (project_and_group_name, self._get_user_id(user)),
+            (project_and_group_name, user_id),
             method="DELETE",
             expected_codes=[204, 404],
         )
@@ -62,8 +73,12 @@ class GitLabMembers(GitLabCore):
 
         return final_members
 
-    def add_member_to_group(self, group_name, username, access_level, expires_at=None):
-        data = {"user_id": self._get_user_id(username), "expires_at": expires_at}
+    def add_member_to_group(
+        self, group_name, username, access_level, expires_at=None, user_id=None
+    ):
+        if not user_id:
+            user_id = self._get_user_id(username)
+        data = {"user_id": user_id, "expires_at": expires_at}
         if access_level is not None:
             data["access_level"] = access_level
 
@@ -75,11 +90,13 @@ class GitLabMembers(GitLabCore):
             expected_codes=201,
         )
 
-    def remove_member_from_group(self, group_name, user):
+    def remove_member_from_group(self, group_name, username, user_id=None):
+        if not user_id:
+            user_id = self._get_user_id(username)
         # 404 means that the user is already removed, so let's accept it for idempotency
         return self._make_requests_to_api(
             "groups/%s/members/%s",
-            (group_name, self._get_user_id(user)),
+            (group_name, user_id),
             method="DELETE",
             expected_codes=[204, 404],
         )

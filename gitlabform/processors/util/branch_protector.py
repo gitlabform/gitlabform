@@ -74,7 +74,7 @@ class BranchProtector(object):
                             ]:
                                 # loop over the array of extra param and get the user_id related to user
                                 if "user" in extra_config.keys():
-                                    user_id = self.gitlab.get_user_to_protect_branch(
+                                    user_id = self.gitlab._get_user_id(
                                         extra_config.pop("user")
                                     )
                                     extra_config["user_id"] = user_id
@@ -128,7 +128,10 @@ class BranchProtector(object):
     ):
 
         # for new API any keys needs to be defined...
-        if any(key in requested_configuration for key in self.new_api_keys):
+        if any(
+            key in requested_configuration
+            for key in self.new_api_keys + self.extra_param_keys
+        ):
             return "new"
 
         # ...while for the old API - *all* of them

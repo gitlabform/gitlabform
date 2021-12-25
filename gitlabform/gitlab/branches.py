@@ -100,9 +100,6 @@ class GitLabBranches(GitLabCore):
             "projects/%s/protected_branches/%s", (project_and_group_name, branch)
         )
 
-    def get_user_to_protect_branch(self, user_name):
-        return self._get_user_id(user_name)
-
     def get_only_branch_access_levels(self, project_and_group_name, branch):
         try:
             result = self._make_requests_to_api(

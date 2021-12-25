@@ -57,3 +57,6 @@ gitlab_url.txt
 output.yml
 
 .tox/
+
+/private-key.json
+**/.vagrant/

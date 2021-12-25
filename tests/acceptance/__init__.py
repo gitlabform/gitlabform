@@ -38,9 +38,9 @@ for env_var, file_paths in env_vars_and_file_paths.items():
 gl = GitLab(config_string=CONFIG)
 
 
-def get_random_name():
+def get_random_name(entity: str):
     random_suffix = get_random_suffix()
-    return f"gitlabform__{random_suffix}"
+    return f"gitlabform_{entity}_{random_suffix}"
 
 
 word_file = xp.locate_wordfile()
@@ -48,7 +48,7 @@ my_words = xp.generate_wordlist(wordfile=word_file, min_length=5, max_length=8)
 
 
 def get_random_suffix():
-    return xp.generate_xkcdpassword(wordlist=my_words, numwords=2, delimiter="_")
+    return xp.generate_xkcdpassword(wordlist=my_words, numwords=1, delimiter="_")
 
 
 def get_gitlab():
@@ -94,25 +94,6 @@ def create_project(group_name, project_name):
         DEFAULT_README,
         "Create README",
     )
-
-
-def create_users_in_project(user_base_name, no_of_users, project_and_group):
-    for user_no in range(1, no_of_users + 1):
-        username = user_base_name + str(user_no)
-        try:
-            gl.get_user_by_name(username)
-        except NotFoundException:
-            gl.create_user(
-                username + "@example.com", username + " Example", username, "password"
-            )
-
-        try:
-            gl.add_member_to_project(
-                project_and_group, username, AccessLevel.DEVELOPER_ACCESS.value
-            )
-        except UnexpectedResponseException:
-            # this is fine - user is already in the project
-            pass
 
 
 def create_users(user_base_name, no_of_users):
