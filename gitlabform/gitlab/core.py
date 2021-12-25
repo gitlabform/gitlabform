@@ -3,6 +3,7 @@ import os
 from logging import debug
 from urllib import parse
 
+import ez_yaml
 import pkg_resources
 import requests
 
@@ -221,7 +222,11 @@ class GitLabCore:
                     f"Resource with url='{url}' not found (HTTP 404)!"
                 )
             else:
-                data_output = f"data={dict_data}" if dict_data else f"json={json_data}"
+                data_output = (
+                    f"data={dict_data}"
+                    if dict_data
+                    else f"json='{ez_yaml.to_string(json_data)}'"
+                )
                 raise UnexpectedResponseException(
                     f"Request url='{url}', method={method}, {data_output} failed -"
                     f" expected code(s) {str(expected_codes)},"
