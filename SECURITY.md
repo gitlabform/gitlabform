@@ -11,4 +11,4 @@
 ## Reporting a Vulnerability
 
 Please DO NOT file tickets with security questions or issues reports.
-Send them to gdubicki(at)egnyte.com instead.
+Send them to grzegorz.dubicki(at)gmail.com instead.
