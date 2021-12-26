@@ -38,7 +38,7 @@ else
 fi
 
 cecho b "Pulling GitLab image version '$gitlab_version'..."
-docker pull gitlab/gitlab-ee:$gitlab_version
+docker pull docker.io/gitlab/gitlab-ee:$gitlab_version
 
 cecho b "Preparing to start GitLab..."
 existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}")
@@ -81,7 +81,7 @@ container_id=$(docker run --detach \
     --health-cmd '/healthcheck-and-setup.sh' \
     --health-interval 2s \
     --health-timeout 2m \
-    gitlab/gitlab-ee:$gitlab_version)
+    docker.io/gitlab/gitlab-ee:$gitlab_version)
 
 cecho b "Waiting 3 minutes before starting to check if GitLab has started..."
 cecho b "(Run this in another terminal you want to follow the instance logs:"
