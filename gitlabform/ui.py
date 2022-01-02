@@ -1,3 +1,6 @@
+import json
+import logging
+
 import sys
 from typing import Any
 
@@ -218,3 +221,9 @@ def info_count(color, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> No
     counter_format = "(%{}d/%d)".format(num_digits)
     counter_str = counter_format % (i, n)
     info(color, prefix, reset, counter_str, reset, *rest, **kwargs)
+
+
+def to_json_str(a_dict: dict):
+    # the arguably easiest to read way of showing dict in a single line
+    # is JSON with sorted keys
+    return json.dumps(a_dict, sort_keys=True)

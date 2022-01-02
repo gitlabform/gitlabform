@@ -1,17 +1,12 @@
-from logging import debug
-from cli_ui import debug as verbose
-
 from gitlabform.gitlab import GitLab
-from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.processors.single_entity_processor import SingleEntityProcessor
 
 
-class GroupSettingsProcessor(AbstractProcessor):
+class GroupSettingsProcessor(SingleEntityProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("group_settings", gitlab)
-
-    def _process_configuration(self, group: str, configuration: dict):
-        group_settings = configuration["group_settings"]
-        debug("Group settings BEFORE: %s", self.gitlab.get_group_settings(group))
-        verbose(f"Setting group settings: {group_settings}")
-        self.gitlab.put_group_settings(group, group_settings)
-        debug("Group settings AFTER: %s", self.gitlab.get_group_settings(group))
+        super().__init__(
+            "group_settings",
+            gitlab,
+            get_method_name="get_group_settings",
+            edit_method_name="put_group_settings",
+        )
