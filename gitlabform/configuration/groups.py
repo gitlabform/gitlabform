@@ -1,3 +1,4 @@
+import functools
 from logging import debug
 
 from gitlabform.configuration.core import ConfigurationCore
@@ -20,6 +21,7 @@ class ConfigurationGroups(ConfigurationCore):
                 groups.append(group_name)
         return sorted(groups)
 
+    @functools.lru_cache()
     def get_effective_config_for_group(self, group) -> dict:
         """
         :param group: "group_name"

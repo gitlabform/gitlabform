@@ -1,3 +1,4 @@
+import functools
 from logging import debug
 
 from gitlabform.configuration.groups import ConfigurationGroups
@@ -18,6 +19,7 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
                 projects.append(element)
         return sorted(projects)
 
+    @functools.lru_cache()
     def get_effective_config_for_project(self, group_and_project) -> dict:
         """
         :param group_and_project: "project_group/project_name"
