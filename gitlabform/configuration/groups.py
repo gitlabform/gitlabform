@@ -2,6 +2,7 @@ import functools
 from logging import debug
 
 from gitlabform.configuration.core import ConfigurationCore
+from gitlabform.ui import to_str
 
 
 class ConfigurationGroups(ConfigurationCore):
@@ -29,10 +30,10 @@ class ConfigurationGroups(ConfigurationCore):
         """
 
         common_config = self.get_common_config()
-        debug("Common config: %s" % common_config)
+        debug("Common config: %s", to_str(common_config))
 
         group_config = self.get_group_config(group)
-        debug("Group config: %s" % group_config)
+        debug("Group config: %s", to_str(group_config))
 
         if not group_config and not common_config:
             return {}
@@ -62,21 +63,26 @@ class ConfigurationGroups(ConfigurationCore):
         for element in elements:
             if not last_element:
                 effective_config = self.get_group_config(element)
-                debug("First level config for '%s': %s" % (element, effective_config))
+                debug(
+                    "First level config for '%s': %s", element, to_str(effective_config)
+                )
                 last_element = element
             else:
                 next_level_subgroup = last_element + "/" + element
                 next_level_subgroup_config = self.get_group_config(next_level_subgroup)
                 debug(
-                    "Config for '%s': %s"
-                    % (next_level_subgroup, next_level_subgroup_config)
+                    "Config for '%s': %s",
+                    next_level_subgroup,
+                    to_str(next_level_subgroup_config),
                 )
                 effective_config = self.merge_configs(
                     effective_config, next_level_subgroup_config
                 )
                 debug(
-                    "Merged previous level config for '%s' with config for '%s': %s"
-                    % (last_element, next_level_subgroup, effective_config)
+                    "Merged previous level config for '%s' with config for '%s': %s",
+                    last_element,
+                    next_level_subgroup,
+                    to_str(effective_config),
                 )
                 last_element = last_element + "/" + element
 

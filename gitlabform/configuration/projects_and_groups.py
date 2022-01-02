@@ -2,6 +2,7 @@ import functools
 from logging import debug
 
 from gitlabform.configuration.groups import ConfigurationGroups
+from gitlabform.ui import to_str
 
 
 class ConfigurationProjectsAndGroups(ConfigurationGroups):
@@ -30,23 +31,29 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
         """
 
         common_config = self.get_common_config()
-        debug("Common config: %s" % common_config)
+        debug("Common config: %s", to_str(common_config))
 
         group, project = group_and_project.rsplit("/", 1)
         if "/" in group:
             group_config = self.get_effective_subgroup_config(group)
         else:
             group_config = self.get_group_config(group)
-        debug("Effective group/subgroup config: %s" % group_config)
+        debug("Effective group/subgroup config: %s", to_str(group_config))
 
         project_config = self.get_project_config(group_and_project)
-        debug("Project config: %s" % project_config)
+        debug("Project config: %s", to_str(project_config))
 
         common_and_group_config = self.merge_configs(common_config, group_config)
-        debug("Effective config common+group/subgroup: %s" % common_and_group_config)
+        debug(
+            "Effective config common+group/subgroup: %s",
+            to_str(common_and_group_config),
+        )
 
         effective_config = self.merge_configs(common_and_group_config, project_config)
-        debug("Effective config common+group/subgroup+project: %s" % effective_config)
+        debug(
+            "Effective config common+group/subgroup+project: %s",
+            to_str(effective_config),
+        )
 
         return effective_config
 

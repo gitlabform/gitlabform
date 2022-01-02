@@ -1,11 +1,11 @@
 import json
-import logging
-
-import sys
 from typing import Any
+from urllib.error import URLError
 
 import luddite
 import pkg_resources
+import sys
+from cli_ui import debug as verbose
 from cli_ui import (
     message,
     info,
@@ -21,10 +21,7 @@ from cli_ui import (
     Symbol,
     Token,
 )
-from cli_ui import debug as verbose
-
 from packaging import version as packaging_version
-from urllib.error import URLError
 
 from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT, Entities
 
@@ -223,7 +220,7 @@ def info_count(color, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> No
     info(color, prefix, reset, counter_str, reset, *rest, **kwargs)
 
 
-def to_json_str(a_dict: dict):
-    # the arguably easiest to read way of showing dict in a single line
+def to_str(a_dict: dict) -> str:
+    # arguably the most readable form of a dict in a single line
     # is JSON with sorted keys
     return json.dumps(a_dict, sort_keys=True)
