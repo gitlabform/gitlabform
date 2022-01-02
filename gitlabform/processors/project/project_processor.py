@@ -9,12 +9,9 @@ class ProjectProcessor(AbstractProcessor):
         super().__init__("project", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-        project = configuration["project"]
-        if project:
-            if "archive" in project:
-                if project["archive"]:
-                    verbose("Archiving project...")
-                    self.gitlab.archive(project_and_group)
-                else:
-                    verbose("Unarchiving project...")
-                    self.gitlab.unarchive(project_and_group)
+        if configuration["project"].get("archive"):
+            verbose("Archiving project...")
+            self.gitlab.archive(project_and_group)
+        else:
+            verbose("Unarchiving project...")
+            self.gitlab.unarchive(project_and_group)

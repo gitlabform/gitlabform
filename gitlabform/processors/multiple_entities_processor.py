@@ -42,7 +42,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         self._find_duplicates(project_or_group, entities_in_configuration)
 
         entities_in_gitlab = self.list_method(project_or_group)
-        debug(f"{self.configuration_name} BEFORE: {entities_in_gitlab}")
+        debug(f"{self.configuration_name} BEFORE: ^^^")
 
         for entity_name, entity_config in entities_in_configuration.items():
 
@@ -67,12 +67,14 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                         self.edit_method(
                             project_or_group, entity_in_gitlab, entity_config
                         )
+                        debug(f"{self.configuration_name} AFTER: ^^^")
                     else:
                         verbose(
                             f"Recreating {entity_name} of {self.configuration_name} in {project_or_group}"
                         )
                         self.delete_method(project_or_group, entity_in_gitlab)
                         self.add_method(project_or_group, entity_config)
+                        debug(f"{self.configuration_name} AFTER: ^^^")
                 else:
                     verbose(
                         f"{entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update."
@@ -90,10 +92,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                         f"Adding {entity_name} of {self.configuration_name} in {project_or_group}"
                     )
                     self.add_method(project_or_group, entity_config)
-
-        debug(
-            f"{self.configuration_name} AFTER: %s", self.list_method(project_or_group)
-        )
+                    debug(f"{self.configuration_name} AFTER: ^^^")
 
     def _find_duplicates(self, project_or_group: str, entities_in_configuration: dict):
         for first_key, first_value in entities_in_configuration.items():
@@ -133,22 +132,5 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         for entity_in_gitlab in entities_in_gitlab:
             if self.defining.matches(entity_in_gitlab, entity_in_configuration):
                 return entity_in_gitlab
-
-        return False
-
-    @staticmethod
-    def _needs_update(
-        entity_in_gitlab: dict,
-        entity_in_configuration: dict,
-    ):
-        # in configuration we often don't define every key value because we rely on the defaults.
-        # that's why GitLab API often returns many more keys than we have in the configuration.
-        # so to decide if the entity should be update we are checking only the values of the ones
-        # that are in the configuration.
-
-        for key in entity_in_gitlab.keys():
-            if key in entity_in_configuration.keys():
-                if entity_in_gitlab[key] != entity_in_configuration[key]:
-                    return True
 
         return False

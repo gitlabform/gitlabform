@@ -64,5 +64,22 @@ class AbstractProcessor(ABC):
     ):
         pass
 
-    def _print_diff(self, project_or_project_and_group: str, configuration_to_process):
+    def _print_diff(self, project_or_project_and_group: str, entity_config):
         verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
+
+    @staticmethod
+    def _needs_update(
+        entity_in_gitlab: dict,
+        entity_in_configuration: dict,
+    ):
+        # in configuration we often don't define every key value because we rely on the defaults.
+        # that's why GitLab API often returns many more keys than we have in the configuration.
+        # so to decide if the entity should be update we are checking only the values of the ones
+        # that are in the configuration.
+
+        for key in entity_in_gitlab.keys():
+            if key in entity_in_configuration.keys():
+                if entity_in_gitlab[key] != entity_in_configuration[key]:
+                    return True
+
+        return False

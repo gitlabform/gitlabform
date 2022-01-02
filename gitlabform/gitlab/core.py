@@ -1,9 +1,8 @@
-import json
+import functools
 import os
 from logging import debug
 from urllib import parse
 
-import ez_yaml
 import pkg_resources
 import requests
 
@@ -16,6 +15,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from gitlabform.configuration import Configuration
+from gitlabform.ui import to_json_str
 
 
 class GitLabCore:
@@ -66,6 +66,7 @@ class GitLabCore:
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
 
+    @functools.lru_cache()
     def _get_user_id(self, username):
         users = self._make_requests_to_api("users?username=%s", username, "GET")
 
@@ -79,14 +80,13 @@ class GitLabCore:
 
         return users[0]["id"]
 
-    def _get_user(self, user_id):
-        return self._make_requests_to_api("users/%s", str(user_id), "GET")
-
+    @functools.lru_cache()
     def _get_group_id(self, path):
         group = self._make_requests_to_api("groups/%s", path, "GET")
         # TODO: add tests for all that uses this and then stop converting these ints to strings here
         return str(group["id"])
 
+    @functools.lru_cache()
     def _get_project_id(self, project_and_group):
         # This is a NEW workaround for https://github.com/gitlabhq/gitlabhq/issues/8290
         result = self.get_project(project_and_group)
@@ -186,35 +186,24 @@ class GitLabCore:
                 "You need to pass the data either as dict (dict_data) or JSON (json_data), not both!"
             )
 
-        url = (
-            self.url
-            + "/api/v4/"
-            + self._format_with_url_encoding(path_as_format_string, args)
-        )
-        debug(
-            "url = %s , method = %s , data = %s, json = %s",
-            url,
-            method,
-            json.dumps(dict_data, sort_keys=True),
-            json.dumps(json_data, sort_keys=True),
-        )
+        url = f"{self.url}/api/v4/{self._format_with_url_encoding(path_as_format_string, args)}"
         if dict_data:
+            debug(f"===> data = {to_json_str(dict_data)}")
             response = self.session.request(
                 method, url, data=dict_data, timeout=self.timeout
             )
         elif json_data:
+            debug(f"===> json = {to_json_str(json_data)}")
             response = self.session.request(
                 method, url, json=json_data, timeout=self.timeout
             )
         else:
             response = self.session.request(method, url, timeout=self.timeout)
-        debug("response code=%s" % response.status_code)
 
         if response.status_code in expected_codes:
             # if we accept error responses then they will likely not contain a JSON body
             # so fake it to fix further calls to response.json()
             if response.status_code == 204 or (400 <= response.status_code <= 499):
-                debug("faking response body to be {}")
                 response.json = lambda: {}
         else:
             if response.status_code == 404:
@@ -223,19 +212,19 @@ class GitLabCore:
                 )
             else:
                 data_output = (
-                    f"data={dict_data}"
+                    f"data='{to_json_str(dict_data)}' "
                     if dict_data
-                    else f"json='{ez_yaml.to_string(json_data)}'"
+                    else f"json='{to_json_str(json_data)}' "
                 )
                 raise UnexpectedResponseException(
-                    f"Request url='{url}', method={method}, {data_output} failed -"
+                    f"Request url='{url}', method={method}, {data_output}failed -"
                     f" expected code(s) {str(expected_codes)},"
                     f" got code {response.status_code} & body: '{response.text}'",
                     response.status_code,
                     response.text,
                 )
-
-        debug("response json=%s" % json.dumps(response.json(), sort_keys=True))
+        if response.json():
+            debug(f"<--- json = {to_json_str(response.json())}")
         return response
 
     @staticmethod

@@ -214,7 +214,7 @@ class GitLabProjects(GitLabCore):
         #     'setting2': value2,
         # }
         # ..as documented at: https://docs.gitlab.com/ce/api/projects.html#edit-project
-        self._make_requests_to_api(
+        return self._make_requests_to_api(
             "projects/%s",
             project_and_group_name,
             "PUT",

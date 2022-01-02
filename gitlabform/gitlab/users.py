@@ -16,7 +16,7 @@ class GitLabUsers(GitLabCore):
     def get_user_by_name(self, username, user_id=None):
         if not user_id:
             user_id = self._get_user_id(username)
-        return self._get_user(user_id)
+        return self._make_requests_to_api("users/%s", str(user_id), "GET")
 
     def delete_user(self, username, user_id=None):
         if not user_id:
