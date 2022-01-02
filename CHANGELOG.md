@@ -1,5 +1,11 @@
 ## Changelog
 
+### 2.9.2
+
+* Slightly faster thanks to making less requests to GitLab.
+* With debug enabled a lot less duplication and a more readable output of dicts (as JSONs).
+* **For Contributors** Faster tests and improved usage of fixtures.
+
 ### 2.9.1
 
 * Fix version 2.9.0 not even starting. 🤦‍♂️ Add test to prevent this from happening again.
