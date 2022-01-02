@@ -15,7 +15,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from gitlabform.configuration import Configuration
-from gitlabform.ui import to_json_str
+from gitlabform.ui import to_str
 
 
 class GitLabCore:
@@ -188,12 +188,12 @@ class GitLabCore:
 
         url = f"{self.url}/api/v4/{self._format_with_url_encoding(path_as_format_string, args)}"
         if dict_data:
-            debug(f"===> data = {to_json_str(dict_data)}")
+            debug(f"===> data = {to_str(dict_data)}")
             response = self.session.request(
                 method, url, data=dict_data, timeout=self.timeout
             )
         elif json_data:
-            debug(f"===> json = {to_json_str(json_data)}")
+            debug(f"===> json = {to_str(json_data)}")
             response = self.session.request(
                 method, url, json=json_data, timeout=self.timeout
             )
@@ -212,9 +212,9 @@ class GitLabCore:
                 )
             else:
                 data_output = (
-                    f"data='{to_json_str(dict_data)}' "
+                    f"data='{to_str(dict_data)}' "
                     if dict_data
-                    else f"json='{to_json_str(json_data)}' "
+                    else f"json='{to_str(json_data)}' "
                 )
                 raise UnexpectedResponseException(
                     f"Request url='{url}', method={method}, {data_output}failed -"
@@ -224,7 +224,7 @@ class GitLabCore:
                     response.text,
                 )
         if response.json():
-            debug(f"<--- json = {to_json_str(response.json())}")
+            debug(f"<--- json = {to_str(response.json())}")
         return response
 
     @staticmethod
