@@ -1,10 +1,14 @@
 ## Changelog
 
-### 2.9.2
+### 2.10.0
 
-* Slightly faster thanks to making less requests to GitLab.
+* **Deleting deploy keys is now possible**. This partially implements [#193](https://github.com/gdubicki/gitlabform/issues/193). Also completely replace the implementation of deploy keys, secret variables and group secret variables with a new universal one. This possibly fixes [#19](https://github.com/gdubicki/gitlabform/issues/19).
+* About 10% faster in some cases thanks to making less requests to GitLab.
 * With debug enabled a lot less duplication and a more readable output of dicts (as JSONs).
+* **For Contributors** Introduce `SingleEntityProcessor` that generalizes editing things that are single per project, f.e. settings or push rules set. It does not edit entities if there are not changes to be applied. Using it implementing new features can be super fast! (See also `MultipleEntitiesProcessor` added in v2.2.0).
 * **For Contributors** Faster tests and improved usage of fixtures.
+
+(A pre-release of 2.9.2 RC1 contained some of the above changes.)
 
 ### 2.9.1
 
