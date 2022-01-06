@@ -78,6 +78,9 @@ projects_and_groups:
         key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)"
         title: other_ssh_key_name_that_is_shown_in_gitlab
         can_push: false
+      ensure_to_remove_this_one:
+        title: different_key_title
+        delete: true
 
     # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
     secret_variables:

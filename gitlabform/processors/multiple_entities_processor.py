@@ -35,20 +35,39 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         else:
             self.edit_method = None
 
+    def _can_proceed(self, project_or_group: str, configuration: dict):
+        return True
+
     def _process_configuration(self, project_or_group: str, configuration: dict):
+
+        if not self._can_proceed(project_or_group, configuration):
+            return
 
         entities_in_configuration = configuration[self.configuration_name]
 
+        # TODO: move/convert this to a configuration validation phase
         self._find_duplicates(project_or_group, entities_in_configuration)
 
         entities_in_gitlab = self.list_method(project_or_group)
         debug(f"{self.configuration_name} BEFORE: ^^^")
 
+        # 1. group entities into 3 groups:
+        # a) only in configuration,
+        # b) in both configuration and gitlab (matching defining keys),
+        # c) only in gitlab,
+
+        # 2. if "enforce", then delete c)
+        # TODO: implement this.
+
+        # 3. update b), if needed (or delete them if marked as "delete")
+
+        # 4. add a) (or do nothing if marked as "delete")
+
         for entity_name, entity_config in entities_in_configuration.items():
 
             entity_in_gitlab = self._is_in_gitlab(entity_config, entities_in_gitlab)
             if entity_in_gitlab:
-                if "delete" in entity_config and entity_config["delete"]:
+                if entity_config.get("delete", False):
                     self._validate_required_to_delete(
                         project_or_group, entity_name, entity_config
                     )
@@ -80,7 +99,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                         f"{entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update."
                     )
             else:
-                if "delete" in entity_config and entity_config["delete"]:
+                if entity_config.get("delete", False):
                     verbose(
                         f"{entity_name} of {self.configuration_name} in {project_or_group} already doesn't exist."
                     )

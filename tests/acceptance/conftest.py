@@ -25,12 +25,23 @@ def group_and_project(group, project):
 
 
 @pytest.fixture(scope="function")
-def group_and_project_for_function(group, project):
-    return f"{group}/{project}"
+def group_and_project_for_function(group, project_for_function):
+    return f"{group}/{project_for_function}"
 
 
 @pytest.fixture(scope="class")
 def group():
+    group_name = get_random_name("group")
+    create_group(group_name)
+
+    yield group_name
+
+    gl = get_gitlab()
+    gl.delete_group(group_name)
+
+
+@pytest.fixture(scope="function")
+def group_for_function():
     group_name = get_random_name("group")
     create_group(group_name)
 
@@ -67,6 +78,17 @@ def sub_group(group):
 
 @pytest.fixture(scope="class")
 def project(group):
+    project_name = get_random_name("project")
+    create_project(group, project_name)
+
+    yield project_name
+
+    gl = get_gitlab()
+    gl.delete_project(f"{group}/{project_name}")
+
+
+@pytest.fixture(scope="function")
+def project_for_function(group):
     project_name = get_random_name("project")
     create_project(group, project_name)
 
