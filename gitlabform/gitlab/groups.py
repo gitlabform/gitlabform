@@ -122,44 +122,6 @@ class GitLabGroups(GitLabCore):
             "groups/%s", project_and_group_name, "PUT", group_settings
         )
 
-    def post_group_secret_variable(self, group, secret_variable):
-        # secret_variable has to be like documented at:
-        # https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
-        self._make_requests_to_api(
-            "groups/%s/variables", group, "POST", secret_variable, expected_codes=201
-        )
-
-    def put_group_secret_variable(self, group, secret_variable):
-        # secret_variable has to be like documented at:
-        # https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
-        self._make_requests_to_api(
-            "groups/%s/variables/%s",
-            (group, secret_variable["key"]),
-            "PUT",
-            secret_variable,
-        )
-
-    def get_group_secret_variable(self, group, secret_variable_key):
-        return self._make_requests_to_api(
-            "groups/%s/variables/%s", (group, secret_variable_key)
-        )["value"]
-
-    def get_group_secret_variable_object(self, group, secret_variable_key):
-        return self._make_requests_to_api(
-            "groups/%s/variables/%s", (group, secret_variable_key)
-        )
-
-    def get_group_secret_variables(self, group):
-        return self._make_requests_to_api("groups/%s/variables", group)
-
-    def delete_group_secret_variable(self, group, secret_variable):
-        self._make_requests_to_api(
-            "groups/%s/variables/%s",
-            (group, secret_variable),
-            "DELETE",
-            expected_codes=[200, 202, 204, 404],
-        )
-
     def get_group_shared_with(self, group):
         group = self.get_group_case_insensitive(group)
 

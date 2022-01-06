@@ -1,4 +1,3 @@
-from logging import debug
 from cli_ui import debug as verbose
 from cli_ui import warning
 
@@ -7,62 +6,37 @@ import textwrap
 import ez_yaml
 
 from gitlabform.gitlab import GitLab
-from gitlabform.gitlab.core import NotFoundException
-from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.difference_logger import hide
+from gitlabform.processors.defining_keys import Key, And
+from gitlabform.processors.multiple_entities_processor import MultipleEntitiesProcessor
 
 
-class SecretVariablesProcessor(AbstractProcessor):
+class SecretVariablesProcessor(MultipleEntitiesProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("secret_variables", gitlab)
+        super().__init__(
+            "secret_variables",
+            gitlab,
+            list_method_name="get_secret_variables",
+            add_method_name="post_secret_variable",
+            delete_method_name="delete_secret_variable",
+            defining=Key("key"),
+            required_to_create_or_update=And(Key("key"), Key("value")),
+            edit_method_name="put_secret_variable",
+        )
 
-    def _process_configuration(self, project_and_group: str, configuration: dict):
+    def _can_proceed(self, project_or_group: str, configuration: dict):
         if (
-            self.gitlab.get_project_settings(project_and_group)["builds_access_level"]
+            self.gitlab.get_project_settings(project_or_group).get(
+                "builds_access_level"
+            )
             == "disabled"
         ):
             warning(
                 "Builds disabled in this project so I can't set secret variables here."
             )
-            return
-
-        debug(
-            "Secret variables BEFORE: %s",
-            self.gitlab.get_secret_variables(project_and_group),
-        )
-
-        for secret_variable in sorted(configuration["secret_variables"]):
-
-            if "delete" in configuration["secret_variables"][secret_variable]:
-                key = configuration["secret_variables"][secret_variable]["key"]
-                if configuration["secret_variables"][secret_variable]["delete"]:
-                    verbose(
-                        f"Deleting {secret_variable}: {key} in project {project_and_group}"
-                    )
-                    try:
-                        self.gitlab.delete_secret_variable(project_and_group, key)
-                    except:
-                        warning(
-                            f"Could not delete variable {key} in group {project_and_group}"
-                        )
-                    continue
-
-            verbose(f"Setting secret variable: {secret_variable}")
-            try:
-                self.gitlab.put_secret_variable(
-                    project_and_group,
-                    configuration["secret_variables"][secret_variable],
-                )
-            except NotFoundException:
-                self.gitlab.post_secret_variable(
-                    project_and_group,
-                    configuration["secret_variables"][secret_variable],
-                )
-
-        debug(
-            "Secret variables AFTER: %s",
-            self.gitlab.get_secret_variables(project_and_group),
-        )
+            return False
+        else:
+            return True
 
     def _print_diff(self, project_and_group: str, configuration):
 

@@ -211,11 +211,13 @@ class GitLabCore:
                     f"Resource with url='{url}' not found (HTTP 404)!"
                 )
             else:
-                data_output = (
-                    f"data='{to_str(dict_data)}' "
-                    if dict_data
-                    else f"json='{to_str(json_data)}' "
-                )
+                if dict_data:
+                    data_output = f"data='{to_str(dict_data)}' "
+                elif json_data:
+                    data_output = f"json='{to_str(json_data)}' "
+                else:
+                    data_output = ""
+
                 raise UnexpectedResponseException(
                     f"Request url='{url}', method={method}, {data_output}failed -"
                     f" expected code(s) {str(expected_codes)},"
