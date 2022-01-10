@@ -1,6 +1,6 @@
 ## Changelog
 
-### 2.10.0
+### 2.10.0 (& 2.10.0rc1)
 
 * **Deleting deploy keys is now possible**. This partially implements [#193](https://github.com/gdubicki/gitlabform/issues/193). Also completely replace the implementation of deploy keys, secret variables and group secret variables with a new universal one. This possibly fixes [#19](https://github.com/gdubicki/gitlabform/issues/19).
 * About 10% faster in some cases thanks to making less requests to GitLab.
