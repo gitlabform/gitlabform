@@ -110,7 +110,7 @@ projects_and_groups:
       only_allow_merge_if_all_discussions_are_resolved: true
 
       # Container Registry cleanup policies
-      # https://docs.gitlab.com/ee/user/packages/container_registry/#use-the-cleanup-policy-api
+      # https://docs.gitlab.com/ee/user/packages/container_registry/reduce_container_registry_storage.html#use-the-cleanup-policy-api
       container_expiration_policy_attributes:
         cadence: "1month"
         enabled: true
