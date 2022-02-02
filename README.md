@@ -1,6 +1,6 @@
 [![version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
 ![release date](https://img.shields.io/github/release-date/gdubicki/gitlabform)
-![PyPI downloads](https://img.shields.io/pypi/dm/gitlabform?label=PyPI%20Downloads)
+[![Downloads](https://pepy.tech/badge/gitlabform/month)](https://pepy.tech/project/gitlabform)
 ![docker pulls](https://img.shields.io/docker/pulls/egnyte/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/egnyte/gitlabform?label=code%20quality)](https://lgtm.com/projects/g/egnyte/gitlabform/context:python)
