@@ -12,6 +12,7 @@ from yamlpath.common import Parsers
 from yamlpath.wrappers import ConsolePrinter
 
 from gitlabform import EXIT_INVALID_INPUT
+from ruamel.yaml.comments import CommentedMap
 
 
 class ConfigurationCore(ABC):
@@ -168,7 +169,28 @@ class ConfigurationCore(ABC):
         :return: merge more general config with more specific configs.
                  More specific config values take precedence over more general ones.
         """
-        return dict(merge({}, more_general_config, more_specific_config))
+
+        merged_dict = merge({}, more_general_config, more_specific_config)
+
+        def break_inheritance(specific_config, prev_key=""):
+            for key, value in specific_config.items():
+                if "inherit" == key:
+                    break_inheritance_helper(merged_dict, prev_key, specific_config)
+                elif type(value) is CommentedMap:
+                    break_inheritance(value, key)
+
+        def break_inheritance_helper(merged_config, specific_key="", specific_value=""):
+            for key, value in merged_config.items():
+                if specific_key == key:
+                    merged_config[key] = dict(specific_value)
+                    del merged_config[key]["inherit"]
+                    break
+                elif type(value) is CommentedMap:
+                    break_inheritance_helper(value, specific_key, specific_value)
+
+        break_inheritance(more_specific_config)
+
+        return dict(merged_dict)
 
 
 class ConfigFileNotFoundException(Exception):
