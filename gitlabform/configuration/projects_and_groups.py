@@ -41,15 +41,22 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
         debug("Effective group/subgroup config: %s", to_str(group_config))
 
         project_config = self.get_project_config(group_and_project)
-        debug("Project config: %s", to_str(project_config))
+        debug("\nProject config: %s", to_str(project_config))
 
-        common_and_group_config = self.merge_configs(common_config, group_config)
+        common_and_group_config = self.merge_configs(
+            common_config, group_config, general="common", specific="group"
+        )
         debug(
             "Effective config common+group/subgroup: %s",
             to_str(common_and_group_config),
         )
 
-        effective_config = self.merge_configs(common_and_group_config, project_config)
+        effective_config = self.merge_configs(
+            common_and_group_config,
+            project_config,
+            general="common_and_group",
+            specific="project",
+        )
         debug(
             "Effective config common+group/subgroup+project: %s",
             to_str(effective_config),
