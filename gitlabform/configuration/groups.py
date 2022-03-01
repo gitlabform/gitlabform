@@ -38,7 +38,18 @@ class ConfigurationGroups(ConfigurationCore):
         if not group_config and not common_config:
             return {}
 
-        return self.merge_configs(common_config, group_config)
+        if common_config:
+            self.validate_break_inheritance_flag(
+                common_config, level="common", parent=""
+            )
+        elif not common_config and group_config:
+            self.validate_break_inheritance_flag(
+                group_config, level="group", parent="empty"
+            )
+
+        return self.merge_configs(
+            common_config, group_config, general="common", specific="group"
+        )
 
     def get_effective_subgroup_config(self, subgroup):
 
@@ -75,8 +86,19 @@ class ConfigurationGroups(ConfigurationCore):
                     next_level_subgroup,
                     to_str(next_level_subgroup_config),
                 )
+
+                if effective_config:
+                    self.validate_break_inheritance_flag(
+                        effective_config, level="group", parent=""
+                    )
+                elif not effective_config and next_level_subgroup_config:
+                    self.validate_break_inheritance_flag(
+                        next_level_subgroup_config, level="subgroup", parent="empty"
+                    )
+
                 effective_config = self.merge_configs(
-                    effective_config, next_level_subgroup_config
+                    effective_config,
+                    next_level_subgroup_config,
                 )
                 debug(
                     "Merged previous level config for '%s' with config for '%s': %s",
