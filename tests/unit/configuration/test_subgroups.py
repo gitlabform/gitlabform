@@ -109,12 +109,13 @@ def test__get_effective_config_for_project__project_from_config__level2(
 def test__get_effective_config_for_subgroup(
     configuration_with_subgroups,
 ):
-    effective_config = configuration_with_subgroups.get_effective_config_for_group(
+    effective_config = configuration_with_subgroups.get_effective_subgroup_config(
         "some_group/subgroup"
     )
 
     assert effective_config == {
         "group_members": {
+            "my-user": {"access_level": 10},
             "my-user2": {
                 "access_level": 20,
             },
