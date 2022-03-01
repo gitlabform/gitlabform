@@ -164,9 +164,36 @@ class ConfigurationCore(ABC):
         pass
 
     @staticmethod
-    def merge_configs(
-        more_general_config, more_specific_config, **config_level
-    ) -> dict:
+    def validate_break_inheritance_flag(config, **kwargs):
+        has_invalid_flag = False
+        level = None
+        for key, value in config.items():
+            if "inherit" == key:
+                if kwargs["parent"] == "empty" and (
+                    kwargs["level"] == "group"
+                    or kwargs["level"] == "project"
+                    or kwargs["level"] == "subgroup"
+                ):
+                    level = kwargs["level"]
+                    has_invalid_flag = True
+                elif kwargs["level"] == "common":
+                    level = "common"
+                    has_invalid_flag = True
+            if has_invalid_flag:
+                fatal(
+                    "The inheritance break flag cannot be placed at the {config_level} level\n"
+                    "because {config_level} level is the highest level in the configuration file.\n".format(
+                        config_level=level
+                    ),
+                    exit_code=EXIT_PROCESSING_ERROR,
+                )
+            elif type(value) is CommentedMap:
+                ConfigurationCore.validate_break_inheritance_flag(
+                    value, level=kwargs["level"], parent=kwargs["parent"]
+                )
+
+    @staticmethod
+    def merge_configs(more_general_config, more_specific_config) -> dict:
         """
         :return: merge more general config with more specific configs.
                  More specific config values take precedence over more general ones.
@@ -174,37 +201,11 @@ class ConfigurationCore(ABC):
 
         merged_dict = merge({}, more_general_config, more_specific_config)
 
-        def validate_break_inheritance_flag(config, is_general_config):
-            has_invalid_flag = False
-            level = None
-            for key, value in config.items():
-                if "inherit" == key:
-                    # more_general_config is empty and more_specific_config is either group level or project level
-                    if not more_general_config and (
-                        config_level["specific"] == "group"
-                        or config_level["specific"] == "project"
-                    ):
-                        level = config_level["specific"]
-                        has_invalid_flag = True
-                    # more_general_config is common level and checking more_general_config
-                    elif config_level["general"] == "common" and is_general_config:
-                        level = config_level["general"]
-                        has_invalid_flag = True
-                    if has_invalid_flag:
-                        fatal(
-                            "The inheritance break flag cannot be placed at the {config_level} level\n"
-                            "because {config_level} level is the highest level in the configuration file.\n".format(
-                                config_level=level
-                            ),
-                            exit_code=EXIT_PROCESSING_ERROR,
-                        )
-                elif type(value) is CommentedMap:
-                    validate_break_inheritance_flag(value, is_general_config)
-
         def break_inheritance(specific_config, parent_key=""):
             for key, value in specific_config.items():
                 if "inherit" == key:
                     replace_config_sections(merged_dict, parent_key, specific_config)
+                    break
                 elif type(value) is CommentedMap:
                     break_inheritance(value, key)
 
@@ -216,8 +217,6 @@ class ConfigurationCore(ABC):
                 elif type(value) is CommentedMap:
                     replace_config_sections(value, specific_key, specific_config)
 
-        validate_break_inheritance_flag(more_general_config, True)
-        validate_break_inheritance_flag(more_specific_config, False)
         break_inheritance(more_specific_config)
 
         return dict(merged_dict)
