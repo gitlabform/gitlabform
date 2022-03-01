@@ -43,19 +43,32 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
         project_config = self.get_project_config(group_and_project)
         debug("\nProject config: %s", to_str(project_config))
 
+        if common_config:
+            self.validate_break_inheritance_flag(
+                common_config, level="common", parent=""
+            )
+        elif not common_config and group_config:
+            self.validate_break_inheritance_flag(
+                group_config, level="group", parent="empty"
+            )
+
         common_and_group_config = self.merge_configs(
-            common_config, group_config, general="common", specific="group"
+            common_config,
+            group_config,
         )
         debug(
             "Effective config common+group/subgroup: %s",
             to_str(common_and_group_config),
         )
 
+        if not common_and_group_config and project_config:
+            self.validate_break_inheritance_flag(
+                project_config, level="project", parent="empty"
+            )
+
         effective_config = self.merge_configs(
             common_and_group_config,
             project_config,
-            general="common_and_group",
-            specific="project",
         )
         debug(
             "Effective config common+group/subgroup+project: %s",
