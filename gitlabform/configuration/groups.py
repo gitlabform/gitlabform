@@ -47,9 +47,7 @@ class ConfigurationGroups(ConfigurationCore):
                 group_config, level="group", parent="empty"
             )
 
-        return self.merge_configs(
-            common_config, group_config, general="common", specific="group"
-        )
+        return self.merge_configs(common_config, group_config)
 
     def get_effective_subgroup_config(self, subgroup):
 
