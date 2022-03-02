@@ -37,7 +37,28 @@ def configuration_with_invalid_inheritance_break_set_at_subgroup_level():
 
 
 @pytest.fixture
-def configuration_with_subgroups_and_projects():
+def configuration_with_inheritance_break_set_at_subgroups_level():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      some_group/*:
+        group_members:
+          my-user:
+            access_level: developer
+        enforce_group_members: true
+
+      some_group/subgroup/*:
+        group_members:
+          inherit: false
+          my-user2:
+            access_level: maintainer
+        enforce_group_members: true
+    """
+    return Configuration(config_string=config_yaml)
+
+
+@pytest.fixture
+def configuration_with_inheritance_break_from_subgroups_set_at_project_level():
     config_yaml = """
     ---
     projects_and_groups:
@@ -71,6 +92,7 @@ def configuration_with_subgroups_and_projects():
 
       some_group/subgroup_level_1/some_project:
           project_settings:
+            inherit: false
             bar: something_else2
           hooks:
             b:
@@ -78,31 +100,11 @@ def configuration_with_subgroups_and_projects():
 
       some_group/subgroup_level_1/subgroup_level_2/some_project:
           project_settings:
+            inherit: false
             bar: something_else3
           hooks:
             b:
               bar: something_else3
-    """
-    return Configuration(config_string=config_yaml)
-
-
-@pytest.fixture
-def configuration_with_subgroups():
-    config_yaml = """
-    ---
-    projects_and_groups:
-      some_group/*:
-        group_members:
-          my-user:
-            access_level: 10
-        enforce_group_members: true
-
-      some_group/subgroup/*:
-        group_members:
-          inherit: false
-          my-user2:
-            access_level: 20
-        enforce_group_members: true
     """
     return Configuration(config_string=config_yaml)
 
@@ -129,48 +131,53 @@ def test__get_effective_config_for_group__with_invalid_inheritance_break_set_at_
     assert exception.value.code == 2
 
 
-def test__get_effective_config_for_project__project_from_config__level1(
-    configuration_with_subgroups_and_projects,
+def test__get_effective_config_for_subgroup__with_break_inheritance_from_group_level_set_at_subgroup_level(
+    configuration_with_inheritance_break_set_at_subgroups_level,
 ):
-    effective_config = (
-        configuration_with_subgroups_and_projects.get_effective_config_for_project(
-            "some_group/subgroup_level_1/some_project"
-        )
-    )
-
-    additive__project_settings = effective_config["project_settings"]
-
-    # project and only subgroup level 1
-    assert additive__project_settings == {"foo": "bar2", "bar": "something_else2"}
-
-
-def test__get_effective_config_for_project__project_from_config__level2(
-    configuration_with_subgroups_and_projects,
-):
-    effective_config = (
-        configuration_with_subgroups_and_projects.get_effective_config_for_project(
-            "some_group/subgroup_level_1/subgroup_level_2/some_project"
-        )
-    )
-
-    additive__project_settings = effective_config["project_settings"]
-
-    # project and only subgroup level 2
-    assert additive__project_settings == {"foo": "bar3", "bar": "something_else3"}
-
-
-def test__get_effective_config_for_subgroup(
-    configuration_with_subgroups,
-):
-    effective_config = configuration_with_subgroups.get_effective_subgroup_config(
+    effective_config = configuration_with_inheritance_break_set_at_subgroups_level.get_effective_subgroup_config(
         "some_group/subgroup"
     )
 
     assert effective_config == {
         "group_members": {
+            "inherit": False,
             "my-user2": {
-                "access_level": 20,
+                "access_level": "maintainer",
             },
         },
         "enforce_group_members": True,
+    }
+
+
+def test__get_effective_config_for_level_1_project__with_inheritance_break_from_subgroups_set_at_project_level(
+    configuration_with_inheritance_break_from_subgroups_set_at_project_level,
+):
+    effective_config = configuration_with_inheritance_break_from_subgroups_set_at_project_level.get_effective_config_for_project(
+        "some_group/subgroup_level_1/some_project"
+    )
+
+    # project and only subgroup level 1
+    assert effective_config == {
+        "project_settings": {
+            "inherit": False,
+            "bar": "something_else2",
+        },
+        "hooks": {"a": {"foo": "bar2"}, "b": {"bar": "something_else2"}},
+    }
+
+
+def test__get_effective_config_for_level_2_project__with_inheritance_break_from_subgroups_set_at_project_level(
+    configuration_with_inheritance_break_from_subgroups_set_at_project_level,
+):
+    effective_config = configuration_with_inheritance_break_from_subgroups_set_at_project_level.get_effective_config_for_project(
+        "some_group/subgroup_level_1/subgroup_level_2/some_project"
+    )
+
+    # project and only subgroup level 2
+    assert effective_config == {
+        "project_settings": {
+            "inherit": False,
+            "bar": "something_else3",
+        },
+        "hooks": {"a": {"foo": "bar3"}, "b": {"bar": "something_else3"}},
     }
