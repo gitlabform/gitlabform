@@ -247,7 +247,6 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_multi
     secret_variables = effective_config["secret_variables"]
 
     assert secret_variables == {
-        "inherit": False,
         "second": {"key": "bizz", "value": "buzz"},
     }
 
@@ -263,7 +262,6 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
 
     assert secret_variables == {
         "first": {"key": "foo", "value": "bar"},
-        "inherit": False,
         "second": {"key": "bizz", "value": "buzz"},
     }
 
@@ -283,7 +281,6 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
             }
         },
         "secret_variables": {
-            "inherit": False,
             "second": {"key": "bizz", "value": "buzz"},
         },
     }
@@ -298,7 +295,6 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_group
 
     assert effective_config == {
         "secret_variables": {
-            "inherit": False,
             "second": {"key": "bizz", "value": "buzz"},
         },
         "public_variables": {"key": "fizz", "value": "fuzz"},
@@ -329,12 +325,10 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
 
     assert effective_config == {
         "secret_variables": {
-            "inherit": False,
             "first": {"key": "foo", "value": "bar"},
             "second": {"key": "bizz", "value": "buzz"},
         },
         "members": {
-            "inherit": False,
             "users": {
                 "user3": "maintainer",
                 "user4": "maintainer",

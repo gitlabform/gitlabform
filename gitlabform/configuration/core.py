@@ -212,6 +212,7 @@ class ConfigurationCore(ABC):
         def replace_config_sections(merged_config, specific_key, specific_config):
             for key, value in merged_config.items():
                 if specific_key == key:
+                    del specific_config["inherit"]
                     merged_config[key] = specific_config
                     break
                 elif type(value) is CommentedMap:
