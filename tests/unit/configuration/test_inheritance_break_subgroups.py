@@ -140,7 +140,6 @@ def test__get_effective_config_for_subgroup__with_break_inheritance_from_group_l
 
     assert effective_config == {
         "group_members": {
-            "inherit": False,
             "my-user2": {
                 "access_level": "maintainer",
             },
@@ -159,7 +158,6 @@ def test__get_effective_config_for_level_1_project__with_inheritance_break_from_
     # project and only subgroup level 1
     assert effective_config == {
         "project_settings": {
-            "inherit": False,
             "bar": "something_else2",
         },
         "hooks": {"a": {"foo": "bar2"}, "b": {"bar": "something_else2"}},
@@ -176,7 +174,6 @@ def test__get_effective_config_for_level_2_project__with_inheritance_break_from_
     # project and only subgroup level 2
     assert effective_config == {
         "project_settings": {
-            "inherit": False,
             "bar": "something_else3",
         },
         "hooks": {"a": {"foo": "bar3"}, "b": {"bar": "something_else3"}},
