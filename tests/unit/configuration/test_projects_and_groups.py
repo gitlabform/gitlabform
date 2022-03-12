@@ -7,56 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def configuration_with_multiple_levels_and_lists():
-    config_yaml = """
-    ---
-    projects_and_groups:
-      "*":
-        merge_requests:
-          approvals:
-            approvals_before_merge: 3
-          approvers:
-            - common_approvers
-
-      "some_group/*":
-        merge_requests:
-          approvals:
-            reset_approvals_on_push: true
-          approvers:
-            - group_approvers
-
-      "some_group/my_project":
-        merge_requests:
-          approvals:
-            reset_approvals_on_push: false
-            disable_overriding_approvers_per_merge_request: true
-          approvers:
-            - project_approvers
-    """
-    return Configuration(config_string=config_yaml)
-
-
-@pytest.fixture
-def configuration_for_other_project():
-    config_yaml = """
-    ---
-    projects_and_groups:
-      "some_group/*":
-        secret_variables:
-          first:
-            key: foo
-            value: bar
-
-      "some_group/my_project":
-        secret_variables:
-          second:
-            key: foo
-            value: bar
-    """
-    return Configuration(config_string=config_yaml)
-
-
-@pytest.fixture
 def configuration_with_only_group_and_project():
     config_yaml = """
     ---
@@ -122,35 +72,75 @@ def test__get_effective_config_for_project__project_from_config__additive_hooks(
     }  # added from both group and project level
 
 
-def test__get_effective_config_for_project__with_multiple_levels(
-    configuration_with_multiple_levels_and_lists,
-):
-    x = configuration_with_multiple_levels_and_lists.get_effective_config_for_project(
-        "some_group/my_project"
-    )
+def test__get_effective_config_for_project__with_multiple_levels():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      "*":
+        merge_requests:
+          approvals:
+            approvals_before_merge: 3
+          approvers:
+            - common_approvers
 
-    assert x == {
+      "some_group/*":
+        merge_requests:
+          approvals:
+            reset_approvals_on_push: true
+          approvers:
+            - group_approvers
+
+      "some_group/my_project":
+        merge_requests:
+          approvals:
+            reset_approvals_on_push: false
+            disable_overriding_approvers_per_merge_request: true
+          approvers:
+            - project_approvers
+    """
+
+    effective_config = Configuration(
+        config_string=config_yaml
+    ).get_effective_config_for_project("some_group/my_project")
+
+    assert effective_config == {
         "merge_requests": {
             "approvals": {
+                # dict is merged - below is the config from common + group + project level
                 "approvals_before_merge": 3,
                 "reset_approvals_on_push": False,
                 "disable_overriding_approvers_per_merge_request": True,
             },
             "approvers": [
+                # list is overriden - only the element from the project level config is here
                 "project_approvers",
             ],
         }
     }
 
 
-def test__get_effective_config_for_project__configuration_for_other_project(
-    configuration_for_other_project,
-):
-    x = configuration_for_other_project.get_effective_config_for_project(
-        "some_group/some_project_after_defined"
-    )
+def test__get_effective_config_for_project__configuration_for_other_project():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      "some_group/*":
+        secret_variables:
+          first:
+            key: foo
+            value: bar
 
-    assert x == {
+      "some_group/my_project":
+        secret_variables:
+          second:
+            key: foo
+            value: bar
+    """
+
+    effective_config = Configuration(
+        config_string=config_yaml
+    ).get_effective_config_for_project("some_group/some_project_after_defined")
+
+    assert effective_config == {
         "secret_variables": {
             "first": {
                 "key": "foo",

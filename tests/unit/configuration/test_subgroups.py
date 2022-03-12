@@ -56,26 +56,6 @@ def configuration_with_subgroups_and_projects():
     return Configuration(config_string=config_yaml)
 
 
-@pytest.fixture
-def configuration_with_subgroups():
-    config_yaml = """
-    ---
-    projects_and_groups:
-      some_group/*:
-        group_members:
-          my-user:
-            access_level: 10
-        enforce_group_members: true
-
-      some_group/subgroup/*:
-        group_members:
-          my-user2:
-            access_level: 20
-        enforce_group_members: true
-    """
-    return Configuration(config_string=config_yaml)
-
-
 def test__get_effective_config_for_project__project_from_config__level1(
     configuration_with_subgroups_and_projects,
 ):
@@ -106,12 +86,26 @@ def test__get_effective_config_for_project__project_from_config__level2(
     assert additive__project_settings == {"foo": "bar3", "bar": "something_else3"}
 
 
-def test__get_effective_config_for_subgroup(
-    configuration_with_subgroups,
-):
-    effective_config = configuration_with_subgroups.get_effective_subgroup_config(
-        "some_group/subgroup"
-    )
+def test__get_effective_config_for_subgroup():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      some_group/*:
+        group_members:
+          my-user:
+            access_level: 10
+        enforce_group_members: true
+
+      some_group/subgroup/*:
+        group_members:
+          my-user2:
+            access_level: 20
+        enforce_group_members: true
+    """
+
+    effective_config = Configuration(
+        config_string=config_yaml
+    ).get_effective_subgroup_config("some_group/subgroup")
 
     assert effective_config == {
         "group_members": {
