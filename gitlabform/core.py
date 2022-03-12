@@ -1,13 +1,13 @@
 import argparse
-import logging.config
 import logging
+import logging.config
 import sys
 import textwrap
 import traceback
-
 from logging import debug
-from cli_ui import warning, fatal
+
 import cli_ui
+from cli_ui import warning, fatal
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration.core import (
@@ -118,11 +118,13 @@ class GitLabForm(object):
         parser = argparse.ArgumentParser(
             description=textwrap.dedent(
                 f"""
-            Specialized "configuration as a code" tool for GitLab projects, groups and more
+            🏗 Specialized "configuration as a code" tool for GitLab projects, groups and more
             using hierarchical configuration written in YAML.
 
-            Exits with code {EXIT_INVALID_INPUT} on invalid input errors (f.e. config file not found),
-            and with code {EXIT_PROCESSING_ERROR} if the are processing errors (f.e. if GitLab returns 400).
+            Exits with code:
+              * 0 - on success,
+              * {EXIT_INVALID_INPUT} - on invalid input errors (f.e. bad syntax in the config file) ~ "it's your fault". 😅
+              * {EXIT_PROCESSING_ERROR} - if there were backend processing errors (f.e. when requests to GitLab fail) ~ "it's not your fault". 😎
             """
             ),
             formatter_class=Formatter,
