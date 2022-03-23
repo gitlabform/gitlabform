@@ -41,7 +41,7 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
         debug("Effective group/subgroup config: %s", to_str(group_config))
 
         project_config = self.get_project_config(group_and_project)
-        debug("\nProject config: %s", to_str(project_config))
+        debug("Project config: %s", to_str(project_config))
 
         if common_config:
             self.validate_break_inheritance_flag(common_config, level="common")
