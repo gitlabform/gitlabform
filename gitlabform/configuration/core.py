@@ -11,7 +11,7 @@ from mergedeep import merge
 from yamlpath.common import Parsers
 from yamlpath.wrappers import ConsolePrinter
 
-from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
+from gitlabform import EXIT_INVALID_INPUT
 from ruamel.yaml.comments import CommentedMap
 
 
@@ -170,7 +170,7 @@ class ConfigurationCore(ABC):
                 fatal(
                     f"The inheritance break flag cannot be placed at the {level} level\n"
                     f"because {level} level is the highest level in the configuration file.\n",
-                    exit_code=EXIT_PROCESSING_ERROR,
+                    exit_code=EXIT_INVALID_INPUT,
                 )
                 break
             elif type(value) is CommentedMap:
