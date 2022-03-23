@@ -164,33 +164,17 @@ class ConfigurationCore(ABC):
         pass
 
     @staticmethod
-    def validate_break_inheritance_flag(config, **kwargs):
-        has_invalid_flag = False
-        level = None
+    def validate_break_inheritance_flag(config, level):
         for key, value in config.items():
             if "inherit" == key:
-                if kwargs["parent"] == "empty" and (
-                    kwargs["level"] == "group"
-                    or kwargs["level"] == "project"
-                    or kwargs["level"] == "subgroup"
-                ):
-                    level = kwargs["level"]
-                    has_invalid_flag = True
-                elif kwargs["level"] == "common":
-                    level = "common"
-                    has_invalid_flag = True
-            if has_invalid_flag:
                 fatal(
-                    "The inheritance break flag cannot be placed at the {config_level} level\n"
-                    "because {config_level} level is the highest level in the configuration file.\n".format(
-                        config_level=level
-                    ),
+                    f"The inheritance break flag cannot be placed at the {level} level\n"
+                    f"because {level} level is the highest level in the configuration file.\n",
                     exit_code=EXIT_PROCESSING_ERROR,
                 )
+                break
             elif type(value) is CommentedMap:
-                ConfigurationCore.validate_break_inheritance_flag(
-                    value, level=kwargs["level"], parent=kwargs["parent"]
-                )
+                ConfigurationCore.validate_break_inheritance_flag(value, level)
 
     @staticmethod
     def merge_configs(more_general_config, more_specific_config) -> dict:
