@@ -72,14 +72,24 @@ class AbstractProcessor(ABC):
         entity_in_gitlab: dict,
         entity_in_configuration: dict,
     ):
-        # in configuration we often don't define every key value because we rely on the defaults.
+        # in the configuration we often don't define every key value because we rely on the defaults.
         # that's why GitLab API often returns many more keys than we have in the configuration.
-        # so to decide if the entity should be update we are checking only the values of the ones
-        # that are in the configuration.
 
-        for key in entity_in_gitlab.keys():
-            if key in entity_in_configuration.keys():
-                if entity_in_gitlab[key] != entity_in_configuration[key]:
-                    return True
+        # so to decide if the entity should be updated:
+        # a) we look for ANY settings that are ONLY in configuration,
+        # a) we compare the settings that are in both configuration and gitlab,
+
+        keys_only_in_configuration = set(entity_in_configuration.keys()) - set(
+            entity_in_gitlab.keys()
+        )
+        if len(keys_only_in_configuration) > 0:
+            return True
+
+        keys_on_both_sides = set(entity_in_configuration.keys()) & set(
+            entity_in_gitlab.keys()
+        )
+        for key in keys_on_both_sides:
+            if entity_in_gitlab[key] != entity_in_configuration[key]:
+                return True
 
         return False
