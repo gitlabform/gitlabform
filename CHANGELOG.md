@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.10.1rc1
+
+* Fix a problem causing some changes to not be applied. Fixes [#334](https://github.com/gdubicki/gitlabform/issues/334). PR [#350](https://github.com/gdubicki/gitlabform/pull/350).
+
 ### 2.10.0
 
 * **Deleting deploy keys is now possible**. This partially implements [#193](https://github.com/gdubicki/gitlabform/issues/193). Also completely replace the implementation of deploy keys, secret variables and group secret variables with a new universal one. This possibly fixes [#19](https://github.com/gdubicki/gitlabform/issues/19).
