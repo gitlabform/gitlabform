@@ -58,5 +58,6 @@ output.yml
 
 .tox/
 
+Vagrantfile
 /private-key.json
 **/.vagrant/
