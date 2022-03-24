@@ -8,57 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def configuration_with_invalid_inheritance_break_set_at_group_level():
-    config_yaml = """
-    ---
-    projects_and_groups:
-      some_group/*:
-        group_members:
-          inherit: false
-          my-user:
-            access_level: 10
-        enforce_group_members: true
-    """
-    return Configuration(config_string=config_yaml)
-
-
-@pytest.fixture
-def configuration_with_invalid_inheritance_break_set_at_subgroup_level():
-    config_yaml = """
-    ---
-    projects_and_groups:
-      some_group/subgroup/*:
-        group_members:
-          inherit: false
-          my-user:
-            access_level: 10
-        enforce_group_members: true
-    """
-    return Configuration(config_string=config_yaml)
-
-
-@pytest.fixture
-def configuration_with_inheritance_break_set_at_subgroups_level():
-    config_yaml = """
-    ---
-    projects_and_groups:
-      some_group/*:
-        group_members:
-          my-user:
-            access_level: developer
-        enforce_group_members: true
-
-      some_group/subgroup/*:
-        group_members:
-          inherit: false
-          my-user2:
-            access_level: maintainer
-        enforce_group_members: true
-    """
-    return Configuration(config_string=config_yaml)
-
-
-@pytest.fixture
 def configuration_with_inheritance_break_from_subgroups_set_at_project_level():
     config_yaml = """
     ---
@@ -110,32 +59,67 @@ def configuration_with_inheritance_break_from_subgroups_set_at_project_level():
     return Configuration(config_string=config_yaml)
 
 
-def test__get_effective_config_for_group__with_invalid_inheritance_break_set_at_group_level(
-    configuration_with_invalid_inheritance_break_set_at_group_level,
-):
+def test__get_effective_config_for_group__with_invalid_inheritance_break_set_at_group_level():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      some_group/*:
+        group_members:
+          inherit: false
+          my-user:
+            access_level: 10
+        enforce_group_members: true
+    """
+
     with pytest.raises(SystemExit) as exception:
-        configuration_with_invalid_inheritance_break_set_at_group_level.get_effective_config_for_group(
+        Configuration(config_string=config_yaml).get_effective_config_for_group(
             "some_group"
         )
     assert exception.type == SystemExit
     assert exception.value.code == EXIT_INVALID_INPUT
 
 
-def test__get_effective_config_for_group__with_invalid_inheritance_break_set_at_subgroup_level(
-    configuration_with_invalid_inheritance_break_set_at_subgroup_level,
-):
+def test__get_effective_config_for_group__with_invalid_inheritance_break_set_at_subgroup_level():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      some_group/subgroup/*:
+        group_members:
+          inherit: false
+          my-user:
+            access_level: 10
+        enforce_group_members: true
+    """
+
     with pytest.raises(SystemExit) as exception:
-        configuration_with_invalid_inheritance_break_set_at_subgroup_level.get_effective_subgroup_config(
+        Configuration(config_string=config_yaml).get_effective_config_for_group(
             "some_group/subgroup"
         )
     assert exception.type == SystemExit
     assert exception.value.code == EXIT_INVALID_INPUT
 
 
-def test__get_effective_config_for_subgroup__with_break_inheritance_from_group_level_set_at_subgroup_level(
-    configuration_with_inheritance_break_set_at_subgroups_level,
-):
-    effective_config = configuration_with_inheritance_break_set_at_subgroups_level.get_effective_subgroup_config(
+def test__get_effective_config_for_subgroup__with_break_inheritance_from_group_level_set_at_subgroup_level():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      some_group/*:
+        group_members:
+          my-user:
+            access_level: developer
+        enforce_group_members: true
+
+      some_group/subgroup/*:
+        group_members:
+          inherit: false
+          my-user2:
+            access_level: maintainer
+        enforce_group_members: true
+    """
+
+    configuration = Configuration(config_string=config_yaml)
+
+    effective_config = configuration.get_effective_subgroup_config(
         "some_group/subgroup"
     )
 
