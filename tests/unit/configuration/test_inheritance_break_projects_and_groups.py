@@ -2,6 +2,7 @@ import logging
 import pytest
 
 from gitlabform.configuration import Configuration
+from gitlabform import EXIT_INVALID_INPUT
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +213,7 @@ def test__get_effective_config_for_project__with_invalid_inheritance_break_set_a
             "another_group/another_project"
         )
     assert exception.type == SystemExit
-    assert exception.value.code == 2
+    assert exception.value.code == EXIT_INVALID_INPUT
 
 
 def test__get_effective_config_for_project__with_invalid_inheritance_break_set_at_group_level(
@@ -223,7 +224,7 @@ def test__get_effective_config_for_project__with_invalid_inheritance_break_set_a
             "some_group/my_project"
         )
     assert exception.type == SystemExit
-    assert exception.value.code == 2
+    assert exception.value.code == EXIT_INVALID_INPUT
 
 
 def test__get_effective_config_for_project__with_invalid_inheritance_break_set_at_project_level(
@@ -234,7 +235,7 @@ def test__get_effective_config_for_project__with_invalid_inheritance_break_set_a
             "some_group/my_project"
         )
     assert exception.type == SystemExit
-    assert exception.value.code == 2
+    assert exception.value.code == EXIT_INVALID_INPUT
 
 
 def test__get_effective_config_for_my_project__with_break_inheritance_from_multiple_levels_set_at_project_level(
