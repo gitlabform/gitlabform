@@ -1,6 +1,6 @@
 ## Changelog
 
-### 2.10.1rc1
+### 2.10.1
 
 * Fix a problem causing some changes to not be applied. Fixes [#334](https://github.com/gdubicki/gitlabform/issues/334). PR [#350](https://github.com/gdubicki/gitlabform/pull/350).
 
