@@ -1,5 +1,10 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 21.6b0
+    rev: 22.3.0
     hooks:
       - id: black
+  - repo: https://github.com/gdubicki/pre-commit-pngquant
+    rev: 9010345cf034fe1097b3b7bb9ecd5ea92dcf85dc
+    hooks:
+      - id: pngquant
+        args: [--speed=1]
