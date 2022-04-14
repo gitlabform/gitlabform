@@ -83,6 +83,32 @@ def test__get_effective_config_for_project__with_invalid_inheritance_break_set_a
     assert exception.value.code == EXIT_INVALID_INPUT
 
 
+def test__get_effective_config_for_project__with_invalid_inheritance_break_set_at_group_level_outside_a_section():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      "some_group/*":
+        secret_variables:
+          first:
+            key: foo
+            value: bar
+
+      "some_group/my_project":
+        inherit: false
+        secret_variables:
+          second:
+            key: bizz
+            value: buzz
+    """
+
+    with pytest.raises(SystemExit) as exception:
+        Configuration(config_string=config_yaml).get_effective_config_for_project(
+            "some_group/my_project"
+        )
+    assert exception.type == SystemExit
+    assert exception.value.code == EXIT_INVALID_INPUT
+
+
 def test__get_effective_config_for_project__with_invalid_inheritance_break_set_at_project_level():
     config_yaml = """
     ---
