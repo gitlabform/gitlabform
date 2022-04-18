@@ -16,20 +16,23 @@ DEFAULT_README = "Default README content."
 # automate reading files created by run_gitlab_in_docker.sh to run tests in PyCharm / IntelliJ
 # (workaround for lack of this feature: https://youtrack.jetbrains.com/issue/PY-5543 )
 
-env_vars_and_file_paths = {
-    "GITLAB_URL": ["gitlab_url.txt", "../../gitlab_url.txt"],
-    "GITLAB_TOKEN": ["gitlab_token.txt", "../../gitlab_token.txt"],
+env_vars_to_files = {
+    "GITLAB_URL": "gitlab_url.txt",
+    "GITLAB_TOKEN": "gitlab_token.txt",
 }
 
-for env_var, file_paths in env_vars_and_file_paths.items():
+for env_var in env_vars_to_files.keys():
     if env_var not in os.environ:
-        print(f"{env_var} not set - trying to read it from {file_paths} ...")
-        for file_path in file_paths:
+        print(f"{env_var} not set - trying to read it from a file...")
+        for up_dir_level in range(1, 4):
+            file_path = (up_dir_level * '../') + env_vars_to_files[env_var]
+            print(f"Trying to read {file_path} ...")
             if os.path.isfile(file_path):
                 try:
                     with open(file_path, "r") as file:
-                        os.environ[env_var] = file.read().replace("\n", "")
+                        os.environ[env_var] = file.read().strip()
                         print(f"{env_var} set!")
+                        break
                 except Exception as e:
                     print(f"Failed to read {file_path}: {e}")
             else:
