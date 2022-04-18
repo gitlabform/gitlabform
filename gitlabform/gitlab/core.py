@@ -188,15 +188,15 @@ class GitLabCore:
 
         url = f"{self.url}/api/v4/{self._format_with_url_encoding(path_as_format_string, args)}"
         if dict_data:
-            debug(f"===> data = {to_str(dict_data)}")
             response = self.session.request(
                 method, url, data=dict_data, timeout=self.timeout
             )
+            debug(f"===> data = {to_str(dict_data)}")
         elif json_data:
-            debug(f"===> json = {to_str(json_data)}")
             response = self.session.request(
                 method, url, json=json_data, timeout=self.timeout
             )
+            debug(f"===> json = {to_str(json_data)}")
         else:
             response = self.session.request(method, url, timeout=self.timeout)
 
@@ -227,6 +227,8 @@ class GitLabCore:
                 )
         if response.json():
             debug(f"<--- json = {to_str(response.json())}")
+        else:
+            debug(f"<--- json = (empty))")
         return response
 
     @staticmethod
