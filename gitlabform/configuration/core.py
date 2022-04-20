@@ -188,8 +188,17 @@ class ConfigurationCore(ABC):
         def break_inheritance(specific_config, parent_key=""):
             for key, value in specific_config.items():
                 if "inherit" == key:
-                    replace_config_sections(merged_dict, parent_key, specific_config)
-                    break
+                    if not value:
+                        replace_config_sections(
+                            merged_dict, parent_key, specific_config
+                        )
+                        break
+                    elif value:
+                        fatal(
+                            f"Cannot set the inheritance break flag with true\n",
+                            exit_code=EXIT_INVALID_INPUT,
+                        )
+                        break
                 elif type(value) is CommentedMap:
                     break_inheritance(value, key)
 
