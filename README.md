@@ -72,7 +72,7 @@ GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/P
 
 ### Used by
 
-<a href="https://www.egnyte.com"><img src="https://www.egnyte.com/themes/custom/egnyte/logo.svg" width="200px" alt="Egnyte logo"></a>
+<a href="https://www.egnyte.com" target="_blank"><img src="https://www.egnyte.com/themes/custom/egnyte/logo.svg" width="200px" alt="Egnyte logo"></a>
 
 (Feel free to create PR to add your company logo/name here!)
 
