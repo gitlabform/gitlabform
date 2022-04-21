@@ -27,7 +27,7 @@ using hierarchical configuration written in YAML.
   [Running in an automated pipeline](#running-in-an-automated-pipeline),
   [Running automatically for new projects](#running-automatically-for-new-projects),
 * History - [Changelog (external file)](https://github.com/gdubicki/gitlabform/blob/main/CHANGELOG.md), [Origins](#origins)
-* Join us! - [Contributing](#contributing),
+* Join us! - [Contributing](#contributing), [Legal](#legal),
 
 ## Features
 
@@ -228,3 +228,6 @@ GitLab is a registered trademark of GitLab, Inc. This application is not endorse
 The GitLabForm logo is based on the GitLab logos available [here](https://about.gitlab.com/press/),
 and like the original art is licensed under the
 [Creative Commons Attribution Non-Commercial ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+
+All the logos shown in the "Used by" section below to their respective owners.
