@@ -12,21 +12,22 @@
 GitLabForm is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
 
-### Note
+## Used by
 
-This project was originally hosted on the [Egnyte](https://github.com/Egnyte) organization who is my employer and where
-I developed the initial version of the app. They kindly agreed to give back ownership of this project to me. Thanks!
+<a href="https://www.egnyte.com" target="_blank"><img src="https://www.egnyte.com/themes/custom/egnyte/logo.svg" width="150px" alt="Egnyte logo"></a>
+
+(Feel free to create PR to add your company logo/name here!)
 
 ## Table of Contents
 
-* What you get? - [Features](#features) (with [Comparison to similar apps](#comparison-to-similar-apps) and [Limitations](#limitations))
+* What you get? - [Features](#features) (see also [Limitations](#limitations) and [Comparison to similar apps](#comparison-to-similar-apps))
 * Basic usage - [Requirements](#requirements), [Installation](#installation), [Quick start](#quick-start)
 * Advanced usage - [Full configuration syntax](#full-configuration-syntax),
   [More cli usage examples](#more-cli-usage-examples),
   [Running in an automated pipeline](#running-in-an-automated-pipeline),
   [Running automatically for new projects](#running-automatically-for-new-projects),
 * History - [Changelog (external file)](https://github.com/gdubicki/gitlabform/blob/main/CHANGELOG.md), [Origins](#origins)
-* Join us! - [Contributing](#contributing), [Legal](#legal),
+* Join us! - [Contributing](#contributing),
 
 ## Features
 
@@ -70,11 +71,9 @@ GitLabForm enables you to manage:
 GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/gdubicki/gitlabform/blob/main/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
 GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/gdubicki/gitlabform/blob/main/docs/FEATURES_DESIGN.md#raw-parameters-passing).
 
-### Used by
+### Limitations
 
-<a href="https://www.egnyte.com" target="_blank"><img src="https://www.egnyte.com/themes/custom/egnyte/logo.svg" width="200px" alt="Egnyte logo"></a>
-
-(Feel free to create PR to add your company logo/name here!)
+Some app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/gdubicki/gitlabform/labels/🦊gitlab%20issue). Please check the links to the GitLab issue(s) in their comments and upvote them if they are affecting you. Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
 
 ### Comparison to similar apps
 
@@ -86,10 +85,6 @@ Please read more about [GitLab provider for Terraform vs GitLabForm](https://git
 
 To configure your GitLab instance itself (appearance, application settings, features, license) please check out
 the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-configuration-as-code) project!
-
-### Limitations
-
-Some of the app features are limited because of the GitLab API issues. [Here is the list of them](https://github.com/gdubicki/gitlabform/labels/🦊gitlab%20issue). Please check the links to the GitLab issue(s) in their comments and please upvote them if they are affecting you. Note that these issues/bugs affect all the apps using GitLab API, not just GitLabForm.
 
 ## Requirements
 
@@ -215,9 +210,7 @@ add new features, please see the [implementation design](https://github.com/gdub
 
 ## Origins
 
-This tool has been originally created as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890)
-but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729)
-(released in GitLab 9.4) to keep the configuration as code.
+This tool has been originally created at [Egnyte](https://github.com/Egnyte) as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890) but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729) (released in GitLab 9.4) to keep the configuration as code.
 
 Later on we added features that allowed us to use GitLabForm to improve a group containing around 100 similar projects
 to move to a unified development flow (by managing branches protection and the Pull Requests configuration),
