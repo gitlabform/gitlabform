@@ -1,5 +1,36 @@
 ## Changelog
 
+### 2.11.0b1
+
+* **Allow breaking configuration inheritance**. Implements [#326](https://github.com/gdubicki/gitlabform/issues/326). PR [#339](https://github.com/gdubicki/gitlabform/pull/339).
+
+Imagine you have a configuration like this: 
+```yaml
+projects_and_groups:
+  my-group/*:
+    members:
+      enforce: true
+      groups:
+        regular-developers:
+          group_access: developer
+ 
+  my-group/special-private-project:
+    members:
+      inherit: false # <--- the new keyword
+      enforce: true
+      groups:
+        special-developers:
+          group_access: developer
+      users:
+        john:
+          access_level: maintainer
+```
+With the new `inherit: false` entry used here, the effective members for `my-group/special-private-project` project are ONLY the `special-developers` grup and `john` user.
+
+<br/>
+
+Big thanks to the [Elastic Path](https://www.elasticpath.com/) team for their contribution of the above feature, especially [@ep-linden](https://github.com/ep-linden) for the whole implementation and [@amimas](https://github.com/amimas) for the initial proposal and cooperation on design!
+
 ### 2.10.1
 
 * Fix a problem causing some changes to not be applied. Fixes [#334](https://github.com/gdubicki/gitlabform/issues/334). PR [#350](https://github.com/gdubicki/gitlabform/pull/350).
