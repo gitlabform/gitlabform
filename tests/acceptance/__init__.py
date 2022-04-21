@@ -25,7 +25,7 @@ for env_var in env_vars_to_files.keys():
     if env_var not in os.environ:
         print(f"{env_var} not set - trying to read it from a file...")
         for up_dir_level in range(1, 4):
-            file_path = (up_dir_level * '../') + env_vars_to_files[env_var]
+            file_path = (up_dir_level * "../") + env_vars_to_files[env_var]
             print(f"Trying to read {file_path} ...")
             if os.path.isfile(file_path):
                 try:
