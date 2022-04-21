@@ -70,6 +70,12 @@ GitLabForm enables you to manage:
 GitLabForm uses [hierarchical configuration with inheritance, merging/overwriting and addivity](https://github.com/gdubicki/gitlabform/blob/main/docs/FEATURES_DESIGN.md#hierarchical-merged-and-overridable-configuration).
 GitLabForm is also using [passing the parameters as-is to GitLab APIs with PUT/POST requests](https://github.com/gdubicki/gitlabform/blob/main/docs/FEATURES_DESIGN.md#raw-parameters-passing).
 
+### Used by
+
+<a href="https://www.egnyte.com"><img src="https://www.egnyte.com/themes/custom/egnyte/logo.svg" width="200px" alt="Egnyte logo"></a>
+
+(Feel free to create PR to add your company logo/name here!)
+
 ### Comparison to similar apps
 
 GitLabForm has roughly the same purpose as [GitLab provider](https://www.terraform.io/docs/providers/gitlab/index.html)
