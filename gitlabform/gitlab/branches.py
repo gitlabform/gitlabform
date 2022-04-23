@@ -86,7 +86,7 @@ class GitLabBranches(GitLabCore):
 
     def get_branches(self, project_and_group_name):
         result = self._make_requests_to_api(
-            "projects/%s/repository/branches", project_and_group_name, paginated=True
+            "projects/%s/repository/branches", project_and_group_name
         )
         return sorted(map(lambda x: x["name"], result))
 
@@ -170,7 +170,7 @@ class GitLabBranches(GitLabCore):
 
     def get_protected_branches(self, project_and_group_name):
         branches = self._make_requests_to_api(
-            "projects/%s/repository/branches", project_and_group_name, paginated=True
+            "projects/%s/repository/branches", project_and_group_name
         )
 
         protected_branches = []
@@ -183,7 +183,7 @@ class GitLabBranches(GitLabCore):
 
     def get_unprotected_branches(self, project_and_group_name):
         branches = self._make_requests_to_api(
-            "projects/%s/repository/branches", project_and_group_name, paginated=True
+            "projects/%s/repository/branches", project_and_group_name
         )
 
         unprotected_branches = []

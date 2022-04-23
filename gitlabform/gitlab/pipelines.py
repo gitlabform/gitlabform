@@ -6,7 +6,6 @@ class GitLabPipelines(GitLabCore):
         pipelines = self._make_requests_to_api(
             "projects/%s/pipelines?ref=%s",
             (project_and_group_name, branch),
-            paginated=True,
         )
         return pipelines
 

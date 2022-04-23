@@ -48,7 +48,6 @@ class GitLabMergeRequests(GitLabCore):
         return self._make_requests_to_api(
             "projects/%s/merge_requests?scope=all&state=opened",
             project_and_group_name,
-            paginated=True,
         )
 
     def get_mr(self, project_and_group_name, mr_iid):

@@ -60,7 +60,7 @@ class GitLabGroups(GitLabCore):
         """
         :return: sorted list of groups
         """
-        result = self._make_requests_to_api("groups?all_available=true", paginated=True)
+        result = self._make_requests_to_api("groups?all_available=true")
         return sorted(map(lambda x: x["full_path"], result))
 
     def get_projects(self, group, include_archived=False, only_names=True):
@@ -81,7 +81,7 @@ class GitLabGroups(GitLabCore):
                 query_string = "include_subgroups=true&archived=false"
 
             projects = self._make_requests_to_api(
-                f"groups/%s/projects?{query_string}", group, paginated=True
+                f"groups/%s/projects?{query_string}", group
             )
         except NotFoundException:
             projects = []

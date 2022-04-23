@@ -7,9 +7,7 @@ class GitLabMembers(GitLabCore):
         if all:
             url_template += "/all"
 
-        return self._make_requests_to_api(
-            url_template, project_and_group_name, paginated=True
-        )
+        return self._make_requests_to_api(url_template, project_and_group_name)
 
     def get_shared_with_groups(self, project_and_group_name):
         # a dict with groups that this project has been shared with
@@ -57,12 +55,12 @@ class GitLabMembers(GitLabCore):
         if with_inherited:
             url_template += "/all"
 
-        return self._make_requests_to_api(url_template, group_name, paginated=True)
+        return self._make_requests_to_api(url_template, group_name)
 
     def get_members_from_project(self, project_and_group_name):
         # note that this DOES NOT return inherited users
         members = self._make_requests_to_api(
-            "projects/%s/members", project_and_group_name, paginated=True
+            "projects/%s/members", project_and_group_name
         )
         # it will return {username1: {...api info about username1...}, username2: {...}}
         # otherwise it can get very long to iterate when checking if a user

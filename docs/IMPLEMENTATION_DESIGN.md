@@ -76,7 +76,7 @@ With the basics for making requests to the GitLab API covered in the `GitLabCore
 is simple (most of the time).
 
 Almost all methods in other classes end up calling `self._make_requests_to_api`, which takes care of making the HTTP
-GitLab API requests with proper authentication, sometimes pagination, if needed retries & timeouts support, and more.
+GitLab API requests with proper authentication, pagination, retries, timeouts and more.
 
 Sometimes there is some logic in these methods if:
 * we only need a specific part of the response from GitLab API - see `GitLabProjects.get_all_projects()` as an example,
