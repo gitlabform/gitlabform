@@ -33,7 +33,6 @@ class GitLabTags(GitLabCore):
         return self._make_requests_to_api(
             "projects/%s/protected_tags",
             project_and_group_name,
-            paginated=True,
         )
 
     def protect_tag(self, project_and_group_name, tag_name, create_access_level):

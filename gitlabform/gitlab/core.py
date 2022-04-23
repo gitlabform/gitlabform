@@ -103,13 +103,11 @@ class GitLabCore:
         method="GET",
         data=None,
         expected_codes=200,
-        paginated=False,
         json=None,
     ):
         """
-        Makes a HTTP request (or requests) to the GitLab API endpoint. It takes case of making as many requests as
-        needed in case we are using a paginated endpoint. (See underlying method for authentication, retries,
-        timeout etc.)
+        Makes an HTTP request or requests to the GitLab API endpoint. More than one request is made automatically
+        if the endpoint is paginated. (See underlying method for authentication, retries, timeout etc.)
 
         :param path_as_format_string: path with parts to be replaced by values from `args` replaced by '%s'
                                       (aka the old-style Python string formatting, see:
@@ -119,14 +117,13 @@ class GitLabCore:
         :param data: dict with data to be 'PUT'ted or 'POST'ed
         :param expected_codes: a single HTTP code (like: 200) or a list of accepted HTTP codes
                                - if the call to the API will return other code an exception will be thrown
-        :param paginated: if given API is paginated (see https://docs.gitlab.com/ee/api/#pagination )
         :param json: alternatively to `dict` you can set this to a string that can be parsed as JSON that will
                      be used as data to be 'PUT'ted or 'POST'ed
-        :return: data returned by the endpoint, as a JSON object. If the API is paginated the it returns JSONs with
+        :return: data returned by the endpoint, as a JSON object. If the API is paginated, it returns JSONs with
                  arrays of objects and then this method returns JSON with a single array that contains all of those
                  objects.
         """
-        if not paginated:
+        if method != "GET":
             response = self._make_request_to_api(
                 path_as_format_string, args, method, data, expected_codes, json
             )
@@ -142,9 +139,9 @@ class GitLabCore:
             )
             results = first_response.json()
 
-            # In newer versions of GitLab the 'X-Total-Pages' may not be available
+            # In newer versions of GitLab the 'x-total-pages' may not be available
             # anymore, see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43159
-            # so let's switch to thew newer style.
+            # so let's use the 'x-next-page' header instead
 
             response = first_response
             while True:
