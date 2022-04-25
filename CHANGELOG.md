@@ -1,6 +1,6 @@
 ## Changelog
 
-### 2.11.0b1
+### 2.11.0b2
 
 * **Allow breaking configuration inheritance**. Implements [#326](https://github.com/gdubicki/gitlabform/issues/326). PR [#339](https://github.com/gdubicki/gitlabform/pull/339).
 
@@ -26,6 +26,8 @@ projects_and_groups:
           access_level: maintainer
 ```
 With the new `inherit: false` entry used here, the effective members for `my-group/special-private-project` project are ONLY the `special-developers` grup and `john` user.
+
+* Always expect pagination for GETs. Fixes [#354](https://github.com/gdubicki/gitlabform/issues/354). PR [#358](https://github.com/gdubicki/gitlabform/pull/358).
 
 <br/>
 
