@@ -69,7 +69,7 @@ setup(
     ],
     extras_require={
         "test": [
-            "pytest==7.0.1",
+            "pytest==7.1.2",
             "xkcdpass==1.19.3",
             "pre-commit==2.17.0",  # not really for tests, but for development
             "coverage==6.2",
