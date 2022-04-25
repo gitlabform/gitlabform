@@ -33,6 +33,10 @@ With the new `inherit: false` entry used here, the effective members for `my-gro
 
 Big thanks to the [Elastic Path](https://www.elasticpath.com/) team for their contribution of the above feature, especially [@ep-linden](https://github.com/ep-linden) for the whole implementation and [@amimas](https://github.com/amimas) for the initial proposal and cooperation on design!
 
+### 2.11.0b1
+
+(Like v2.11.0b2 but without [#358](https://github.com/gdubicki/gitlabform/pull/358).)
+
 ### 2.10.1
 
 * Fix a problem causing some changes to not be applied. Fixes [#334](https://github.com/gdubicki/gitlabform/issues/334). PR [#350](https://github.com/gdubicki/gitlabform/pull/350).
