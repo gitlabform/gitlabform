@@ -1,6 +1,7 @@
 import os
 import textwrap
 from abc import ABC
+from copy import deepcopy
 from logging import debug
 from pathlib import Path
 from types import SimpleNamespace
@@ -182,6 +183,9 @@ class ConfigurationCore(ABC):
         :return: merge more general config with more specific configs.
                  More specific config values take precedence over more general ones.
         """
+
+        more_general_config = deepcopy(more_general_config)
+        more_specific_config = deepcopy(more_specific_config)
 
         merged_dict = merge({}, more_general_config, more_specific_config)
 
