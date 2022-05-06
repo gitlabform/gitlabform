@@ -1,6 +1,6 @@
 ## Changelog
 
-### 2.11.0b2
+### 2.11.0b3
 
 * **Allow breaking configuration inheritance**. Implements [#326](https://github.com/gdubicki/gitlabform/issues/326). PR [#339](https://github.com/gdubicki/gitlabform/pull/339).
 
@@ -32,6 +32,10 @@ With the new `inherit: false` entry used here, the effective members for `my-gro
 <br/>
 
 Big thanks to the [Elastic Path](https://www.elasticpath.com/) team for their contribution of the above feature, especially [@ep-linden](https://github.com/ep-linden) for the whole implementation and [@amimas](https://github.com/amimas) for the initial proposal and cooperation on design!
+
+### 2.11.0b2
+
+Like v2.11.0b1 but with a bug that cause breaking config inheritance to not work in some cases.
 
 ### 2.11.0b1
 
