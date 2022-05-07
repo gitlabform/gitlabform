@@ -1,10 +1,10 @@
 ## Changelog
 
-### 2.11.0b3
+### 2.11.0b4
 
 * **Allow breaking configuration inheritance**. Implements [#326](https://github.com/gdubicki/gitlabform/issues/326). PR [#339](https://github.com/gdubicki/gitlabform/pull/339).
 
-Imagine you have a configuration like this: 
+Imagine you have a configuration like this:
 ```yaml
 projects_and_groups:
   my-group/*:
@@ -28,18 +28,23 @@ projects_and_groups:
 With the new `inherit: false` entry used here, the effective members for `my-group/special-private-project` project are ONLY the `special-developers` grup and `john` user.
 
 * Always expect pagination for GETs. Fixes [#354](https://github.com/gdubicki/gitlabform/issues/354). PR [#358](https://github.com/gdubicki/gitlabform/pull/358).
+* Workaround for the GitLab's Schedules API change/bug. Fixes [#361](https://github.com/gdubicki/gitlabform/issues/361).
 
 <br/>
 
 Big thanks to the [Elastic Path](https://www.elasticpath.com/) team for their contribution of the above feature, especially [@ep-linden](https://github.com/ep-linden) for the whole implementation and [@amimas](https://github.com/amimas) for the initial proposal and cooperation on design!
 
+### 2.11.0b3
+
+Like v2.11.0b4 but without [#361](https://github.com/gdubicki/gitlabform/issues/361).
+
 ### 2.11.0b2
 
-Like v2.11.0b1 but with a bug that cause breaking config inheritance to not work in some cases.
+Like v2.11.0b3 but without fix o a bug that caused breaking config inheritance to not work in some cases.
 
 ### 2.11.0b1
 
-(Like v2.11.0b2 but without [#358](https://github.com/gdubicki/gitlabform/pull/358).)
+Like v2.11.0b2 but without [#358](https://github.com/gdubicki/gitlabform/pull/358).
 
 ### 2.10.1
 
