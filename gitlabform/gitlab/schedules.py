@@ -49,7 +49,11 @@ class GitLabPipelineSchedules(GitLabCore):
             "projects/%s/pipeline_schedules/%s/take_ownership",
             (project_and_group_name, pipeline_schedule_id),
             method="POST",
-            expected_codes=[200, 201, 403],  # TODO: stop accepting 403 after GitLab idempotency bug is fixed
+            expected_codes=[
+                200,
+                201,
+                403,  # TODO: stop accepting 403 after GitLab idempotency bug is fixed
+            ],
         )
 
     def delete_pipeline_schedule(self, project_and_group_name, pipeline_schedule_id):
