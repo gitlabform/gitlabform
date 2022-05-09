@@ -14,8 +14,8 @@ using hierarchical configuration written in YAML.
 
 ## Used by
 
-<a href="https://www.egnyte.com" target="_blank"><img src="https://www.egnyte.com/themes/custom/egnyte/logo.svg" width="130px" alt="Egnyte logo"></a>
-<a href="https://www.elasticpath.com" target="_blank"><img src="https://www.elasticpath.com/themes/custom/bootstrap_sass/logo.svg" width="130px" alt="Elastic Path" /></a>
+<a href="https://www.egnyte.com" target="_blank"><img src="https://www.egnyte.com/themes/custom/egnyte/logo.svg" width="130px" style="margin: 10px" alt="Egnyte logo"></a>
+<a href="https://www.elasticpath.com" target="_blank"><img src="https://www.elasticpath.com/themes/custom/bootstrap_sass/logo.svg" width="130px" style="margin: 10px" alt="Elastic Path" /></a>
 
 (Feel free to create PR to add your company logo/name here!)
 
