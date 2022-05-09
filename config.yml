@@ -41,6 +41,7 @@ projects_and_groups:
   "*":
     # common settings for ALL projects and ALL groups
 
+    # these are now called "Project CI/CD variables"
     # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
     secret_variables:
       # this name is not actually used, it's just for you
@@ -49,6 +50,7 @@ projects_and_groups:
         value: "ThisIsAVerySecretPassword"
         delete: false  # Set to true to delete this variable
 
+    # these are now called "Group CI/CD variables"
     # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
     group_secret_variables:
       # this name is not actually used, it's just for you
@@ -82,6 +84,7 @@ projects_and_groups:
         title: different_key_title
         delete: true
 
+    # these are now called "Project CI/CD variables"
     # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
     secret_variables:
       # this name is not actually used, it's just for you
@@ -89,6 +92,7 @@ projects_and_groups:
         key: SSH_PRIVATE_KEY_BASE64
         value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
 
+    # these are now called "Group CI/CD variables"
     # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
     group_secret_variables:
       # this name is not actually used, it's just for you
@@ -245,9 +249,10 @@ projects_and_groups:
         protected: true
         create_access_level: maintainer
 
-    # service names are as in the endpoints described at https://docs.gitlab.com/ce/api/services.html
-    # hashes under those name correspond to the parameters described for given service there
-    # except where services are deleted with `delete: true`
+    # these are now called "Integrations"
+    # names are as in the endpoints described at https://docs.gitlab.com/ee/api/integrations.html
+    # hashes under those name correspond to the parameters described for a given integration there
+    # except where integrations are deleted with `delete: true`
     services:
       slack:
         delete: true
@@ -369,8 +374,9 @@ projects_and_groups:
         title: ssh_key_name_that_is_shown_in_gitlab_3
         can_push: false
 
+    # these are now called "Project CI/CD variables"
     secret_variables:
-      # CI CD variable for this project. Variables can be scoped to an "environment".
+      # Variables can be scoped to an "environment".
       # Scoping to environment also allows using the same "key" name for multiple variables.
       # This can simplify CI Config file because the appropriate variable will be exposed
       # by GitLab to the job that is targetting a given environment. If the same "key" name

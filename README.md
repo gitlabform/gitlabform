@@ -39,7 +39,7 @@ GitLabForm enables you to manage:
   * Members (users) {add/remove user, change access level, optional enforce},
   * Members (groups) {share/unshare with group, change access level, optional enforce},
   * Members using LDAP Group Links (**GitLab Premium (paid) only**),
-  * Secret variables,
+  * CI/CD variables,
   * Settings,
 
 * Project:
@@ -48,7 +48,7 @@ GitLabForm enables you to manage:
   * Protected branches:
     * access levels (roles) allowed to push/merge/unprotect, allow force push flag,
     * users/groups allowed to push/merge/unprotect, code owner approval required flag (**GitLab Premium (paid) only**),
-  * Deployment keys,
+  * Deploy keys,
   * Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!),
   * Hooks,
   * Members (users) {add/remove user, change access level, optional enforce},
@@ -56,8 +56,8 @@ GitLabForm enables you to manage:
   * Merge Requests approvals settings and approvers (**GitLab Premium (paid) only**),
   * Pipeline schedules,
   * Push Rules (**GitLab Premium (paid) only**),
-  * Secret variables,
-  * Services,
+  * CI/CD variables,
+  * Integrations,
   * Settings,
   * Tags {protect/unprotect},
 
