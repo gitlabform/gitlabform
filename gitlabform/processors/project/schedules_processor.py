@@ -34,14 +34,13 @@ class SchedulesProcessor(AbstractProcessor):
                     debug(
                         "Changing existing pipeline schedule '%s'", schedule_description
                     )
-
+                    self.gitlab.take_ownership(
+                        project_and_group, updated_schedule["id"]
+                    )
                     updated_schedule = self.gitlab.update_pipeline_schedule(
                         project_and_group,
                         schedule_ids[0],
                         configuration.get("schedules|" + schedule_description),
-                    )
-                    self.gitlab.take_ownership(
-                        project_and_group, updated_schedule["id"]
                     )
                     self.__set_schedule_variables(
                         project_and_group,
