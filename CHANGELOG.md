@@ -1,5 +1,9 @@
 ## Changelog
 
+### 2.11.1rc1
+
+* Fix another case of GitLab's Schedules API change/bug. Fixes [#364](https://github.com/gdubicki/gitlabform/issues/364).
+
 ### 2.11.0
 
 * **Allow breaking configuration inheritance**. Implements [#326](https://github.com/gdubicki/gitlabform/issues/326). PR [#339](https://github.com/gdubicki/gitlabform/pull/339).
