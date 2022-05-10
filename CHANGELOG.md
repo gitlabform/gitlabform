@@ -1,6 +1,6 @@
 ## Changelog
 
-### 2.11.1rc2
+### 2.11.1
 
 * Fix another case of GitLab's Schedules API change/bug. Fixes [#364](https://github.com/gdubicki/gitlabform/issues/364).
 
