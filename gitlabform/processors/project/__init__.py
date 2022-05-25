@@ -24,6 +24,9 @@ from gitlabform.processors.project.project_push_rules_processor import (
 from gitlabform.processors.project.project_settings_processor import (
     ProjectSettingsProcessor,
 )
+from gitlabform.processors.project.resource_group_processor import (
+    ResourceGroupProcessor,
+)
 from gitlabform.processors.project.schedules_processor import (
     SchedulesProcessor,
 )
@@ -54,4 +57,5 @@ class ProjectProcessors(AbstractProcessors):
             MembersProcessor(gitlab),
             SchedulesProcessor(gitlab),
             BadgesProcessor(gitlab),
+            ResourceGroupProcessor(gitlab),
         ]
