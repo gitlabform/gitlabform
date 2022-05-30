@@ -12,7 +12,7 @@ Example:
 projects_and_groups:
   group_1/project_1:
     secret_variables:
-      # --- Adding/resetting variable
+      # --- Adding/resetting
       # the below name is not used by GitLab, it's just for you
       a_friendly_secret_variable_name:
         # keys and values below are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable, except the id
@@ -52,14 +52,14 @@ projects_and_groups:
         environment_scope: staging
         filter[environment_scope]: staging
 
-      # --- Deleting variable
+      # --- Deleting
       # the below name is not used by GitLab, it's just for you
       a_secret_you_want_to_remove:
         key: MY_SECRET
         delete: true
 ```
 
-# Groups CI/CD variables
+## Group CI/CD variables
 
 This section purpose is to manage the **group-level** CI/CD variables.
 
@@ -68,7 +68,7 @@ Example:
 projects_and_groups:
   group_1/*:
     group_secret_variables:
-      # --- Adding/resetting variable
+      # --- Adding/resetting
       # the below name is not used by GitLab, it's just for you
       a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
         # keys and values below are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
@@ -77,7 +77,7 @@ projects_and_groups:
         variable_type: env_var # or file
         protected: false
 
-      # --- Deleting variable
+      # --- Deleting
       # the below name is not used by GitLab, it's just for you
       old_variable:
         key: PASSWORD

@@ -4,27 +4,6 @@ projects_and_groups:
 
   # settings for ALL projects in 'my-group' group
   "my-group/*":
-    deploy_keys:
-      # this name is not actually used, it's just for you
-      a_friendly_deploy_key_name:
-        # you have to pass whole SSH key content here even if GitLab already has this key added and you just assign it
-        # to another project here
-        # this is a limitation of GitLab API
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL (...)"
-        title: ssh_key_name_that_is_shown_in_gitlab
-        # note that you can set this to `true` or `false` only on the first assignment of the key / its creation
-        # see https://gitlab.com/gitlab-org/gitlab-ce/issues/30021#note_39567845
-        # this is a limitation of GitLab API
-        can_push: false
-      # this name is not actually used, it's just for you
-      another_friendly_deploy_key_name:
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg (...)"
-        title: other_ssh_key_name_that_is_shown_in_gitlab
-        can_push: false
-      ensure_to_remove_this_one:
-        title: different_key_title
-        delete: true
-
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
       default_branch: main
@@ -287,13 +266,6 @@ projects_and_groups:
       # this will make this project settings set to values defined on a group level, but with this single parameter
       # overriden
       visibility: private
-
-    deploy_keys:
-      # see comment above - this key will be ADDED to the keys configured on a group level
-      one_more_deploy_key:
-        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
-        title: ssh_key_name_that_is_shown_in_gitlab_3
-        can_push: false
 
     hooks:
       skip: true # this will skip whole hooks config *section* for this project, although it is set on group level
