@@ -114,4 +114,4 @@ GitLabForm version: 1.20.0 (the latest)
 [webhook] 2021/01/25 19:24:58 finished handling run-gitlabform
 ```
 
-- congrats! This means that it works! 🎉
+\- congrats! This means that it works! 🎉

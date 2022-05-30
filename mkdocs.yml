@@ -3,6 +3,9 @@ repo_url: https://github.com/gdubicki/gitlabform/
 docs_dir: docs_new
 strict: true
 
+# TODO: update it when docs are in main
+edit_uri: edit/docs_website/docs_new/
+
 nav:
   - Home: index.md
 
@@ -15,6 +18,9 @@ nav:
   - Configuration Reference:
     - Introduction: configuration_reference.md
     - CI/CD Variables: reference/ci_cd_variables.md
+    - Deploy Keys: reference/deploy_keys.md
+    - Merge Requests: reference/merge_requests.md
+    - Project Settings: reference/project_settings.md
 
   - Running: running.md
   - Automation: automation.md
@@ -67,8 +73,8 @@ theme:
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: blue
+      primary: blue
+      accent: cyan
       toggle:
         icon: material/weather-night
         name: Switch to light mode
