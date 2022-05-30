@@ -10,7 +10,7 @@ Note that some keys and values can be very complex here - see the [Container Reg
 
 !!! note
 
-    Some [Merge Requests][merge_requests]-related settings are also set here.
+    Some [Merge Requests](merge_requests.md)-related settings are also set here.
 
 Example:
 
