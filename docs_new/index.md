@@ -1,3 +1,10 @@
+!!! warning
+
+    This site is not finished yet. See [PR #370](https://github.com/gdubicki/gitlabform/pull/370) for more information about its status.
+
+    Until it is done, please see [the current app README](https://github.com/gdubicki/gitlabform/blob/main/README.md) and linked there articles for the up to date app docs.
+
+
 ![GitLabForm logo](https://raw.githubusercontent.com/gdubicki/gitlabform/main/docs/gitlabform-logo.png){ align=left } 
 is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
