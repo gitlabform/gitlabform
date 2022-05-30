@@ -1,0 +1,1346 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../gitlabform-logo-favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.16">
+    
+    
+      
+        <title>Changelog - GitLabForm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.1c3799f8.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cc9b2e1e.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="GitLabForm" class="md-header__button md-logo" aria-label="GitLabForm" data-md-component="logo">
+      
+  <img src="../gitlabform-logo-favicon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GitLabForm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/gdubicki/gitlabform/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="GitLabForm" class="md-nav__button md-logo" aria-label="GitLabForm" data-md-component="logo">
+      
+  <img src="../gitlabform-logo-favicon.png" alt="logo">
+
+    </a>
+    GitLabForm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/gdubicki/gitlabform/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick_start/" class="md-nav__link">
+        Quick Start
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        Requirements and Installation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../main_concepts/" class="md-nav__link">
+        Main Concepts
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Configuration Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration_reference/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/ci_cd_variables/" class="md-nav__link">
+        CI/CD Variables
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../running/" class="md-nav__link">
+        Running
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../automation/" class="md-nav__link">
+        Automation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
+          Contributing
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Contributing" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Contributing
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contrib/introduction/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contrib/local_development/" class="md-nav__link">
+        Local Development
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contrib/implementation_design/" class="md-nav__link">
+        Implementation Design
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contrib/coding_guidelines/" class="md-nav__link">
+        Coding Guidelines
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contrib/releases/" class="md-nav__link">
+        Releases
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../similar_apps/" class="md-nav__link">
+        Similar Apps
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Changelog
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Changelog
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    Changelog
+  </a>
+  
+    <nav class="md-nav" aria-label="Changelog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2111" class="md-nav__link">
+    2.11.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2110" class="md-nav__link">
+    2.11.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2101" class="md-nav__link">
+    2.10.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2100" class="md-nav__link">
+    2.10.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#291" class="md-nav__link">
+    2.9.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#290" class="md-nav__link">
+    2.9.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#281" class="md-nav__link">
+    2.8.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#280" class="md-nav__link">
+    2.8.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#271" class="md-nav__link">
+    2.7.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#270" class="md-nav__link">
+    2.7.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#260" class="md-nav__link">
+    2.6.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#250" class="md-nav__link">
+    2.5.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#240" class="md-nav__link">
+    2.4.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#230" class="md-nav__link">
+    2.3.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#220" class="md-nav__link">
+    2.2.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#212" class="md-nav__link">
+    2.1.2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#211" class="md-nav__link">
+    2.1.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#210" class="md-nav__link">
+    2.1.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#206" class="md-nav__link">
+    2.0.6
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#205" class="md-nav__link">
+    2.0.5
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#204" class="md-nav__link">
+    2.0.4
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#203" class="md-nav__link">
+    2.0.3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#202" class="md-nav__link">
+    2.0.2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#201" class="md-nav__link">
+    2.0.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#200" class="md-nav__link">
+    2.0.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#before-200" class="md-nav__link">
+    before 2.0.0
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../legal/" class="md-nav__link">
+        Legal
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    Changelog
+  </a>
+  
+    <nav class="md-nav" aria-label="Changelog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2111" class="md-nav__link">
+    2.11.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2110" class="md-nav__link">
+    2.11.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2101" class="md-nav__link">
+    2.10.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2100" class="md-nav__link">
+    2.10.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#291" class="md-nav__link">
+    2.9.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#290" class="md-nav__link">
+    2.9.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#281" class="md-nav__link">
+    2.8.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#280" class="md-nav__link">
+    2.8.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#271" class="md-nav__link">
+    2.7.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#270" class="md-nav__link">
+    2.7.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#260" class="md-nav__link">
+    2.6.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#250" class="md-nav__link">
+    2.5.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#240" class="md-nav__link">
+    2.4.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#230" class="md-nav__link">
+    2.3.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#220" class="md-nav__link">
+    2.2.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#212" class="md-nav__link">
+    2.1.2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#211" class="md-nav__link">
+    2.1.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#210" class="md-nav__link">
+    2.1.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#206" class="md-nav__link">
+    2.0.6
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#205" class="md-nav__link">
+    2.0.5
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#204" class="md-nav__link">
+    2.0.4
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#203" class="md-nav__link">
+    2.0.3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#202" class="md-nav__link">
+    2.0.2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#201" class="md-nav__link">
+    2.0.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#200" class="md-nav__link">
+    2.0.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#before-200" class="md-nav__link">
+    before 2.0.0
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/gdubicki/gitlabform/edit/master/docs/changelog.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+  <h1>Changelog</h1>
+
+<h2 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h2>
+<h3 id="2111">2.11.1<a class="headerlink" href="#2111" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix another case of GitLab's Schedules API change/bug. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/364">#364</a>.</li>
+</ul>
+<h3 id="2110">2.11.0<a class="headerlink" href="#2110" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Allow breaking configuration inheritance</strong>. Implements <a href="https://github.com/gdubicki/gitlabform/issues/326">#326</a>. PR <a href="https://github.com/gdubicki/gitlabform/pull/339">#339</a>.</li>
+</ul>
+<p>Imagine you have a configuration like this:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">my-group/*</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">regular-developers</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+
+<span class="w">  </span><span class="nt">my-group/special-private-project</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">inherit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"> </span><span class="c1"># &lt;--- the new keyword</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">special-developers</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+<span class="w">      </span><span class="nt">users</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">john</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"></span>
+</code></pre></div>
+With the new <code>inherit: false</code> entry used here, the effective members for <code>my-group/special-private-project</code> project are ONLY the <code>special-developers</code> grup and <code>john</code> user.</p>
+<ul>
+<li>Always expect pagination for GETs. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/354">#354</a>. PR <a href="https://github.com/gdubicki/gitlabform/pull/358">#358</a>.</li>
+<li>Workaround for the GitLab's Schedules API change/bug. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/361">#361</a>.</li>
+</ul>
+<p><br/></p>
+<p>Big thanks to the <a href="https://www.elasticpath.com/">Elastic Path</a> team for their contribution of the above feature, especially <a href="https://github.com/ep-linden">@ep-linden</a> for the whole implementation and <a href="https://github.com/amimas">@amimas</a> for the initial proposal and cooperation on design!</p>
+<p><br/></p>
+<p>(There were 4 pre-releases of this version, 2.11.0b1-b4. b1 contained "Allow breaking configuration inheritance", b2 also <a href="https://github.com/gdubicki/gitlabform/pull/358">#358</a>, b3 also a fix of a bug that caused breaking config inheritance to not work in some cases, b4 - <a href="https://github.com/gdubicki/gitlabform/issues/361">#361</a>).</p>
+<h3 id="2101">2.10.1<a class="headerlink" href="#2101" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix a problem causing some changes to not be applied. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/334">#334</a>. PR <a href="https://github.com/gdubicki/gitlabform/pull/350">#350</a>.</li>
+</ul>
+<h3 id="2100">2.10.0<a class="headerlink" href="#2100" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Deleting deploy keys is now possible</strong>. This partially implements <a href="https://github.com/gdubicki/gitlabform/issues/193">#193</a>. Also completely replace the implementation of deploy keys, secret variables and group secret variables with a new universal one. This possibly fixes <a href="https://github.com/gdubicki/gitlabform/issues/19">#19</a>.</li>
+<li><strong>Up to 40% faster thanks to making less requests to GitLab.</strong> (For almost 1000 repositories the apply time has dropped from ~18 minutes to ~11 minutes.)</li>
+<li>With debug enabled a lot less duplication and a more readable output of dicts (shown as JSONs).</li>
+<li><strong>For Contributors</strong> Introduce <code>SingleEntityProcessor</code> that generalizes editing things that are single per project, f.e. settings or push rules set. It does not edit entities if there are not changes to be applied. Using it implementing new features can be superfast! (See also <code>MultipleEntitiesProcessor</code> added in v2.2.0).</li>
+<li><strong>For Contributors</strong> Faster tests and improved usage of fixtures.</li>
+</ul>
+<p>(A pre-release of 2.9.2 RC1 contained some of the above changes. 2.10.0rc1 pre-release was the same as 2.10.0 final but with a slightly different changelog - the speed gains turned out to be higher than expected.)</p>
+<h3 id="291">2.9.1<a class="headerlink" href="#291" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fix version 2.9.0 not even starting. 🤦‍♂️ Add test to prevent this from happening again.</li>
+</ul>
+<h3 id="290">2.9.0<a class="headerlink" href="#290" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Access level names (not only their numbers) are now accepted in the configuration</strong>.</li>
+<li>More strictness in parsing configuration YAML and better error messages thanks to a switch to different libraries. F.e. hash keys overwriting is not accepted anymore.</li>
+<li>Moved the project from <code>egnyte/gitlabform</code> to <code>gdubicki/gitlabform</code> and switch to GitHub Registry as the new main Docker registry. </li>
+</ul>
+<h3 id="281">2.8.1<a class="headerlink" href="#281" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Don't show "Warning: Using group_shared_with: is deprecated" although the user is not really using this config syntax.</li>
+</ul>
+<h3 id="280">2.8.0<a class="headerlink" href="#280" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Complete support for managing groups and projects members</strong>:</li>
+<li>Add enforcing (direct) project members - groups and users, including being able to remove all direct members and keep only the members inherited from the group. Implements <a href="https://github.com/gdubicki/gitlabform/issues/100">#100</a>.</li>
+<li>Unify the configuration syntax for group and project level membership.</li>
+</ul>
+<p>✨ <strong>New</strong> ✨ config syntax example:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">foo/*</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># below key now includes what used to be under </span><span class="w"></span>
+<span class="w">    </span><span class="c1"># `group_shared_with` and `enforce_group_members` keys</span><span class="w"></span>
+<span class="w">    </span><span class="nt">group_members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># there are only up to 3 direct keys below</span><span class="w"></span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">another-group</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># below key&#39;s name been changed to the name used in projects `members`</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># for groups (and the same as in the API to share group with group)</span><span class="w"></span>
+<span class="w">          </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">      </span><span class="nt">users</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">my-user</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"> </span><span class="c1"># owner</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># this will enforce group-level users to be ONLY as defined above</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1"># this will make the projects in `foo` group not contain any **direct** users or groups other</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># (so it will make it contain only the ones inherited from the group `foo`)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</code></pre></div>
+The 🏚 old and deprecated 🏚 syntax for a similar* config would be:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">foo/*</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">group_shared_with</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">another-group</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">group_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">group_members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">my-user</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"> </span><span class="c1"># owner</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enforce_group_members</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+
+<span class="w">    </span><span class="c1"># !!! * - there was no enforce project members support before v2.8.0 !!!</span><span class="w"></span>
+</code></pre></div>
+The old syntax works but will generate warnings. Support for it will be removed in one the future major GitLabForm versions.</p>
+<h3 id="271">2.7.1<a class="headerlink" href="#271" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Speed up running for <code>ALL_DEFINED</code>, when the defined groups and projects for just a small part of all the GitLab instance's groups and projects. Additionally <strong>always</strong> show the number of omitted groups and projects for any reasons (no config, archived, skipped). Fixes <a href="https://github.com/gdubicki/gitlabform/issues/285">#285</a>.</li>
+</ul>
+<h3 id="270">2.7.0<a class="headerlink" href="#270" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Allow processing only requested configuration sections</strong> using a new cli argument <code>-os / --only-sections</code>.</li>
+<li>Minimize the number of unnecessary audit branch unprotect/protect events. Up to now every apply of the <code>files</code> section for protected branch resulted in unprotect and then (re)protect event for each protected branches and each file. Now this will only happen when the user running GitLabForm actually needs to do that, which should not happen often if you are using an admin account. Completely fixes <a href="https://github.com/gdubicki/gitlabform/issues/178">#178</a>.</li>
+</ul>
+<h3 id="260">2.6.0<a class="headerlink" href="#260" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Complete support for Protected branches - access levels / users / groups allowed to push/merge/unprotect</strong> (<strong>GitLab Premium (paid) only</strong>). PR <a href="https://github.com/gdubicki/gitlabform/pull/289">#289</a>.</li>
+<li><strong>Add option to allow push force in protected branches</strong>. Implements <a href="https://github.com/gdubicki/gitlabform/issues/227">#227</a>.</li>
+<li>Fix a bug causing the app to get HTTP 502 from GitLab when protecting branches in some cases.</li>
+<li>Fix getting members list to include usernames of all direct members not just the first page. PR <a href="https://github.com/gdubicki/gitlabform/pull/284">#284</a>.</li>
+</ul>
+<p>Big thanks to the contributors of this release: <a href="https://github.com/trissanen">@trissanen</a></p>
+<h3 id="250">2.5.0<a class="headerlink" href="#250" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Make commit messages for file operations configurable.</strong> Implements <a href="https://github.com/gdubicki/gitlabform/issues/278">#278</a>.</li>
+</ul>
+<p>Thanks to <a href="https://github.com/aleung">@aleung</a> for his contribution!</p>
+<h3 id="240">2.4.0<a class="headerlink" href="#240" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Add wildcard support for <code>skip_groups</code> and <code>skip_projects</code>.</strong> Implements <a href="https://github.com/gdubicki/gitlabform/issues/275">#275</a> and <a href="https://github.com/gdubicki/gitlabform/issues/276">#276</a>.</li>
+</ul>
+<p>Thanks to <a href="https://github.com/chris-workingmouse">@chris-workingmouse</a> for his contribution!</p>
+<h3 id="230">2.3.0<a class="headerlink" href="#230" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Add Protected branches - users allowed to push/merge</strong> (<strong>GitLab Premium (paid) only</strong>), PR <a href="https://github.com/gdubicki/gitlabform/pull/273">#273</a>.</li>
+<li>For <code>ALL_DEFINED</code> also skip archived projects even if they are explicitly defined in the config, unless -a flag is added - for consistency.</li>
+<li><strong>For Contributors</strong> Add docs for running the test themselves in a Docker container and for running GitLab in Docker using a license file, for testing paid-only features.</li>
+</ul>
+<p>Thanks to <a href="https://github.com/florentio">@florentio</a>, <a href="https://github.com/barryib">@barryib</a> and <a href="https://github.com/Pigueiras">@Pigueiras</a> for their contribution!</p>
+<h3 id="220">2.2.0<a class="headerlink" href="#220" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>Add LDAP Group Links support</strong> (<strong>GitLab Premium (paid) only</strong>). Implements <a href="https://github.com/gdubicki/gitlabform/issues/140">#140</a>.</p>
+</li>
+<li>
+<p><strong>Add project and group badges support</strong>. Implements <a href="https://github.com/gdubicki/gitlabform/issues/59">#59</a>.</p>
+</li>
+<li>
+<p>Allow 0 (no access) in Protected Tags. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/172">#172</a>.</p>
+</li>
+<li>
+<p>Exit on configuration missing <code>projects_and_groups</code> key. This will provide a helpful error message for typos made in this key. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/242">#242</a>.</p>
+</li>
+<li>Make error messages more friendly when there is no network connection or when configuration is invalid (f.e. YAML parsing errors).</li>
+<li>
+<p>Make the output of some processors a bit more consistent.</p>
+</li>
+<li>
+<p>Fix detecting an "empty effective config" and improve the UI related to processing groups and projects with such. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/251">#251</a>.</p>
+</li>
+<li>
+<p>Big refactoring that should make adding new features easier and faster. The main change is introducing a new way to implement "processors" - thanks to a generalized <code>MultipleEntitiesProcessor</code> class adding a new feature like Project Badges should is now as easy as implementing a class like <code>BadgesProcessor</code> and writing an acceptance test like <code>TestBadges</code>. Note that this new design may change in the near future and we are open to discussions and PRs to make it even better! We also plan to create a similar generalized <code>SingleEntityProcessor</code> class soon.</p>
+</li>
+<li>
+<p>Change the User Agent that the app uses when making requests to GitLab to a custom <code>GitLabForm/&lt;gitlabform_version&gt; (python-requests/&lt;requests_version&gt;)</code>.</p>
+</li>
+</ul>
+<h3 id="212">2.1.2<a class="headerlink" href="#212" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Managing project members is not incredibly slow anymore. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/240">#240</a></li>
+</ul>
+<p>Thanks to <a href="https://github.com/andrewjw">@andrewjw</a> (Ocado Technology) for his contribution!</p>
+<h3 id="211">2.1.1<a class="headerlink" href="#211" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fixed sharing group with a subgroup. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/236">#236</a></li>
+<li>Improved re-protecting branches after updating files in them. Fail fast if the config is invalid.</li>
+<li>Better Docker images:</li>
+<li>Updated Alpine from 3.12 to 3.14,</li>
+<li>Started to build images in ARM64 architecture (apart from x86-64),</li>
+<li>Started to add tags <major_version>, <major_version>.<minor_version>. Note that Alpine-based image is the main one which gets these tags. For Debian-based images add "-buster" suffix. Implements <a href="https://github.com/gdubicki/gitlabform/issues/173">#173</a></li>
+</ul>
+<p>Thanks to <a href="https://github.com/andrewjw">@andrewjw</a> (Ocado Technology) for his contribution!</p>
+<h3 id="210">2.1.0<a class="headerlink" href="#210" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Added a feature to share groups with other groups, with optional enforcing.</strong> Implements <a href="https://github.com/gdubicki/gitlabform/issues/150">#150</a></li>
+</ul>
+<p>Thanks to <a href="https://github.com/andrewjw">@andrewjw</a> (Ocado Technology) for this contribution!</p>
+<h3 id="206">2.0.6<a class="headerlink" href="#206" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fixed incorrect subgroups list when requesting to process ALL_DEFINED. Completes the fix for <a href="https://github.com/gdubicki/gitlabform/issues/221">#221</a></li>
+</ul>
+<h3 id="205">2.0.5<a class="headerlink" href="#205" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>Really</em> fixed issue with <code>unprotect_branch_new_api</code>. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/219">#219</a></li>
+<li>Fixed call to a Merge Requests Approvers API endpoint removed in GitLab 13.11.0. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/220">#220</a></li>
+<li>Fixed potential security issue by enabling autoescaping when loading Jinja templates. (Bandit security tool issue <a href="https://bandit.readthedocs.io/en/latest/plugins/b701_jinja2_autoescape_false.html">B701</a>)</li>
+</ul>
+<p>Thanks to <a href="https://github.com/Pigueiras">@Pigueiras</a> for his contribution!</p>
+<h3 id="204">2.0.4<a class="headerlink" href="#204" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fixed issue with Push Rules when the project name contains a dot. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/224">#224</a></li>
+<li>Fixed calling to process a single subgroup (like: <code>gitlabform 'group/subgroup'</code>). Fixes <a href="https://github.com/gdubicki/gitlabform/issues/221">#221</a></li>
+</ul>
+<h3 id="203">2.0.3<a class="headerlink" href="#203" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fixed issue with dry-run for Project Push Rules when the current config is empty (<code>None</code>). Fixes <a href="https://github.com/gdubicki/gitlabform/issues/223">#223</a></li>
+</ul>
+<h3 id="202">2.0.2<a class="headerlink" href="#202" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fixed issue with <code>unprotect_branch_new_api</code>. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/219">#219</a>
+  (update: later it turned out that it was not really fixed in 2.0.2 but in 2.0.5 instead)</li>
+</ul>
+<h3 id="201">2.0.1<a class="headerlink" href="#201" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Fixed issues with Jinja loader.</li>
+<li>Fixed calls to GitLab API that do not contain 'x-total-pages' header (gradually rolled out since <a href="https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/23931">GitLab MR #23931</a>).</li>
+<li>Start showing deprecation warning when using the old branch protection API config syntax.</li>
+</ul>
+<p>Thanks to <a href="https://github.com/mkjmdski">@mkjmdski</a> for his contribution!</p>
+<p>(2.0.0post1-3 release is technically the same as 2.0.1 but was incorrectly versioned.)</p>
+<h3 id="200">2.0.0<a class="headerlink" href="#200" title="Permanent link">&para;</a></h3>
+<p>(For a detailed info about changes in each RC of v2 please see the previous version of this changelog.)</p>
+<ul>
+<li>
+<p><strong>Make deep merging of configuration actually work (breaking change).</strong> Fixes <a href="https://github.com/gdubicki/gitlabform/issues/197">#197</a> (RC5)</p>
+</li>
+<li>
+<p><strong>Introduce config versioning (breaking change).</strong> ...or rather a change to avoid breakage. New major releases of GitLabForm starting with v2 will look for <code>config_version</code> key in the config file. If it doesn't exist, or the version does not match expected then the app will exit to avoid applying unexpected configuration and allowing the user to update the configuration. (RC1)</p>
+</li>
+<li>
+<p><strong>New config syntax (breaking change).</strong> All 3 levels under a common key <code>projects_and_groups</code>. It should contain a dict, where common config is under a special <code>"*"</code> key, group configs under keys like <code>group/*</code> and project configs under keys like <code>group/project</code>. This will allow introducing pattern matching in these keys and introducing support for multiple config files in the future releases. Partially implements <a href="https://github.com/gdubicki/gitlabform/pull/138">#138</a>. (RC1)</p>
+</li>
+<li>
+<p><strong>Exit with code != 0 when any group/project processing was failed (breaking change).</strong> This will allow you to notice problems when running the app from CI. Note that you can restore the old behaviour by running the app with <code>(...) || true</code>. Also <strong>standardized exit codes.</strong> Exit with 1 in case of input error (f.e. config file does not exist), with 2 in case of processing error (f.e. GitLab returns HTTP 500).Fixes <a href="https://github.com/gdubicki/gitlabform/issues/153">#153</a>. (RC1)</p>
+</li>
+<li>
+<p><strong>Allow any case in groups and projects names (breaking change).</strong> GitLab groups and projects names are case sensitive but you cannot create such entities that differ only in the case. There is also a distinction between a "name" and a "path" and they may differ in case... To make work with this easier GitLabForm now accepts any case for them in both config files as well as when provided as command line arguments. We also disallow such entities that differ only in case (f.e. <code>group/*</code> and <code>GROUP/*</code>) to avoid ambiguity. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/160">#160</a>. (RC2)</p>
+</li>
+<li>
+<p><strong>Ignore archived projects by default (breaking change).</strong> This makes processing faster and output shorter. You can restore the previous behavior by adding <code>--include-archived-projects</code>/<code>-a</code> command line switch. Note that you have to do it if you want to unarchive archived projects! Fixes <a href="https://github.com/gdubicki/gitlabform/issues/157">#157</a> in (arguably) a more convenient way. (RC2)</p>
+</li>
+<li>
+<p><strong>Color output!</strong> Implements <a href="https://github.com/gdubicki/gitlabform/issues/141">#141</a>. (RC1)</p>
+</li>
+<li>
+<p><strong>Add diffing feature for secret variables.</strong> (with values shown as hashes to protect the secrets from leaking). (RC6)</p>
+</li>
+<li>
+<p><strong>Added checking for invalid syntax in "members" section.</strong> Defining groups or users directly under this key instead of under sub-keys "users" and "groups" will now trigger an immediate error. (RC5)</p>
+</li>
+<li>
+<p><strong>Add support for Python 3.9</strong> (RC8)</p>
+</li>
+<li>
+<p><strong>Added Windows support.</strong> Fixes <a href="https://github.com/gdubicki/gitlabform/issues/206">#206</a> (RC5)</p>
+</li>
+<li>
+<p><strong>Start processing at any group</strong> using the new command line switch - <code>--start-from-group</code>/<code>-sfg</code>. Similar to <code>--start-from</code>/<code>-sf</code> switch that can be used for projects. (RC1)</p>
+</li>
+<li>
+<p>Start releasing pre-releases as Docker images. They have tags with specific versions, but not "latest" tag as it is reserved for new final releases. Implements <a href="https://github.com/gdubicki/gitlabform/issues/201">#201</a> (RC5)</p>
+</li>
+<li>
+<p>Prevent multiple email notifications from being sent when adding members to project. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/101">#101</a> (RC6)</p>
+</li>
+<li>
+<p>Prevent project's Audit Events being filled in with "Added protected branch". Fixes <a href="https://github.com/gdubicki/gitlabform/issues/178">#178</a> (RC6)</p>
+</li>
+<li>
+<p>Fixed using "expires_at" for users. Fixes <a href="https://github.com/gdubicki/gitlabform/issues/207">#207</a> (RC6)</p>
+</li>
+<li>
+<p>Remove the need to add the <code>gitlab.api_version</code> configuration key. (RC1)</p>
+</li>
+<li>
+<p><strong>For Contributors</strong> Make writing tests easier and the tests more robust. Deduplicate a lot of the boilerplate code, allow putting configs into the test methods and use pytest fixtures for easier setup and cleanup. This should fix issues with tests reported in <a href="https://github.com/gdubicki/gitlabform/issues/190">#190</a>. Also stop storing any dockerized GitLab data permanently to avoid problems like <a href="https://github.com/gdubicki/gitlabform/issues/196">#196</a> and probably other related to failed dockerized GitLab upgrades. (RC3)</p>
+</li>
+<li>
+<p><strong>For Contributors</strong> Rename "integration tests" to "acceptance tests". Because they ARE in fact acceptance tests. (RC3)</p>
+</li>
+</ul>
+<p>Thanks to <a href="https://github.com/amimas">@amimas</a>, <a href="https://github.com/weakcamel">@weakcamel</a>, <a href="https://github.com/kowpatryk">@kowpatryk</a>, <a href="https://github.com/ss7548">@ss7548</a>, <a href="https://github.com/houres">@houres</a>, <a href="https://github.com/Pigueiras">@Pigueiras</a> and <a href="https://github.com/YuraBeznos">@YuraBeznos</a> for their contributions!</p>
+<h3 id="before-200">before 2.0.0<a class="headerlink" href="#before-200" title="Permanent link">&para;</a></h3>
+<p>Please see <a href="https://github.com/gdubicki/gitlabform/releases?after=v2.0.0rc1">GitHub pre-2.0 releases' descriptions</a>.</p>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../similar_apps/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Similar Apps" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Similar Apps
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../legal/" class="md-footer__link md-footer__link--next" aria-label="Next: Legal" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Legal
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.3a4b43e5.min.js"></script>
+      
+    
+  </body>
+</html>
