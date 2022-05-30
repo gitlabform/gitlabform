@@ -613,6 +613,7 @@
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/settings/">project settings</a>.</p>
 <p>The settings should be as documented at GitLab's <a href="https://docs.gitlab.com/ee/api/projects.html#edit-project">Project API docs</a>, <strong>except the id</strong>.</p>
 <p>You can provide any number of the settings from there - if you don't provide a setting then it will be not changed.</p>
+<p>Note that some keys and values can be very complex here - see the <a href="https://docs.gitlab.com/ee/user/packages/container_registry/reduce_container_registry_storage.html#use-the-cleanup-policy-api">Container Registry cleanup policies</a> under the <code>container_expiration_policy_attributes</code> key in the code below as an example.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Some [Merge Requests][merge_requests]-related settings are also set here.</p>
@@ -626,6 +627,14 @@
 <span class="w">      </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internal</span><span class="w"></span>
 <span class="w">      </span><span class="nt">only_allow_merge_if_pipeline_succeeds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="w">      </span><span class="nt">only_allow_merge_if_all_discussions_are_resolved</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">container_expiration_policy_attributes</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">cadence</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1month&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">keep_n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">older_than</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;14d&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name_regex_delete</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name_regex_keep</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*-main&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="c1"># (...)</span><span class="w"></span>
 </code></pre></div>
 
