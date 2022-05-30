@@ -4,14 +4,6 @@ projects_and_groups:
 
   # settings for ALL projects in 'my-group' group
   "my-group/*":
-    # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
-    project_settings:
-      default_branch: main
-      jobs_enabled: true
-      public_jobs: false # "Public pipelines" checkbox in GitLab web UI
-      visibility: internal
-      only_allow_merge_if_pipeline_succeeds: true
-      only_allow_merge_if_all_discussions_are_resolved: true
 
       # Container Registry cleanup policies
       # https://docs.gitlab.com/ee/user/packages/container_registry/reduce_container_registry_storage.html#use-the-cleanup-policy-api
@@ -38,28 +30,7 @@ projects_and_groups:
       file_name_regex: ""
       max_file_size: 0 # in MB, 0 means unlimited
 
-    # *** This section requires GitLab Premium (paid) ***
-    merge_requests:
-      # keys and values here are as described at
-      # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
-      # (note that some Merge Requests-related settings are set in project_settings! read linked gitlab API docs_new for details)
-      approvals:
-        approvals_before_merge: 2
-        reset_approvals_on_push: true
-        disable_overriding_approvers_per_merge_request: true
-      # below settings are using https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-allowed-approvers
-      # but instead of user and group ids ONLY use usernames and full groups/subgroup paths here
-      # if neither 'approvers' or 'approver_groups' below are set, approvers are NOT managed by gitlabform
-      # you DON'T have to provide both
-      approvers:
-        - user1
-        - user2
-      approver_groups:
-        - my-group
-        - my-group1/subgroup
-        - my-group2/subgroup/subsubgroup
-      # if true, it will delete any other preexisting approval rules
-      remove_other_approval_rules: false
+    # ***  ***
 
     # keys names are branches names and values can be as shown below
     # https://docs.gitlab.com/ee/api/protected_branches.html
@@ -262,11 +233,6 @@ projects_and_groups:
 
   # settings specific to 'my-group/my-project1' project
   "my-group/my-project1":
-    project_settings:
-      # this will make this project settings set to values defined on a group level, but with this single parameter
-      # overriden
-      visibility: private
-
     hooks:
       skip: true # this will skip whole hooks config *section* for this project, although it is set on group level
 
