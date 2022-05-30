@@ -5,17 +5,6 @@ projects_and_groups:
   # settings for ALL projects in 'my-group' group
   "my-group/*":
 
-      # Container Registry cleanup policies
-      # https://docs.gitlab.com/ee/user/packages/container_registry/reduce_container_registry_storage.html#use-the-cleanup-policy-api
-      container_expiration_policy_attributes:
-        cadence: "1month"
-        enabled: true
-        keep_n: 1
-        older_than: "14d"
-        name_regex: ""
-        name_regex_delete: ".*"
-        name_regex_keep: ".*-main"
-
     # *** This section requires GitLab Premium (paid) ***
     project_push_rules:
       # keys and values here are as described at
@@ -29,8 +18,6 @@ projects_and_groups:
       author_email_regex: ""
       file_name_regex: ""
       max_file_size: 0 # in MB, 0 means unlimited
-
-    # ***  ***
 
     # keys names are branches names and values can be as shown below
     # https://docs.gitlab.com/ee/api/protected_branches.html
