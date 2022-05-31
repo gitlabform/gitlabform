@@ -8,7 +8,7 @@ class GroupPushRuleProcessor(SingleEntityProcessor):
             "group_push_rule",
             gitlab,
             get_method_name="get_group_push_rule", 
-            edit_method_name="put_group_push_rule", 
-            add_method_name="post_group_push_rule",
+            edit_method_name="edit_group_push_rule",
+            add_method_name="add_group_push_rule",
         )
 
