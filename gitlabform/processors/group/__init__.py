@@ -20,7 +20,9 @@ from gitlabform.processors.group.group_secret_variables_processor import (
 from gitlabform.processors.group.group_settings_processor import (
     GroupSettingsProcessor,
 )
-
+from gitlabform.processors.group.group_push_rule_processor import (
+    GroupPushRuleProcessor,
+)
 
 class GroupProcessors(AbstractProcessors):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
@@ -32,4 +34,5 @@ class GroupProcessors(AbstractProcessors):
             GroupSharedWithProcessor(gitlab),
             GroupLDAPLinksProcessor(gitlab),
             GroupBadgesProcessor(gitlab),
+            GroupPushRuleProcessor(gitlab),
         ]

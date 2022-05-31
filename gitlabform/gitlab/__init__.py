@@ -7,6 +7,7 @@ from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
 from gitlabform.gitlab.group_secret_variables import GitLabGroupSecretVariables
+from gitlabform.gitlab.group_push_rule import GitLabGroupPushRule
 from gitlabform.gitlab.members import GitLabMembers
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
@@ -18,7 +19,6 @@ from gitlabform.gitlab.schedules import GitLabPipelineSchedules
 from gitlabform.gitlab.services import GitLabServices
 from gitlabform.gitlab.tags import GitLabTags
 from gitlabform.gitlab.users import GitLabUsers
-
 
 @enum.unique
 class AccessLevel(enum.IntEnum):
@@ -55,6 +55,7 @@ class GitLab(
     GitLabGroupLDAPLinks,
     GitLabGroupBadges,
     GitLabGroupSecretVariables,
+    GitLabGroupPushRule,
     GitLabPipelines,
     GitLabMembers,
     GitLabUsers,

@@ -153,3 +153,20 @@ class GitLabGroups(GitLabCore):
             method="DELETE",
             expected_codes=[204, 404],
         )
+
+    def get_group_push_rule(self, project_and_group_name):
+        try:
+            return self._make_requests_to_api("groups/%s/push_rule", project_and_group_name)
+        except NotFoundException:
+            return dict()
+
+    def put_group_push_rule(self, project_and_group_name, push_rule):
+        self._make_requests_to_api(
+            "groups/%s/push_rule", project_and_group_name, "PUT", push_rule
+        )
+
+    def post_group_push_rule(self, project_and_group_name, push_rule):
+        self._make_requests_to_api(
+            "groups/%s/push_rule", project_and_group_name, "POST", push_rule
+        )
+

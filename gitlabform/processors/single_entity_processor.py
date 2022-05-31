@@ -29,7 +29,6 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
     def _process_configuration(self, project_or_group: str, configuration: dict):
 
         entity_config = configuration[self.configuration_name]
-
         entity_in_gitlab = self.get_method(project_or_group)
         debug(f"{self.configuration_name} BEFORE: ^^^")
 
