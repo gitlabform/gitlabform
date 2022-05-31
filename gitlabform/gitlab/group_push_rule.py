@@ -18,7 +18,15 @@ class GitLabGroupPushRule(GitLabGroups):
             "groups/%s/push_rule",
             group_path,
             method="POST",
-            data=push_rule_in_config,
-            expected_codes=201,
+            data=push_rule_in_config
         )
 
+    def put_group_push_rule(self, project_and_group_name, push_rule):
+        self._make_requests_to_api(
+            "groups/%s/push_rule", project_and_group_name, "PUT", push_rule
+        )
+
+    def post_group_push_rule(self, project_and_group_name, push_rule):
+        self._make_requests_to_api(
+            "groups/%s/push_rule", project_and_group_name, "POST", push_rule
+        )
