@@ -17,10 +17,12 @@ nav:
 
   - Configuration Reference:
     - Introduction: configuration_reference.md
+    - Branches: reference/protected_branches.md
     - CI/CD Variables: reference/ci_cd_variables.md
     - Deploy Keys: reference/deploy_keys.md
     - Merge Requests: reference/merge_requests.md
     - Project Settings: reference/project_settings.md
+    - Push rules: reference/push_rules.md
 
   - Running: running.md
   - Automation: automation.md
