@@ -53,7 +53,7 @@ GitLabForm enables you to manage:
     * Settings,
 
 * Project:
-    * Archive/unarchive,
+    * [Archive/unarchive](reference/archive_unarchive.md),
     * Badges,
     * [CI/CD variables](reference/ci_cd_variables.md),
     * [Protected branches](reference/protected_branches.md):
