@@ -13,7 +13,7 @@
     
     
       
-        <title>Introduction - GitLabForm</title>
+        <title>Branches - GitLabForm</title>
       
     
     
@@ -63,7 +63,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#issues" class="md-skip">
+        <a href="#protected-branches" class="md-skip">
           Skip to content
         </a>
       
@@ -95,7 +95,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Introduction
+              Branches
             
           </span>
         </div>
@@ -284,12 +284,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
       
       
       
@@ -326,7 +328,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/archive_unarchive/" class="md-nav__link">
+      <a href="../archive_unarchive/" class="md-nav__link">
         Archive/unarchive
       </a>
     </li>
@@ -338,11 +340,59 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../reference/protected_branches/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Branches
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Branches
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#common-features" class="md-nav__link">
+    Common features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#premium-only-features" class="md-nav__link">
+    Premium-only features
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -354,7 +404,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/ci_cd_variables/" class="md-nav__link">
+      <a href="../ci_cd_variables/" class="md-nav__link">
         CI/CD Variables
       </a>
     </li>
@@ -368,7 +418,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/deploy_keys/" class="md-nav__link">
+      <a href="../deploy_keys/" class="md-nav__link">
         Deploy Keys
       </a>
     </li>
@@ -382,7 +432,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/group_ldap_links/" class="md-nav__link">
+      <a href="../group_ldap_links/" class="md-nav__link">
         Group LDAP links
       </a>
     </li>
@@ -396,7 +446,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/merge_requests/" class="md-nav__link">
+      <a href="../merge_requests/" class="md-nav__link">
         Merge Requests
       </a>
     </li>
@@ -410,7 +460,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/project_settings/" class="md-nav__link">
+      <a href="../project_settings/" class="md-nav__link">
         Project Settings
       </a>
     </li>
@@ -424,7 +474,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/push_rules/" class="md-nav__link">
+      <a href="../push_rules/" class="md-nav__link">
         Push rules
       </a>
     </li>
@@ -474,14 +524,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
       
       
       
@@ -502,75 +550,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Introduction
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../contrib/introduction/" class="md-nav__link">
         Introduction
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#issues" class="md-nav__link">
-    Issues
-  </a>
-  
-    <nav class="md-nav" aria-label="Issues">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#questions" class="md-nav__link">
-    Questions
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#problems" class="md-nav__link">
-    Problems
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#feature-requests" class="md-nav__link">
-    Feature requests
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -582,7 +566,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../local_development/" class="md-nav__link">
+      <a href="../../contrib/local_development/" class="md-nav__link">
         Local Development
       </a>
     </li>
@@ -596,7 +580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../implementation_design/" class="md-nav__link">
+      <a href="../../contrib/implementation_design/" class="md-nav__link">
         Implementation Design
       </a>
     </li>
@@ -610,7 +594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../coding_guidelines/" class="md-nav__link">
+      <a href="../../contrib/coding_guidelines/" class="md-nav__link">
         Coding Guidelines
       </a>
     </li>
@@ -624,7 +608,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../releases/" class="md-nav__link">
+      <a href="../../contrib/releases/" class="md-nav__link">
         Releases
       </a>
     </li>
@@ -700,6 +684,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -708,36 +694,16 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#issues" class="md-nav__link">
-    Issues
-  </a>
-  
-    <nav class="md-nav" aria-label="Issues">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#questions" class="md-nav__link">
-    Questions
+  <a href="#common-features" class="md-nav__link">
+    Common features
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#problems" class="md-nav__link">
-    Problems
+      
+        <li class="md-nav__item">
+  <a href="#premium-only-features" class="md-nav__link">
+    Premium-only features
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#feature-requests" class="md-nav__link">
-    Feature requests
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -753,44 +719,100 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/gdubicki/gitlabform/edit/docs_website/docs_new/contrib/introduction.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/gdubicki/gitlabform/edit/docs_website/docs_new/reference/protected_branches.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-  <h1>Introduction</h1>
-
-<p>All contributions are welcome!</p>
+<h1 id="protected-branches">Protected branches<a class="headerlink" href="#protected-branches" title="Permanent link">&para;</a></h1>
+<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/protected_branches.html">protected branches</a>.</p>
+<h2 id="common-features">Common features<a class="headerlink" href="#common-features" title="Permanent link">&para;</a></h2>
+<p>The key names here may be:</p>
 <ul>
-<li>ask questions, report issues, ask for features or write anything message to the app authors - use <strong>Issues</strong> for all
-of these,</li>
-<li>contribute to the documentation and example configuration - with <strong>Pull Requests</strong>, </li>
-<li>contribute your bug fixes, new features, refactoring and other code improvements - with <strong>Pull Requests</strong>,</li>
+<li>exact branch names,</li>
+<li><a href="https://docs.gitlab.com/ee/user/project/protected_branches.html#configure-multiple-protected-branches-by-using-a-wildcard">branch names using wildcards</a>,</li>
 </ul>
-<p>...and probably more! If you want to help in any way but don't know how - create an <strong>Issue</strong>.</p>
-<h2 id="issues">Issues<a class="headerlink" href="#issues" title="Permanent link">&para;</a></h2>
-<p>As the project is not (yet ;) flooded with issues the guidelines for creating them are not very strict
-and should be very common sense ones.</p>
-<h3 id="questions">Questions<a class="headerlink" href="#questions" title="Permanent link">&para;</a></h3>
-<p>Before asking a question please make sure that you have read the docs, especially the example 
-<a href="https://github.com/gdubicki/gitlabform/blob/main/config.yml">config.yml</a>.  </p>
-<h3 id="problems">Problems<a class="headerlink" href="#problems" title="Permanent link">&para;</a></h3>
-<p>Before reporting a problem please update GitLabForm to the latest version and check if the issue persists.</p>
-<p>If it does then please try to report what environment you have, what you try to do, what you expect to happen
-and what does in fact happen.</p>
-<p>To be more specific please remember to:</p>
+<p>The values:</p>
 <ul>
-<li>provide GitLab version,</li>
-<li>provide GitLabForm version,</li>
-<li>provide your Python version and Operating System,</li>
-<li>provide config in whole, or a relevant fragment (of course you can and should redact any values you need
-to redact for privacy and security reasons),</li>
+<li>have to contain a <code>protected</code> key set to <code>true</code> or <code>false</code>,</li>
+<li>if <code>protected: true</code>, then you can configure the protection using:<ul>
+<li><code>push_access_level</code>, <code>merge_access_level</code>, <code>unprotect_access_level</code> keys, each set to one of the <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access levels</a> that will be the minimal access level required for a given action,</li>
+<li>(optional) <code>allow_force_push</code> key set to <code>true</code> or <code>false</code>,</li>
 </ul>
-<h3 id="feature-requests">Feature requests<a class="headerlink" href="#feature-requests" title="Permanent link">&para;</a></h3>
-<p>Please note that although we do accept feature requests we do not promise to fulfill them.</p>
-<p>However, it's still worth creating an issue for this as it shows interest in given feature and that may be taken
-into account by both existing app authors and new contributors when planning to implement something new.</p>
+</li>
+</ul>
+<p>Example 1:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Keep this branch unprotected</span><span class="w"></span>
+<span class="w">      </span><span class="nt">develop</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Allow merging by developers, but no direct commits</span><span class="w"></span>
+<span class="w">      </span><span class="nt">main</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span><span class="w"></span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+<span class="w">        </span><span class="nt">unprotect_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Disallow any changes to this branch</span><span class="w"></span>
+<span class="w">      </span><span class="nt">special_protected_branch</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span><span class="w"></span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span><span class="w"></span>
+<span class="w">        </span><span class="nt">unprotect_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Protect branches with names matching wildcards</span><span class="w"></span>
+<span class="w">      </span><span class="s">&#39;*-some-name-suffix&#39;</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span><span class="w"></span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+<span class="w">        </span><span class="nt">unprotect_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Protect the branch but allow force pushes</span><span class="w"></span>
+<span class="w">      </span><span class="nt">allow_to_force_push</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span><span class="w"></span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+<span class="w">        </span><span class="nt">unprotect_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"></span>
+<span class="w">        </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</code></pre></div>
+<h2 id="premium-only-features">Premium-only features<a class="headerlink" href="#premium-only-features" title="Permanent link">&para;</a></h2>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Below syntax and features require GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
+</div>
+<p>In GitLab Premium instances you can also use the following extra keys under each branch:
+* <code>code_owner_approval_required</code> set to <code>true</code> or <code>false</code>,
+* <code>allowed_to_push</code>, <code>allowed_to_merge</code>, <code>allowed_to_unprotect</code> keys that can be set to the arrays containing any combination of:
+    * <code>user</code> set to username,
+    * <code>user_id</code> set to user id,
+    * <code>group</code> set to group name (path),
+    * <code>group_id</code> set to group id,
+    * <code>access_level</code> set to <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access level</a></p>
+<p>Note that you should NOT use both <code>*_access_level</code> and <code>allowed_to_*</code> keys - the result could be ambiguous, please choose the first or the second set.</p>
+<p>Example 2:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Require code approvals, merge for developers, no direct commits</span><span class="w"></span>
+<span class="w">      </span><span class="nt">extra</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span><span class="w"></span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+<span class="w">        </span><span class="nt">unprotect_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"></span>
+<span class="w">        </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># Allow specific users and groups to operate on this branch</span><span class="w"></span>
+<span class="w">      </span><span class="nt">special</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">        </span><span class="nt">allowed_to_push</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jsmith</span><span class="w"> </span><span class="c1"># you can use usernames...</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bdoe</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">another-group</span><span class="w"> </span><span class="c1"># ...or group names (paths)...</span><span class="w"></span>
+<span class="w">        </span><span class="nt">allowed_to_merge</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">user_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span><span class="w"> </span><span class="c1"># ...or user ids, if you know them...</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">456</span><span class="w"> </span><span class="c1"># ...or group ids, if you know them...</span><span class="w"></span>
+<span class="w">        </span><span class="nt">allowed_to_unprotect</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"> </span><span class="c1"># ...or the whole access levels</span><span class="w"></span>
+</code></pre></div>
 
               
             </article>
@@ -804,7 +826,7 @@ into account by both existing app authors and new contributors when planning to 
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../../automation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Automation" rel="prev">
+        <a href="../archive_unarchive/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Archive/unarchive" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -813,20 +835,20 @@ into account by both existing app authors and new contributors when planning to 
               <span class="md-footer__direction">
                 Previous
               </span>
-              Automation
+              Archive/unarchive
             </div>
           </div>
         </a>
       
       
         
-        <a href="../local_development/" class="md-footer__link md-footer__link--next" aria-label="Next: Local Development" rel="next">
+        <a href="../ci_cd_variables/" class="md-footer__link md-footer__link--next" aria-label="Next: CI/CD Variables" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Local Development
+              CI/CD Variables
             </div>
           </div>
           <div class="md-footer__button md-icon">
