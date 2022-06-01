@@ -56,7 +56,7 @@ GitLabForm enables you to manage:
     * Archive/unarchive,
     * Badges,
     * [CI/CD variables](reference/ci_cd_variables.md),
-    * Protected branches:
+    * [Protected branches](reference/protected_branches.md):
         * access levels (roles) allowed to push/merge/unprotect, allow force push flag,
         * users/groups allowed to push/merge/unprotect, code owner approval required flag (**GitLab Premium (paid) only**),
     * [Deploy keys](reference/deploy_keys.md),
@@ -66,7 +66,7 @@ GitLabForm enables you to manage:
     * Members (groups) {share/unshare with group, change access level, optional enforce},
     * [Merge Requests approvals settings and approvers](reference/merge_requests.md) (**GitLab Premium (paid) only**),
     * Pipeline schedules,
-    * Push Rules (**GitLab Premium (paid) only**),
+    * [Push Rules](reference/push_rules.md) (**GitLab Premium (paid) only**),
     * Integrations,
     * [Settings](reference/project_settings.md),
     * Tags {protect/unprotect},
