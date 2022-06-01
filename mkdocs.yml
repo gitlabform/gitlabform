@@ -17,6 +17,7 @@ nav:
 
   - Configuration Reference:
     - Introduction: configuration_reference.md
+    - Archive/unarchive: reference/archive_unarchive.md
     - Branches: reference/protected_branches.md
     - CI/CD Variables: reference/ci_cd_variables.md
     - Deploy Keys: reference/deploy_keys.md

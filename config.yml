@@ -143,14 +143,6 @@ projects_and_groups:
         content: |
           This file will be added to all protected branches.
 
-  # settings for ALL projects in 'old-projects-group' group
-  old-projects-group/*:
-    # this will archive all the projects in the 'old-projects-group' group
-    project:
-      # note: you can also unarchive a project by setting this to 'false' but then you need to run
-      # the app with --include-archived-projects option
-      archive: true
-
   group-with-spammy-projects/*:
     # configures settings for the 'group-with-spammy-projects' group
     group_settings:
