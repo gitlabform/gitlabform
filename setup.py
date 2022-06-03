@@ -61,7 +61,7 @@ setup(
         "MarkupSafe==1.1.1",
         "ruamel.yaml==0.17.17",
         "luddite==1.0.2",
-        "cli-ui==0.15.2",
+        "cli-ui==0.17.0",
         "packaging==21.3",
         "mergedeep==1.3.4",
         "yamlpath==3.6.4",
