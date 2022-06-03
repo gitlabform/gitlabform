@@ -5,7 +5,7 @@
     Until it is done, please see [the current app README](https://github.com/gdubicki/gitlabform/blob/main/README.md) and linked there articles for the up to date app docs.
 
 
-![GitLabForm logo](https://raw.githubusercontent.com/gdubicki/gitlabform/main/docs/gitlabform-logo.png){ align=left } 
+![GitLabForm logo](images/gitlabform-logo.png){ align=left } 
 is a specialized "configuration as a code" tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
 
@@ -48,7 +48,7 @@ GitLabForm enables you to manage:
     * Badges,
     * Members (users) {add/remove user, change access level, optional enforce},
     * Members (groups) {share/unshare with group, change access level, optional enforce},
-    * Members using LDAP Group Links (**GitLab Premium (paid) only**),
+    * [Members using LDAP Group Links](reference/group_ldap_links.md) (**GitLab Premium (paid) only**),
     * [CI/CD variables](reference/ci_cd_variables.md),
     * Settings,
 

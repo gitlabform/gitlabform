@@ -23,22 +23,6 @@ projects_and_groups:
       # note: you have to keep at least 1 user with "owner" access level group - it's required by GitLab
       enforce: true  # default: false
 
-    # *** This section requires GitLab Premium (paid) ***
-    # configure members of groups by syncing them with LDAP
-    # keys are only used as labels in this config, values are as described at
-    # https://docs.gitlab.com/ee/api/groups.html#add-ldap-group-link-with-cn-or-filter
-    group_ldap_links:
-      # "provider" field should contain a value that you can find in the GitLab web UI,
-      # see https://github.com/gitlabform/gitlabform/issues/261
-      devops_are_maintainers:
-        provider: "AD"
-        cn: "devops"
-        group_access: maintainer
-      developers_are_developers:
-        provider: "AD"
-        filter: "(employeeType=developer)"
-        group_access: developer
-
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
     tags:
