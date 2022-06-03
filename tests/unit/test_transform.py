@@ -85,7 +85,7 @@ def test__config__with_access_level_names__group_ldap_links():
       foobar/*:
         group_ldap_links:
           # "provider" field should contain a value that you can find in the GitLab web UI,
-          # see https://github.com/gdubicki/gitlabform/issues/261
+          # see https://github.com/gitlabform/gitlabform/issues/261
           devops_are_maintainers:
             provider: "AD"
             cn: "devops"
@@ -104,7 +104,7 @@ def test__config__with_access_level_names__group_ldap_links():
       foobar/*:
         group_ldap_links:
           # "provider" field should contain a value that you can find in the GitLab web UI,
-          # see https://github.com/gdubicki/gitlabform/issues/261
+          # see https://github.com/gitlabform/gitlabform/issues/261
           devops_are_maintainers:
             provider: "AD"
             cn: "devops"

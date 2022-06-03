@@ -30,7 +30,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            ghcr.io/gdubicki/gitlabform
+            ghcr.io/gitlabform/gitlabform
             egnyte/gitlabform
           # Alpine-based images is the main one, so only it gets the 'latest' tag for public releases
           flavor: |
@@ -48,7 +48,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            ghcr.io/gdubicki/gitlabform
+            ghcr.io/gitlabform/gitlabform
             egnyte/gitlabform
           flavor: |
             latest=false
@@ -66,7 +66,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      # gdubicki/gitlabform image is going to be here
+      # gitlabform/gitlabform image is going to be here
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:

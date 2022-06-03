@@ -33,7 +33,7 @@ setup(
     " using hierarchical configuration written in YAML",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/gdubicki/gitlabform",
+    url="https://github.com/gitlabform/gitlabform",
     author="Greg Dubicki and Contributors",
     keywords=["gitlab", "configuration-as-code"],
     classifiers=[

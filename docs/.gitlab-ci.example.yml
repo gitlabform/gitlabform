@@ -1,4 +1,4 @@
-image: gdubicki/gitlabform:latest
+image: gitlabform/gitlabform:latest
 
 project:
   only:
