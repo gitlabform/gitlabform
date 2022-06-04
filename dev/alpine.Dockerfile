@@ -14,3 +14,5 @@ RUN cd gitlabform \
     && apk --purge del build-base
 
 WORKDIR /config
+
+ENTRYPOINT ["gitlabform"]

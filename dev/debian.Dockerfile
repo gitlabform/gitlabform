@@ -5,3 +5,5 @@ RUN apt-get update \
 COPY . /gitlabform
 RUN cd gitlabform && python setup.py develop
 WORKDIR /config
+
+ENTRYPOINT ["gitlabform"]
