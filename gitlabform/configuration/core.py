@@ -202,7 +202,6 @@ class ConfigurationCore(ABC):
                             f"Cannot set the inheritance break flag with true\n",
                             exit_code=EXIT_INVALID_INPUT,
                         )
-                        break
                 elif type(value) is CommentedMap:
                     break_inheritance(value, key)
 
