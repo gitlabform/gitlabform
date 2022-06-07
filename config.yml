@@ -5,24 +5,6 @@ projects_and_groups:
   # settings for ALL projects in 'my-group' group
   "my-group/*":
 
-    # this is for adding/changing the access level of group members and/or users
-    # note: removing members from the config DOES NOT remove their access unless "enforce" flag is set to true!
-    #
-    # keys names are usernames/groups' paths and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/groups.html#create-a-link-to-share-a-group-with-another-group
-    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
-    group_members:
-      groups:
-        another-group:
-          group_access: no access
-      users:
-        my-user:
-          access_level: owner
-      # if this flag is set to 'true', then removing a user or group from the above config will remove the user
-      # from the group
-      # note: you have to keep at least 1 user with "owner" access level group - it's required by GitLab
-      enforce: true  # default: false
-
     # keys names are tags names and values are as parameters described at
     # https://docs.gitlab.com/ee/api/protected_tags.html
     tags:
@@ -79,27 +61,6 @@ projects_and_groups:
   "my-group/my-project1":
     hooks:
       skip: true # this will skip whole hooks config *section* for this project, although it is set on group level
-
-    # this is for adding/changing the access level of project members - groups and/or users
-    # note: removing members from the config DOES NOT remove their access unless "enforce" flag is set to true!
-    #
-    # keys names are usernames/groups' paths and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/projects.html#share-project-with-group
-    # https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project
-    members:
-      groups:
-        my-group:
-          group_access: maintainer
-        my-other-group/subgroup:
-          group_access: maintainer
-      users:
-        my-user:
-          access_level: maintainer
-          expires_at: 2025-09-26
-      # if this flag is set to 'true', then this project will have only the users and groups listed above as the *direct*
-      # members (so this setting will NOT affect the members inherited f.e. from a group that contains this project)
-      # note: there has to be at least 1 user/group with "owner" access level per project - it's required by GitLab
-      enforce: true
 
     # this is for adding/changing/deleting pipeline schedules
     #
