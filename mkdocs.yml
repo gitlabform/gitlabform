@@ -21,6 +21,7 @@ nav:
     - Branches: reference/protected_branches.md
     - CI/CD Variables: reference/ci_cd_variables.md
     - Deploy Keys: reference/deploy_keys.md
+    - Files: reference/files.md
     - Group LDAP links: reference/group_ldap_links.md
     - Merge Requests: reference/merge_requests.md
     - Project Settings: reference/project_settings.md
