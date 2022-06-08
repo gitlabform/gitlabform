@@ -39,9 +39,10 @@ class ConfigurationGroups(ConfigurationCore):
             return {}
 
         if common_config:
-            self.validate_break_inheritance_flag(common_config, level="common")
-        elif not common_config and group_config:
-            self.validate_break_inheritance_flag(group_config, level="group")
+            # since common is not included in the groups array,
+            # we define it here
+            section_name = 'common "*"'
+            self.validate_break_inheritance_flag(common_config, section_name)
 
         return self.merge_configs(common_config, group_config)
 
@@ -83,11 +84,11 @@ class ConfigurationGroups(ConfigurationCore):
 
                 if effective_config:
                     self.validate_break_inheritance_flag(
-                        effective_config, level="group"
+                        effective_config, section_name="group"
                     )
                 elif not effective_config and next_level_subgroup_config:
                     self.validate_break_inheritance_flag(
-                        next_level_subgroup_config, level="subgroup"
+                        next_level_subgroup_config, section_name="subgroup"
                     )
 
                 effective_config = self.merge_configs(
