@@ -43,7 +43,7 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
         if common_config:
             # since common is not included in the projects array,
             # we define it here
-            section_name = 'common "*"'
+            section_name = "*"
             self.validate_break_inheritance_flag(common_config, section_name)
         elif not common_config and group_config:
             self.validate_break_inheritance_flag(group_config, group)
