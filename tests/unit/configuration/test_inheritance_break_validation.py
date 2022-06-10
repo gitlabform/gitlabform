@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestInheritanceBreakValidation:
-    def test__get_effective_config_for_project__valid_flag_set_at_common_level(self):
+    def test__validate_break_inheritance_flag__valid_flag_set_at_common_level(self):
         config_yaml = """
             ---
             projects_and_groups:
@@ -23,7 +23,7 @@ class TestInheritanceBreakValidation:
         configuration = Configuration(config_string=config_yaml).get_common_config()
         Configuration.validate_break_inheritance_flag(configuration, common_key)
 
-    def test__get_effective_config_for_project__valid_flag_set_at_group_level(self):
+    def test__validate_break_inheritance_flag__valid_flag_set_at_group_level(self):
         config_yaml = """
         ---
         projects_and_groups:
@@ -40,7 +40,7 @@ class TestInheritanceBreakValidation:
         )
         Configuration.validate_break_inheritance_flag(configuration, group_name)
 
-    def test__get_effective_config_for_project__valid_flag_set_at_project_level(self):
+    def test__validate_break_inheritance_flag__valid_flag_set_at_project_level(self):
         config_yaml = """
         ---
         projects_and_groups:
@@ -57,7 +57,7 @@ class TestInheritanceBreakValidation:
             configuration, group_and_project_name
         )
 
-    def test__get_effective_config_for_project__invalid_flag_set_at_common_level(self):
+    def test__validate_break_inheritance_flag__invalid_flag_set_at_common_level(self):
         config_yaml = """
             ---
             projects_and_groups:
@@ -76,7 +76,7 @@ class TestInheritanceBreakValidation:
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT
 
-    def test__get_effective_config_for_project__invalid_flag_set_at_group_level(self):
+    def test__validate_break_inheritance_flag__invalid_flag_set_at_group_level(self):
         config_yaml = """
         ---
         projects_and_groups:
@@ -97,7 +97,7 @@ class TestInheritanceBreakValidation:
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT
 
-    def test__get_effective_config_for_project__invalid_flag_set_at_project_level(self):
+    def test__validate_break_inheritance_flag__invalid_flag_set_at_project_level(self):
         config_yaml = """
         ---
         projects_and_groups:
