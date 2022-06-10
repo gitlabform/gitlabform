@@ -191,7 +191,7 @@ class TestGroupSecretVariables:
         run_gitlabform(config_single_secret_variable, group_for_function)
 
         secret_variable = gitlab.get_group_secret_variable_object(
-            group_for_function, "FOO"
+            group_for_function, "DOUBLE_NOT"
         )
         assert secret_variable["masked"] is False
         assert secret_variable["protected"] is False
