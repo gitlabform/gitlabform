@@ -173,3 +173,25 @@ class TestGroupSecretVariables:
         )
         assert secret_variable["value"] == "123"
         assert secret_variable["protected"] is True
+
+    def test__not_masked_and_not_protected_secret_variable(
+        self, gitlab, group_for_function
+    ):
+        config_single_secret_variable = f"""
+        projects_and_groups:
+          {group_for_function}/*:
+            group_secret_variables:
+              foo:
+                key: DOUBLE_NOT
+                value: 123
+                masked: false
+                protected: false
+        """
+
+        run_gitlabform(config_single_secret_variable, group_for_function)
+
+        secret_variable = gitlab.get_group_secret_variable_object(
+            group_for_function, "FOO"
+        )
+        assert secret_variable["masked"] is False
+        assert secret_variable["protected"] is False
