@@ -52,7 +52,7 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
         debug("Project config: %s", to_str(project_config))
 
         if not common_config and not group_config and project_config:
-            self.validate_break_inheritance_flag(project_config, project)
+            self.validate_break_inheritance_flag(project_config, group_and_project)
 
         common_and_group_config = self.merge_configs(
             common_config,
