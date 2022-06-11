@@ -2,7 +2,6 @@ import logging
 import pytest
 
 from gitlabform.configuration import Configuration
-from gitlabform import EXIT_INVALID_INPUT
 
 logger = logging.getLogger(__name__)
 
