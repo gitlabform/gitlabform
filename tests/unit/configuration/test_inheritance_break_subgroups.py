@@ -35,7 +35,7 @@ class TestInheritanceBreakSubgroups:
         }
 
     @pytest.fixture
-    def configuration_with_inheritance_break_set_at_project_level(self):
+    def configuration_with_inheritance_break_set_at_subgroup_and_project_level(self):
         config_yaml = """
         ---
         projects_and_groups:
@@ -54,6 +54,7 @@ class TestInheritanceBreakSubgroups:
 
           some_group/subgroup_level_1/subgroup_level_2/*:
             project_settings:
+              inherit: false
               foo2: bar2
 
           some_group/subgroup_level_1/subgroup_level_2/some_project:
@@ -65,13 +66,12 @@ class TestInheritanceBreakSubgroups:
 
     def test__inheritance_break__flag_set_at_project_level__first_subgroup_project_inherits_nothing(
         self,
-        configuration_with_inheritance_break_set_at_project_level,
+        configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
-        effective_config = configuration_with_inheritance_break_set_at_project_level.get_effective_config_for_project(
+        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_project(
             "some_group/subgroup_level_1/some_project"
         )
 
-        # project and only subgroup level 1
         assert effective_config == {
             "project_settings": {
                 "fizz": "buzz",
@@ -80,15 +80,28 @@ class TestInheritanceBreakSubgroups:
 
     def test__inheritance_break__flag_set_at_project_level__second_subgroup_project_inherits_nothing(
         self,
-        configuration_with_inheritance_break_set_at_project_level,
+        configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
-        effective_config = configuration_with_inheritance_break_set_at_project_level.get_effective_config_for_project(
+        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_project(
             "some_group/subgroup_level_1/subgroup_level_2/some_project"
         )
 
-        # project and only subgroup level 1
         assert effective_config == {
             "project_settings": {
                 "fizz": "buzz",
+            },
+        }
+
+    def test__inheritance_break__flag_set_at_subgroup_level__second_subgroup_inherits_nothing(
+        self,
+        configuration_with_inheritance_break_set_at_subgroup_and_project_level,
+    ):
+        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_subgroup_config(
+            "some_group/subgroup_level_1/subgroup_level_2"
+        )
+
+        assert effective_config == {
+            "project_settings": {
+                "foo2": "bar2",
             },
         }
