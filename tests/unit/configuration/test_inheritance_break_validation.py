@@ -117,3 +117,39 @@ class TestInheritanceBreakValidation:
             )
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT
+
+    def test__validate_break_inheritance_flag__valid_flag_set_at_subgroup_level(self):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          some_group/subgroup/*:
+            group_members:
+              my-user:
+                access_level: 10
+        """
+
+        subgroup_name = "some_group/subgroup"
+        configuration = Configuration(config_string=config_yaml).get_group_config(
+            subgroup_name
+        )
+        Configuration.validate_break_inheritance_flag(configuration, subgroup_name)
+
+    def test__validate_break_inheritance_flag__invalid_flag_set_at_subgroup_level(self):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          some_group/subgroup/*:
+            group_members:
+              inherit: false
+              my-user:
+                access_level: 10
+        """
+
+        subgroup_name = "some_group/subgroup"
+        configuration = Configuration(config_string=config_yaml).get_group_config(
+            subgroup_name
+        )
+        with pytest.raises(SystemExit) as exception:
+            Configuration.validate_break_inheritance_flag(configuration, subgroup_name)
+        assert exception.type == SystemExit
+        assert exception.value.code == EXIT_INVALID_INPUT
