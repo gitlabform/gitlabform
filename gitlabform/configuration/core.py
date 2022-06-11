@@ -168,7 +168,9 @@ class ConfigurationCore(ABC):
     def validate_break_inheritance_flag(config, section_name, parent_key=""):
         for key, value in config.items():
             if "inherit" == key:
-                parent_key_description = ' under key "' + parent_key + '"'
+                parent_key_description = (
+                    ' under key "' + parent_key + '"' if parent_key else ""
+                )
                 fatal(
                     f'The inheritance-break flag set in "{section_name}"{parent_key_description} is invalid\n'
                     f"because it has no higher level setting to inherit from.\n",
