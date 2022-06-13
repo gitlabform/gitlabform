@@ -44,45 +44,6 @@ class TestInheritanceBreakProjectsAndGroups:
             "second": {"key": "bizz", "value": "buzz"},
         }
 
-    def test__inheritance_break__flag_set_at_group_level__project_inherits_group_and_not_common(
-        self,
-    ):
-        config_yaml = """
-        ---
-        projects_and_groups:
-          "*":
-            secret_variables:
-              third:
-                key: foo
-                value: bar
-    
-          "some_group/*":
-            secret_variables:
-              inherit: false
-              first:
-                key: foo
-                value: bar
-    
-          "some_group/my_project":
-            secret_variables:
-              second:
-                key: bizz
-                value: buzz
-        """
-
-        configuration = Configuration(config_string=config_yaml)
-
-        effective_config = configuration.get_effective_config_for_project(
-            "some_group/my_project"
-        )
-
-        secret_variables = effective_config["secret_variables"]
-
-        assert secret_variables == {
-            "first": {"key": "foo", "value": "bar"},
-            "second": {"key": "bizz", "value": "buzz"},
-        }
-
     def test__inheritance_break__flag_set_at_project_level__project_inherits_group_and_not_common(
         self,
     ):
@@ -125,4 +86,112 @@ class TestInheritanceBreakProjectsAndGroups:
             "secret_variables": {
                 "second": {"key": "bizz", "value": "buzz"},
             },
+        }
+
+    def test__inheritance_break__flag_set_at_group_level__group_inherits_nothing(
+        self,
+    ):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            secret_variables:
+              third:
+                key: foo
+                value: bar
+
+          "some_group/*":
+            secret_variables:
+              inherit: false
+              first:
+                key: foo
+                value: bar
+        """
+
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_group("some_group")
+
+        secret_variables = effective_config["secret_variables"]
+
+        assert secret_variables == {
+            "first": {"key": "foo", "value": "bar"},
+        }
+
+    def test__inheritance_break__flag_set_at_group_level__project_inherits_group_and_not_common(
+        self,
+    ):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            secret_variables:
+              third:
+                key: foo
+                value: bar
+
+          "some_group/*":
+            secret_variables:
+              inherit: false
+              first:
+                key: foo
+                value: bar
+
+          "some_group/my_project":
+            secret_variables:
+              second:
+                key: bizz
+                value: buzz
+        """
+
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_project(
+            "some_group/my_project"
+        )
+
+        secret_variables = effective_config["secret_variables"]
+
+        assert secret_variables == {
+            "first": {"key": "foo", "value": "bar"},
+            "second": {"key": "bizz", "value": "buzz"},
+        }
+
+    def test__inheritance_break__flag_set_at_group_level_and_project_level__project_inherits_nothing(
+        self,
+    ):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            secret_variables:
+              third:
+                key: foo
+                value: bar
+
+          "some_group/*":
+            secret_variables:
+              inherit: false
+              first:
+                key: foo
+                value: bar
+
+          "some_group/my_project":
+            secret_variables:
+              inherit: false
+              second:
+                key: bizz
+                value: buzz
+        """
+
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_project(
+            "some_group/my_project"
+        )
+
+        secret_variables = effective_config["secret_variables"]
+
+        assert secret_variables == {
+            "second": {"key": "bizz", "value": "buzz"},
         }
