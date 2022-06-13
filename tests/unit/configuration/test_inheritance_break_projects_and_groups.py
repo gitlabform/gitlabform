@@ -118,6 +118,30 @@ class TestInheritanceBreakProjectsAndGroups:
             "first": {"key": "foo", "value": "bar"},
         }
 
+    def test__inheritance_break__flag_set_at_group_level__group_is_highest_level_and_inherits_nothing(
+        self,
+    ):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "some_group/*":
+            secret_variables:
+              inherit: false
+              first:
+                key: foo
+                value: bar
+        """
+
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_group("some_group")
+
+        secret_variables = effective_config["secret_variables"]
+
+        assert secret_variables == {
+            "first": {"key": "foo", "value": "bar"},
+        }
+
     def test__inheritance_break__flag_set_at_group_level__project_inherits_group_and_not_common(
         self,
     ):
