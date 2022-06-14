@@ -40,6 +40,6 @@ class ResourceGroupProcessor(AbstractProcessor):
                     )
             else:
                 fatal(
-                    f"Project is not configured to use resource group {config_resource_group_name}\n",
+                    f"Project is not configured to use resource group: {config_resource_group_name}\n",
                     exit_code=EXIT_INVALID_INPUT,
                 )
