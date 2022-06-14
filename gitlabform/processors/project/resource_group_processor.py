@@ -38,7 +38,8 @@ class ResourceGroupProcessor(AbstractProcessor):
                     verbose(
                         f"Setting resource group process mode to {config_process_mode}"
                     )
-            fatal(
-                f"Project is not configured to use resource group {config_resource_group_name}\n",
-                exit_code=EXIT_INVALID_INPUT,
-            )
+            else:
+                fatal(
+                    f"Project is not configured to use resource group {config_resource_group_name}\n",
+                    exit_code=EXIT_INVALID_INPUT,
+                )
