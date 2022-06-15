@@ -1,5 +1,12 @@
 ## Changelog
 
+### 2.12.0
+
+* Update base Docker images:
+  * from Python 3.9 and Alpine 3.14 to Python 3.10 and Alpine 3.16,
+  * from Python 3.9 and Debian 10 (Buster) to Python 3.10 and Debian 11 (Bullseye).
+* Fix Group CI/CD Variables not honoring `protected` and `masked` values set to `false`. Fixes [#384](https://github.com/gitlabform/gitlabform/issues/384).
+
 ### 2.11.1post3
 
 * Moved the project from `gdubicki/gitlabform` to `gitlabform/gitlabform`. Stopped publishing new images to the old `egnyte/gitlabform` Docker registry.
