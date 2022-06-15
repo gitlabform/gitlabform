@@ -14,20 +14,20 @@ class TestInheritanceBreakProjectsAndGroups:
         projects_and_groups:
           "*":
             secret_variables:
-              third:
+              secret1:
                 key: foo
                 value: bar
     
           "some_group/*":
             secret_variables:
-              first:
+              secret2:
                 key: foo
                 value: bar
     
           "some_group/my_project":
             secret_variables:
               inherit: false
-              second:
+              secret3:
                 key: bizz
                 value: buzz
         """
@@ -41,7 +41,7 @@ class TestInheritanceBreakProjectsAndGroups:
         secret_variables = effective_config["secret_variables"]
 
         assert secret_variables == {
-            "second": {"key": "bizz", "value": "buzz"},
+            "secret3": {"key": "bizz", "value": "buzz"},
         }
 
     def test__inheritance_break__flag_set_at_project_level__project_inherits_group_and_not_common(
@@ -52,7 +52,7 @@ class TestInheritanceBreakProjectsAndGroups:
         projects_and_groups:
           "*":
             secret_variables:
-              third:
+              secret1:
                 key: foo
                 value: bar
     
@@ -65,7 +65,7 @@ class TestInheritanceBreakProjectsAndGroups:
           "some_group/my_project":
             secret_variables:
               inherit: false
-              second:
+              secret2:
                 key: bizz
                 value: buzz
         """
@@ -84,7 +84,7 @@ class TestInheritanceBreakProjectsAndGroups:
                 }
             },
             "secret_variables": {
-                "second": {"key": "bizz", "value": "buzz"},
+                "secret2": {"key": "bizz", "value": "buzz"},
             },
         }
 
@@ -96,14 +96,14 @@ class TestInheritanceBreakProjectsAndGroups:
         projects_and_groups:
           "*":
             secret_variables:
-              third:
+              secret1:
                 key: foo
                 value: bar
 
           "some_group/*":
             secret_variables:
               inherit: false
-              first:
+              secret2:
                 key: foo
                 value: bar
         """
@@ -115,7 +115,7 @@ class TestInheritanceBreakProjectsAndGroups:
         secret_variables = effective_config["secret_variables"]
 
         assert secret_variables == {
-            "first": {"key": "foo", "value": "bar"},
+            "secret2": {"key": "foo", "value": "bar"},
         }
 
     def test__inheritance_break__flag_set_at_group_level__group_is_highest_level_and_inherits_nothing(
@@ -127,7 +127,7 @@ class TestInheritanceBreakProjectsAndGroups:
           "some_group/*":
             secret_variables:
               inherit: false
-              first:
+              secret1:
                 key: foo
                 value: bar
         """
@@ -139,7 +139,7 @@ class TestInheritanceBreakProjectsAndGroups:
         secret_variables = effective_config["secret_variables"]
 
         assert secret_variables == {
-            "first": {"key": "foo", "value": "bar"},
+            "secret1": {"key": "foo", "value": "bar"},
         }
 
     def test__inheritance_break__flag_set_at_group_level__project_inherits_group_and_not_common(
@@ -150,20 +150,20 @@ class TestInheritanceBreakProjectsAndGroups:
         projects_and_groups:
           "*":
             secret_variables:
-              third:
+              secret1:
                 key: foo
                 value: bar
 
           "some_group/*":
             secret_variables:
               inherit: false
-              first:
+              secret2:
                 key: foo
                 value: bar
 
           "some_group/my_project":
             secret_variables:
-              second:
+              secret3:
                 key: bizz
                 value: buzz
         """
@@ -177,8 +177,8 @@ class TestInheritanceBreakProjectsAndGroups:
         secret_variables = effective_config["secret_variables"]
 
         assert secret_variables == {
-            "first": {"key": "foo", "value": "bar"},
-            "second": {"key": "bizz", "value": "buzz"},
+            "secret2": {"key": "foo", "value": "bar"},
+            "secret3": {"key": "bizz", "value": "buzz"},
         }
 
     def test__inheritance_break__flag_set_at_group_level_and_project_level__project_inherits_nothing(
@@ -189,21 +189,21 @@ class TestInheritanceBreakProjectsAndGroups:
         projects_and_groups:
           "*":
             secret_variables:
-              third:
+              secret1:
                 key: foo
                 value: bar
 
           "some_group/*":
             secret_variables:
               inherit: false
-              first:
+              secret2:
                 key: foo
                 value: bar
 
           "some_group/my_project":
             secret_variables:
               inherit: false
-              second:
+              secret3:
                 key: bizz
                 value: buzz
         """
@@ -217,5 +217,5 @@ class TestInheritanceBreakProjectsAndGroups:
         secret_variables = effective_config["secret_variables"]
 
         assert secret_variables == {
-            "second": {"key": "bizz", "value": "buzz"},
+            "secret3": {"key": "bizz", "value": "buzz"},
         }
