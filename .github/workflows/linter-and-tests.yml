@@ -38,6 +38,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install test dependencies
         run: |
+          pip install wheel
           pip install -e .[test]
       - name: Run acceptance tests
         env:
@@ -65,6 +66,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install test dependencies
         run: |
+          pip install wheel
           pip install -e .[test]
       - name: Run unit tests
         run: |
@@ -84,6 +86,7 @@ jobs:
           python-version: '3.10'
       - name: Install dependencies
         run: |
+          pip install wheel
           pip install bandit
       - name: Run bandit
         run: |
@@ -104,8 +107,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install runtime dependencies
         run: |
+          pip install wheel
           pip install -e .
-      - name: Run acceptance tests
+      - name: Check if the app starts
         run: |
           gitlabform -V
-
