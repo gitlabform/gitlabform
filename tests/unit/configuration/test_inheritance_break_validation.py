@@ -15,7 +15,7 @@ class TestInheritanceBreakValidation:
               "*":
                 inherit: false
                 secret_variables:
-                  secret_key:
+                  secret:
                     key: foo
                     value: bar
             """
@@ -34,7 +34,7 @@ class TestInheritanceBreakValidation:
           some_group/*:
             secret_variables:
               inherit: false
-              secret_key:
+              secret:
                 key: foo
                 value: bar
         """
@@ -55,7 +55,7 @@ class TestInheritanceBreakValidation:
           "some_group/some_project":
             secret_variables:
               inherit: false
-              secret_key:
+              secret:
                 key: foo
                 value: bar
         """
