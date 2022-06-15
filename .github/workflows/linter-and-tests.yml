@@ -44,7 +44,7 @@ jobs:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: |
           ./dev/run_gitlab_in_docker.sh
-          pytest --cov=. --cov-report=xml --durations=0 tests/acceptance
+          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
