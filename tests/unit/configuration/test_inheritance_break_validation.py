@@ -8,21 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class TestInheritanceBreakValidation:
-    def test__validate_break_inheritance_flag__valid_flag_set_at_common_level(self):
-        config_yaml = """
-            ---
-            projects_and_groups:
-              "*":
-                secret_variables:
-                  first:
-                    key: foo
-                    value: bar
-            """
-
-        common_key = "*"
-        configuration = Configuration(config_string=config_yaml).get_common_config()
-        Configuration.validate_break_inheritance_flag(configuration, common_key)
-
     def test__validate_break_inheritance_flag__valid_flag_set_at_group_level(self):
         config_yaml = """
         ---
