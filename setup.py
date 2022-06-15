@@ -75,6 +75,7 @@ setup(
             "coverage==6.2",
             "pytest-cov==3.0.0",
             "deepdiff==5.7.0",
+            "pytest-rerunfailures==10.2",
         ],
     },
     entry_points={
