@@ -103,8 +103,8 @@ machine.
 ./dev/run_gitlab_in_docker.sh
 ```
 
-3. Run `pytest tests/acceptance` to start all tests.
-To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
+3. Run `pytest --reruns 3 --reruns-delay 10 tests/acceptance` to start all tests.
+To run only a single class with tests run f.e. `py.test --reruns 3 --reruns-delay 10 tests/acceptance -k "TestArchiveProject"`.
 
 ##### Running acceptance tests using your own GitLab instance
 
@@ -119,8 +119,8 @@ export GITLAB_URL="https://mygitlab.company.com"
 export GITLAB_TOKEN="<my admin user API token>"
 ```
 
-2. Run `pytest tests/acceptance` to start all tests
-To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
+2. Run `pytest --reruns 3 --reruns-delay 10 tests/acceptance` to start all tests
+To run only a single class with tests run f.e. `py.test --reruns 3 --reruns-delay 10 tests/acceptance -k "TestArchiveProject"`.
 
 #### Running test code in a Docker container
 
@@ -133,7 +133,7 @@ docker build . -f ./dev/tests.Dockerfile -t gitlabform-tests:latest
 ```
 2. Use it to run the tests:
 ```
-docker run -it -v $(pwd):/code gitlabform-tests:latest /bin/ash -c "cd /code && pytest tests/acceptance"
+docker run -it -v $(pwd):/code gitlabform-tests:latest /bin/ash -c "cd /code && pytest --reruns 3 --reruns-delay 10 tests/acceptance"
 ```
 
 #### General coding guidelines
