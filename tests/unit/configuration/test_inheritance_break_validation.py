@@ -20,8 +20,9 @@ class TestInheritanceBreakValidation:
                 value: bar
         """
 
+        configuration = Configuration(config_string=config_yaml)
         with pytest.raises(SystemExit) as exception:
-            Configuration(config_string=config_yaml).get_common_config()
+            configuration.get_common_config()
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT
 
@@ -37,12 +38,9 @@ class TestInheritanceBreakValidation:
                 value: bar
         """
 
-        group_name = "some_group"
-        configuration = Configuration(config_string=config_yaml).get_group_config(
-            group_name
-        )
+        configuration = Configuration(config_string=config_yaml)
         with pytest.raises(SystemExit) as exception:
-            Configuration.validate_break_inheritance_flag(configuration, group_name)
+            configuration.get_effective_config_for_group("some_group")
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT
 
@@ -58,14 +56,9 @@ class TestInheritanceBreakValidation:
                 value: bar
         """
 
-        group_and_project_name = "some_group/some_project"
-        configuration = Configuration(config_string=config_yaml).get_project_config(
-            group_and_project_name
-        )
+        configuration = Configuration(config_string=config_yaml)
         with pytest.raises(SystemExit) as exception:
-            Configuration.validate_break_inheritance_flag(
-                configuration, group_and_project_name
-            )
+            configuration.get_effective_config_for_project("some_group/some_project")
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT
 
@@ -80,11 +73,8 @@ class TestInheritanceBreakValidation:
                 access_level: 10
         """
 
-        subgroup_name = "some_group/subgroup"
-        configuration = Configuration(config_string=config_yaml).get_group_config(
-            subgroup_name
-        )
+        configuration = Configuration(config_string=config_yaml)
         with pytest.raises(SystemExit) as exception:
-            Configuration.validate_break_inheritance_flag(configuration, subgroup_name)
+            configuration.get_effective_config_for_group("some_group/subgroup")
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT
