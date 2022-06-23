@@ -10,15 +10,15 @@ logger = logging.getLogger(__name__)
 class TestInheritanceBreakValidation:
     def test__validate_break_inheritance_flag__invalid_flag_set_at_common_level(self):
         config_yaml = """
-            ---
-            projects_and_groups:
-              "*":
-                inherit: false
-                secret_variables:
-                  secret:
-                    key: foo
-                    value: bar
-            """
+        ---
+        projects_and_groups:
+          "*":
+            inherit: false
+            secret_variables:
+              secret:
+                key: foo
+                value: bar
+        """
 
         with pytest.raises(SystemExit) as exception:
             Configuration(config_string=config_yaml).get_common_config()

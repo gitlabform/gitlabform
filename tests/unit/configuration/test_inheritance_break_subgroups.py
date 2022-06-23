@@ -47,9 +47,9 @@ class TestInheritanceBreakSubgroups:
               foo1: bar1
               
           some_group/subgroup_level_1/some_project:
-              project_settings:
-                inherit: false
-                fizz: buzz
+            project_settings:
+              inherit: false
+              fizz: buzz
 
           some_group/subgroup_level_1/subgroup_level_2/*:
             project_settings:
@@ -57,9 +57,9 @@ class TestInheritanceBreakSubgroups:
               foo2: bar2
 
           some_group/subgroup_level_1/subgroup_level_2/some_project:
-              project_settings:
-                inherit: false
-                fizz: buzz
+            project_settings:
+              inherit: false
+              fizz: buzz
         """
         return Configuration(config_string=config_yaml)
 
