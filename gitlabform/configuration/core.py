@@ -153,7 +153,11 @@ class ConfigurationCore(ABC):
         """
         :return: literal common configuration or empty dict if not defined
         """
-        return self.get("projects_and_groups|*", {})
+        common_config = self.get("projects_and_groups|*", {})
+        if common_config:
+            section_name = "*"
+            self.validate_break_inheritance_flag(common_config, section_name)
+        return common_config
 
     def is_project_skipped(self, project) -> bool:
         pass

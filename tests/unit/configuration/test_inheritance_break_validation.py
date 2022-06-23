@@ -20,10 +20,8 @@ class TestInheritanceBreakValidation:
                     value: bar
             """
 
-        common_key = "*"
-        configuration = Configuration(config_string=config_yaml).get_common_config()
         with pytest.raises(SystemExit) as exception:
-            Configuration.validate_break_inheritance_flag(configuration, common_key)
+            Configuration(config_string=config_yaml).get_common_config()
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT
 

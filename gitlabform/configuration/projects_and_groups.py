@@ -40,12 +40,7 @@ class ConfigurationProjectsAndGroups(ConfigurationGroups):
             group_config = self.get_group_config(group)
         debug("Effective group/subgroup config: %s", to_str(group_config))
 
-        if common_config:
-            # since common is not included in the projects array,
-            # we define it here
-            section_name = "*"
-            self.validate_break_inheritance_flag(common_config, section_name)
-        elif not common_config and group_config:
+        if not common_config and group_config:
             self.validate_break_inheritance_flag(group_config, group)
 
         project_config = self.get_project_config(group_and_project)

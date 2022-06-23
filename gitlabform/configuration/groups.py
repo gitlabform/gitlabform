@@ -38,12 +38,6 @@ class ConfigurationGroups(ConfigurationCore):
         if not group_config and not common_config:
             return {}
 
-        if common_config:
-            # since common is not included in the groups array,
-            # we define it here
-            section_name = "*"
-            self.validate_break_inheritance_flag(common_config, section_name)
-
         return self.merge_configs(common_config, group_config)
 
     def get_effective_subgroup_config(self, subgroup):
@@ -60,7 +54,7 @@ class ConfigurationGroups(ConfigurationCore):
         #                    |       v
         #                    \------>b = effective config to return
         #
-        # ..where a = merged_config("x", "x/y") and b = merged_config(a, "x/y/z")
+        # ...where a = merged_config("x", "x/y") and b = merged_config(a, "x/y/z")
         #
 
         effective_config = {}
