@@ -8,7 +8,7 @@ from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 
 CONFIG = """
-config_version: 2
+config_version: 3
 """
 
 DEFAULT_README = "Default README content."
