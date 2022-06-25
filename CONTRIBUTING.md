@@ -57,7 +57,7 @@ Just use the common sense:
 
 #### Development environment setup how-to
 
-1. Create virtualenv with Python 3.6-3.9, for example in `venv` dir which is in `.gitignore` and activate it:
+1. Create virtualenv with Python 3.7-3.10, for example in `venv` dir which is in `.gitignore` and activate it:
 ```
 virtualenv -p python3 venv
 . venv/bin/activate

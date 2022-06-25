@@ -88,7 +88,7 @@ the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-confi
 
 ## Requirements
 
-* Docker or Python 3.6-3.10 with [pipx](https://github.com/pypa/pipx) (recommended) or pip,
+* Docker or Python 3.7-3.10 with [pipx](https://github.com/pypa/pipx) (recommended) or pip,
 * GitLab 11+
 * GitLab Premium (paid) for some features
 
