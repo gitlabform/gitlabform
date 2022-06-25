@@ -1,5 +1,11 @@
 ## Changelog
 
+### 3.0.0
+
+* Bump minimal required Python version to 3.7 (as 3.6 is EOL since Dec 2021),
+  * Update many dependencies that have required Python >= 3.7,
+* Drop Debian-based Docker image,
+
 ### 2.12.0
 
 * Update base Docker images:
