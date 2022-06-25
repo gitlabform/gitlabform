@@ -100,10 +100,10 @@ Run the latest stable version with:
 * [pipx](https://github.com/pypa/pipx): `pipx run gitlabform`
 
 
-Run the latest 2.* version with:
+Run the latest 3.* version with:
 
-* Docker: `docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:2 gitlabform`.
-* [pipx](https://github.com/pypa/pipx): `pipx run --spec gitlabform~=2.2.0 gitlabform`
+* Docker: `docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:3 gitlabform`.
+* [pipx](https://github.com/pypa/pipx): `pipx run --spec gitlabform~=3.0.0 gitlabform`
 
 See [this](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform) for all available Docker tags.
 
