@@ -5,37 +5,37 @@ from tests.acceptance import run_gitlabform
 
 
 @pytest.fixture(scope="function")
-def services(request, gitlab, group_and_project):
+def integrations(request, gitlab, group_and_project):
 
-    services = ["asana", "slack", "redmine", "jira", "mattermost"]
+    integrations = ["asana", "slack", "redmine", "jira", "mattermost"]
 
     def fin():
         # disable test integrations
-        for service in services:
-            gitlab.delete_service(group_and_project, service)
+        for integration in integrations:
+            gitlab.delete_integration(group_and_project, integration)
 
     request.addfinalizer(fin)
-    return services  # provide fixture value
+    return integrations  # provide fixture value
 
 
-class TestServices:
+class TestIntegrations:
     # we use "other_project" here on purpose because if we would reuse the "project"
-    # then we could end up with running this test after another, and a service created
+    # then we could end up with running this test after another, and a integration created
     # and then deleted is a different entity in GitLab than a never created one (!).
     # the first one exists but has "active" field set to False, the other throws 404
     def test__if_they_are_not_set_by_default(self, gitlab, group, other_project):
         group_and_project = f"{group}/{other_project}"
 
-        for service_name in ["asana", "slack", "redmine", "jira"]:
+        for integration_name in ["asana", "slack", "redmine", "jira"]:
             with pytest.raises(NotFoundException):
-                gitlab.get_service(group_and_project, service_name)
+                gitlab.get_integration(group_and_project, integration_name)
 
     def test__if_delete_works(self, gitlab, group_and_project):
 
-        config_services = f"""
+        config_integrations = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               jira:
                 url: http://foo.bar.com
                 username: foo
@@ -55,34 +55,34 @@ class TestServices:
                 push_events: true
         """
 
-        run_gitlabform(config_services, group_and_project)
+        run_gitlabform(config_integrations, group_and_project)
 
-        for service_name in ["jira", "asana", "slack", "redmine"]:
-            service = gitlab.get_service(group_and_project, service_name)
-            assert service["active"] is True
+        for integration_name in ["jira", "asana", "slack", "redmine"]:
+            integration = gitlab.get_integration(group_and_project, integration_name)
+            assert integration["active"] is True
 
-        config_services_delete = f"""
+        config_integrations_delete = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               jira:
                 delete: true
               slack:
                 delete: true
         """
 
-        run_gitlabform(config_services_delete, group_and_project)
+        run_gitlabform(config_integrations_delete, group_and_project)
 
-        for service_name in ["jira", "slack"]:
-            service = gitlab.get_service(group_and_project, service_name)
-            assert service["active"] is False
+        for integration_name in ["jira", "slack"]:
+            integration = gitlab.get_integration(group_and_project, integration_name)
+            assert integration["active"] is False
 
     def test__if_push_events_true_works(self, gitlab, group_and_project):
 
-        config_service_push_events_true = f"""
+        config_integration_push_events_true = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               asana:
                 api_key: foo
                 push_events: true
@@ -96,22 +96,22 @@ class TestServices:
                 push_events: true
         """
 
-        run_gitlabform(config_service_push_events_true, group_and_project)
+        run_gitlabform(config_integration_push_events_true, group_and_project)
 
-        services = []
-        for service_name in ["asana", "slack", "redmine"]:
-            service = gitlab.get_service(group_and_project, service_name)
-            services.append(service)
+        integrations = []
+        for integration_name in ["asana", "slack", "redmine"]:
+            integration = gitlab.get_integration(group_and_project, integration_name)
+            integrations.append(integration)
 
-        assert all([service["active"] for service in services]) is True
-        assert all([service["push_events"] for service in services]) is True
+        assert all([integration["active"] for integration in integrations]) is True
+        assert all([integration["push_events"] for integration in integrations]) is True
 
     def test__if_push_events_false_works(self, gitlab, group_and_project):
 
-        config_service_push_events_false = f"""
+        config_integration_push_events_false = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               asana:
                 api_key: foo
                 push_events: false # changed
@@ -125,22 +125,24 @@ class TestServices:
                 push_events: false # changed
         """
 
-        run_gitlabform(config_service_push_events_false, group_and_project)
+        run_gitlabform(config_integration_push_events_false, group_and_project)
 
-        services = []
-        for service_name in ["asana", "slack", "redmine"]:
-            service = gitlab.get_service(group_and_project, service_name)
-            services.append(service)
+        integrations = []
+        for integration_name in ["asana", "slack", "redmine"]:
+            integration = gitlab.get_integration(group_and_project, integration_name)
+            integrations.append(integration)
 
-        assert all([service["active"] for service in services]) is True
-        assert all([service["push_events"] for service in services]) is False
+        assert all([integration["active"] for integration in integrations]) is True
+        assert (
+            all([integration["push_events"] for integration in integrations]) is False
+        )
 
     def test__if_push_events_change_works(self, gitlab, group_and_project):
 
-        config_service_push_events_true = f"""
+        config_integration_push_events_true = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               asana:
                 api_key: foo
                 push_events: true
@@ -154,20 +156,20 @@ class TestServices:
                 push_events: true
         """
 
-        run_gitlabform(config_service_push_events_true, group_and_project)
+        run_gitlabform(config_integration_push_events_true, group_and_project)
 
-        services = []
-        for service_name in ["asana", "slack", "redmine"]:
-            service = gitlab.get_service(group_and_project, service_name)
-            services.append(service)
+        integrations = []
+        for integration_name in ["asana", "slack", "redmine"]:
+            integration = gitlab.get_integration(group_and_project, integration_name)
+            integrations.append(integration)
 
-        assert all([service["active"] for service in services]) is True
-        assert all([service["push_events"] for service in services]) is True
+        assert all([integration["active"] for integration in integrations]) is True
+        assert all([integration["push_events"] for integration in integrations]) is True
 
-        config_service_push_events_false = f"""
+        config_integration_push_events_false = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               asana:
                 api_key: foo
                 push_events: false # changed
@@ -181,22 +183,24 @@ class TestServices:
                 push_events: false # changed
         """
 
-        run_gitlabform(config_service_push_events_false, group_and_project)
+        run_gitlabform(config_integration_push_events_false, group_and_project)
 
-        services = []
-        for service_name in ["asana", "slack", "redmine"]:
-            service = gitlab.get_service(group_and_project, service_name)
-            services.append(service)
+        integrations = []
+        for integration_name in ["asana", "slack", "redmine"]:
+            integration = gitlab.get_integration(group_and_project, integration_name)
+            integrations.append(integration)
 
-        assert all([service["active"] for service in services]) is True
-        assert all([service["push_events"] for service in services]) is False
+        assert all([integration["active"] for integration in integrations]) is True
+        assert (
+            all([integration["push_events"] for integration in integrations]) is False
+        )
 
     def test__if_jira_commit_events_true_works(self, gitlab, group_and_project):
 
-        config_service_jira_commit_events_true = f"""
+        config_integration_jira_commit_events_true = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               jira:
                 url: http://foo.bar.com
                 username: foo
@@ -205,18 +209,18 @@ class TestServices:
                 commit_events: true
         """
 
-        run_gitlabform(config_service_jira_commit_events_true, group_and_project)
+        run_gitlabform(config_integration_jira_commit_events_true, group_and_project)
 
-        service = gitlab.get_service(group_and_project, "jira")
-        assert service["active"] is True
-        assert service["commit_events"] is True
+        integration = gitlab.get_integration(group_and_project, "jira")
+        assert integration["active"] is True
+        assert integration["commit_events"] is True
 
     def test__if_jira_commit_events_false_works(self, gitlab, group_and_project):
 
-        config_service_jira_commit_events_false = f"""
+        config_integration_jira_commit_events_false = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               jira:
                 url: http://foo.bar.com
                 username: foo
@@ -225,18 +229,18 @@ class TestServices:
                 commit_events: false
         """
 
-        run_gitlabform(config_service_jira_commit_events_false, group_and_project)
+        run_gitlabform(config_integration_jira_commit_events_false, group_and_project)
 
-        service = gitlab.get_service(group_and_project, "jira")
-        assert service["active"] is True
-        assert service["commit_events"] is False
+        integration = gitlab.get_integration(group_and_project, "jira")
+        assert integration["active"] is True
+        assert integration["commit_events"] is False
 
     def test__if_change_works(self, gitlab, group_and_project):
 
-        config_service_jira_commit_events_true = f"""
+        config_integration_jira_commit_events_true = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               jira:
                 url: http://foo.bar.com
                 username: foo
@@ -245,16 +249,16 @@ class TestServices:
                 commit_events: true
         """
 
-        run_gitlabform(config_service_jira_commit_events_true, group_and_project)
+        run_gitlabform(config_integration_jira_commit_events_true, group_and_project)
 
-        service = gitlab.get_service(group_and_project, "jira")
-        assert service["active"] is True
-        assert service["commit_events"] is True
+        integration = gitlab.get_integration(group_and_project, "jira")
+        assert integration["active"] is True
+        assert integration["commit_events"] is True
 
-        config_service_jira_commit_events_false = f"""
+        config_integration_jira_commit_events_false = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               jira:
                 url: http://foo.bar.com
                 username: foo
@@ -263,18 +267,18 @@ class TestServices:
                 commit_events: false
         """
 
-        run_gitlabform(config_service_jira_commit_events_false, group_and_project)
+        run_gitlabform(config_integration_jira_commit_events_false, group_and_project)
 
-        service = gitlab.get_service(group_and_project, "jira")
-        assert service["active"] is True
-        assert service["commit_events"] is False
+        integration = gitlab.get_integration(group_and_project, "jira")
+        assert integration["active"] is True
+        assert integration["commit_events"] is False
 
     def test__mattermost_confidential_issues_events(self, gitlab, group_and_project):
 
-        config_service_mattermost_confidential_issues_events = f"""
+        config_integration_mattermost_confidential_issues_events = f"""
         projects_and_groups:
           {group_and_project}:
-            services:
+            integrations:
               mattermost:
                 active: true
                 webhook: https://mattermost.com/hooks/xxx
@@ -293,8 +297,8 @@ class TestServices:
         """
 
         run_gitlabform(
-            config_service_mattermost_confidential_issues_events, group_and_project
+            config_integration_mattermost_confidential_issues_events, group_and_project
         )
 
-        service = gitlab.get_service(group_and_project, "mattermost")
-        assert service["confidential_issues_events"] is False
+        integration = gitlab.get_integration(group_and_project, "mattermost")
+        assert integration["confidential_issues_events"] is False
