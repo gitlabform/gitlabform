@@ -27,8 +27,8 @@ from gitlabform.processors.project.project_settings_processor import (
 from gitlabform.processors.project.schedules_processor import (
     SchedulesProcessor,
 )
-from gitlabform.processors.project.secret_variables_processor import (
-    SecretVariablesProcessor,
+from gitlabform.processors.project.variables_processor import (
+    VariablesProcessor,
 )
 from gitlabform.processors.project.integrations_processor import (
     IntegrationsProcessor,
@@ -45,7 +45,7 @@ class ProjectProcessors(AbstractProcessors):
             ProjectPushRulesProcessor(gitlab),
             MergeRequestsProcessor(gitlab),
             DeployKeysProcessor(gitlab),
-            SecretVariablesProcessor(gitlab),
+            VariablesProcessor(gitlab),
             BranchesProcessor(gitlab, strict),
             TagsProcessor(gitlab, strict),
             IntegrationsProcessor(gitlab),

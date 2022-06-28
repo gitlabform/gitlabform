@@ -187,7 +187,7 @@ file.
 Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is
 encrypted) for security reasons - please set it in the `GITLAB_TOKEN` environment variable instead.
 
-For GitLab CI a secure place to set it would be a [Secret/Protected Variable in the project configuration](https://docs.gitlab.com/ee/ci/variables/#via-the-ui).
+For GitLab CI a secure place to set it would be a [Masked and Protected Variable in the project configuration](https://docs.gitlab.com/ee/ci/variables/#via-the-ui).
 
 ## Running automatically for new projects
 
@@ -210,11 +210,11 @@ add new features, please see the [implementation design](https://github.com/gitl
 
 ## Origins
 
-This tool has been originally created at [Egnyte](https://github.com/Egnyte) as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890) but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729) (released in GitLab 9.4) to keep the configuration as code.
+This tool has been originally created at [Egnyte](https://github.com/Egnyte) as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890) but as of now we prefer to use it ever if there are appropriate web UI features, such as [variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729) (released in GitLab 9.4) to keep the configuration as code.
 
 Later on we added features that allowed us to use GitLabForm to improve a group containing around 100 similar projects
 to move to a unified development flow (by managing branches protection and the Pull Requests configuration),
-basic tests and deployment process (by managing secret variables, deployment keys and files, such as `.gitlab-ci.yml`),
+basic tests and deployment process (by managing variables, deployment keys and files, such as `.gitlab-ci.yml`),
 integrations (such as JIRA or Slack) and more.
 
 ## Legal
