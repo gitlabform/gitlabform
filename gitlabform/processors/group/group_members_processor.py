@@ -1,5 +1,5 @@
 from logging import debug
-from cli_ui import warning, fatal
+from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
@@ -10,19 +10,9 @@ class GroupMembersProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_members", gitlab)
 
-    def _section_is_in_config(self, configuration: dict):
-        return any(
-            section_name in configuration
-            for section_name in [
-                "group_members",
-                "group_shared_with",
-                "enforce_group_members",
-            ]
-        )
-
     def _process_configuration(self, group: str, configuration: dict):
 
-        enforce_group_members = self._is_enforce_enabled(configuration)
+        enforce_group_members = configuration.get("group_members|enforce", False)
 
         (
             groups_to_set_by_group_path,
@@ -46,35 +36,9 @@ class GroupMembersProcessor(AbstractProcessor):
         self._process_users(group, users_to_set_by_username, enforce_group_members)
 
     @staticmethod
-    def _is_enforce_enabled(configuration: dict) -> bool:
-
-        # read if enforcing is enabled from the config once - it will be used for both sharing group with groups
-        # as well as assigning single users to group
-
-        enforce_group_members = configuration.get("enforce_group_members", False)
-        if enforce_group_members:
-            warning(
-                "Using `enforce_group_members` key is deprecated and will be removed in future versions "
-                "of GitLabForm. Please use `group_members.enforce` key instead."
-            )
-        else:
-            enforce_group_members = configuration.get("group_members|enforce", False)
-        return enforce_group_members
-
-    @staticmethod
     def _get_groups_and_users_to_set(configuration: dict) -> (dict, dict):
 
-        # read the configs in a single place, as the syntax is changing and there are a lot of possible
-        # deprecation notices to be printed
-
-        groups_to_set_by_group_path = configuration.get("group_shared_with", {})
-        if groups_to_set_by_group_path:
-            warning(
-                "Using `group_shared_with:` is deprecated and will be removed in future versions "
-                "of GitLabForm. Please move its contents to `group_members.groups`."
-            )
-        else:
-            groups_to_set_by_group_path = configuration.get("group_members|groups", {})
+        groups_to_set_by_group_path = configuration.get("group_members|groups", {})
 
         users_to_set_by_username = configuration.get("group_members", {})
         if users_to_set_by_username:
@@ -87,12 +51,6 @@ class GroupMembersProcessor(AbstractProcessor):
                 users_to_set_by_username.pop("enforce", None)
                 users_to_set_by_username.pop("users", None)
                 users_to_set_by_username.pop("groups", None)
-                if users_to_set_by_username:
-                    warning(
-                        "Putting users as target members of the groups directly under `group_members` key is deprecated "
-                        "and will be removed in future versions of GitLabForm. "
-                        "Please put them under `group_members.users` key instead."
-                    )
 
         return groups_to_set_by_group_path, users_to_set_by_username
 
@@ -114,18 +72,9 @@ class GroupMembersProcessor(AbstractProcessor):
 
         for share_with_group_path in groups_to_set_by_group_path:
 
-            group_access_to_set = groups_to_set_by_group_path[
-                share_with_group_path
-            ].get("group_access_level", None)
-            if group_access_to_set:
-                warning(
-                    "Using `group_access_level` key deprecated and will be removed in future versions "
-                    "of GitLabForm. Please rename it to `group_access`."
-                )
-            else:
-                group_access_to_set = groups_to_set_by_group_path[
-                    share_with_group_path
-                ]["group_access"]
+            group_access_to_set = groups_to_set_by_group_path[share_with_group_path][
+                "group_access"
+            ]
 
             expires_at_to_set = (
                 groups_to_set_by_group_path[share_with_group_path]["expires_at"]
