@@ -14,8 +14,9 @@ class TestFilesAll:
             branches:
               {branch}:
                 protected: true
-                developers_can_push: false
-                developers_can_merge: true
+                push_access_level: maintainer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
               {other_branch}:
                 protected: false
             files:
