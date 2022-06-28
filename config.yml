@@ -249,11 +249,10 @@ projects_and_groups:
         protected: true
         create_access_level: maintainer
 
-    # these are now called "Integrations"
     # names are as in the endpoints described at https://docs.gitlab.com/ee/api/integrations.html
     # hashes under those name correspond to the parameters described for a given integration there
     # except where integrations are deleted with `delete: true`
-    services:
+    integrations:
       slack:
         delete: true
       drone-ci:
