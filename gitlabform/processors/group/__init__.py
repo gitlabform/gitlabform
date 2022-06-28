@@ -11,8 +11,8 @@ from gitlabform.processors.group.group_ldap_links_processor import (
 from gitlabform.processors.group.group_members_processor import (
     GroupMembersProcessor,
 )
-from gitlabform.processors.group.group_secret_variables_processor import (
-    GroupSecretVariablesProcessor,
+from gitlabform.processors.group.group_variables_processor import (
+    GroupVariablesProcessor,
 )
 from gitlabform.processors.group.group_settings_processor import (
     GroupSettingsProcessor,
@@ -23,7 +23,7 @@ class GroupProcessors(AbstractProcessors):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
         super().__init__(gitlab, config, strict)
         self.processors: List[AbstractProcessor] = [
-            GroupSecretVariablesProcessor(gitlab),
+            GroupVariablesProcessor(gitlab),
             GroupSettingsProcessor(gitlab),
             GroupMembersProcessor(gitlab),
             GroupLDAPLinksProcessor(gitlab),
