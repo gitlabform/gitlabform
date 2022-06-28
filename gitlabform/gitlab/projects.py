@@ -231,29 +231,6 @@ class GitLabProjects(GitLabCore):
         pid = self._get_project_id(project_and_group_name)
         return self._make_requests_to_api("projects/%s/approvals", pid)
 
-    def delete_legacy_approvers(self, project_and_group_name):
-        # uses pre-12.3, deprecated API to clean up the setup of approvers made the old way of configuring approvers
-
-        # we need to pass data to this gitlab API endpoint as JSON, because when passing as data the JSON converter
-        # used by requests lib changes empty arrays into nulls and omits it, which results in
-        # {"error":"approver_group_ids is missing"} error from gitlab...
-
-        # for this endpoint GitLab still actually wants pid, not "group/project"...
-        pid = self._get_project_id(project_and_group_name)
-        data = (
-            "{"
-            + '"id":'
-            + str(pid)
-            + ","
-            + '"approver_ids": [],'
-            + '"approver_group_ids": []'
-            + "}"
-        )
-        json_data = json.loads(data)
-        self._make_requests_to_api(
-            "projects/%s/approvers", pid, "PUT", data=None, json=json_data
-        )
-
     def get_approvals_rules(self, project_and_group_name):
         # for this endpoint GitLab still actually wants pid, not "group/project"...
         pid = self._get_project_id(project_and_group_name)
