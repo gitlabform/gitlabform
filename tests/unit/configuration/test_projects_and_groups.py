@@ -124,13 +124,13 @@ def test__get_effective_config_for_project__configuration_for_other_project():
     ---
     projects_and_groups:
       "some_group/*":
-        secret_variables:
+        variables:
           first:
             key: foo
             value: bar
 
       "some_group/my_project":
-        secret_variables:
+        variables:
           second:
             key: foo
             value: bar
@@ -141,7 +141,7 @@ def test__get_effective_config_for_project__configuration_for_other_project():
     ).get_effective_config_for_project("some_group/some_project_after_defined")
 
     assert effective_config == {
-        "secret_variables": {
+        "variables": {
             "first": {
                 "key": "foo",
                 "value": "bar",

@@ -146,7 +146,7 @@ def remove_users_from_group(group_name, usernames):
 def delete_variables_from_group(group_name, variables):
     for variable in variables:
         try:
-            gl.delete_group_secret_variable(group_name, variable)
+            gl.delete_group_variable(group_name, variable)
         except NotFoundException:
             # this is fine - variable is removed from group
             pass
