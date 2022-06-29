@@ -2,10 +2,10 @@
 # Please remove it if you create your config as a copy of this file.
 example_config: true
 
-# This key is required in configs for GitLabForm version 2.x.x or 3.x.x
-# This ensures that when the application behavior changes
-# you won't apply unexpected configuration to your GitLab instance.
-config_version: 3 # value `2` is also accepted by GitLabForm 3.x.x
+# This key is required in configs for GitLabForm version 3.x.x
+# This ensures that if the application behavior changes in a backward-incompatible way
+# you won't apply unwanted configuration to your GitLab instance.
+config_version: 3
 
 # GitLab API access config
 gitlab:
