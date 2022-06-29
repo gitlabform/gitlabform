@@ -16,7 +16,11 @@ This is a maintenance release that lays the ground for the future user-facing im
   * `services` -> `integrations`,
   * `secret_variables` -> `variables`,
   * `group_secret_variables` -> `group_variables`,
-* (Applies only to the users of this app as library) Rename a few API methods
+* (Applies only to the users of this app as library) Rename some API methods, remove deprecated ones,
+  * `protect_branch()` is now the method using the new API, the method using the old one has been removed,
+  * `branch_code_owner_approval_required()` -> `set_branch_code_owner_approval_required()`.
+  * `delete_legacy_approvers()` has been removed,
+  * all the methods with `service(s)`/`secret_variable(s)`/`group_secret_variable(s)` in their names have been renamed to contain `integration(s)`/`variable(s)`/`group_variables(s)`.
 
 ### 2.12.0
 
