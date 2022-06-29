@@ -15,6 +15,7 @@ This is a maintenance release that lays the ground for the future user-facing im
   * `services` -> `integrations`,
   * `secret_variables` -> `variables`,
   * `group_secret_variables` -> `group_variables`,
+* (Applies only to the users of this app as library) Rename a few API methods
 
 ### 2.12.0
 
