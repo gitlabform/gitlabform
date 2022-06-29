@@ -12,13 +12,13 @@ class NonEmptyConfigsProvider(object):
 
     projects_and_groups:
       *:
-        group_secret_variables:
+        group_variables:
           foobar:
             key: "a key"
             value: "the value"
 
     ...and a request query "foo/bar" that points to a project "bar" in a group "foo", the effective config
-    is empty, as "group_secret_variables" is a group-level configuration and "foo/bar" is a project.
+    is empty, as "group_variables" is a group-level configuration and "foo/bar" is a project.
     """
 
     def __init__(self, configuration, group_processors, project_processors):

@@ -13,13 +13,13 @@ def configuration_with_break_inheritance_from_group_level_set_at_project_level()
     ---
     projects_and_groups:
       "some_group/*":
-        secret_variables:
+        variables:
           first:
             key: foo
             value: bar
 
       "some_group/my_project":
-        secret_variables:
+        variables:
           inherit: false
           second:
             key: bizz
@@ -29,7 +29,7 @@ def configuration_with_break_inheritance_from_group_level_set_at_project_level()
           value: fuzz
     
       "some_group/my_other_project":
-        secret_variables:
+        variables:
           fourth:
             key: foo4
             value: bar4
@@ -42,7 +42,7 @@ def test__get_effective_config_for_project__with_invalid_inheritance_break_set_a
         ---
         projects_and_groups:
           "*":
-            secret_variables:
+            variables:
               inherit: false
               first:
                 key: foo
@@ -62,14 +62,14 @@ def test__get_effective_config_for_project__with_invalid_inheritance_break_set_a
     ---
     projects_and_groups:
       "some_group/*":
-        secret_variables:
+        variables:
           inherit: false
           first:
             key: foo
             value: bar
 
       "some_group/my_project":
-        secret_variables:
+        variables:
           second:
             key: bizz
             value: buzz
@@ -88,7 +88,7 @@ def test__get_effective_config_for_project__with_invalid_inheritance_break_set_a
     ---
     projects_and_groups:
       "some_group/my_project":
-        secret_variables:
+        variables:
           inherit: false
           second:
             key: bizz
@@ -108,19 +108,19 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_multi
     ---
     projects_and_groups:
       "*":
-        secret_variables:
+        variables:
           third:
             key: foo
             value: bar
 
       "some_group/*":
-        secret_variables:
+        variables:
           first:
             key: foo
             value: bar
 
       "some_group/my_project":
-        secret_variables:
+        variables:
           inherit: false
           second:
             key: bizz
@@ -133,9 +133,9 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_multi
         "some_group/my_project"
     )
 
-    secret_variables = effective_config["secret_variables"]
+    variables = effective_config["variables"]
 
-    assert secret_variables == {
+    assert variables == {
         "second": {"key": "bizz", "value": "buzz"},
     }
 
@@ -145,20 +145,20 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
     ---
     projects_and_groups:
       "*":
-        secret_variables:
+        variables:
           third:
             key: foo
             value: bar
 
       "some_group/*":
-        secret_variables:
+        variables:
           inherit: false
           first:
             key: foo
             value: bar
 
       "some_group/my_project":
-        secret_variables:
+        variables:
           second:
             key: bizz
             value: buzz
@@ -170,9 +170,9 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
         "some_group/my_project"
     )
 
-    secret_variables = effective_config["secret_variables"]
+    variables = effective_config["variables"]
 
-    assert secret_variables == {
+    assert variables == {
         "first": {"key": "foo", "value": "bar"},
         "second": {"key": "bizz", "value": "buzz"},
     }
@@ -183,7 +183,7 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
     ---
     projects_and_groups:
       "*":
-        secret_variables:
+        variables:
           third:
             key: foo
             value: bar
@@ -195,7 +195,7 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
             user2: developer
 
       "some_group/my_project":
-        secret_variables:
+        variables:
           inherit: false
           second:
             key: bizz
@@ -215,7 +215,7 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
                 "user2": "developer",
             }
         },
-        "secret_variables": {
+        "variables": {
             "second": {"key": "bizz", "value": "buzz"},
         },
     }
@@ -229,7 +229,7 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_group
     )
 
     assert effective_config == {
-        "secret_variables": {
+        "variables": {
             "second": {"key": "bizz", "value": "buzz"},
         },
         "public_variables": {"key": "fizz", "value": "fuzz"},
@@ -243,9 +243,9 @@ def test__get_effective_config_for_my_other_project__with_break_inheritance_from
         "some_group/my_other_project"
     )
 
-    secret_variables = effective_config["secret_variables"]
+    variables = effective_config["variables"]
 
-    assert secret_variables == {
+    assert variables == {
         "first": {"key": "foo", "value": "bar"},
         "fourth": {"key": "foo4", "value": "bar4"},
     }
@@ -256,13 +256,13 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
     ---
     projects_and_groups:
       "*":
-        secret_variables:
+        variables:
           third:
             key: foo
             value: bar
 
       "some_group/*":
-        secret_variables:
+        variables:
           inherit: false
           first:
             key: foo
@@ -273,7 +273,7 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
             user2: developer
 
       "some_group/my_project":
-        secret_variables:
+        variables:
           second:
             key: bizz
             value: buzz
@@ -291,7 +291,7 @@ def test__get_effective_config_for_my_project__with_break_inheritance_from_commo
     )
 
     assert effective_config == {
-        "secret_variables": {
+        "variables": {
             "first": {"key": "foo", "value": "bar"},
             "second": {"key": "bizz", "value": "buzz"},
         },

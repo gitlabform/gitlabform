@@ -13,7 +13,7 @@ tickets from MRs that have "closes <ticket_id>" in their description, so you do 
 projects_and_groups:
   # common settings for ALL projects in ALL groups
   "*":
-    services:
+    integrations:
       jira:
         url: https://jira.yourcompany.com
         commit_events: false
@@ -26,7 +26,7 @@ so then you add this to your config:
 ```yaml
   # settings for ALL projects in 'some_group_name' group
   "some_group_name/*":
-    services:
+    integrations:
       jira:
         username: real_username
         password: real_password
@@ -38,7 +38,7 @@ compliance reasons), so you add:
 ```yaml
   # settings for a single project
   some_group_name/specific_project_name:
-    services:
+    integrations:
       jira:
         commit_events: true
  ```

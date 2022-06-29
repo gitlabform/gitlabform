@@ -42,7 +42,7 @@ This code boils down to the `run()` method, which for each project that accordin
 and config should be taken into account, applies the effective config.
 
 The effective config contains what is called the "config sections", which are the YAML keys that can exist under projects
-in the config YAML, for example: `deploy_keys`, `secret_variables`, `group_secret_variables` and so on.
+in the config YAML, for example: `deploy_keys`, `variables`, `group_variables` and so on.
 
 Those config sections are processed by the code in the classes inheriting from the `AbstractProcessor` class. This class
 should be reused when implementing new functionalities (such as supporting new configuration keys) as it holds the common 
