@@ -4,6 +4,7 @@
 
 This is a maintenance release that lays the ground for the future user-facing improvements. It is a major version bump because of some backward-incompatible changes, see below:
 
+* Bump the minimal GitLab version to 14.4 (released in Oct 2021) (as it contains the [required API rename](https://gitlab.com/gitlab-org/gitlab/-/issues/334500)),
 * Bump the minimal required Python version to 3.7 (as 3.6 is EOL since Dec 2021),
   * Update many dependencies that have required Python >= 3.7,
 * Drop the Debian-based Docker image,
