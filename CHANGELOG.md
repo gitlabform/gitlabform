@@ -2,9 +2,19 @@
 
 ### 3.0.0
 
-* Bump minimal required Python version to 3.7 (as 3.6 is EOL since Dec 2021),
+This is a maintenance release that lays the ground for the future user-facing improvements. It is a major version bump because of some backward-incompatible changes, see below:
+
+* Bump the minimal required Python version to 3.7 (as 3.6 is EOL since Dec 2021),
   * Update many dependencies that have required Python >= 3.7,
-* Drop Debian-based Docker image,
+* Drop the Debian-based Docker image,
+* Drop support for a lot of deprecated configuration syntax that the app has warned about: 
+  * branch protection - no more `developers_can_push`, `developers_can_merge`, use `push_access_level`, `merge_access_level` etc. instead,
+  * group members - no more `group_shared_with`, `enforce_group_members`, `group_access_level`, use `group_members`, `group_members.enforce`, `group_access` instead,
+  * services/integrations - no more `recreate`,
+* Follow the renames in GitLab and rename some configuration sections:
+  * `services` -> `integrations`,
+  * `secret_variables` -> `variables`,
+  * `group_secret_variables` -> `group_variables`,
 
 ### 2.12.0
 
