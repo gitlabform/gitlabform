@@ -44,13 +44,12 @@ class ConfigurationCore(ABC):
                         exit_code=EXIT_INVALID_INPUT,
                     )
 
-                if self.config.get("config_version", 1) not in [2, 3]:
+                if self.config.get("config_version", 1) != 3:
                     fatal(
                         "This version of GitLabForm requires 'config_version: 3' entry in the config. "
-                        "(The value `2` is also accepted.)\n"
-                        "This ensures that when the application behavior changes in a backward incompatible way,"
-                        " you won't apply unexpected configuration to your GitLab instance.\n"
-                        "Please read the upgrading guide here: https://bit.ly/3ub1g5C\n",
+                        "This ensures that if the application behavior changes in a backward-incompatible way,"
+                        " you won't apply unwanted configuration to your GitLab instance.\n"
+                        "Please follow this guide to update your configuration: https://bit.ly/3ub1g5C\n",
                         exit_code=EXIT_INVALID_INPUT,
                     )
 
