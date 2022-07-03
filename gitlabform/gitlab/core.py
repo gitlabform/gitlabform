@@ -38,11 +38,10 @@ class GitLabCore:
         self.http_client.timeout = self.timeout
 
         self.gitlabform_version = pkg_resources.get_distribution("gitlabform").version
-        self.requests_version = pkg_resources.get_distribution("requests").version
         self.http_client.headers = {
             "private-token": self.token,
             "authorization": f"Bearer {self.token}",
-            "user-agent": f"GitLabForm/{self.gitlabform_version} (python-requests/{self.requests_version})",
+            "user-agent": f"GitLabForm/{self.gitlabform_version}",
         }
 
         try:
