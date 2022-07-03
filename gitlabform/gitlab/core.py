@@ -1,18 +1,15 @@
 import functools
 import os
+import re
 from logging import debug
 from urllib import parse
 
+import httpx
 import pkg_resources
-import requests
 
 # noinspection PyPackageRequirements
 import urllib3
 from cli_ui import debug as verbose
-from requests.adapters import HTTPAdapter
-
-# noinspection PyPackageRequirements
-from urllib3.util.retry import Retry
 
 from gitlabform.configuration import Configuration
 from gitlabform.ui import to_str
@@ -23,33 +20,30 @@ class GitLabCore:
 
         self.configuration = Configuration(config_path, config_string)
 
-        self.url = self.configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
+        url = self.configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
+        # trim the redundant trailing slash(es)
+        self.url = re.sub(r"/+$", "", url)
         self.token = self.configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
         self.ssl_verify = self.configuration.get("gitlab|ssl_verify", True)
         self.timeout = self.configuration.get("gitlab|timeout", 10)
 
-        self.session = requests.Session()
+        self.http_client = httpx.Client()
 
-        retries = Retry(
-            total=3, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504]
-        )
+        # TODO: re-add retry using tenacity library
 
-        self.session.mount("http://", HTTPAdapter(max_retries=retries))
-        self.session.mount("https://", HTTPAdapter(max_retries=retries))
-
-        self.session.verify = self.ssl_verify
+        self.http_client.verify = self.ssl_verify
         if not self.ssl_verify:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+        self.http_client.timeout = self.timeout
+
         self.gitlabform_version = pkg_resources.get_distribution("gitlabform").version
         self.requests_version = pkg_resources.get_distribution("requests").version
-        self.session.headers.update(
-            {
-                "private-token": self.token,
-                "authorization": f"Bearer {self.token}",
-                "user-agent": f"GitLabForm/{self.gitlabform_version} (python-requests/{self.requests_version})",
-            }
-        )
+        self.http_client.headers = {
+            "private-token": self.token,
+            "authorization": f"Bearer {self.token}",
+            "user-agent": f"GitLabForm/{self.gitlabform_version} (python-requests/{self.requests_version})",
+        }
 
         try:
             version = self._make_requests_to_api("version")
@@ -185,17 +179,23 @@ class GitLabCore:
 
         url = f"{self.url}/api/v4/{self._format_with_url_encoding(path_as_format_string, args)}"
         if dict_data:
-            response = self.session.request(
-                method, url, data=dict_data, timeout=self.timeout
+            request = self.http_client.build_request(
+                method,
+                url,
+                data=dict_data,
             )
             debug(f"===> data = {to_str(dict_data)}")
         elif json_data:
-            response = self.session.request(
-                method, url, json=json_data, timeout=self.timeout
+            request = self.http_client.build_request(
+                method,
+                url,
+                json=json_data,
             )
             debug(f"===> json = {to_str(json_data)}")
         else:
-            response = self.session.request(method, url, timeout=self.timeout)
+            request = self.http_client.build_request(method, url)
+
+        response = self.http_client.send(request)
 
         if response.status_code in expected_codes:
             # if we accept error responses then they will likely not contain a JSON body
@@ -209,16 +209,27 @@ class GitLabCore:
                 )
             else:
                 if dict_data:
-                    data_output = f"data='{to_str(dict_data)}' "
+                    data_output = f"  data: {to_str(dict_data)}\n"
                 elif json_data:
-                    data_output = f"json='{to_str(json_data)}' "
+                    data_output = f"  json: {to_str(json_data)}\n"
                 else:
                     data_output = ""
 
+                try:
+                    body = to_str(response.json())
+                except:
+                    body = response.text
+
                 raise UnexpectedResponseException(
-                    f"Request url='{url}', method={method}, {data_output}failed -"
-                    f" expected code(s) {str(expected_codes)},"
-                    f" got code {response.status_code} & body: '{response.text}'",
+                    f"Unexpected response to request to GitLab API.\n"
+                    f"Request:\n"
+                    f"  url: {url}\n"
+                    f"  method: {method}\n"
+                    f"{data_output}"
+                    f"  expected code(s): {str(expected_codes)}\n"
+                    f"Response:\n"
+                    f"  code: {response.status_code}\n"
+                    f"  body: {body}\n",
                     response.status_code,
                     response.text,
                 )
