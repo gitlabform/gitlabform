@@ -2,12 +2,12 @@
 
 ### 3.0.0
 
-This is a maintenance release that lays the ground for the future user-facing improvements. It is a major version bump because of some backward-incompatible changes, see below:
+This is mostly a maintenance release that lays the ground for the future user-facing improvements. It is a major version bump because of the backward-incompatible changes, see below:
 
 * Bump the minimal GitLab version to 14.4 (released in Oct 2021) (as it contains the [required API rename](https://gitlab.com/gitlab-org/gitlab/-/issues/334500)),
 * Bump the minimal required Python version to 3.7 (as 3.6 is EOL since Dec 2021),
   * Update many dependencies that have required Python >= 3.7,
-* Drop the Debian-based Docker image,
+* Drop the Debian-based Docker image (it's nearly unused - you can maintain your own, if you needed it),
 * Drop support for a lot of deprecated configuration syntax that the app has warned about: 
   * branch protection - no more `developers_can_push`, `developers_can_merge`, use `push_access_level`, `merge_access_level` etc. instead,
   * group members - no more `group_shared_with`, `enforce_group_members`, `group_access_level`, use `group_members`, `group_members.enforce`, `group_access` instead,
@@ -21,6 +21,7 @@ This is a maintenance release that lays the ground for the future user-facing im
   * `branch_code_owner_approval_required()` -> `set_branch_code_owner_approval_required()`.
   * `delete_legacy_approvers()` has been removed,
   * all the methods with `service(s)`/`secret_variable(s)`/`group_secret_variable(s)` in their names have been renamed to contain `integration(s)`/`variable(s)`/`group_variables(s)`.
+* Shorter and easier to read errors (full stacktrace shown only when `--debug` is enabled),
 
 ### 2.12.0
 
