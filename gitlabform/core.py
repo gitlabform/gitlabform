@@ -7,7 +7,7 @@ import traceback
 from logging import debug
 
 import cli_ui
-from cli_ui import warning, fatal
+from cli_ui import warning, error, fatal
 
 from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration.core import (
@@ -379,16 +379,18 @@ class GitLabForm(object):
                 failed_groups[group_number] = group
 
                 trace = traceback.format_exc()
-                message = f"Error occurred while processing group {group}, exception:\n\n{e}\n\n{trace}"
+                message = (
+                    f"Error occurred while processing group {group}, exception:\n\n{e}"
+                )
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
-                    fatal(
-                        message,
-                        exit_code=EXIT_PROCESSING_ERROR,
-                    )
+                    error(message)
+                    debug(trace)
+                    sys.exit(EXIT_PROCESSING_ERROR)
                 else:
                     warning(message)
+                    debug(trace)
             finally:
                 debug(
                     f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
@@ -442,17 +444,16 @@ class GitLabForm(object):
                 failed_projects[project_number] = project_and_group
 
                 trace = traceback.format_exc()
-                message = f"Error occurred while processing project {project_and_group}, exception:\n\n{e}\n\n{trace}"
+                message = f"Error occurred while processing project {project_and_group}, exception:\n\n{e}"
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
-                    fatal(
-                        message,
-                        exit_code=EXIT_PROCESSING_ERROR,
-                    )
+                    error(message)
+                    debug(trace)
+                    sys.exit(EXIT_PROCESSING_ERROR)
                 else:
                     warning(message)
-
+                    debug(trace)
             finally:
 
                 debug(
