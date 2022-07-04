@@ -39,10 +39,15 @@ class TestInheritanceBreakSubgroups:
         ---
         projects_and_groups:
           some_group/*:
+            group_settings:
+              snap: crackle
             project_settings:
               foo: bar
 
           some_group/subgroup_level_1/*:
+            group_settings:
+              inherit: false
+              crackle: pop
             project_settings:
               foo1: bar1
               
@@ -57,13 +62,32 @@ class TestInheritanceBreakSubgroups:
               foo2: bar2
 
           some_group/subgroup_level_1/subgroup_level_2/some_project:
+            group_settings:
+              inherit: false
+              snap: pop
             project_settings:
               inherit: false
               fizz: buzz
         """
         return Configuration(config_string=config_yaml)
 
-    def test__inheritance_break__flag_set_at_project_level__first_subgroup_project_inherits_nothing(
+    def test__inheritance_break__flag_set_at_subgroup_level__first_subgroup_does_not_inherit_group_settings(
+        self,
+        configuration_with_inheritance_break_set_at_subgroup_and_project_level,
+    ):
+        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_subgroup_config(
+            "some_group/subgroup_level_1"
+        )
+
+        assert effective_config == {
+            "group_settings": {"crackle": "pop"},
+            "project_settings": {
+                "foo": "bar",
+                "foo1": "bar1",
+            },
+        }
+
+    def test__inheritance_break__flag_set_at_project_level__first_subgroup_project_does_not_inherit_project_settings(
         self,
         configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
@@ -72,8 +96,24 @@ class TestInheritanceBreakSubgroups:
         )
 
         assert effective_config == {
+            "group_settings": {"crackle": "pop"},
             "project_settings": {
                 "fizz": "buzz",
+            },
+        }
+
+    def test__inheritance_break__flag_set_at_subgroup_level__second_subgroup_does_not_inherit_project_settings(
+        self,
+        configuration_with_inheritance_break_set_at_subgroup_and_project_level,
+    ):
+        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_subgroup_config(
+            "some_group/subgroup_level_1/subgroup_level_2"
+        )
+
+        assert effective_config == {
+            "group_settings": {"crackle": "pop"},
+            "project_settings": {
+                "foo2": "bar2",
             },
         }
 
@@ -86,21 +126,8 @@ class TestInheritanceBreakSubgroups:
         )
 
         assert effective_config == {
+            "group_settings": {"snap": "pop"},
             "project_settings": {
                 "fizz": "buzz",
-            },
-        }
-
-    def test__inheritance_break__flag_set_at_subgroup_level__second_subgroup_inherits_nothing(
-        self,
-        configuration_with_inheritance_break_set_at_subgroup_and_project_level,
-    ):
-        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_subgroup_config(
-            "some_group/subgroup_level_1/subgroup_level_2"
-        )
-
-        assert effective_config == {
-            "project_settings": {
-                "foo2": "bar2",
             },
         }
