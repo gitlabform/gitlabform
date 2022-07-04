@@ -36,6 +36,8 @@ class ConfigurationGroups(ConfigurationCore):
             group_config = self.get_effective_subgroup_config(group)
         else:
             group_config = self.get_group_config(group)
+            if not common_config:
+                self.validate_break_inheritance_flag(group_config, group)
         debug("Effective group/subgroup config: %s", to_str(group_config))
 
         if not group_config and not common_config:
