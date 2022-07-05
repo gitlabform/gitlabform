@@ -79,19 +79,18 @@ def configuration_with_subgroups_only():
     ---
     projects_and_groups:
       some_group/*:
-        group_members:
-          my-user:
-            access_level: 10
+        group_settings:
+          project_creation_level: maintainer
+          subgroup_creation_level: owner
+          visibility: internal
 
       some_group/subgroup/*:
-        group_members:
-          my-user2:
-            access_level: 20
+        group_settings:
+          project_creation_level: developer
             
       some_group/subgroup/subsubgroup/*:
-        group_members:
-          my-user3:
-            access_level: 30
+        group_settings:
+          visibility: private
     """
     return Configuration(config_string=config_yaml)
 
@@ -103,11 +102,10 @@ def test__get_effective_subgroup_config__level1(configuration_with_subgroups_onl
 
     # the settings should be inherited from all levels
     assert effective_config == {
-        "group_members": {
-            "my-user": {"access_level": 10},
-            "my-user2": {
-                "access_level": 20,
-            },
+        "group_settings": {
+            "project_creation_level": "developer",
+            "subgroup_creation_level": "owner",
+            "visibility": "internal",
         },
     }
 
@@ -119,13 +117,9 @@ def test__get_effective_subgroup_config__level2(configuration_with_subgroups_onl
 
     # the settings should be inherited from all levels
     assert effective_config == {
-        "group_members": {
-            "my-user": {"access_level": 10},
-            "my-user2": {
-                "access_level": 20,
-            },
-            "my-user3": {
-                "access_level": 30,
-            },
+        "group_settings": {
+            "project_creation_level": "developer",
+            "subgroup_creation_level": "owner",
+            "visibility": "private",
         },
     }
