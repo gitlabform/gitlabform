@@ -13,19 +13,19 @@ class TestInheritanceBreakProjectsAndGroups:
         ---
         projects_and_groups:
           "*":
-            secret_variables:
+            variables:
               secret1:
                 key: foo
                 value: bar
-    
+
           "some_group/*":
-            secret_variables:
+            variables:
               secret2:
                 key: foo
                 value: bar
-    
+
           "some_group/my_project":
-            secret_variables:
+            variables:
               inherit: false
               secret3:
                 key: bizz
@@ -38,9 +38,9 @@ class TestInheritanceBreakProjectsAndGroups:
             "some_group/my_project"
         )
 
-        secret_variables = effective_config["secret_variables"]
+        variables = effective_config["variables"]
 
-        assert secret_variables == {
+        assert variables == {
             "secret3": {"key": "bizz", "value": "buzz"},
         }
 
@@ -51,19 +51,19 @@ class TestInheritanceBreakProjectsAndGroups:
         ---
         projects_and_groups:
           "*":
-            secret_variables:
+            variables:
               secret1:
                 key: foo
                 value: bar
-    
+
           "some_group/*":
             members:
               users:
                 user1: developer
                 user2: developer
-    
+
           "some_group/my_project":
-            secret_variables:
+            variables:
               inherit: false
               secret2:
                 key: bizz
@@ -83,7 +83,7 @@ class TestInheritanceBreakProjectsAndGroups:
                     "user2": "developer",
                 }
             },
-            "secret_variables": {
+            "variables": {
                 "secret2": {"key": "bizz", "value": "buzz"},
             },
         }
@@ -95,13 +95,13 @@ class TestInheritanceBreakProjectsAndGroups:
         ---
         projects_and_groups:
           "*":
-            secret_variables:
+            variables:
               secret1:
                 key: foo
                 value: bar
 
           "some_group/*":
-            secret_variables:
+            variables:
               inherit: false
               secret2:
                 key: foo
@@ -112,9 +112,9 @@ class TestInheritanceBreakProjectsAndGroups:
 
         effective_config = configuration.get_effective_config_for_group("some_group")
 
-        secret_variables = effective_config["secret_variables"]
+        variables = effective_config["variables"]
 
-        assert secret_variables == {
+        assert variables == {
             "secret2": {"key": "foo", "value": "bar"},
         }
 
@@ -125,20 +125,20 @@ class TestInheritanceBreakProjectsAndGroups:
         ---
         projects_and_groups:
           "*":
-            secret_variables:
+            variables:
               secret1:
                 key: foo
                 value: bar
 
           "some_group/*":
-            secret_variables:
+            variables:
               inherit: false
               secret2:
                 key: foo
                 value: bar
 
           "some_group/my_project":
-            secret_variables:
+            variables:
               secret3:
                 key: bizz
                 value: buzz
@@ -150,9 +150,9 @@ class TestInheritanceBreakProjectsAndGroups:
             "some_group/my_project"
         )
 
-        secret_variables = effective_config["secret_variables"]
+        variables = effective_config["variables"]
 
-        assert secret_variables == {
+        assert variables == {
             "secret2": {"key": "foo", "value": "bar"},
             "secret3": {"key": "bizz", "value": "buzz"},
         }
@@ -164,20 +164,20 @@ class TestInheritanceBreakProjectsAndGroups:
         ---
         projects_and_groups:
           "*":
-            secret_variables:
+            variables:
               secret1:
                 key: foo
                 value: bar
 
           "some_group/*":
-            secret_variables:
+            variables:
               inherit: false
               secret2:
                 key: foo
                 value: bar
 
           "some_group/my_project":
-            secret_variables:
+            variables:
               inherit: false
               secret3:
                 key: bizz
@@ -190,8 +190,8 @@ class TestInheritanceBreakProjectsAndGroups:
             "some_group/my_project"
         )
 
-        secret_variables = effective_config["secret_variables"]
+        variables = effective_config["variables"]
 
-        assert secret_variables == {
+        assert variables == {
             "secret3": {"key": "bizz", "value": "buzz"},
         }

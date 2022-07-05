@@ -7,7 +7,6 @@ from gitlabform.gitlab.core import NotFoundException
 
 
 class BranchProtector(object):
-    old_api_keys = ["developers_can_push", "developers_can_merge"]
     new_api_keys = [
         "push_access_level",
         "merge_access_level",
@@ -47,49 +46,38 @@ class BranchProtector(object):
         try:
             requested_configuration = configuration["branches"][branch]
 
-            config_type = self.get_branch_protection_config_type(
+            self.validate_branch_protection_config(
                 project_and_group, requested_configuration, branch
             )
 
-            if config_type == "old":
+            if any(
+                extra_key in requested_configuration
+                for extra_key in self.extra_param_keys
+            ):
+                for extra_param_key in self.extra_param_keys:
+                    # check if an extra_param is in config, and it contains the user parameter
+                    if extra_param_key in requested_configuration and any(
+                        "user" in d for d in requested_configuration[extra_param_key]
+                    ):
+                        for extra_config in requested_configuration[extra_param_key]:
+                            # loop over the array of extra param and get the user_id related to user
+                            if "user" in extra_config.keys():
+                                user_id = self.gitlab._get_user_id(
+                                    extra_config.pop("user")
+                                )
+                                extra_config["user_id"] = user_id
 
-                self.protect_using_old_api(
+            if self.configuration_update_needed(
+                requested_configuration, project_and_group, branch
+            ):
+                self.do_protect_branch(
                     requested_configuration, project_and_group, branch
                 )
-
-            elif config_type == "new":
-                # when configuration contains at least one of allowed_to_push and allowed_to_merge
-                if any(
-                    extra_key in requested_configuration
-                    for extra_key in self.extra_param_keys
-                ):
-                    for extra_param_key in self.extra_param_keys:
-                        # check if an extra_param is in config and it contain user parameter
-                        if extra_param_key in requested_configuration and any(
-                            "user" in d
-                            for d in requested_configuration[extra_param_key]
-                        ):
-                            for extra_config in requested_configuration[
-                                extra_param_key
-                            ]:
-                                # loop over the array of extra param and get the user_id related to user
-                                if "user" in extra_config.keys():
-                                    user_id = self.gitlab._get_user_id(
-                                        extra_config.pop("user")
-                                    )
-                                    extra_config["user_id"] = user_id
-
-                if self.configuration_update_needed(
-                    requested_configuration, project_and_group, branch
-                ):
-                    self.protect_using_new_api(
-                        requested_configuration, project_and_group, branch
-                    )
-                else:
-                    debug(
-                        "Skipping setting branch '%s' protection configuration because it's already as requested.",
-                        branch,
-                    )
+            else:
+                debug(
+                    "Skipping setting branch '%s' protection configuration because it's already as requested.",
+                    branch,
+                )
 
             if "code_owner_approval_required" in requested_configuration:
 
@@ -110,8 +98,7 @@ class BranchProtector(object):
     def unprotect_branch(self, project_and_group, branch):
         try:
             debug("Setting branch '%s' as unprotected", branch)
-
-            self.gitlab.unprotect_branch_new_api(project_and_group, branch)
+            self.gitlab.unprotect_branch(project_and_group, branch)
 
         except NotFoundException:
             message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
@@ -123,57 +110,32 @@ class BranchProtector(object):
             else:
                 warning(message)
 
-    def get_branch_protection_config_type(
+    def validate_branch_protection_config(
         self, project_and_group, requested_configuration, branch
     ):
 
-        # for new API any keys needs to be defined...
+        # for the new API any key needs to be defined...
         if any(
             key in requested_configuration
             for key in self.new_api_keys + self.extra_param_keys
         ):
-            return "new"
-
-        # ...while for the old API - *all* of them
-        if all(key in requested_configuration for key in self.old_api_keys):
-            return "old"
-
+            return
         else:
             fatal(
                 f"Invalid configuration for protecting branches in project '{project_and_group}',"
-                f" branch '{branch}' - missing keys.",
+                f" branch '{branch}' - missing keys. Required is any of these: "
+                f"{self.new_api_keys + self.extra_param_keys}",
                 exit_code=EXIT_INVALID_INPUT,
             )
 
-    def protect_using_old_api(self, requested_configuration, project_and_group, branch):
-        warning(
-            f"Using keys {self.old_api_keys} for configuring protected"
-            " branches is deprecated and will be removed in future versions of GitLabForm."
-            f" Please start using new keys: {self.new_api_keys}"
-        )
-        debug("Setting branch '%s' as *protected*", branch)
-
-        # Protected Branches API is one of those that do not support editing entities
-        # (PUT is not documented for it, at least). so you need to delete existing
-        # branch protection (DELETE) and recreate it (POST) to perform an update
-        # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
-        self.gitlab.unprotect_branch_new_api(project_and_group, branch)
-
-        self.gitlab.protect_branch(
-            project_and_group,
-            branch,
-            requested_configuration["developers_can_push"],
-            requested_configuration["developers_can_merge"],
-        )
-
-    def protect_using_new_api(self, requested_configuration, project_and_group, branch):
+    def do_protect_branch(self, requested_configuration, project_and_group, branch):
         debug("Setting branch '%s' access level", branch)
 
         # Protected Branches API is one of those that do not support editing entities
         # (PUT is not documented for it, at least). so you need to delete existing
         # branch protection (DELETE) and recreate it (POST) to perform an update
         # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
-        self.gitlab.unprotect_branch_new_api(project_and_group, branch)
+        self.gitlab.unprotect_branch(project_and_group, branch)
 
         # replace in our config our custom "user" and "group" entries with supported by
         # the Protected Branches API "user_id" and "group_id"
@@ -194,7 +156,7 @@ class BranchProtector(object):
             if key != "protected"
         }
 
-        self.gitlab.branch_access_level(
+        self.gitlab.protect_branch(
             project_and_group,
             branch,
             protect_rules,
@@ -207,7 +169,7 @@ class BranchProtector(object):
             "Setting branch '%s' \"code owner approval required\" option",
             branch,
         )
-        self.gitlab.branch_code_owner_approval_required(
+        self.gitlab.set_branch_code_owner_approval_required(
             project_and_group,
             branch,
             requested_configuration["code_owner_approval_required"],

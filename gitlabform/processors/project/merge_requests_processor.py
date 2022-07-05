@@ -33,17 +33,6 @@ class MergeRequestsProcessor(AbstractProcessor):
         ):
             verbose(f"Setting approvers...")
 
-            # in pre-12.3 API approvers (users and groups) were configured under the same endpoint as approvals settings
-            approvals_settings = self.gitlab.get_approvals_settings(project_and_group)
-            if (
-                "approvers" in approvals_settings
-                or "approver_groups" in approvals_settings
-            ):
-                # /approvers endpoint has been removed in 13.11.x GitLab version
-                if LooseVersion(self.gitlab.version) < LooseVersion("13.11"):
-                    debug("Deleting legacy approvers setup")
-                    self.gitlab.delete_legacy_approvers(project_and_group)
-
             approval_rule_name = "Approvers (configured using GitLabForm)"
 
             # is a rule already configured and just needs updating?

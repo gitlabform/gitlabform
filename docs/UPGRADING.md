@@ -1,8 +1,22 @@
 # Upgrading to new major versions
 
-## From 1.* to 2.0
+Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.
 
-Version 2 has introduced some breaking changes that may affect the effective configuration that would be applied if you run the application. To make the change safely please follow this procedure.
+## From 2.* to 3.*
+
+Steps outline:
+
+1. Update to the latest v2.x.x and fix all the deprecation warnings the application prints out during run. The syntax deprecated in v2 has been removed in v3.
+2. Stop v2 from running automatically (if you have such automation).
+3. In your config:
+* Replace `services:` with `integrations:`,
+* Replace `secret_variables:` with `variables:`,
+* Replace `group_secret_variables:` with `group_variables:`,
+* Replace `config_version: 2` with `config_version: 3` 
+3. Upgrade the app from v2 to v3.
+4. Re-enable v3 to run automatically (if you have such automation).
+
+## From 1.* to 2.*
 
 Steps outline:
 

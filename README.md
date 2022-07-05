@@ -88,8 +88,8 @@ the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-confi
 
 ## Requirements
 
-* Docker or Python 3.6-3.10 with [pipx](https://github.com/pypa/pipx) (recommended) or pip,
-* GitLab 11+
+* Docker or Python 3.7-3.10 with [pipx](https://github.com/pypa/pipx) (recommended) or pip,
+* GitLab 14.4+
 * GitLab Premium (paid) for some features
 
 ## Installation
@@ -100,10 +100,10 @@ Run the latest stable version with:
 * [pipx](https://github.com/pypa/pipx): `pipx run gitlabform`
 
 
-Run the latest 2.* version with:
+Run the latest 3.* version with:
 
-* Docker: `docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:2 gitlabform`.
-* [pipx](https://github.com/pypa/pipx): `pipx run --spec gitlabform~=2.2.0 gitlabform`
+* Docker: `docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:3 gitlabform`.
+* [pipx](https://github.com/pypa/pipx): `pipx run --spec gitlabform~=3.0.0 gitlabform`
 
 See [this](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform) for all available Docker tags.
 
@@ -121,7 +121,7 @@ If so then:
 1. Create example `config.yml`:
 
 ```yaml
-config_version: 2
+config_version: 3
 
 gitlab:
   # You can also set in your environment GITLAB_URL
@@ -187,7 +187,7 @@ file.
 Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is
 encrypted) for security reasons - please set it in the `GITLAB_TOKEN` environment variable instead.
 
-For GitLab CI a secure place to set it would be a [Secret/Protected Variable in the project configuration](https://docs.gitlab.com/ee/ci/variables/#via-the-ui).
+For GitLab CI a secure place to set it would be a [Masked and Protected Variable in the project configuration](https://docs.gitlab.com/ee/ci/variables/#via-the-ui).
 
 ## Running automatically for new projects
 
@@ -210,11 +210,11 @@ add new features, please see the [implementation design](https://github.com/gitl
 
 ## Origins
 
-This tool has been originally created at [Egnyte](https://github.com/Egnyte) as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890) but as of now we prefer to use it ever if there are appropriate web UI features, such as [secret variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729) (released in GitLab 9.4) to keep the configuration as code.
+This tool has been originally created at [Egnyte](https://github.com/Egnyte) as a workaround for missing GitLab features such as [assigning deploy keys per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/3890) but as of now we prefer to use it ever if there are appropriate web UI features, such as [variables per project groups](https://gitlab.com/gitlab-org/gitlab-ce/issues/12729) (released in GitLab 9.4) to keep the configuration as code.
 
 Later on we added features that allowed us to use GitLabForm to improve a group containing around 100 similar projects
 to move to a unified development flow (by managing branches protection and the Pull Requests configuration),
-basic tests and deployment process (by managing secret variables, deployment keys and files, such as `.gitlab-ci.yml`),
+basic tests and deployment process (by managing variables, deployment keys and files, such as `.gitlab-ci.yml`),
 integrations (such as JIRA or Slack) and more.
 
 ## Legal
