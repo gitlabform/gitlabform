@@ -1,6 +1,6 @@
 # CI/CD variables
 
-Please note that project-level and group-level [CI/CD variables](https://docs.gitlab.com/ee/ci/variables/) (used to be known as "Secret Variables") are different entities in GitLab!
+Please note that project-level and group-level [CI/CD variables](https://docs.gitlab.com/ee/ci/variables/) are different entities in GitLab!
 
 ## Project CI/CD variables
 
@@ -23,9 +23,9 @@ Example:
 ```yaml
 projects_and_groups:
   group_1/project_1:
-    secret_variables:
+    variables:
       # --- Adding/resetting
-      a_friendly_secret_variable_name: # this is just a label
+      a_friendly_variable_name: # this is just a label
         key: SSH_PRIVATE_KEY_BASE64
         value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
 
@@ -84,7 +84,7 @@ Example:
 ```yaml
 projects_and_groups:
   group_1/*:
-    group_secret_variables:
+    group_variables:
       # --- Adding/resetting
       a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance: # this is just a label
         key: A_NEW_PASSWORD
