@@ -1,115 +1,110 @@
-name: Linter and tests
-
-# trigger only on pushes to main OR PRs to main
-# to prevent double tests on my own
-# PRs within gitlabform/gitlabform repo from a feature
-# branch to main
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-      - v3
-
-jobs:
-  black-formatting:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Black Code Formatter
-        uses: gdubicki/black-action@main
-        with:
-          args: ". --check"
-
-  acceptance-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
-      matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10", 3.11-dev]
-      fail-fast : false
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install test dependencies
-        run: |
-          pip install wheel
-          pip install -e .[test]
-      - name: Run acceptance tests
-        env:
-          GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
-        run: |
-          ./dev/run_gitlab_in_docker.sh
-          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
-
-  unit-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
-      matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10", 3.11-dev]
-      fail-fast : false
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install test dependencies
-        run: |
-          pip install wheel
-          pip install -e .[test]
-      - name: Run unit tests
-        run: |
-          pytest --cov=. --cov-report=xml tests/unit
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
-
-  security-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: |
-          pip install wheel
-          pip install bandit
-      - name: Run bandit
-        run: |
-          bandit -r gitlabform
-
-  smoke-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
-      matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10", 3.11-dev]
-      fail-fast : false
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install runtime dependencies
-        run: |
-          pip install wheel
-          pip install -e .
-      - name: Check if the app starts
-        run: |
-          gitlabform -V
+#name: Linter and tests
+#
+## trigger only on pushes to main OR PRs to main
+## to prevent double tests on my own
+## PRs within gdubicki/gitlabform repo from a feature
+## branch to main
+#on:
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#    branches:
+#      - main
+#
+#jobs:
+#  black-formatting:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#      - name: Black Code Formatter
+#        uses: gdubicki/black-action@main
+#        with:
+#          args: ". --check"
+#
+#  acceptance-tests:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      max-parallel: 5
+#      matrix:
+#        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+#      fail-fast : false
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Python ${{ matrix.python-version }}
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: ${{ matrix.python-version }}
+#      - name: Install test dependencies
+#        run: |
+#          pip install -e .[test]
+#      - name: Run acceptance tests
+#        env:
+#          GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
+#        run: |
+#          ./dev/run_gitlab_in_docker.sh
+#          pytest --cov=. --cov-report=xml --durations=0 tests/acceptance
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v2
+#        with:
+#          fail_ci_if_error: true
+#
+#  unit-tests:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      max-parallel: 5
+#      matrix:
+#        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+#      fail-fast : false
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Python ${{ matrix.python-version }}
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: ${{ matrix.python-version }}
+#      - name: Install test dependencies
+#        run: |
+#          pip install -e .[test]
+#      - name: Run unit tests
+#        run: |
+#          pytest --cov=. --cov-report=xml tests/unit
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v2
+#        with:
+#          fail_ci_if_error: true
+#
+#  security-tests:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Python 3.9
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: 3.9
+#      - name: Install dependencies
+#        run: |
+#          pip install bandit
+#      - name: Run bandit
+#        run: |
+#          bandit -r gitlabform
+#
+#  smoke-tests:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      max-parallel: 5
+#      matrix:
+#        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+#      fail-fast : false
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up Python ${{ matrix.python-version }}
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: ${{ matrix.python-version }}
+#      - name: Install runtime dependencies
+#        run: |
+#          pip install -e .
+#      - name: Run acceptance tests
+#        run: |
+#          gitlabform -V
