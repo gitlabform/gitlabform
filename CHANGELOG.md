@@ -2,26 +2,33 @@
 
 ### 3.0.0
 
-This is mostly a maintenance release that lays the ground for the future user-facing improvements. It is a major version bump because of the backward-incompatible changes, see below:
+This is a major new version with some backward incompatibility. Please follow [the upgrade guide](https://bit.ly/3ub1g5C) for a fast and safe upgrade.
 
-* Bump the minimal GitLab version to 14.4 (released in Oct 2021) (as it contains the [required API rename](https://gitlab.com/gitlab-org/gitlab/-/issues/334500)),
-* Bump the minimal required Python version to 3.7 (as 3.6 is EOL since Dec 2021),
-  * Update many dependencies that have required Python >= 3.7,
-* Drop the Debian-based Docker image (it's nearly unused - you can maintain your own, if you needed it),
-* Drop support for a lot of deprecated configuration syntax that the app has warned about: 
+New features/bugfixes:
+
+* **Subgroups now _do_ inherit the settings from their supergroups.** It should have worked like this already, but it did not because of a [bug #372](https://github.com/gitlabform/gitlabform/issues/372) fixed in [PR #385](https://github.com/gitlabform/gitlabform/pull/385). Now it does work. (Please use `inherit: false` to keep the old behavior. See [the upgrade guide](https://bit.ly/3ub1g5C) for more info.),
+* **Shorter and easier to read errors** (full stacktrace shown only when `--debug` is enabled),
+
+Backward-incompatible changes that lay the ground for the future user-facing improvements:
+
+* Require **GitLab version >= 14.4** (released in Oct 2021) as it contains the [required API rename](https://gitlab.com/gitlab-org/gitlab/-/issues/334500),
+* Require **Python version >= 3.7** (as 3.6 is EOL since Dec 2021) and update many dependencies that have required it,
+* Drop the Debian-based Docker image (it's practically unused - you can maintain your own, if you needed it),
+* **Drop support for a lot of deprecated configuration syntax** that the app has warned about: 
   * branch protection - no more `developers_can_push`, `developers_can_merge`, use `push_access_level`, `merge_access_level` etc. instead,
   * group members - no more `group_shared_with`, `enforce_group_members`, `group_access_level`, use `group_members`, `group_members.enforce`, `group_access` instead,
   * services/integrations - no more `recreate`,
-* Follow the renames in GitLab and rename some configuration sections:
+* **Rename some configuration sections** following the renames made in GitLab:
   * `services` -> `integrations`,
   * `secret_variables` -> `variables`,
   * `group_secret_variables` -> `group_variables`,
-* (Applies only to the users of this app as library) Rename some API methods, remove deprecated ones,
+* _(For users of this app as a library)_ Rename some API methods, remove deprecated ones:
   * `protect_branch()` is now the method using the new API, the method using the old one has been removed,
   * `branch_code_owner_approval_required()` -> `set_branch_code_owner_approval_required()`.
   * `delete_legacy_approvers()` has been removed,
   * all the methods with `service(s)`/`secret_variable(s)`/`group_secret_variable(s)` in their names have been renamed to contain `integration(s)`/`variable(s)`/`group_variables(s)`.
-* Shorter and easier to read errors (full stacktrace shown only when `--debug` is enabled),
+
+Thanks to the contributors of this release: [@ep-linden](https://github.com/ep-linden) from [Elastic Path](https://www.elasticpath.com/).
 
 ### 2.12.0
 
