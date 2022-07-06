@@ -33,8 +33,6 @@ GitLabForm has been built specifically for managing GitLab and has been designed
   Also when you update your GitLab instance you can start using new API features immediately with **GLF** while with **GT** you
   have to wait until its new version supporting those features is released.
 
-You can read more about the last two points in the GitLabForm key features design article [here](main_concepts.md).
-
 ### Feature matrix/comparison sheet
 
 For your convenience we have prepared [GitLab provider for Terraform vs GitLabForm feature matrix / comparion sheet](https://docs.google.com/spreadsheets/d/1RenC5OoLW_bt8QYrijNP42w8SGBw8JTg1-7RKWgStrQ/edit?usp=sharing).
