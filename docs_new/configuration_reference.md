@@ -6,7 +6,7 @@ The whole configuration for the app needs to be in a single YAML file of any nam
 
 Here is a minimal working configuration file example:
 ```yaml
-config_version: 2
+config_version: 3
 
 gitlab:
   url: https://gitlab.yourcompany.com
@@ -23,10 +23,10 @@ groups_and_project:
 
 The configuration has to contain the following keys:
 ```yaml
-# This key is required in configs for GitLabForm version 2.x.x
-# This ensures that when the application behavior changes
-# you won't apply unexpected configuration to your GitLab instance.
-config_version: 2
+# This key is required in configs for GitLabForm version 3.x.x
+# This ensures that if the application behavior changes in a backward-incompatible way
+# you won't apply unwanted configuration to your GitLab instance.
+config_version: 3
 
 # GitLab API access config
 gitlab:

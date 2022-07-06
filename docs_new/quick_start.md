@@ -6,7 +6,7 @@ If so then:
 1. Create example `config.yml`:
 
 ```yaml
-config_version: 2
+config_version: 3
 
 gitlab:
   url: https://gitlab.yourcompany.com
