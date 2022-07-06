@@ -11,11 +11,9 @@ nav:
 
   - Quick Start: quick_start.md
 
-  - Requirements and Installation: installation.md
-
-  - Main Concepts: main_concepts.md
-
-  - Configuration Reference:
+  - Requirements: requirements.md
+  - Installation: installation.md
+  - Configuration:
     - Introduction: configuration_reference.md
     - Archive/unarchive: reference/archive_unarchive.md
     - Branches: reference/protected_branches.md

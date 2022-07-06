@@ -16,7 +16,7 @@ The values:
     * `push_access_level`, `merge_access_level`, `unprotect_access_level` keys, each set to one of the [valid access levels](https://docs.gitlab.com/ee/api/members.html#valid-access-levels) that will be the minimal access level required for a given action,
     * (optional) `allow_force_push` key set to `true` or `false`,
 
-Example 1:
+Example:
 
 ```yaml
 projects_and_groups:
@@ -59,6 +59,7 @@ projects_and_groups:
     Below syntax and features require GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)
 
 In GitLab Premium instances you can also use the following extra keys under each branch:
+
 * `code_owner_approval_required` set to `true` or `false`,
 * `allowed_to_push`, `allowed_to_merge`, `allowed_to_unprotect` keys that can be set to the arrays containing any combination of:
     * `user` set to username,
@@ -69,7 +70,7 @@ In GitLab Premium instances you can also use the following extra keys under each
 
 Note that you should NOT use both `*_access_level` and `allowed_to_*` keys - the result could be ambiguous, please choose the first or the second set.
 
-Example 2:
+Example:
 
 ```yaml
 projects_and_groups:

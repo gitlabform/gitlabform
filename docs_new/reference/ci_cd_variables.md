@@ -86,7 +86,7 @@ projects_and_groups:
   group_1/*:
     group_variables:
       # --- Adding/resetting
-      a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance: # this is just a label
+      some_secret: # this is just a label
         key: A_NEW_PASSWORD
         value: "ThisIsAVerySecretPassword"
         variable_type: env_var # or file

@@ -1,6 +1,6 @@
 # Running
 
-To apply settings for a single project, run:
+To apply settings for a single project, run the app with the path to the project, f.e.:
 
 ```shell
 gitlabform my-group/my-project1
