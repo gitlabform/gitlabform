@@ -642,8 +642,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#publish-docs-locally" class="md-nav__link">
-    Publish docs locally
+  <a href="#preview-docs-website-locally" class="md-nav__link">
+    Preview docs website locally
   </a>
   
 </li>
@@ -838,8 +838,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#publish-docs-locally" class="md-nav__link">
-    Publish docs locally
+  <a href="#preview-docs-website-locally" class="md-nav__link">
+    Preview docs website locally
   </a>
   
 </li>
@@ -944,11 +944,13 @@ export GITLAB_TOKEN=&quot;&lt;my admin user API token&gt;&quot;
 To run only a single class with tests run f.e. <code>py.test tests/acceptance -k "TestArchiveProject"</code>.</p>
 </li>
 </ol>
-<h2 id="publish-docs-locally">Publish docs locally<a class="headerlink" href="#publish-docs-locally" title="Permanent link">&para;</a></h2>
+<h2 id="preview-docs-website-locally">Preview docs website locally<a class="headerlink" href="#preview-docs-website-locally" title="Permanent link">&para;</a></h2>
+<p>To make mkdocs build the app website and serve it on your loopback interface do this:
 <div class="highlight"><pre><span></span><code>. venv/bin/activate
 pip install -e .<span class="o">[</span>docs<span class="o">]</span>
 mkdocs serve
 </code></pre></div>
+...and open the provided link (probably <a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a>) in your browser.</p>
 
               
             </article>
