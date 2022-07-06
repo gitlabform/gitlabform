@@ -25,7 +25,7 @@ class TestInheritanceBreakSubgroups:
 
         configuration = Configuration(config_string=config_yaml)
 
-        effective_config = configuration.get_effective_subgroup_config(
+        effective_config = configuration.get_effective_config_for_group(
             "some_group/some_subgroup"
         )
 
@@ -75,7 +75,7 @@ class TestInheritanceBreakSubgroups:
         self,
         configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
-        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_subgroup_config(
+        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_group(
             "some_group/subgroup_level_1"
         )
 
@@ -106,7 +106,7 @@ class TestInheritanceBreakSubgroups:
         self,
         configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
-        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_subgroup_config(
+        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_group(
             "some_group/subgroup_level_1/subgroup_level_2"
         )
 

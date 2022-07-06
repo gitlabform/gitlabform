@@ -95,8 +95,8 @@ def configuration_with_subgroups_only():
     return Configuration(config_string=config_yaml)
 
 
-def test__get_effective_subgroup_config__level1(configuration_with_subgroups_only):
-    effective_config = configuration_with_subgroups_only.get_effective_subgroup_config(
+def test__get_effective_config_for_group__level1(configuration_with_subgroups_only):
+    effective_config = configuration_with_subgroups_only.get_effective_config_for_group(
         "some_group/subgroup"
     )
 
@@ -110,8 +110,8 @@ def test__get_effective_subgroup_config__level1(configuration_with_subgroups_onl
     }
 
 
-def test__get_effective_subgroup_config__level2(configuration_with_subgroups_only):
-    effective_config = configuration_with_subgroups_only.get_effective_subgroup_config(
+def test__get_effective_config_for_group__level2(configuration_with_subgroups_only):
+    effective_config = configuration_with_subgroups_only.get_effective_config_for_group(
         "some_group/subgroup/subsubgroup"
     )
 
