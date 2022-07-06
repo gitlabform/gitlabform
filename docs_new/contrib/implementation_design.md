@@ -1,6 +1,6 @@
 # Implementation design
 
-If you haven't done this before, please read the [main concepts](../main_concepts.md) article first.
+If you haven't done this before, please read the [configuration reference](../configuration_reference.md) article first.
 
 It explains the "why"s of the two key design concepts of this app:
 * hierarchical configuration with inheritance, merging/overwriting and additivity,
