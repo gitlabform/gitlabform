@@ -12,7 +12,7 @@ using hierarchical configuration written in YAML.
 
 ## Why?
 
-* **Short and powerful syntax.** We provide a lot of features for your configurations (not programs!) thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](main_concepts.md#hierarchical-merged-and-overridable-configuration) .
+* **Short and powerful syntax.** A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](main_concepts.md#hierarchical-merged-and-overridable-configuration) .
 ```yaml
   # configuration shared by all projects in this group...
   a_group/*:
@@ -26,7 +26,7 @@ using hierarchical configuration written in YAML.
         approvals_before_merge: 1
 ```
 
-* **Dynamic features.** GitLab has monthly releases, so it introduces new features that you can configure with API very often. GitLabForm can use them immediately because we use [passing the parameters as-is to GitLab APIs with PUT/POST requests](main_concepts.md#raw-parameters-passing).
+* **Dynamic features.** GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](main_concepts.md#raw-parameters-passing).
 ```yaml
   a_group/a_project:
     project_settings:
@@ -36,9 +36,9 @@ using hierarchical configuration written in YAML.
 ```
 
 * **Stability.** We treat our users the way we would like to be treated by other software projects maintainers:
-    * We follow [semver](https://semver.org/) and don't allow behavior _changes_ in minor or patch versions.
+    * We follow [semver](https://semver.org/) and don't allow _existing features behavior changes_ in minor or patch versions.
     * Before changing the syntax we start printing _deprecation warnings_ in the versions before.
-    * We use _versioning of the configuration syntax_ for major changes.
+    * We use _versioning of the configuration syntax_ for major changes and provide step-by-step upgrade guidelines.
 
 ## Features
 
