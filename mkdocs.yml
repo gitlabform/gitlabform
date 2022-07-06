@@ -7,13 +7,11 @@ strict: true
 edit_uri: edit/docs_website/docs_new/
 
 nav:
-  - Home: index.md
-
-  - Quick Start: quick_start.md
-
-  - Requirements: requirements.md
-  - Installation: installation.md
-  - Configuration:
+  - 🏡 Home: index.md
+  - 💨 Quick Start: quick_start.md
+  - 🫴 Requirements: requirements.md
+  - 💾 Installation: installation.md
+  - 📋 Configuration:
     - Introduction: configuration_reference.md
     - Archive/unarchive: reference/archive_unarchive.md
     - Branches: reference/protected_branches.md
@@ -25,21 +23,17 @@ nav:
     - Merge Requests: reference/merge_requests.md
     - Project Settings: reference/project_settings.md
     - Push rules: reference/push_rules.md
-
-  - Running: running.md
-  - Automation: automation.md
-
-  - Contributing:
-    - Introduction: contrib/introduction.md
-    - Local Development: contrib/local_development.md
-    - Implementation Design: contrib/implementation_design.md
-    - Coding Guidelines: contrib/coding_guidelines.md
-    - Releases: contrib/releases.md
-
-  - Similar Apps: similar_apps.md
-
-  - Changelog: changelog.md
-  - Legal: legal.md
+  - 🏃 Running: running.md
+  - 🤖 Automation: automation.md
+  - 🗓 Changelog: changelog.md
+  - 🙋 Contributing:
+      - Introduction: contrib/introduction.md
+      - Local Development: contrib/local_development.md
+      - Implementation Design: contrib/implementation_design.md
+      - Coding Guidelines: contrib/coding_guidelines.md
+      - Releases: contrib/releases.md
+  - ⚖️ Similar Apps: similar_apps.md
+  - 🧑‍⚖️ Legal: legal.md
 
 markdown_extensions:
   - attr_list
