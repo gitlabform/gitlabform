@@ -83,10 +83,12 @@ export GITLAB_TOKEN="<my admin user API token>"
 2. Run `pytest tests/acceptance` to start all tests
 To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
 
-## Publish docs locally
+## Preview docs website locally
 
+To make mkdocs build the app website and serve it on your loopback interface do this:
 ```shell
 . venv/bin/activate
 pip install -e .[docs]
 mkdocs serve
 ```
+...and open the provided link (probably [http://127.0.0.1:8000/](http://127.0.0.1:8000/)) in your browser.
