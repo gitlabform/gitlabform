@@ -87,6 +87,6 @@ To run only a single class with tests run f.e. `py.test tests/acceptance -k "Tes
 
 ```shell
 . venv/bin/activate
-pip install -e 
-mkdocs server
+pip install -e .[docs]
+mkdocs serve
 ```
