@@ -6,14 +6,13 @@ This is a major new version with some backward incompatibility. Please follow [t
 
 New features/bugfixes:
 
-* **Subgroups now _do_ inherit the settings from their supergroups.** It should have worked like this already, but it did not because of a [bug #372](https://github.com/gitlabform/gitlabform/issues/372) fixed in [PR #385](https://github.com/gitlabform/gitlabform/pull/385). Now it does work. (Please use `inherit: false` to keep the old behavior. See [the upgrade guide](https://bit.ly/3ub1g5C) for more info.),
+* **Subgroups now _do_ inherit the settings from their groups.** It should have worked like this already, but it did not because of a [bug #372](https://github.com/gitlabform/gitlabform/issues/372) fixed in [PR #385](https://github.com/gitlabform/gitlabform/pull/385). (Please use `inherit: false` to keep the old behavior. See [the upgrade guide](https://bit.ly/3ub1g5C) for more info.),
 * **Shorter and easier to read errors** (full stacktrace shown only when `--debug` is enabled),
 
-Backward-incompatible changes that lay the ground for the future user-facing improvements:
+Backward-incompatible maintenance changes:
 
-* Require **GitLab version >= 14.4** (released in Oct 2021) as it contains the [required API rename](https://gitlab.com/gitlab-org/gitlab/-/issues/334500),
-* Require **Python version >= 3.7** (as 3.6 is EOL since Dec 2021) and update many dependencies that have required it,
-* Drop the Debian-based Docker image (it's practically unused - you can maintain your own, if you needed it),
+* **Require GitLab version >= 14.4** (released in Oct 2021) as it contains the [required API rename](https://gitlab.com/gitlab-org/gitlab/-/issues/334500),
+* **Require Python version >= 3.7** (as 3.6 is EOL since Dec 2021) and update many dependencies that have required it,
 * **Drop support for a lot of deprecated configuration syntax** that the app has warned about: 
   * branch protection - no more `developers_can_push`, `developers_can_merge`, use `push_access_level`, `merge_access_level` etc. instead,
   * group members - no more `group_shared_with`, `enforce_group_members`, `group_access_level`, use `group_members`, `group_members.enforce`, `group_access` instead,
@@ -22,6 +21,7 @@ Backward-incompatible changes that lay the ground for the future user-facing imp
   * `services` -> `integrations`,
   * `secret_variables` -> `variables`,
   * `group_secret_variables` -> `group_variables`,
+* Drop the Debian-based Docker image (it's practically unused - you can maintain your own, if you needed it),
 * _(For users of this app as a library)_ Rename some API methods, remove deprecated ones:
   * `protect_branch()` is now the method using the new API, the method using the old one has been removed,
   * `branch_code_owner_approval_required()` -> `set_branch_code_owner_approval_required()`.
