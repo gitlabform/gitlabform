@@ -12,7 +12,7 @@ using hierarchical configuration written in YAML.
 
 ## Why?
 
-* **Short and powerful syntax.** A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](main_concepts.md#hierarchical-merged-and-overridable-configuration) .
+* **Short and powerful syntax.** A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](configuration_reference/#effective-configuration) .
 ```yaml
   # configuration shared by all projects in this group...
   a_group/*:
@@ -26,7 +26,7 @@ using hierarchical configuration written in YAML.
         approvals_before_merge: 1
 ```
 
-* **Dynamic features.** GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](main_concepts.md#raw-parameters-passing).
+* **Dynamic features.** GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](configuration_reference/#raw-parameters-passing).
 ```yaml
   a_group/a_project:
     project_settings:
