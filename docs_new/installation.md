@@ -2,8 +2,8 @@
 
 ## Requirements
 
-* Docker or Python 3.6-3.10
-* GitLab 11+
+* Docker or Python 3.7-3.10
+* GitLab 14.4+
 * GitLab Premium (paid) for some features
 
 ## Installation
@@ -19,15 +19,15 @@ docker run -it -v $(pwd):/config ghcr.io/gdubicki/gitlabform:latest gitlabform
 pipx run gitlabform
 ```
 
-Run the latest 2.* version with:
+Run the latest 3.* version with:
 
 * Docker:
 ```shell
-docker run -it -v $(pwd):/config ghcr.io/gdubicki/gitlabform:2 gitlabform
+docker run -it -v $(pwd):/config ghcr.io/gdubicki/gitlabform:3 gitlabform
 ```
 * [pipx](https://github.com/pypa/pipx):
 ```shell
-pipx run --spec 'gitlabform>=2,<3' gitlabform
+pipx run --spec 'gitlabform>=3,<4' gitlabform
 ```
 
 See [this](https://github.com/gdubicki/gitlabform/pkgs/container/gitlabform) for all the available Docker tags.
