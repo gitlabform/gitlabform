@@ -1,21 +1,21 @@
 # Implementation design
 
-If you haven't done this before, please read the [features design](FEATURES_DESIGN.md) article.
+If you haven't done this before, please read the [main concepts](../main_concepts.md) article first.
 
 It explains the "why"s of the two key design concepts of this app:
 * hierarchical configuration with inheritance, merging/overwriting and additivity,
 * raw parameters passing
 
-Please also read the usual [contributing guide](https://github.com/gitlabform/gitlabform/blob/main/CONTRIBUTING.md) for the basics of how to create PRs,
+Please also read the general [coding guidelines](coding_guidelines.md) for the basics of how to create PRs,
 the expected style of your code etc. - the "general how"s.
 
 This article purpose is to explain "specific how"s - explain what is where in the code and how to add features
 by example.
 
-## Structure
+## Project Structure
 
-### Packages:
-  
+### Packages
+
 * `gitlabform.*` and `gitlabform.processors.*` - contains the main app logic. It provides the CLI, parsing of the parameters,
   uses below two packages to apply the config defined in `config.yml` to the requested set of projects.
 
@@ -54,6 +54,9 @@ Since v2.2.0 there is a new way of implementing processors - by inheriting form 
 It should be applied for new features which manage 0-N entities of some kind under a group or a project.
 See `BadgesProcessor` as an example how to use it.
 
+Since v2.10.0 we have a similar solution for features where you manage a single entity - `SingleEntityProcessor` class.
+See `ProjectPushRulesProcessor` as an example how to use it. 
+
 #### Usage
 
 If you want to **add/change/fix things under an existing config section** then most likely you will need to update 
@@ -79,12 +82,11 @@ Almost all methods in other classes end up calling `self._make_requests_to_api`,
 GitLab API requests with proper authentication, pagination, retries, timeouts and more.
 
 Sometimes there is some logic in these methods if:
+
 * we only need a specific part of the response from GitLab API - see `GitLabProjects.get_all_projects()` as an example,
 * some GitLab APIs need some workarounds for their bugs or documentation inconsistencies, like:
-  * some APIs declare in the docs that they accept both "group/project" string OR a project id while in fact only
-the latter works - see `GitLabProjects.post_approvals()` as an example,
-  * some APIs return invalid HTTP error codes, like 404 instead of 400 - see `GitLabGroupLDAPLinks.add_ldap_group_link`
-    as an example.
+    * some APIs declare in the docs that they accept both "group/project" string OR a project id while in fact only the latter works - see `GitLabProjects.post_approvals()` as an example,
+    * some APIs return invalid HTTP error codes, like 404 instead of 400 - see `GitLabGroupLDAPLinks.add_ldap_group_link` as an example.
 
 **Note**: Some of the code here is **NOT used by the GitLabForm app**, but utilized by internal Egnyte
 applications that have not yet switched to the more standard `python-gitlab`.

@@ -1,65 +1,6 @@
-# This key prevents GitLabForm from actually using this config.
-# Please remove it if you create your config as a copy of this file.
-example_config: true
-
-# This key is required in configs for GitLabForm version 3.x.x
-# This ensures that if the application behavior changes in a backward-incompatible way
-# you won't apply unwanted configuration to your GitLab instance.
-config_version: 3
-
-# GitLab API access config
-gitlab:
-  # You can also set in your environment GITLAB_URL
-  url: https://gitlab.yourcompany.com
-  # You can also set in your environment GITLAB_TOKEN
-  # this can be both private token OR OAuth2 access token
-  token: "<private token of an admin user>"
-  # SSL will be verified by default, you can turn checks off by passing `ssl_verify: false`
-  ssl_verify: true
-  # timeout, defaults to 10
-  timeout: 10
-
-#
-# You can define settings on 3 levels here:
-# * common - for ALL projects in ALL groups - under "*" key
-# * group/subgroup - for ALL projects in selected group/subgroup (recursively) - under keys ending with "/*"
-# * project - for single projects
-#
-# Each level is optional.
-#
-# To generate effective settings to apply for a given project, if it is configured on more than one level
-# (for example you run it for "my-group/my-project" with the example configuration below, where this project will
-# take configuration from all 3 levels), GitLabForm will merge those configurations.
-#
-# Merging is additive, so for sections like `deploy_keys`, `variables`, `hooks' on each lower level
-# the effective configuration will contain elements from higher levels plus elements from lower levels.
-#
-# Exception: when `skip: true` is set on a more specific level, given config section is not set AT ALL for given project.
-#
-
 projects_and_groups:
-  "*":
-    # common settings for ALL projects and ALL groups
 
-    # aka "Project CI/CD variables"
-    # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
-    variables:
-      # this name is not actually used, it's just for you
-      a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
-        key: A_VERY_COMMONLY_USED_PASSWORD
-        value: "ThisIsAVerySecretPassword"
-        delete: false  # Set to true to delete this variable
-
-    # aka "Group CI/CD variables"
-    # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
-    group_variables:
-      # this name is not actually used, it's just for you
-      a_secret_you_want_to_add_to_all_groups_in_your_gitlab_instance:
-        key: A_VERY_COMMONLY_USED_PASSWORD
-        value: "ThisIsAVerySecretPassword"
-        variable_type: env_var #or file
-        protected: false #
-        delete: false  # Set to true to delete this variable
+  # (TODO: migrate this whole file into the new docs "reference" per config section...)
 
   # settings for ALL projects in 'my-group' group
   "my-group/*":
@@ -83,26 +24,6 @@ projects_and_groups:
       ensure_to_remove_this_one:
         title: different_key_title
         delete: true
-
-    # these are now called "Project CI/CD variables"
-    # keys and values here are as described at https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable
-    variables:
-      # this name is not actually used, it's just for you
-      a_friendly_secret_variable_name:
-        key: SSH_PRIVATE_KEY_BASE64
-        value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
-
-    # these are now called "Group CI/CD variables"
-    # keys and values here are as described at https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable
-    group_variables:
-      # this name is not actually used, it's just for you
-      a_secret_you_want_to_add_to_all_projects_in_your_gitlab_instance:
-        key: A_VERY_COMMONLY_USED_PASSWORD
-        value: "ThisIsAVerySecretPassword"
-        protected: true
-        # note that there are extra requirements for variables to be "masked",
-        # see https://docs.gitlab.com/ee/ci/variables/#masked-variable-requirements
-        masked: true
 
     # keys and values here are as described at https://docs.gitlab.com/ce/api/projects.html#edit-project
     project_settings:
@@ -142,7 +63,7 @@ projects_and_groups:
     merge_requests:
       # keys and values here are as described at
       # https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration
-      # (note that some Merge Requests-related settings are set in project_settings! read linked gitlab API docs for details)
+      # (note that some Merge Requests-related settings are set in project_settings! read linked gitlab API docs_new for details)
       approvals:
         approvals_before_merge: 2
         reset_approvals_on_push: true
@@ -249,10 +170,11 @@ projects_and_groups:
         protected: true
         create_access_level: maintainer
 
+    # these are now called "Integrations"
     # names are as in the endpoints described at https://docs.gitlab.com/ee/api/integrations.html
     # hashes under those name correspond to the parameters described for a given integration there
     # except where integrations are deleted with `delete: true`
-    integrations:
+    services:
       slack:
         delete: true
       drone-ci:
@@ -373,29 +295,6 @@ projects_and_groups:
         title: ssh_key_name_that_is_shown_in_gitlab_3
         can_push: false
 
-    # aka "Project CI/CD variables"
-    variables:
-      # Variables can be scoped to an "environment".
-      # Scoping to environment also allows using the same "key" name for multiple variables.
-      # This can simplify CI Config file because the appropriate variable will be exposed
-      # by GitLab to the job that is targetting a given environment. If the same "key" name
-      # is used for different environments, you'll need to add filter[environment_scope] to
-      # configuration as shown below.
-      aws_access_key_id_for_deploying_in_production:
-        key: APP_HOST_AWS_ACCESS_KEY_ID
-        value: "prod-value-1234"
-        protected: true
-        masked: true
-        environment_scope: production
-        filter[environment_scope]: production
-      aws_access_key_id_for_deploying_in_staging:
-        key: APP_HOST_AWS_ACCESS_KEY_ID
-        value: "staging-value-1234"
-        protected: true
-        masked: true
-        environment_scope: staging
-        filter[environment_scope]: staging
-
     hooks:
       skip: true # this will skip whole hooks config *section* for this project, although it is set on group level
 
@@ -481,14 +380,3 @@ projects_and_groups:
       old-badge-to-delete:
         name: "a-badge"
         delete: true
-
-# this will skip these projects from being processed
-skip_projects:
-  - my-group/this-project-will-not-be-processed-with-gitlabform-when-running-for-my-group
-  - my-group/and-this-too
-  - my-group/everything-under/*
-
-# this will skip these groups from being processed
-skip_groups:
-  - my-other-group
-  - this-group-and-all-sub-groups/*

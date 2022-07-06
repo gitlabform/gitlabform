@@ -26,7 +26,7 @@ class GitLabProjectDeployKeys(GitLabProjects):
     def put_deploy_key(
         self, project_and_group_name, deploy_key_in_gitlab, deploy_key_in_config
     ):
-        # according to docs at https://docs.gitlab.com/ee/api/deploy_keys.html#update-deploy-key
+        # according to docs_new at https://docs.gitlab.com/ee/api/deploy_keys.html#update-deploy-key
         # you only can change key's title and can_push param
 
         changeable_data = {

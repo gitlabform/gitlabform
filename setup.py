@@ -77,6 +77,9 @@ setup(
             "deepdiff==5.8.1",
             "pytest-rerunfailures==10.2",
         ],
+        "docs": [
+            "mkdocs",
+        ],
     },
     entry_points={
         "console_scripts": [
