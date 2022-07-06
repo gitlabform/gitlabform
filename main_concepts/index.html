@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.0">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
     
     
       
@@ -17,7 +17,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.fd896c8a.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.1d29e8d0.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#main-concepts" class="md-skip">
+        <a href="#hierarchical-merged-and-overridable-configuration" class="md-skip">
           Skip to content
         </a>
       
@@ -281,67 +281,9 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Main Concepts
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         Main Concepts
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#hierarchical-merged-and-overridable-configuration" class="md-nav__link">
-    Hierarchical, merged and overridable configuration
-  </a>
-  
-    <nav class="md-nav" aria-label="Hierarchical, merged and overridable configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example-1-configuration-inheritance-overriding" class="md-nav__link">
-    Example 1 - configuration inheritance &amp; overriding
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-2-adding-elements" class="md-nav__link">
-    Example 2 - adding elements
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#raw-parameters-passing" class="md-nav__link">
-    Raw parameters passing
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -734,48 +676,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#hierarchical-merged-and-overridable-configuration" class="md-nav__link">
-    Hierarchical, merged and overridable configuration
-  </a>
-  
-    <nav class="md-nav" aria-label="Hierarchical, merged and overridable configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example-1-configuration-inheritance-overriding" class="md-nav__link">
-    Example 1 - configuration inheritance &amp; overriding
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-2-adding-elements" class="md-nav__link">
-    Example 2 - adding elements
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#raw-parameters-passing" class="md-nav__link">
-    Raw parameters passing
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -792,19 +692,18 @@
 
 
 
-<h1 id="main-concepts">Main Concepts<a class="headerlink" href="#main-concepts" title="Permanent link">&para;</a></h1>
-<h2 id="hierarchical-merged-and-overridable-configuration">Hierarchical, merged and overridable configuration<a class="headerlink" href="#hierarchical-merged-and-overridable-configuration" title="Permanent link">&para;</a></h2>
+<h1 id="hierarchical-merged-and-overridable-configuration">Hierarchical, merged and overridable configuration<a class="headerlink" href="#hierarchical-merged-and-overridable-configuration" title="Permanent link">&para;</a></h1>
 <p>GitLabForm has been heavily inspired by <a href="https://puppet.com/docs/puppet/latest/hiera_intro.html">Puppet's hiera</a>. This
 is where we borrowed from the concept of a hierarchical configuration that is inherited from the higher to the lower
 levers while you also can override some config parts on the lower levels.</p>
-<h3 id="example-1-configuration-inheritance-overriding">Example 1 - configuration inheritance &amp; overriding<a class="headerlink" href="#example-1-configuration-inheritance-overriding" title="Permanent link">&para;</a></h3>
+<p><strong>Example 1 - configuration inheritance &amp; overriding</strong></p>
 <p>You want to configure all your GitLab instance projects to have JIRA integration enabled for your MRs to have
 ticket ids shown as links to JIRA in the web UI, but you DON'T want the integration that enables to close JIRA
-tickets from MRs that have "closes <ticket_id>" in their description, so you do this:</p>
+tickets from MRs that have "closes <ticket_id>" in their description, so you do this:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="c1"># common settings for ALL projects in ALL groups</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">integrations</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">jira</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://jira.yourcompany.com</span><span class="w"></span>
 <span class="w">        </span><span class="nt">commit_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
@@ -812,29 +711,37 @@ tickets from MRs that have "closes <ticket_id>" in their description, so you do 
 <span class="w">        </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fake</span><span class="w"> </span><span class="c1"># this field is required by the GitLab API, but you can set it to any value</span><span class="w"></span>
 <span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fake</span><span class="w"> </span><span class="c1"># this field is required by the GitLab API, but you can set it to any value</span><span class="w"></span>
 </code></pre></div>
-<p>...but you DO want this feature for a group of projects, but without comments about each commit added to JIRA, so then you add this to your config:</p>
+...but you DO want this feature for a group of projects, but without comments about each commit added to JIRA,
+so then you add this to your config:
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1"># settings for ALL projects in &#39;some_group_name&#39; group</span><span class="w"></span>
-<span class="w">  </span><span class="nt">some_group_name/*</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">services</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="s">&quot;some_group_name/*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">integrations</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">jira</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">real_username</span><span class="w"></span>
 <span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">real_password</span><span class="w"></span>
 <span class="w">        </span><span class="nt">jira_issue_transition_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123</span><span class="w"></span>
-</code></pre></div>
-<p>...and finally you realize that for a single project in that group you also DO WANT those comments (for example for
-compliance reasons), so you add:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1"># settings for a single project</span><span class="w"></span>
-<span class="w">  </span><span class="nt">some_group_name/specific_project_name</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">services</span><span class="p">:</span><span class="w"></span>
+
+<span class="w w-Error"> </span><span class="err">```</span><span class="w"></span>
+<span class="l l-Scalar l-Scalar-Plain">...and finally you realize that for a single project in that group you also DO WANT those comments (for example for</span><span class="w"></span>
+<span class="l l-Scalar l-Scalar-Plain">compliance reasons), so you add</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="err">```</span><span class="l l-Scalar l-Scalar-Plain">yaml</span><span class="w"></span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain"># settings for a single project</span><span class="w"></span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">some_group_name/specific_project_name</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">integrations</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">jira</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">commit_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-</code></pre></div>
-<p>Note how you don't have to provide a full config each time - only the parts that are changing. This is because the configs
-from the higher level are being merged with the ones on the lower.</p>
-<h3 id="example-2-adding-elements">Example 2 - adding elements<a class="headerlink" href="#example-2-adding-elements" title="Permanent link">&para;</a></h3>
-<p>You want to add a default README file to all your projects that contains a convenience link to search for given project
-in Confluence. So you add this to your config:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w w-Error"> </span><span class="err">```</span><span class="w"></span>
+
+<span class="l l-Scalar l-Scalar-Plain">Note how you don&#39;t have to provide a full config each time - only the parts that are changing. This is because the configs</span><span class="w"></span>
+<span class="l l-Scalar l-Scalar-Plain">from the higher level are being merged with the ones on the lower.</span><span class="w"></span>
+
+<span class="err">*</span><span class="nv">*Example</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2 - adding elements**</span><span class="w"></span>
+
+<span class="l l-Scalar l-Scalar-Plain">You want to add a default README file to all your projects that contains a convenience link to search for given project</span><span class="w"></span>
+<span class="nt">in Confluence. So you add this to your config</span><span class="p">:</span><span class="w"></span>
+
+<span class="err">```</span><span class="l l-Scalar l-Scalar-Plain">yaml</span><span class="w"></span>
+<span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">files</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="s">&quot;README.md&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
@@ -847,9 +754,9 @@ in Confluence. So you add this to your config:</p>
 <span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
 <span class="w">          </span><span class="no">This is a default project README. Please replace it with a proper one!</span><span class="w"></span>
 <span class="w">          </span><span class="no">Search for this project in Confluence with this [link](https://confluence.yourcompany.com/dosearchsite.action?cql=siteSearch%20~%20%22{{ project }}%22&amp;includeArchivedSpaces=false).</span><span class="w"></span>
-</code></pre></div>
+</code></pre></div></p>
 <p>Then you realize that for "app_1" group projects you also want to add a default <code>.gitignore</code> file, so you add this to your config:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">app_1/*</span><span class="p">:</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s">&quot;app_1/*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">files</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="s">&quot;.gitignore&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">overwrite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
@@ -864,14 +771,14 @@ in Confluence. So you add this to your config:</p>
 </code></pre></div>
 <p>Note that the projects in the group "app_1" will have BOTH files added - <code>README.md</code> and <code>.gitignore</code>. This is because
 the configs are additive for most "listed" elements.</p>
-<p>(Note that you can disable additivity selectively by using <code>skip: true</code> configuration expression, like this:</p>
-<p><div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">app_1/some_repo</span><span class="p">:</span><span class="w"></span>
+<p>(Note that you can disable addivity selectively by using <code>skip: true</code> configuration expression, like this:</p>
+<p><div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s">&quot;app_1/some_repo&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">files</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="s">&quot;.gitignore&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">skip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># thanks to this `app_1/some_repo` will NOT get `.gitignore` file from GitLabForm</span><span class="w"></span>
 </code></pre></div>
 )</p>
-<h2 id="raw-parameters-passing">Raw parameters passing<a class="headerlink" href="#raw-parameters-passing" title="Permanent link">&para;</a></h2>
+<h1 id="raw-parameters-passing">Raw parameters passing<a class="headerlink" href="#raw-parameters-passing" title="Permanent link">&para;</a></h1>
 <p>Since 2017, when GitLabForm was originally developed, GitLab development pace is so fast that we are not able to keep up with it
 by updating GitLabForm whenever a parameter is added or changed in the GitLab's API.</p>
 <p>Because of that we made a decision to use "raw parameters passing" - for many configuration elements whatever you put inside
@@ -949,10 +856,10 @@ have to update your config.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b028fd86.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.0f659f14.min.js"></script>
+      <script src="../assets/javascripts/bundle.6c7ad80a.min.js"></script>
       
     
   </body>

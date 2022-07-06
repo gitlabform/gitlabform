@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.0">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
     
     
       
@@ -17,7 +17,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.fd896c8a.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.1d29e8d0.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
@@ -662,6 +662,20 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#300" class="md-nav__link">
+    3.0.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2120" class="md-nav__link">
+    2.12.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#2111post3" class="md-nav__link">
     2.11.1post3
   </a>
@@ -911,6 +925,20 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#300" class="md-nav__link">
+    3.0.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2120" class="md-nav__link">
+    2.12.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#2111post3" class="md-nav__link">
     2.11.1post3
   </a>
@@ -1125,6 +1153,40 @@
   <h1>Changelog</h1>
 
 <h2 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h2>
+<h3 id="300">3.0.0<a class="headerlink" href="#300" title="Permanent link">&para;</a></h3>
+<p>This is a major new version with some backward incompatibility. Please follow <a href="https://bit.ly/3ub1g5C">the upgrade guide</a> for a fast and safe upgrade.</p>
+<p>New features/bugfixes:</p>
+<ul>
+<li><strong>Subgroups now <em>do</em> inherit the settings from their groups.</strong> It should have worked like this already, but it did not because of a <a href="https://github.com/gitlabform/gitlabform/issues/372">bug #372</a> fixed in <a href="https://github.com/gitlabform/gitlabform/pull/385">PR #385</a>. (Please use <code>inherit: false</code> to keep the old behavior. See <a href="https://bit.ly/3ub1g5C">the upgrade guide</a> for more info.),</li>
+<li><strong>Shorter and easier to read errors</strong> (full stacktrace shown only when <code>--debug</code> is enabled),</li>
+</ul>
+<p>Backward-incompatible maintenance changes:</p>
+<ul>
+<li><strong>Require GitLab version &gt;= 14.4</strong> (released in Oct 2021) as it contains the <a href="https://gitlab.com/gitlab-org/gitlab/-/issues/334500">required API rename</a>,</li>
+<li><strong>Require Python version &gt;= 3.7</strong> (as 3.6 is EOL since Dec 2021) and update many dependencies that have required it,</li>
+<li><strong>Drop support for a lot of deprecated configuration syntax</strong> that the app has warned about: </li>
+<li>branch protection - no more <code>developers_can_push</code>, <code>developers_can_merge</code>, use <code>push_access_level</code>, <code>merge_access_level</code> etc. instead,</li>
+<li>group members - no more <code>group_shared_with</code>, <code>enforce_group_members</code>, <code>group_access_level</code>, use <code>group_members</code>, <code>group_members.enforce</code>, <code>group_access</code> instead,</li>
+<li>services/integrations - no more <code>recreate</code>,</li>
+<li><strong>Rename some configuration sections</strong> following the renames made in GitLab:</li>
+<li><code>services</code> -&gt; <code>integrations</code>,</li>
+<li><code>secret_variables</code> -&gt; <code>variables</code>,</li>
+<li><code>group_secret_variables</code> -&gt; <code>group_variables</code>,</li>
+<li>Drop the Debian-based Docker image (it's practically unused - you can maintain your own, if you needed it),</li>
+<li><em>(For users of this app as a library)</em> Rename some API methods, remove deprecated ones:</li>
+<li><code>protect_branch()</code> is now the method using the new API, the method using the old one has been removed,</li>
+<li><code>branch_code_owner_approval_required()</code> -&gt; <code>set_branch_code_owner_approval_required()</code>.</li>
+<li><code>delete_legacy_approvers()</code> has been removed,</li>
+<li>all the methods with <code>service(s)</code>/<code>secret_variable(s)</code>/<code>group_secret_variable(s)</code> in their names have been renamed to contain <code>integration(s)</code>/<code>variable(s)</code>/<code>group_variables(s)</code>.</li>
+</ul>
+<p>Thanks to the contributors of this release: <a href="https://github.com/ep-linden">@ep-linden</a> from <a href="https://www.elasticpath.com/">Elastic Path</a>.</p>
+<h3 id="2120">2.12.0<a class="headerlink" href="#2120" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Update base Docker images:</li>
+<li>from Python 3.9 and Alpine 3.14 to Python 3.10 and Alpine 3.16,</li>
+<li>from Python 3.9 and Debian 10 (Buster) to Python 3.10 and Debian 11 (Bullseye).</li>
+<li>Fix Group CI/CD Variables not honoring <code>protected</code> and <code>masked</code> values set to <code>false</code>. Fixes <a href="https://github.com/gitlabform/gitlabform/issues/384">#384</a>.</li>
+</ul>
 <h3 id="2111post3">2.11.1post3<a class="headerlink" href="#2111post3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Moved the project from <code>gdubicki/gitlabform</code> to <code>gitlabform/gitlabform</code>. Stopped publishing new images to the old <code>egnyte/gitlabform</code> Docker registry.</li>
@@ -1483,10 +1545,10 @@ The old syntax works but will generate warnings. Support for it will be removed 
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b028fd86.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.0f659f14.min.js"></script>
+      <script src="../assets/javascripts/bundle.6c7ad80a.min.js"></script>
       
     
   </body>
