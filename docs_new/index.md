@@ -1,8 +1,8 @@
 !!! warning
 
-    This site is not finished yet. See [PR #370](https://github.com/gdubicki/gitlabform/pull/370) for more information about its status.
+    This site is not finished yet. See [PR #370](https://github.com/gitlabform/gitlabform/pull/370) for more information about its status.
 
-    Until it is done, please see [the current app README](https://github.com/gdubicki/gitlabform/blob/main/README.md) and linked there articles for the up to date app docs.
+    Until it is done, please see [the current app README](https://github.com/gitlabform/gitlabform/blob/main/README.md) and linked there articles for the up to date app docs.
 
 
 ![GitLabForm logo](images/gitlabform-logo.png){ align=left } 
