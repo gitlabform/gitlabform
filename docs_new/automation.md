@@ -10,7 +10,7 @@ but automate cleaning up the drift each night.
 
 An example `.gitlab-ci.yml` for running GitLabForm using GitLab CI is provided here:
 ```yaml
-image: ghcr.io/gdubicki/gitlabform:latest
+image: ghcr.io/gitlabform/gitlabform:latest
 
 some_project:
   only:

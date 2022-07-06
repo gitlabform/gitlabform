@@ -12,7 +12,7 @@ Run the latest stable version with:
 
 * Docker:
 ```shell
-docker run -it -v $(pwd):/config ghcr.io/gdubicki/gitlabform:latest gitlabform
+docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:latest gitlabform
 ```
 * [pipx](https://github.com/pypa/pipx):
 ```shell
@@ -23,14 +23,14 @@ Run the latest 3.* version with:
 
 * Docker:
 ```shell
-docker run -it -v $(pwd):/config ghcr.io/gdubicki/gitlabform:3 gitlabform
+docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:3 gitlabform
 ```
 * [pipx](https://github.com/pypa/pipx):
 ```shell
 pipx run --spec 'gitlabform>=3,<4' gitlabform
 ```
 
-See [this](https://github.com/gdubicki/gitlabform/pkgs/container/gitlabform) for all the available Docker tags.
+See [this](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform) for all the available Docker tags.
 
 
 Install with:

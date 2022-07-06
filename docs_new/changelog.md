@@ -39,7 +39,7 @@ Thanks to the contributors of this release: [@ep-linden](https://github.com/ep-l
 
 ### 2.11.1post3
 
-* Moved the project from `gdubicki/gitlabform` to `gitlabform/gitlabform`. Stopped publishing new images to the old `egnyte/gitlabform` Docker registry.
+* Moved the project from `gitlabform/gitlabform` to `gitlabform/gitlabform`. Stopped publishing new images to the old `egnyte/gitlabform` Docker registry.
 
 ### 2.11.1
 
@@ -105,7 +105,7 @@ Big thanks to the [Elastic Path](https://www.elasticpath.com/) team for their co
 
 * **Access level names (not only their numbers) are now accepted in the configuration**.
 * More strictness in parsing configuration YAML and better error messages thanks to a switch to different libraries. F.e. hash keys overwriting is not accepted anymore.
-* Moved the project from `egnyte/gitlabform` to `gdubicki/gitlabform` and switch to GitHub Registry as the new main Docker registry.
+* Moved the project from `egnyte/gitlabform` to `gitlabform/gitlabform` and switch to GitHub Registry as the new main Docker registry.
 
 ### 2.8.1
 

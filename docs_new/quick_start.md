@@ -23,6 +23,6 @@ projects_and_groups:
 ```
 2. Run:
 ```shell
-docker run -it -v $(pwd):/config ghcr.io/gdubicki/gitlabform:latest gitlabform my-group
+docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:latest gitlabform my-group
 ```
 3. Watch GitLabForm add this deploy key to all projects in "My Group" group in your GitLab!

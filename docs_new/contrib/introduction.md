@@ -15,7 +15,7 @@ and should be very common sense ones.
 ### Questions
 
 Before asking a question please make sure that you have read the docs, especially the example 
-[config.yml](https://github.com/gdubicki/gitlabform/blob/main/config.yml).  
+[config.yml](https://github.com/gitlabform/gitlabform/blob/main/config.yml).  
 
 
 ### Problems
