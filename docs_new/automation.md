@@ -1,4 +1,36 @@
-# Automate configuring new GitLab projects with GitLabForm*
+# Automation
+
+## Running in an automated pipeline
+
+You can use GitLabForm as a part of your [CCA (Continuous Configuration Automation)](https://en.wikipedia.org/wiki/Continuous_configuration_automation) pipeline.
+
+You can run it with a schedule on `ALL_DEFINED` or `ALL` projects to unify your GitLab configuration, after it may have drifted
+from the configuration. For example you may allow the users to reconfigure projects during their working hours
+but automate cleaning up the drift each night.
+
+An example `.gitlab-ci.yml` for running GitLabForm using GitLab CI is provided here:
+```yaml
+image: ghcr.io/gdubicki/gitlabform:latest
+
+some_project:
+  only:
+    changes:
+    - config.yml
+  script: gitlabform my-group/subgroup/project
+
+my_whole_other_group:
+  only:
+    changes:
+    - other-config.yml
+  script: gitlabform -c other-config.yml my_whole_other_group
+```
+
+Note that as a standard best practice you should not put your GitLab access token in your `config.yml` (unless it is
+encrypted) for security reasons - please set it in the `GITLAB_TOKEN` environment variable instead.
+
+For GitLab CI a secure place to set it would be a [Protected Variable in the project configuration](https://docs.gitlab.com/ee/ci/variables/#protected-cicd-variables).
+
+## Running automatically for new projects
 
 (* - Why do we provide a how-to only for the new projects and not groups?
 
@@ -14,24 +46,23 @@ which makes GitLab perform HTTP POST request on - among other ones - these event
 * `project_rename` - we want this because after the rename project may get a new config from GitLabForm,
 * `project_transfer` - we want this because under a new group the project may get a new config from GitLabForm,
 
-## Method 1: GitLabForm on the same server as GitLab + adnanh/webhook app
+### Method 1: GitLabForm on the same server as GitLab + adnanh/webhook app
 
 In this method we assume that:
 
 * you have GitLabForm installed on the same server as your GitLab instance.
-  * its binary is here: `/opt/gitlabform/venv/bin/gitlabform`.
-  * its config is in `/opt/gitlabform/conf` - `config.yml` plus some files for the `files:` sections.
+    * its binary is here: `/opt/gitlabform/venv/bin/gitlabform`.
+    * its config is in `/opt/gitlabform/conf` - `config.yml` plus some files for the `files:` sections.
 
 
+#### Step 1: Configure GitLab system hooks
 
-### Step 1: Configure GitLab system hooks
-
-Got to https://gitlab.your-company.com/admin/hooks and create a hook with the URL http://127.0.0.1:9000/hooks/run-gitlabform .
+Go to https://gitlab.your-company.com/admin/hooks and create a hook with the URL http://127.0.0.1:9000/hooks/run-gitlabform .
 Uncheck all the extra triggers as the events that are interesting for us are among the standard ones.
 Leave "Enable SSL verification" unchecked as we are making calls over loopback, there is no need to encrypt the traffic
 here.
 
-### Step 2: Configure the webhook app to run GitLabForm
+#### Step 2: Configure the webhook app to run GitLabForm
 
 Get and install the [adnanh/webhook](https://github.com/adnanh/webhook) app.
 
@@ -66,7 +97,7 @@ Run webhook app with:
 
 (In the long term you should make this permanent with a systemd service/other way appropriate to your distro.)
 
-### Step 3: Test
+#### Step 3: Test
 
 Create a project with a config defined in your GitLabForm config and watch the output of webhook app.
 It should look like this:

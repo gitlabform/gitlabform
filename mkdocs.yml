@@ -1,0 +1,74 @@
+site_name: GitLabForm
+repo_url: https://github.com/gdubicki/gitlabform/
+docs_dir: docs_new
+strict: true
+
+nav:
+  - Home: index.md
+
+  - Quick Start: quick_start.md
+
+  - Requirements and Installation: installation.md
+
+  - Main Concepts: main_concepts.md
+
+  - Configuration Reference:
+    - Introduction: configuration_reference.md
+    - CI/CD Variables: reference/ci_cd_variables.md
+
+  - Running: running.md
+  - Automation: automation.md
+
+  - Contributing:
+    - Introduction: contrib/introduction.md
+    - Local Development: contrib/local_development.md
+    - Implementation Design: contrib/implementation_design.md
+    - Coding Guidelines: contrib/coding_guidelines.md
+    - Releases: contrib/releases.md
+
+  - Similar Apps: similar_apps.md
+
+  - Changelog: changelog.md
+  - Legal: legal.md
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+
+  - codehilite
+  - markdown.extensions.admonition #for !!! notice
+  - markdown.extensions.def_list
+  - pymdownx.superfences
+
+  - toc:
+      permalink: True
+      separator: "-"
+
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      options:
+        custom_icons:
+          - .overrides/.icons
+
+theme:
+  name: material
+  custom_dir: .overrides
+  logo: gitlabform-logo-favicon.png
+  favicon: gitlabform-logo-favicon.png
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep orange
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode

@@ -8,7 +8,7 @@ class GitLabProjectBadges(GitLabProjects):
             project_and_group_name,
             expected_codes=200,
         )
-        # according to the docs this endpoint returns also the group badges
+        # according to the docs_new this endpoint returns also the group badges
         # but we want only the project badges here
         return [badge for badge in badges if badge["kind"] == "project"]
 
