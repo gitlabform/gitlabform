@@ -755,8 +755,8 @@
 <h1 id="requirements-and-installation">Requirements and Installation<a class="headerlink" href="#requirements-and-installation" title="Permanent link">&para;</a></h1>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Docker or Python 3.6-3.10</li>
-<li>GitLab 11+</li>
+<li>Docker or Python 3.7-3.10</li>
+<li>GitLab 14.4+</li>
 <li>GitLab Premium (paid) for some features</li>
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
@@ -769,13 +769,13 @@
 <div class="highlight"><pre><span></span><code>pipx run gitlabform
 </code></pre></div></li>
 </ul>
-<p>Run the latest 2.* version with:</p>
+<p>Run the latest 3.* version with:</p>
 <ul>
 <li>Docker:
-<div class="highlight"><pre><span></span><code>docker run -it -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/config ghcr.io/gdubicki/gitlabform:2 gitlabform
+<div class="highlight"><pre><span></span><code>docker run -it -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/config ghcr.io/gdubicki/gitlabform:3 gitlabform
 </code></pre></div></li>
 <li><a href="https://github.com/pypa/pipx">pipx</a>:
-<div class="highlight"><pre><span></span><code>pipx run --spec <span class="s1">&#39;gitlabform&gt;=2,&lt;3&#39;</span> gitlabform
+<div class="highlight"><pre><span></span><code>pipx run --spec <span class="s1">&#39;gitlabform&gt;=3,&lt;4&#39;</span> gitlabform
 </code></pre></div></li>
 </ul>
 <p>See <a href="https://github.com/gdubicki/gitlabform/pkgs/container/gitlabform">this</a> for all the available Docker tags.</p>

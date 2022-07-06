@@ -842,7 +842,7 @@
 <p>The whole configuration for the app needs to be in a single YAML file of any name.</p>
 <h2 id="minimal-example">Minimal example<a class="headerlink" href="#minimal-example" title="Permanent link">&para;</a></h2>
 <p>Here is a minimal working configuration file example:
-<div class="highlight"><pre><span></span><code><span class="nt">config_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">config_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
 
 <span class="nt">gitlab</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://gitlab.yourcompany.com</span><span class="w"></span>
@@ -856,10 +856,10 @@
 </code></pre></div></p>
 <h2 id="mandatory-keys">Mandatory keys<a class="headerlink" href="#mandatory-keys" title="Permanent link">&para;</a></h2>
 <p>The configuration has to contain the following keys:
-<div class="highlight"><pre><span></span><code><span class="c1"># This key is required in configs for GitLabForm version 2.x.x</span><span class="w"></span>
-<span class="c1"># This ensures that when the application behavior changes</span><span class="w"></span>
-<span class="c1"># you won&#39;t apply unexpected configuration to your GitLab instance.</span><span class="w"></span>
-<span class="nt">config_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="c1"># This key is required in configs for GitLabForm version 3.x.x</span><span class="w"></span>
+<span class="c1"># This ensures that if the application behavior changes in a backward-incompatible way</span><span class="w"></span>
+<span class="c1"># you won&#39;t apply unwanted configuration to your GitLab instance.</span><span class="w"></span>
+<span class="nt">config_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
 
 <span class="c1"># GitLab API access config</span><span class="w"></span>
 <span class="nt">gitlab</span><span class="p">:</span><span class="w"></span>
