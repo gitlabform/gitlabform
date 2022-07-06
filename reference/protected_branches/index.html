@@ -257,8 +257,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../installation/" class="md-nav__link">
-        Requirements and Installation
+      <a href="../../requirements/" class="md-nav__link">
+        Requirements
       </a>
     </li>
   
@@ -272,8 +272,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../main_concepts/" class="md-nav__link">
-        Main Concepts
+      <a href="../../installation/" class="md-nav__link">
+        Installation
       </a>
     </li>
   
@@ -298,14 +298,14 @@
       
       
         <label class="md-nav__link" for="__nav_5">
-          Configuration Reference
+          Configuration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Configuration Reference" data-md-level="1">
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
         <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
-          Configuration Reference
+          Configuration
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -771,7 +771,7 @@
 </ul>
 </li>
 </ul>
-<p>Example 1:</p>
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"></span>
@@ -809,16 +809,20 @@
 <p class="admonition-title">Info</p>
 <p>Below syntax and features require GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
 </div>
-<p>In GitLab Premium instances you can also use the following extra keys under each branch:
-* <code>code_owner_approval_required</code> set to <code>true</code> or <code>false</code>,
-* <code>allowed_to_push</code>, <code>allowed_to_merge</code>, <code>allowed_to_unprotect</code> keys that can be set to the arrays containing any combination of:
-    * <code>user</code> set to username,
-    * <code>user_id</code> set to user id,
-    * <code>group</code> set to group name (path),
-    * <code>group_id</code> set to group id,
-    * <code>access_level</code> set to <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access level</a></p>
+<p>In GitLab Premium instances you can also use the following extra keys under each branch:</p>
+<ul>
+<li><code>code_owner_approval_required</code> set to <code>true</code> or <code>false</code>,</li>
+<li><code>allowed_to_push</code>, <code>allowed_to_merge</code>, <code>allowed_to_unprotect</code> keys that can be set to the arrays containing any combination of:<ul>
+<li><code>user</code> set to username,</li>
+<li><code>user_id</code> set to user id,</li>
+<li><code>group</code> set to group name (path),</li>
+<li><code>group_id</code> set to group id,</li>
+<li><code>access_level</code> set to <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access level</a></li>
+</ul>
+</li>
+</ul>
 <p>Note that you should NOT use both <code>*_access_level</code> and <code>allowed_to_*</code> keys - the result could be ambiguous, please choose the first or the second set.</p>
-<p>Example 2:</p>
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"></span>

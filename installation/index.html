@@ -13,7 +13,7 @@
     
     
       
-        <title>Requirements and Installation - GitLabForm</title>
+        <title>Installation - GitLabForm</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#requirements-and-installation" class="md-skip">
+        <a href="#installation" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Requirements and Installation
+              Installation
             
           </span>
         </div>
@@ -255,6 +255,21 @@
 
   
   
+  
+    <li class="md-nav__item">
+      <a href="../requirements/" class="md-nav__link">
+        Requirements
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
     
   
   
@@ -267,12 +282,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Requirements and Installation
+          Installation
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Requirements and Installation
+        Installation
       </a>
       
         
@@ -291,15 +306,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    Requirements
+  <a href="#run-without-installing" class="md-nav__link">
+    Run without installing
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
+  <a href="#really-install" class="md-nav__link">
+    Really install
   </a>
   
 </li>
@@ -308,21 +323,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../main_concepts/" class="md-nav__link">
-        Main Concepts
-      </a>
     </li>
   
 
@@ -344,14 +344,14 @@
       
       
         <label class="md-nav__link" for="__nav_5">
-          Configuration Reference
+          Configuration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Configuration Reference" data-md-level="1">
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
         <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
-          Configuration Reference
+          Configuration
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -721,15 +721,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    Requirements
+  <a href="#run-without-installing" class="md-nav__link">
+    Run without installing
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
+  <a href="#really-install" class="md-nav__link">
+    Really install
   </a>
   
 </li>
@@ -752,15 +752,10 @@
 
 
 
-<h1 id="requirements-and-installation">Requirements and Installation<a class="headerlink" href="#requirements-and-installation" title="Permanent link">&para;</a></h1>
-<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Docker or Python 3.7-3.10</li>
-<li>GitLab 14.4+</li>
-<li>GitLab Premium (paid) for some features</li>
-</ul>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<p>Run the latest stable version with:</p>
+<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
+<h2 id="run-without-installing">Run without installing<a class="headerlink" href="#run-without-installing" title="Permanent link">&para;</a></h2>
+<p>Note: you <strong>don't</strong> have to install the app to use it.</p>
+<p>You can just run the latest stable version with:</p>
 <ul>
 <li>Docker:
 <div class="highlight"><pre><span></span><code>docker run -it -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/config ghcr.io/gitlabform/gitlabform:latest gitlabform
@@ -769,7 +764,7 @@
 <div class="highlight"><pre><span></span><code>pipx run gitlabform
 </code></pre></div></li>
 </ul>
-<p>Run the latest 3.* version with:</p>
+<p>Similarly, you can run the latest 3.* version with:</p>
 <ul>
 <li>Docker:
 <div class="highlight"><pre><span></span><code>docker run -it -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/config ghcr.io/gitlabform/gitlabform:3 gitlabform
@@ -779,7 +774,8 @@
 </code></pre></div></li>
 </ul>
 <p>See <a href="https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform">this</a> for all the available Docker tags.</p>
-<p>Install with:</p>
+<h2 id="really-install">Really install<a class="headerlink" href="#really-install" title="Permanent link">&para;</a></h2>
+<p>If you <strong>do</strong> want to install the app you can do it with:</p>
 <ul>
 <li><a href="https://github.com/pypa/pipx">pipx</a> (recommended):
 <div class="highlight"><pre><span></span><code>pipx install gitlabform
@@ -803,7 +799,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../quick_start/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Quick Start" rel="prev">
+        <a href="../requirements/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Requirements" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -812,20 +808,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Quick Start
+              Requirements
             </div>
           </div>
         </a>
       
       
         
-        <a href="../main_concepts/" class="md-footer__link md-footer__link--next" aria-label="Next: Main Concepts" rel="next">
+        <a href="../configuration_reference/" class="md-footer__link md-footer__link--next" aria-label="Next: Introduction" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Main Concepts
+              Introduction
             </div>
           </div>
           <div class="md-footer__button md-icon">

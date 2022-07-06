@@ -308,8 +308,8 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/" class="md-nav__link">
-        Requirements and Installation
+      <a href="requirements/" class="md-nav__link">
+        Requirements
       </a>
     </li>
   
@@ -323,8 +323,8 @@
   
   
     <li class="md-nav__item">
-      <a href="main_concepts/" class="md-nav__link">
-        Main Concepts
+      <a href="installation/" class="md-nav__link">
+        Installation
       </a>
     </li>
   
@@ -347,14 +347,14 @@
       
       
         <label class="md-nav__link" for="__nav_5">
-          Configuration Reference
+          Configuration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Configuration Reference" data-md-level="1">
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
         <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
-          Configuration Reference
+          Configuration
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -773,7 +773,7 @@ using hierarchical configuration written in YAML.</p>
 <h2 id="why">Why?<a class="headerlink" href="#why" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
-<p><strong>Short and powerful syntax.</strong> A lot of features with a little amount of YAML thanks to the <a href="main_concepts/#hierarchical-merged-and-overridable-configuration">hierarchical configuration with inheritance, merging/overwriting and additivity</a> .
+<p><strong>Short and powerful syntax.</strong> A lot of features with a little amount of YAML thanks to the <a href="configuration_reference/#effective-configuration">hierarchical configuration with inheritance, merging/overwriting and additivity</a> .
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1"># configuration shared by all projects in this group...</span><span class="w"></span>
 <span class="w">  </span><span class="nt">a_group/*</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">merge_requests</span><span class="p">:</span><span class="w"></span>
@@ -787,7 +787,7 @@ using hierarchical configuration written in YAML.</p>
 </code></pre></div></p>
 </li>
 <li>
-<p><strong>Dynamic features.</strong> GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we <a href="main_concepts/#raw-parameters-passing">pass some parameters as-is to GitLab APIs with PUT/POST requests</a>.
+<p><strong>Dynamic features.</strong> GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we <a href="configuration_reference/#raw-parameters-passing">pass some parameters as-is to GitLab APIs with PUT/POST requests</a>.
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">a_group/a_project</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">project_settings</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="c1"># ALL the keys described at</span><span class="w"></span>
