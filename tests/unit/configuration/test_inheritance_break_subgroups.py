@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestInheritanceBreakSubgroups:
-    def test__inheritance_break__flag_set_at_subgroup_level__subgroup_inherits_nothing(
+    def test__inheritance_break__flag_set_at_subgroup_level__subgroup_doesnt_inherit_project_settings(
         self,
     ):
         config_yaml = """
@@ -32,6 +32,30 @@ class TestInheritanceBreakSubgroups:
         assert effective_config == {
             "project_settings": {"fizz": "buzz"},
         }
+
+    def test__inheritance_break__flag_set_at_subgroup_level__subgroup_inherits_nothing(
+        self,
+    ):
+        config_yaml = """
+            ---
+            projects_and_groups:
+              some_group/*:
+                project_settings:
+                  foo: bar
+        
+              some_group/some_subgroup/*:
+                inherit: false
+                project_settings:
+                  fizz: buzz
+            """
+
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_group(
+            "some_group/some_subgroup"
+        )
+
+        assert effective_config == {}
 
     @pytest.fixture
     def configuration_with_inheritance_break_set_at_subgroup_and_project_level(self):
