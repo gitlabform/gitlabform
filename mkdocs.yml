@@ -16,6 +16,7 @@ nav:
       - Deploy Keys: reference/deploy_keys.md
       - Files: reference/files.md
       - Group LDAP links: reference/group_ldap_links.md
+      - Integrations: reference/integrations.md
       - Members: reference/members.md
       - Merge Requests: reference/merge_requests.md
       - Project Settings: reference/project_settings.md

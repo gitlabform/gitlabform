@@ -5,22 +5,6 @@ projects_and_groups:
   # settings for ALL projects in 'my-group' group
   "my-group/*":
 
-
-    # these are now called "Integrations"
-    # names are as in the endpoints described at https://docs.gitlab.com/ee/api/integrations.html
-    # hashes under those name correspond to the parameters described for a given integration there
-    # except where integrations are deleted with `delete: true`
-    services:
-      slack:
-        delete: true
-      drone-ci:
-        delete: true
-      jira:
-        active: true
-        url: https://jira.yourcompany.com
-        username: foo
-        password: bar
-
     # key names here are hook URLs and values are as parameters described at
     # https://docs.gitlab.com/ee/api/projects.html#edit-project-hook
     # except where hooks are deleted with `delete: true`
