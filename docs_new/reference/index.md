@@ -1,4 +1,4 @@
-# Syntax Reference
+# Configuration
 
 The whole configuration for the app needs to be in a single YAML file of any name.
 

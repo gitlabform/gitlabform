@@ -7,12 +7,12 @@ strict: true
 edit_uri: edit/docs_website/docs_new/
 
 nav:
-  - 🏡 Home: index.md
+  - 🏗 Home: index.md
   - 💨 Quick Start: quick_start.md
   - 🫴 Requirements: requirements.md
   - 💾 Installation: installation.md
   - 📋 Configuration:
-    - Introduction: configuration_reference.md
+    - reference/index.md
     - Archive/unarchive: reference/archive_unarchive.md
     - Branches: reference/protected_branches.md
     - CI/CD Variables: reference/ci_cd_variables.md
@@ -27,7 +27,7 @@ nav:
   - 🤖 Automation: automation.md
   - 🗓 Changelog: changelog.md
   - 🙋 Contributing:
-      - Introduction: contrib/introduction.md
+      - contrib/index.md
       - Local Development: contrib/local_development.md
       - Implementation Design: contrib/implementation_design.md
       - Coding Guidelines: contrib/coding_guidelines.md
@@ -60,6 +60,9 @@ theme:
   custom_dir: .overrides
   logo: gitlabform-logo-favicon.png
   favicon: gitlabform-logo-favicon.png
+
+  features:
+    - navigation.indexes
 
   palette:
     - media: "(prefers-color-scheme: light)"

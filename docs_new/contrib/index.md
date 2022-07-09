@@ -1,3 +1,5 @@
+# Contributing
+
 All contributions are welcome!
 
 * ask questions, report issues, ask for features or write anything message to the app authors - use **Issues** for all
