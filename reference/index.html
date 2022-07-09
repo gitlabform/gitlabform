@@ -13,7 +13,7 @@
     
     
       
-        <title>Introduction - GitLabForm</title>
+        <title>Configuration reference - GitLabForm</title>
       
     
     
@@ -39,6 +39,16 @@
     <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  
+  
+
+
+  <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-SDZKWFBX4S"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){this.value&&gtag("event","search",{search_term:this.value})}),"undefined"!=typeof location$&&location$.subscribe(function(e){gtag("config","G-SDZKWFBX4S",{page_path:e.pathname})})})</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SDZKWFBX4S"></script>
+
 
     
     
@@ -64,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#syntax-reference" class="md-skip">
+        <a href="#configuration-reference" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Introduction
+              Configuration reference
             
           </span>
         </div>
@@ -228,7 +238,22 @@
   
     <li class="md-nav__item">
       <a href=".." class="md-nav__link">
-        🏡 Home
+        🏗 GitLabForm
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        ✨ Features
       </a>
     </li>
   
@@ -292,145 +317,55 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
       
       
       
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
       
-        <label class="md-nav__link" for="__nav_5">
-          📋 Configuration
-          <span class="md-nav__icon md-icon"></span>
-        </label>
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index md-nav__link--active">
+          <a href="./">📋 Configuration</a>
+          
+            <label for="__nav_6">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
       
       <nav class="md-nav" aria-label="📋 Configuration" data-md-level="1">
-        <label class="md-nav__title" for="__nav_5">
+        <label class="md-nav__title" for="__nav_6">
           <span class="md-nav__icon md-icon"></span>
           📋 Configuration
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
-            
-              
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Introduction
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        Introduction
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#minimal-working-config" class="md-nav__link">
-    Minimal working config
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mandatory-top-level-keys" class="md-nav__link">
-    Mandatory top-level keys
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#projects-and-groups-configuration" class="md-nav__link">
-    Projects and groups configuration
-  </a>
-  
-    <nav class="md-nav" aria-label="Projects and groups configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#configuration-hierarchy" class="md-nav__link">
-    Configuration hierarchy
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration-sections" class="md-nav__link">
-    Configuration sections
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#effective-configuration" class="md-nav__link">
-    Effective configuration
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skipping-sections" class="md-nav__link">
-    Skipping sections
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#breaking-inheritance" class="md-nav__link">
-    Breaking inheritance
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#raw-parameters-passing" class="md-nav__link">
-    Raw parameters passing
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-top-level-keys" class="md-nav__link">
-    Optional top-level keys
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
             
           
             
@@ -439,7 +374,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/archive_unarchive/" class="md-nav__link">
+      <a href="archive_unarchive/" class="md-nav__link">
         Archive/unarchive
       </a>
     </li>
@@ -453,7 +388,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/protected_branches/" class="md-nav__link">
+      <a href="protected_branches/" class="md-nav__link">
         Branches
       </a>
     </li>
@@ -467,7 +402,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/ci_cd_variables/" class="md-nav__link">
+      <a href="ci_cd_variables/" class="md-nav__link">
         CI/CD Variables
       </a>
     </li>
@@ -481,7 +416,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/deploy_keys/" class="md-nav__link">
+      <a href="deploy_keys/" class="md-nav__link">
         Deploy Keys
       </a>
     </li>
@@ -495,7 +430,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/files/" class="md-nav__link">
+      <a href="files/" class="md-nav__link">
         Files
       </a>
     </li>
@@ -509,7 +444,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/group_ldap_links/" class="md-nav__link">
+      <a href="group_ldap_links/" class="md-nav__link">
         Group LDAP links
       </a>
     </li>
@@ -523,7 +458,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/members/" class="md-nav__link">
+      <a href="members/" class="md-nav__link">
         Members
       </a>
     </li>
@@ -537,7 +472,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/merge_requests/" class="md-nav__link">
+      <a href="merge_requests/" class="md-nav__link">
         Merge Requests
       </a>
     </li>
@@ -551,7 +486,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/project_settings/" class="md-nav__link">
+      <a href="project_settings/" class="md-nav__link">
         Project Settings
       </a>
     </li>
@@ -565,7 +500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/push_rules/" class="md-nav__link">
+      <a href="push_rules/" class="md-nav__link">
         Push rules
       </a>
     </li>
@@ -631,39 +566,62 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../upgrade/" class="md-nav__link">
+        ⏫ Upgrading
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
       
       
       
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
       
-        <label class="md-nav__link" for="__nav_9">
-          🙋 Contributing
-          <span class="md-nav__icon md-icon"></span>
-        </label>
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../contrib/">🙋 Contributing</a>
+          
+            <label for="__nav_11">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
       
       <nav class="md-nav" aria-label="🙋 Contributing" data-md-level="1">
-        <label class="md-nav__title" for="__nav_9">
+        <label class="md-nav__title" for="__nav_11">
           <span class="md-nav__icon md-icon"></span>
           🙋 Contributing
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../contrib/introduction/" class="md-nav__link">
-        Introduction
-      </a>
-    </li>
-  
-
             
           
             
@@ -872,14 +830,14 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/gitlabform/gitlabform/edit/docs_website/docs_new/configuration_reference.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/reference/index.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="syntax-reference">Syntax Reference<a class="headerlink" href="#syntax-reference" title="Permanent link">&para;</a></h1>
-<p>The whole configuration for the app needs to be in a single YAML file of any name.</p>
+<h1 id="configuration-reference">Configuration reference<a class="headerlink" href="#configuration-reference" title="Permanent link">&para;</a></h1>
+<p>The whole configuration for the app needs to be in a single YAML file of any name. The default location used is the current working directory and the default name is <code>config.yml</code>.</p>
 <h2 id="minimal-working-config">Minimal working config<a class="headerlink" href="#minimal-working-config" title="Permanent link">&para;</a></h2>
 <p>Here is an example of a complete small config that actually does something:
 <div class="highlight"><pre><span></span><code><span class="nt">config_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
@@ -1108,7 +1066,7 @@ For the above configuration, for a project <code>group_1/project_1</code> the ef
       
       
         
-        <a href="../reference/archive_unarchive/" class="md-footer__link md-footer__link--next" aria-label="Next: Archive/unarchive" rel="next">
+        <a href="archive_unarchive/" class="md-footer__link md-footer__link--next" aria-label="Next: Archive/unarchive" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
@@ -1144,7 +1102,7 @@ For the above configuration, for a project <code>group_1/project_1</code> the ef
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.6c7ad80a.min.js"></script>
