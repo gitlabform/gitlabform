@@ -25,7 +25,7 @@ GitLabForm enables you to manage:
     * [Merge Requests approvals settings and approvers](reference/merge_requests.md) (**GitLab Premium (paid) only**),
     * Pipeline schedules,
     * [Push Rules](reference/push_rules.md) (**GitLab Premium (paid) only**),
-    * Integrations,
+    * [Integrations](reference/integrations.md),
     * [Settings](reference/project_settings.md),
     * [Tags protect/unprotect](reference/tags_protection.md),
 
