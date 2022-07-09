@@ -9,7 +9,7 @@ Steps outline:
 1. Update to the latest v2.x.x and fix all the deprecation warnings the application prints out during run. The syntax deprecated in v2 has been removed in v3.
 2. Stop v2 from running automatically (if you have such automation).
 3. In your config:
-* In v3 a bug that caused subgroup config to not inherit its group config has been fixed. If you do have configs for some groups and a config for their subgroups, then your effective configuration may change after the upgrade to v3. If you do not want that, or you are not sure, then please do the following to keep the old behavior: add `inherit: false` entry to all of such subgroups config.
+* In v3 a bug that caused subgroup config to not inherit its group config has been fixed. If you do have configs for some groups and a config for their subgroups, then your effective configuration may change after the upgrade to v3. If you do not want that, or you are not sure, then please do the following to keep the old behavior: add `inherit: false` entries to all of such subgroups config, under each configuration section:
 Example:
 ```yaml
 projects_and_groups:
@@ -20,15 +20,15 @@ projects_and_groups:
       visibility: internal
   
   some_group/subgroup/*:
-    # add the line below to keep the old behavior
-    inherit: false
     group_settings:
+      # add the line below to keep the old behavior
+      inherit: false
       project_creation_level: developer
         
   some_group/subgroup/subsubgroup/*:
-    # add the line below to keep the old behavior
-    inherit: false
     group_settings:
+      # add the line below to keep the old behavior
+      inherit: false
       visibility: private
 ```
 * Replace `services:` with `integrations:`,
