@@ -6,7 +6,6 @@ strict: true
 nav:
   - 🏗 GitLabForm: index.md
   - ✨ Features: features.md
-  - 💨 Quick Start: quick_start.md
   - 🫴 Requirements: requirements.md
   - 💾 Installation: installation.md
   - 📋 Configuration:
@@ -32,7 +31,6 @@ nav:
       - Coding Guidelines: contrib/coding_guidelines.md
       - Releases: contrib/releases.md
   - ⚖️ Similar Apps: similar_apps.md
-  - 🧑‍⚖️ Legal: legal.md
 
 markdown_extensions:
   - attr_list
