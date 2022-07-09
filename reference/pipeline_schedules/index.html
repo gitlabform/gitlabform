@@ -13,7 +13,7 @@
     
     
       
-        <title>Archive/unarchive - GitLabForm</title>
+        <title>Pipeline schedules - GitLabForm</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#archiveunarchive-project" class="md-skip">
+        <a href="#pipeline-schedules" class="md-skip">
           Skip to content
         </a>
       
@@ -106,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Archive/unarchive
+              Pipeline schedules
             
           </span>
         </div>
@@ -363,21 +363,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../archive_unarchive/" class="md-nav__link">
         Archive/unarchive
       </a>
-      
     </li>
   
 
@@ -499,11 +489,21 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../pipeline_schedules/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Pipeline schedules
       </a>
+      
     </li>
   
 
@@ -774,25 +774,42 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/reference/archive_unarchive.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/reference/pipeline_schedules.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="archiveunarchive-project">Archive/unarchive project<a class="headerlink" href="#archiveunarchive-project" title="Permanent link">&para;</a></h1>
-<p>This section purpose is to <a href="https://docs.gitlab.com/ee/user/project/settings/#archiving-a-project">archive a project</a> or revert this process - unarchive it.</p>
-<p>There can be only one key under this section - <code>archive</code> - set to <code>true</code> or <code>false</code>.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>To unarchive a project you must run GitLabForm with the <code>--include-archived-projects</code> cli parameter, as by default the app skips the archived projects when it gathers the list of projects to process.</p>
+<h1 id="pipeline-schedules">Pipeline schedules<a class="headerlink" href="#pipeline-schedules" title="Permanent link">&para;</a></h1>
+<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/pipelines/schedules.html">pipeline schedules</a>.</p>
+<p>The keys name are schedule descriptions and values are parameters described in the <a href="https://docs.gitlab.com/ee/api/pipeline_schedules.html#create-a-new-pipeline-schedule">Pipeline schedules API docs</a>, <strong>except the id</strong>.</p>
+<p>Additionally, under a <code>variables</code> key you can add the pipeline schedule variables. The syntax here is that key name is the variable name, the value is under <code>value</code> and the optional <code>variable_type</code> can be set to <code>env_var</code> (default) or <code>file</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If there are multiple pipeline schedules with the same description in a single project,
+this will cause those schedules to be DELETED and replaced with the one from the configuration.</p>
 </div>
-<p>Example:</p>
+<p>Example:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">project</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">archive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-</code></pre></div>
+<span class="w">    </span><span class="nt">schedules</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="s">&quot;Some</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
+<span class="w">        </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">MON-FRI&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">cron_timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;London&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">      </span><span class="s">&quot;Another</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">develop</span><span class="w"></span>
+<span class="w">        </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">variables</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">some_variable</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some_value</span><span class="w"></span>
+<span class="w">            </span><span class="nt">variable_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span><span class="w"></span>
+<span class="w">          </span><span class="nt">other_variable</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">another_value</span><span class="w"></span>
+<span class="w">      </span><span class="s">&quot;Obsolete</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</code></pre></div></p>
 
               
             </article>
@@ -808,7 +825,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Configuration reference" rel="prev">
+        <a href="../merge_requests/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Merge Requests" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -817,20 +834,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Configuration reference
+              Merge Requests
             </div>
           </div>
         </a>
       
       
         
-        <a href="../protected_branches/" class="md-footer__link md-footer__link--next" aria-label="Next: Branches" rel="next">
+        <a href="../project_settings/" class="md-footer__link md-footer__link--next" aria-label="Next: Project Settings" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Branches
+              Project Settings
             </div>
           </div>
           <div class="md-footer__button md-icon">
