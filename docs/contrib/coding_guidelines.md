@@ -1,4 +1,4 @@
-# General coding guidelines
+# Coding guidelines
 
 Please do:
 

@@ -2,14 +2,15 @@
 
 If you haven't done this before, please read the [configuration introduction](../reference/index.md) article first.
 
-It explains the "why"s of the two key design concepts of this app:
+It explains the "**why**"s of the two key design concepts of this app:
+
 * hierarchical configuration with inheritance, merging/overwriting and additivity,
 * raw parameters passing
 
 Please also read the general [coding guidelines](coding_guidelines.md) for the basics of how to create PRs,
-the expected style of your code etc. - the "general how"s.
+the expected style of your code etc. - the "**general how**"s.
 
-This article purpose is to explain "specific how"s - explain what is where in the code and how to add features
+This article purpose is to explain "**specific how**"s - explain what is where in the code and how to add features
 by example.
 
 ## Project Structure
@@ -17,7 +18,7 @@ by example.
 ### Packages
 
 * `gitlabform.*` and `gitlabform.processors.*` - contains the main app logic. It provides the CLI, parsing of the parameters,
-  uses below two packages to apply the config defined in `config.yml` to the requested set of projects.
+  uses below two packages to apply the configuration to the requested set of projects and groups.
 
 * `gitlabform.gitlab.*` - contains the GitLab API client code, grouped mostly by the GitLab API 
   [as documented at docs.gitlab.com](https://docs.gitlab.com/ee/api/api_resources.html).
@@ -64,7 +65,7 @@ the code in the processor classes (for example, in `BranchesProcessor`).
 
 If you want to **add support for a new config section** (= completely new feature), then you need to:
 
-0. (TODO: expand this sections) Consider writing a new processor using `MultipleEntitiesProcessor` class as a base.
+0. (TODO: expand this sections) Consider writing a new processor using `MultipleEntitiesProcessor` or `SingleEntityProcessor` class as a base.
 1. Create a new class `group_<new_config_section_name>_processor` (if it applies to the group settings) or 
 `<new_config_section_name>_processor` (if it applies to project settings) and implement two methods:
     - `_process_configuration` - which does the actual processing by calling the API and applying the changes in GitLab;
@@ -89,7 +90,7 @@ Sometimes there is some logic in these methods if:
     * some APIs return invalid HTTP error codes, like 404 instead of 400 - see `GitLabGroupLDAPLinks.add_ldap_group_link` as an example.
 
 **Note**: Some of the code here is **NOT used by the GitLabForm app**, but utilized by internal Egnyte
-applications that have not yet switched to the more standard `python-gitlab`.
+applications that have not (yet) switched to the more standard `python-gitlab`.
 
 #### Usage
 

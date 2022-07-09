@@ -49,7 +49,7 @@ class ConfigurationCore(ABC):
                         "This version of GitLabForm requires 'config_version: 3' entry in the config. "
                         "This ensures that if the application behavior changes in a backward-incompatible way,"
                         " you won't apply unwanted configuration to your GitLab instance.\n"
-                        "Please follow this guide to update your configuration: https://bit.ly/3ub1g5C\n",
+                        "Please follow this guide: https://gitlabform.github.io/gitlabform/upgrade/\n",
                         exit_code=EXIT_INVALID_INPUT,
                     )
 

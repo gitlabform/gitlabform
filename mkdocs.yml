@@ -1,31 +1,30 @@
 site_name: GitLabForm
 repo_url: https://github.com/gitlabform/gitlabform/
-docs_dir: docs_new
+docs_dir: docs
 strict: true
 
-# TODO: update it when docs are in main
-edit_uri: edit/docs_website/docs_new/
-
 nav:
-  - 🏗 Home: index.md
+  - 🏗 GitLabForm: index.md
+  - ✨ Features: features.md
   - 💨 Quick Start: quick_start.md
   - 🫴 Requirements: requirements.md
   - 💾 Installation: installation.md
   - 📋 Configuration:
-    - reference/index.md
-    - Archive/unarchive: reference/archive_unarchive.md
-    - Branches: reference/protected_branches.md
-    - CI/CD Variables: reference/ci_cd_variables.md
-    - Deploy Keys: reference/deploy_keys.md
-    - Files: reference/files.md
-    - Group LDAP links: reference/group_ldap_links.md
-    - Members: reference/members.md
-    - Merge Requests: reference/merge_requests.md
-    - Project Settings: reference/project_settings.md
-    - Push rules: reference/push_rules.md
+      - reference/index.md
+      - Archive/unarchive: reference/archive_unarchive.md
+      - Branches: reference/protected_branches.md
+      - CI/CD Variables: reference/ci_cd_variables.md
+      - Deploy Keys: reference/deploy_keys.md
+      - Files: reference/files.md
+      - Group LDAP links: reference/group_ldap_links.md
+      - Members: reference/members.md
+      - Merge Requests: reference/merge_requests.md
+      - Project Settings: reference/project_settings.md
+      - Push rules: reference/push_rules.md
   - 🏃 Running: running.md
   - 🤖 Automation: automation.md
   - 🗓 Changelog: changelog.md
+  - ⏫ Upgrading: upgrade.md
   - 🙋 Contributing:
       - contrib/index.md
       - Local Development: contrib/local_development.md
@@ -79,3 +78,8 @@ theme:
       toggle:
         icon: material/weather-night
         name: Switch to light mode
+
+extra:
+  analytics:
+    provider: google
+    property: G-SDZKWFBX4S
