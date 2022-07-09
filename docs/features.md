@@ -23,7 +23,7 @@ GitLabForm enables you to manage:
     * Members (users) {add/remove user, change access level, optional enforce},
     * Members (groups) {share/unshare with group, change access level, optional enforce},
     * [Merge Requests approvals settings and approvers](reference/merge_requests.md) (**GitLab Premium (paid) only**),
-    * Pipeline schedules,
+    * [Pipeline schedules](reference/pipeline_schedules.md),
     * [Push Rules](reference/push_rules.md) (**GitLab Premium (paid) only**),
     * [Integrations](reference/integrations.md),
     * [Settings](reference/project_settings.md),
