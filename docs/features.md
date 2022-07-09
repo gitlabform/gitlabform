@@ -27,7 +27,7 @@ GitLabForm enables you to manage:
     * [Push Rules](reference/push_rules.md) (**GitLab Premium (paid) only**),
     * Integrations,
     * [Settings](reference/project_settings.md),
-    * Tags {protect/unprotect},
+    * [Tags protect/unprotect](reference/tags_protection.md),
 
 ...for:
 

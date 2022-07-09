@@ -5,12 +5,6 @@ projects_and_groups:
   # settings for ALL projects in 'my-group' group
   "my-group/*":
 
-    # keys names are tags names and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/protected_tags.html
-    tags:
-      "v*":
-        protected: true
-        create_access_level: maintainer
 
     # these are now called "Integrations"
     # names are as in the endpoints described at https://docs.gitlab.com/ee/api/integrations.html
