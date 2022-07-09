@@ -2,11 +2,11 @@
 
 ## 3.0.0
 
-This is a major new version with some backward incompatibility. Please follow [the upgrade guide](https://bit.ly/3ub1g5C) for a fast and safe upgrade.
+This is a major new version with some backward incompatibility. Please follow [the upgrade guide](https://gitlabform.github.io/gitlabform/upgrade/) for a fast and safe upgrade.
 
 New features/bugfixes:
 
-* **Subgroups now _do_ inherit the settings from their groups.** It should have worked like this already, but it did not because of a [bug #372](https://github.com/gitlabform/gitlabform/issues/372) fixed in [PR #385](https://github.com/gitlabform/gitlabform/pull/385). (Please use `inherit: false` to keep the old behavior. See [the upgrade guide](https://bit.ly/3ub1g5C) for more info.),
+* **Subgroups now _do_ inherit the settings from their groups.** It should have worked like this already, but it did not because of a [bug #372](https://github.com/gitlabform/gitlabform/issues/372) fixed in [PR #385](https://github.com/gitlabform/gitlabform/pull/385). (Please use `inherit: false` to keep the old behavior. See [the upgrade guide](https://gitlabform.github.io/gitlabform/upgrade/) for more info.),
 * **Shorter and easier to read errors** (full stacktrace shown only when `--debug` is enabled),
 
 Backward-incompatible maintenance changes:

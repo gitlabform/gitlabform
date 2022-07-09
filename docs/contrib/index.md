@@ -16,9 +16,7 @@ and should be very common sense ones.
 
 ### Questions
 
-Before asking a question please make sure that you have read the docs, especially the example 
-[config.yml](https://github.com/gitlabform/gitlabform/blob/main/config.yml).  
-
+Before asking a question please make sure that you have read these docs.
 
 ### Problems
 
@@ -41,3 +39,7 @@ Please note that although we do accept feature requests we do not promise to ful
 
 However, it's still worth creating an issue for this as it shows interest in given feature and that may be taken
 into account by both existing app authors and new contributors when planning to implement something new.
+
+## Pull Requests
+
+Please read the other articles about contributing for more info about this.

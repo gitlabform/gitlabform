@@ -1,6 +1,6 @@
-# Configuration
+# Configuration reference
 
-The whole configuration for the app needs to be in a single YAML file of any name.
+The whole configuration for the app needs to be in a single YAML file of any name. The default location used is the current working directory and the default name is `config.yml`.
 
 ## Minimal working config
 

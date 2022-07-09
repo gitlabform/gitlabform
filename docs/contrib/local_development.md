@@ -1,6 +1,6 @@
 # Local Development
 
-## Development environment setup
+## Environment setup
 
 1. Create virtualenv with Python 3, for example in `venv` dir which is in `.gitignore` and activate it:
 ```
