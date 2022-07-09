@@ -40,37 +40,6 @@ projects_and_groups:
     hooks:
       skip: true # this will skip whole hooks config *section* for this project, although it is set on group level
 
-    # this is for adding/changing/deleting pipeline schedules
-    #
-    # keys names are schedule descriptions and values are parameters described at
-    # https://docs.gitlab.com/ee/api/pipeline_schedules.html
-    #
-    # note: if there multiple pipeline schedules with the same description in GitLab project, corresponding entry
-    # will cause those schedules to be DELETED and replaced with the one from the configuration
-    # if there is exactly one schedule with the corresponding description, only parameters provided in the configuration
-    # will be updated
-    #
-    # timezone defaults to 'UTC', valid values must be supported by ActiveSupport::TimeZone and can be taken e.g.
-    # from https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html
-    schedules:
-      "Some schedule":
-        ref: main
-        cron: "0 * * * MON-FRI"
-        cron_timezone: "London"
-        active: false
-      "Another schedule":
-        ref: develop
-        cron: "0 * * * *"
-        variables:
-          some_variable:
-            value: some_value
-            variable_type: file # optional parameter, defaults to 'env_var'
-          other_variable:
-            value: another_value
-      # this one will be deleted if exists
-      "Obsolete schedule":
-        delete: true
-
     # key names here are just labels,
     # values are as parameters described at
     # https://docs.gitlab.com/ee/api/project_badges.html#add-a-badge-to-a-project
