@@ -20,6 +20,7 @@ nav:
       - Merge Requests: reference/merge_requests.md
       - Project Settings: reference/project_settings.md
       - Push rules: reference/push_rules.md
+      - Tags protection: reference/tags_protection.md
   - 🏃 Running: running.md
   - 🤖 Automation: automation.md
   - 🗓 Changelog: changelog.md
