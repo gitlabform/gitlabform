@@ -81,8 +81,3 @@ theme:
       toggle:
         icon: material/weather-night
         name: Switch to light mode
-
-extra:
-  analytics:
-    provider: google
-    property: G-SDZKWFBX4S
