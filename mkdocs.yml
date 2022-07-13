@@ -23,6 +23,7 @@ nav:
       - Project Settings: reference/project_settings.md
       - Push rules: reference/push_rules.md
       - Tags protection: reference/tags_protection.md
+      - Webhooks: reference/webhooks.md
   - 🏃 Running: running.md
   - 🤖 Automation: automation.md
   - 🗓 Changelog: changelog.md

@@ -5,17 +5,6 @@ projects_and_groups:
   # settings for ALL projects in 'my-group' group
   "my-group/*":
 
-    # key names here are hook URLs and values are as parameters described at
-    # https://docs.gitlab.com/ee/api/projects.html#edit-project-hook
-    # except where hooks are deleted with `delete: true`
-    hooks:
-      "http://host.domain.com/some-old-hook-you-want-to-remove-from-config":
-        delete: true
-      "http://127.0.0.1:5000/hooks/merge-request":
-        push_events: false # this is set to true by GitLab API by default
-        merge_requests_events: true
-        token: some_secret_auth_token
-
     # key names here are just labels,
     # values are as parameters described at
     # https://docs.gitlab.com/ee/api/group_badges.html#add-a-badge-to-a-group
@@ -27,7 +16,6 @@ projects_and_groups:
         name: "Group Badge"
         link_url: "https://gitlab.yourcompany.com/%{project_path}/-/commits/%{default_branch}"
         image_url: "https://gitlab.yourcompany.com/%{project_path}/badges/%{default_branch}/pipeline.svg"
-
 
   group-with-spammy-projects/*:
     # configures settings for the 'group-with-spammy-projects' group
