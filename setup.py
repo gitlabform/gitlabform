@@ -17,13 +17,13 @@ def get_version_file_path():
 setup(
     name="gitlabform",
     version=open(get_version_file_path()).read(),
-    description='Specialized "configuration as a code" tool for GitLab projects, groups and more'
+    description='🏗 Specialized "configuration as a code" tool for GitLab projects, groups and more'
     " using hierarchical configuration written in YAML",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://gitlabform.github.io/gitlabform",
     author="Greg Dubicki and Contributors",
-    keywords=["gitlab", "configuration-as-code"],
+    keywords=["cli", "yaml", "gitlab", "configuration-as-code"],
     classifiers=[
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
