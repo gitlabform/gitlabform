@@ -17,12 +17,6 @@ projects_and_groups:
         link_url: "https://gitlab.yourcompany.com/%{project_path}/-/commits/%{default_branch}"
         image_url: "https://gitlab.yourcompany.com/%{project_path}/badges/%{default_branch}/pipeline.svg"
 
-  group-with-spammy-projects/*:
-    # configures settings for the 'group-with-spammy-projects' group
-    group_settings:
-      # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
-      emails_disabled: true
-
   # settings specific to 'my-group/my-project1' project
   "my-group/my-project1":
     hooks:
