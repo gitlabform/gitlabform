@@ -3,7 +3,7 @@
 GitLabForm enables you to manage:
 
 * Group:
-    * Badges,
+    * [Badges](reference/badges.md#group-badges),
     * [Members (users) {add/remove user, change access level, optional enforce}](reference/members.md#group-members),
     * [Members (groups) {share/unshare with group, change access level, optional enforce}](reference/members.md#group-members),
     * [Members using LDAP Group Links](reference/group_ldap_links.md) (**GitLab Premium (paid) only**),
@@ -12,7 +12,7 @@ GitLabForm enables you to manage:
 
 * Project:
     * [Archive/unarchive](reference/archive_unarchive.md),
-    * Badges,
+    * [Badges](reference/badges.md#project-badges)
     * [CI/CD variables](reference/ci_cd_variables.md#project-cicd-variables),
     * [Protected branches](reference/protected_branches.md):
         * access levels (roles) allowed to push/merge/unprotect, allow force push flag,
