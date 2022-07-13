@@ -1,4 +1,6 @@
-# Project Settings
+# Settings
+
+## Project Settings
 
 This section purpose is to manage the [project settings](https://docs.gitlab.com/ee/user/project/settings/).
 
@@ -32,4 +34,21 @@ projects_and_groups:
         name_regex_delete: ".*"
         name_regex_keep: ".*-main"
       # (...)
+```
+
+## Group Settings
+
+This section purpose is to manage the [group settings](https://docs.gitlab.com/ee/user/group/).
+
+The settings should be as documented at GitLab's [Groups API docs](https://docs.gitlab.com/ee/api/groups.html#update-group), **except the id**.
+
+You can provide any number of the settings from there - if you don't provide a setting then it will be not changed.
+
+```yaml
+projects_and_groups:
+  group_1/*:
+    # configures settings for the 'group-with-spammy-projects' group
+    group_settings:
+      # keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group
+      emails_disabled: true
 ```

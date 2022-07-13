@@ -20,8 +20,8 @@ nav:
       - Members: reference/members.md
       - Merge Requests: reference/merge_requests.md
       - Pipeline schedules: reference/pipeline_schedules.md
-      - Project Settings: reference/project_settings.md
       - Push rules: reference/push_rules.md
+      - Settings: reference/settings.md
       - Tags protection: reference/tags_protection.md
       - Webhooks: reference/webhooks.md
   - 🏃 Running: running.md

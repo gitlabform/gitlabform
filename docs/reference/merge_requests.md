@@ -18,7 +18,7 @@ The `remove_other_approval_rules` key is optional and if it is set to `true` the
 
 !!! note
 
-    Some Merge Requests-related settings are also set in the [project settings](project_settings.md).
+    Some Merge Requests-related settings are also set in the [project settings](settings.md#project-settings).
 
 Example:
 

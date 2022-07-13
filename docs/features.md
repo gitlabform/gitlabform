@@ -8,7 +8,7 @@ GitLabForm enables you to manage:
     * [Members (groups) {share/unshare with group, change access level, optional enforce}](reference/members.md#group-members),
     * [Members using LDAP Group Links](reference/group_ldap_links.md) (**GitLab Premium (paid) only**),
     * [CI/CD variables](reference/ci_cd_variables.md#group-cicd-variables),
-    * Settings,
+    * [Settings](reference/settings.md#group-settings),
 
 * Project:
     * [Archive/unarchive](reference/archive_unarchive.md),
@@ -26,7 +26,7 @@ GitLabForm enables you to manage:
     * [Pipeline schedules](reference/pipeline_schedules.md),
     * [Push Rules](reference/push_rules.md) (**GitLab Premium (paid) only**),
     * [Integrations](reference/integrations.md),
-    * [Settings](reference/project_settings.md),
+    * [Settings](reference/settings.md#project-settings),
     * [Tags protect/unprotect](reference/tags_protection.md),
 
 ...for:
