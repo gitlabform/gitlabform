@@ -19,7 +19,7 @@ GitLabForm enables you to manage:
         * users/groups allowed to push/merge/unprotect, code owner approval required flag (**GitLab Premium (paid) only**),
     * [Deploy keys](reference/deploy_keys.md),
     * [Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!)](reference/files.md),
-    * Hooks,
+    * [Webhooks](reference/webhooks.md),
     * [Members (users) {add/remove user, change access level, optional enforce}](reference/members.md#project-members),
     * [Members (groups) {share/unshare with group, change access level, optional enforce}](reference/members.md#project-members),
     * [Merge Requests approvals settings and approvers](reference/merge_requests.md) (**GitLab Premium (paid) only**),
