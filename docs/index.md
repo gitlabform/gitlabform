@@ -1,9 +1,3 @@
-!!! warning
-
-    This site is not finished yet. See [PR #370](https://github.com/gitlabform/gitlabform/pull/370) for more information about its status.
-
-    Until it is done, please see [the current app README](https://github.com/gitlabform/gitlabform/blob/main/README.md) and linked there articles for the up to date app docs.
-
 [![version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
 ![release date](https://img.shields.io/github/release-date/gitlabform/gitlabform)
 [![Downloads](https://pepy.tech/badge/gitlabform/month)](https://pepy.tech/project/gitlabform)
