@@ -3,6 +3,7 @@ from cli_ui import fatal
 from gitlabform import EXIT_INVALID_INPUT
 
 from gitlabform.gitlab import GitLab
+from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
@@ -16,30 +17,27 @@ class ResourceGroupProcessor(AbstractProcessor):
                 config_resource_group_name
             ]["process_mode"]
 
-            gitlab_resource_group = self.gitlab.get_specific_resource_group(
-                project_and_group, config_resource_group_name
-            )
+            try:
+                gitlab_resource_group = self.gitlab.get_specific_resource_group(
+                    project_and_group, config_resource_group_name
+                )
+            except NotFoundException:
+                raise Exception(
+                    f"Project is not configured to use resource group: {config_resource_group_name}.\n"
+                    f"Add the resource group in your project's .gitlab-ci.yml file.\n"
+                    f"For more information, visit https://docs.gitlab.com/ee/ci/resource_groups/#add-a-resource-group.",
+                )
 
-            if gitlab_resource_group:
-                # the project is configured to use the provided resource group
-                if config_process_mode != gitlab_resource_group["process_mode"]:
-                    # check the resource group process mode diff comparing config entity and gitlab entity
-                    response = self.gitlab.update_resource_group(
+            # compare the resource group process mode between the config entity and gitlab entity
+            if config_process_mode != gitlab_resource_group["process_mode"]:
+                try:
+                    self.gitlab.update_resource_group(
                         project_and_group,
                         config_resource_group_name,
                         {"process_mode": config_process_mode},
                     )
-                    # an invalid process mode will return an empty response
-                    if not response:
-                        fatal(
-                            f"process_mode does not have a valid value: {config_process_mode}\n",
-                            exit_code=EXIT_INVALID_INPUT,
-                        )
-                    verbose(
-                        f"Setting resource group process mode to {config_process_mode}"
+                except UnexpectedResponseException:
+                    raise Exception(
+                        f"process_mode does not have a valid value: {config_process_mode}"
                     )
-            else:
-                fatal(
-                    f"Project is not configured to use resource group: {config_resource_group_name}\n",
-                    exit_code=EXIT_INVALID_INPUT,
-                )
+                verbose(f"Setting resource group process mode to {config_process_mode}")
