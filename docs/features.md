@@ -28,6 +28,7 @@ GitLabForm enables you to manage:
     * [Integrations](reference/integrations.md),
     * [Settings](reference/settings.md#project-settings),
     * [Tags protect/unprotect](reference/tags_protection.md),
+    * [Resource group](reference/resource_group.md),
 
 ...for:
 
