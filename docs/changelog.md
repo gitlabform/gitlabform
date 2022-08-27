@@ -2,8 +2,10 @@
 
 ## 3.1.0
 
+* **Add support for Resource groups**. Implements [#341](https://github.com/gitlabform/gitlabform/issues/341). PR [#369](https://github.com/gitlabform/gitlabform/pull/369).
+* Fix Integrations documentation. PR [#402](https://github.com/gitlabform/gitlabform/pull/402).  
 
-Thanks to [@ep-linden](https://github.com/ep-linden) from [Elastic Path](https://www.elasticpath.com/) for this contribution!
+Thanks to [@ep-linden](https://github.com/ep-linden) from [Elastic Path](https://www.elasticpath.com/) and to [@L154x](https://github.com/L154x) for their contribution!
 
 ## 3.0.0
 
