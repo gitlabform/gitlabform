@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.0
+
+
+Thanks to [@ep-linden](https://github.com/ep-linden) from [Elastic Path](https://www.elasticpath.com/) for this contribution!
+
 ## 3.0.0
 
 This is a major new version with some backward incompatibility. Please follow [the upgrade guide](https://gitlabform.github.io/gitlabform/upgrade/) for a fast and safe upgrade.
