@@ -1270,7 +1270,11 @@
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
 <h2 id="310">3.1.0<a class="headerlink" href="#310" title="Permanent link">&para;</a></h2>
-<p>Thanks to <a href="https://github.com/ep-linden">@ep-linden</a> from <a href="https://www.elasticpath.com/">Elastic Path</a> for this contribution!</p>
+<ul>
+<li><strong>Add support for Resource groups</strong>. Implements <a href="https://github.com/gitlabform/gitlabform/issues/341">#341</a>. PR <a href="https://github.com/gitlabform/gitlabform/pull/369">#369</a>.</li>
+<li>Fix Integrations documentation. PR <a href="https://github.com/gitlabform/gitlabform/pull/402">#402</a>.  </li>
+</ul>
+<p>Thanks to <a href="https://github.com/ep-linden">@ep-linden</a> from <a href="https://www.elasticpath.com/">Elastic Path</a> and to <a href="https://github.com/L154x">@L154x</a> for their contribution!</p>
 <h2 id="300">3.0.0<a class="headerlink" href="#300" title="Permanent link">&para;</a></h2>
 <p>This is a major new version with some backward incompatibility. Please follow <a href="https://gitlabform.github.io/gitlabform/upgrade/">the upgrade guide</a> for a fast and safe upgrade.</p>
 <p>New features/bugfixes:</p>
@@ -1327,23 +1331,23 @@
 </ul>
 <p>Imagine you have a configuration like this:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*my-group/*</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*members</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*regular-developers</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
-<span class="w">    </span><span class="err">*</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*my-group/special-private-project</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*members</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*inherit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"> </span><span class="c1"># &lt;--- the new keyword</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*special-developers</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*users</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*john</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"></span>
+<span class="w">  </span><span class="nt">my-group/*</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">regular-developers</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+
+<span class="w">  </span><span class="nt">my-group/special-private-project</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">inherit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"> </span><span class="c1"># &lt;--- the new keyword</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">special-developers</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+<span class="w">      </span><span class="nt">users</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">john</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span><span class="w"></span>
 </code></pre></div>
 With the new <code>inherit: false</code> entry used here, the effective members for <code>my-group/special-private-project</code> project are ONLY the <code>special-developers</code> grup and <code>john</code> user.</p>
 <ul>
@@ -1391,40 +1395,40 @@ With the new <code>inherit: false</code> entry used here, the effective members 
 </ul>
 <p>✨ <strong>New</strong> ✨ config syntax example:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*foo/*</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="err">*</span><span class="c1"># below key now includes what used to be under </span><span class="w"></span>
-<span class="w">    </span><span class="err">*</span><span class="c1"># `group_shared_with` and `enforce_group_members` keys</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*group_members</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="err">*</span><span class="c1"># there are only up to 3 direct keys below</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*another-group</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="err">*</span><span class="c1"># below key&#39;s name been changed to the name used in projects `members`</span><span class="w"></span>
-<span class="w">    </span><span class="err">*</span><span class="c1"># for groups (and the same as in the API to share group with group)</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*users</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*my-user</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"> </span><span class="c1"># owner</span><span class="w"></span>
-<span class="w">    </span><span class="err">*</span><span class="c1"># this will enforce group-level users to be ONLY as defined above</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">foo/*</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># below key now includes what used to be under </span><span class="w"></span>
+<span class="w">    </span><span class="c1"># `group_shared_with` and `enforce_group_members` keys</span><span class="w"></span>
+<span class="w">    </span><span class="nt">group_members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># there are only up to 3 direct keys below</span><span class="w"></span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">another-group</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># below key&#39;s name been changed to the name used in projects `members`</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># for groups (and the same as in the API to share group with group)</span><span class="w"></span>
+<span class="w">          </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">      </span><span class="nt">users</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">my-user</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"> </span><span class="c1"># owner</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># this will enforce group-level users to be ONLY as defined above</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 
-<span class="w">    </span><span class="err">*</span><span class="c1"># this will make the projects in `foo` group not contain any **direct** users or groups other</span><span class="w"></span>
-<span class="w">    </span><span class="err">*</span><span class="c1"># (so it will make it contain only the ones inherited from the group `foo`)</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*members</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># this will make the projects in `foo` group not contain any **direct** users or groups other</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># (so it will make it contain only the ones inherited from the group `foo`)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 </code></pre></div>
 The 🏚 old and deprecated 🏚 syntax for a similar* config would be:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*foo/*</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*group_shared_with</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*another-group</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*group_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*group_members</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*my-user</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"> </span><span class="c1"># owner</span><span class="w"></span>
-<span class="w">    </span><span class="nt">*enforce_group_members</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="nt">foo/*</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">group_shared_with</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">another-group</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">group_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">    </span><span class="nt">group_members</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">my-user</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w"> </span><span class="c1"># owner</span><span class="w"></span>
+<span class="w">    </span><span class="nt">enforce_group_members</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 
-<span class="w">    </span><span class="err">*</span><span class="c1"># !!! * - there was no enforce project members support before v2.8.0 !!!</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># !!! * - there was no enforce project members support before v2.8.0 !!!</span><span class="w"></span>
 </code></pre></div>
 The old syntax works but will generate warnings. Support for it will be removed in one the future major GitLabForm versions.</p>
 <h2 id="271">2.7.1<a class="headerlink" href="#271" title="Permanent link">&para;</a></h2>
@@ -1534,7 +1538,7 @@ The old syntax works but will generate warnings. Support for it will be removed 
 <h2 id="202">2.0.2<a class="headerlink" href="#202" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Fixed issue with <code>unprotect_branch_new_api</code>. Fixes <a href="https://github.com/gitlabform/gitlabform/issues/219">#219</a>
-    *(update: later it turned out that it was not really fixed in 2.0.2 but in 2.0.5 instead)</li>
+    (update: later it turned out that it was not really fixed in 2.0.2 but in 2.0.5 instead)</li>
 </ul>
 <h2 id="201">2.0.1<a class="headerlink" href="#201" title="Permanent link">&para;</a></h2>
 <ul>
