@@ -59,23 +59,23 @@ Thanks to the contributors of this release: [@ep-linden](https://github.com/ep-l
 Imagine you have a configuration like this:
 ```yaml
 projects_and_groups:
-    *my-group/*:
-    *members:
-    *enforce: true
-    *groups:
-    *regular-developers:
-    *group_access: developer
-    *
-    *my-group/special-private-project:
-    *members:
-    *inherit: false # <--- the new keyword
-    *enforce: true
-    *groups:
-    *special-developers:
-    *group_access: developer
-    *users:
-    *john:
-    *access_level: maintainer
+  my-group/*:
+    members:
+      enforce: true
+      groups:
+        regular-developers:
+          group_access: developer
+
+  my-group/special-private-project:
+    members:
+      inherit: false # <--- the new keyword
+      enforce: true
+      groups:
+        special-developers:
+          group_access: developer
+      users:
+        john:
+          access_level: maintainer
 ```
 With the new `inherit: false` entry used here, the effective members for `my-group/special-private-project` project are ONLY the `special-developers` grup and `john` user.
 
@@ -127,41 +127,41 @@ Big thanks to the [Elastic Path](https://www.elasticpath.com/) team for their co
 ✨ **New** ✨ config syntax example:
 ```yaml
 projects_and_groups:
-    *foo/*:
-    *# below key now includes what used to be under 
-    *# `group_shared_with` and `enforce_group_members` keys
-    *group_members:
-    *# there are only up to 3 direct keys below
-    *groups:
-    *another-group:
-    *# below key's name been changed to the name used in projects `members`
-    *# for groups (and the same as in the API to share group with group)
-    *group_access: 30
-    *users:
-    *my-user:
-    *access_level: 50 # owner
-    *# this will enforce group-level users to be ONLY as defined above
-    *enforce: true
+  foo/*:
+    # below key now includes what used to be under 
+    # `group_shared_with` and `enforce_group_members` keys
+    group_members:
+      # there are only up to 3 direct keys below
+      groups:
+        another-group:
+          # below key's name been changed to the name used in projects `members`
+          # for groups (and the same as in the API to share group with group)
+          group_access: 30
+      users:
+        my-user:
+          access_level: 50 # owner
+      # this will enforce group-level users to be ONLY as defined above
+      enforce: true
 
-    *# this will make the projects in `foo` group not contain any **direct** users or groups other
-    *# (so it will make it contain only the ones inherited from the group `foo`)
-    *members:
-    *enforce: true
+    # this will make the projects in `foo` group not contain any **direct** users or groups other
+    # (so it will make it contain only the ones inherited from the group `foo`)
+    members:
+      enforce: true
 ```
 The 🏚 old and deprecated 🏚 syntax for a similar* config would be:
 ```yaml
 projects_and_groups:
-    *foo/*:
-    *group_shared_with:
-    *groups:
-    *another-group:
-    *group_access_level: 30
-    *group_members:
-    *my-user:
-    *access_level: 50 # owner
-    *enforce_group_members: true
+  foo/*:
+    group_shared_with:
+      groups:
+        another-group:
+          group_access_level: 30
+    group_members:
+      my-user:
+        access_level: 50 # owner
+    enforce_group_members: true
 
-    *# !!! * - there was no enforce project members support before v2.8.0 !!!
+    # !!! * - there was no enforce project members support before v2.8.0 !!!
 ```
 The old syntax works but will generate warnings. Support for it will be removed in one the future major GitLabForm versions.
 
@@ -268,7 +268,7 @@ Thanks to [@Pigueiras](https://github.com/Pigueiras) for his contribution!
 ## 2.0.2
 
 * Fixed issue with `unprotect_branch_new_api`. Fixes [#219](https://github.com/gitlabform/gitlabform/issues/219)
-    *(update: later it turned out that it was not really fixed in 2.0.2 but in 2.0.5 instead)
+    (update: later it turned out that it was not really fixed in 2.0.2 but in 2.0.5 instead)
 
 ## 2.0.1
 
