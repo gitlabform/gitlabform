@@ -35,7 +35,7 @@ class TestResourceGroups:
         update_resource_group_config = f"""
         projects_and_groups:
           {group_and_project}:
-            resource_group:
+            resource_groups:
               production:
                 process_mode: newest_first
             """

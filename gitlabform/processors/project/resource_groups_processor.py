@@ -1,19 +1,17 @@
 from cli_ui import debug as verbose
-from cli_ui import fatal
-from gitlabform import EXIT_INVALID_INPUT
 
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
-class ResourceGroupProcessor(AbstractProcessor):
+class ResourceGroupsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("resource_group", gitlab)
+        super().__init__("resource_groups", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-        for config_resource_group_name in configuration["resource_group"]:
-            config_process_mode = configuration["resource_group"][
+        for config_resource_group_name in configuration["resource_groups"]:
+            config_process_mode = configuration["resource_groups"][
                 config_resource_group_name
             ]["process_mode"]
 

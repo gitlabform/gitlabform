@@ -14,7 +14,7 @@ from gitlabform.gitlab.project_badges import GitLabProjectBadges
 from gitlabform.gitlab.project_deploy_keys import GitLabProjectDeployKeys
 from gitlabform.gitlab.variables import GitLabVariables
 from gitlabform.gitlab.repositories import GitLabRepositories
-from gitlabform.gitlab.resource_group import GitLabResourceGroup
+from gitlabform.gitlab.resource_groups import GitLabResourceGroups
 from gitlabform.gitlab.schedules import GitLabPipelineSchedules
 from gitlabform.gitlab.integrations import GitLabIntegrations
 from gitlabform.gitlab.tags import GitLabTags
@@ -51,7 +51,7 @@ class GitLab(
     GitLabCommits,
     GitLabMergeRequests,
     GitLabRepositories,
-    GitLabResourceGroup,
+    GitLabResourceGroups,
     GitLabIntegrations,
     GitLabTags,
     GitLabGroupLDAPLinks,
