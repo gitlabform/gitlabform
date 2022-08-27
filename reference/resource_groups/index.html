@@ -13,7 +13,7 @@
     
     
       
-        <title>Resource group - GitLabForm</title>
+        <title>Resource groups - GitLabForm</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#resource-group" class="md-skip">
+        <a href="#resource-groups" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Resource group
+              Resource groups
             
           </span>
         </div>
@@ -539,12 +539,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Resource group
+          Resource groups
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Resource group
+        Resource groups
       </a>
       
         
@@ -872,17 +872,16 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/reference/resource_group.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/reference/resource_groups.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="resource-group">Resource Group<a class="headerlink" href="#resource-group" title="Permanent link">&para;</a></h1>
+<h1 id="resource-groups">Resource Groups<a class="headerlink" href="#resource-groups" title="Permanent link">&para;</a></h1>
 <h2 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">&para;</a></h2>
 <p>A resource group must exist before the process mode can be updated. </p>
-<p>Add a resource group to a project by configuring it in your project's <code>gitlab-ci.yml</code> file. For more information, visit
-https://docs.gitlab.com/ee/ci/resource_groups/#add-a-resource-group.</p>
+<p>Add a resource group to a project by configuring it in your project's <code>gitlab-ci.yml</code> file. For more information, visit <a href="https://docs.gitlab.com/ee/ci/resource_groups/#add-a-resource-group">the appropriate GitLab's docs</a>.</p>
 <h2 id="update-process-mode">Update Process Mode<a class="headerlink" href="#update-process-mode" title="Permanent link">&para;</a></h2>
 <p>This section's purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/resource_groups/#process-modes">resource group process modes</a>.</p>
 <p>The key names are the resource group names associated with the project.</p>
@@ -891,7 +890,7 @@ modes defined <a href="https://docs.gitlab.com/ee/ci/resource_groups/#change-the
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">resource_group</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">resource_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">staging</span><span class="p">:</span><span class="w"> </span>
 <span class="w">        </span><span class="nt">process_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oldest_first</span><span class="w"></span>
 <span class="w">      </span><span class="nt">production</span><span class="p">:</span><span class="w"> </span>
