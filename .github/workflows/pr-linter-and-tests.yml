@@ -105,6 +105,9 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          override_pr: ${{ github.event.number }}
+          override_commit: ${{ github.event.pull_request.head.sha }}
 
   security-tests:
 
