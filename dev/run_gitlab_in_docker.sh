@@ -86,7 +86,7 @@ echo ''
 if [[ -n "${GITLAB_EE_LICENSE:-}" ]] ; then
   cecho b 'Loading GitLab license...'
   echo "{\"license\":\"$GITLAB_EE_LICENSE\"}" > $repo_root_directory/gitlab-license.json
-  curl -s -X POST -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" -H "Content-Type: application/json" -F @$repo_root_directory/gitlab-license.json http://localhost/api/v4/license
+  curl -s -X POST -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" -H "Content-Type: application/json" -d @$repo_root_directory/gitlab-license.json http://localhost/api/v4/license
 
   cecho b 'GitLab license (plan, is expired?):'
   curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/license | jq '.plan, .expired'
