@@ -1,16 +1,32 @@
-name: Linter and tests
+name: Linter and tests (PRs)
 
 on:
-  push:
+  pull_request_target:
     branches:
       - main
 
 jobs:
+
+  approve:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Approve
+        run: echo For security reasons, all pull requests need to be approved first before running any automated CI.
+
   black-formatting:
     runs-on: ubuntu-latest
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Black Code Formatter
         uses: gdubicki/black-action@main
         with:
@@ -18,13 +34,22 @@ jobs:
 
   acceptance-tests:
     runs-on: ubuntu-latest
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
     strategy:
       max-parallel: 5
       matrix:
         python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -43,8 +68,16 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          override_pr: ${{ github.event.number }}
+          override_commit: ${{ github.event.pull_request.head.sha }}
 
   unit-tests:
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
@@ -52,7 +85,11 @@ jobs:
         python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -70,9 +107,18 @@ jobs:
           fail_ci_if_error: true
 
   security-tests:
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
@@ -86,6 +132,11 @@ jobs:
           bandit -r gitlabform
 
   smoke-tests:
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
@@ -93,7 +144,11 @@ jobs:
         python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
