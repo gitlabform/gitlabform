@@ -1036,7 +1036,7 @@ against a disposable GitLab instance running as a Docker container OR use your o
 <h3 id="running-acceptance-tests-using-gitlab-instance-in-docker">Running acceptance tests using GitLab instance in Docker<a class="headerlink" href="#running-acceptance-tests-using-gitlab-instance-in-docker" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p>(optional) If you have it, put your GitLab license into the <code>Gitlab.gitlab-license</code> file. According to the license
+<p>(optional) If you have it, put your GitLab license in its base64-encoded form into the <code>$GITLAB_EE_LICENSE</code> environment variable. According to the license
 agreement (as of now and IANAL) you are allowed to use it for testing and development purposes such as this. This will
 make the following script use it to be able to test Premium (paid) features. Of course this license will not leave your
 machine.</p>
