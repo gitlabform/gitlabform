@@ -102,6 +102,11 @@ echo ''
 cecho b 'GitLab version:'
 curl -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/version
 echo ''
+if [[ -f Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
+  cecho b 'GitLab license:'
+  curl -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/license | jq ' .plan'
+  echo ''
+fi
 cecho b 'GitLab web UI URL (user: root, password: password)'
 echo 'http://localhost'
 echo ''
