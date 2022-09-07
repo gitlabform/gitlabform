@@ -49,24 +49,6 @@ if [[ -n $existing_gitlab_container_id ]] ; then
 fi
 
 gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'password'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;"
-if [[ -f Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
-
-  mkdir -p $repo_root_directory/config
-  rm -rf $repo_root_directory/config/*
-
-  if [[ -f Gitlab.gitlab-license ]]; then
-    cecho b "EE license file found - using it..."
-    cp Gitlab.gitlab-license $repo_root_directory/config/
-  else
-    cecho b "EE license env variable found - using it..."
-    echo "$GITLAB_EE_LICENSE" | base64 -d > $repo_root_directory/config/Gitlab.gitlab-license
-  fi
-
-  gitlab_omnibus_config="$gitlab_omnibus_config gitlab_rails['initial_license_file'] = '/etc/gitlab/Gitlab.gitlab-license';"
-  config_volume="--volume $repo_root_directory/config:/etc/gitlab"
-else
-  config_volume=""
-fi
 
 cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
@@ -77,7 +59,6 @@ container_id=$(docker run --detach \
     --name gitlab \
     --restart always \
     --volume "$repo_root_directory/dev/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
-    $config_volume \
     --health-cmd '/healthcheck-and-setup.sh' \
     --health-interval 2s \
     --health-timeout 2m \
@@ -100,8 +81,17 @@ echo "token-string-here123" > $repo_root_directory/gitlab_token.txt
 cecho b 'Starting GitLab complete!'
 echo ''
 cecho b 'GitLab version:'
-curl -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/version
+curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/version
 echo ''
+if [[ -n "${GITLAB_EE_LICENSE:-}" ]] ; then
+  cecho b 'Loading GitLab license...'
+  echo "{\"license\":\"$GITLAB_EE_LICENSE\"}" > $repo_root_directory/gitlab-license.json
+  curl -s -X POST -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" -H "Content-Type: application/json" -d @$repo_root_directory/gitlab-license.json http://localhost/api/v4/license >/dev/null 2>&1
+
+  cecho b 'GitLab license (plan, is expired?):'
+  curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/license | jq '.plan, .expired'
+  echo ''
+fi
 cecho b 'GitLab web UI URL (user: root, password: password)'
 echo 'http://localhost'
 echo ''
