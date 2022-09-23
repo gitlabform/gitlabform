@@ -52,4 +52,6 @@ class TestGroupSettings:
         run_gitlabform(edit_group_settings, group)
 
         settings = gitlab.get_group_settings(group)
-        assert settings["file_template_project_id"] == project_id
+        # the type returned by the API is int, but in the _get_project_id we return str,
+        # so we need a cast here
+        assert settings["file_template_project_id"] == int(project_id)
