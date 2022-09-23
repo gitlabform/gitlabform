@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1
+
+* Fixed error when passing the GitLab token in the config file with single or double quotes. Fixes [#364](https://github.com/gitlabform/gitlabform/issues/401), PR [#412](https://github.com/gitlabform/gitlabform/pull/412).
+
 ## 3.1.0
 
 * **Add support for Resource groups**. Implements [#341](https://github.com/gitlabform/gitlabform/issues/341). PR [#369](https://github.com/gitlabform/gitlabform/pull/369).
