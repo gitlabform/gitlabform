@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from gitlabform.gitlab import AccessLevel
@@ -219,3 +221,13 @@ def outsider_user(gitlab, group_and_project):
     yield user_obj.name
 
     gitlab.delete_user(None, user_id=user_obj.id)
+
+
+@pytest.fixture(scope="class")
+def token_from_env_var():
+    token = os.environ["GITLAB_TOKEN"]
+    del os.environ["GITLAB_TOKEN"]
+
+    yield token
+
+    os.environ["GITLAB_TOKEN"] = token
