@@ -4,6 +4,7 @@ from abc import ABC
 from copy import deepcopy
 from logging import debug
 from pathlib import Path
+from ruamel.yaml.scalarstring import ScalarString
 from types import SimpleNamespace
 
 from cli_ui import debug as verbose
@@ -141,7 +142,10 @@ class ConfigurationCore(ABC):
             else:
                 raise KeyNotFoundException
 
-        return current
+        if isinstance(current, ScalarString):
+            return str(current)
+        else:
+            return current
 
     def get_group_config(self, group) -> dict:
         pass
