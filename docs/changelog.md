@@ -2,7 +2,7 @@
 
 ## 3.1.1
 
-* Fixed error when passing the GitLab token in the config file with single or double quotes. Fixes [#364](https://github.com/gitlabform/gitlabform/issues/401), PR [#412](https://github.com/gitlabform/gitlabform/pull/412).
+* Fixed error when passing the GitLab token in the config file with single or double quotes. Fixes [#401](https://github.com/gitlabform/gitlabform/issues/401), PR [#412](https://github.com/gitlabform/gitlabform/pull/412).
 
 ## 3.1.0
 
