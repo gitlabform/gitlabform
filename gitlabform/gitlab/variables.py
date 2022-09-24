@@ -41,7 +41,11 @@ class GitLabVariables(GitLabProjects):
             expected_codes=[204, 404],
         )
 
-    def get_variable(self, project_and_group_name, variable_key):
-        return self._make_requests_to_api(
-            "projects/%s/variables/%s", (project_and_group_name, variable_key)
-        )["value"]
+    def get_variable(self, project_and_group_name, variable_key, environment_scope="*"):
+        if environment_scope == "*":
+            url = "projects/%s/variables/%s"
+        else:
+            url = f"projects/%s/variables/%s?filter[environment_scope]={environment_scope}"
+        return self._make_requests_to_api(url, (project_and_group_name, variable_key))[
+            "value"
+        ]

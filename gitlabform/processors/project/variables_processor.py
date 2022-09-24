@@ -7,7 +7,7 @@ import ez_yaml
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.util.difference_logger import hide
-from gitlabform.processors.defining_keys import Key, And
+from gitlabform.processors.defining_keys import Key, And, OptionalKey
 from gitlabform.processors.multiple_entities_processor import MultipleEntitiesProcessor
 
 
@@ -19,7 +19,7 @@ class VariablesProcessor(MultipleEntitiesProcessor):
             list_method_name="get_variables",
             add_method_name="post_variable",
             delete_method_name="delete_variable",
-            defining=Key("key"),
+            defining=And(Key("key"), OptionalKey("environment_scope")),
             required_to_create_or_update=And(Key("key"), Key("value")),
             edit_method_name="put_variable",
         )

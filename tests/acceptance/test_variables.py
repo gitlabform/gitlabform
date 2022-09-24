@@ -1,6 +1,6 @@
 import pytest
 
-from gitlabform.gitlab.core import UnexpectedResponseException
+from gitlabform.gitlab.core import UnexpectedResponseException, NotFoundException
 
 from tests.acceptance import run_gitlabform
 
@@ -38,8 +38,8 @@ class TestVariables:
 
         run_gitlabform(config_single_variable, group_and_project)
 
-        variables = gitlab.get_variables(group_and_project)
-        assert len(variables) == 1
+        variable = gitlab.get_variable(group_and_project, "FOO")
+        assert variable == "123"
 
     def test__delete_variable(self, gitlab, group_and_project):
         config_single_variable = f"""
@@ -55,9 +55,8 @@ class TestVariables:
 
         run_gitlabform(config_single_variable, group_and_project)
 
-        variables = gitlab.get_variables(group_and_project)
-        assert len(variables) == 1
-        assert variables[0]["value"] == "123"
+        variable = gitlab.get_variable(group_and_project, "FOO")
+        assert variable == "123"
 
         config_delete_variable = f"""
         projects_and_groups:
@@ -73,8 +72,8 @@ class TestVariables:
 
         run_gitlabform(config_delete_variable, group_and_project)
 
-        variables = gitlab.get_variables(group_and_project)
-        assert len(variables) == 0
+        with pytest.raises(NotFoundException):
+            gitlab.get_variable(group_and_project, "FOO")
 
     def test__reset_single_variable(self, gitlab, group_and_project):
         config_single_variable = f"""
@@ -90,9 +89,8 @@ class TestVariables:
 
         run_gitlabform(config_single_variable, group_and_project)
 
-        variables = gitlab.get_variables(group_and_project)
-        assert len(variables) == 1
-        assert variables[0]["value"] == "123"
+        variable = gitlab.get_variable(group_and_project, "FOO")
+        assert variable == "123"
 
         config_single_variable2 = f"""
         projects_and_groups:
@@ -107,9 +105,8 @@ class TestVariables:
 
         run_gitlabform(config_single_variable2, group_and_project)
 
-        variables = gitlab.get_variables(group_and_project)
-        assert len(variables) == 1
-        assert variables[0]["value"] == "123456"
+        variable = gitlab.get_variable(group_and_project, "FOO")
+        assert variable == "123456"
 
     def test__more_variables(self, gitlab, group_and_project):
         config_more_variables = f"""
@@ -128,7 +125,56 @@ class TestVariables:
 
         run_gitlabform(config_more_variables, group_and_project)
 
+        variable = gitlab.get_variable(group_and_project, "FOO")
+        assert variable == "123456"
+        variable = gitlab.get_variable(group_and_project, "BAR")
+        assert variable == "bleble"
+
+    def test__variable_with_env_scope(self, gitlab, group_and_project):
+        config_more_variables = f"""
+        projects_and_groups:
+          {group_and_project}:
+            project_settings:
+              builds_access_level: enabled
+            variables:
+              foo_ee:
+                key: FOO1
+                value: alfa
+                environment_scope: test/ee
+                filter[environment_scope]: test/ee
+        """
+
+        run_gitlabform(config_more_variables, group_and_project)
+
+        variable = gitlab.get_variable(group_and_project, "FOO1", "test/ee")
+        assert variable == "alfa"
+
+    def test__variables_with_env_scope(self, gitlab, group_and_project):
+        config_more_variables = f"""
+        projects_and_groups:
+          {group_and_project}:
+            project_settings:
+              builds_access_level: enabled
+            variables:
+              foo_ee:
+                key: FOO2
+                value: alfa
+                environment_scope: test/ee
+                filter[environment_scope]: test/ee
+              foo_lv:
+                key: FOO2
+                value: beta
+                environment_scope: test/lv
+                filter[environment_scope]: test/lv
+        """
+
+        run_gitlabform(config_more_variables, group_and_project)
+
         variables = gitlab.get_variables(group_and_project)
-        variables_keys = set([variable["key"] for variable in variables])
-        assert len(variables) == 2
-        assert variables_keys == {"FOO", "BAR"}
+        variables_keys = [variable["key"] for variable in variables]
+        assert "FOO2" in variables_keys
+
+        variable = gitlab.get_variable(group_and_project, "FOO2", "test/ee")
+        assert variable == "alfa"
+        variable = gitlab.get_variable(group_and_project, "FOO2", "test/lv")
+        assert variable == "beta"

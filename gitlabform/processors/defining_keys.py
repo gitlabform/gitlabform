@@ -88,3 +88,23 @@ class Xor(AbstractKey):
     def explain(self) -> str:
         explains = [key.explain() for key in self.keys]
         return f"(exactly one of: {', '.join(explains)})"
+
+
+class OptionalKey(AbstractKey):
+    def __init__(self, value):
+        self.value = value
+
+    def matches(self, e1, e2):
+        only_in_e1 = self.value in e1 and self.value not in e2
+        only_in_e2 = self.value not in e1 and self.value in e2
+        in_both_and_equal = (
+            self.value in e1 and self.value in e2 and e1[self.value] == e2[self.value]
+        )
+        return only_in_e1 or only_in_e2 or in_both_and_equal
+
+    def contains(self, entity):
+        # as it's optional, we don't check for its existence
+        return True
+
+    def explain(self) -> str:
+        return f"(optionally '{self.value}')"
