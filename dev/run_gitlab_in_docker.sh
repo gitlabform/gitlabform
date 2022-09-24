@@ -59,7 +59,6 @@ gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'password'; regis
 cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
 docker run --detach \
-    --name gitlab \
     --hostname gitlab.foobar.com \
     --env GITLAB_OMNIBUS_CONFIG="$gitlab_omnibus_config" \
     --publish 443:443 --publish 80:80 --publish 2022:22 \
@@ -91,8 +90,10 @@ cecho b 'GitLab version:'
 curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/version
 echo ''
 if [[ -n "${GITLAB_EE_LICENSE:-}" ]] ; then
-  cecho b 'Loading GitLab license...'
   echo "{\"license\":\"$GITLAB_EE_LICENSE\"}" > $repo_root_directory/gitlab-license.json
+fi
+if [[ -f $repo_root_directory/gitlab-license.json ]] ; then
+  cecho b 'Loading GitLab license...'
   curl -s -X POST -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" -H "Content-Type: application/json" -d @$repo_root_directory/gitlab-license.json http://localhost/api/v4/license >/dev/null 2>&1
 
   cecho b 'GitLab license (plan, is expired?):'
