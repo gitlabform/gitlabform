@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.2
+
+* Make setting project-level CI/CI variables with a non-default different `environment_scope` work again. Fixes [#411](https://github.com/gitlabform/gitlabform/issues/411), PR [#414](https://github.com/gitlabform/gitlabform/pull/414).
+
 ## 3.1.1
 
 * Fixed error when passing the GitLab token in the config file with single or double quotes. Fixes [#401](https://github.com/gitlabform/gitlabform/issues/401), PR [#412](https://github.com/gitlabform/gitlabform/pull/412).
