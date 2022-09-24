@@ -37,8 +37,14 @@ else
   gitlab_version="latest"
 fi
 
+if [[ $(uname -s) == 'Darwin' ]] && [[ $(uname -m) == 'arm64' ]] ; then
+  gitlab_image="gsdukbh/gitlab-ee-arm64"
+else
+  gitlab_image="gitlab/gitlab-ee"
+fi
+
 cecho b "Pulling GitLab image version '$gitlab_version'..."
-docker pull gitlab/gitlab-ee:$gitlab_version
+docker pull $gitlab_image:$gitlab_version
 
 cecho b "Preparing to start GitLab..."
 existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}")
@@ -52,7 +58,8 @@ gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'password'; regis
 
 cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
-container_id=$(docker run --detach \
+docker run --detach \
+    --name gitlab \
     --hostname gitlab.foobar.com \
     --env GITLAB_OMNIBUS_CONFIG="$gitlab_omnibus_config" \
     --publish 443:443 --publish 80:80 --publish 2022:22 \
@@ -62,13 +69,13 @@ container_id=$(docker run --detach \
     --health-cmd '/healthcheck-and-setup.sh' \
     --health-interval 2s \
     --health-timeout 2m \
-    gitlab/gitlab-ee:$gitlab_version)
+    $gitlab_image:$gitlab_version
 
-cecho b "Waiting 3 minutes before starting to check if GitLab has started..."
+cecho b "Waiting 2 minutes before starting to check if GitLab has started..."
 cecho b "(Run this in another terminal you want to follow the instance logs:"
-cecho y "docker logs -f ${container_id}"
+cecho y "docker logs -f gitlab"
 cecho b ")"
-sleep 3m
+sleep 120
 
 $script_directory/await-healthy.sh
 
@@ -95,11 +102,11 @@ fi
 cecho b 'GitLab web UI URL (user: root, password: password)'
 echo 'http://localhost'
 echo ''
-alias stop_gitlab='existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}"); docker stop --time=30 $existing_gitlab_container_id ; docker rm $existing_gitlab_container_id'
-cecho b 'Run this command to stop GitLab container:'
-cecho r 'stop_gitlab'
+cecho b 'You can run these commands to stop and delete the GitLab container:'
+cecho r "docker stop --time=30 gitlab"
+cecho r "docker rm gitlab"
 echo ''
-cecho b 'To start GitLab container again, re-run this script. Note that GitLab will NOT existing any data'
+cecho b 'To start GitLab container again, re-run this script. Note that GitLab will NOT keep any data'
 cecho b 'so the start will take a lot of time again. (But this is the only way to make GitLab in Docker stable.)'
 echo ''
 cecho b 'Run this to start the acceptance tests (it will automatically load GITLAB_URL from gitlab_url.txt'
