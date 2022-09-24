@@ -1,11 +1,10 @@
 import pytest
 
+from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
     run_gitlabform,
-    DEFAULT_README,
     get_gitlab,
-    get_random_name,
 )
 
 
@@ -13,36 +12,40 @@ gl = get_gitlab()
 
 
 class TestBranches:
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
+    def test__code_owners_approval(self, gitlab, group_and_project, branch):
 
-    # @pytest.mark.skipif(
-    #     gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    # )
-    # def test__code_owners_approval(self, gitlab, group_and_project, branch):
-    #     branch_access_levels = gitlab.get_branch_access_levels(
-    #         group_and_project, branch
-    #     )
-    #     assert branch_access_levels["code_owner_approval_required"] is False
-    #
-    #     protect_branch_with_code_owner_approval_required = f"""
-    #     projects_and_groups:
-    #       {group_and_project}:
-    #         branches:
-    #           {branch}:
-    #             protected: true
-    #             push_access_level: maintainer
-    #             merge_access_level: developer
-    #             unprotect_access_level: maintainer
-    #             code_owner_approval_required: true
-    #     """
-    #
-    #     run_gitlabform(
-    #         protect_branch_with_code_owner_approval_required, group_and_project
-    #     )
-    #
-    #     branch_access_levels = gitlab.get_branch_access_levels(
-    #         group_and_project, branch
-    #     )
-    #     assert branch_access_levels["code_owner_approval_required"] is True
+        try:
+            branch_access_levels = gitlab.get_branch_access_levels(
+                group_and_project, branch
+            )
+            assert branch_access_levels["code_owner_approval_required"] is False
+        except NotFoundException:
+            # this is fine, the branch may not be protected at all yet
+            pass
+
+        protect_branch_with_code_owner_approval_required = f"""
+        projects_and_groups:
+          {group_and_project}:
+            branches:
+              {branch}:
+                protected: true
+                push_access_level: maintainer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
+                code_owner_approval_required: true
+        """
+
+        run_gitlabform(
+            protect_branch_with_code_owner_approval_required, group_and_project
+        )
+
+        branch_access_levels = gitlab.get_branch_access_levels(
+            group_and_project, branch
+        )
+        assert branch_access_levels["code_owner_approval_required"] is True
 
     @pytest.mark.skipif(
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"

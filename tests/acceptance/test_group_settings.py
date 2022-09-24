@@ -1,4 +1,6 @@
-from tests.acceptance import run_gitlabform
+import pytest
+
+from tests.acceptance import run_gitlabform, gl
 
 
 class TestGroupSettings:
@@ -34,7 +36,9 @@ class TestGroupSettings:
         settings = gitlab.get_group_settings(group)
         assert settings["path"] == current_value
 
-    # this test requires GitLab Premium license
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
     def test__edit_new_setting_premium(self, gitlab, project, group):
 
         project_id = gitlab._get_project_id(f"{group}/{project}")
