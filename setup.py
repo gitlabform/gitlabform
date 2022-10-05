@@ -64,6 +64,7 @@ setup(
             "pytest-cov==3.0.0",
             "deepdiff==5.8.1",
             "pytest-rerunfailures==10.2",
+            "cryptography==38.0.1",
         ],
         "docs": [
             "mkdocs",
