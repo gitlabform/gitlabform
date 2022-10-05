@@ -1,8 +1,8 @@
 import pytest
 
-from acceptance import run_gitlabform
-from gitlab import AccessLevel
-from processors.project.merge_requests_processor import APPROVAL_RULE_NAME
+from tests.acceptance import run_gitlabform
+from gitlabform.gitlab import AccessLevel
+from gitlabform.processors.project.merge_requests_processor import APPROVAL_RULE_NAME
 
 
 @pytest.fixture(scope="function")
