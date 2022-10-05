@@ -9,7 +9,7 @@ from tests.acceptance import run_gitlabform, DEFAULT_README
 @pytest.fixture(scope="function")
 def no_access_branch(request, gitlab, group_and_project):
     gitlab.create_branch(group_and_project, "no_access_branch", "main")
-    gitlab.branch_access_level(
+    gitlab.protect_branch(
         group_and_project,
         "no_access_branch",
         {
@@ -59,8 +59,9 @@ class TestFiles:
             branches:
               {branch}:
                 protected: true
-                developers_can_push: false
-                developers_can_merge: true
+                push_access_level: maintainer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
             files:
               "README.md":
                 overwrite: true
@@ -98,9 +99,9 @@ class TestFiles:
                 branches:
                   no_access_branch:
                     protected: true
-                    push_access_level: 0 # no one
-                    merge_access_level: 0 # no one
-                    unprotect_access_level: 40
+                    push_access_level: no access
+                    merge_access_level: no access
+                    unprotect_access_level: maintainer
                 files:
                   "README.md":
                     overwrite: true
@@ -136,8 +137,9 @@ class TestFiles:
                 branches:
                   {branch}:
                     protected: true
-                    developers_can_push: false
-                    developers_can_merge: true
+                    push_access_level: maintainer
+                    merge_access_level: developer
+                    unprotect_access_level: maintainer
                 files:
                   "README.md":
                     branches:
@@ -180,9 +182,7 @@ class TestFiles:
         commit = gitlab.get_last_commit(group_and_project, branch)
         assert commit["message"] == "Preconfigured commit message [skip ci]"
 
-    def test__set_file_protected_branches_new_api(
-        self, gitlab, group_and_project, branch
-    ):
+    def test__set_file_protected_branches(self, gitlab, group_and_project, branch):
 
         test_config = f"""
         projects_and_groups:
@@ -220,7 +220,7 @@ class TestFiles:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-    def test__set_file_protected_branches_new_api_not_all_levels(
+    def test__set_file_protected_branches_not_all_levels(
         self, gitlab, group_and_project, branch
     ):
 

@@ -1,0 +1,165 @@
+name: Linter and tests (PRs)
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+
+  approve:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Approve
+        run: echo For security reasons, all pull requests need to be approved first before running any automated CI.
+
+  black-formatting:
+    runs-on: ubuntu-latest
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Black Code Formatter
+        uses: gdubicki/black-action@main
+        with:
+          args: ". --check"
+
+  acceptance-tests:
+    runs-on: ubuntu-latest
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
+      fail-fast : false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install test dependencies
+        run: |
+          pip install wheel
+          pip install -e .[test]
+      - name: Run acceptance tests
+        env:
+          GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
+        run: |
+          ./dev/run_gitlab_in_docker.sh
+          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          override_pr: ${{ github.event.number }}
+          override_commit: ${{ github.event.pull_request.head.sha }}
+
+  unit-tests:
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
+      fail-fast : false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install test dependencies
+        run: |
+          pip install wheel
+          pip install -e .[test]
+      - name: Run unit tests
+        run: |
+          pytest --cov=. --cov-report=xml tests/unit
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          override_pr: ${{ github.event.number }}
+          override_commit: ${{ github.event.pull_request.head.sha }}
+
+  security-tests:
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install wheel
+          pip install bandit
+      - name: Run bandit
+        run: |
+          bandit -r gitlabform
+
+  smoke-tests:
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
+      fail-fast : false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install runtime dependencies
+        run: |
+          pip install wheel
+          pip install -e .
+      - name: Check if the app starts
+        run: |
+          gitlabform -V

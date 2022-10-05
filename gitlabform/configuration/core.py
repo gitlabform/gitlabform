@@ -4,6 +4,7 @@ from abc import ABC
 from copy import deepcopy
 from logging import debug
 from pathlib import Path
+from ruamel.yaml.scalarstring import ScalarString
 from types import SimpleNamespace
 
 from cli_ui import debug as verbose
@@ -44,12 +45,12 @@ class ConfigurationCore(ABC):
                         exit_code=EXIT_INVALID_INPUT,
                     )
 
-                if self.config.get("config_version", 1) != 2:
+                if self.config.get("config_version", 1) != 3:
                     fatal(
-                        "This version of GitLabForm requires 'config_version: 2' entry in the config.\n"
-                        "This ensures that when the application behavior changes in a backward incompatible way,"
-                        " you won't apply unexpected configuration to your GitLab instance.\n"
-                        "Please read the upgrading guide here: https://bit.ly/3ub1g5C\n",
+                        "This version of GitLabForm requires 'config_version: 3' entry in the config. "
+                        "This ensures that if the application behavior changes in a backward-incompatible way,"
+                        " you won't apply unwanted configuration to your GitLab instance.\n"
+                        "Please follow this guide: https://gitlabform.github.io/gitlabform/upgrade/\n",
                         exit_code=EXIT_INVALID_INPUT,
                     )
 
@@ -141,7 +142,10 @@ class ConfigurationCore(ABC):
             else:
                 raise KeyNotFoundException
 
-        return current
+        if isinstance(current, ScalarString):
+            return str(current)
+        else:
+            return current
 
     def get_group_config(self, group) -> dict:
         pass
@@ -153,7 +157,11 @@ class ConfigurationCore(ABC):
         """
         :return: literal common configuration or empty dict if not defined
         """
-        return self.get("projects_and_groups|*", {})
+        common_config = self.get("projects_and_groups|*", {})
+        if common_config:
+            section_name = "*"
+            self.validate_break_inheritance_flag(common_config, section_name)
+        return common_config
 
     def is_project_skipped(self, project) -> bool:
         pass
@@ -165,17 +173,21 @@ class ConfigurationCore(ABC):
         pass
 
     @staticmethod
-    def validate_break_inheritance_flag(config, level):
+    def validate_break_inheritance_flag(config, section_name, parent_key=""):
         for key, value in config.items():
             if "inherit" == key:
+                parent_key_description = (
+                    ' under key "' + parent_key + '"' if parent_key else ""
+                )
                 fatal(
-                    f"The inheritance break flag cannot be placed at the {level} level\n"
-                    f"because {level} level is the highest level in the configuration file.\n",
+                    f'The inheritance-break flag set in "{section_name}"{parent_key_description} is invalid\n'
+                    f"because it has no higher level setting to inherit from.\n",
                     exit_code=EXIT_INVALID_INPUT,
                 )
-                break
             elif type(value) is CommentedMap:
-                ConfigurationCore.validate_break_inheritance_flag(value, level)
+                ConfigurationCore.validate_break_inheritance_flag(
+                    value, section_name, key
+                )
 
     @staticmethod
     def merge_configs(more_general_config, more_specific_config) -> dict:
@@ -202,7 +214,6 @@ class ConfigurationCore(ABC):
                             f"Cannot set the inheritance break flag with true\n",
                             exit_code=EXIT_INVALID_INPUT,
                         )
-                        break
                 elif type(value) is CommentedMap:
                     break_inheritance(value, key)
 

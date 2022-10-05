@@ -32,16 +32,16 @@ class ConfigurationGroups(ConfigurationCore):
         common_config = self.get_common_config()
         debug("Common config: %s", to_str(common_config))
 
-        group_config = self.get_group_config(group)
-        debug("Group config: %s", to_str(group_config))
+        if "/" in group:
+            group_config = self.get_effective_subgroup_config(group)
+        else:
+            group_config = self.get_group_config(group)
+            if not common_config:
+                self.validate_break_inheritance_flag(group_config, group)
+        debug("Effective group/subgroup config: %s", to_str(group_config))
 
         if not group_config and not common_config:
             return {}
-
-        if common_config:
-            self.validate_break_inheritance_flag(common_config, level="common")
-        elif not common_config and group_config:
-            self.validate_break_inheritance_flag(group_config, level="group")
 
         return self.merge_configs(common_config, group_config)
 
@@ -59,7 +59,7 @@ class ConfigurationGroups(ConfigurationCore):
         #                    |       v
         #                    \------>b = effective config to return
         #
-        # ..where a = merged_config("x", "x/y") and b = merged_config(a, "x/y/z")
+        # ...where a = merged_config("x", "x/y") and b = merged_config(a, "x/y/z")
         #
 
         effective_config = {}
@@ -82,12 +82,10 @@ class ConfigurationGroups(ConfigurationCore):
                 )
 
                 if effective_config:
-                    self.validate_break_inheritance_flag(
-                        effective_config, level="group"
-                    )
+                    self.validate_break_inheritance_flag(effective_config, subgroup)
                 elif not effective_config and next_level_subgroup_config:
                     self.validate_break_inheritance_flag(
-                        next_level_subgroup_config, level="subgroup"
+                        next_level_subgroup_config, next_level_subgroup
                     )
 
                 effective_config = self.merge_configs(

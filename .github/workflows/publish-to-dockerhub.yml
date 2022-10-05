@@ -26,35 +26,18 @@ jobs:
           pip download gitlabform==${{ env.VERSION }} > /dev/null
           while [ $? -ne 0 ]; do sleep 10; pip3 download gitlabform==${{ env.VERSION }} > /dev/null ; done
         shell: bash {0}
-      - name: Docker meta for Alpine-based image
-        id: meta-alpine
+      - name: Docker metadata
+        id: metadata
         uses: docker/metadata-action@v3
         with:
           images: |
             ghcr.io/gitlabform/gitlabform
-          # Alpine-based images is the main one, so only it gets the 'latest' tag for public releases
           flavor: |
             latest=auto
-          # Alpine-based images is the main one, so only it gets the non-suffixed tags
           tags: |
             type=pep440,pattern={{version}}
             type=pep440,pattern={{major}}.{{minor}}
             type=pep440,pattern={{major}}
-            type=pep440,pattern={{version}}-alpine3.14
-            type=pep440,pattern={{major}}.{{minor}}-alpine3.14
-            type=pep440,pattern={{major}}-alpine3.14
-      - name: Docker meta for Debian-based image
-        id: meta-debian
-        uses: docker/metadata-action@v3
-        with:
-          images: |
-            ghcr.io/gitlabform/gitlabform
-          flavor: |
-            latest=false
-          tags: |
-            type=pep440,pattern={{version}}-buster
-            type=pep440,pattern={{major}}.{{minor}}-buster
-            type=pep440,pattern={{major}}-buster
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -67,21 +50,12 @@ jobs:
           username: ${{ github.repository_owner }}
           # This token is provided by Actions, you do not need to create your own token
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish Debian-based image to registries
+      - name: Publish image to registries
         uses: docker/build-push-action@v2
         with:
           push: true
           context: .
-          file: ./dev/debian.Dockerfile
+          file: ./dev/Dockerfile
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta-debian.outputs.tags }}
-          labels: ${{ steps.meta-debian.outputs.labels }}
-      - name: Publish Alpine-based image to registries
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          context: .
-          file: ./dev/alpine.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta-alpine.outputs.tags }}
-          labels: ${{ steps.meta-alpine.outputs.labels }}
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}

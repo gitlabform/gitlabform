@@ -1,14 +1,7 @@
 name: Linter and tests
 
-# trigger only on pushes to main OR PRs to main
-# to prevent double tests on my own
-# PRs within gitlabform/gitlabform repo from a feature
-# branch to main
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -28,7 +21,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
       - uses: actions/checkout@v3
@@ -56,7 +49,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
       - uses: actions/checkout@v3
@@ -97,7 +90,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
       - uses: actions/checkout@v3

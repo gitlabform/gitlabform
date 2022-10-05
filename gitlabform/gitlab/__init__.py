@@ -6,17 +6,18 @@ from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
-from gitlabform.gitlab.group_secret_variables import GitLabGroupSecretVariables
 from gitlabform.gitlab.group_push_rule import GitLabGroupPushRule
+from gitlabform.gitlab.group_variables import GitLabGroupVariables
 from gitlabform.gitlab.members import GitLabMembers
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
 from gitlabform.gitlab.project_badges import GitLabProjectBadges
 from gitlabform.gitlab.project_deploy_keys import GitLabProjectDeployKeys
-from gitlabform.gitlab.project_secret_variables import GitLabProjectSecretVariables
+from gitlabform.gitlab.variables import GitLabVariables
 from gitlabform.gitlab.repositories import GitLabRepositories
+from gitlabform.gitlab.resource_groups import GitLabResourceGroups
 from gitlabform.gitlab.schedules import GitLabPipelineSchedules
-from gitlabform.gitlab.services import GitLabServices
+from gitlabform.gitlab.integrations import GitLabIntegrations
 from gitlabform.gitlab.tags import GitLabTags
 from gitlabform.gitlab.users import GitLabUsers
 
@@ -50,11 +51,12 @@ class GitLab(
     GitLabCommits,
     GitLabMergeRequests,
     GitLabRepositories,
-    GitLabServices,
+    GitLabResourceGroups,
+    GitLabIntegrations,
     GitLabTags,
     GitLabGroupLDAPLinks,
     GitLabGroupBadges,
-    GitLabGroupSecretVariables,
+    GitLabGroupVariables,
     GitLabGroupPushRule,
     GitLabPipelines,
     GitLabMembers,
@@ -62,6 +64,6 @@ class GitLab(
     GitLabPipelineSchedules,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
-    GitLabProjectSecretVariables,
+    GitLabVariables,
 ):
     pass

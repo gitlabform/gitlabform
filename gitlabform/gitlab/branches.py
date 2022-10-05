@@ -2,27 +2,7 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 
 class GitLabBranches(GitLabCore):
-
-    # old API
-    def protect_branch(
-        self, project_and_group_name, branch, developers_can_push, developers_can_merge
-    ):
-        data = {
-            "id": project_and_group_name,
-            "branch": branch,
-            "developers_can_push": developers_can_push,
-            "developers_can_merge": developers_can_merge,
-        }
-        return self._make_requests_to_api(
-            "projects/%s/repository/branches/%s/protect",
-            (project_and_group_name, branch),
-            method="PUT",
-            data=data,
-            expected_codes=[200, 201],
-        )
-
-    # new API
-    def branch_access_level(self, project_and_group_name, branch, protect_settings):
+    def protect_branch(self, project_and_group_name, branch, protect_settings):
 
         url = "projects/%s/protected_branches?name=%s"
         parameters_list = [
@@ -40,7 +20,7 @@ class GitLabBranches(GitLabCore):
             json=protect_settings,
         )
 
-    def branch_code_owner_approval_required(
+    def set_branch_code_owner_approval_required(
         self,
         project_and_group_name,
         branch,
@@ -63,19 +43,6 @@ class GitLabBranches(GitLabCore):
         )
 
     def unprotect_branch(self, project_and_group_name, branch):
-        data = {
-            "id": project_and_group_name,
-            "branch": branch,
-        }
-        return self._make_requests_to_api(
-            "projects/%s/repository/branches/%s/unprotect",
-            (project_and_group_name, branch),
-            method="PUT",
-            data=data,
-            expected_codes=[200, 201],
-        )
-
-    def unprotect_branch_new_api(self, project_and_group_name, branch):
         # 404 means that the branch is already unprotected
         return self._make_requests_to_api(
             "projects/%s/protected_branches/%s",

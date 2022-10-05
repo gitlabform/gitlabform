@@ -15,14 +15,16 @@ class TestFilesProtected:
             branches:
               main:
                 protected: true
-                developers_can_push: false
-                developers_can_merge: true
+                push_access_level: maintainer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
               {branch}:
                 protected: false
               {other_branch}:
                 protected: true
-                developers_can_push: true
-                developers_can_merge: true
+                push_access_level: developer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
             files:
               "README.md":
                 overwrite: true

@@ -1,21 +1,9 @@
 import codecs
 import os
-import re
 from setuptools import setup, find_packages
 
 with codecs.open("README.md", encoding="utf-8") as f:
     readme = f.read()
-
-# ToC doesn't work when viewed in PyPI :(
-# it also contains link to changelog which for PyPI is added to the end of the readme
-# so let's remove the ToC here
-regexp = re.compile(r"## Table of Contents(.*)## Features", re.MULTILINE + re.DOTALL)
-readme = re.sub(regexp, "## Features", readme)
-
-with codecs.open("CHANGELOG.md", encoding="utf-8") as f:
-    changelog = f.read()
-
-long_description = readme + "\n" + changelog
 
 
 def get_version_file_path():
@@ -29,15 +17,14 @@ def get_version_file_path():
 setup(
     name="gitlabform",
     version=open(get_version_file_path()).read(),
-    description='Specialized "configuration as a code" tool for GitLab projects, groups and more'
+    description='🏗 Specialized "configuration as a code" tool for GitLab projects, groups and more'
     " using hierarchical configuration written in YAML",
-    long_description=long_description,
+    long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/gitlabform/gitlabform",
+    url="https://gitlabform.github.io/gitlabform",
     author="Greg Dubicki and Contributors",
-    keywords=["gitlab", "configuration-as-code"],
+    keywords=["cli", "yaml", "gitlab", "configuration-as-code"],
     classifiers=[
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -54,28 +41,34 @@ setup(
     packages=find_packages(),
     package_data={"": ["LICENSE", "version", "*.md", "config.yml"]},
     include_package_data=True,
+    python_requires=">=3.7.0",
     install_requires=[
         "certifi",  # we want the latest root certs for security
-        "requests==2.27.1",
-        "Jinja2==2.11.3",
-        "MarkupSafe==1.1.1",
-        "ruamel.yaml==0.17.17",
+        "requests==2.28.1",
+        "Jinja2==3.1.2",
+        "MarkupSafe==2.1.1",
+        "ruamel.yaml==0.17.21",
         "luddite==1.0.2",
-        "cli-ui==0.15.2",
+        "cli-ui==0.17.2",
         "packaging==21.3",
         "mergedeep==1.3.4",
-        "yamlpath==3.6.4",
+        "yamlpath==3.6.7",
         "ez-yaml==1.2.0",
     ],
     extras_require={
         "test": [
-            "pytest==7.0.1",
+            "pytest==7.1.3",
             "xkcdpass==1.19.3",
-            "pre-commit==2.17.0",  # not really for tests, but for development
-            "coverage==6.2",
-            "pytest-cov==3.0.0",
-            "deepdiff==5.7.0",
+            "pre-commit==2.20.0",  # not really for tests, but for development
+            "coverage==6.5.0",
+            "pytest-cov==4.0.0",
+            "deepdiff==5.8.1",
             "pytest-rerunfailures==10.2",
+            "cryptography==38.0.1",
+        ],
+        "docs": [
+            "mkdocs",
+            "mkdocs-material",
         ],
     },
     entry_points={

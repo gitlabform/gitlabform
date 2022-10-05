@@ -24,14 +24,17 @@ from gitlabform.processors.project.project_push_rules_processor import (
 from gitlabform.processors.project.project_settings_processor import (
     ProjectSettingsProcessor,
 )
+from gitlabform.processors.project.resource_groups_processor import (
+    ResourceGroupsProcessor,
+)
 from gitlabform.processors.project.schedules_processor import (
     SchedulesProcessor,
 )
-from gitlabform.processors.project.secret_variables_processor import (
-    SecretVariablesProcessor,
+from gitlabform.processors.project.variables_processor import (
+    VariablesProcessor,
 )
-from gitlabform.processors.project.services_processor import (
-    ServicesProcessor,
+from gitlabform.processors.project.integrations_processor import (
+    IntegrationsProcessor,
 )
 from gitlabform.processors.project.tags_processor import TagsProcessor
 
@@ -45,13 +48,14 @@ class ProjectProcessors(AbstractProcessors):
             ProjectPushRulesProcessor(gitlab),
             MergeRequestsProcessor(gitlab),
             DeployKeysProcessor(gitlab),
-            SecretVariablesProcessor(gitlab),
+            VariablesProcessor(gitlab),
             BranchesProcessor(gitlab, strict),
             TagsProcessor(gitlab, strict),
-            ServicesProcessor(gitlab),
+            IntegrationsProcessor(gitlab),
             FilesProcessor(gitlab, config, strict),
             HooksProcessor(gitlab),
             MembersProcessor(gitlab),
             SchedulesProcessor(gitlab),
             BadgesProcessor(gitlab),
+            ResourceGroupsProcessor(gitlab),
         ]

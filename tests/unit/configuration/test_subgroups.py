@@ -13,50 +13,28 @@ def configuration_with_subgroups_and_projects():
     projects_and_groups:
       some_group/*:
         project_settings:
-          foo: bar
-        hooks:
-          a:
-            foo: bar
+          setting_from_group: foo
 
       some_group/subgroup_level_1/*:
         project_settings:
-          foo: bar2
-        hooks:
-          a:
-            foo: bar2
+          setting_from_subgroup_level_1: foo
+
+      some_group/subgroup_level_1/some_project:
+        project_settings:
+          setting_from_project: foo
 
       some_group/subgroup_level_1/subgroup_level_2/*:
         project_settings:
-          foo: bar3
-        hooks:
-          a:
-            foo: bar3
-
-      some_group/some_project:
-        project_settings:
-          bar: something_else
-        hooks:
-          b:
-            bar: something_else
-
-      some_group/subgroup_level_1/some_project:
-          project_settings:
-            bar: something_else2
-          hooks:
-            b:
-              bar: something_else2
+          setting_from_subgroup_level_2: foo
 
       some_group/subgroup_level_1/subgroup_level_2/some_project:
           project_settings:
-            bar: something_else3
-          hooks:
-            b:
-              bar: something_else3
+            setting_from_project: foo
     """
     return Configuration(config_string=config_yaml)
 
 
-def test__get_effective_config_for_project__project_from_config__level1(
+def test__get_effective_config_for_project__level1(
     configuration_with_subgroups_and_projects,
 ):
     effective_config = (
@@ -67,11 +45,15 @@ def test__get_effective_config_for_project__project_from_config__level1(
 
     additive__project_settings = effective_config["project_settings"]
 
-    # project and only subgroup level 1
-    assert additive__project_settings == {"foo": "bar2", "bar": "something_else2"}
+    # for project settings all the levels up are inherited
+    assert additive__project_settings == {
+        "setting_from_group": "foo",
+        "setting_from_subgroup_level_1": "foo",
+        "setting_from_project": "foo",
+    }
 
 
-def test__get_effective_config_for_project__project_from_config__level2(
+def test__get_effective_config_for_project__level2(
     configuration_with_subgroups_and_projects,
 ):
     effective_config = (
@@ -82,37 +64,62 @@ def test__get_effective_config_for_project__project_from_config__level2(
 
     additive__project_settings = effective_config["project_settings"]
 
-    # project and only subgroup level 2
-    assert additive__project_settings == {"foo": "bar3", "bar": "something_else3"}
+    # the settings should be inherited from all levels
+    assert additive__project_settings == {
+        "setting_from_group": "foo",
+        "setting_from_subgroup_level_1": "foo",
+        "setting_from_subgroup_level_2": "foo",
+        "setting_from_project": "foo",
+    }
 
 
-def test__get_effective_config_for_subgroup():
+@pytest.fixture
+def configuration_with_subgroups_only():
     config_yaml = """
     ---
     projects_and_groups:
       some_group/*:
-        group_members:
-          my-user:
-            access_level: 10
-        enforce_group_members: true
+        group_settings:
+          project_creation_level: maintainer
+          subgroup_creation_level: owner
+          visibility: internal
 
       some_group/subgroup/*:
-        group_members:
-          my-user2:
-            access_level: 20
-        enforce_group_members: true
+        group_settings:
+          project_creation_level: developer
+            
+      some_group/subgroup/subsubgroup/*:
+        group_settings:
+          visibility: private
     """
+    return Configuration(config_string=config_yaml)
 
-    effective_config = Configuration(
-        config_string=config_yaml
-    ).get_effective_subgroup_config("some_group/subgroup")
 
+def test__get_effective_config_for_group__level1(configuration_with_subgroups_only):
+    effective_config = configuration_with_subgroups_only.get_effective_config_for_group(
+        "some_group/subgroup"
+    )
+
+    # the settings should be inherited from all levels
     assert effective_config == {
-        "group_members": {
-            "my-user": {"access_level": 10},
-            "my-user2": {
-                "access_level": 20,
-            },
+        "group_settings": {
+            "project_creation_level": "developer",
+            "subgroup_creation_level": "owner",
+            "visibility": "internal",
         },
-        "enforce_group_members": True,
+    }
+
+
+def test__get_effective_config_for_group__level2(configuration_with_subgroups_only):
+    effective_config = configuration_with_subgroups_only.get_effective_config_for_group(
+        "some_group/subgroup/subsubgroup"
+    )
+
+    # the settings should be inherited from all levels
+    assert effective_config == {
+        "group_settings": {
+            "project_creation_level": "developer",
+            "subgroup_creation_level": "owner",
+            "visibility": "private",
+        },
     }
