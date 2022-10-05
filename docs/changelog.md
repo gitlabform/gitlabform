@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.0
+
+* **Add authoritative mode (`enforce: true`) support to group badges, group LDAP links, group variables, badges, deploy keys, variables.** Implements [#403](https://github.com/gitlabform/gitlabform/issues/403), PR [#419](https://github.com/gitlabform/gitlabform/pull/419).
+
 ## 3.1.2
 
 * Make setting project-level CI/CI variables with a non-default different `environment_scope` work again. Fixes [#411](https://github.com/gitlabform/gitlabform/issues/411), PR [#414](https://github.com/gitlabform/gitlabform/pull/414).
