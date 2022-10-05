@@ -45,7 +45,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
 
         entities_in_configuration = configuration[self.configuration_name]
         if "enforce" in entities_in_configuration:
-            enforce = True
+            enforce = entities_in_configuration["enforce"]
             del entities_in_configuration["enforce"]
         else:
             enforce = False

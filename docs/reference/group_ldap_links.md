@@ -6,9 +6,11 @@
 
 This section purpose is to manage [group membership via LDAP](https://docs.gitlab.com/ee/user/group/index.html#manage-group-memberships-via-ldap).
 
-The keys and values for each link should be as documented in the [LDAP Group Links section of the Groups API docs](https://docs.gitlab.com/ee/api/groups.html#add-ldap-group-link-with-cn-or-filter), **except the id**.
+Key names here are just any labels, except if the key name is `enforce` and is set to `true` - then only the group LDAP links defined here will remain in the group, all other will be deleted.
 
-The `provider` key should contain a value that can be found in the GitLab web UI, here:
+Values are like documented at [LDAP Group Links section of the Groups API docs](https://docs.gitlab.com/ee/api/groups.html#add-ldap-group-link-with-cn-or-filter), **except the id**.
+
+The `provider` should be set to a value that can be found in the GitLab web UI, here:
 
 ![group-ldap-links-provider.png](../images/group-ldap-links-provider.png)
 
@@ -30,4 +32,5 @@ projects_and_groups:
         provider: AD
         filter: "(employeeType=developer)"
         group_access: developer
+      enforce: true # optional
 ```
