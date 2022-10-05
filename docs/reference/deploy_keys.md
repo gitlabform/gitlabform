@@ -4,7 +4,11 @@
 
 This section purpose is to manage [project deploy keys](https://docs.gitlab.com/ee/user/project/deploy_keys/#create-a-project-deploy-key).
 
-The keys and values for each deploy key should be as documented in the [Deploy keys API docs](https://docs.gitlab.com/ee/api/deploy_keys.html#add-deploy-key), **except the id**.
+
+Key names here are just any labels, except if the key name is `enforce` and is set to `true` - then only the deploy keys defined here will remain in the project, all other will be deleted.
+
+
+The values are as documented at [Deploy keys API docs](https://docs.gitlab.com/ee/api/deploy_keys.html#add-deploy-key), **except the id**.
 
 Notes:
 
@@ -32,4 +36,6 @@ projects_and_groups:
       ensure_to_remove_this_one:
         title: different_key_title
         delete: true
+
+      enforce: true # optional
 ```
