@@ -871,7 +871,8 @@
 <h1 id="deploy-keys">Deploy keys<a class="headerlink" href="#deploy-keys" title="Permanent link">&para;</a></h1>
 <h2 id="project-deploy-keys">Project deploy keys<a class="headerlink" href="#project-deploy-keys" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage <a href="https://docs.gitlab.com/ee/user/project/deploy_keys/#create-a-project-deploy-key">project deploy keys</a>.</p>
-<p>The keys and values for each deploy key should be as documented in the <a href="https://docs.gitlab.com/ee/api/deploy_keys.html#add-deploy-key">Deploy keys API docs</a>, <strong>except the id</strong>.</p>
+<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the deploy keys defined here will remain in the project, all other will be deleted.</p>
+<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/deploy_keys.html#add-deploy-key">Deploy keys API docs</a>, <strong>except the id</strong>.</p>
 <p>Notes:</p>
 <ul>
 <li>you have to always provide the whole SSH key under the <code>key</code>. This is a limitation of the GitLab API. You can see an example of this <a href="https://docs.gitlab.com/ee/api/deploy_keys.html#add-deploy-keys-to-multiple-projects">here in the docs</a>.</li>
@@ -896,6 +897,8 @@
 <span class="w">      </span><span class="nt">ensure_to_remove_this_one</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">different_key_title</span><span class="w"></span>
 <span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
 </code></pre></div>
 
 

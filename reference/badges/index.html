@@ -885,9 +885,9 @@
 <h1 id="badges">Badges<a class="headerlink" href="#badges" title="Permanent link">&para;</a></h1>
 <h2 id="project-badges">Project Badges<a class="headerlink" href="#project-badges" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/badges.html#project-badges">project badges</a>.</p>
-<p>Key names here are just any labels.</p>
-<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/project_badges.html#add-a-badge-to-a-project">add a badge to a project endpoint</a>, with the appropriate <a href="https://docs.gitlab.com/ee/api/project_badges.html#placeholder-tokens">placeholder tokens</a>, but we <strong>require</strong> you to define the <code>name</code> of the badge.</p>
-<p>If the only non-required value is <code>delete: true</code> then the given badge is going to be removed.</p>
+<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the badges defined here will remain in the project, all other will be deleted.</p>
+<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/project_badges.html#add-a-badge-to-a-project">add a badge to a project endpoint</a>, with the appropriate <a href="https://docs.gitlab.com/ee/api/project_badges.html#placeholder-tokens">placeholder tokens</a>, but we <strong>require</strong> you to define the <code>name</code> of the badge.
+If the only non-required value is <code>delete: true</code> then the given badge is going to be removed.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
@@ -899,12 +899,13 @@
 <span class="w">      </span><span class="nt">old-badge-to-delete</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;a-badge&quot;</span><span class="w"></span>
 <span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
 </code></pre></div>
 <h2 id="group-badges">Group Badges<a class="headerlink" href="#group-badges" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/badges.html#group-badges">group badges</a>.</p>
-<p>Key names here are just any labels.</p>
-<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/group_badges.html#add-a-badge-to-a-group">add a badge to a group endpoint</a>, with the appropriate <a href="https://docs.gitlab.com/ee/api/group_badges.html#placeholder-tokens">placeholder tokens</a>, but we <strong>require</strong> you to define the <code>name</code> of the badge.</p>
-<p>If the only non-required value is <code>delete: true</code> then the given badge is going to be removed.</p>
+<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the badges defined here will remain in the group, all other will be deleted.</p>
+<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/group_badges.html#add-a-badge-to-a-group">add a badge to a group endpoint</a>, with the appropriate <a href="https://docs.gitlab.com/ee/api/group_badges.html#placeholder-tokens">placeholder tokens</a>, but we <strong>require</strong> you to define the <code>name</code> of the badge.
+If the only non-required value is <code>delete: true</code> then the given badge is going to be removed.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
@@ -913,6 +914,7 @@
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Group</span><span class="nv"> </span><span class="s">Badge&quot;</span><span class="w"></span>
 <span class="w">        </span><span class="nt">link_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://gitlab.yourcompany.com/%{project_path}/-/commits/%{default_branch}&quot;</span><span class="w"></span>
 <span class="w">        </span><span class="nt">image_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://gitlab.yourcompany.com/%{project_path}/badges/%{default_branch}/pipeline.svg&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
 </code></pre></div>
 
 

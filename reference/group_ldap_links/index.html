@@ -828,8 +828,9 @@
 <p>This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
 </div>
 <p>This section purpose is to manage <a href="https://docs.gitlab.com/ee/user/group/index.html#manage-group-memberships-via-ldap">group membership via LDAP</a>.</p>
-<p>The keys and values for each link should be as documented in the <a href="https://docs.gitlab.com/ee/api/groups.html#add-ldap-group-link-with-cn-or-filter">LDAP Group Links section of the Groups API docs</a>, <strong>except the id</strong>.</p>
-<p>The <code>provider</code> key should contain a value that can be found in the GitLab web UI, here:</p>
+<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the group LDAP links defined here will remain in the group, all other will be deleted.</p>
+<p>Values are like documented at <a href="https://docs.gitlab.com/ee/api/groups.html#add-ldap-group-link-with-cn-or-filter">LDAP Group Links section of the Groups API docs</a>, <strong>except the id</strong>.</p>
+<p>The <code>provider</code> should be set to a value that can be found in the GitLab web UI, here:</p>
 <p><img alt="group-ldap-links-provider.png" src="../../images/group-ldap-links-provider.png" /></p>
 <p>- it's "ldapmain" in this example.</p>
 <p>The <code>access_level</code> should be set to one of the <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access levels</a>.</p>
@@ -845,6 +846,7 @@
 <span class="w">        </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AD</span><span class="w"></span>
 <span class="w">        </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(employeeType=developer)&quot;</span><span class="w"></span>
 <span class="w">        </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
 </code></pre></div>
 
 

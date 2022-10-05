@@ -886,7 +886,8 @@
 <p>Please note that project-level and group-level <a href="https://docs.gitlab.com/ee/ci/variables/">CI/CD variables</a> are different entities in GitLab!</p>
 <h2 id="project-cicd-variables">Project CI/CD variables<a class="headerlink" href="#project-cicd-variables" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <strong>project-level</strong> CI/CD variables.</p>
-<p>The keys and values for each variable should be as documented in the <a href="https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable">Project-Level Variables API docs</a>, <strong>except the id</strong>.</p>
+<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the variables defined here will remain in the project, all other will be deleted.</p>
+<p>The values are like documented at <a href="https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable">Project-Level Variables API docs</a>, <strong>except the id</strong>.</p>
 <p>You can make the:</p>
 <ul>
 <li><a href="https://docs.gitlab.com/ee/ci/variables/#protected-cicd-variables">protected variables</a></li>
@@ -939,10 +940,13 @@
 <span class="w">      </span><span class="nt">a_secret_you_want_to_remove</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SECRET</span><span class="w"></span>
 <span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
 </code></pre></div>
 <h2 id="group-cicd-variables">Group CI/CD variables<a class="headerlink" href="#group-cicd-variables" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <strong>group-level</strong> CI/CD variables.</p>
-<p>The keys and values for each variable should be as documented in the <a href="https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable">Group-Level Variables API docs</a>, <strong>except the id</strong>.</p>
+<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the variables defined here will remain in the group, all other will be deleted.</p>
+<p>The values are like documented at <a href="https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable">Group-Level Variables API docs</a>, <strong>except the id</strong>.</p>
 <p>Although we do not provide examples like for the project-level variables, all the features like above are also supported:</p>
 <ul>
 <li>protected variables,</li>
@@ -968,6 +972,8 @@
 <span class="w">      </span><span class="nt">old_variable</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PASSWORD</span><span class="w"></span>
 <span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
 </code></pre></div></p>
 
 
