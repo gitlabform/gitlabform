@@ -127,3 +127,39 @@ class TestBadges:
             else:
                 assert not badge["link_url"].endswith("foobar")
                 assert not badge["image_url"].endswith("foobar")
+
+    def test__badges_enforce(self, gitlab, group_and_project_for_function):
+        group_and_project = group_and_project_for_function
+
+        config = f"""
+            projects_and_groups:
+              {group_and_project}:
+                badges:
+                  pipeline-status:
+                    name: "Project Badge"
+                    link_url: "https://gitlab.example.com/first"
+                    image_url: "https://gitlab.example.com/first"
+                  another:
+                    name: "Project Badge 2"
+                    link_url: "https://gitlab.example.com/second"
+                    image_url: "https://gitlab.example.com/second" 
+            """
+        run_gitlabform(config, group_and_project)
+
+        badges = gitlab.get_project_badges(group_and_project)
+        assert len(badges) == 2
+
+        config2 = f"""
+            projects_and_groups:
+              {group_and_project}:
+                badges:
+                  another:
+                    name: "Project Badge 2"
+                    link_url: "https://gitlab.example.com/foobar"
+                    image_url: "https://gitlab.example.com/foobar"
+                  enforce: true
+            """
+        run_gitlabform(config2, group_and_project)
+
+        badges = gitlab.get_project_badges(group_and_project)
+        assert len(badges) == 1
