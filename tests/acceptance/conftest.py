@@ -69,6 +69,18 @@ def other_group():
 
 
 @pytest.fixture(scope="class")
+def third_group():
+    # TODO: deduplicate this - it's a copy and paste from the above fixture
+    group_name = get_random_name("group")
+    create_group(group_name)
+
+    yield group_name
+
+    gl = get_gitlab()
+    gl.delete_group(group_name)
+
+
+@pytest.fixture(scope="class")
 def sub_group(group):
     gl = get_gitlab()
     parent_id = gl.get_group_id_case_insensitive(group)
@@ -164,7 +176,7 @@ def branch(gitlab, group_and_project):
 
 @pytest.fixture(scope="class")
 def other_branch(gitlab, group_and_project):
-    # TOOD: deduplicate
+    # TODO: deduplicate
     name = get_random_name("other_branch")
     gitlab.create_branch(group_and_project, name, "main")
 
