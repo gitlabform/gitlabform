@@ -2,13 +2,7 @@ import pytest
 
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab import AccessLevel
-from tests.acceptance import (
-    run_gitlabform,
-    get_gitlab,
-)
-
-
-gl = get_gitlab()
+from tests.acceptance import run_gitlabform, gl
 
 
 class TestBranches:

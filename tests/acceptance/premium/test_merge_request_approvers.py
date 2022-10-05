@@ -1,6 +1,6 @@
 import pytest
 
-from tests.acceptance import run_gitlabform
+from tests.acceptance import run_gitlabform, gl
 from gitlabform.gitlab import AccessLevel
 from gitlabform.processors.project.merge_requests_processor import APPROVAL_RULE_NAME
 
@@ -48,6 +48,9 @@ def group_with_just_owner(gitlab, third_group, users):
 
 
 class TestMergeRequestApprovers:
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
     def test__only_users(self, gitlab, group_and_project, make_user):
 
         user1 = make_user(AccessLevel.DEVELOPER)
@@ -112,6 +115,9 @@ class TestMergeRequestApprovers:
                 found = True
         assert found
 
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
     def test__only_groups(
         self,
         gitlab,
@@ -179,6 +185,9 @@ class TestMergeRequestApprovers:
                 found = True
         assert found
 
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
     def test__single_user_and_single_group(
         self,
         gitlab,
@@ -260,6 +269,9 @@ class TestMergeRequestApprovers:
                 found = True
         assert found
 
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
     def test__more_than_one_user_and_more_than_one_group(
         self,
         gitlab,
@@ -314,6 +326,9 @@ class TestMergeRequestApprovers:
                 found = True
         assert found
 
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
     def test__removing_preexisting_rules(
         self,
         gitlab,

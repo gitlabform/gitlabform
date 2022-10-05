@@ -1,11 +1,5 @@
 import pytest
-from tests.acceptance import (
-    run_gitlabform,
-    get_gitlab,
-)
-
-
-gl = get_gitlab()
+from tests.acceptance import run_gitlabform, gl
 
 
 class TestPushRules:
