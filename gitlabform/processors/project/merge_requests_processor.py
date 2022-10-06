@@ -1,12 +1,12 @@
 from logging import debug
 from cli_ui import debug as verbose
 
-from distutils.version import LooseVersion
-
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.decorators import SafeDict
 from gitlabform.processors.util.difference_logger import DifferenceLogger
+
+APPROVAL_RULE_NAME = "Approvers (configured using GitLabForm)"
 
 
 class MergeRequestsProcessor(AbstractProcessor):
@@ -33,13 +33,11 @@ class MergeRequestsProcessor(AbstractProcessor):
         ):
             verbose(f"Setting approvers...")
 
-            approval_rule_name = "Approvers (configured using GitLabForm)"
-
             # is a rule already configured and just needs updating?
             approval_rule_id = None
             rules = self.gitlab.get_approvals_rules(project_and_group)
             for rule in rules:
-                if rule["name"] == approval_rule_name:
+                if rule["name"] == APPROVAL_RULE_NAME:
                     approval_rule_id = rule["id"]
                 else:
                     if remove_other_approval_rules:
@@ -59,7 +57,7 @@ class MergeRequestsProcessor(AbstractProcessor):
                 self.gitlab.update_approval_rule(
                     project_and_group,
                     approval_rule_id,
-                    approval_rule_name,
+                    APPROVAL_RULE_NAME,
                     approvals["approvals_before_merge"],
                     approvers,
                     approver_groups,
@@ -71,7 +69,7 @@ class MergeRequestsProcessor(AbstractProcessor):
                 )
                 self.gitlab.create_approval_rule(
                     project_and_group,
-                    approval_rule_name,
+                    APPROVAL_RULE_NAME,
                     approvals["approvals_before_merge"],
                     approvers,
                     approver_groups,
