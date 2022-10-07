@@ -21,7 +21,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
+        python-version: [3.7, 3.8, 3.9, "3.10", 3.11]
       fail-fast : false
     steps:
       - uses: actions/checkout@v3
@@ -47,7 +47,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: ["3.10"]
+        python-version: [3.11]
       fail-fast : false
     steps:
       - uses: actions/checkout@v3
@@ -75,7 +75,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
+        python-version: [3.7, 3.8, 3.9, "3.10", 3.11]
       fail-fast : false
     steps:
       - uses: actions/checkout@v3
@@ -99,10 +99,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: 3.11
       - name: Install dependencies
         run: |
           pip install wheel
@@ -116,7 +116,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
+        python-version: [3.7, 3.8, 3.9, "3.10", 3.11]
       fail-fast : false
     steps:
       - uses: actions/checkout@v3
