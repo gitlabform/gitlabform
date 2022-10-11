@@ -48,10 +48,10 @@ jobs:
         run: |
           ./dev/run_gitlab_in_docker.sh
           pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false
+          override_pr: ${{ github.event.number }}
+          override_commit: ${{ github.event.pull_request.head.sha }}
 
   acceptance-tests-premium:
     runs-on: ubuntu-latest
@@ -81,10 +81,10 @@ jobs:
         run: |
           ./dev/run_gitlab_in_docker.sh
           pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false
+          override_pr: ${{ github.event.number }}
+          override_commit: ${{ github.event.pull_request.head.sha }}
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -113,8 +113,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
           override_pr: ${{ github.event.number }}
           override_commit: ${{ github.event.pull_request.head.sha }}
 
