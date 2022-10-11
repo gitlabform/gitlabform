@@ -1,7 +1,7 @@
 codecov:
   notify:
-    # 5 unit tests + at least one acceptance test
-    after_n_builds: 6
+    # 4 unit tests + at least one acceptance test
+    after_n_builds: 5
 
 # adding Flags to your `layout` configuration to show up in the PR comment
 comment:
