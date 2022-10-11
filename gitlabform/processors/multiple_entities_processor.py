@@ -3,7 +3,7 @@ from cli_ui import debug as verbose
 from cli_ui import fatal
 
 import abc
-from typing import Callable, List
+from typing import Callable, List, Union, Any
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
@@ -16,22 +16,52 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         self,
         configuration_name: str,
         gitlab: GitLab,
-        list_method_name: str,
-        add_method_name: str,
-        delete_method_name: str,
+        # TODO: Should the option of passing as str be deprecated ? It makes life harder (for Mypy and for the devs),
+        #    and it's not like the method is not known|doesn't exist at compile-time
+        list_method_name: Union[str, Callable[[str], list]],
+        add_method_name: Union[str, Callable[[str, Any], None]],
+        delete_method_name: Union[str, Callable[[str, dict], None]],
         defining: AbstractKey,
         required_to_create_or_update: AbstractKey,
-        edit_method_name=None,
+        edit_method_name: Union[str, Callable[[str, str, Any], None], None] = None,
     ):
+        """
+
+        :param configuration_name: The key in the YAML cfg file that determines the start of this Entity's section
+        :param gitlab:
+        :param list_method_name:
+        :param add_method_name:
+        :param delete_method_name:
+        :param defining: TODO -> what is this for ?
+        :param required_to_create_or_update: Entries which (according to the API documentation) are required fields
+        :param edit_method_name: TODO -> how does it handle the actual and new cfg diff ?
+        """
+
         super().__init__(configuration_name, gitlab)
-        self.list_method: Callable = getattr(self.gitlab, list_method_name)
-        self.add_method: Callable = getattr(self.gitlab, add_method_name)
-        self.delete_method: Callable = getattr(self.gitlab, delete_method_name)
+        self.list_method: Callable = (
+            getattr(self.gitlab, list_method_name)
+            if (isinstance(list_method_name, str))
+            else list_method_name
+        )
+        self.add_method: Callable = (
+            getattr(self.gitlab, add_method_name)
+            if (isinstance(add_method_name, str))
+            else add_method_name
+        )
+        self.delete_method: Callable = (
+            getattr(self.gitlab, delete_method_name)
+            if (isinstance(delete_method_name, str))
+            else delete_method_name
+        )
         self.defining: AbstractKey = defining
         self.required_to_create_or_update: AbstractKey = required_to_create_or_update
 
         if edit_method_name:
-            self.edit_method: Callable = getattr(self.gitlab, edit_method_name)
+            self.edit_method: Union[Callable, None] = (
+                getattr(self.gitlab, edit_method_name)
+                if (isinstance(edit_method_name, str))
+                else edit_method_name
+            )
         else:
             self.edit_method = None
 
