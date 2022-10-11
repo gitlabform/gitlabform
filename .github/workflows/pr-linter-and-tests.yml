@@ -52,8 +52,6 @@ jobs:
         run: |
           ./dev/run_gitlab_in_docker.sh
           pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: false
           override_pr: ${{ github.event.number }}
@@ -91,8 +89,6 @@ jobs:
         run: |
           ./dev/run_gitlab_in_docker.sh
           pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: false
           override_pr: ${{ github.event.number }}
