@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.util.decorators import configuration_to_safe_dict
+from logging import debug
 
 
 class AbstractProcessor(ABC):
@@ -16,7 +18,7 @@ class AbstractProcessor(ABC):
     def process(
         self,
         project_or_project_and_group: str,
-        configuration: dict,
+        configuration: dict[str, Any],
         dry_run: bool,
         effective_configuration: EffectiveConfiguration,
     ):
@@ -89,7 +91,15 @@ class AbstractProcessor(ABC):
             entity_in_gitlab.keys()
         )
         for key in keys_on_both_sides:
+            # TODO -> The return from Gitlab has:
+            #  - all the keys, even if their values is None, e.g.
+            #  - keys which are not part of the request API
+            # entity_in_gitlab[deploy_access_levels] -> [{'access_level': 40, 'access_level_description': 'Maintainers', 'user_id': None, 'group_id': None, 'group_inheritance_type': 0}]
+            # != entity_in_configuration[deploy_access_levels] -> [ordereddict([('access_level', 40)])]
             if entity_in_gitlab[key] != entity_in_configuration[key]:
+                debug(
+                    f"entity_in_gitlab[{key}] -> {entity_in_gitlab[key]} != entity_in_configuration[{key}] -> {entity_in_configuration[key]}"
+                )
                 return True
 
         return False
