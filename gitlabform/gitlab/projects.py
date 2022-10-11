@@ -1,4 +1,3 @@
-import json
 from time import sleep
 
 from gitlabform.gitlab.core import (
