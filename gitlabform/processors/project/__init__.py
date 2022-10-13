@@ -24,7 +24,7 @@ from gitlabform.processors.project.project_push_rules_processor import (
 from gitlabform.processors.project.project_settings_processor import (
     ProjectSettingsProcessor,
 )
-from gitlabform.processors.project.protected_environments import (
+from gitlabform.processors.project.protected_environments_processor import (
     ProtectedEnvironmentsProcessor,
 )
 from gitlabform.processors.project.resource_groups_processor import (

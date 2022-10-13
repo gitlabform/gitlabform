@@ -1,3 +1,5 @@
+from logging import debug
+
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.defining_keys import Key, And
 from gitlabform.processors.multiple_entities_processor import MultipleEntitiesProcessor
@@ -15,14 +17,37 @@ class ProtectedEnvironmentsProcessor(MultipleEntitiesProcessor):
             add_method_name=gitlab.protect_a_repository_environment,
             edit_method_name=gitlab.update_a_protected_environment,
             delete_method_name=gitlab.unprotect_environment,
-            # TODO: I had to define "name" inside the cfg, it should get the section's name as the entity name, e.g.
-            # protected_environments:
-            #   foo:
-            #     name: "foo" <- This is redundant
-            #
             defining=Key("name"),
             required_to_create_or_update=And(Key("name"), Key("deploy_access_levels")),
         )
+
+        self.custom_diff_analyzers[
+            "deploy_access_levels"
+        ] = self._deploy_access_levels_delta_analyzer
+
+    @staticmethod
+    def _deploy_access_levels_delta_analyzer(
+        cfg_key: str, cfg_in_gitlab: list, local_cfg: list
+    ) -> bool:
+        if len(cfg_in_gitlab) != len(local_cfg):
+            return True
+
+        for index in range(len(cfg_in_gitlab)):
+            from_gitlab = {
+                k: v for k, v in cfg_in_gitlab[index].items() if v is not None
+            }
+            from_local_cfg = local_cfg[index]
+
+            keys_on_both_sides = set(from_gitlab.keys()) & set(from_local_cfg.keys())
+
+            for key in keys_on_both_sides:
+                if from_gitlab[key] != from_local_cfg[key]:
+                    debug(
+                        f"* A <{key}> in [{cfg_key}] differs: GitLab :: {from_gitlab} != Local :: {from_local_cfg}"
+                    )
+                    return True
+
+        return False
 
     def _print_diff(self, project_or_project_and_group: str, entity_config: dict):
         # TODO: yeah... I didn't get how this is supposed to work :-(

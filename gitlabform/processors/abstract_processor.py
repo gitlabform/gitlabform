@@ -1,18 +1,24 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from logging import debug
+from typing import Any, Callable, Union
 
 from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.util.decorators import configuration_to_safe_dict
-from logging import debug
 
 
 class AbstractProcessor(ABC):
     def __init__(self, configuration_name: str, gitlab: GitLab):
         self.configuration_name = configuration_name
         self.gitlab = gitlab
+        self.custom_diff_analyzers: dict[
+            str,
+            Callable[
+                [str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool
+            ],
+        ] = {}
 
     @configuration_to_safe_dict
     def process(
@@ -69,8 +75,8 @@ class AbstractProcessor(ABC):
     def _print_diff(self, project_or_project_and_group: str, entity_config):
         verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
 
-    @staticmethod
     def _needs_update(
+        self,
         entity_in_gitlab: dict,
         entity_in_configuration: dict,
     ):
@@ -91,11 +97,11 @@ class AbstractProcessor(ABC):
             entity_in_gitlab.keys()
         )
         for key in keys_on_both_sides:
-            # TODO -> The return from Gitlab has:
-            #  - all the keys, even if their values is None, e.g.
-            #  - keys which are not part of the request API
-            # entity_in_gitlab[deploy_access_levels] -> [{'access_level': 40, 'access_level_description': 'Maintainers', 'user_id': None, 'group_id': None, 'group_inheritance_type': 0}]
-            # != entity_in_configuration[deploy_access_levels] -> [ordereddict([('access_level', 40)])]
+            if key in self.custom_diff_analyzers:
+                return self.custom_diff_analyzers[key](
+                    key, entity_in_gitlab[key], entity_in_configuration[key]
+                )
+
             if entity_in_gitlab[key] != entity_in_configuration[key]:
                 debug(
                     f"entity_in_gitlab[{key}] -> {entity_in_gitlab[key]} != entity_in_configuration[{key}] -> {entity_in_configuration[key]}"
