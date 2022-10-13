@@ -26,17 +26,13 @@ class GitLabProjectProtectedEnvironments(GitLabProjects):
         protected_env_name: str,
         protected_env_cfg: dict,
     ):
-        # TODO: The algorithm that decides if there are changes in AbstractProcessor :: _needs_update gets this wrong
-        #  making this always be updated
-        pass
-
-        # return self._make_requests_to_api(
-        #     "projects/%s/protected_environments/%s",
-        #     (project_and_group_name, protected_env_name),
-        #     method="PUT",
-        #     json=json.loads(json.dumps(protected_env_cfg)),
-        #     expected_codes=201,
-        # )
+        return self._make_requests_to_api(
+            "projects/%s/protected_environments/%s",
+            (project_and_group_name, protected_env_name),
+            method="PUT",
+            json=json.loads(json.dumps(protected_env_cfg)),
+            expected_codes=201,
+        )
 
     def unprotect_environment(
         self, project_and_group_name: str, protected_env_cfg: dict
