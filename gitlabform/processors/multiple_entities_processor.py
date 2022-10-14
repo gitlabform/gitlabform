@@ -3,7 +3,7 @@ from cli_ui import debug as verbose
 from cli_ui import fatal
 
 import abc
-from typing import Callable, List, Union, Any
+from typing import Callable, Union, Any
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
@@ -23,18 +23,17 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         delete_method_name: Union[str, Callable[[str, dict], None]],
         defining: AbstractKey,
         required_to_create_or_update: AbstractKey,
-        edit_method_name: Union[str, Callable[[str, str, Any], None], None] = None,
+        edit_method_name: Union[str, Callable[[str, dict, dict], None], None] = None,
     ):
         """
-
         :param configuration_name: The key in the YAML cfg file that determines the start of this Entity's section
-        :param gitlab:
-        :param list_method_name:
-        :param add_method_name:
-        :param delete_method_name:
-        :param defining: TODO -> what is this for ?
+        :param gitlab: Gitlab instance
+        :param list_method_name: Retrieves the entities in question
+        :param add_method_name: Creates a new entity in Gitlab
+        :param delete_method_name: Removes the entity from Gitlab
+        :param defining: An expression that tells which fields of the entity in GitLab are identifying it.
         :param required_to_create_or_update: Entries which (according to the API documentation) are required fields
-        :param edit_method_name: TODO -> how does it handle the actual and new cfg diff ?
+        :param edit_method_name: Edits the existing entity in Gitlab
         """
 
         super().__init__(configuration_name, gitlab)
