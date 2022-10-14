@@ -109,3 +109,32 @@ class AbstractProcessor(ABC):
                 return True
 
         return False
+
+    @staticmethod
+    def recursive_diff_analyzer(cfg_key: str, cfg_in_gitlab: list, local_cfg: list):
+        if len(cfg_in_gitlab) != len(local_cfg):
+            return True
+
+        for index in range(len(cfg_in_gitlab)):
+            from_gitlab = {
+                k: v for k, v in cfg_in_gitlab[index].items() if v is not None
+            }
+            from_local_cfg = local_cfg[index]
+
+            keys_on_both_sides = set(from_gitlab.keys()) & set(from_local_cfg.keys())
+
+            for key in keys_on_both_sides:
+                if isinstance(from_gitlab[key], list) and isinstance(
+                    from_local_cfg[key], list
+                ):
+                    AbstractProcessor.recursive_diff_analyzer(
+                        key, from_gitlab[key], from_local_cfg[key]
+                    )
+
+                if from_gitlab[key] != from_local_cfg[key]:
+                    debug(
+                        f"* A <{key}> in [{cfg_key}] differs:\n GitLab :: {from_gitlab} != Local :: {from_local_cfg}"
+                    )
+                    return True
+
+        return False
