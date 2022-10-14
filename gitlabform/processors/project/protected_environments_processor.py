@@ -15,7 +15,6 @@ class ProtectedEnvironmentsProcessor(MultipleEntitiesProcessor):
             gitlab,
             list_method_name=gitlab.list_protected_environments,
             add_method_name=gitlab.protect_a_repository_environment,
-            edit_method_name=gitlab.update_a_protected_environment,
             delete_method_name=gitlab.unprotect_environment,
             defining=Key("name"),
             required_to_create_or_update=And(Key("name"), Key("deploy_access_levels")),
