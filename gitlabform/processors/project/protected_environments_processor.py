@@ -47,12 +47,3 @@ class ProtectedEnvironmentsProcessor(MultipleEntitiesProcessor):
                     return True
 
         return False
-
-    def _print_diff(self, project_or_project_and_group: str, entity_config: dict):
-        # TODO: yeah... I didn't get how this is supposed to work :-(
-        # Should I receive (from the super class) the "live" cfg from Gitlab ?
-        DifferenceLogger.log_diff(
-            f"Project {project_or_project_and_group} {self.configuration_name} changes",
-            self.gitlab.list_protected_environments(project_or_project_and_group),
-            entity_config,
-        )
