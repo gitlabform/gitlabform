@@ -18,20 +18,6 @@ class GitLabProjectProtectedEnvironments(GitLabProjects):
             expected_codes=201,
         )
 
-    def update_a_protected_environment(
-        self,
-        project_and_group_name: str,
-        protected_env_name: str,
-        protected_env_cfg: dict,
-    ):
-        return self._make_requests_to_api(
-            "projects/%s/protected_environments/%s",
-            (project_and_group_name, protected_env_name),
-            method="PUT",
-            json=protected_env_cfg,
-            expected_codes=201,
-        )
-
     def unprotect_environment(
         self, project_and_group_name: str, protected_env_cfg: dict
     ):
