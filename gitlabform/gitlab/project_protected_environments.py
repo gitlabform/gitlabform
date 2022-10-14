@@ -1,5 +1,3 @@
-import json
-
 from gitlabform.gitlab.projects import GitLabProjects
 
 
@@ -16,7 +14,7 @@ class GitLabProjectProtectedEnvironments(GitLabProjects):
             "projects/%s/protected_environments",
             project_and_group_name,
             method="POST",
-            json=json.loads(json.dumps(protected_env_cfg)),
+            json=protected_env_cfg,
             expected_codes=201,
         )
 
@@ -30,7 +28,7 @@ class GitLabProjectProtectedEnvironments(GitLabProjects):
             "projects/%s/protected_environments/%s",
             (project_and_group_name, protected_env_name),
             method="PUT",
-            json=json.loads(json.dumps(protected_env_cfg)),
+            json=protected_env_cfg,
             expected_codes=201,
         )
 
