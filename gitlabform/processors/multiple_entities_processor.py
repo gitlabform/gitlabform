@@ -16,8 +16,6 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         self,
         configuration_name: str,
         gitlab: GitLab,
-        # TODO: Should the option of passing as str be deprecated ? It makes life harder (for Mypy and for the devs),
-        #    and it's not like the method is not known|doesn't exist at compile-time
         list_method_name: Union[str, Callable[[str], list]],
         add_method_name: Union[str, Callable[[str, Any], None]],
         delete_method_name: Union[str, Callable[[str, dict], None]],
