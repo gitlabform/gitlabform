@@ -112,6 +112,9 @@ class AbstractProcessor(ABC):
 
     @staticmethod
     def recursive_diff_analyzer(cfg_key: str, cfg_in_gitlab: list, local_cfg: list):
+        """
+        :return: True if the lists are NOT equal, False otherwise
+        """
         if len(cfg_in_gitlab) != len(local_cfg):
             return True
 
