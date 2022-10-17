@@ -1,12 +1,12 @@
 from collections import defaultdict
-from typing import DefaultDict
+from typing import DefaultDict, Final
 
 from abc import ABC
 
 # f.e. bad syntax in the config file ~= "it's your fault" 😅
-EXIT_INVALID_INPUT = 1
+EXIT_INVALID_INPUT: Final = 1
 # f.e. when requests to GitLab fail ~= "it's not your fault" 😎
-EXIT_PROCESSING_ERROR = 2
+EXIT_PROCESSING_ERROR: Final = 2
 
 
 class Entities(ABC):
