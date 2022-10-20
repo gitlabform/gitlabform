@@ -2,7 +2,7 @@ from gitlabform.gitlab.projects import GitLabProjects
 
 
 class GitLabProjectProtectedEnvironments(GitLabProjects):
-    def list_protected_environments(self, project_and_group_name: str) -> list[dict]:
+    def list_protected_environments(self, project_and_group_name: str):
         return self._make_requests_to_api(
             "projects/%s/protected_environments", project_and_group_name
         )

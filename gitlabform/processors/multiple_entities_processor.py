@@ -147,7 +147,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                     debug(f"{self.configuration_name} AFTER: ^^^")
                 else:
                     verbose(
-                        f"Recreating {entity_name} of {self.configuration_name} in {project_or_group}"
+                        f" * Recreating {entity_name} of {self.configuration_name} in {project_or_group}"
                     )
                     self.delete_method(project_or_group, entity_in_gitlab)
                     self.add_method(project_or_group, entity_config)
