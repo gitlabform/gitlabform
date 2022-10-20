@@ -2,7 +2,6 @@ from gitlabform.processors import AbstractProcessor
 
 
 class TestRecursiveDiffAnalyzer:
-    # TODO: user (instead of user_id)
     _cfg_a = [
         {
             "access_level": 40,
@@ -22,7 +21,7 @@ class TestRecursiveDiffAnalyzer:
 
     _cfg_b = [{"access_level": 40, "group_inheritance_type": 0}, {"user_id": 967}]
 
-    def test_equal_configurations(self):
+    def test__equal_configurations(self):
         import logging
 
         logging.getLogger().setLevel(logging.DEBUG)
@@ -31,7 +30,7 @@ class TestRecursiveDiffAnalyzer:
             "deploy_access_levels", self._cfg_a, self._cfg_b
         )
 
-    def test_unequal_configurations(self):
+    def test__unequal_configurations(self):
         modified_cfg = self._cfg_b.copy()
 
         modified_cfg[1]["group_inheritance_type"] = 1
