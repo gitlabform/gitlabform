@@ -1,5 +1,7 @@
+import logging
 from abc import ABC, abstractmethod
 from types import SimpleNamespace
+from gitlabform.gitlab import GitLab
 
 from cli_ui import fatal
 from yamlpath import Processor
@@ -11,11 +13,42 @@ from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
 
 
+class ConfigurationTransformerFromGitlab(ABC):
+    @classmethod
+    @abstractmethod
+    def transform(cls, configuration: Configuration, gitlab: GitLab) -> None:
+        pass
+
+
 class ConfigurationTransformer(ABC):
     @classmethod
     @abstractmethod
-    def transform(cls, configuration: Configuration):
+    def transform(cls, configuration: Configuration) -> None:
         pass
+
+
+class UserTransformer(ConfigurationTransformerFromGitlab):
+    @classmethod
+    def transform(cls, configuration: Configuration, gitlab: GitLab) -> None:
+        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
+
+        processor = Processor(ConsolePrinter(logging_args), configuration.config)
+
+        paths_to_user = [
+            "projects_and_groups.*.protected_environments.*.deploy_access_levels.user"
+        ]
+
+        for path in paths_to_user:
+            try:
+                for node_coordinate in processor.get_nodes(path):
+                    user = node_coordinate.parent.pop("user")
+
+                    node_coordinate.parent["user_id"] = gitlab._get_user_id(user)
+            except YAMLPathException as e:
+                # TODO: We should gather a cfg example that makes the lib throw and file a bug issue
+                logging.debug(f"The YAMl library threw an exception: {e}")
+
+                pass
 
 
 class AccessLevelsTransformer(ConfigurationTransformer):
