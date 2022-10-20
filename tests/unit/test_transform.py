@@ -1,9 +1,13 @@
+from unittest import TestCase
+from unittest.mock import MagicMock
+
 import pytest
 from deepdiff import DeepDiff
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
-from gitlabform.transform import AccessLevelsTransformer
+from gitlabform.gitlab import GitLab
+from gitlabform.transform import AccessLevelsTransformer, UserTransformer
 
 
 def test__config__with_access_level_names__branches():
@@ -188,3 +192,50 @@ def test__config__with_access_level_names__invalid_name():
     with pytest.raises(SystemExit) as e:
         AccessLevelsTransformer.transform(configuration)
     assert e.value.code == EXIT_INVALID_INPUT
+
+
+class TestUserTransformer(TestCase):
+    def test__transform_for_protected_environments(self) -> None:
+        config_yaml = f"""
+        projects_and_groups:
+          "foo/bar":
+            protected_environments:
+              foo:
+                name: foo
+                deploy_access_levels:
+                  - access_level: 40
+                    group_inheritance_type: 0
+                  - user: jsmith
+                  - user_id: 123
+                  - user: bdoe
+                  - user_id: 456
+        """
+        configuration = Configuration(config_string=config_yaml)
+
+        gitlab_mock = MagicMock(GitLab)
+        gitlab_mock._get_user_id = MagicMock(side_effect=[78, 89])
+
+        UserTransformer.transform(configuration, gitlab_mock)
+
+        assert gitlab_mock._get_user_id.call_count == 2
+
+        expected_transformed_config_yaml = f"""
+        projects_and_groups:
+          "foo/bar":
+            protected_environments:
+              foo:
+                name: foo
+                deploy_access_levels:
+                  - access_level: 40
+                    group_inheritance_type: 0
+                  - user_id: 78
+                  - user_id: 123
+                  - user_id: 89
+                  - user_id: 456
+        """
+
+        expected_transformed_config = Configuration(
+            config_string=expected_transformed_config_yaml
+        )
+
+        assert not DeepDiff(configuration.config, expected_transformed_config.config)
