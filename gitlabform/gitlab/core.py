@@ -67,7 +67,7 @@ class GitLabCore:
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
 
     @functools.lru_cache()
-    def _get_user_id(self, username):
+    def _get_user_id(self, username: str) -> str: # TODO: should it return an int ?
         users = self._make_requests_to_api("users?username=%s", username, "GET")
 
         # this API endpoint is for lookup, not search, so 'username' has to be full and exact username
