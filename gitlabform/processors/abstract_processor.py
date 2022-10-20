@@ -24,7 +24,7 @@ class AbstractProcessor(ABC):
     def process(
         self,
         project_or_project_and_group: str,
-        configuration: dict[str, Any],
+        configuration,
         dry_run: bool,
         effective_configuration: EffectiveConfiguration,
     ):
