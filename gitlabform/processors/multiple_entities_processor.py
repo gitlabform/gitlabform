@@ -154,7 +154,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                     debug(f"{self.configuration_name} AFTER: ^^^")
             else:
                 verbose(
-                    f"{entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update."
+                    f" * {entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update."
                 )
 
         # add c) (or do nothing if marked as "delete")
@@ -165,7 +165,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                 project_or_group, entity_name, entity_config
             )
             verbose(
-                f"Adding {entity_name} of {self.configuration_name} in {project_or_group}"
+                f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}"
             )
             self.add_method(project_or_group, entity_config)
             debug(f"{self.configuration_name} AFTER: ^^^")
