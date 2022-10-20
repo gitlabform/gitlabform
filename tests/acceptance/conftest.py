@@ -1,11 +1,12 @@
 import os
+from typing import Callable, Optional
 
 import pytest
 from cryptography.hazmat.primitives import serialization as crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend as crypto_default_backend
 
-from gitlabform.gitlab import AccessLevel
+from gitlabform.gitlab import AccessLevel, GitLab
 from tests.acceptance import (
     get_gitlab,
     create_group,
@@ -19,23 +20,23 @@ from tests.acceptance import (
 
 
 @pytest.fixture(scope="session")
-def gitlab():
+def gitlab() -> GitLab:
     gl = get_gitlab()
     yield gl  # provide fixture value
 
 
 @pytest.fixture(scope="class")
-def group_and_project(group, project):
+def group_and_project(group, project) -> str:
     return f"{group}/{project}"
 
 
 @pytest.fixture(scope="function")
-def group_and_project_for_function(group, project_for_function):
+def group_and_project_for_function(group, project_for_function) -> str:
     return f"{group}/{project_for_function}"
 
 
 @pytest.fixture(scope="class")
-def group():
+def group() -> str:
     group_name = get_random_name("group")
     create_group(group_name)
 
@@ -192,11 +193,15 @@ class User:
 
 
 @pytest.fixture(scope="class")
-def make_user(gitlab, group_and_project):
+def make_user(
+    gitlab, group_and_project
+) -> Callable[[Optional[AccessLevel], Optional[bool]], User]:
     username_base = get_random_name("user")
     created_users = []
 
-    def _make_user(level=AccessLevel.DEVELOPER, add_to_project=True):
+    def _make_user(
+        level: AccessLevel = AccessLevel.DEVELOPER, add_to_project: bool = True
+    ) -> User:
         last_id = len(created_users) + 1
         username = f"{username_base}_{last_id}"
         user = gitlab.create_user(

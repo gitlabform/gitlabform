@@ -41,7 +41,7 @@ for env_var in env_vars_to_files.keys():
 gl = GitLab(config_string=CONFIG)
 
 
-def get_random_name(entity: str):
+def get_random_name(entity: str) -> str:
     random_suffix = get_random_suffix()
     return f"gitlabform_{entity}_{random_suffix}"
 
