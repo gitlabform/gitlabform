@@ -1,11 +1,9 @@
-from unittest import TestCase
-
 import pytest
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform, gl
 
 
-class TestProtectedEnvironments(TestCase):
+class TestProtectedEnvironments:
     @pytest.mark.skipif(
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
