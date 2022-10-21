@@ -17,7 +17,7 @@ jobs:
   black-formatting:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout code from the PR
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -35,7 +35,11 @@ jobs:
         python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code from the PR
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -68,7 +72,11 @@ jobs:
         python-version: ["3.10"]
       fail-fast : false
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code from the PR
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -98,7 +106,7 @@ jobs:
         python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
-      - name: Checkout code
+      - name: Checkout code from the PR
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -124,7 +132,7 @@ jobs:
   security-tests:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout code from the PR
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -149,7 +157,7 @@ jobs:
         python-version: [3.7, 3.8, 3.9, "3.10"] # 3.11-dev
       fail-fast : false
     steps:
-      - name: Checkout code
+      - name: Checkout code from the PR
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
