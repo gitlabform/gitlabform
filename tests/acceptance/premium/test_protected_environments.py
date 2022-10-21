@@ -25,7 +25,7 @@ class TestProtectedEnvironments(TestCase):
                 - access_level: 40
                   group_inheritance_type: 0
                 - user_id: {user1.id}
-                - user: {user2.id}
+                - user: {user2.name}
         """
 
         run_gitlabform(config, group_and_project)
