@@ -21,14 +21,19 @@ class GitLabProjectProtectedEnvironments(GitLabProjects):
         )
 
         # TODO: remove this when this issue is resolved -> https://gitlab.com/gitlab-org/gitlab/-/issues/378657
-        if retry and (len(protected_env_cfg['deploy_access_levels']) != len(response['deploy_access_levels'])):
+        if retry and (
+            len(protected_env_cfg["deploy_access_levels"])
+            != len(response["deploy_access_levels"])
+        ):
             verbose(
-                f"Gitlab's returned \"deploy_access_levels\" differs from the sent cfg, trying again..."
+                f'Gitlab\'s returned "deploy_access_levels" differs from the sent cfg, trying again...'
             )
 
             self.unprotect_environment(project_and_group_name, protected_env_cfg)
 
-            return self.protect_a_repository_environment(project_and_group_name, protected_env_cfg, False)
+            return self.protect_a_repository_environment(
+                project_and_group_name, protected_env_cfg, False
+            )
 
         return response
 
