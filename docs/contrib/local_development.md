@@ -65,7 +65,9 @@ machine.
 ```
 
 3. Run `pytest tests/acceptance` to start all tests.
-To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
+To run only a single class with tests run f.e.
+- `py.test tests/acceptance -k "TestArchiveProject"`.
+- `pytest tests/acceptance/<TEST_FILE>.py::<TestClass>::<TEST_METHOD>`
 
 ### Running acceptance tests using your own GitLab instance
 
