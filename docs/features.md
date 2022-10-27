@@ -17,6 +17,7 @@ GitLabForm enables you to manage:
     * [Protected branches](reference/protected_branches.md):
         * access levels (roles) allowed to push/merge/unprotect, allow force push flag,
         * users/groups allowed to push/merge/unprotect, code owner approval required flag (**GitLab Premium (paid) only**),
+    * [Protected environments](reference/protected_environments.md),
     * [Deploy keys](reference/deploy_keys.md),
     * [Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!)](reference/files.md),
     * [Webhooks](reference/webhooks.md),
