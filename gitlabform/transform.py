@@ -45,7 +45,6 @@ class UserTransformer(ConfigurationTransformerFromGitlab):
 
                     node_coordinate.parent["user_id"] = gitlab._get_user_id(user)
             except YAMLPathException as e:
-                # TODO: We should gather a cfg example that makes the lib throw and file a bug issue
                 logging.debug(f"The YAMl library threw an exception: {e}")
 
                 pass
