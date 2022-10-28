@@ -19,18 +19,17 @@ class TestRecursiveDiffAnalyzer:
         },
     ]
 
-    _cfg_b = [{"access_level": 40, "group_inheritance_type": 0}, {"user_id": 967}]
+    _cfg_b = [
+        {"access_level": 40, "group_inheritance_type": 0},
+        {"user_id": 967},
+    ]
 
-    def test__equal_configurations(self):
-        import logging
-
-        logging.getLogger().setLevel(logging.DEBUG)
-
+    def test__equal_configurations(self) -> None:
         assert not AbstractProcessor.recursive_diff_analyzer(
             "deploy_access_levels", self._cfg_a, self._cfg_b
         )
 
-    def test__unequal_configurations(self):
+    def test__unequal_configurations(self) -> None:
         modified_cfg = self._cfg_b.copy()
 
         modified_cfg[1]["group_inheritance_type"] = 1
