@@ -203,7 +203,7 @@ class TestUserTransformer(TestCase):
               foo:
                 name: foo
                 deploy_access_levels:
-                  - access_level: 40
+                  - access_level: maintainer
                     group_inheritance_type: 0
                   - user: jsmith
                   - user_id: 123
@@ -226,7 +226,7 @@ class TestUserTransformer(TestCase):
               foo:
                 name: foo
                 deploy_access_levels:
-                  - access_level: 40
+                  - access_level: maintainer
                     group_inheritance_type: 0
                   - user_id: 78
                   - user_id: 123

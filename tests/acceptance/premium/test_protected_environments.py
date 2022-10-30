@@ -20,7 +20,7 @@ class TestProtectedEnvironments:
               foo:
                 name: foo
                 deploy_access_levels:
-                  - access_level: 40
+                  - access_level: maintainer
                     group_inheritance_type: 0
                   - user_id: {make_user(AccessLevel.DEVELOPER).id}
                   - user: {make_user(AccessLevel.DEVELOPER).name}
