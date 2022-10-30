@@ -24,13 +24,9 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
       - name: Create release in GitHub
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          # This token is provided by Actions, you do not need to create your own token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/release-action@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
+          name: ${{ github.ref }}
+          body: "(this is a placeholder, it will be replaced with a changelog contents)"
+          # This token is provided by Actions, you do not need to create your own token
+          token: ${{ secrets.GITHUB_TOKEN }}

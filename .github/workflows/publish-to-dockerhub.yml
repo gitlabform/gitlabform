@@ -28,7 +28,7 @@ jobs:
         shell: bash {0}
       - name: Docker metadata
         id: metadata
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: |
             ghcr.io/gitlabform/gitlabform
@@ -39,19 +39,19 @@ jobs:
             type=pep440,pattern={{major}}.{{minor}}
             type=pep440,pattern={{major}}
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       # gitlabform/gitlabform image is going to be here
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           # This token is provided by Actions, you do not need to create your own token
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish image to registries
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           context: .
