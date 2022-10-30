@@ -845,11 +845,13 @@
 </div>
 <p>This section purpose is to manage the project <a href="https://docs.gitlab.com/ee/ci/environments/protected_environments.html#protected-environments">protected environments</a>.</p>
 <p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the protected environments defined here will remain in the project, all other will be deleted.</p>
-<p>The supported values are like documented in the <a href="https://docs.gitlab.com/ee/api/protected_environments.html#protect-repository-environments">protect environment endpoint of the Protected environments API</a>, with the following changes:
-* <code>user</code> with a username can be used instead of <code>user_id</code> with a user id,
-* <code>group</code> with a group name can be used instead of <code>group_id</code> with a group id.
-* <code>access_level</code> can have a string from the <a href="https://docs.gitlab.com/ee/api/protected_environments.html#valid-access-levels">valid access levels</a> as a value instead of just a number,
-* using <code>approval_rules</code> may work but this has not been tested yet, </p>
+<p>The supported values are like documented in the <a href="https://docs.gitlab.com/ee/api/protected_environments.html#protect-repository-environments">protect environment endpoint of the Protected environments API</a>, with the following changes:</p>
+<ul>
+<li><code>user</code> with a username can be used instead of <code>user_id</code> with a user id,</li>
+<li><code>group</code> with a group name can be used instead of <code>group_id</code> with a group id.</li>
+<li><code>access_level</code> can have a string from the <a href="https://docs.gitlab.com/ee/api/protected_environments.html#valid-access-levels">valid access levels</a> as a value instead of just a number,</li>
+<li>using <code>approval_rules</code> may work but this has not been tested yet, </li>
+</ul>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
