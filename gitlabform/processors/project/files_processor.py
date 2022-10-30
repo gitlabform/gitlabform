@@ -91,19 +91,18 @@ class FilesProcessor(AbstractProcessor):
                         new_content = configuration.get("files|" + file + "|content")
                     else:
                         path_in_config = Path(
-                            configuration.get("files|" + file + "|file")
+                            str(configuration.get("files|" + file + "|file"))
                         )
                         if path_in_config.is_absolute():
-                            # TODO: does this work? we are reading the content twice in this case...
-                            path = path_in_config.read_text()
+                            effective_path = path_in_config
                         else:
                             # relative paths are relative to config file location
-                            path = Path(
+                            effective_path = Path(
                                 os.path.join(
                                     self.config.config_dir, str(path_in_config)
                                 )
                             )
-                        new_content = path.read_text()
+                        new_content = effective_path.read_text()
 
                     if configuration.get("files|" + file + "|template", True):
                         new_content = self.get_file_content_as_template(

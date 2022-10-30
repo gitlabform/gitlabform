@@ -2,11 +2,15 @@ from logging import debug
 from cli_ui import debug as verbose
 
 import abc
-from typing import Callable
+from typing import Callable, Optional
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.difference_logger import DifferenceLogger
+
+
+def noop():
+    pass
 
 
 class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
@@ -24,7 +28,7 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         if add_method_name:
             self.add_method: Callable = getattr(self.gitlab, add_method_name)
         else:
-            self.add_method = None
+            self.add_method = noop
 
     def _process_configuration(self, project_or_group: str, configuration: dict):
 

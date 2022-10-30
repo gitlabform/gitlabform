@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT, Groups, Projects
@@ -16,7 +18,7 @@ class GroupsAndProjectsProvider:
         self.configuration = configuration
         self.include_archived_projects = include_archived_projects
 
-    def get_groups_and_projects(self, target: str) -> (Groups, Projects):
+    def get_groups_and_projects(self, target: str) -> Tuple[Groups, Projects]:
         """
         :param target: "project/group", "group", "group/subgroup", ALL or ALL_DEFINED
         :return: tuple with Groups and Projects
@@ -32,7 +34,7 @@ class GroupsAndProjectsProvider:
 
         return groups, projects
 
-    def _get_single_group_or_project(self, target: str) -> (Groups, Projects):
+    def _get_single_group_or_project(self, target: str) -> Tuple[Groups, Projects]:
 
         groups = Groups()
         projects = Projects()
@@ -144,7 +146,9 @@ class GroupsAndProjectsProvider:
                 )
         return archived
 
-    def _get_all_and_archived_projects_from_groups(self, groups: list) -> (list, list):
+    def _get_all_and_archived_projects_from_groups(
+        self, groups: list
+    ) -> Tuple[list, list]:
         all = []
         archived = []
         for group in groups:

@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Optional
+from typing import Callable, Optional, Generator, List
 
 import pytest
 from cryptography.hazmat.primitives import serialization as crypto_serialization
@@ -20,7 +20,7 @@ from tests.acceptance import (
 
 
 @pytest.fixture(scope="session")
-def gitlab() -> GitLab:
+def gitlab() -> Generator:
     gl = get_gitlab()
     yield gl  # provide fixture value
 
@@ -36,7 +36,7 @@ def group_and_project_for_function(group, project_for_function) -> str:
 
 
 @pytest.fixture(scope="class")
-def group() -> str:
+def group() -> Generator:
     group_name = get_random_name("group")
     create_group(group_name)
 
@@ -193,11 +193,9 @@ class User:
 
 
 @pytest.fixture(scope="class")
-def make_user(
-    gitlab, group_and_project
-) -> Callable[[Optional[AccessLevel], Optional[bool]], User]:
+def make_user(gitlab, group_and_project) -> Generator:
     username_base = get_random_name("user")
-    created_users = []
+    created_users: List[User] = []
 
     def _make_user(
         level: AccessLevel = AccessLevel.DEVELOPER, add_to_project: bool = True

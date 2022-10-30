@@ -94,3 +94,10 @@ pip install -e .[docs]
 mkdocs serve
 ```
 ...and open the provided link (probably [http://127.0.0.1:8000/](http://127.0.0.1:8000/)) in your browser.
+
+## Testing types
+
+Please run mypy to test static types:
+```shell
+mypy .
+```

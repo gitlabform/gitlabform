@@ -1,4 +1,6 @@
 from logging import debug
+from typing import Dict, Tuple
+
 from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT
@@ -36,7 +38,7 @@ class GroupMembersProcessor(AbstractProcessor):
         self._process_users(group, users_to_set_by_username, enforce_group_members)
 
     @staticmethod
-    def _get_groups_and_users_to_set(configuration: dict) -> (dict, dict):
+    def _get_groups_and_users_to_set(configuration: dict) -> Tuple[dict, dict]:
 
         groups_to_set_by_group_path = configuration.get("group_members|groups", {})
 
@@ -154,7 +156,7 @@ class GroupMembersProcessor(AbstractProcessor):
         if users_to_set_by_username:
 
             # group users to set by access level
-            users_to_set_by_access_level = dict()
+            users_to_set_by_access_level: Dict[int, list] = dict()
             for user in users_to_set_by_username:
                 access_level = users_to_set_by_username[user]["access_level"]
                 users_to_set_by_access_level.setdefault(access_level, []).append(user)

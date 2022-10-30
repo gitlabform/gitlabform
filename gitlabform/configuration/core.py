@@ -92,10 +92,10 @@ class ConfigurationCore(ABC):
         yaml.version = (1, 1)
 
         if config_string:
-            config_string = textwrap.dedent(source)
+            config = textwrap.dedent(source)
             verbose("Reading config from the provided string.")
             (yaml_data, doc_loaded) = Parsers.get_yaml_data(
-                yaml, log, config_string, literal=True
+                yaml, log, config, literal=True
             )
         else:
             config_path = source

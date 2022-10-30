@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from cli_ui import fatal
 
 from gitlabform import EXIT_INVALID_INPUT, Groups, Projects
@@ -34,7 +36,7 @@ class NonEmptyConfigsProvider(object):
 
     def omit_groups_and_projects_with_empty_configs(
         self, groups: Groups, projects: Projects
-    ) -> (Groups, Projects):
+    ) -> Tuple[Groups, Projects]:
         """
         :param groups: list of groups (and possibly subgroups)
         :param projects: list of projects

@@ -36,10 +36,10 @@ class Entities(ABC):
 
     def get_effective(self) -> list:
         if self.recalculate_effective:
-            self.effective = self.requested
+            effective_set = self.requested
             for reason in self.omitted:
-                self.effective = self.effective - self.omitted[reason]
-            self.effective = sorted(self.effective)
+                effective_set = effective_set - self.omitted[reason]
+            self.effective = sorted(effective_set)
         return self.effective
 
 
