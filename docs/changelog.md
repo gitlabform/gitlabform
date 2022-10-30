@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.0rc1
+
+* **Add support for managing project [Protected environments]().** PR [#423](https://github.com/gitlabform/gitlabform/pull/423).
+* Add support for Python 3.11 and switch to this version in the Docker image.
+* (For contributors) Move all the GitLabForm tests that require GitLab Premium license into a separate module and introduce a new GitHub Actions flow to enable running them for PRs after the maintainer's approval.
+
+Thanks to [Rafael Zanella](https://github.com/zanella) for his contribution!
+
 ## 3.2.0
 
 * **Add authoritative mode (`enforce: true`) support to group badges, group LDAP links, group variables, badges, deploy keys, variables.** Implements [#403](https://github.com/gitlabform/gitlabform/issues/403), PR [#419](https://github.com/gitlabform/gitlabform/pull/419).
