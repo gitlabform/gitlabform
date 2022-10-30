@@ -333,6 +333,8 @@
         
           
         
+          
+        
       
       
         
@@ -503,6 +505,20 @@
     <li class="md-nav__item">
       <a href="../../reference/pipeline_schedules/" class="md-nav__link">
         Pipeline schedules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/protected_environments/" class="md-nav__link">
+        Protected environments
       </a>
     </li>
   
@@ -1053,7 +1069,9 @@ machine.</p>
 </code></pre></div>
 <ol>
 <li>Run <code>pytest tests/acceptance</code> to start all tests.
-To run only a single class with tests run f.e. <code>py.test tests/acceptance -k "TestArchiveProject"</code>.</li>
+To run only a single class with tests run f.e.</li>
+<li><code>py.test tests/acceptance -k "TestArchiveProject"</code>.</li>
+<li><code>pytest tests/acceptance/&lt;TEST_FILE&gt;.py::&lt;TestClass&gt;::&lt;TEST_METHOD&gt;</code></li>
 </ol>
 <h3 id="running-acceptance-tests-using-your-own-gitlab-instance">Running acceptance tests using your own GitLab instance<a class="headerlink" href="#running-acceptance-tests-using-your-own-gitlab-instance" title="Permanent link">&para;</a></h3>
 <p><strong>Note</strong>: GitLabForm acceptance tests operate own their own groups, projects and users and it should be safe
