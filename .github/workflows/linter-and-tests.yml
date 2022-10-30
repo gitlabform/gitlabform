@@ -29,7 +29,8 @@ jobs:
           pip install mypy
       - name: Run mypy
         run: |
-          mypy --install-types
+          mypy . || true
+          mypy --install-types --non-interactive
           mypy .
 
   acceptance-tests:

@@ -99,5 +99,7 @@ mkdocs serve
 
 Please run mypy to test static types:
 ```shell
+mypy . || true
+mypy --install-types --non-interactive
 mypy .
 ```
