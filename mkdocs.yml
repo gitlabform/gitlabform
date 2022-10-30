@@ -21,6 +21,7 @@ nav:
       - Members: reference/members.md
       - Merge Requests: reference/merge_requests.md
       - Pipeline schedules: reference/pipeline_schedules.md
+      - Protected environments: reference/protected_environments.md
       - Push rules: reference/push_rules.md
       - Resource groups: reference/resource_groups.md
       - Settings: reference/settings.md
