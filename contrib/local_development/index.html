@@ -1113,7 +1113,9 @@ mkdocs serve
 ...and open the provided link (probably <a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a>) in your browser.</p>
 <h2 id="testing-types">Testing types<a class="headerlink" href="#testing-types" title="Permanent link">&para;</a></h2>
 <p>Please run mypy to test static types:
-<div class="highlight"><pre><span></span><code>mypy .
+<div class="highlight"><pre><span></span><code>mypy . <span class="o">||</span> <span class="nb">true</span>
+mypy --install-types --non-interactive
+mypy .
 </code></pre></div></p>
 
 
