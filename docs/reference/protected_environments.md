@@ -9,6 +9,7 @@ This section purpose is to manage the project [protected environments](https://d
 Key names here are just any labels, except if the key name is `enforce` and is set to `true` - then only the protected environments defined here will remain in the project, all other will be deleted.
 
 The supported values are like documented in the [protect environment endpoint of the Protected environments API](https://docs.gitlab.com/ee/api/protected_environments.html#protect-repository-environments), with the following changes:
+
 * `user` with a username can be used instead of `user_id` with a user id,
 * `group` with a group name can be used instead of `group_id` with a group id.
 * `access_level` can have a string from the [valid access levels](https://docs.gitlab.com/ee/api/protected_environments.html#valid-access-levels) as a value instead of just a number,
