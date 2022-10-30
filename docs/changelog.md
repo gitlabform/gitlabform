@@ -2,7 +2,7 @@
 
 ## 3.3.0rc1
 
-* **Add support for managing project [Protected environments]().** PR [#423](https://github.com/gitlabform/gitlabform/pull/423).
+* **Add support for managing project [Protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html#protected-environments).** PR [#423](https://github.com/gitlabform/gitlabform/pull/423).
 * Add support for Python 3.11 and switch to this version in the Docker image.
 * (For contributors) Move all the GitLabForm tests that require GitLab Premium license into a separate module and introduce a new GitHub Actions flow to enable running them for PRs after the maintainer's approval.
 
