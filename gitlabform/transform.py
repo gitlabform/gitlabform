@@ -50,6 +50,42 @@ class UserTransformer(ConfigurationTransformerFromGitlab):
                 pass
 
 
+class ImplicitNameTransformer(ConfigurationTransformer):
+    """
+    Creates a 'name' field that has the same value as the "scope" delimiter, e.g.:
+
+    ...
+      blah: # start of the cfg scope
+       name: blah # name to be used
+       smth_else: <...>
+
+    It's redundant, so this can be done as :
+
+    ...
+     foo: # a 'name' field will be created as -> name: foo
+       smth_else: <...>
+    """
+
+    @classmethod
+    def transform(cls, configuration: Configuration) -> None:
+        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
+
+        processor = Processor(ConsolePrinter(logging_args), configuration.config)
+
+        paths_to_implicit_names = ["projects_and_groups.*.protected_environments.*"]
+
+        for path in paths_to_implicit_names:
+            try:
+                for node_coordinate in processor.get_nodes(path):
+                    node_coordinate.parent[node_coordinate.parentref][
+                        "name"
+                    ] = node_coordinate.parentref
+            except YAMLPathException as e:
+                logging.debug(f"The YAMl library threw an exception: {e}")
+
+                pass
+
+
 class AccessLevelsTransformer(ConfigurationTransformer):
     """
     Internally the app supports only numeric access levels, but for user-friendliness

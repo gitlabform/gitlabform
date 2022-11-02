@@ -7,7 +7,11 @@ from deepdiff import DeepDiff
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
-from gitlabform.transform import AccessLevelsTransformer, UserTransformer
+from gitlabform.transform import (
+    AccessLevelsTransformer,
+    UserTransformer,
+    ImplicitNameTransformer,
+)
 
 
 def test__config__with_access_level_names__branches():
@@ -239,3 +243,46 @@ class TestUserTransformer(TestCase):
         )
 
         assert not DeepDiff(configuration.config, expected_transformed_config.config)
+
+
+class TestImplicitNameTransformer(TestCase):
+    _base_cfg = config_yaml = f"""
+        projects_and_groups:
+          "foo/bar":
+            protected_environments:
+              foo:
+                deploy_access_levels:
+                  - access_level: 40
+        """
+
+    def test__transform_for_protected_environments(self):
+        configuration = Configuration(config_string=self._base_cfg)
+
+        ImplicitNameTransformer.transform(configuration)
+
+        expected_transformed_config_yaml = f"""
+        {self._base_cfg}
+                name: foo
+        """
+
+        expected_transformed_config = Configuration(
+            config_string=expected_transformed_config_yaml
+        )
+
+        assert not DeepDiff(configuration.config, expected_transformed_config.config)
+
+    def test__transform_for_protected_environments_sanity_check(self):
+        configuration = Configuration(config_string=self._base_cfg)
+
+        ImplicitNameTransformer.transform(configuration)
+
+        expected_transformed_config_yaml = f"""
+        {self._base_cfg}
+                name: blah
+        """
+
+        expected_transformed_config = Configuration(
+            config_string=expected_transformed_config_yaml
+        )
+
+        assert DeepDiff(configuration.config, expected_transformed_config.config)
