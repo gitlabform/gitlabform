@@ -246,7 +246,7 @@ class TestUserTransformer(TestCase):
 
 
 class TestImplicitNameTransformer(TestCase):
-    _base_cfg = config_yaml = f"""
+    _base_cfg = f"""
         projects_and_groups:
           "foo/bar":
             protected_environments:
