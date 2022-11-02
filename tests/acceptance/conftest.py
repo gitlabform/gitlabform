@@ -20,7 +20,7 @@ from tests.acceptance import (
 
 
 @pytest.fixture(scope="session")
-def gitlab() -> Generator:
+def gitlab() -> Generator[GitLab]:
     gl = get_gitlab()
     yield gl  # provide fixture value
 
@@ -36,7 +36,7 @@ def group_and_project_for_function(group, project_for_function) -> str:
 
 
 @pytest.fixture(scope="class")
-def group() -> Generator:
+def group() -> Generator[str]:
     group_name = get_random_name("group")
     create_group(group_name)
 
@@ -193,7 +193,9 @@ class User:
 
 
 @pytest.fixture(scope="class")
-def make_user(gitlab, group_and_project) -> Generator:
+def make_user(
+    gitlab, group_and_project
+) -> Generator[Callable[[Optional[AccessLevel], Optional[bool]], User]]:
     username_base = get_random_name("user")
     created_users: List[User] = []
 
