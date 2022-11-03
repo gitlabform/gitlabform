@@ -22,13 +22,11 @@ projects_and_groups:
   group_1/project_1:
     protected_environments:
       enforce: true
-      env_1: # this is just a label
-        name: env_1
+      env_1: # name of the environment
         deploy_access_levels: &example_anchor_to_reuse_this_cfg
           - access_level: maintainer
           - user: johndoe
           - user_id: 1234
-      env_2: # this is just a label
-        name: env_2
+      env_2: # name of the environment
         deploy_access_levels: *example_anchor_to_reuse_this_cfg
 ```

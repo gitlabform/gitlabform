@@ -21,7 +21,11 @@ from gitlabform.input import GroupsAndProjectsProvider
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
-from gitlabform.transform import AccessLevelsTransformer, UserTransformer
+from gitlabform.transform import (
+    AccessLevelsTransformer,
+    ImplicitNameTransformer,
+    UserTransformer,
+)
 from gitlabform.ui import (
     info_group_count,
     info_project_count,
@@ -306,6 +310,8 @@ class GitLabForm(object):
                 gitlab = GitLab(config_path=self.config)
             configuration = gitlab.get_configuration()
             self.access_levels_transformer.transform(configuration)
+
+            ImplicitNameTransformer.transform(configuration)
 
             UserTransformer.transform(configuration, gitlab)
 

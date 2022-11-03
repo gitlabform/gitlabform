@@ -18,7 +18,6 @@ class TestProtectedEnvironments:
             protected_environments:
               enforce: true
               foo:
-                name: foo
                 deploy_access_levels:
                   - access_level: maintainer
                     group_inheritance_type: 0
@@ -104,7 +103,6 @@ class TestProtectedEnvironments:
         config = f"""
         {config}
               blah:
-                name: blah
                 deploy_access_levels:
                   - user: {user1.name}
         """
