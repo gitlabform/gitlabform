@@ -24,7 +24,7 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
       - name: Create release in GitHub
-        uses: actions/release-action@v1
+        uses: ncipollo/release-action@v1
         with:
           name: ${{ github.ref }}
           body: "(this is a placeholder, it will be replaced with a changelog contents)"
