@@ -6,7 +6,7 @@ Exactly like 3.3.0rc2 which was not released to PyPI because of a GitHub Actions
 
 ## 3.3.0rc2
 
-Like 3.3.0rc1 + improvement to the Protected environments syntax and a fix for the Python 3.11 Docker image (it used a final version of Python 3.11 instead of its RC2). 
+Like 3.3.0rc1 + improvement to the Protected environments syntax and a fix for the Python 3.11 Docker image (it used an RC2 version of Python 3.11 instead of its final one).
 
 Thanks to [Rafael Zanella](https://github.com/zanella) for his contribution!
 
