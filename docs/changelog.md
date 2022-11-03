@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.0rc2
+
+Like 3.3.0rc1 + improvement to the Protected environments syntax and a fix for the Python 3.11 Docker image (it used a final version of Python 3.11 instead of its RC2). 
+
+Thanks to [Rafael Zanella](https://github.com/zanella) for his contribution!
+
 ## 3.3.0rc1
 
 * **Add support for managing project [Protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html#protected-environments).** PR [#423](https://github.com/gitlabform/gitlabform/pull/423).
