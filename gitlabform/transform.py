@@ -1,9 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
 from types import SimpleNamespace
-from gitlabform.gitlab import GitLab
 
 from cli_ui import fatal
+from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
 from yamlpath.wrappers import ConsolePrinter
@@ -11,6 +11,7 @@ from yamlpath.wrappers import ConsolePrinter
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
+from gitlabform.gitlab import GitLab
 
 
 class ConfigurationTransformerFromGitlab(ABC):
@@ -77,6 +78,9 @@ class ImplicitNameTransformer(ConfigurationTransformer):
         for path in paths_to_implicit_names:
             try:
                 for node_coordinate in processor.get_nodes(path):
+                    if not isinstance(node_coordinate.node, CommentedMap):
+                        continue
+
                     node_coordinate.parent[node_coordinate.parentref][
                         "name"
                     ] = node_coordinate.parentref

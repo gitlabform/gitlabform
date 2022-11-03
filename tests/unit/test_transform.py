@@ -250,6 +250,7 @@ class TestImplicitNameTransformer(TestCase):
         projects_and_groups:
           "foo/bar":
             protected_environments:
+              enforce: true
               foo:
                 deploy_access_levels:
                   - access_level: 40
