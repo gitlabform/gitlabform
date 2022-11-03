@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0rc3
+
+Exactly like 3.3.0rc2 which was not released to PyPI because of a GitHub Actions configuration issue in this repo.
+
 ## 3.3.0rc2
 
 Like 3.3.0rc1 + improvement to the Protected environments syntax and a fix for the Python 3.11 Docker image (it used a final version of Python 3.11 instead of its RC2). 
