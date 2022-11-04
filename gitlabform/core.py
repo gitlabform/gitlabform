@@ -280,24 +280,24 @@ class GitLabForm:
 
         logging.basicConfig()
 
-        if not self.verbose and not self.debug:  # normal
-            cli_ui.setup()
-            level = (
-                logging.FATAL
-            )  # de facto disabled as we don't use logging different than debug in this project
+        if self.debug or tests:
+            # debug / tests
+            cli_ui_verbose = True
+            level = logging.DEBUG
+        elif self.verbose:
+            # verbose
+            cli_ui_verbose = True
+            # de facto disabled as we don't use logging different from debug in this project
+            level = logging.FATAL
         else:
-            if (
-                self.debug or tests
-            ):  # debug (BUT verbose may also be set, that's why we check this first)
-                cli_ui.setup(verbose=True)
-                level = logging.DEBUG
-            elif self.verbose:  # verbose
-                cli_ui.setup(verbose=True)
-                level = (
-                    logging.FATAL
-                )  # de facto disabled as we don't use logging different than debug in this project
+            # normal
+            cli_ui_verbose = False
+            # de facto disabled as we don't use logging different from debug in this project
+            level = logging.FATAL
 
+        cli_ui.setup(verbose=cli_ui_verbose)
         logging.getLogger().setLevel(level)
+
         fmt = logging.Formatter("%(message)s")
         logging.getLogger().handlers[0].setFormatter(fmt)
 
