@@ -42,7 +42,7 @@ class Formatter(
     pass
 
 
-class GitLabForm(object):
+class GitLabForm:
     def __init__(self, include_archived_projects=True, target=None, config_string=None):
 
         if target and config_string:

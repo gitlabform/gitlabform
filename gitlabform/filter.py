@@ -5,7 +5,7 @@ from cli_ui import fatal
 from gitlabform import EXIT_INVALID_INPUT, Groups, Projects
 
 
-class NonEmptyConfigsProvider(object):
+class NonEmptyConfigsProvider:
     """
     To speed up the processing of possibly long groups and projects lists we want to quickly remove
     the ones that have an empty effective config.

@@ -314,11 +314,11 @@ class TestMergeRequestApprovers:
         for rule in rules:
             if rule["name"] == APPROVAL_RULE_NAME:
                 assert len(rule["users"]) == 2
-                usernames_in_rule = set([user["username"] for user in rule["users"]])
+                usernames_in_rule = {user["username"] for user in rule["users"]}
                 assert usernames_in_rule == {user1.name, user2.name}
 
                 assert len(rule["groups"]) == 2
-                groupnames_in_rule = set([group["name"] for group in rule["groups"]])
+                groupnames_in_rule = {group["name"] for group in rule["groups"]}
                 assert groupnames_in_rule == {
                     group_with_one_owner_and_two_developers,
                     group_with_just_owner,

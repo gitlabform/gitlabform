@@ -29,7 +29,7 @@ for env_var in env_vars_to_files.keys():
             print(f"Trying to read {file_path} ...")
             if os.path.isfile(file_path):
                 try:
-                    with open(file_path, "r") as file:
+                    with open(file_path) as file:
                         os.environ[env_var] = file.read().strip()
                         print(f"{env_var} set!")
                         break

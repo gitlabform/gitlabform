@@ -11,7 +11,7 @@ def hide(text: str):
     return f"<secret {hashlib.sha256(text.encode('utf-8')).hexdigest()[:8]}>"
 
 
-class DifferenceLogger(object):
+class DifferenceLogger:
     @staticmethod
     def log_diff(
         subject,

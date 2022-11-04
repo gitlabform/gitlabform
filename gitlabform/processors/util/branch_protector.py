@@ -6,7 +6,7 @@ from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 
 
-class BranchProtector(object):
+class BranchProtector:
     new_api_keys = [
         "push_access_level",
         "merge_access_level",

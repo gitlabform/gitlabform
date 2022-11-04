@@ -1,3 +1,5 @@
+from typing import Any
+
 import os
 import textwrap
 from abc import ABC
@@ -57,7 +59,7 @@ class ConfigurationCore(ABC):
                 # we are NOT checking for the existence of non-empty 'projects_and_groups' key here
                 # as it would break using GitLabForm as a library
 
-        except (FileNotFoundError, IOError):
+        except (FileNotFoundError, OSError):
             raise ConfigFileNotFoundException(config_path)
 
         except Exception as e:
@@ -110,7 +112,7 @@ class ConfigurationCore(ABC):
 
         return yaml_data
 
-    def get(self, path, default=None):
+    def get(self, path, default=None) -> Any:
         """
         :param path: "path" to given element in YAML file, for example for:
 
@@ -173,7 +175,9 @@ class ConfigurationCore(ABC):
         pass
 
     @staticmethod
-    def validate_break_inheritance_flag(config, section_name, parent_key=""):
+    def validate_break_inheritance_flag(
+        config: dict, section_name: str, parent_key: str = ""
+    ):
         for key, value in config.items():
             if "inherit" == key:
                 parent_key_description = (

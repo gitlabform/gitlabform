@@ -215,7 +215,7 @@ def info_project_count(prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> N
 
 def info_count(color, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
     num_digits = len(str(n))
-    counter_format = "(%{}d/%d)".format(num_digits)
+    counter_format = f"(%{num_digits}d/%d)"
     counter_str = counter_format % (i, n)
     info(color, prefix, reset, counter_str, reset, *rest, **kwargs)
 

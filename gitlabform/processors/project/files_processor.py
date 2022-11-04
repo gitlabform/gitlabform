@@ -273,7 +273,7 @@ class FilesProcessor(AbstractProcessor):
         skip_build = configuration.get("files|" + file + "|skip_ci")
         skip_build_str = " [skip ci]" if skip_build else ""
 
-        return "%s%s" % (commit_message, skip_build_str)
+        return f"{commit_message}{skip_build_str}"
 
     @staticmethod
     def get_group(project_and_group):

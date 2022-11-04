@@ -95,7 +95,7 @@ class TestGroupVariables:
         run_gitlabform(config_more_variables, group_for_function)
 
         variables = gitlab.get_group_variables(group_for_function)
-        variables_keys = set([variable["key"] for variable in variables])
+        variables_keys = {variable["key"] for variable in variables}
         assert len(variables) == 2
         assert variables_keys == {"FOO", "BAR"}
 
