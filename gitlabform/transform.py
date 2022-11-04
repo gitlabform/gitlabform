@@ -14,21 +14,14 @@ from gitlabform.gitlab import AccessLevel
 from gitlabform.gitlab import GitLab
 
 
-class ConfigurationTransformerFromGitlab(ABC):
+class ConfigurationTransformer(ABC):
     @classmethod
     @abstractmethod
     def transform(cls, configuration: Configuration, gitlab: GitLab) -> None:
         pass
 
 
-class ConfigurationTransformer(ABC):
-    @classmethod
-    @abstractmethod
-    def transform(cls, configuration: Configuration) -> None:
-        pass
-
-
-class UserTransformer(ConfigurationTransformerFromGitlab):
+class UserTransformer(ConfigurationTransformer):
     @classmethod
     def transform(cls, configuration: Configuration, gitlab: GitLab) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
@@ -68,7 +61,7 @@ class ImplicitNameTransformer(ConfigurationTransformer):
     """
 
     @classmethod
-    def transform(cls, configuration: Configuration) -> None:
+    def transform(cls, configuration: Configuration, gitlab: GitLab) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
 
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
@@ -98,7 +91,7 @@ class AccessLevelsTransformer(ConfigurationTransformer):
     """
 
     @classmethod
-    def transform(cls, configuration: Configuration):
+    def transform(cls, configuration: Configuration, gitlab: GitLab):
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         log = ConsolePrinter(logging_args)
 
@@ -136,7 +129,7 @@ class AccessLevelsTransformer(ConfigurationTransformer):
             except YAMLPathException:
                 pass
 
-        # there are different than the above, as they are elements of arrays
+        # these are different from the above, as they are elements of arrays,
         # so we need different search query and an extra condition for
         # transformation
         paths_to_arrays = [

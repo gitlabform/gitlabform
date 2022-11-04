@@ -96,8 +96,6 @@ class GitLabForm:
                     exit_code=EXIT_INVALID_INPUT,
                 )
 
-        self.access_levels_transformer = AccessLevelsTransformer
-
         self.gitlab, self.configuration = self.initialize_configuration_and_gitlab()
 
         self.group_processors = GroupProcessors(
@@ -309,10 +307,9 @@ class GitLabForm:
             else:
                 gitlab = GitLab(config_path=self.config)
             configuration = gitlab.get_configuration()
-            self.access_levels_transformer.transform(configuration)
 
-            ImplicitNameTransformer.transform(configuration)
-
+            AccessLevelsTransformer.transform(configuration, gitlab)
+            ImplicitNameTransformer.transform(configuration, gitlab)
             UserTransformer.transform(configuration, gitlab)
 
             return gitlab, configuration
