@@ -1,7 +1,7 @@
 from logging import debug
 from cli_ui import warning, fatal
 
-from gitlabform import EXIT_PROCESSING_ERROR
+from gitlabform.constants import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.processors.abstract_processor import AbstractProcessor

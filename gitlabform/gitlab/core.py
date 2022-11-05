@@ -15,7 +15,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from gitlabform.configuration import Configuration
-from gitlabform.ui import to_str
+from gitlabform.util import to_str
 
 
 class GitLabCore:

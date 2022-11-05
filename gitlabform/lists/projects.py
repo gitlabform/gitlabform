@@ -2,9 +2,9 @@ from typing import Tuple
 
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT
-from gitlabform.input.core import Groups, Projects, OmissionReason
-from gitlabform.input.groups import GroupsProvider
+from gitlabform.constants import EXIT_INVALID_INPUT
+from gitlabform.lists import OmissionReason, Groups, Projects
+from gitlabform.lists.groups import GroupsProvider
 
 # from gitlabform.gitlab.core import NotFoundException
 

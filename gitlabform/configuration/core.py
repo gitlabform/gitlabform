@@ -15,7 +15,7 @@ from mergedeep import merge
 from yamlpath.common import Parsers
 from yamlpath.wrappers import ConsolePrinter
 
-from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT
 from ruamel.yaml.comments import CommentedMap
 
 

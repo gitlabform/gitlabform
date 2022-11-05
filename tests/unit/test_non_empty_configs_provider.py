@@ -2,7 +2,7 @@ import pytest
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
-from input.filter import NonEmptyConfigsProvider
+from gitlabform.lists.filter import NonEmptyConfigsProvider
 
 
 def test_error_on_missing_key():

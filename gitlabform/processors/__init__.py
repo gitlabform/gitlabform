@@ -6,7 +6,7 @@ from typing import List
 
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
-from gitlabform.output import EffectiveConfiguration
+from gitlabform.output import EffectiveConfigurationFile
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
@@ -22,7 +22,7 @@ class AbstractProcessors(ABC):
         entity_reference: str,
         configuration: dict,
         dry_run: bool,
-        effective_configuration: EffectiveConfiguration,
+        effective_configuration: EffectiveConfigurationFile,
         only_sections: List[str],
     ):
         for processor in self.processors:

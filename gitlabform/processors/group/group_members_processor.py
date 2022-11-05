@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
 

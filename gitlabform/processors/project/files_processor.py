@@ -8,7 +8,7 @@ from cli_ui import warning, fatal
 
 from jinja2 import Environment, FileSystemLoader
 
-from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException

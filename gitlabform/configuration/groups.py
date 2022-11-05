@@ -4,7 +4,7 @@ import functools
 from logging import debug
 
 from gitlabform.configuration import ConfigurationCommon
-from gitlabform.ui import to_str
+from gitlabform.util import to_str
 
 
 class ConfigurationGroups(ConfigurationCommon, ABC):

@@ -1,10 +1,16 @@
+import enum
+
 import copy
 from collections import defaultdict
+
 from typing import DefaultDict
+
 from abc import ABC
+
 from enum import Enum
 
 
+@enum.unique
 class OmissionReason(Enum):
     ARCHIVED = "archived"
     EMPTY = "empty effective config"

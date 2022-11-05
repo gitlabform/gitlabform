@@ -2,7 +2,7 @@ from logging import debug
 from cli_ui import debug as verbose
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 

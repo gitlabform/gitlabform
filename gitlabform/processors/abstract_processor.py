@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from logging import debug
-from typing import Any, Callable, Union
+from typing import Callable, Union
 
 from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
-from gitlabform.output import EffectiveConfiguration
+from gitlabform.output import EffectiveConfigurationFile
 from gitlabform.processors.util.decorators import configuration_to_safe_dict
 
 
@@ -26,7 +26,7 @@ class AbstractProcessor(ABC):
         project_or_project_and_group: str,
         configuration,
         dry_run: bool,
-        effective_configuration: EffectiveConfiguration,
+        effective_configuration: EffectiveConfigurationFile,
     ):
         if self._section_is_in_config(configuration):
             if configuration.get(f"{self.configuration_name}|skip"):

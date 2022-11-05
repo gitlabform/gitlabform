@@ -3,7 +3,7 @@ import textwrap
 
 from xkcdpass import xkcd_password as xp
 
-from gitlabform.core import GitLabForm
+from gitlabform import GitLabForm
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 

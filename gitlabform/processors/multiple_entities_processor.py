@@ -5,7 +5,7 @@ from cli_ui import fatal
 import abc
 from typing import Callable, Union, Any
 
-from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.defining_keys import AbstractKey

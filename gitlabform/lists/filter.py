@@ -1,7 +1,7 @@
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT
-from gitlabform.input.core import Groups, Projects, OmissionReason
+from gitlabform.constants import EXIT_INVALID_INPUT
+from gitlabform.lists import OmissionReason, Groups, Projects
 
 
 class NonEmptyConfigsProvider:
