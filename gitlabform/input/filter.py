@@ -1,8 +1,7 @@
-from typing import Tuple
-
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT, Groups, Projects
+from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.input.core import Groups, Projects, OmissionReason
 
 
 class NonEmptyConfigsProvider:
@@ -36,29 +35,25 @@ class NonEmptyConfigsProvider:
 
     def omit_groups_and_projects_with_empty_configs(
         self, groups: Groups, projects: Projects
-    ) -> Tuple[Groups, Projects]:
+    ) -> None:
         """
         :param groups: list of groups (and possibly subgroups)
         :param projects: list of projects
-        :return: Groups object, that contains both the list of all the groups and the non-omitted groups,
-                 and a similar object with Projects
         """
 
         groups_with_empty_configs = []
         for group in groups.get_effective():
-            if self.group_has_empty_effective_config(group):
+            if self._group_has_empty_effective_config(group):
                 groups_with_empty_configs.append(group)
-        groups.add_omitted("empty effective config", groups_with_empty_configs)
+        groups.add_omitted(OmissionReason.EMPTY, groups_with_empty_configs)
 
         projects_with_empty_configs = []
         for project in projects.get_effective():
-            if self.project_has_empty_effective_config(project):
+            if self._project_has_empty_effective_config(project):
                 projects_with_empty_configs.append(project)
-        projects.add_omitted("empty effective config", projects_with_empty_configs)
+        projects.add_omitted(OmissionReason.EMPTY, projects_with_empty_configs)
 
-        return groups, projects
-
-    def group_has_empty_effective_config(self, group: str) -> bool:
+    def _group_has_empty_effective_config(self, group: str) -> bool:
         """
         :param group: group/subgroup
         :return: if given group/subgroup has no config that can be processed
@@ -70,7 +65,7 @@ class NonEmptyConfigsProvider:
                 return False
         return True
 
-    def project_has_empty_effective_config(self, project: str) -> bool:
+    def _project_has_empty_effective_config(self, project: str) -> bool:
         """
         :param project: 'group/project'
         :return: if given project has no config that can be processed

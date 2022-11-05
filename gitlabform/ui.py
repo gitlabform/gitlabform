@@ -23,7 +23,11 @@ from cli_ui import (
 )
 from packaging import version as packaging_version
 
-from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT, Entities
+from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
+from gitlabform.input.core import Entities
+from gitlabform.input.filter import NonEmptyConfigsProvider
+from gitlabform.input.groups import GroupsProvider
+from gitlabform.input.projects import ProjectsProvider
 
 
 def show_version(skip_version_check: bool):
@@ -88,18 +92,20 @@ def show_version(skip_version_check: bool):
 
 
 def show_header(
-    target,
-    groups_and_projects_provider,
-    non_empty_configs_provider,
+    target: str,
+    groups_provider: GroupsProvider,
+    projects_provider: ProjectsProvider,
+    non_empty_configs_provider: NonEmptyConfigsProvider,
 ):
     if target == "ALL":
         info(">>> Getting ALL groups and projects...")
     elif target == "ALL_DEFINED":
-        info(">>> Getting ALL_DEFINED groups and projects...")
+        info(">>> Getting all groups and projects defined in the configuration...")
     else:
-        info(">>> Getting requested groups/projects...")
+        info(">>> Getting requested groups or projects...")
 
-    groups, projects = groups_and_projects_provider.get_groups_and_projects(target)
+    groups = groups_provider.get_groups(target)
+    projects = projects_provider.get_projects(target)
 
     if len(groups.get_effective()) == 0 and len(projects.get_effective()) == 0:
         if target == "ALL":
@@ -115,10 +121,7 @@ def show_header(
             exit_code=EXIT_INVALID_INPUT,
         )
 
-    (
-        groups,
-        projects,
-    ) = non_empty_configs_provider.omit_groups_and_projects_with_empty_configs(
+    non_empty_configs_provider.omit_groups_and_projects_with_empty_configs(
         groups, projects
     )
 

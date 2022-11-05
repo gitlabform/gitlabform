@@ -14,10 +14,9 @@ from gitlabform.configuration.core import (
     ConfigFileNotFoundException,
     ConfigInvalidException,
 )
-from gitlabform.filter import NonEmptyConfigsProvider
+from gitlabform.input.filter import NonEmptyConfigsProvider
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException
-from gitlabform.input import GroupsAndProjectsProvider
 from gitlabform.output import EffectiveConfiguration
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
@@ -33,6 +32,8 @@ from gitlabform.ui import (
     show_summary,
     show_header,
 )
+from gitlabform.input.groups import GroupsProvider
+from gitlabform.input.projects import ProjectsProvider
 
 
 class Formatter(
@@ -104,7 +105,11 @@ class GitLabForm:
         self.project_processors = ProjectProcessors(
             self.gitlab, self.configuration, self.strict
         )
-        self.groups_and_projects_provider = GroupsAndProjectsProvider(
+        self.groups_provider = GroupsProvider(
+            self.gitlab,
+            self.configuration,
+        )
+        self.projects_provider = ProjectsProvider(
             self.gitlab,
             self.configuration,
             self.include_archived_projects,
@@ -333,7 +338,8 @@ class GitLabForm:
 
         projects, groups = show_header(
             self.target,
-            self.groups_and_projects_provider,
+            self.groups_provider,
+            self.projects_provider,
             self.non_empty_configs_provider,
         )
 

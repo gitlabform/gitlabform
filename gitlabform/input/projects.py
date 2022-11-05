@@ -2,76 +2,58 @@ from typing import Tuple
 
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT, Groups, Projects
-from gitlabform.gitlab.core import NotFoundException
+from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.input.core import Groups, Projects, OmissionReason
+from gitlabform.input.groups import GroupsProvider
+
+# from gitlabform.gitlab.core import NotFoundException
 
 
-class GroupsAndProjectsProvider:
+class ProjectsProvider(GroupsProvider):
     """
     For a query like "project/group", "group", "group/subgroup", ALL or ALL_DEFINED this
-    class gets the effective lists of groups and project, taking into account skipped groups
-    and projects and the fact that the group and project names case are somewhat case-sensitive.
+    class gets the effective lists of projects, taking into account skipped projects
+    and the fact that the group and project names case are somewhat case-sensitive.
+
+    Because the projects depend on groups requested, this class inherits GroupsProvider.
     """
 
     def __init__(self, gitlab, configuration, include_archived_projects):
-        self.gitlab = gitlab
-        self.configuration = configuration
+        super().__init__(gitlab, configuration)
         self.include_archived_projects = include_archived_projects
 
-    def get_groups_and_projects(self, target: str) -> Tuple[Groups, Projects]:
+    def get_projects(self, target: str) -> Projects:
         """
         :param target: "project/group", "group", "group/subgroup", ALL or ALL_DEFINED
-        :return: tuple with Groups and Projects
+        :return: Projects
         """
 
+        groups = self.get_groups(target)
+
         if target not in ["ALL", "ALL_DEFINED"]:
-            groups, projects = self._get_single_group_or_project(target)
             if len(groups.get_effective()) == 1:
                 projects = self._get_projects(target, groups)
+            else:
+                projects = self._get_single_project(target)
         else:
-            groups = self._get_groups(target)
             projects = self._get_projects(target, groups)
 
-        return groups, projects
+        return projects
 
-    def _get_single_group_or_project(self, target: str) -> Tuple[Groups, Projects]:
+    def _get_single_project(self, target: str) -> Projects:
 
-        groups = Groups()
         projects = Projects()
 
-        # it may be a subgroup or a single group...
+        # it may be a single project
         try:
-            maybe_group = self.gitlab.get_group_case_insensitive(target)
-            groups.add_requested([maybe_group["full_path"]])
+            maybe_project = self.gitlab.get_project_case_insensitive(target)
+            projects.add_requested([maybe_project["path_with_namespace"]])
 
-        except NotFoundException:
+        except Exception:  # TODO: this should be NotFoundException but it causes an import issue
+            # it's a group or a subgroup - ignore it here
+            pass
 
-            # ...or a single project
-            try:
-                maybe_project = self.gitlab.get_project_case_insensitive(target)
-                projects.add_requested([maybe_project["path_with_namespace"]])
-
-            except NotFoundException:
-                pass
-
-        return groups, projects
-
-    def _get_groups(self, target: str) -> Groups:
-
-        groups = Groups()
-
-        if target == "ALL":
-            groups.add_requested(self.gitlab.get_groups())
-        else:  # ALL_DEFINED
-            groups.add_requested(self.configuration.get_groups())
-
-        groups.add_omitted("skipped", self._get_skipped_groups(groups.get_effective()))
-
-        if target == "ALL_DEFINED":
-            # check if all the groups from the config actually exist
-            self._verify_if_groups_exist(groups.get_effective())
-
-        return groups
+        return projects
 
     def _get_projects(self, target: str, groups: Groups) -> Projects:
 
@@ -83,7 +65,7 @@ class GroupsAndProjectsProvider:
             archived_projects_from_groups,
         ) = self._get_all_and_archived_projects_from_groups(groups.get_effective())
         projects.add_requested(projects_from_groups)
-        projects.add_omitted("archived", archived_projects_from_groups)
+        projects.add_omitted(OmissionReason.ARCHIVED, archived_projects_from_groups)
 
         if target == "ALL_DEFINED":
 
@@ -110,25 +92,16 @@ class GroupsAndProjectsProvider:
 
             projects.add_requested(projects_from_configuration_not_from_groups)
             projects.add_omitted(
-                "archived", archived_projects_from_configuration_not_from_groups
+                OmissionReason.ARCHIVED,
+                archived_projects_from_configuration_not_from_groups,
             )
 
         # TODO: consider checking for skipped earlier to avoid making requests for projects that will be skipped anyway
         projects.add_omitted(
-            "skipped", self._get_skipped_projects(projects.get_effective())
+            OmissionReason.SKIPPED, self._get_skipped_projects(projects.get_effective())
         )
 
         return projects
-
-    def _verify_if_groups_exist(self, groups: list):
-        for group in groups:
-            try:
-                self.gitlab.get_group_case_insensitive(group)
-            except NotFoundException:
-                fatal(
-                    f"Configuration contains group {group} but it cannot be found in GitLab!",
-                    exit_code=EXIT_INVALID_INPUT,
-                )
 
     def _verify_if_projects_exist_and_get_archived_projects(
         self, projects: list
@@ -139,7 +112,7 @@ class GroupsAndProjectsProvider:
                 project_object = self.gitlab.get_project_case_insensitive(project)
                 if project_object["archived"]:
                     archived.append(project_object["path_with_namespace"])
-            except NotFoundException:
+            except Exception:  # TODO: this should be NotFoundException but it causes an import issue
                 fatal(
                     f"Configuration contains project {project} but it cannot be found in GitLab!",
                     exit_code=EXIT_INVALID_INPUT,
@@ -167,14 +140,6 @@ class GroupsAndProjectsProvider:
         # deduplicate as we may have a group X and its subgroup X/Y in the groups list so the effective projects
         # may occur more than once
         return list(set(all)), list(set(archived))
-
-    def _get_skipped_groups(self, groups: list) -> list:
-        skipped = []
-        for group in groups:
-            if self.configuration.is_group_skipped(group):
-                skipped.append(group)
-
-        return skipped
 
     def _get_skipped_projects(self, projects: list) -> list:
         skipped = []
