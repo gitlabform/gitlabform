@@ -1,8 +1,13 @@
-from gitlabform.configuration.case_insensitivity import (
-    ConfigurationCaseInsensitiveProjectsAndGroups,
-)
+from gitlabform.configuration.common import ConfigurationCommon
+from gitlabform.configuration.groups import ConfigurationGroups
+from gitlabform.configuration.projects import ConfigurationProjects
 
 
-# note that we are NOT using mixins here, but only the most advanced subclass
-class Configuration(ConfigurationCaseInsensitiveProjectsAndGroups):
+#
+# This the only external interface for operating on the configuration from a given YAML file
+# (or an input string in case of tests).
+#
+
+
+class Configuration(ConfigurationProjects):
     pass
