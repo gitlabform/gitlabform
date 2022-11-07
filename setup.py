@@ -54,7 +54,7 @@ setup(
         "cli-ui==0.17.2",
         "packaging==21.3",
         "mergedeep==1.3.4",
-        "yamlpath==3.6.7",
+        "yamlpath==3.6.9",
         "ez-yaml==1.2.0",
     ],
     extras_require={
