@@ -48,7 +48,8 @@ def test__config__with_access_level_names__branches():
     """
     configuration = Configuration(config_string=config_yaml)
 
-    AccessLevelsTransformer.transform(configuration, MagicMock(GitLab))
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+    transformer.transform(configuration)
 
     config_with_numbers = f"""
     projects_and_groups:
@@ -105,7 +106,8 @@ def test__config__with_access_level_names__group_ldap_links():
     """
     configuration = Configuration(config_string=config_yaml)
 
-    AccessLevelsTransformer.transform(configuration, MagicMock(GitLab))
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+    transformer.transform(configuration)
 
     config_with_numbers = f"""
     projects_and_groups:
@@ -148,7 +150,8 @@ def test__config__with_access_level_names__branches_premium_syntax():
     """
     configuration = Configuration(config_string=config_yaml)
 
-    AccessLevelsTransformer.transform(configuration, MagicMock(GitLab))
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+    transformer.transform(configuration)
 
     config_with_numbers = f"""
     projects_and_groups:
@@ -192,9 +195,11 @@ def test__config__with_access_level_names__invalid_name():
               - access_level: maintainer # ...or the whole access levels, like in the other syntax
     """
     configuration = Configuration(config_string=config_yaml)
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
 
     with pytest.raises(SystemExit) as e:
-        AccessLevelsTransformer.transform(configuration, MagicMock(GitLab))
+        transformer.transform(configuration)
+
     assert e.value.code == EXIT_INVALID_INPUT
 
 
@@ -219,7 +224,8 @@ class TestUserTransformer(TestCase):
         gitlab_mock = MagicMock(GitLab)
         gitlab_mock._get_user_id = MagicMock(side_effect=[78, 89])
 
-        UserTransformer.transform(configuration, gitlab_mock)
+        transformer = UserTransformer(gitlab_mock)
+        transformer.transform(configuration)
 
         assert gitlab_mock._get_user_id.call_count == 2
 
@@ -259,7 +265,8 @@ class TestImplicitNameTransformer(TestCase):
     def test__transform_for_protected_environments(self):
         configuration = Configuration(config_string=self._base_cfg)
 
-        ImplicitNameTransformer.transform(configuration, MagicMock(GitLab))
+        transformer = ImplicitNameTransformer(MagicMock(GitLab))
+        transformer.transform(configuration)
 
         expected_transformed_config_yaml = f"""
         {self._base_cfg}
@@ -275,7 +282,8 @@ class TestImplicitNameTransformer(TestCase):
     def test__transform_for_protected_environments_sanity_check(self):
         configuration = Configuration(config_string=self._base_cfg)
 
-        ImplicitNameTransformer.transform(configuration, MagicMock(GitLab))
+        transformer = ImplicitNameTransformer(MagicMock(GitLab))
+        transformer.transform(configuration)
 
         expected_transformed_config_yaml = f"""
         {self._base_cfg}

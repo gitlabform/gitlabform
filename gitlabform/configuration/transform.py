@@ -14,16 +14,37 @@ from gitlabform.gitlab import AccessLevel
 from gitlabform.gitlab import GitLab
 
 
+# Configuration transformers are classes which take the input configuration as YAML and change it
+# to from the more user-friendly input to an output that is more applicable to passing to GitLab
+# over its API.
+#
+# For example, we want to operate on usernames in the configuration while GitLab sometimes operates
+# on user ids. Therefore, one of the transformers changes "user_id: <number>" into "user: <username>".
+
+
+class ConfigurationTransformers:
+    def __init__(self, gitlab: GitLab):
+        self.user_transformer = UserTransformer(gitlab)
+        self.implicit_name_transformer = ImplicitNameTransformer(gitlab)
+        self.access_level_transformer = AccessLevelsTransformer(gitlab)
+
+    def transform(self, configuration: Configuration) -> None:
+        self.user_transformer.transform(configuration)
+        self.implicit_name_transformer.transform(configuration)
+        self.access_level_transformer.transform(configuration)
+
+
 class ConfigurationTransformer(ABC):
-    @classmethod
     @abstractmethod
-    def transform(cls, configuration: Configuration, gitlab: GitLab) -> None:
+    def transform(self, configuration: Configuration) -> None:
         pass
 
 
 class UserTransformer(ConfigurationTransformer):
-    @classmethod
-    def transform(cls, configuration: Configuration, gitlab: GitLab) -> None:
+    def __init__(self, gitlab: GitLab):
+        self.gitlab = gitlab
+
+    def transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
 
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
@@ -37,7 +58,7 @@ class UserTransformer(ConfigurationTransformer):
                 for node_coordinate in processor.get_nodes(path):
                     user = node_coordinate.parent.pop("user")
 
-                    node_coordinate.parent["user_id"] = gitlab._get_user_id(user)
+                    node_coordinate.parent["user_id"] = self.gitlab._get_user_id(user)
             except YAMLPathException as e:
                 logging.debug(f"The YAMl library threw an exception: {e}")
 
@@ -60,8 +81,11 @@ class ImplicitNameTransformer(ConfigurationTransformer):
        smth_else: <...>
     """
 
-    @classmethod
-    def transform(cls, configuration: Configuration, gitlab: GitLab) -> None:
+    def __init__(self, gitlab: GitLab):
+        # this transformer doesn't need to call gitlab
+        pass
+
+    def transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
 
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
@@ -90,8 +114,11 @@ class AccessLevelsTransformer(ConfigurationTransformer):
     the appropriate numbers.
     """
 
-    @classmethod
-    def transform(cls, configuration: Configuration, gitlab: GitLab):
+    def __init__(self, gitlab: GitLab):
+        # this transformer doesn't need to call gitlab
+        pass
+
+    def transform(self, configuration: Configuration):
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         log = ConsolePrinter(logging_args)
 

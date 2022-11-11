@@ -1,23 +1,13 @@
+import sys
 from logging import debug
 
-import traceback
-
+import argparse
 import cli_ui
 import logging
-
-import textwrap
-
-import argparse
-
-import json
-import sys
-from typing import Any
-
-from packaging import version as packaging_version
-from urllib.error import URLError
-
 import luddite
 import pkg_resources
+import textwrap
+import traceback
 from cli_ui import (
     Symbol,
     reset,
@@ -35,21 +25,20 @@ from cli_ui import (
     purple,
     warning,
 )
+from packaging import version as packaging_version
+from typing import Any, Tuple
 
-from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
+from configuration import Configuration
 from gitlabform.configuration.core import (
     ConfigFileNotFoundException,
     ConfigInvalidException,
 )
-from gitlabform.configuration.transform import (
-    AccessLevelsTransformer,
-    ImplicitNameTransformer,
-    UserTransformer,
-)
+from gitlabform.configuration.transform import ConfigurationTransformers
+from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.lists import Entities
-from gitlabform.lists.filter import NonEmptyConfigsProvider
+from gitlabform.lists.filter import GroupsAndProjectsFilters
 from gitlabform.lists.groups import GroupsProvider
 from gitlabform.lists.projects import ProjectsProvider
 from gitlabform.output import EffectiveConfigurationFile
@@ -113,6 +102,8 @@ class GitLabForm:
 
         self.gitlab, self.configuration = self._initialize_configuration_and_gitlab()
 
+        self.configuration_transformers = ConfigurationTransformers(self.gitlab)
+
         self.group_processors = GroupProcessors(
             self.gitlab, self.configuration, self.strict
         )
@@ -129,13 +120,17 @@ class GitLabForm:
             self.include_archived_projects,
         )
 
-        self.non_empty_configs_provider = NonEmptyConfigsProvider(
+        self.groups_and_projects_filters = GroupsAndProjectsFilters(
             self.configuration, self.group_processors, self.project_processors
         )
 
     @staticmethod
-    def _parse_args():
+    def _parse_args() -> Tuple:
+        """
+        Parses the input command-line arguments.
 
+        :return: a tuple with all the arguments that have been parsed
+        """
         parser = argparse.ArgumentParser(
             description=textwrap.dedent(
                 f"""
@@ -289,11 +284,16 @@ class GitLabForm:
             args.only_sections,
         )
 
-    def _configure_output(self, tests=False):
+    def _configure_output(self, tests=False) -> None:
+        """
+        Configures the application output using cli_ui and logging, based on debug and verbose flags:
 
-        # normal mode - print cli_ui.* except debug as verbose
-        # verbose mode - print all cli_ui.*, including debug as verbose
-        # debug / tests mode - like above + (logging.)debug
+        * normal mode - print cli_ui.* except debug as verbose
+        * verbose mode - print all cli_ui.*, including debug as verbose
+        * debug / tests mode - like above + (logging.)debug
+
+        :param tests: True if we are running in tests mode
+        """
 
         logging.basicConfig()
 
@@ -318,7 +318,14 @@ class GitLabForm:
         fmt = logging.Formatter("%(message)s")
         logging.getLogger().handlers[0].setFormatter(fmt)
 
-    def _initialize_configuration_and_gitlab(self):
+    def _initialize_configuration_and_gitlab(self) -> Tuple[GitLab, Configuration]:
+        """
+        Creates the GitLab object, which represents connection to the GitLab API,
+        and the configuration object, which represents the YAML configuration,
+        and runs processing the configuration with configuration transformers.
+
+        :return: tuple with GitLab and Configuration objects
+        """
 
         try:
             if hasattr(self, "config_string"):
@@ -327,9 +334,7 @@ class GitLabForm:
                 gitlab = GitLab(config_path=self.config)
             configuration = gitlab.get_configuration()
 
-            AccessLevelsTransformer.transform(configuration, gitlab)
-            ImplicitNameTransformer.transform(configuration, gitlab)
-            UserTransformer.transform(configuration, gitlab)
+            self.configuration_transformers.transform(configuration)
 
             return gitlab, configuration
         except ConfigFileNotFoundException as e:
@@ -348,13 +353,13 @@ class GitLabForm:
                 exit_code=EXIT_PROCESSING_ERROR,
             )
 
-    def run(self):
+    def run(self) -> None:
+        """
+        The main method.
+        """
 
         projects, groups = self._show_header(
             self.target,
-            self.groups_provider,
-            self.projects_provider,
-            self.non_empty_configs_provider,
         )
 
         group_number = 0
@@ -372,13 +377,15 @@ class GitLabForm:
                     "@",
                     group_number,
                     len(groups),
-                    cli_ui.yellow,
+                    yellow,
                     f"Skipping group {group} as requested to start from {self.start_from_group}...",
-                    cli_ui.reset,
+                    reset,
                 )
                 continue
 
-            configuration = self.configuration.get_effective_config_for_group(group)
+            group_configuration = self.configuration.get_effective_config_for_group(
+                group
+            )
 
             effective_configuration.add_placeholder(group)
 
@@ -392,7 +399,7 @@ class GitLabForm:
             try:
                 self.group_processors.process_entity(
                     group,
-                    configuration,
+                    group_configuration,
                     dry_run=self.noop,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
@@ -435,13 +442,13 @@ class GitLabForm:
                     "*",
                     project_number,
                     len(projects),
-                    cli_ui.yellow,
+                    yellow,
                     f"Skipping project {project_and_group} as requested to start from {self.start_from}...",
-                    cli_ui.reset,
+                    reset,
                 )
                 continue
 
-            configuration = self.configuration.get_effective_config_for_project(
+            project_configuration = self.configuration.get_effective_config_for_project(
                 project_and_group
             )
 
@@ -457,7 +464,7 @@ class GitLabForm:
             try:
                 self.project_processors.process_entity(
                     project_and_group,
-                    configuration,
+                    project_configuration,
                     dry_run=self.noop,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
@@ -499,20 +506,21 @@ class GitLabForm:
         )
 
     @classmethod
-    def _show_version(cls, skip_version_check: bool):
+    def _show_version(cls, skip_version_check: bool) -> None:
+        """
+        Prints the app version and how it relates to the latest stable version
+        available at PyPI.
+
+        :param skip_version_check: if True then the comparison to the latest versions is skipped
+        """
+
         local_version = pkg_resources.get_distribution("gitlabform").version
 
+        # fmt: off
         tower_crane = Symbol("🏗", "")
-        tokens_to_show = [
-            reset,
-            tower_crane,
-            " GitLabForm version:",
-            blue,
-            local_version,
-            reset,
-        ]
-
-        message(*tokens_to_show, end="")
+        to_show = [reset, tower_crane, "GitLabForm version:", blue, local_version, reset]
+        # fmt: on
+        message(*to_show, sep=" ", end="")
 
         if skip_version_check:
             # just print end of the line
@@ -520,53 +528,45 @@ class GitLabForm:
         else:
             try:
                 latest_version = luddite.get_version_pypi("gitlabform")
-            except URLError as e:
+            except Exception as e:
                 # end the line with current version
                 print()
                 error(f"Checking latest version failed:\n{e}")
                 return
 
             if local_version == latest_version:
+                # fmt: off
                 happy = Symbol("😊", ":)")
-                tokens_to_show = [
-                    "= the latest stable ",
-                    happy,
-                ]
+                to_show = ["= the latest stable ", happy]
+                # fmt: on
             elif packaging_version.parse(local_version) < packaging_version.parse(
                 latest_version
             ):
+                # fmt: off
                 sad = Symbol("😔", ":(")
-                tokens_to_show = [
-                    "= outdated ",
-                    sad,
-                    f", please update! (the latest stable is ",
-                    blue,
-                    latest_version,
-                    reset,
-                    ")",
-                ]
+                to_show = ["= outdated ", sad, " , please update! (the latest stable is ", latest_version, ")"]
+                # fmt: on
             else:
+                # fmt: off
                 excited = Symbol("🤩", "8)")
-                tokens_to_show = [
-                    "= pre-release ",
-                    excited,
-                    f" (the latest stable is ",
-                    blue,
-                    latest_version,
-                    reset,
-                    ")",
-                ]
+                to_show = ["= pre-release ", excited, " (the latest stable is ", latest_version, ")"]
+                # fmt: on
 
-            message(*tokens_to_show, sep="")
+            # complete the line with a line ending
+            message(*to_show, sep="")
 
-    @classmethod
     def _show_header(
-        cls,
+        self,
         target: str,
-        groups_provider: GroupsProvider,
-        projects_provider: ProjectsProvider,
-        non_empty_configs_provider: NonEmptyConfigsProvider,
-    ):
+    ) -> Tuple[list, list]:
+        """
+        Gets the list of groups and projects to apply the configuration to, based on the provided 'target' parameter
+        and prints out the output header based on that.
+
+        :param target: what the configuration should be applied to
+        :return: a tuple of lists of effective projects and effective groups
+        """
+
         if target == "ALL":
             info(">>> Getting ALL groups and projects...")
         elif target == "ALL_DEFINED":
@@ -574,8 +574,8 @@ class GitLabForm:
         else:
             info(">>> Getting requested groups or projects...")
 
-        groups = groups_provider.get_groups(target)
-        projects = projects_provider.get_projects(target)
+        groups = self.groups_provider.get_groups(target)
+        projects = self.projects_provider.get_projects(target)
 
         if len(groups.get_effective()) == 0 and len(projects.get_effective()) == 0:
             if target == "ALL":
@@ -591,17 +591,20 @@ class GitLabForm:
                 exit_code=EXIT_INVALID_INPUT,
             )
 
-        non_empty_configs_provider.omit_groups_and_projects_with_empty_configs(
-            groups, projects
-        )
+        self.groups_and_projects_filters.filter(groups, projects)
 
-        cls._show_input_entities(groups)
-        cls._show_input_entities(projects)
+        self._show_input_entities(groups)
+        self._show_input_entities(projects)
 
         return projects.get_effective(), groups.get_effective()
 
     @classmethod
-    def _show_input_entities(cls, entities: Entities):
+    def _show_input_entities(cls, entities: Entities) -> None:
+        """
+        Prints out the groups or projects that will be processed.
+
+        :param entities: groups or projects
+        """
         info_1(f"# of {entities.name} to process: {len(entities.get_effective())}")
 
         entities_omitted = ""
@@ -626,57 +629,54 @@ class GitLabForm:
     @classmethod
     def _show_summary(
         cls,
-        groups_with_non_empty_configs: list,
-        projects_with_non_empty_configs: list,
+        effective_groups: list,
+        effective_projects: list,
         successful_groups: int,
         successful_projects: int,
         failed_groups: dict,
         failed_projects: dict,
     ):
-        if (
-            len(groups_with_non_empty_configs) > 0
-            or len(projects_with_non_empty_configs) > 0
-        ):
+        """
+        Prints out the summary after processing has ended with the info of what was done and what failed.
+
+        :param effective_groups: list of effective groups that the run was done on
+        :param effective_projects: list of effective projects that the run was done on
+        :param successful_groups: number of successfully processed groups
+        :param successful_projects: number of successfully processed projects
+        :param failed_groups: a dict with failed groups, where keys are their numbers in the processing order
+        :param failed_projects: a dict with failed projects, where keys are their numbers in the processing order
+        """
+
+        if len(effective_groups) > 0 or len(effective_projects) > 0:
             info_1(f"# of groups processed successfully: {successful_groups}")
             info_1(f"# of projects processed successfully: {successful_projects}")
 
         if len(failed_groups) > 0:
             info_1(red, f"# of groups failed: {len(failed_groups)}", reset)
             for group_number in failed_groups.keys():
-                info_1(
-                    red,
-                    f"Failed group {group_number}: {failed_groups[group_number]}",
-                    reset,
-                )
+                # fmt: off
+                info_1(red, f"Failed group {group_number}: {failed_groups[group_number]}", reset)
+                # fmt: on
         if len(failed_projects) > 0:
-            info_1(
-                red,
-                f"# of projects failed: {len(failed_projects)}",
-                reset,
-            )
+            # fmt: off
+            info_1(red, f"# of projects failed: {len(failed_projects)}", reset)
+            # fmt: on
             for project_number in failed_projects.keys():
-                info_1(
-                    red,
-                    f"Failed project {project_number}: {failed_projects[project_number]}",
-                    reset,
-                )
+                # fmt: off
+                info_1(red, f"Failed project {project_number}: {failed_projects[project_number]}", reset)
+                # fmt: on
 
         if len(failed_groups) > 0 or len(failed_projects) > 0:
             sys.exit(EXIT_PROCESSING_ERROR)
         elif successful_groups > 0 or successful_projects > 0:
+            # fmt: off
             shine = Symbol("✨", "!!!")
-            info_1(
-                green,
-                f"All requested groups/projects processed successfully!",
-                reset,
-                shine,
-            )
+            info_1(green, "All requested groups/projects processed successfully!", reset, shine)
+            # fmt: on
         else:
-            info_1(
-                yellow,
-                "Nothing to do.",
-                reset,
-            )
+            # fmt: off
+            info_1(yellow, "Nothing to do.", reset)
+            # fmt: on
 
     @classmethod
     def _info_group_count(

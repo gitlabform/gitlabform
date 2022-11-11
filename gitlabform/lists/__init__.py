@@ -20,8 +20,8 @@ class OmissionReason(Enum):
 class Entities(ABC):
     """
     Entities here are lists of GitLab groups or projects on which GitLabForm will operate.
-    The code here assumes that there is a set of requested entities, but some of them may be omitted for various reasons
-    so there effective set of entities may be different.
+    The code here assumes that there is a set of requested entities, but some of them may be omitted
+    for various reasons, so we want to be able to get only the effective set of them.
     """
 
     def __init__(self, name: str):

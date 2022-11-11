@@ -1,13 +1,40 @@
+from abc import ABC, abstractmethod
+
 from cli_ui import fatal
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
 
 
-class NonEmptyConfigsProvider:
+# Groups and projects filters jobs is to omit some groups and projects that GitLabForm is requested
+# to process for a speed-up.
+#
+# An example reason for omitting groups and projects is when they have an empty effective config.
+
+
+class GroupsAndProjectsFilters:
+    def __init__(self, configuration, group_processors, project_processors):
+        self.configuration = configuration
+
+        self.omit_empty_configs = OmitEmptyConfigs(
+            configuration, group_processors, project_processors
+        )
+        # add next filters here
+
+    def filter(self, groups: Groups, projects: Projects):
+        self.omit_empty_configs.filter(groups, projects)
+        # add next filters here
+
+
+class GroupsAndProjectsFilter(ABC):
+    @abstractmethod
+    def filter(self, groups: Groups, projects: Projects):
+        pass
+
+
+class OmitEmptyConfigs(GroupsAndProjectsFilter):
     """
-    To speed up the processing of possibly long groups and projects lists we want to quickly remove
-    the ones that have an empty effective config.
+    One of the reasons groups or project can be omitted from processing is when they have an empty effective config.
 
     For example with a config like:
 
@@ -33,9 +60,7 @@ class NonEmptyConfigsProvider:
                 exit_code=EXIT_INVALID_INPUT,
             )
 
-    def omit_groups_and_projects_with_empty_configs(
-        self, groups: Groups, projects: Projects
-    ) -> None:
+    def filter(self, groups: Groups, projects: Projects) -> None:
         """
         :param groups: list of groups (and possibly subgroups)
         :param projects: list of projects
