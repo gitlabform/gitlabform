@@ -4,7 +4,7 @@ from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups
 
 
-# from gitlabform.gitlab.core import NotFoundException
+from gitlabform.gitlab.core import NotFoundException
 
 
 class GroupsProvider:
@@ -40,7 +40,7 @@ class GroupsProvider:
             maybe_group = self.gitlab.get_group_case_insensitive(target)
             groups.add_requested([maybe_group["full_path"]])
 
-        except Exception:  # TODO: this should be NotFoundException but it causes an import issue
+        except NotFoundException:
             # ...or a single project, which we ignore here
             pass
 
@@ -69,7 +69,7 @@ class GroupsProvider:
         for group in groups:
             try:
                 self.gitlab.get_group_case_insensitive(group)
-            except Exception:  # TODO: this should be NotFoundException but it causes an import issue
+            except NotFoundException:
                 fatal(
                     f"Configuration contains group {group} but it cannot be found in GitLab!",
                     exit_code=EXIT_INVALID_INPUT,

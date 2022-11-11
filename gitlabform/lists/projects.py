@@ -6,7 +6,7 @@ from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
 from gitlabform.lists.groups import GroupsProvider
 
-# from gitlabform.gitlab.core import NotFoundException
+from gitlabform.gitlab.core import NotFoundException
 
 
 class ProjectsProvider(GroupsProvider):
@@ -49,7 +49,7 @@ class ProjectsProvider(GroupsProvider):
             maybe_project = self.gitlab.get_project_case_insensitive(target)
             projects.add_requested([maybe_project["path_with_namespace"]])
 
-        except Exception:  # TODO: this should be NotFoundException but it causes an import issue
+        except NotFoundException:
             # it's a group or a subgroup - ignore it here
             pass
 
@@ -112,7 +112,7 @@ class ProjectsProvider(GroupsProvider):
                 project_object = self.gitlab.get_project_case_insensitive(project)
                 if project_object["archived"]:
                     archived.append(project_object["path_with_namespace"])
-            except Exception:  # TODO: this should be NotFoundException but it causes an import issue
+            except NotFoundException:
                 fatal(
                     f"Configuration contains project {project} but it cannot be found in GitLab!",
                     exit_code=EXIT_INVALID_INPUT,
