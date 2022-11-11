@@ -64,3 +64,8 @@ Vagrantfile
 **/.vagrant/
 
 **/test_data/
+
+# pyre experiments
+.pyre_configuration
+.watchmanconfig
+.pyre
