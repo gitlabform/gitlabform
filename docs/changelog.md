@@ -1,22 +1,12 @@
 # Changelog
 
-## 3.3.0rc3
+## 3.3.0
 
-Exactly like 3.3.0rc2 which was not released to PyPI because of a GitHub Actions configuration issue in this repo.
-
-## 3.3.0rc2
-
-Like 3.3.0rc1 + improvement to the Protected environments syntax and a fix for the Python 3.11 Docker image (it used an RC2 version of Python 3.11 instead of its final one).
-
-Thanks to [Rafael Zanella](https://github.com/zanella) for his contribution!
-
-## 3.3.0rc1
-
-* **Add support for managing project [Protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html#protected-environments).** PR [#423](https://github.com/gitlabform/gitlabform/pull/423).
+* **Add support for managing project [Protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html#protected-environments).** PR [#423](https://github.com/gitlabform/gitlabform/pull/423) & PR [#430](https://github.com/gitlabform/gitlabform/pull/430)
 * Add support for Python 3.11 and switch to this version in the Docker image.
 * (For contributors) Move all the GitLabForm tests that require GitLab Premium license into a separate module and introduce a new GitHub Actions flow to enable running them for PRs after the maintainer's approval.
 
-Thanks to [Rafael Zanella](https://github.com/zanella) for his contribution!
+Thanks to [Rafael Zanella](https://github.com/zanella) for his contributions!
 
 ## 3.2.0
 
