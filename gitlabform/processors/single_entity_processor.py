@@ -20,7 +20,7 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         gitlab: GitLab,
         get_method_name: str,
         edit_method_name: str,
-        add_method_name: str = None,
+        add_method_name: Optional[str] = None,
     ):
         super().__init__(configuration_name, gitlab)
         self.get_method: Callable = getattr(self.gitlab, get_method_name)

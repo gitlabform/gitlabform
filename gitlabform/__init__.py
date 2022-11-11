@@ -28,7 +28,7 @@ from cli_ui import (
 from packaging import version as packaging_version
 from typing import Any, Tuple
 
-from configuration import Configuration
+from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import (
     ConfigFileNotFoundException,
     ConfigInvalidException,
@@ -101,8 +101,6 @@ class GitLabForm:
                 )
 
         self.gitlab, self.configuration = self._initialize_configuration_and_gitlab()
-
-        self.configuration_transformers = ConfigurationTransformers(self.gitlab)
 
         self.group_processors = GroupProcessors(
             self.gitlab, self.configuration, self.strict
@@ -334,9 +332,9 @@ class GitLabForm:
                 gitlab = GitLab(config_path=self.config)
             configuration = gitlab.get_configuration()
 
-            self.configuration_transformers.transform(configuration)
+            configuration_transformers = ConfigurationTransformers(gitlab)
+            configuration_transformers.transform(configuration)
 
-            return gitlab, configuration
         except ConfigFileNotFoundException as e:
             fatal(
                 f"Config file not found at: {e}",
@@ -352,6 +350,8 @@ class GitLabForm:
                 f"GitLab test request failed:\n{e.underlying}",
                 exit_code=EXIT_PROCESSING_ERROR,
             )
+
+        return gitlab, configuration
 
     def run(self) -> None:
         """

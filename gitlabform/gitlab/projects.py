@@ -155,7 +155,7 @@ class GitLabProjects(GitLabCore):
         except NotFoundException:
             return dict()
 
-    def put_project_push_rules(self, project_and_group_name, push_rules):
+    def put_project_push_rules(self, project_and_group_name: str, push_rules):
         # push_rules has to be like this:
         # {
         #     'setting1': value1,

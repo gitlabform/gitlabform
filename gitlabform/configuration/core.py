@@ -145,21 +145,23 @@ class ConfigurationCore(ABC):
         try:
             for token in tokens:
                 current = current[token]
+
+            if isinstance(current, ScalarString):
+                to_return = str(current)
+            else:
+                to_return = current
         except:
             if default is not None:
-                return default
+                to_return = default
             else:
                 raise KeyNotFoundException
 
-        if isinstance(current, ScalarString):
-            return str(current)
-        else:
-            return current
+        return to_return
 
     @staticmethod
     def _validate_break_inheritance_flag(
         config: dict, section_name: str, parent_key: str = ""
-    ):
+    ) -> None:
         for key, value in config.items():
             if "inherit" == key:
                 parent_key_description = (
