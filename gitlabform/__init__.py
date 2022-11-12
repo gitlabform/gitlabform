@@ -616,8 +616,10 @@ class GitLabForm:
                 if len(entities.omitted[reason]) > 0:
                     if not first:
                         entities_omitted += ","
-                    entities_omitted += f" {reason}: {len(entities.omitted[reason])}"
-                    entities_verbose += f"\nomitted {entities.name} - {reason}: {entities.get_omitted(reason)}"
+                    entities_omitted += (
+                        f" {reason.value}: {len(entities.omitted[reason])}"
+                    )
+                    entities_verbose += f"\nomitted {entities.name} - {reason.value}: {entities.get_omitted(reason)}"
                     first = False
             entities_omitted += ")"
 
