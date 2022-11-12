@@ -777,8 +777,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#packages" class="md-nav__link">
-    Packages
+  <a href="#packages-overview" class="md-nav__link">
+    Packages overview
   </a>
   
 </li>
@@ -797,11 +797,11 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#gitlabform-and-gitlabformprocessors" class="md-nav__link">
-    gitlabform. and gitlabform.processors.
+  <a href="#gitlabform-gitlabformlists-and-gitlabformprocessors" class="md-nav__link">
+    gitlabform., gitlabform.lists. and gitlabform.processors.*
   </a>
   
-    <nav class="md-nav" aria-label="gitlabform. and gitlabform.processors.">
+    <nav class="md-nav" aria-label="gitlabform., gitlabform.lists. and gitlabform.processors.*">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -941,8 +941,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#packages" class="md-nav__link">
-    Packages
+  <a href="#packages-overview" class="md-nav__link">
+    Packages overview
   </a>
   
 </li>
@@ -961,11 +961,11 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#gitlabform-and-gitlabformprocessors" class="md-nav__link">
-    gitlabform. and gitlabform.processors.
+  <a href="#gitlabform-gitlabformlists-and-gitlabformprocessors" class="md-nav__link">
+    gitlabform., gitlabform.lists. and gitlabform.processors.*
   </a>
   
-    <nav class="md-nav" aria-label="gitlabform. and gitlabform.processors.">
+    <nav class="md-nav" aria-label="gitlabform., gitlabform.lists. and gitlabform.processors.*">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1044,11 +1044,13 @@ the expected style of your code etc. - the "<strong>general how</strong>"s.</p>
 <p>This article purpose is to explain "<strong>specific how</strong>"s - explain what is where in the code and how to add features
 by example.</p>
 <h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">&para;</a></h2>
-<h3 id="packages">Packages<a class="headerlink" href="#packages" title="Permanent link">&para;</a></h3>
+<h3 id="packages-overview">Packages overview<a class="headerlink" href="#packages-overview" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
-<p><code>gitlabform.*</code> and <code>gitlabform.processors.*</code> - contains the main app logic. It provides the CLI, parsing of the parameters,
-  uses below two packages to apply the configuration to the requested set of projects and groups.</p>
+<p><code>gitlabform.*</code>, <code>gitlabform.lists.*</code> and <code>gitlabform.processors.*</code> - these contain the main app logic.
+  They provide the CLI, parsing of the parameters (<code>gitlabform.*</code>), getting the input lists of groups and projects
+  to process and omitting unneeded ones to get the effective lists (<code>gitlabform.lists.*</code>) and finally processors
+  are used to apply the groups and projects configurations in GitLab,</p>
 </li>
 <li>
 <p><code>gitlabform.gitlab.*</code> - contains the GitLab API client code, grouped mostly by the GitLab API 
@@ -1060,16 +1062,18 @@ by example.</p>
   the config on these levels: common, group and project settings.</p>
 </li>
 </ul>
+<p>Please see the below doc sections for more info about these packages.</p>
 <h2 id="common-pattern-multiple-inheritance">Common pattern - multiple inheritance<a class="headerlink" href="#common-pattern-multiple-inheritance" title="Permanent link">&para;</a></h2>
 <p>In many of the above packages we are using <em>multiple inheritance</em>.</p>
-<p>The basic features are implemented in the "core" class defined in <code>core.py</code>. Extensions to it are defined in all other
+<p>The basic features are often implemented in the "core" class defined in <code>core.py</code>. Extensions to it are defined in all other
 files as "feature" classes that inherit the "core". Finally, there is an "everything" class that groups them all - it is
 defined in the <code>__init__.py</code> file.</p>
-<h3 id="gitlabform-and-gitlabformprocessors">gitlabform.<em> and gitlabform.processors.</em><a class="headerlink" href="#gitlabform-and-gitlabformprocessors" title="Permanent link">&para;</a></h3>
+<h3 id="gitlabform-gitlabformlists-and-gitlabformprocessors">gitlabform.<em>, gitlabform.lists.</em> and gitlabform.processors.*<a class="headerlink" href="#gitlabform-gitlabformlists-and-gitlabformprocessors" title="Permanent link">&para;</a></h3>
 <p>The entry point for running the app is in <code>run.py</code> and the main logic is in the <code>GitLabForm</code> class.</p>
 <p>This code boils down to the <code>run()</code> method, which for each project that according to the app parameters
 and config should be taken into account, applies the effective config.</p>
-<p>The effective config contains what is called the "config sections", which are the YAML keys that can exist under projects
+<p>The code in <code>gitlabform.lists.*</code> is used to generate the input lists of groups and projects, omit the ones that can and should be omitted for saving the processing time (f.e. archived projects, groups and projects with empty effective config) and this way generate the effective lists of groups and projects.</p>
+<p>The effective config for these contain what is called the "config sections", which are the YAML keys that can exist under projects
 in the config YAML, for example: <code>deploy_keys</code>, <code>variables</code>, <code>group_variables</code> and so on.</p>
 <p>Those config sections are processed by the code in the classes inheriting from the <code>AbstractProcessor</code> class. This class
 should be reused when implementing new functionalities (such as supporting new configuration keys) as it holds the common 
@@ -1124,7 +1128,14 @@ the "feature" classes in this package (for example <code>GitLabMergeRequests</co
    defined in <code>__init__.py</code>. </li>
 </ol>
 <h3 id="gitlabformconfiguration">gitlabform.configuration.*<a class="headerlink" href="#gitlabformconfiguration" title="Permanent link">&para;</a></h3>
-<p><strong>TODO</strong>: describe this part. Especially what an "effective project config" is, because that may not be clear.</p>
+<p>The core code in this package contains some share code, which apart from the rather obvious things like parsing the input YAML, getting the value from a specific subkey and merging configs, contains also:</p>
+<ul>
+<li>code for breaking configuration inheritance using <code>inherit: false</code>,</li>
+<li>dealing with groups and project names in GitLab being de facto case-insensitive (you can change case of such entities name, but you cannot have 2 which names differ only in case) (see "almost duplicates" in the code),</li>
+</ul>
+<p>The class inheritance order in this package (core -&gt; common -&gt; groups -&gt; projects) is intentional, as common config affects groups configs and this in turn affects projects configs.</p>
+<p>The effective configuration for a project may contain elements that are inherited from the common level and from the group level.</p>
+<p>A separate module in this package, <code>transform.py</code>, contains code that does YAML-level transformation form allow a more user-friendly config syntax that is later replaced with a syntax required by GitLab API. An example of this can be accepting <code>user: &lt;username&gt;</code> in the input config syntax but internally transforming it into <code>user_id: &lt;id_number&gt;</code>.</p>
 
 
 
