@@ -241,6 +241,11 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                 pass
 
 
+#
+# TODO: remove below code in v4.x
+#
+
+
 class MergeRequestApprovalsTransformer(ConfigurationTransformer):
     def __init__(self, gitlab: GitLab):
         # this transformer doesn't need to call gitlab
@@ -314,10 +319,10 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
 
                 if old_syntax_found:
                     warning(
-                        "The 'merge_requests' configuration section syntax is deprecated and will be removed "
-                        "in future versions of GitLabForm. "
-                        "Please migrate to the new syntax using 'merge_requests_approvals' "
-                        "and 'merge_requests_approval_rules' sections."
+                        "The 'merge_requests' configuration section syntax works but is deprecated and will be removed "
+                        "in the next major version of GitLabForm. "
+                        "Please migrate to the new syntax using the 'merge_requests_approvals' "
+                        "and the 'merge_requests_approval_rules' sections."
                     )
 
         except YAMLPathException:

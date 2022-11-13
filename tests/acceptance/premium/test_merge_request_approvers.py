@@ -4,6 +4,10 @@ from tests.acceptance import run_gitlabform, gl
 from gitlabform.gitlab import AccessLevel
 from gitlabform.constants import APPROVAL_RULE_NAME
 
+#
+# TODO: remove this file in v4.x
+#
+
 
 @pytest.fixture(scope="function")
 def group_with_one_owner_and_two_developers(gitlab, other_group, users):

@@ -59,26 +59,6 @@ class Key(AbstractKey):
         return f"'{self.name}'"
 
 
-# class KeyWithValue(AbstractKey):
-#     """
-#     A single, mandatory key with a specific value.
-#     """
-#     def __init__(self, name, value):
-#         self.name = name
-#         self.value = value
-#
-#     def matches(self, e1, e2):
-#         return (
-#                 self.name in e1 and self.name in e2 and e1[self.name] == e2[self.name] and e1[self.name] == self.value
-#         )
-#
-#     def contains(self, entity):
-#         return entity.get(self.name, None) == self.value
-#
-#     def explain(self) -> str:
-#         return f"'{self.value}=={self.value}'"
-
-
 class And(AbstractKey):
     """
     This groups two or more keys of which all are mandatory.
