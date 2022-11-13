@@ -1,5 +1,5 @@
 from gitlabform.gitlab import GitLab
-from processors.single_entity_processor import SingleEntityProcessor
+from gitlabform.processors.single_entity_processor import SingleEntityProcessor
 
 
 class MergeRequestsApprovals(SingleEntityProcessor):

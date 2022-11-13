@@ -25,11 +25,13 @@ from gitlabform.gitlab import GitLab
 class ConfigurationTransformers:
     def __init__(self, gitlab: GitLab):
         self.user_transformer = UserTransformer(gitlab)
+        self.group_transformer = GroupTransformer(gitlab)
         self.implicit_name_transformer = ImplicitNameTransformer(gitlab)
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
 
     def transform(self, configuration: Configuration) -> None:
         self.user_transformer.transform(configuration)
+        self.group_transformer.transform(configuration)
         self.implicit_name_transformer.transform(configuration)
         self.access_level_transformer.transform(configuration)
 
@@ -60,8 +62,52 @@ class UserTransformer(ConfigurationTransformer):
 
                     node_coordinate.parent["user_id"] = self.gitlab._get_user_id(user)
             except YAMLPathException as e:
-                logging.debug(f"The YAMl library threw an exception: {e}")
+                # this just means that we haven't found any keys in YAML
+                # under the given path
+                pass
 
+        paths_to_users = ["projects_and_groups.*.merge_requests_approval_rules.*.users"]
+
+        for path in paths_to_users:
+            try:
+                for node_coordinate in processor.get_nodes(path):
+                    user_ids = []
+                    users = node_coordinate.parent.pop("users")
+                    for user in users:
+                        user_id = self.gitlab._get_user_id(user)
+                        user_ids.append(user_id)
+                    node_coordinate.parent["user_ids"] = user_ids
+            except YAMLPathException as e:
+                # this just means that we haven't found any keys in YAML
+                # under the given path
+                pass
+
+
+class GroupTransformer(ConfigurationTransformer):
+    def __init__(self, gitlab: GitLab):
+        self.gitlab = gitlab
+
+    def transform(self, configuration: Configuration) -> None:
+        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
+
+        processor = Processor(ConsolePrinter(logging_args), configuration.config)
+
+        paths_to_groups = [
+            "projects_and_groups.*.merge_requests_approval_rules.*.groups"
+        ]
+
+        for path in paths_to_groups:
+            try:
+                for node_coordinate in processor.get_nodes(path):
+                    group_ids = []
+                    groups = node_coordinate.parent.pop("groups")
+                    for group in groups:
+                        group_id = self.gitlab._get_group_id(group)
+                        group_ids.append(group_id)
+                    node_coordinate.parent["group_ids"] = group_ids
+            except YAMLPathException:
+                # this just means that we haven't found any keys in YAML
+                # under the given path
                 pass
 
 
@@ -101,9 +147,9 @@ class ImplicitNameTransformer(ConfigurationTransformer):
                     node_coordinate.parent[node_coordinate.parentref][
                         "name"
                     ] = node_coordinate.parentref
-            except YAMLPathException as e:
-                logging.debug(f"The YAMl library threw an exception: {e}")
-
+            except YAMLPathException:
+                # this just means that we haven't found any keys in YAML
+                # under the given path
                 pass
 
 
@@ -154,6 +200,8 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                             exit_code=EXIT_INVALID_INPUT,
                         )
             except YAMLPathException:
+                # this just means that we haven't found any keys in YAML
+                # under the given path
                 pass
 
         # these are different from the above, as they are elements of arrays,
@@ -182,4 +230,6 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                                 exit_code=EXIT_INVALID_INPUT,
                             )
             except YAMLPathException:
+                # this just means that we haven't found any keys in YAML
+                # under the given path
                 pass

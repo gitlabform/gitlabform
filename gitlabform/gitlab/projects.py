@@ -230,12 +230,26 @@ class GitLabProjects(GitLabCore):
         pid = self._get_project_id(project_and_group_name)
         return self._make_requests_to_api("projects/%s/approvals", pid)
 
-    def get_approvals_rules(self, project_and_group_name):
+    def get_approval_rules(self, project_and_group_name):
         # for this endpoint GitLab still actually wants pid, not "group/project"...
         pid = self._get_project_id(project_and_group_name)
         return self._make_requests_to_api("projects/%s/approval_rules", pid)
 
-    def delete_approvals_rule(self, project_and_group_name, approval_rule_id):
+    # new syntax
+    def delete_approval_rule(self, project_and_group_name, rule_in_gitlab):
+        # for this endpoint GitLab still actually wants pid, not "group/project"...
+        pid = self._get_project_id(project_and_group_name)
+        approval_rule_id = rule_in_gitlab["id"]
+
+        self._make_requests_to_api(
+            "projects/%s/approval_rules/%s",
+            (pid, approval_rule_id),
+            method="DELETE",
+            expected_codes=[200, 204],
+        )
+
+    # TODO: delete
+    def delete_approval_rule_by_id(self, project_and_group_name, approval_rule_id):
         # for this endpoint GitLab still actually wants pid, not "group/project"...
         pid = self._get_project_id(project_and_group_name)
         self._make_requests_to_api(
@@ -245,6 +259,24 @@ class GitLabProjects(GitLabCore):
             expected_codes=[200, 204],
         )
 
+    # new syntax
+    def add_approval_rule(
+        self,
+        project_and_group_name,
+        data,
+    ):
+        pid = self._get_project_id(project_and_group_name)
+
+        self._make_requests_to_api(
+            "projects/%s/approval_rules",
+            pid,
+            method="POST",
+            data=None,
+            expected_codes=201,
+            json=data,
+        )
+
+    # TODO: delete when not used anymore
     def create_approval_rule(
         self,
         project_and_group_name,
@@ -268,6 +300,41 @@ class GitLabProjects(GitLabCore):
             json=data,
         )
 
+    def get_approval_rule(self, project_and_group_name, name):
+        # for this endpoint GitLab still actually wants pid, not "group/project"...
+        pid = self._get_project_id(project_and_group_name)
+        rules = self._make_requests_to_api("projects/%s/approval_rules", pid)
+        for rule in rules:
+            if rule["name"] == name:
+                return rule
+        raise NotFoundException
+
+    # new syntax
+    def edit_approval_rule(
+        self,
+        project_and_group_name,
+        rule_in_gitlab,
+        rule_in_config,
+    ):
+        pid = self._get_project_id(project_and_group_name)
+        approval_rule_id = rule_in_gitlab["id"]
+
+        # not passing any of these lists means: "do not change them"
+        # while what we really what is in this case is "clear them"
+        if "user_ids" not in rule_in_config:
+            rule_in_config["user_ids"] = []
+        if "group_ids" not in rule_in_config:
+            rule_in_config["group_ids"] = []
+
+        self._make_requests_to_api(
+            "projects/%s/approval_rules/%s",
+            (pid, approval_rule_id),
+            method="PUT",
+            data=None,
+            json=rule_in_config,
+        )
+
+    # TODO: delete when not used anymore
     def update_approval_rule(
         self,
         project_and_group_name,

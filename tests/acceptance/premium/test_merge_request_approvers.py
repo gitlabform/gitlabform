@@ -71,7 +71,7 @@ class TestMergeRequestApprovers:
 
         run_gitlabform(config, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) >= 1
 
@@ -102,7 +102,7 @@ class TestMergeRequestApprovers:
 
         run_gitlabform(config_user_change, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) >= 1
 
@@ -141,7 +141,7 @@ class TestMergeRequestApprovers:
 
         run_gitlabform(config__approvers_single_group, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) >= 1
 
@@ -172,7 +172,7 @@ class TestMergeRequestApprovers:
 
         run_gitlabform(config__approvers_single_group_change, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) >= 1
 
@@ -219,7 +219,7 @@ class TestMergeRequestApprovers:
             config__approvers_single_user_and_single_group, group_and_project
         )
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
         assert len(rules) >= 1
 
         found = False
@@ -256,7 +256,7 @@ class TestMergeRequestApprovers:
             config__approvers_single_user_and_single_group_change, group_and_project
         )
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
         assert len(rules) >= 1
 
         found = False
@@ -307,7 +307,7 @@ class TestMergeRequestApprovers:
             group_and_project,
         )
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
         assert len(rules) >= 1
 
         found = False
@@ -370,7 +370,7 @@ class TestMergeRequestApprovers:
             config__approvers_removing_preexisting_approvals, group_and_project
         )
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) == 1
         rule = rules[0]

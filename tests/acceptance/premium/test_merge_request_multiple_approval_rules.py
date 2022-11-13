@@ -48,7 +48,7 @@ class TestMergeRequestApprovers:
 
         run_gitlabform(config, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) >= 1
 
@@ -90,13 +90,13 @@ class TestMergeRequestApprovers:
                       - {user1.name}
                     groups:
                       - {group_with_one_owner_and_two_developers}
-                    protected_branches:
-                      - sensitive-branch 
+                    # protected_branches:
+                    #   - sensitive-branch 
             """
 
         run_gitlabform(config, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) >= 2
 
@@ -148,13 +148,13 @@ class TestMergeRequestApprovers:
                       - {user1.name}
                     groups:
                       - {group_with_one_owner_and_two_developers}
-                    protected_branches:
-                      - sensitive-branch 
+                    # protected_branches:
+                    #   - sensitive-branch 
             """
 
         run_gitlabform(config, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) >= 2
 
@@ -172,7 +172,7 @@ class TestMergeRequestApprovers:
 
         run_gitlabform(config, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) == 1
 
@@ -211,13 +211,13 @@ class TestMergeRequestApprovers:
                       - {user1.name}
                     groups:
                       - {group_with_one_owner_and_two_developers}
-                    protected_branches:
-                      - sensitive-branch 
+                    # protected_branches:
+                    #   - sensitive-branch 
             """
 
         run_gitlabform(config, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) >= 2
 
@@ -237,7 +237,7 @@ class TestMergeRequestApprovers:
                 assert (
                     rule["groups"][0]["name"] == group_with_one_owner_and_two_developers
                 )
-                assert rule["protected_branches"] == ["sensitive-branch"]
+                # assert rule["protected_branches"] == ["sensitive-branch"]
                 second_found = True
 
         assert first_found and second_found
@@ -261,14 +261,14 @@ class TestMergeRequestApprovers:
                     #   - {user1.name}
                     groups:
                       - {group_with_one_owner_and_two_developers}
-                    protected_branches:
-                      - sensitive-branch 
-                      - another # changed
+                    # protected_branches:
+                    #   - sensitive-branch 
+                    #   - another # changed
             """
 
         run_gitlabform(config, group_and_project)
 
-        rules = gitlab.get_approvals_rules(group_and_project)
+        rules = gitlab.get_approval_rules(group_and_project)
 
         assert len(rules) == 2  # because of enforce
 
@@ -290,10 +290,10 @@ class TestMergeRequestApprovers:
                 assert (
                     rule["groups"][0]["name"] == group_with_one_owner_and_two_developers
                 )
-                assert rule["protected_branches"] == [
-                    "sensitive-branch",
-                    "another",
-                ]  # changed
+                # assert rule["protected_branches"] == [
+                #     "sensitive-branch",
+                #     "another",
+                # ]  # changed
                 second_found = True
 
         assert first_found and second_found

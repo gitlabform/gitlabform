@@ -35,14 +35,16 @@ class MergeRequestsProcessor(AbstractProcessor):
 
             # is a rule already configured and just needs updating?
             approval_rule_id = None
-            rules = self.gitlab.get_approvals_rules(project_and_group)
+            rules = self.gitlab.get_approval_rules(project_and_group)
             for rule in rules:
                 if rule["name"] == APPROVAL_RULE_NAME:
                     approval_rule_id = rule["id"]
                 else:
                     if remove_other_approval_rules:
                         debug("Deleting extra approval rule '%s'" % rule["name"])
-                        self.gitlab.delete_approvals_rule(project_and_group, rule["id"])
+                        self.gitlab.delete_approval_rule_by_id(
+                            project_and_group, rule["id"]
+                        )
 
             if not approvers:
                 approvers = []
