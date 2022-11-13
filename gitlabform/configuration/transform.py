@@ -1,14 +1,13 @@
-import logging
 from abc import ABC, abstractmethod
 from types import SimpleNamespace
 
-from cli_ui import fatal
+from cli_ui import fatal, warning
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
 from yamlpath.wrappers import ConsolePrinter
 
-from gitlabform.constants import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT, APPROVAL_RULE_NAME
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
 from gitlabform.gitlab import GitLab
@@ -24,12 +23,19 @@ from gitlabform.gitlab import GitLab
 
 class ConfigurationTransformers:
     def __init__(self, gitlab: GitLab):
+        self.merge_request_approvals_transformer = MergeRequestApprovalsTransformer(
+            gitlab
+        )
         self.user_transformer = UserTransformer(gitlab)
         self.group_transformer = GroupTransformer(gitlab)
         self.implicit_name_transformer = ImplicitNameTransformer(gitlab)
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
 
     def transform(self, configuration: Configuration) -> None:
+        # this needs to run before user and group transformer as it may contain users and group
+        # names to convert to ids
+        self.merge_request_approvals_transformer.transform(configuration)
+
         self.user_transformer.transform(configuration)
         self.group_transformer.transform(configuration)
         self.implicit_name_transformer.transform(configuration)
@@ -233,3 +239,88 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                 # this just means that we haven't found any keys in YAML
                 # under the given path
                 pass
+
+
+class MergeRequestApprovalsTransformer(ConfigurationTransformer):
+    def __init__(self, gitlab: GitLab):
+        # this transformer doesn't need to call gitlab
+        pass
+
+    def transform(self, configuration: Configuration) -> None:
+        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
+
+        processor = Processor(ConsolePrinter(logging_args), configuration.config)
+
+        try:
+            for node_coordinate in processor.get_nodes(
+                "projects_and_groups.*.merge_requests"
+            ):
+                old_syntax_found = False
+
+                where_to_add_new_syntax = node_coordinate.parent
+
+                old_syntax = node_coordinate.node
+
+                # approval rules
+                if "approvers" in old_syntax or "approver_groups" in old_syntax:
+                    old_syntax_found = True
+
+                    # we shouldn't have accepted this syntax before, but we did and now it's a problem
+                    # because what should be the default approvals required setting? :/
+                    if (
+                        "approvals" in old_syntax
+                        and "approvals_before_merge" in old_syntax["approvals"]
+                    ):
+                        approvals_required = old_syntax["approvals"][
+                            "approvals_before_merge"
+                        ]
+                    else:
+                        approvals_required = 2
+
+                    where_to_add_new_syntax["merge_requests_approval_rules"] = {
+                        "legacy": {
+                            "approvals_required": approvals_required,
+                            "name": APPROVAL_RULE_NAME,
+                        }
+                    }
+
+                    if "approvers" in old_syntax:
+                        where_to_add_new_syntax["merge_requests_approval_rules"][
+                            "legacy"
+                        ]["users"] = old_syntax["approvers"]
+                    if "approver_groups" in old_syntax:
+                        where_to_add_new_syntax["merge_requests_approval_rules"][
+                            "legacy"
+                        ]["groups"] = old_syntax["approver_groups"]
+
+                    if (
+                        "remove_other_approval_rules" in old_syntax
+                        and old_syntax["remove_other_approval_rules"]
+                    ):
+                        old_syntax_found = True
+                        where_to_add_new_syntax["merge_requests_approval_rules"][
+                            "enforce"
+                        ] = True
+
+                # approvals configurations
+                if "approvals" in old_syntax:
+                    old_syntax_found = True
+                    if "approvals_before_merge" in old_syntax["approvals"]:
+                        # this setting is now moved inside the approval rules, so remove it from here
+                        old_syntax["approvals"].pop("approvals_before_merge")
+                    where_to_add_new_syntax["merge_requests_approvals"] = old_syntax[
+                        "approvals"
+                    ]
+
+                if old_syntax_found:
+                    warning(
+                        "The 'merge_requests' configuration section syntax is deprecated and will be removed "
+                        "in future versions of GitLabForm. "
+                        "Please migrate to the new syntax using 'merge_requests_approvals' "
+                        "and 'merge_requests_approval_rules' sections."
+                    )
+
+        except YAMLPathException:
+            # this just means that we haven't found any keys in YAML
+            # under the given path
+            pass

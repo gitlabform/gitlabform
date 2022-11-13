@@ -2,7 +2,7 @@ import pytest
 
 from tests.acceptance import run_gitlabform, gl
 from gitlabform.gitlab import AccessLevel
-from gitlabform.processors.project.merge_requests_processor import APPROVAL_RULE_NAME
+from gitlabform.constants import APPROVAL_RULE_NAME
 
 
 @pytest.fixture(scope="function")
@@ -340,12 +340,16 @@ class TestMergeRequestApprovers:
 
         user1 = make_user(AccessLevel.DEVELOPER)
         # add some preexisting approval rules
-        gitlab.create_approval_rule(
+        gitlab.add_approval_rule(
             group_and_project,
-            "additional approval rule",
-            1,
-            [user1.name],
-            [group_with_one_owner_and_two_developers],
+            {
+                "name": "additional approval rule",
+                "approvals_required": 1,
+                "user_ids": [user1.id],
+                "group_ids": [
+                    gitlab._get_group_id(group_with_one_owner_and_two_developers)
+                ],
+            },
         )
 
         user2 = make_user(AccessLevel.DEVELOPER)
