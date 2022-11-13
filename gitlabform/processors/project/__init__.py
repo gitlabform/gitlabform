@@ -40,6 +40,7 @@ from gitlabform.processors.project.integrations_processor import (
     IntegrationsProcessor,
 )
 from gitlabform.processors.project.tags_processor import TagsProcessor
+from processors.project.merge_requests_approvals import MergeRequestsApprovals
 
 
 class ProjectProcessors(AbstractProcessors):
@@ -62,4 +63,5 @@ class ProjectProcessors(AbstractProcessors):
             BadgesProcessor(gitlab),
             ResourceGroupsProcessor(gitlab),
             ProtectedEnvironmentsProcessor(gitlab),
+            MergeRequestsApprovals(gitlab),
         ]
