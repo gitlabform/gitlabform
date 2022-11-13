@@ -83,8 +83,14 @@ class GitLabCore:
     @functools.lru_cache()
     def _get_group_id(self, path) -> int:
         group = self._make_requests_to_api("groups/%s", path, "GET")
-        # TODO: add tests for all that uses this and then stop converting these ints to strings here
         return int(group["id"])
+
+    @functools.lru_cache()
+    def _get_protected_branch_id(self, project_and_group_name, branch) -> int:
+        branch = self._make_requests_to_api(
+            "projects/%s/protected_branches/%s", (project_and_group_name, branch)
+        )
+        return int(branch["id"])
 
     @functools.lru_cache()
     def _get_project_id(self, project_and_group):

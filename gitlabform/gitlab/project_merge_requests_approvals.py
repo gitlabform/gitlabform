@@ -1,12 +1,10 @@
-from gitlab.branches import GitLabBranches
-
-# from gitlab.projects import GitLabProjects
 from gitlabform.gitlab.core import (
     NotFoundException,
+    GitLabCore,
 )
 
 
-class GitLabProjectMergeRequestsApprovals(GitLabBranches):
+class GitLabProjectMergeRequestsApprovals(GitLabCore):
 
     # https://docs.gitlab.com/ee/api/merge_request_approvals.html#get-configuration
     def get_approvals_settings(self, project_and_group_name):
@@ -196,8 +194,8 @@ class GitLabProjectMergeRequestsApprovals(GitLabBranches):
         data.pop("protected_branches")
         protected_branch_ids = []
         for branch_name in protected_branches_name:
-            branch_id = self.get_protected_branch(project_and_group_name, branch_name)[
-                "id"
-            ]
+            branch_id = self._get_protected_branch_id(
+                project_and_group_name, branch_name
+            )
             protected_branch_ids.append(branch_id)
         data["protected_branch_ids"] = protected_branch_ids

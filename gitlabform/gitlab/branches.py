@@ -135,11 +135,6 @@ class GitLabBranches(GitLabCore):
             expected_codes=[200, 204],
         )
 
-    def get_protected_branch(self, project_and_group_name, branch):
-        return self._make_requests_to_api(
-            "projects/%s/protected_branches/%s", (project_and_group_name, branch)
-        )
-
     def get_protected_branches(self, project_and_group_name):
         protected_branches = self._make_requests_to_api(
             "projects/%s/protected_branches", project_and_group_name
