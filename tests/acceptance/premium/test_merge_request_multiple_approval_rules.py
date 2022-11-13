@@ -2,7 +2,6 @@ import pytest
 
 from tests.acceptance import run_gitlabform, gl
 from gitlabform.gitlab import AccessLevel
-from gitlabform.processors.project.merge_requests_processor import APPROVAL_RULE_NAME
 
 
 @pytest.fixture(scope="function")
@@ -70,6 +69,7 @@ class TestMergeRequestApprovers:
         group_and_project,
         group_with_one_owner_and_two_developers,
         make_user,
+        branch,
     ):
 
         user1 = make_user(AccessLevel.DEVELOPER)
@@ -77,6 +77,12 @@ class TestMergeRequestApprovers:
         config = f"""
             projects_and_groups:
               {group_and_project}:
+                branches:
+                  {branch}:
+                    protected: true
+                    push_access_level: no access
+                    merge_access_level: developer
+                    unprotect_access_level: maintainer
                 merge_requests_approval_rules:
                   standard:
                     approvals_required: 1
@@ -90,8 +96,8 @@ class TestMergeRequestApprovers:
                       - {user1.name}
                     groups:
                       - {group_with_one_owner_and_two_developers}
-                    # protected_branches:
-                    #   - sensitive-branch 
+                    protected_branches:
+                      - {branch} 
             """
 
         run_gitlabform(config, group_and_project)
@@ -115,6 +121,7 @@ class TestMergeRequestApprovers:
                 assert (
                     rule["groups"][0]["name"] == group_with_one_owner_and_two_developers
                 )
+                assert len(rule["protected_branches"]) == 1
                 second_found = True
 
         assert first_found and second_found
@@ -128,6 +135,7 @@ class TestMergeRequestApprovers:
         group_and_project,
         group_with_one_owner_and_two_developers,
         make_user,
+        branch,
     ):
 
         user1 = make_user(AccessLevel.DEVELOPER)
@@ -135,6 +143,12 @@ class TestMergeRequestApprovers:
         config = f"""
             projects_and_groups:
               {group_and_project}:
+                branches:
+                  {branch}:
+                    protected: true
+                    push_access_level: no access
+                    merge_access_level: developer
+                    unprotect_access_level: maintainer
                 merge_requests_approval_rules:
                   standard:
                     approvals_required: 1
@@ -148,8 +162,8 @@ class TestMergeRequestApprovers:
                       - {user1.name}
                     groups:
                       - {group_with_one_owner_and_two_developers}
-                    # protected_branches:
-                    #   - sensitive-branch 
+                    protected_branches:
+                      - {branch} 
             """
 
         run_gitlabform(config, group_and_project)
@@ -191,6 +205,8 @@ class TestMergeRequestApprovers:
         group_and_project,
         group_with_one_owner_and_two_developers,
         make_user,
+        branch,
+        other_branch,
     ):
 
         user1 = make_user(AccessLevel.DEVELOPER)
@@ -198,6 +214,17 @@ class TestMergeRequestApprovers:
         config = f"""
             projects_and_groups:
               {group_and_project}:
+                branches:
+                  {branch}:
+                    protected: true
+                    push_access_level: no access
+                    merge_access_level: developer
+                    unprotect_access_level: maintainer
+                  {other_branch}:
+                    protected: true
+                    push_access_level: no access
+                    merge_access_level: developer
+                    unprotect_access_level: maintainer
                 merge_requests_approval_rules:
                   standard:
                     approvals_required: 1
@@ -211,8 +238,8 @@ class TestMergeRequestApprovers:
                       - {user1.name}
                     groups:
                       - {group_with_one_owner_and_two_developers}
-                    # protected_branches:
-                    #   - sensitive-branch 
+                    protected_branches:
+                      - {branch} 
             """
 
         run_gitlabform(config, group_and_project)
@@ -237,7 +264,10 @@ class TestMergeRequestApprovers:
                 assert (
                     rule["groups"][0]["name"] == group_with_one_owner_and_two_developers
                 )
-                # assert rule["protected_branches"] == ["sensitive-branch"]
+                protected_branches_name = [
+                    branch["name"] for branch in rule["protected_branches"]
+                ]
+                assert protected_branches_name == [branch]
                 second_found = True
 
         assert first_found and second_found
@@ -261,9 +291,9 @@ class TestMergeRequestApprovers:
                     #   - {user1.name}
                     groups:
                       - {group_with_one_owner_and_two_developers}
-                    # protected_branches:
-                    #   - sensitive-branch 
-                    #   - another # changed
+                    protected_branches:
+                      - {branch} 
+                      - {other_branch} # changed
             """
 
         run_gitlabform(config, group_and_project)
@@ -290,10 +320,15 @@ class TestMergeRequestApprovers:
                 assert (
                     rule["groups"][0]["name"] == group_with_one_owner_and_two_developers
                 )
-                # assert rule["protected_branches"] == [
-                #     "sensitive-branch",
-                #     "another",
-                # ]  # changed
+                protected_branches_name = sorted(
+                    [branch["name"] for branch in rule["protected_branches"]]
+                )
+                assert protected_branches_name == sorted(
+                    [
+                        branch,
+                        other_branch,
+                    ]
+                )  # changed
                 second_found = True
 
         assert first_found and second_found

@@ -135,18 +135,16 @@ class GitLabBranches(GitLabCore):
             expected_codes=[200, 204],
         )
 
-    def get_protected_branches(self, project_and_group_name):
-        branches = self._make_requests_to_api(
-            "projects/%s/repository/branches", project_and_group_name
+    def get_protected_branch(self, project_and_group_name, branch):
+        return self._make_requests_to_api(
+            "projects/%s/protected_branches/%s", (project_and_group_name, branch)
         )
 
-        protected_branches = []
-        for branch in branches:
-            if branch["protected"]:
-                name = branch["name"]
-                protected_branches.append(name)
-
-        return protected_branches
+    def get_protected_branches(self, project_and_group_name):
+        protected_branches = self._make_requests_to_api(
+            "projects/%s/protected_branches", project_and_group_name
+        )
+        return [branch["name"] for branch in protected_branches]
 
     def get_unprotected_branches(self, project_and_group_name):
         branches = self._make_requests_to_api(

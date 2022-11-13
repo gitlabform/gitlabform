@@ -2,6 +2,7 @@ import enum
 
 from typing import List
 
+from gitlabform.gitlab.project_mr_approvals import GitLabProjectMergeRequestsApprovals
 from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
@@ -66,6 +67,7 @@ class GitLab(
     GitLabPipelineSchedules,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
+    GitLabProjectMergeRequestsApprovals,
     GitLabVariables,
     GitLabProjectProtectedEnvironments,
 ):
