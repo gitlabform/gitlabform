@@ -297,3 +297,29 @@ class TestMergeRequestApprovers:
                 second_found = True
 
         assert first_found and second_found
+
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
+    def test__add_any_approver_rule(self, gitlab, group_and_project, make_user):
+
+        config = f"""
+            projects_and_groups:
+              {group_and_project}:
+                merge_requests_approval_rules:
+                  any:
+                    approvals_required: 0
+                    rule_type: any_approver
+                    name: "Any approver"
+                  enforce: true
+            """
+
+        run_gitlabform(config, group_and_project)
+
+        rules = gitlab.get_approval_rules(group_and_project)
+
+        assert len(rules) == 1
+        rule = rules[0]
+        assert rule["approvals_required"] == 0
+        assert rule["name"] == "Any approver"
+        assert rule["rule_type"] == "any_approver"
