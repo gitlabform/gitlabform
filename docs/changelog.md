@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.0rc1
+
+* **Add support for [multiple merge request approval rules](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html#add-multiple-approval-rules) and for changing the name of the currently managed single approval rule**. Implements [#388](https://github.com/gitlabform/gitlabform/issues/388) and [#95](https://github.com/gitlabform/gitlabform/issues/95), PR [#435](https://github.com/gitlabform/gitlabform/pull/435). The syntax for this feature is shown [here](https://github.com/gitlabform/gitlabform/issues/388#issuecomment-1278213194) for now - it will be moved to the GitHub Pages docs before the final release of v3.4.0.
+* (For contributors) Big refactoring to make the code more logically groupped and contribution documentation updates for easier contributions. Please see the commit messages in the PR [#431](https://github.com/gitlabform/gitlabform/pull/431) for more information.
+
 ## 3.3.0
 
 * **Add support for managing project [Protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html#protected-environments).** PR [#423](https://github.com/gitlabform/gitlabform/pull/423) & PR [#430](https://github.com/gitlabform/gitlabform/pull/430)
