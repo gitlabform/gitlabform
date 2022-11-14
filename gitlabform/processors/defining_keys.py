@@ -2,36 +2,68 @@ from abc import ABC, abstractmethod
 
 
 class AbstractKey(ABC):
+    """
+    This represents a key in an entity configuration.
+
+    For example in such an entity:
+
+    rule:
+      name: foo
+      rule_type: bar
+
+    ...the "name" and "rule_type" are keys.
+
+    This may also be an expression made with keys and relationships between them, see below.
+    """
+
     @abstractmethod
     def matches(self, e1, e2):
+        """
+        :param e1: some entity
+        :param e2: another entity
+        :return: True if the two given entities have the same value of this key.
+        """
         pass
 
     @abstractmethod
     def contains(self, entity):
+        """
+        :param entity: some entity
+        :return: True if the entity contains this key
+        """
         pass
 
     @abstractmethod
     def explain(self) -> str:
+        """
+        :return: a user-friendly explanation of what this key is
+        """
         pass
 
 
 class Key(AbstractKey):
-    def __init__(self, value):
-        self.value = value
+    """
+    A single, mandatory key.
+    """
+
+    def __init__(self, name):
+        self.name = name
 
     def matches(self, e1, e2):
-        return (
-            self.value in e1 and self.value in e2 and e1[self.value] == e2[self.value]
-        )
+        return self.name in e1 and self.name in e2 and e1[self.name] == e2[self.name]
 
     def contains(self, entity):
-        return entity.get(self.value, None) is not None
+        return entity.get(self.name, None) is not None
 
     def explain(self) -> str:
-        return f"'{self.value}'"
+        return f"'{self.name}'"
 
 
 class And(AbstractKey):
+    """
+    This groups two or more keys of which all are mandatory.
+    """
+
     def __init__(self, *arg: AbstractKey):
         self.keys = arg
 
@@ -47,6 +79,10 @@ class And(AbstractKey):
 
 
 class Or(AbstractKey):
+    """
+    This groups two or more keys where at least one must exist.
+    """
+
     def __init__(self, *arg: AbstractKey):
         self.keys = arg
 
@@ -62,6 +98,10 @@ class Or(AbstractKey):
 
 
 class Xor(AbstractKey):
+    """
+    This groups two or more keys where exactly one must exist.
+    """
+
     def __init__(self, *arg: AbstractKey):
         self.keys = arg
 
@@ -70,7 +110,7 @@ class Xor(AbstractKey):
     def _single_true(iterable):
         iterator = iter(iterable)
 
-        # consume from "i" until first true or it's exhausted
+        # consume from "i" until first true, or it's exhausted
         has_true = any(iterator)
 
         # carry on consuming until another true value / exhausted
@@ -91,14 +131,18 @@ class Xor(AbstractKey):
 
 
 class OptionalKey(AbstractKey):
-    def __init__(self, value):
-        self.value = value
+    """
+    This is a non-mandatory key.
+    """
+
+    def __init__(self, name):
+        self.name = name
 
     def matches(self, e1, e2):
-        only_in_e1 = self.value in e1 and self.value not in e2
-        only_in_e2 = self.value not in e1 and self.value in e2
+        only_in_e1 = self.name in e1 and self.name not in e2
+        only_in_e2 = self.name not in e1 and self.name in e2
         in_both_and_equal = (
-            self.value in e1 and self.value in e2 and e1[self.value] == e2[self.value]
+            self.name in e1 and self.name in e2 and e1[self.name] == e2[self.name]
         )
         return only_in_e1 or only_in_e2 or in_both_and_equal
 
@@ -107,4 +151,4 @@ class OptionalKey(AbstractKey):
         return True
 
     def explain(self) -> str:
-        return f"(optionally '{self.value}')"
+        return f"(optionally '{self.name}')"
