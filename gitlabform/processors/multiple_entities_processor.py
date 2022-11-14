@@ -112,7 +112,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                 # no need to validate if we have what's needed to delete as we got the entities from gitlab
                 verbose(
                     f"Deleting entity no {entity_name} of {self.configuration_name} in {project_or_group} "
-                    f" as it's not in config and enforce is set to true."
+                    f"as it's not in config and enforce is set to true."
                 )
                 self.delete_method(project_or_group, entity_config)
 
