@@ -52,8 +52,12 @@ class AbstractProcessor(ABC):
                     configuration.get(self.configuration_name),
                 )
             else:
+
                 verbose(f"Processing section '{self.configuration_name}'")
-                self._process_configuration(project_or_project_and_group, configuration)
+                if self._can_proceed(project_or_project_and_group, configuration):
+                    self._process_configuration(
+                        project_or_project_and_group, configuration
+                    )
 
             effective_configuration.add_configuration(
                 project_or_project_and_group,
@@ -141,3 +145,6 @@ class AbstractProcessor(ABC):
                     return True
 
         return False
+
+    def _can_proceed(self, project_or_group: str, configuration: dict):
+        return True

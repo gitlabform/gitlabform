@@ -15,6 +15,9 @@ from gitlabform.gitlab.project_deploy_keys import GitLabProjectDeployKeys
 from gitlabform.gitlab.project_protected_environments import (
     GitLabProjectProtectedEnvironments,
 )
+from gitlabform.gitlab.project_merge_requests_approvals import (
+    GitLabProjectMergeRequestsApprovals,
+)
 from gitlabform.gitlab.variables import GitLabVariables
 from gitlabform.gitlab.repositories import GitLabRepositories
 from gitlabform.gitlab.resource_groups import GitLabResourceGroups
@@ -66,7 +69,8 @@ class GitLab(
     GitLabPipelineSchedules,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
-    GitLabVariables,
     GitLabProjectProtectedEnvironments,
+    GitLabProjectMergeRequestsApprovals,
+    GitLabVariables,
 ):
     pass

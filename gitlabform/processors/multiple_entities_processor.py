@@ -62,13 +62,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         else:
             self.edit_method = None
 
-    def _can_proceed(self, project_or_group: str, configuration: dict):
-        return True
-
     def _process_configuration(self, project_or_group: str, configuration: dict):
-
-        if not self._can_proceed(project_or_group, configuration):
-            return
 
         entities_in_configuration = configuration[self.configuration_name]
         if "enforce" in entities_in_configuration:

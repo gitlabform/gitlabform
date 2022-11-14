@@ -67,7 +67,7 @@ class GitLabCore:
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
 
     @functools.lru_cache()
-    def _get_user_id(self, username: str) -> str:
+    def _get_user_id(self, username: str) -> int:
         users = self._make_requests_to_api("users?username=%s", username, "GET")
 
         # this API endpoint is for lookup, not search, so 'username' has to be full and exact username
@@ -78,13 +78,19 @@ class GitLabCore:
                 "No users found when searching for username '%s'" % username
             )
 
-        return users[0]["id"]
+        return int(users[0]["id"])
 
     @functools.lru_cache()
-    def _get_group_id(self, path):
+    def _get_group_id(self, path) -> int:
         group = self._make_requests_to_api("groups/%s", path, "GET")
-        # TODO: add tests for all that uses this and then stop converting these ints to strings here
-        return str(group["id"])
+        return int(group["id"])
+
+    @functools.lru_cache()
+    def _get_protected_branch_id(self, project_and_group_name, branch) -> int:
+        branch = self._make_requests_to_api(
+            "projects/%s/protected_branches/%s", (project_and_group_name, branch)
+        )
+        return int(branch["id"])
 
     @functools.lru_cache()
     def _get_project_id(self, project_and_group):
