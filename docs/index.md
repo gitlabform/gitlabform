@@ -46,9 +46,10 @@ GitLab introduces new features monthly. You can often use them in GitLabForm wit
 ### Stability
 
 We treat our users the way we would like to be treated by other software projects maintainers:
-    * We follow [semver](https://semver.org/) and don't allow _existing features behavior changes_ in minor or patch versions.
-    * Before changing the syntax we start printing _deprecation warnings_ in the versions before.
-    * We use _versioning of the configuration syntax_ for major changes and provide step-by-step upgrade guidelines.
+
+* We follow [semver](https://semver.org/) and don't allow _existing features behavior changes_ in minor or patch versions.
+* Before changing the syntax we start printing _deprecation warnings_ in the versions before.
+* We use _versioning of the configuration syntax_ for major changes and provide step-by-step upgrade guidelines.
 
 ## Quick start
 
