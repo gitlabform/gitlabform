@@ -42,7 +42,6 @@ nav:
 markdown_extensions:
   - attr_list
   - md_in_html
-
   - codehilite
   - markdown.extensions.admonition #for !!! notice
   - markdown.extensions.def_list
