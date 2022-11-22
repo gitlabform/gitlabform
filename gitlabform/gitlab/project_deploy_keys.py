@@ -47,19 +47,8 @@ class GitLabProjectDeployKeys(GitLabProjects):
 
                 existing_key_id = None
                 for existing_key in all_existing_keys:
-                    # We ignore the comment part of the SSH key as GitLab doesn't allow adding the same key just
-                    # with a different comment BUT it also has a bug that it returns keys with only parts of the
-                    # comments if the comment contains spaces, so it may show a difference where there is none...
-
-                    existing_key_type = existing_key["key"].split(" ")[0]
-                    existing_key_value = existing_key["key"].split(" ")[1]
-                    # fmt: off
-                    deploy_key_in_config_type = deploy_key_in_config["key"].split(" ")[0]
-                    deploy_key_in_config_value = deploy_key_in_config["key"].split(" ")[1]
-                    # fmt: on
-
-                    if (existing_key_type == deploy_key_in_config_type) and (
-                        existing_key_value == deploy_key_in_config_value
+                    if self._keys_are_effectively_equal(
+                        existing_key["key"], deploy_key_in_config["key"]
                     ):
                         existing_key_id = existing_key["id"]
                         break
@@ -110,3 +99,16 @@ class GitLabProjectDeployKeys(GitLabProjects):
         return self._make_requests_to_api(
             "projects/%s/deploy_keys/%s", (project_and_group_name, id), "GET"
         )
+
+    @staticmethod
+    def _keys_are_effectively_equal(key1, key2):
+        # We ignore the comment part of the SSH key as GitLab doesn't allow adding the same key just
+        # with a different comment BUT it also has a bug that it returns keys with only parts of the
+        # comments if the comment contains spaces, so it may show a difference where there is none...
+
+        key1_type = key1.split(" ")[0]
+        key1_value = key1.split(" ")[1]
+        key2_type = key2.split(" ")[0]
+        key2_value = key2.split(" ")[1]
+
+        return (key1_type == key2_type) and (key1_value == key2_value)
