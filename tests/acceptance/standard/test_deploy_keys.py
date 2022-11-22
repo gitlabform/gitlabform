@@ -59,6 +59,35 @@ class TestDeployKeys:
         deploy_keys = gitlab.get_deploy_keys(group_and_project_for_function)
         assert not any([key["title"] == "some_key" for key in deploy_keys])
 
+    def test__deploy_key_add_delete_with_enforce(
+        self, gitlab, group_and_project_for_function, public_ssh_key
+    ):
+
+        config_add = f"""
+        projects_and_groups:
+          {group_and_project_for_function}:
+            deploy_keys:
+              foobar:
+                key: {public_ssh_key}
+                title: some_key
+        """
+        run_gitlabform(config_add, group_and_project_for_function)
+
+        deploy_keys = gitlab.get_deploy_keys(group_and_project_for_function)
+        assert len(deploy_keys) >= 1
+        assert single_true([key["title"] == "some_key" for key in deploy_keys])
+
+        config_delete = f"""
+        projects_and_groups:
+          {group_and_project_for_function}:
+            deploy_keys:
+              enforce: true
+        """
+        run_gitlabform(config_delete, group_and_project_for_function)
+
+        deploy_keys = gitlab.get_deploy_keys(group_and_project_for_function)
+        assert len(deploy_keys) == 0
+
     def test__deploy_key_add_delete_readd(
         self, gitlab, group_and_project_for_function, public_ssh_key
     ):
