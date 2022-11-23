@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.1
+
+* Fix for setting deploy key in some cases fail with HTTP 400: `{"fingerprint":["has already been taken"]}`. Fixes [#19](https://github.com/gitlabform/gitlabform/issues/19), PR [#441](https://github.com/gitlabform/gitlabform/pull/441).
+
 ## 3.4.0rc1
 
 * **Add support for [multiple merge request approval rules](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html#add-multiple-approval-rules) and for changing the name of the currently managed single approval rule**. Implements [#388](https://github.com/gitlabform/gitlabform/issues/388) and [#95](https://github.com/gitlabform/gitlabform/issues/95), PR [#435](https://github.com/gitlabform/gitlabform/pull/435). The syntax for this feature is shown [here](https://github.com/gitlabform/gitlabform/issues/388#issuecomment-1278213194) for now - it will be moved to the GitHub Pages docs before the final release of v3.4.0.
