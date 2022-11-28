@@ -104,7 +104,13 @@ class FilesProcessor(AbstractProcessor):
                             )
                         new_content = effective_path.read_text()
 
-                    if configuration.get("files|" + file + "|template", True):
+                    # templating is documented to be enabled by default,
+                    # see https://gitlabform.github.io/gitlabform/reference/files/#files
+                    templating_enabled = True
+
+                    if configuration.get(
+                        "files|" + file + "|template", templating_enabled
+                    ):
                         new_content = self.get_file_content_as_template(
                             new_content,
                             project_and_group,
@@ -253,7 +259,9 @@ class FilesProcessor(AbstractProcessor):
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group
         rtemplate = Environment(
-            loader=FileSystemLoader("."), autoescape=True
+            loader=FileSystemLoader("."),
+            autoescape=True,
+            keep_trailing_newline=True,
         ).from_string(template)
         return rtemplate.render(
             project=self.get_project(project_and_group),
