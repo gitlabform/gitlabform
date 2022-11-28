@@ -1,5 +1,6 @@
 import os
 import pytest
+import re
 
 from gitlabform.gitlab import AccessLevel
 from gitlabform.gitlab.core import NotFoundException
@@ -279,7 +280,7 @@ class TestFiles:
         run_gitlabform(set_file_chinese_characters, group_and_project)
 
         file_content = gitlab.get_file(group_and_project, branch, "README.md")
-        assert file_content == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两"
+        assert file_content == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两\n"
 
     def test__set_external_file_with_chinese_characters(
         self, gitlab, group_and_project, branch, file
@@ -317,4 +318,4 @@ class TestFiles:
         run_gitlabform(set_file_chinese_characters, group_and_project)
 
         file_content = gitlab.get_file(group_and_project, branch, "README.md")
-        assert file_content == "LICENSE\n\n“This is a license file”"
+        assert file_content == "LICENSE\n\n“This is a license file”\n"
