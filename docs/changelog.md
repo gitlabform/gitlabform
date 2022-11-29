@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.2
+
+* Don't strip trailing new lines from files. Fixes [#451](https://github.com/gitlabform/gitlabform/issues/451), PR [#452](https://github.com/gitlabform/gitlabform/pull/452).
+
 ## 3.3.1
 
 * Fix for setting deploy key in some cases fail with HTTP 400: `{"fingerprint":["has already been taken"]}`. Fixes [#19](https://github.com/gitlabform/gitlabform/issues/19), PR [#441](https://github.com/gitlabform/gitlabform/pull/441).
