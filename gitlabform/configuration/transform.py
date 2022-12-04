@@ -270,8 +270,6 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                 if "approvers" in old_syntax or "approver_groups" in old_syntax:
                     old_syntax_found = True
 
-                    # we shouldn't have accepted this syntax before, but we did and now it's a problem
-                    # because what should be the default approvals required setting? :/
                     if (
                         "approvals" in old_syntax
                         and "approvals_before_merge" in old_syntax["approvals"]
@@ -280,6 +278,9 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                             "approvals_before_merge"
                         ]
                     else:
+                        # we shouldn't have accepted this syntax before, but we did, and now it's a problem
+                        # because what should be the default approvals required setting? :/
+                        # the value below is just something that seems convenient to me...
                         approvals_required = 2
 
                     where_to_add_new_syntax["merge_requests_approval_rules"] = {
@@ -316,6 +317,9 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                     where_to_add_new_syntax["merge_requests_approvals"] = old_syntax[
                         "approvals"
                     ]
+
+                if old_syntax_found:
+                    where_to_add_new_syntax.pop("merge_requests")
 
                 if old_syntax_found:
                     warning(
