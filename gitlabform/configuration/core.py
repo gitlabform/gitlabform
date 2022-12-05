@@ -1,6 +1,7 @@
 from typing import Any
 
 import os
+import logging
 import textwrap
 from abc import ABC
 from copy import deepcopy
@@ -154,7 +155,7 @@ class ConfigurationCore(ABC):
             if default is not None:
                 to_return = default
             else:
-                raise KeyNotFoundException
+                raise KeyNotFoundException(path) from None
 
         return to_return
 
@@ -318,4 +319,13 @@ class ConfigInvalidException(Exception):
 
 
 class KeyNotFoundException(Exception):
-    pass
+    __slots__ = "key"
+
+    def __init__(self, key: str):
+        if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
+            self.key = key
+        else:
+            fatal(
+                f"Unable to find the key: {key.replace('|', '.')}\n",
+                exit_code=EXIT_INVALID_INPUT,
+            )
