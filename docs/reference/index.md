@@ -116,10 +116,17 @@ projects_and_groups:
     project_settings:
       visibility: private
 ``` 
-For this configuration, for a project `group_1/project_1` the effective project settings will be: `default_branch: main`, `visibility: private`.
+With this configuration, for a project `group_1/project_1` the effective configuration will be like:
+```yaml
+project_settings:
+  default_branch: main
+  visibility: private
+```
 
 
-If the keys are added under different names in the more general and the more specific config, then they are **added**. So for example for sections like `deploy_keys`, `variables`, `hooks` on each lower level the effective configuration will contain elements from the higher levels plus elements from the lower levels. Example:
+If the keys are added under different names in the more general and the more specific config, then they are **added**. So for example for sections like `deploy_keys`, `variables`, `hooks` on each lower level the effective configuration will contain elements from the higher levels AND the elements from the lower levels.
+
+Example:
 ```yaml
 projects_and_groups:
   "*":
@@ -136,32 +143,92 @@ projects_and_groups:
         title: group_key
         can_push: false
 ```
-For this configuration, for a project `group_1/project_1` the effective configuration will contain 2 keys, `a_shared_key` and `another_key`.
+With this configuration, for a project `group_1/project_1` the effective configuration will be:
+```yaml
+deploy_keys:
+  a_shared_key:
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
+    title: global_key
+    can_push: false
+  another_key:
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
+    title: group_key
+    can_push: false
+```
 
-### Skipping sections
 
-If the only key under a section is `skip: true` then the given config section is not set AT ALL for a given entity. Example:
+Note that if you want to have a key **removed**, you will need to use the `break-inheritance: true` feature, explained in details below.
+
+For example for the following configuration:
 ```yaml
 projects_and_groups:
   "*":
-    deploy_keys:
-      a_shared_key:
-        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
-        title: global_key
-        can_push: false
-  group_1/*:
-    deploy_keys:
-      skip: true
+    variables:
+      shared_with_all_projects: &shared_with_all_projects
+        key: SSH_PRIVATE_KEY_BASE64
+        value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
+      shared_with_ALMOST_all_projects:
+        key: PROTECTED_VAR
+        value: "foobar-123 (...)"
+        protected: true
+
+  group_1/project_1:
+    variables:
+      <<: *shared_with_all_projects
 ```
-For the above configuration, for a project `group_1/project_1` the effective configuration is to NOT manage the deploy keys at all.
+Note that we used YAML anchors here to not repeat ourselves.
+With this configuration, for a project `group_1/project_1` the effective configuration will be:
+```yaml
+group_1/project_1:
+  variables:
+    shared_with_all_projects:
+      key: SSH_PRIVATE_KEY_BASE64
+      value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
+```
 
-!!! important
 
-    `skip: true` can be placed ONLY directly under a section name.
+**Warning**: dicts are additive but arrays are not!
+
+For example with this config:
+```yaml
+projects_and_groups:
+  "*":
+    merge_requests_approval_rules:
+      default:
+        approvals_required: 2
+        name: "Team X or Y or super-user"
+        groups:
+          - group-x
+          - group-y
+        users:
+          - super-user
+  group_1/*:
+    merge_requests_approval_rules:
+      default:
+        approvals_required: 1
+        name: "Team Z"
+        groups:
+          - group-z
+        users: []
+```
+With this configuration, for a project `group_1/project_1` the effective configuration will be:
+```yaml
+merge_requests_approval_rules:
+  default:
+    approvals_required: 1
+    name: "Team Z"
+    groups:
+      - group-z
+```
+Note that the value of `groups` is an array, so the effective `groups` contains only the single element array from `group_1/*` - the arrays were not added!
+
+Also note that the `users` is a key in the `default` dict, so we could not omit it. If we did that then __adding__ would work here and `users` would be effective set to `[super-user]`. We didn't want that and that's why we did set it an explicitly empty array `[]`.
 
 ### Breaking inheritance
 
-You can prevent inheriting configuration from the higher levels by placing `inherit: false` under a given section. Example:
+You can prevent inheriting configuration from the higher levels by placing `inherit: false` under a given section.
+
+Example:
 ```yaml
 projects_and_groups:
   "*":
@@ -178,11 +245,41 @@ projects_and_groups:
         title: group_key # this name is show in GitLab
         can_push: false
 ```
-For the above configuration, for a project `group_1/project_1` the effective configuration will contain only 1 key - the `another_key`.
+For the above configuration, for a project `group_1/project_1` the effective configuration for section `deploy_keys` is like defined for all projects and groups under `*`, with the more specific config in `group_1/*` ignored. In other words it will be like this:
+```yaml
+deploy_keys:
+  a_shared_key:
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
+    title: global_key # this name is show in GitLab
+    can_push: false
+```
 
 !!! important
 
     `inherit: false` can be placed at ANY place in the configuration (if it makes sense).
+
+### Skipping sections
+
+If the only key under a section is `skip: true` then the given config section is not set AT ALL for a given entity.
+
+Example:
+```yaml
+projects_and_groups:
+  "*":
+    deploy_keys:
+      a_shared_key:
+        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
+        title: global_key
+        can_push: false
+  group_1/*:
+    deploy_keys:
+      skip: true
+```
+For the above configuration, for a project `group_1/project_1` the deploy keys are not managed by GitLabForm all.
+
+!!! important
+
+    `skip: true` can be placed ONLY directly under a section name.
 
 ### Raw parameters passing
 
