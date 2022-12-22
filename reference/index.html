@@ -862,15 +862,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#skipping-sections" class="md-nav__link">
-    Skipping sections
+  <a href="#breaking-inheritance" class="md-nav__link">
+    Breaking inheritance
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#breaking-inheritance" class="md-nav__link">
-    Breaking inheritance
+  <a href="#skipping-sections" class="md-nav__link">
+    Skipping sections
   </a>
   
 </li>
@@ -1029,8 +1029,13 @@
 <span class="w">    </span><span class="nt">project_settings</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">private</span><span class="w"></span>
 </code></pre></div>
-For this configuration, for a project <code>group_1/project_1</code> the effective project settings will be: <code>default_branch: main</code>, <code>visibility: private</code>.</p>
-<p>If the keys are added under different names in the more general and the more specific config, then they are <strong>added</strong>. So for example for sections like <code>deploy_keys</code>, <code>variables</code>, <code>hooks</code> on each lower level the effective configuration will contain elements from the higher levels plus elements from the lower levels. Example:
+With this configuration, for a project <code>group_1/project_1</code> the effective configuration will be like:
+<div class="highlight"><pre><span></span><code><span class="nt">project_settings</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">default_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
+<span class="w">  </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">private</span><span class="w"></span>
+</code></pre></div></p>
+<p>If the keys are added under different names in the more general and the more specific config, then they are <strong>added</strong>. So for example for sections like <code>deploy_keys</code>, <code>variables</code>, <code>hooks</code> on each lower level the effective configuration will contain elements from the higher levels AND the elements from the lower levels.</p>
+<p>Example:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
@@ -1046,27 +1051,77 @@ For this configuration, for a project <code>group_1/project_1</code> the effecti
 <span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group_key</span><span class="w"></span>
 <span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 </code></pre></div>
-For this configuration, for a project <code>group_1/project_1</code> the effective configuration will contain 2 keys, <code>a_shared_key</code> and <code>another_key</code>.</p>
-<h3 id="skipping-sections">Skipping sections<a class="headerlink" href="#skipping-sections" title="Permanent link">&para;</a></h3>
-<p>If the only key under a section is <code>skip: true</code> then the given config section is not set AT ALL for a given entity. Example:
+With this configuration, for a project <code>group_1/project_1</code> the effective configuration will be:
+<div class="highlight"><pre><span></span><code><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
+<span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"></span>
+<span class="w">    </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">  </span><span class="nt">another_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...</span><span class="w"></span>
+<span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group_key</span><span class="w"></span>
+<span class="w">    </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+</code></pre></div></p>
+<p>Note that if you want to have a key <strong>removed</strong>, you will need to use the <code>break-inheritance: true</code> feature, explained in details below.</p>
+<p>For example for the following configuration:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
-<span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"></span>
-<span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">skip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">variables</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">shared_with_all_projects</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;shared_with_all_projects</span><span class="w"></span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSH_PRIVATE_KEY_BASE64</span><span class="w"></span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl</span><span class="nv"> </span><span class="s">(...)&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">shared_with_ALMOST_all_projects</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PROTECTED_VAR</span><span class="w"></span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foobar-123</span><span class="nv"> </span><span class="s">(...)&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">variables</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*shared_with_all_projects</span><span class="w"></span>
 </code></pre></div>
-For the above configuration, for a project <code>group_1/project_1</code> the effective configuration is to NOT manage the deploy keys at all.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p><code>skip: true</code> can be placed ONLY directly under a section name.</p>
-</div>
+Note that we used YAML anchors here to not repeat ourselves.
+With this configuration, for a project <code>group_1/project_1</code> the effective configuration will be:
+<div class="highlight"><pre><span></span><code><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">variables</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shared_with_all_projects</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSH_PRIVATE_KEY_BASE64</span><span class="w"></span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl</span><span class="nv"> </span><span class="s">(...)&quot;</span><span class="w"></span>
+</code></pre></div></p>
+<p><strong>Warning</strong>: dicts are additive but arrays are not!</p>
+<p>For example with this config:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">merge_requests_approval_rules</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">default</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Team</span><span class="nv"> </span><span class="s">X</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">Y</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">super-user&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-x</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-y</span><span class="w"></span>
+<span class="w">        </span><span class="nt">users</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">super-user</span><span class="w"></span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">merge_requests_approval_rules</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">default</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Team</span><span class="nv"> </span><span class="s">Z&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-z</span><span class="w"></span>
+<span class="w">        </span><span class="nt">users</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"></span>
+</code></pre></div>
+With this configuration, for a project <code>group_1/project_1</code> the effective configuration will be:
+<div class="highlight"><pre><span></span><code><span class="nt">merge_requests_approval_rules</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Team</span><span class="nv"> </span><span class="s">Z&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-z</span><span class="w"></span>
+</code></pre></div>
+Note that the value of <code>groups</code> is an array, so the effective <code>groups</code> contains only the single element array from <code>group_1/*</code> - the arrays were not added!</p>
+<p>Also note that the <code>users</code> is a key in the <code>default</code> dict, so we could not omit it. If we did that then <strong>adding</strong> would work here and <code>users</code> would be effective set to <code>[super-user]</code>. We didn't want that and that's why we did set it an explicitly empty array <code>[]</code>.</p>
 <h3 id="breaking-inheritance">Breaking inheritance<a class="headerlink" href="#breaking-inheritance" title="Permanent link">&para;</a></h3>
-<p>You can prevent inheriting configuration from the higher levels by placing <code>inherit: false</code> under a given section. Example:
+<p>You can prevent inheriting configuration from the higher levels by placing <code>inherit: false</code> under a given section.</p>
+<p>Example:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
@@ -1082,10 +1137,35 @@ For the above configuration, for a project <code>group_1/project_1</code> the ef
 <span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group_key</span><span class="w"> </span><span class="c1"># this name is show in GitLab</span><span class="w"></span>
 <span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 </code></pre></div>
-For the above configuration, for a project <code>group_1/project_1</code> the effective configuration will contain only 1 key - the <code>another_key</code>.</p>
+For the above configuration, for a project <code>group_1/project_1</code> the effective configuration for section <code>deploy_keys</code> is like defined for all projects and groups under <code>*</code>, with the more specific config in <code>group_1/*</code> ignored. In other words it will be like this:
+<div class="highlight"><pre><span></span><code><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
+<span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"> </span><span class="c1"># this name is show in GitLab</span><span class="w"></span>
+<span class="w">    </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+</code></pre></div></p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p><code>inherit: false</code> can be placed at ANY place in the configuration (if it makes sense).</p>
+</div>
+<h3 id="skipping-sections">Skipping sections<a class="headerlink" href="#skipping-sections" title="Permanent link">&para;</a></h3>
+<p>If the only key under a section is <code>skip: true</code> then the given config section is not set AT ALL for a given entity.</p>
+<p>Example:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
+<span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"></span>
+<span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">skip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+</code></pre></div>
+For the above configuration, for a project <code>group_1/project_1</code> the deploy keys are not managed by GitLabForm all.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><code>skip: true</code> can be placed ONLY directly under a section name.</p>
 </div>
 <h3 id="raw-parameters-passing">Raw parameters passing<a class="headerlink" href="#raw-parameters-passing" title="Permanent link">&para;</a></h3>
 <p>Some configuration sections, f.e. <code>project_settings</code>, will be directly send by the app via the API to specific GitLab API endpoints. This means that they key names and values are exactly like they are described in the appropriate API docs.</p>
