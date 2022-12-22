@@ -1016,8 +1016,9 @@
 <p>Some configuration sections apply only to <strong>projects</strong>, some to <strong>groups</strong>.</p>
 <p>Syntax for each section is explained in detail on subpages - see links on the left.</p>
 <h3 id="effective-configuration">Effective configuration<a class="headerlink" href="#effective-configuration" title="Permanent link">&para;</a></h3>
-<p>To generate the effective configuration to apply for a given project or group, if it is configured on more than one level, GitLabForm will <strong>merge</strong> those configurations.</p>
-<p>If there are conflicting values in the more general (f.e. common) and more specific level (f.e. group level), then the more specific configuration will <strong>overwrite</strong> the more general one. Example:
+<p>To generate the effective configuration to apply for a given project or group, if it is configured on more than one level, GitLabForm will merge those configurations.</p>
+<p>If under the exactly same keys there are different values in the more general (f.e. common) and more specific level (f.e. group level), then the more specific configuration will <strong>overwrite</strong> the more general one.</p>
+<p>Example:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="c1"># common settings for ALL projects in ALL groups</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
@@ -1027,67 +1028,43 @@
 
 <span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">project_settings</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">private</span><span class="w"></span>
+<span class="w">      </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">private</span><span class="w"> </span><span class="c1"># &lt;-- different value!</span><span class="w"></span>
 </code></pre></div>
 With this configuration, for a project <code>group_1/project_1</code> the effective configuration will be like:
 <div class="highlight"><pre><span></span><code><span class="nt">project_settings</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">default_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
 <span class="w">  </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">private</span><span class="w"></span>
 </code></pre></div></p>
-<p>If the keys are added under different names in the more general and the more specific config, then they are <strong>added</strong>. So for example for sections like <code>deploy_keys</code>, <code>variables</code>, <code>hooks</code> on each lower level the effective configuration will contain elements from the higher levels AND the elements from the lower levels.</p>
+<p>If there are more keys in the more specific config than in the more general one, then they are <strong>added</strong>. So for example for sections like <code>deploy_keys</code>, <code>variables</code>, <code>hooks</code> on each lower level the effective configuration will contain elements from the higher levels AND the elements from the lower levels.</p>
 <p>Example:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">key_a</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"></span>
 <span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 
 <span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">another_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">key_b</span><span class="p">:</span><span class="w"> </span><span class="c1"># &lt;-- another key under deploy_keys!</span><span class="w"></span>
 <span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group_key</span><span class="w"></span>
 <span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 </code></pre></div>
 With this configuration, for a project <code>group_1/project_1</code> the effective configuration will be:
 <div class="highlight"><pre><span></span><code><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">key_a</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
 <span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"></span>
 <span class="w">    </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">  </span><span class="nt">another_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">key_b</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...</span><span class="w"></span>
 <span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group_key</span><span class="w"></span>
 <span class="w">    </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 </code></pre></div></p>
-<p>Note that if you want to have a key <strong>removed</strong>, you will need to use the <code>break-inheritance: true</code> feature, explained in details below.</p>
-<p>For example for the following configuration:
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">variables</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">shared_with_all_projects</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;shared_with_all_projects</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSH_PRIVATE_KEY_BASE64</span><span class="w"></span>
-<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl</span><span class="nv"> </span><span class="s">(...)&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">shared_with_ALMOST_all_projects</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PROTECTED_VAR</span><span class="w"></span>
-<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foobar-123</span><span class="nv"> </span><span class="s">(...)&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">variables</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*shared_with_all_projects</span><span class="w"></span>
-</code></pre></div>
-Note that we used YAML anchors here to not repeat ourselves.
-With this configuration, for a project <code>group_1/project_1</code> the effective configuration will be:
-<div class="highlight"><pre><span></span><code><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">variables</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">shared_with_all_projects</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSH_PRIVATE_KEY_BASE64</span><span class="w"></span>
-<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl</span><span class="nv"> </span><span class="s">(...)&quot;</span><span class="w"></span>
-</code></pre></div></p>
-<p><strong>Warning</strong>: dicts are additive but arrays are not!</p>
+<p>(What to do if you want have a key <strong>removed</strong>? You will need to use the "breaking inheritance" feature, explained in details below.)</p>
+<p><strong>Warning</strong>: dicts are additive but arrays are not! The more specific arrays are always overwriting the more general ones.</p>
 <p>For example with this config:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
@@ -1125,21 +1102,21 @@ Note that the value of <code>groups</code> is an array, so the effective <code>g
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">key_a</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"> </span><span class="c1"># this name is show in GitLab</span><span class="w"></span>
 <span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 <span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">inherit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">      </span><span class="nt">another_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">key_b</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group_key</span><span class="w"> </span><span class="c1"># this name is show in GitLab</span><span class="w"></span>
 <span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
 </code></pre></div>
 For the above configuration, for a project <code>group_1/project_1</code> the effective configuration for section <code>deploy_keys</code> is like defined for all projects and groups under <code>*</code>, with the more specific config in <code>group_1/*</code> ignored. In other words it will be like this:
 <div class="highlight"><pre><span></span><code><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">key_a</span><span class="p">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
 <span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"> </span><span class="c1"># this name is show in GitLab</span><span class="w"></span>
 <span class="w">    </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
@@ -1154,7 +1131,7 @@ For the above configuration, for a project <code>group_1/project_1</code> the ef
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
 <span class="w">    </span><span class="nt">deploy_keys</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">a_shared_key</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">key_a</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...</span><span class="w"></span>
 <span class="w">        </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global_key</span><span class="w"></span>
 <span class="w">        </span><span class="nt">can_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
