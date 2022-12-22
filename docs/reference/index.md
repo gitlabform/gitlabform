@@ -100,10 +100,12 @@ Syntax for each section is explained in detail on subpages - see links on the le
 
 ### Effective configuration
 
-To generate the effective configuration to apply for a given project or group, if it is configured on more than one level, GitLabForm will **merge** those configurations.
+To generate the effective configuration to apply for a given project or group, if it is configured on more than one level, GitLabForm will merge those configurations.
 
 
-If there are conflicting values in the more general (f.e. common) and more specific level (f.e. group level), then the more specific configuration will **overwrite** the more general one. Example:
+If under the exactly same keys there are different values in the more general (f.e. common) and more specific level (f.e. group level), then the more specific configuration will **overwrite** the more general one.
+
+Example:
 ```yaml
 projects_and_groups:
   # common settings for ALL projects in ALL groups
@@ -114,7 +116,7 @@ projects_and_groups:
 
   group_1/*:
     project_settings:
-      visibility: private
+      visibility: private # <-- different value!
 ``` 
 With this configuration, for a project `group_1/project_1` the effective configuration will be like:
 ```yaml
@@ -123,22 +125,21 @@ project_settings:
   visibility: private
 ```
 
-
-If the keys are added under different names in the more general and the more specific config, then they are **added**. So for example for sections like `deploy_keys`, `variables`, `hooks` on each lower level the effective configuration will contain elements from the higher levels AND the elements from the lower levels.
+If there are more keys in the more specific config than in the more general one, then they are **added**. So for example for sections like `deploy_keys`, `variables`, `hooks` on each lower level the effective configuration will contain elements from the higher levels AND the elements from the lower levels.
 
 Example:
 ```yaml
 projects_and_groups:
   "*":
     deploy_keys:
-      a_shared_key:
+      key_a:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
         title: global_key
         can_push: false
   
   group_1/*:
     deploy_keys:
-      another_key:
+      key_b: # <-- another key under deploy_keys!
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
         title: group_key
         can_push: false
@@ -146,48 +147,20 @@ projects_and_groups:
 With this configuration, for a project `group_1/project_1` the effective configuration will be:
 ```yaml
 deploy_keys:
-  a_shared_key:
+  key_a:
     key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
     title: global_key
     can_push: false
-  another_key:
+  key_b:
     key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
     title: group_key
     can_push: false
 ```
 
-
-Note that if you want to have a key **removed**, you will need to use the `break-inheritance: true` feature, explained in details below.
-
-For example for the following configuration:
-```yaml
-projects_and_groups:
-  "*":
-    variables:
-      shared_with_all_projects: &shared_with_all_projects
-        key: SSH_PRIVATE_KEY_BASE64
-        value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
-      shared_with_ALMOST_all_projects:
-        key: PROTECTED_VAR
-        value: "foobar-123 (...)"
-        protected: true
-
-  group_1/project_1:
-    variables:
-      <<: *shared_with_all_projects
-```
-Note that we used YAML anchors here to not repeat ourselves.
-With this configuration, for a project `group_1/project_1` the effective configuration will be:
-```yaml
-group_1/project_1:
-  variables:
-    shared_with_all_projects:
-      key: SSH_PRIVATE_KEY_BASE64
-      value: "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl (...)"
-```
+(What to do if you want have a key **removed**? You will need to use the "breaking inheritance" feature, explained in details below.)
 
 
-**Warning**: dicts are additive but arrays are not!
+**Warning**: dicts are additive but arrays are not! The more specific arrays are always overwriting the more general ones.
 
 For example with this config:
 ```yaml
@@ -233,14 +206,14 @@ Example:
 projects_and_groups:
   "*":
     deploy_keys:
-      a_shared_key:
+      key_a:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
         title: global_key # this name is show in GitLab
         can_push: false
   group_1/*:
     deploy_keys:
       inherit: false
-      another_key:
+      key_b:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
         title: group_key # this name is show in GitLab
         can_push: false
@@ -248,7 +221,7 @@ projects_and_groups:
 For the above configuration, for a project `group_1/project_1` the effective configuration for section `deploy_keys` is like defined for all projects and groups under `*`, with the more specific config in `group_1/*` ignored. In other words it will be like this:
 ```yaml
 deploy_keys:
-  a_shared_key:
+  key_a:
     key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
     title: global_key # this name is show in GitLab
     can_push: false
@@ -267,7 +240,7 @@ Example:
 projects_and_groups:
   "*":
     deploy_keys:
-      a_shared_key:
+      key_a:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
         title: global_key
         can_push: false
