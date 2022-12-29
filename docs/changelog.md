@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.0rc2
+
+* A more user-friendly error message when a key is not found. PR [#422](https://github.com/gitlabform/gitlabform/pull/422)
+* Fix for converting legacy merge request approval into the new setup. PR [#456](https://github.com/gitlabform/gitlabform/pull/456)
+
+Thanks to [Rafael Zanella](https://github.com/zanella) for his contribution!
+
 ## 3.3.2
 
 * Don't strip trailing new lines from files. Fixes [#451](https://github.com/gitlabform/gitlabform/issues/451), PR [#452](https://github.com/gitlabform/gitlabform/pull/452).
