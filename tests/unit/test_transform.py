@@ -427,3 +427,40 @@ class TestMergeRequestApprovalsTransformer(TestCase):
         config_after = ez_yaml.to_string(obj=config_after.config, options={})
 
         assert config_before == config_after
+
+    def test__config__with_merge_request_approvals__guessing_approvals_before_merge(
+        self,
+    ):
+        config_before = f"""
+        projects_and_groups:
+          'foo/bar':
+            merge_requests:
+              approvals:
+                reset_approvals_on_push: false
+                disable_overriding_approvers_per_merge_request: true
+              approver_groups:
+                - my-group2
+        """
+        config_before = Configuration(config_string=config_before)
+
+        transformer = MergeRequestApprovalsTransformer(MagicMock(GitLab))
+        transformer.transform(config_before)
+        config_before = ez_yaml.to_string(obj=config_before.config, options={})
+
+        config_after = f"""
+        projects_and_groups:
+          'foo/bar':
+            merge_requests_approval_rules:
+              legacy:
+                approvals_required: 2
+                name: {APPROVAL_RULE_NAME}
+                groups:
+                  - my-group2
+            merge_requests_approvals:
+              reset_approvals_on_push: false
+              disable_overriding_approvers_per_merge_request: true
+        """
+        config_after = Configuration(config_string=config_after)
+        config_after = ez_yaml.to_string(obj=config_after.config, options={})
+
+        assert config_before == config_after

@@ -261,6 +261,7 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                 "projects_and_groups.*.merge_requests"
             ):
                 old_syntax_found = False
+                approvals_required_guessed = False
 
                 where_to_add_new_syntax = node_coordinate.parent
 
@@ -278,10 +279,8 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                             "approvals_before_merge"
                         ]
                     else:
-                        # we shouldn't have accepted this syntax before, but we did, and now it's a problem
-                        # because what should be the default approvals required setting? :/
-                        # the value below is just something that seems convenient to me...
                         approvals_required = 2
+                        approvals_required_guessed = True
 
                     where_to_add_new_syntax["merge_requests_approval_rules"] = {
                         "legacy": {
@@ -327,6 +326,11 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                         "in the next major version of GitLabForm. "
                         "Please migrate to the new syntax using the 'merge_requests_approvals' "
                         "and the 'merge_requests_approval_rules' sections."
+                    )
+                if approvals_required_guessed:
+                    warning(
+                        "'approvals_before_merge' not found in the old 'merge_requests' configuration section",
+                        "- assuming that it is set to 2.",
                     )
 
         except YAMLPathException:
