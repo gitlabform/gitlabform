@@ -16,6 +16,7 @@ from tests.acceptance import (
     get_random_name,
     create_users,
     delete_users,
+    get_random_password,
 )
 
 
@@ -205,7 +206,10 @@ def make_user(
         last_id = len(created_users) + 1
         username = f"{username_base}_{last_id}"
         user = gitlab.create_user(
-            username + "@example.com", username + " Example", username, "password"
+            username + "@example.com",
+            username + " Example",
+            username,
+            get_random_password(),
         )
         user_obj = User(username, user["id"])
         if add_to_project:
@@ -234,7 +238,10 @@ def three_members(gitlab, group_and_project, make_user):
 def outsider_user(gitlab, group_and_project):
     username = get_random_name("outsider_user")
     user = gitlab.create_user(
-        username + "@example.com", username + " Example", username, "password"
+        username + "@example.com",
+        username + " Example",
+        username,
+        get_random_password(),
     )
     user_obj = User(username, user["id"])
 

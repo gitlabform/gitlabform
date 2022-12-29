@@ -54,7 +54,7 @@ if [[ -n $existing_gitlab_container_id ]] ; then
   docker rm "$existing_gitlab_container_id"
 fi
 
-gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'password'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;"
+gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'mK9JnG7jwYdFcBNoQ3W3'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;"
 
 if [[ -f Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
 
@@ -114,7 +114,7 @@ if [[ -f Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
   curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/license | jq '.plan, .expired'
   echo ''
 fi
-cecho b 'GitLab web UI URL (user: root, password: password)'
+cecho b 'GitLab web UI URL (user: root, password: mK9JnG7jwYdFcBNoQ3W3 )'
 echo 'http://localhost'
 echo ''
 cecho b 'You can run these commands to stop and delete the GitLab container:'

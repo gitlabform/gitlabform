@@ -54,6 +54,10 @@ def get_random_suffix():
     return xp.generate_xkcdpassword(wordlist=my_words, numwords=1, delimiter="_")
 
 
+def get_random_password():
+    return xp.generate_xkcdpassword(wordlist=my_words, numwords=3, delimiter="_")
+
+
 def get_gitlab():
     return gl
 
@@ -107,7 +111,10 @@ def create_users(user_base_name, no_of_users):
             gl.get_user_by_name(username)
         except NotFoundException:
             gl.create_user(
-                username + "@example.com", username + " Example", username, "password"
+                username + "@example.com",
+                username + " Example",
+                username,
+                get_random_password(),
             )
         users.append(username)
     return users
