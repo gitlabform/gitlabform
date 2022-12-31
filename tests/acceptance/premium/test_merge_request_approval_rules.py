@@ -1,5 +1,8 @@
 import pytest
+from ez_yaml import ez_yaml
 
+from configuration.transform import UserTransformer
+from gitlabform import Configuration
 from tests.acceptance import run_gitlabform, gl
 from gitlabform.gitlab import AccessLevel
 
@@ -122,6 +125,7 @@ class TestMergeRequestApprovers:
                     rule["groups"][0]["name"] == group_with_one_owner_and_two_developers
                 )
                 assert len(rule["protected_branches"]) == 1
+                assert rule["protected_branches"][0]["name"] == branch
                 second_found = True
 
         assert first_found and second_found
@@ -358,3 +362,90 @@ class TestMergeRequestApprovers:
         assert rule["approvals_required"] == 0
         assert rule["name"] == "Any approver"
         assert rule["rule_type"] == "any_approver"
+
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
+    def test__add_rules__common_and_subgroup(
+        self,
+        gitlab,
+        group_and_project,
+        sub_group,
+        project_in_sub_group,
+        other_group,
+        third_group,
+        make_user,
+        branch,
+    ):
+
+        user1 = make_user(AccessLevel.DEVELOPER)
+
+        config = f"""
+            projects_and_groups:
+              "*":
+                merge_requests_approval_rules:
+                  standard:
+                    approvals_required: 1
+                    name: "All eligible users"
+                  enforce: true
+ 
+              "{sub_group}/*":
+                branches:
+                  {branch}:
+                    protected: true
+                    push_access_level: no access
+                    merge_access_level: developer
+                    unprotect_access_level: maintainer
+
+                merge_requests_approval_rules:
+                  dev-uat:
+                    approvals_required: 1
+                    name: "Dev Code Review - UAT"
+                    groups:
+                      - {other_group}
+                    users:
+                      - {user1.name}
+                    protected_branches:
+                      - {branch}
+                  enforce: true
+            """
+
+        config_object = Configuration(config_string=config)
+        ut = UserTransformer(gitlab)
+        ut.transform(config_object, last=True)
+
+        effective_config_yaml_str = ez_yaml.to_string(
+            obj=config_object.config, options={}
+        )
+        print("!!!Transformed:")
+        print(effective_config_yaml_str)
+
+        effective_config = config_object.get_effective_config_for_group(
+            project_in_sub_group
+        )
+        effective_config_yaml_str = ez_yaml.to_string(obj=effective_config, options={})
+        print("!!!Effective:")
+        print(effective_config_yaml_str)
+
+        run_gitlabform(config, "ALL_DEFINED")
+
+        rules = gitlab.get_approval_rules(project_in_sub_group)
+
+        assert len(rules) == 2
+
+        first_found = False
+        second_found = False
+        for rule in rules:
+            if rule["name"] == "All eligible users":
+                assert len(rule["groups"]) == 0
+                first_found = True
+            if rule["name"] == "Dev Code Review - UAT":
+                assert len(rule["groups"]) == 1
+                assert rule["groups"][0]["name"] == other_group
+                assert len(rule["users"]) == 1
+                assert rule["users"][0]["username"] == user1.name
+                assert len(rule["protected_branches"]) == 1
+                assert rule["protected_branches"][0]["name"] == branch
+                second_found = True
+
+        assert first_found and second_found

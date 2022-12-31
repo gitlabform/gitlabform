@@ -71,7 +71,7 @@ class TestGroupMembersUsers:
                       access_level: {AccessLevel.OWNER.value}
                     {users[1]}:
                       access_level: {AccessLevel.DEVELOPER.value}
-                  enforce: tru
+                  enforce: true
             """
 
         run_gitlabform(remove_users, group)

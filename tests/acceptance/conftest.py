@@ -96,6 +96,17 @@ def sub_group(group):
 
 
 @pytest.fixture(scope="class")
+def project_in_sub_group(sub_group):
+    project_name = get_random_name("project")
+    create_project(sub_group, project_name)
+
+    yield f"{sub_group}/{project_name}"
+
+    gl = get_gitlab()
+    gl.delete_project(f"{sub_group}/{project_name}")
+
+
+@pytest.fixture(scope="class")
 def project(group):
     project_name = get_random_name("project")
     create_project(group, project_name)
