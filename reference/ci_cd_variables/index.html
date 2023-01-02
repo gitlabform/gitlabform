@@ -8,8 +8,14 @@
       
       
       
+      
+        <link rel="prev" href="../protected_branches/">
+      
+      
+        <link rel="next" href="../deploy_keys/">
+      
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
     
     
       
@@ -17,11 +23,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.f79797b0.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
-        
       
       
 
@@ -108,8 +113,6 @@
       <form class="md-header__option" data-md-component="palette">
         
           
-          
-          
           <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
@@ -117,8 +120,6 @@
             </label>
           
         
-          
-          
           
           <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
@@ -894,10 +895,9 @@
                 
                   
 
-  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/reference/ci_cd_variables.md" title="Edit this page" class="md-content__button md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+  
+  
+
 
 
 <h1 id="cicd-variables">CI/CD variables<a class="headerlink" href="#cicd-variables" title="Permanent link">&para;</a></h1>
@@ -917,49 +917,49 @@
 <p>Variables limited to the scope of specific environment(s) requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
 </div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">variables</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># --- Adding/resetting</span><span class="w"></span>
-<span class="w">      </span><span class="nt">a_friendly_variable_name</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSH_PRIVATE_KEY_BASE64</span><span class="w"></span>
-<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl</span><span class="nv"> </span><span class="s">(...)&quot;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">variables</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># --- Adding/resetting</span>
+<span class="w">      </span><span class="nt">a_friendly_variable_name</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSH_PRIVATE_KEY_BASE64</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUl</span><span class="nv"> </span><span class="s">(...)&quot;</span>
 
-<span class="w">      </span><span class="c1"># --- Adding/resetting protected variable</span><span class="w"></span>
-<span class="w">      </span><span class="nt">my_protected_variable</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PROTECTED_VAR</span><span class="w"></span>
-<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foobar-123-123-123&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># --- Adding/resetting protected variable</span>
+<span class="w">      </span><span class="nt">my_protected_variable</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PROTECTED_VAR</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foobar-123-123-123&quot;</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 
-<span class="w">      </span><span class="c1"># --- Adding/resetting masked variable</span><span class="w"></span>
-<span class="w">      </span><span class="nt">my_masked_variable</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MASKED_VAR</span><span class="w"></span>
-<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foobar-123-123-123&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">masked</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># --- Adding/resetting masked variable</span>
+<span class="w">      </span><span class="nt">my_masked_variable</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MASKED_VAR</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;foobar-123-123-123&quot;</span>
+<span class="w">        </span><span class="nt">masked</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 
-<span class="w">      </span><span class="c1"># --- Adding/resetting variables per environment</span><span class="w"></span>
-<span class="w">      </span><span class="nt">aws_access_key_id_for_deploying_in_production</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">APP_HOST_AWS_ACCESS_KEY_ID</span><span class="w"></span>
-<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;prod-value-1234&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">masked</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">environment_scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span><span class="w"></span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">filter[environment_scope]</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span><span class="w"></span>
-<span class="w">      </span><span class="nt">aws_access_key_id_for_deploying_in_staging</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">APP_HOST_AWS_ACCESS_KEY_ID</span><span class="w"></span>
-<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;staging-value-1234&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">masked</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">environment_scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span><span class="w"></span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">filter[environment_scope]</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># --- Adding/resetting variables per environment</span>
+<span class="w">      </span><span class="nt">aws_access_key_id_for_deploying_in_production</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">APP_HOST_AWS_ACCESS_KEY_ID</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;prod-value-1234&quot;</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">masked</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">environment_scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">filter[environment_scope]</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="w">      </span><span class="nt">aws_access_key_id_for_deploying_in_staging</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">APP_HOST_AWS_ACCESS_KEY_ID</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;staging-value-1234&quot;</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">masked</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">environment_scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">filter[environment_scope]</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span>
 
-<span class="w">      </span><span class="c1"># --- Deleting</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># the below name is not used by GitLab, it&#39;s just for you</span><span class="w"></span>
-<span class="w">      </span><span class="nt">a_secret_you_want_to_remove</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SECRET</span><span class="w"></span>
-<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># --- Deleting</span>
+<span class="w">      </span><span class="c1"># the below name is not used by GitLab, it&#39;s just for you</span>
+<span class="w">      </span><span class="nt">a_secret_you_want_to_remove</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SECRET</span>
+<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 
-<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span>
 </code></pre></div>
 <h2 id="group-cicd-variables">Group CI/CD variables<a class="headerlink" href="#group-cicd-variables" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <strong>group-level</strong> CI/CD variables.</p>
@@ -976,22 +976,22 @@
 <p>Variables limited to the scope of specific environment(s) requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
 </div>
 <p>Example:
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">group_variables</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># --- Adding/resetting</span><span class="w"></span>
-<span class="w">      </span><span class="nt">some_secret</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A_NEW_PASSWORD</span><span class="w"></span>
-<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ThisIsAVerySecretPassword&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">variable_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">env_var</span><span class="w"> </span><span class="c1"># or file</span><span class="w"></span>
-<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">group_variables</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># --- Adding/resetting</span>
+<span class="w">      </span><span class="nt">some_secret</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A_NEW_PASSWORD</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ThisIsAVerySecretPassword&quot;</span>
+<span class="w">        </span><span class="nt">variable_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">env_var</span><span class="w"> </span><span class="c1"># or file</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 
-<span class="w">      </span><span class="c1"># --- Deleting</span><span class="w"></span>
-<span class="w">      </span><span class="nt">old_variable</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PASSWORD</span><span class="w"></span>
-<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">      </span><span class="c1"># --- Deleting</span>
+<span class="w">      </span><span class="nt">old_variable</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PASSWORD</span>
+<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 
-<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span><span class="w"></span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span>
 </code></pre></div></p>
 
 
@@ -1008,42 +1008,6 @@
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../protected_branches/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Branches" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Branches
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../deploy_keys/" class="md-footer__link md-footer__link--next" aria-label="Next: Deploy Keys" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Deploy Keys
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -1066,12 +1030,11 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      <script src="../../assets/javascripts/bundle.5cf534bf.min.js"></script>
       
-    
     
   </body>
 </html>

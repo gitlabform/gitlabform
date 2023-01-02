@@ -8,8 +8,14 @@
       
       
       
+      
+        <link rel="prev" href="../resource_groups/">
+      
+      
+        <link rel="next" href="../tags_protection/">
+      
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
     
     
       
@@ -17,11 +23,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.f79797b0.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
-        
       
       
 
@@ -108,8 +113,6 @@
       <form class="md-header__option" data-md-component="palette">
         
           
-          
-          
           <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
@@ -117,8 +120,6 @@
             </label>
           
         
-          
-          
           
           <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
@@ -894,10 +895,9 @@
                 
                   
 
-  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/reference/settings.md" title="Edit this page" class="md-content__button md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+  
+  
+
 
 
 <h1 id="settings">Settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h1>
@@ -911,34 +911,34 @@
 <p>Some <a href="../merge_requests/">Merge Requests</a>-related settings are also set here.</p>
 </div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">project_settings</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">default_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
-<span class="w">      </span><span class="nt">builds_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span><span class="w"></span>
-<span class="w">      </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internal</span><span class="w"></span>
-<span class="w">      </span><span class="nt">only_allow_merge_if_pipeline_succeeds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="nt">only_allow_merge_if_all_discussions_are_resolved</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">      </span><span class="nt">container_expiration_policy_attributes</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">cadence</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1month&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">keep_n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">        </span><span class="nt">older_than</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;14d&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name_regex_delete</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name_regex_keep</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*-main&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># (...)</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">project_settings</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">default_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">      </span><span class="nt">builds_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">      </span><span class="nt">visibility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">internal</span>
+<span class="w">      </span><span class="nt">only_allow_merge_if_pipeline_succeeds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">only_allow_merge_if_all_discussions_are_resolved</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">container_expiration_policy_attributes</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">cadence</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1month&quot;</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">keep_n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">older_than</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;14d&quot;</span>
+<span class="w">        </span><span class="nt">name_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">        </span><span class="nt">name_regex_delete</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*&quot;</span>
+<span class="w">        </span><span class="nt">name_regex_keep</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.*-main&quot;</span>
+<span class="w">      </span><span class="c1"># (...)</span>
 </code></pre></div>
 <h2 id="group-settings">Group Settings<a class="headerlink" href="#group-settings" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/group/">group settings</a>.</p>
 <p>The settings should be as documented at GitLab's <a href="https://docs.gitlab.com/ee/api/groups.html#update-group">Groups API docs</a>, <strong>except the id</strong>.</p>
 <p>You can provide any number of the settings from there - if you don't provide a setting then it will be not changed.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># configures settings for the &#39;group-with-spammy-projects&#39; group</span><span class="w"></span>
-<span class="w">    </span><span class="nt">group_settings</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="c1"># keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group</span><span class="w"></span>
-<span class="w">      </span><span class="nt">emails_disabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># configures settings for the &#39;group-with-spammy-projects&#39; group</span>
+<span class="w">    </span><span class="nt">group_settings</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># keys and values here are as described at https://docs.gitlab.com/ee/api/groups.html#update-group</span>
+<span class="w">      </span><span class="nt">emails_disabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 
 
@@ -955,42 +955,6 @@
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../resource_groups/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Resource groups" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Resource groups
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../tags_protection/" class="md-footer__link md-footer__link--next" aria-label="Next: Tags protection" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Tags protection
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -1013,12 +977,11 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      <script src="../../assets/javascripts/bundle.5cf534bf.min.js"></script>
       
-    
     
   </body>
 </html>

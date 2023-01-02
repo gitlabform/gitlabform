@@ -8,8 +8,14 @@
       
       
       
+      
+        <link rel="prev" href="../running/">
+      
+      
+        <link rel="next" href="../changelog/">
+      
       <link rel="icon" href="../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
     
     
       
@@ -17,11 +23,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.f79797b0.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
-        
       
       
 
@@ -108,8 +113,6 @@
       <form class="md-header__option" data-md-component="palette">
         
           
-          
-          
           <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
@@ -117,8 +120,6 @@
             </label>
           
         
-          
-          
           
           <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
@@ -986,10 +987,9 @@
                 
                   
 
-  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/automation.md" title="Edit this page" class="md-content__button md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+  
+  
+
 
 
 <h1 id="automation">Automation<a class="headerlink" href="#automation" title="Permanent link">&para;</a></h1>
@@ -999,19 +999,19 @@
 from the configuration. For example you may allow the users to reconfigure projects during their working hours
 but automate cleaning up the drift each night.</p>
 <p>An example <code>.gitlab-ci.yml</code> for running GitLabForm using GitLab CI is provided here:
-<div class="highlight"><pre><span></span><code><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/gitlabform/gitlabform:latest</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/gitlabform/gitlabform:latest</span>
 
-<span class="nt">some_project</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">only</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">changes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config.yml</span><span class="w"></span>
-<span class="w">  </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gitlabform my-group/subgroup/project</span><span class="w"></span>
+<span class="nt">some_project</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">only</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">changes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config.yml</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gitlabform my-group/subgroup/project</span>
 
-<span class="nt">my_whole_other_group</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">only</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">changes</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">other-config.yml</span><span class="w"></span>
-<span class="w">  </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gitlabform -c other-config.yml my_whole_other_group</span><span class="w"></span>
+<span class="nt">my_whole_other_group</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">only</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">changes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">other-config.yml</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gitlabform -c other-config.yml my_whole_other_group</span>
 </code></pre></div></p>
 <p>Note that as a standard best practice you should not put your GitLab access token in your <code>config.yml</code> (unless it is
 encrypted) for security reasons - please set it in the <code>GITLAB_TOKEN</code> environment variable instead.</p>
@@ -1045,24 +1045,24 @@ here.</p>
 <h4 id="step-2-configure-the-webhook-app-to-run-gitlabform">Step 2: Configure the webhook app to run GitLabForm<a class="headerlink" href="#step-2-configure-the-webhook-app-to-run-gitlabform" title="Permanent link">&para;</a></h4>
 <p>Get and install the <a href="https://github.com/adnanh/webhook">adnanh/webhook</a> app.</p>
 <p>Create this pretty self-explaining config:</p>
-<div class="highlight"><pre><span></span><code><span class="nn">---</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">run-gitlabform</span><span class="w"></span>
-<span class="w">  </span><span class="nt">execute-command</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/gitlabform/venv/bin/gitlabform&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="nt">command-working-directory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/gitlabform/conf&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pass-arguments-to-command</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">payload</span><span class="w"></span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path_with_namespace</span><span class="w"></span>
-<span class="w">  </span><span class="nt">trigger-rule</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">match</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span><span class="w"></span>
-<span class="w">      </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(project_create|project_rename|project_transfer)&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">parameter</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">payload</span><span class="w"></span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">event_name</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nn">---</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">run-gitlabform</span>
+<span class="w">  </span><span class="nt">execute-command</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/gitlabform/venv/bin/gitlabform&quot;</span>
+<span class="w">  </span><span class="nt">command-working-directory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/opt/gitlabform/conf&quot;</span>
+<span class="w">  </span><span class="nt">pass-arguments-to-command</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">payload</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path_with_namespace</span>
+<span class="w">  </span><span class="nt">trigger-rule</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">match</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">regex</span>
+<span class="w">      </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(project_create|project_rename|project_transfer)&quot;</span>
+<span class="w">      </span><span class="nt">parameter</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">payload</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">event_name</span>
 </code></pre></div>
 <p>...and save it as <code>hooks.yaml</code>.</p>
 <p>Run webhook app with:</p>
-<div class="highlight"><pre><span></span><code>./webhook -hooks path/to/your/hooks.yaml -ip <span class="m">127</span>.0.0.1 -verbose
+<div class="highlight"><pre><span></span><code>./webhook<span class="w"> </span>-hooks<span class="w"> </span>path/to/your/hooks.yaml<span class="w"> </span>-ip<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>-verbose
 </code></pre></div>
 <p>...and keep it running.</p>
 <p>(In the long term you should make this permanent with a systemd service/other way appropriate to your distro.)</p>
@@ -1096,42 +1096,6 @@ GitLabForm version: 1.20.0 (the latest)
       
         <footer class="md-footer">
   
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../running/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 🏃 Running" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              🏃 Running
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../changelog/" class="md-footer__link md-footer__link--next" aria-label="Next: 🗓 Changelog" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              🗓 Changelog
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
-  
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
@@ -1153,12 +1117,11 @@ GitLabForm version: 1.20.0 (the latest)
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      <script src="../assets/javascripts/bundle.5cf534bf.min.js"></script>
       
-    
     
   </body>
 </html>

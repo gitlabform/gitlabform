@@ -8,8 +8,14 @@
       
       
       
+      
+        <link rel="prev" href="../deploy_keys/">
+      
+      
+        <link rel="next" href="../group_ldap_links/">
+      
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
     
     
       
@@ -17,11 +23,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.f79797b0.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
-        
       
       
 
@@ -108,8 +113,6 @@
       <form class="md-header__option" data-md-component="palette">
         
           
-          
-          
           <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
@@ -117,8 +120,6 @@
             </label>
           
         
-          
-          
           
           <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
@@ -834,10 +835,9 @@
                 
                   
 
-  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/reference/files.md" title="Edit this page" class="md-content__button md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+  
+  
+
 
 
 <h1 id="files">Files<a class="headerlink" href="#files" title="Permanent link">&para;</a></h1>
@@ -857,73 +857,73 @@
 <li><code>delete</code> - if set to <code>true</code> then the target file will be deleted, not created.</li>
 </ul>
 <p>Example 1 - initialize with a default README, if custom is not provided:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">files</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="s">&quot;README.md&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">overwrite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">develop</span><span class="w"></span>
-<span class="w">        </span><span class="nt">skip_ci</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
-<span class="w">          </span><span class="no">This is a default README. Please replace it with a proper one!</span><span class="w"></span>
-<span class="w">        </span><span class="nt">commit_message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set default README</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;README.md&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">overwrite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">develop</span>
+<span class="w">        </span><span class="nt">skip_ci</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">This is a default README. Please replace it with a proper one!</span>
+<span class="w">        </span><span class="nt">commit_message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set default README</span>
 </code></pre></div>
 <p>Example 2 - unify GitLab CI pipeline config in the first branch found: develop or main:
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">files</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="s">&quot;.gitlab-ci.yml&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">overwrite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">develop</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
-<span class="w">        </span><span class="nt">only_first_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
-<span class="w">          </span><span class="no">stages:</span><span class="w"></span>
-<span class="w">            </span><span class="no">- test</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;.gitlab-ci.yml&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">overwrite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">develop</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">        </span><span class="nt">only_first_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">stages:</span>
+<span class="w">            </span><span class="no">- test</span>
 
-<span class="w">          </span><span class="no">test:</span><span class="w"></span>
-<span class="w">            </span><span class="no">image: node:6</span><span class="w"></span>
-<span class="w">            </span><span class="no">stage: test</span><span class="w"></span>
-<span class="w">            </span><span class="no">script:</span><span class="w"></span>
-<span class="w">              </span><span class="no">- npm test</span><span class="w"></span>
+<span class="w">          </span><span class="no">test:</span>
+<span class="w">            </span><span class="no">image: node:6</span>
+<span class="w">            </span><span class="no">stage: test</span>
+<span class="w">            </span><span class="no">script:</span>
+<span class="w">              </span><span class="no">- npm test</span>
 </code></pre></div></p>
 <p>Example 3 - templates:
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">files</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="s">&quot;file-using-templating&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span><span class="w"></span>
-<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
-<span class="w">          </span><span class="no">Simple templating is supported via jinja2 with two default variables</span><span class="w"></span>
-<span class="w">          </span><span class="no">{{ project }} will be replaced by project name, while {{ group }} by a group name.</span><span class="w"></span>
-<span class="w">          </span><span class="no">All occurrences will be replaced.</span><span class="w"></span>
-<span class="w">      </span><span class="s">&quot;file-escape-templating&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span><span class="w"></span>
-<span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no</span><span class="w"></span>
-<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
-<span class="w">          </span><span class="no">{{ project }} will be rendered literally</span><span class="w"></span>
-<span class="w">      </span><span class="s">&quot;file-with-custom-variable&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span><span class="w"></span>
-<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
-<span class="w">          </span><span class="no">{{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env.</span><span class="w"></span>
-<span class="w">          </span><span class="no">Group: {{ group }} and project: {{ project }} are always accessable by jinja.</span><span class="w"></span>
-<span class="w">        </span><span class="nt">jinja_env</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="nt">foo</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fooz&quot;</span><span class="w"></span>
-<span class="w">          </span><span class="nt">bar</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;barz&quot;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;file-using-templating&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
+<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">Simple templating is supported via jinja2 with two default variables</span>
+<span class="w">          </span><span class="no">{{ project }} will be replaced by project name, while {{ group }} by a group name.</span>
+<span class="w">          </span><span class="no">All occurrences will be replaced.</span>
+<span class="w">      </span><span class="s">&quot;file-escape-templating&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
+<span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no</span>
+<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">{{ project }} will be rendered literally</span>
+<span class="w">      </span><span class="s">&quot;file-with-custom-variable&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
+<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">{{ foo }} and {{ bar }} are defined by you, but currently only dict is supported for jinja_env.</span>
+<span class="w">          </span><span class="no">Group: {{ group }} and project: {{ project }} are always accessable by jinja.</span>
+<span class="w">        </span><span class="nt">jinja_env</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">foo</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fooz&quot;</span>
+<span class="w">          </span><span class="nt">bar</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;barz&quot;</span>
 </code></pre></div></p>
 <p>Example 4 - deleting files:
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">files</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="s">&quot;some-path/garbage-file&quot;</span><span class="p p-Indicator">:</span><span class="w"></span>
-<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">develop</span><span class="w"></span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span><span class="w"></span>
-<span class="w">        </span><span class="nt">only_first_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w">        </span><span class="nt">skip_ci</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;some-path/garbage-file&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">develop</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">        </span><span class="nt">only_first_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">skip_ci</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div></p>
 
 
@@ -940,42 +940,6 @@
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../deploy_keys/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Deploy Keys" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Deploy Keys
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../group_ldap_links/" class="md-footer__link md-footer__link--next" aria-label="Next: Group LDAP links" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Group LDAP links
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -998,12 +962,11 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      <script src="../../assets/javascripts/bundle.5cf534bf.min.js"></script>
       
-    
     
   </body>
 </html>

@@ -8,8 +8,14 @@
       
       
       
+      
+        <link rel="prev" href="../requirements/">
+      
+      
+        <link rel="next" href="../reference/">
+      
       <link rel="icon" href="../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
     
     
       
@@ -17,11 +23,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.f79797b0.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
-        
       
       
 
@@ -108,8 +113,6 @@
       <form class="md-header__option" data-md-component="palette">
         
           
-          
-          
           <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
@@ -117,8 +120,6 @@
             </label>
           
         
-          
-          
           
           <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
@@ -892,10 +893,9 @@
                 
                   
 
-  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/installation.md" title="Edit this page" class="md-content__button md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+  
+  
+
 
 
 <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
@@ -904,19 +904,19 @@
 <p>You can just run the latest stable version with:</p>
 <ul>
 <li>Docker:
-<div class="highlight"><pre><span></span><code>docker run -it -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/config ghcr.io/gitlabform/gitlabform:latest gitlabform
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/config<span class="w"> </span>ghcr.io/gitlabform/gitlabform:latest<span class="w"> </span>gitlabform
 </code></pre></div></li>
 <li><a href="https://github.com/pypa/pipx">pipx</a>:
-<div class="highlight"><pre><span></span><code>pipx run gitlabform
+<div class="highlight"><pre><span></span><code>pipx<span class="w"> </span>run<span class="w"> </span>gitlabform
 </code></pre></div></li>
 </ul>
 <p>Similarly, you can run the latest 3.* version with:</p>
 <ul>
 <li>Docker:
-<div class="highlight"><pre><span></span><code>docker run -it -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/config ghcr.io/gitlabform/gitlabform:3 gitlabform
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/config<span class="w"> </span>ghcr.io/gitlabform/gitlabform:3<span class="w"> </span>gitlabform
 </code></pre></div></li>
 <li><a href="https://github.com/pypa/pipx">pipx</a>:
-<div class="highlight"><pre><span></span><code>pipx run --spec <span class="s1">&#39;gitlabform&gt;=3,&lt;4&#39;</span> gitlabform
+<div class="highlight"><pre><span></span><code>pipx<span class="w"> </span>run<span class="w"> </span>--spec<span class="w"> </span><span class="s1">&#39;gitlabform&gt;=3,&lt;4&#39;</span><span class="w"> </span>gitlabform
 </code></pre></div></li>
 </ul>
 <p>See <a href="https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform">this</a> for all the available Docker tags.</p>
@@ -924,10 +924,10 @@
 <p>If you <strong>do</strong> want to install the app you can do it with:</p>
 <ul>
 <li><a href="https://github.com/pypa/pipx">pipx</a> (recommended):
-<div class="highlight"><pre><span></span><code>pipx install gitlabform
+<div class="highlight"><pre><span></span><code>pipx<span class="w"> </span>install<span class="w"> </span>gitlabform
 </code></pre></div></li>
 <li>plain <code>pip</code>:
-<div class="highlight"><pre><span></span><code>pip3 install gitlabform
+<div class="highlight"><pre><span></span><code>pip3<span class="w"> </span>install<span class="w"> </span>gitlabform
 </code></pre></div></li>
 </ul>
 
@@ -945,42 +945,6 @@
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../requirements/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 🫴 Requirements" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              🫴 Requirements
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../reference/" class="md-footer__link md-footer__link--next" aria-label="Next: Configuration reference" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Configuration reference
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -1003,12 +967,11 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      <script src="../assets/javascripts/bundle.5cf534bf.min.js"></script>
       
-    
     
   </body>
 </html>

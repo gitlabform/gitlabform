@@ -8,8 +8,14 @@
       
       
       
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../implementation_design/">
+      
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
     
     
       
@@ -17,11 +23,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.f79797b0.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
-        
       
       
 
@@ -108,8 +113,6 @@
       <form class="md-header__option" data-md-component="palette">
         
           
-          
-          
           <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
@@ -117,8 +120,6 @@
             </label>
           
         
-          
-          
           
           <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
@@ -1016,10 +1017,9 @@
                 
                   
 
-  <a href="https://github.com/gitlabform/gitlabform/edit/master/docs/contrib/local_development.md" title="Edit this page" class="md-content__button md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+  
+  
+
 
 
 <h1 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h1>
@@ -1108,16 +1108,16 @@ To run only a single class with tests run f.e. <code>py.test tests/acceptance -k
 </ol>
 <h2 id="preview-docs-website-locally">Preview docs website locally<a class="headerlink" href="#preview-docs-website-locally" title="Permanent link">&para;</a></h2>
 <p>To make mkdocs build the app website and serve it on your loopback interface do this:
-<div class="highlight"><pre><span></span><code>. venv/bin/activate
-pip install -e .<span class="o">[</span>docs<span class="o">]</span>
-mkdocs serve
+<div class="highlight"><pre><span></span><code>.<span class="w"> </span>venv/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>docs<span class="o">]</span>
+mkdocs<span class="w"> </span>serve
 </code></pre></div>
 ...and open the provided link (probably <a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a>) in your browser.</p>
 <h2 id="testing-types">Testing types<a class="headerlink" href="#testing-types" title="Permanent link">&para;</a></h2>
 <p>Please run mypy to test static types:
-<div class="highlight"><pre><span></span><code>mypy . <span class="o">||</span> <span class="nb">true</span>
-mypy --install-types --non-interactive
-mypy .
+<div class="highlight"><pre><span></span><code>mypy<span class="w"> </span>.<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+mypy<span class="w"> </span>--install-types<span class="w"> </span>--non-interactive
+mypy<span class="w"> </span>.
 </code></pre></div></p>
 
 
@@ -1134,42 +1134,6 @@ mypy .
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Contributing" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Contributing
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../implementation_design/" class="md-footer__link md-footer__link--next" aria-label="Next: Implementation Design" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Implementation Design
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -1192,12 +1156,11 @@ mypy .
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      <script src="../../assets/javascripts/bundle.5cf534bf.min.js"></script>
       
-    
     
   </body>
 </html>
