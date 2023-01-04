@@ -12,10 +12,10 @@ def two_members_in_other_group(gitlab, other_group, make_user):
     outsider_user2 = make_user(add_to_project=False)
 
     gitlab.add_member_to_group(
-        other_group, None, AccessLevel.OWNER.value, user_id=outsider_user1.id
+        other_group, outsider_user1.name, AccessLevel.OWNER.value
     )
     gitlab.add_member_to_group(
-        other_group, None, AccessLevel.DEVELOPER.value, user_id=outsider_user2.id
+        other_group, outsider_user2.name, AccessLevel.DEVELOPER.value
     )
 
     yield [outsider_user1.name, outsider_user2.name]

@@ -197,13 +197,10 @@ class GroupMembersProcessor(AbstractProcessor):
                             )
                         else:
                             debug(
-                                "Re-adding user '%s' to change their access level or expires at.",
+                                "Editing user '%s' membership to change their access level or expires at.",
                                 user,
                             )
-                            # we will remove the user first and then re-add they,
-                            # to ensure that the user has the expected access level
-                            self.gitlab.remove_member_from_group(group, user)
-                            self.gitlab.add_member_to_group(
+                            self.gitlab.edit_member_of_group(
                                 group, user, access_level_to_set, expires_at_to_set
                             )
 
