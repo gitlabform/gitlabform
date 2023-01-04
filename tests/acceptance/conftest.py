@@ -211,11 +211,11 @@ def make_user(
             username,
             get_random_password(),
         )
-        user_obj = User(username, user["id"])
+
         if add_to_project:
-            gitlab.add_member_to_project(
-                group_and_project, None, level.value, user_id=user["id"]
-            )
+            gitlab.add_member_to_project(group_and_project, username, level.value)
+
+        user_obj = User(username, user["id"])
         created_users.append(user_obj)
         return user_obj
 
