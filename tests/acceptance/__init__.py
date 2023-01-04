@@ -1,6 +1,7 @@
 import os
+import random
+import string
 import textwrap
-
 from xkcdpass import xkcd_password as xp
 
 from gitlabform import GitLabForm
@@ -55,7 +56,13 @@ def get_random_suffix():
 
 
 def get_random_password():
-    return xp.generate_xkcdpassword(wordlist=my_words, numwords=3, delimiter="_")
+    # copied from https://medium.com/analytics-vidhya/create-a-random-password-generator-using-python-2fea485e9da9
+
+    length = 16
+    all_chars = string.ascii_letters + string.digits
+    password = "".join(random.sample(all_chars, length))
+
+    return password
 
 
 def get_gitlab():
