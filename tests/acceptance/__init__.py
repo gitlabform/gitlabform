@@ -56,7 +56,8 @@ def get_random_suffix():
 
 
 def get_random_password():
-    # copied from https://medium.com/analytics-vidhya/create-a-random-password-generator-using-python-2fea485e9da9
+    # copied from Ayushi Rawat's article
+    # https://medium.com/analytics-vidhya/create-a-random-password-generator-using-python-2fea485e9da9
 
     length = 16
     all_chars = string.ascii_letters + string.digits
