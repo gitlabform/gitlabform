@@ -49,7 +49,6 @@ class ProjectProcessors(AbstractProcessors):
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
-            MergeRequestsProcessor(gitlab),
             DeployKeysProcessor(gitlab),
             VariablesProcessor(gitlab),
             BranchesProcessor(gitlab, strict),
@@ -62,4 +61,5 @@ class ProjectProcessors(AbstractProcessors):
             BadgesProcessor(gitlab),
             ResourceGroupsProcessor(gitlab),
             ProtectedEnvironmentsProcessor(gitlab),
+            MergeRequestsProcessor(gitlab),
         ]

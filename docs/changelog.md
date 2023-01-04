@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.3
+
+* Fix bug on the first run when both adding project members and the same users as merge request approvers. Fixes [#461](https://github.com/gitlabform/gitlabform/issues/461).
+
 ## 3.3.2
 
 * Don't strip trailing new lines from files. Fixes [#451](https://github.com/gitlabform/gitlabform/issues/451), PR [#452](https://github.com/gitlabform/gitlabform/pull/452).
