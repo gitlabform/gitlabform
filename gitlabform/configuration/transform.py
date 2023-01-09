@@ -1,3 +1,4 @@
+from logging import debug
 from abc import ABC, abstractmethod
 from ez_yaml import ez_yaml
 from ruamel.yaml import YAML
@@ -34,6 +35,10 @@ class ConfigurationTransformers:
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
 
     def transform(self, configuration: Configuration) -> None:
+
+        config_before = ez_yaml.to_string(obj=configuration.config, options={})
+        debug(f"Config BEFORE transformations:\n{config_before}")
+
         # this needs to run before user and group transformer as it may contain users and group
         # names to convert to ids
         self.merge_request_approvals_transformer.transform(configuration)
@@ -42,6 +47,9 @@ class ConfigurationTransformers:
         self.group_transformer.transform(configuration)
         self.implicit_name_transformer.transform(configuration)
         self.access_level_transformer.transform(configuration, last=True)
+
+        config_after = ez_yaml.to_string(obj=configuration.config, options={})
+        debug(f"Config AFTER transformations:\n{config_after}")
 
 
 class ConfigurationTransformer(ABC):

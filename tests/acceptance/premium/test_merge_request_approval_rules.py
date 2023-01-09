@@ -1,10 +1,7 @@
 import pytest
-from ez_yaml import ez_yaml
 
-from configuration.transform import UserTransformer
-from gitlabform import Configuration
-from tests.acceptance import run_gitlabform, gl
 from gitlabform.gitlab import AccessLevel
+from tests.acceptance import run_gitlabform, gl
 
 
 @pytest.fixture(scope="function")
@@ -370,8 +367,8 @@ class TestMergeRequestApprovers:
         self,
         gitlab,
         group_and_project,
-        sub_group,
-        project_in_sub_group,
+        subgroup,
+        project_in_subgroup,
         other_group,
         third_group,
         make_user,
@@ -389,7 +386,7 @@ class TestMergeRequestApprovers:
                     name: "All eligible users"
                   enforce: true
  
-              "{sub_group}/*":
+              "{subgroup}/*":
                 branches:
                   {branch}:
                     protected: true
@@ -410,26 +407,9 @@ class TestMergeRequestApprovers:
                   enforce: true
             """
 
-        config_object = Configuration(config_string=config)
-        ut = UserTransformer(gitlab)
-        ut.transform(config_object, last=True)
+        run_gitlabform(config, project_in_subgroup)
 
-        effective_config_yaml_str = ez_yaml.to_string(
-            obj=config_object.config, options={}
-        )
-        print("!!!Transformed:")
-        print(effective_config_yaml_str)
-
-        effective_config = config_object.get_effective_config_for_group(
-            project_in_sub_group
-        )
-        effective_config_yaml_str = ez_yaml.to_string(obj=effective_config, options={})
-        print("!!!Effective:")
-        print(effective_config_yaml_str)
-
-        run_gitlabform(config, "ALL_DEFINED")
-
-        rules = gitlab.get_approval_rules(project_in_sub_group)
+        rules = gitlab.get_approval_rules(project_in_subgroup)
 
         assert len(rules) == 2
 

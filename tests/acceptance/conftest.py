@@ -83,7 +83,7 @@ def third_group():
 
 
 @pytest.fixture(scope="class")
-def sub_group(group):
+def subgroup(group):
     gl = get_gitlab()
     parent_id = gl.get_group_id_case_insensitive(group)
     group_name = get_random_name("subgroup")
@@ -96,14 +96,14 @@ def sub_group(group):
 
 
 @pytest.fixture(scope="class")
-def project_in_sub_group(sub_group):
+def project_in_subgroup(subgroup):
     project_name = get_random_name("project")
-    create_project(sub_group, project_name)
+    create_project(subgroup, project_name)
 
-    yield f"{sub_group}/{project_name}"
+    yield f"{subgroup}/{project_name}"
 
     gl = get_gitlab()
-    gl.delete_project(f"{sub_group}/{project_name}")
+    gl.delete_project(f"{subgroup}/{project_name}")
 
 
 @pytest.fixture(scope="class")
