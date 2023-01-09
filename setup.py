@@ -64,7 +64,7 @@ setup(
             "pre-commit==2.21.0",  # not really for tests, but for development
             "coverage==7.0.4",
             "pytest-cov==4.0.0",
-            "deepdiff==6.2.2",
+            "deepdiff==6.2.3",
             "pytest-rerunfailures==10.3",
             "cryptography==39.0.0",
             "mypy==0.991",
