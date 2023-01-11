@@ -17,7 +17,7 @@ def get_version_file_path():
 setup(
     name="gitlabform",
     version=open(get_version_file_path()).read(),
-    description='🏗 Specialized "configuration as a code" tool for GitLab projects, groups and more'
+    description="🏗 Specialized configuration as a code tool for GitLab projects, groups and more"
     " using hierarchical configuration written in YAML",
     long_description=readme,
     long_description_content_type="text/markdown",

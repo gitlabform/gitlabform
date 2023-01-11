@@ -132,7 +132,7 @@ class GitLabForm:
         parser = argparse.ArgumentParser(
             description=textwrap.dedent(
                 f"""
-            🏗 Specialized "configuration as a code" tool for GitLab projects, groups and more
+            🏗 Specialized configuration as a code tool for GitLab projects, groups and more
             using hierarchical configuration written in YAML.
 
             Exits with code:

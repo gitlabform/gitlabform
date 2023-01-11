@@ -10,7 +10,7 @@
   ![GitLabForm logo](images/gitlabform-logo.png)
 </figure>
 
-is a specialized "configuration as a code" tool for GitLab projects, groups and more
+is a specialized configuration as a code tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
 
 
