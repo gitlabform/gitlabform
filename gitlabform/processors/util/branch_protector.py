@@ -277,7 +277,7 @@ class BranchProtector(object):
         for array_element in protected_branches_response.get(
             f"{action}_access_levels", []
         ):
-            if array_element.get("access_level"):
+            if array_element.get("access_level") is not None:
                 levels.add(array_element.get("access_level"))
             elif array_element.get("user_id"):
                 user_ids.add(array_element.get("user_id"))
