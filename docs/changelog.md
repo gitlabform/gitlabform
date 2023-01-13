@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.4
+
+* Fix unnecessary reapply of branch protection when `*_access_levels` is set to `0`. PR [#474](https://github.com/gitlabform/gitlabform/pull/474)
+
+Thanks to [Ben Kuhar](https://github.com/BenKuhar) for his contribution!
+
 ## 3.3.3
 
 * Fix bug on the first run when both adding project members and the same users as merge request approvers. Fixes [#461](https://github.com/gitlabform/gitlabform/issues/461).
