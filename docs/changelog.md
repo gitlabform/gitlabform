@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.4
+
+* Fix unnecessary reapply of branch protection when `*_access_levels` is set to `0`. PR [#474](https://github.com/gitlabform/gitlabform/pull/474)
+
+Thanks to [BenKuhar](https://github.com/BenKuhar) for his contribution!
+
 ## 3.4.0rc3
 
 * Start to edit instead of remove+re-add users as project and group members when changing their access level or expiration time. This should give cleaner audit logs of membership changes and may resolve some issues. Related to issue [#466](https://github.com/gitlabform/gitlabform/issues/466), PR [#469](https://github.com/gitlabform/gitlabform/pull/469).
