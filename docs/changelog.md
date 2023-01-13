@@ -4,7 +4,7 @@
 
 * Fix unnecessary reapply of branch protection when `*_access_levels` is set to `0`. PR [#474](https://github.com/gitlabform/gitlabform/pull/474)
 
-Thanks to [BenKuhar](https://github.com/BenKuhar) for his contribution!
+Thanks to [Ben Kuhar](https://github.com/BenKuhar) for his contribution!
 
 ## 3.4.0rc3
 
