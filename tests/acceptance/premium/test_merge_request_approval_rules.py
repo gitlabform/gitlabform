@@ -387,6 +387,12 @@ class TestMergeRequestApprovers:
                   enforce: true
  
               "{subgroup}/*":
+
+                members:
+                  users:
+                    {user1.name}:
+                      access_level: {AccessLevel.DEVELOPER.value}
+
                 branches:
                   {branch}:
                     protected: true
