@@ -7,7 +7,7 @@ from tests.acceptance import (
 
 
 @pytest.fixture(scope="function")
-def one_owner(gitlab, group, groups, sub_group, users):
+def one_owner(gitlab, group, groups, subgroup, users):
 
     gitlab.add_member_to_group(group, users[0], AccessLevel.OWNER.value)
     gitlab.remove_member_from_group(group, "root")
@@ -25,7 +25,7 @@ def one_owner(gitlab, group, groups, sub_group, users):
     for user in users:
         gitlab.remove_member_from_group(group, user)
 
-    gitlab.remove_share_from_group(group, sub_group)
+    gitlab.remove_share_from_group(group, subgroup)
     for share_with in groups:
         gitlab.remove_share_from_group(group, share_with)
 
@@ -56,7 +56,7 @@ class TestGroupMembersGroups:
         shared_with = gitlab.get_group_shared_with(group)
         assert len(shared_with) == 2
 
-    def test__sub_group(self, gitlab, group, users, sub_group, one_owner):
+    def test__subgroup(self, gitlab, group, users, subgroup, one_owner):
         no_of_members_before = len(gitlab.get_group_members(group))
 
         add_shared_with = f"""
@@ -67,7 +67,7 @@ class TestGroupMembersGroups:
                 {users[0]}:
                   access_level: {AccessLevel.OWNER.value}
               groups:
-                {sub_group}:
+                {subgroup}:
                   group_access: {AccessLevel.DEVELOPER.value}
         """
 

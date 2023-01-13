@@ -1,4 +1,7 @@
+from logging import debug
 from abc import ABC, abstractmethod
+from ez_yaml import ez_yaml
+from ruamel.yaml import YAML
 from types import SimpleNamespace
 
 from cli_ui import fatal, warning
@@ -32,6 +35,10 @@ class ConfigurationTransformers:
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
 
     def transform(self, configuration: Configuration) -> None:
+
+        config_before = ez_yaml.to_string(obj=configuration.config, options={})
+        debug(f"Config BEFORE transformations:\n{config_before}")
+
         # this needs to run before user and group transformer as it may contain users and group
         # names to convert to ids
         self.merge_request_approvals_transformer.transform(configuration)
@@ -39,82 +46,95 @@ class ConfigurationTransformers:
         self.user_transformer.transform(configuration)
         self.group_transformer.transform(configuration)
         self.implicit_name_transformer.transform(configuration)
-        self.access_level_transformer.transform(configuration)
+        self.access_level_transformer.transform(configuration, last=True)
+
+        config_after = ez_yaml.to_string(obj=configuration.config, options={})
+        debug(f"Config AFTER transformations:\n{config_after}")
 
 
 class ConfigurationTransformer(ABC):
+    def transform(self, configuration: Configuration, last: bool = False) -> None:
+        self._do_transform(configuration)
+        if last:
+            self.convert_to_simple_types(configuration)
+
     @abstractmethod
-    def transform(self, configuration: Configuration) -> None:
+    def _do_transform(self, configuration: Configuration) -> None:
         pass
+
+    @staticmethod
+    def convert_to_simple_types(configuration: Configuration):
+        # we needed complex ruamel.yaml's types like ordereddict and CommentedSeq
+        # for transformations, but at the end convert them to simple dict and lists
+        # for easier to understand debug output and tests
+
+        config_yaml_string = ez_yaml.to_string(obj=configuration.config, options={})
+        simple_yaml_loader = YAML(typ="safe", pure=True)
+        configuration.config = simple_yaml_loader.load(config_yaml_string)
 
 
 class UserTransformer(ConfigurationTransformer):
     def __init__(self, gitlab: GitLab):
         self.gitlab = gitlab
 
-    def transform(self, configuration: Configuration) -> None:
+    def _do_transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
+        log = ConsolePrinter(logging_args)
+        processor = Processor(log, configuration.config)
 
-        processor = Processor(ConsolePrinter(logging_args), configuration.config)
+        try:
+            for node_coordinate in processor.get_nodes(
+                "projects_and_groups.*.protected_environments.*.deploy_access_levels.user",
+                mustexist=True,
+            ):
+                user = node_coordinate.parent.pop("user")
 
-        paths_to_user = [
-            "projects_and_groups.*.protected_environments.*.deploy_access_levels.user"
-        ]
+                node_coordinate.parent["user_id"] = self.gitlab._get_user_id(user)
+        except YAMLPathException as e:
+            # this just means that we haven't found any keys in YAML
+            # under the given path
+            pass
 
-        for path in paths_to_user:
-            try:
-                for node_coordinate in processor.get_nodes(path):
-                    user = node_coordinate.parent.pop("user")
-
-                    node_coordinate.parent["user_id"] = self.gitlab._get_user_id(user)
-            except YAMLPathException as e:
-                # this just means that we haven't found any keys in YAML
-                # under the given path
-                pass
-
-        paths_to_users = ["projects_and_groups.*.merge_requests_approval_rules.*.users"]
-
-        for path in paths_to_users:
-            try:
-                for node_coordinate in processor.get_nodes(path):
-                    user_ids = []
-                    users = node_coordinate.parent.pop("users")
-                    for user in users:
-                        user_id = self.gitlab._get_user_id(user)
-                        user_ids.append(user_id)
-                    node_coordinate.parent["user_ids"] = user_ids
-            except YAMLPathException as e:
-                # this just means that we haven't found any keys in YAML
-                # under the given path
-                pass
+        try:
+            for node_coordinate in processor.get_nodes(
+                "**.merge_requests_approval_rules.*.users",
+                mustexist=True,
+            ):
+                user_ids = []
+                users = node_coordinate.parent.pop("users")
+                for user in users:
+                    user_id = self.gitlab._get_user_id(user)
+                    user_ids.append(user_id)
+                node_coordinate.parent["user_ids"] = user_ids
+        except YAMLPathException as e:
+            # this just means that we haven't found any keys in YAML
+            # under the given path
+            pass
 
 
 class GroupTransformer(ConfigurationTransformer):
     def __init__(self, gitlab: GitLab):
         self.gitlab = gitlab
 
-    def transform(self, configuration: Configuration) -> None:
+    def _do_transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
-
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
 
-        paths_to_groups = [
-            "projects_and_groups.*.merge_requests_approval_rules.*.groups"
-        ]
-
-        for path in paths_to_groups:
-            try:
-                for node_coordinate in processor.get_nodes(path):
-                    group_ids = []
-                    groups = node_coordinate.parent.pop("groups")
-                    for group in groups:
-                        group_id = self.gitlab._get_group_id(group)
-                        group_ids.append(group_id)
-                    node_coordinate.parent["group_ids"] = group_ids
-            except YAMLPathException:
-                # this just means that we haven't found any keys in YAML
-                # under the given path
-                pass
+        try:
+            for node_coordinate in processor.get_nodes(
+                "**.merge_requests_approval_rules.*.groups",
+                mustexist=True,
+            ):
+                group_ids = []
+                groups = node_coordinate.parent.pop("groups")
+                for group in groups:
+                    group_id = self.gitlab._get_group_id(group)
+                    group_ids.append(group_id)
+                node_coordinate.parent["group_ids"] = group_ids
+        except YAMLPathException:
+            # this just means that we haven't found any keys in YAML
+            # under the given path
+            pass
 
 
 class ImplicitNameTransformer(ConfigurationTransformer):
@@ -137,26 +157,25 @@ class ImplicitNameTransformer(ConfigurationTransformer):
         # this transformer doesn't need to call gitlab
         pass
 
-    def transform(self, configuration: Configuration) -> None:
+    def _do_transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
-
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
 
-        paths_to_implicit_names = ["projects_and_groups.*.protected_environments.*"]
+        try:
+            for node_coordinate in processor.get_nodes(
+                "projects_and_groups.*.protected_environments.*",
+                mustexist=True,
+            ):
+                if not isinstance(node_coordinate.node, CommentedMap):
+                    continue
 
-        for path in paths_to_implicit_names:
-            try:
-                for node_coordinate in processor.get_nodes(path):
-                    if not isinstance(node_coordinate.node, CommentedMap):
-                        continue
-
-                    node_coordinate.parent[node_coordinate.parentref][
-                        "name"
-                    ] = node_coordinate.parentref
-            except YAMLPathException:
-                # this just means that we haven't found any keys in YAML
-                # under the given path
-                pass
+                node_coordinate.parent[node_coordinate.parentref][
+                    "name"
+                ] = node_coordinate.parentref
+        except YAMLPathException:
+            # this just means that we haven't found any keys in YAML
+            # under the given path
+            pass
 
 
 class AccessLevelsTransformer(ConfigurationTransformer):
@@ -170,11 +189,9 @@ class AccessLevelsTransformer(ConfigurationTransformer):
         # this transformer doesn't need to call gitlab
         pass
 
-    def transform(self, configuration: Configuration):
+    def _do_transform(self, configuration: Configuration):
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
-        log = ConsolePrinter(logging_args)
-
-        processor = Processor(log, configuration.config)
+        processor = Processor(ConsolePrinter(logging_args), configuration.config)
 
         # [.!<100] effectively means that the value is non-numerical
         paths_to_hashes = [
@@ -193,7 +210,7 @@ class AccessLevelsTransformer(ConfigurationTransformer):
 
         for path in paths_to_hashes:
             try:
-                for node_coordinate in processor.get_nodes(path):
+                for node_coordinate in processor.get_nodes(path, mustexist=True):
                     try:
                         access_level_string = str(node_coordinate.node)
                         node_coordinate.parent[
@@ -222,7 +239,7 @@ class AccessLevelsTransformer(ConfigurationTransformer):
 
         for path in paths_to_arrays:
             try:
-                for node_coordinate in processor.get_nodes(path):
+                for node_coordinate in processor.get_nodes(path, mustexist=True):
                     if node_coordinate.parentref == "access_level":
                         try:
                             access_level_string = str(node_coordinate.node)
@@ -251,14 +268,14 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
         # this transformer doesn't need to call gitlab
         pass
 
-    def transform(self, configuration: Configuration) -> None:
+    def _do_transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
-
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
 
         try:
             for node_coordinate in processor.get_nodes(
-                "projects_and_groups.*.merge_requests"
+                "projects_and_groups.*.merge_requests",
+                mustexist=True,
             ):
                 old_syntax_found = False
                 approvals_required_guessed = False
