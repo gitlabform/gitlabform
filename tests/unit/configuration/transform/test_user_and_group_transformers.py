@@ -81,4 +81,4 @@ def test__transform_for_merge_request_approvals() -> None:
     print(effective_config_yaml_str)
 
     difference = DeepDiff(configuration.config, expected_transformed_config.config)
-    assert not difference, pprint(difference, indent=2)
+    assert not difference
