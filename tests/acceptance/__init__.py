@@ -173,6 +173,10 @@ def delete_pipeline_schedules_from_project(project_and_group):
         gl.delete_pipeline_schedule(project_and_group, schedule["id"])
 
 
+def randomize_case(input: str) -> str:
+    return "".join(random.choice((str.upper, str.lower))(char) for char in input)
+
+
 def run_gitlabform(config, target, include_archived_projects=True):
     # f-strings with """ used as configs have the disadvantage of having indentation in them - let's remove it here
     config = textwrap.dedent(config)
