@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.0rc4
+
+* Fix internal conversion of group names and usernames to ids in some cases for Merge Request approval rules. Reported by [Siythrun](https://github.com/Siythrun) in issue [#388](https://github.com/gitlabform/gitlabform/issues/388), PR [#467](https://github.com/gitlabform/gitlabform/pull/467).
+* Operate on simple dicts and lists instead of more complex ordereddict and CommentedSeq for easier to understand debug output and tests.
+* Show the config before and after the internal transformation stage, with the debug output enabled.
+
 ## 3.3.4
 
 * Fix unnecessary reapply of branch protection when `*_access_levels` is set to `0`. PR [#474](https://github.com/gitlabform/gitlabform/pull/474)
