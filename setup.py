@@ -65,7 +65,7 @@ setup(
             "coverage==7.0.4",
             "pytest-cov==4.0.0",
             "deepdiff==6.2.3",
-            "pytest-rerunfailures==10.3",
+            "pytest-rerunfailures==11.0",
             "cryptography==39.0.0",
             "mypy==0.991",
             "mypy-extensions==0.4.3",
