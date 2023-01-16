@@ -45,7 +45,7 @@ setup(
     python_requires=">=3.7.0",
     install_requires=[
         "certifi",  # we want the latest root certs for security
-        "requests==2.28.1",
+        "requests==2.28.2",
         "types-requests==2.28.11.7",
         "Jinja2==3.1.2",
         "MarkupSafe==2.1.1",
