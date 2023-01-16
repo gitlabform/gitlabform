@@ -173,7 +173,7 @@ class ConfigurationCore(ABC):
                     f"because it has no higher level setting to inherit from.\n",
                     exit_code=EXIT_INVALID_INPUT,
                 )
-            elif type(value) is CommentedMap:
+            elif type(value) in [CommentedMap, dict]:
                 ConfigurationCore._validate_break_inheritance_flag(
                     value, section_name, key
                 )
@@ -203,7 +203,7 @@ class ConfigurationCore(ABC):
                             f"Cannot set the inheritance break flag with true\n",
                             exit_code=EXIT_INVALID_INPUT,
                         )
-                elif type(value) is CommentedMap:
+                elif type(value) in [CommentedMap, dict]:
                     break_inheritance(value, key)
 
         def replace_config_sections(merged_config, specific_key, specific_config):
@@ -212,7 +212,7 @@ class ConfigurationCore(ABC):
                     del specific_config["inherit"]
                     merged_config[key] = specific_config
                     break
-                elif type(value) is CommentedMap:
+                elif type(value) in [CommentedMap, dict]:
                     replace_config_sections(value, specific_key, specific_config)
 
         break_inheritance(more_specific_config)

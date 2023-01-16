@@ -166,7 +166,7 @@ class ImplicitNameTransformer(ConfigurationTransformer):
                 "projects_and_groups.*.protected_environments.*",
                 mustexist=True,
             ):
-                if not isinstance(node_coordinate.node, CommentedMap):
+                if type(node_coordinate.node) not in [CommentedMap, dict]:
                     continue
 
                 node_coordinate.parent[node_coordinate.parentref][
