@@ -504,9 +504,54 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Merge Requests
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Merge Requests
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules" class="md-nav__link">
+    Rules
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -825,6 +870,35 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules" class="md-nav__link">
+    Rules
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -847,30 +921,109 @@
 <p class="admonition-title">Info</p>
 <p>This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
 </div>
-<p>This section purpose is to manage the Merge Requests settings.</p>
-<p>The settings under the <code>approvals</code> key are as documented at GitLab's <a href="https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration">Merge Request approvals API</a>.</p>
-<p>The <code>approvers</code> and <code>approver_groups</code> are both optional. If any of these are set, GitLabForm starts to manage an approval rule named "Approvers (configured using GitLabForm)". Under the <code>approvers</code> there should be an array of usernames, under the <code>approver_groups</code> - array of group/subgroup paths.</p>
-<p>The <code>remove_other_approval_rules</code> key is optional and if it is set to <code>true</code> then any other approval rules that might exist in the project, other than the one mentioned above, will be deleted.</p>
+<div class="admonition new">
+<p class="admonition-title">New</p>
+<p>The syntax described below has been introduced in v3.4.0 of GitLabForm. The old syntax, that used to be documented here,
+will still supported until the release of v4.* of GitLabForm, but is deprecated and you should migrate to the new one.</p>
+</div>
+<p>These sections' purpose is to manage the project-Level Merge Requests <strong>configuration</strong> and <strong>rules</strong>.</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>The section <code>merge_requests_approvals</code> keys are as documented at GitLab's <a href="https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration">project-level Merge Request approvals API, change configuration</a>.</p>
+<p>Note that under it the deprecated key <code>approvals_before_merge</code> is NOT allowed in GitLabForm - please use the <code>approvals_required</code> field in the specific rules instead (see below.)</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Some Merge Requests-related settings are also set in the <a href="../settings/#project-settings">project settings</a>.</p>
 </div>
-<p>Example:</p>
+<h2 id="rules">Rules<a class="headerlink" href="#rules" title="Permanent link">&para;</a></h2>
+<p>In the <code>merge_requests_approval_rules</code> section, key names are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the rules defined here will remain in the project, all other will be deleted.</p>
+<p>Under each key the contents are as documented at GitLab's <a href="https://docs.gitlab.com/ee/api/merge_request_approvals.html#create-project-level-rule">project-level Merge Request approvals API, create project-level rule</a>, but additionally, you may use these keys:</p>
+<ul>
+<li><code>users</code> - an array of usernames,</li>
+<li><code>groups</code> - an array of group/subgroup paths,</li>
+<li><code>protected_branches</code> - an array of branch names.</li>
+</ul>
+<p>...instead of the built-in keys <code>user_ids</code>, <code>group_ids</code>, <code>protected_branch_ids</code> which require you to provide the internal ids of these entities. </p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If any of the users or groups is not a member of the project, they cannot be approvers.
+However GitLab will NOT fail with an error in such case - it's will silently ignore these users and groups.
+This is GitLab's limitation, not GitLabForm's.</p>
+</div>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<p>Example 1 - a single approval rule where all the project members can approve, but no approval is required to merged the MR.</p>
+<p>Note that <code>rule_type: any_approver</code> field makes it a special kind of rule where you don't have to reference specific users or groups. Also note that you can combine it with any number in <code>approvals_required</code> and any <code>name</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">merge_requests</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">approvals</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">approvals_before_merge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="w">        </span><span class="nt">reset_approvals_on_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">        </span><span class="nt">disable_overriding_approvers_per_merge_request</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="nt">approvers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user1</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user2</span>
-<span class="w">      </span><span class="nt">approver_groups</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-group</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-group1/subgroup</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-group2/subgroup/subsubgroup</span>
-<span class="w">      </span><span class="nt">remove_other_approval_rules</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">merge_requests_approvals</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">disable_overriding_approvers_per_merge_request</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">merge_requests_approval_rules</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">any</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Any</span><span class="nv"> </span><span class="s">member&quot;</span>
+<span class="w">        </span><span class="nt">rule_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any_approver</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Example 2 - a single approval rule that requires at least 2 approval from the following approvers: <code>user1</code>, <code>user2</code> and/or the members of the group <code>my-group</code> who will be called "Special approvers" in the GitLab's web UI:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">merge_requests_approvals</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">disable_overriding_approvers_per_merge_request</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">merge_requests_approval_rules</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Special</span><span class="nv"> </span><span class="s">approvers&quot;</span>
+<span class="w">        </span><span class="nt">users</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user2</span>
+<span class="w">        </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-group</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Example 3 - two approval rules:</p>
+<ul>
+<li>one that requires at least 1 approval from any member of the <code>security-team</code> group, who will be called "Security Team" in the GitLab's web UI,</li>
+<li>second that requires at least 1 approval from any of the project members, who will be called "Any member" in the GitLab's web UI.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">merge_requests_approvals</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">disable_overriding_approvers_per_merge_request</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">merge_requests_approval_rules</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">security</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Security</span><span class="nv"> </span><span class="s">Team&quot;</span>
+<span class="w">        </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security-team</span>
+<span class="w">      </span><span class="nt">any</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Any</span><span class="nv"> </span><span class="s">member&quot;</span>
+<span class="w">        </span><span class="nt">rule_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any_approver</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Example 4 - two approval rules:</p>
+<ul>
+<li>one that requires at least 1 approval from <code>senior-sre-1</code> and/or <code>senior-sre-2</code>, who will be called "Senior SRE" in the GitLab's web UI, but this rule will apply only to MRs to the protected branches <code>production</code> and <code>staging</code>,</li>
+<li>second that requires at least 1 approval from any of the project members, who will be called "Any member" in the GitLab's web UI.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">merge_requests_approvals</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">disable_overriding_approvers_per_merge_request</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">merge_requests_approval_rules</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">senior</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Senior</span><span class="nv"> </span><span class="s">SRE&quot;</span>
+<span class="w">        </span><span class="nt">users</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">senior-sre-1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">senior-sre-2</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span>
+<span class="w">      </span><span class="nt">any</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Any</span><span class="nv"> </span><span class="s">member&quot;</span>
+<span class="w">        </span><span class="nt">rule_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any_approver</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 
 

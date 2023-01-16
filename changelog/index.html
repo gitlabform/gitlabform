@@ -677,6 +677,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#340" class="md-nav__link">
+    3.4.0
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#340rc4" class="md-nav__link">
     3.4.0rc4
   </a>
@@ -1148,6 +1155,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#340" class="md-nav__link">
+    3.4.0
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#340rc4" class="md-nav__link">
     3.4.0rc4
   </a>
@@ -1461,6 +1475,18 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="340">3.4.0<a class="headerlink" href="#340" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Add support for <a href="https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html#add-multiple-approval-rules">multiple merge request approval rules</a> and for changing the name of the currently managed single approval rule</strong>. Implements <a href="https://github.com/gitlabform/gitlabform/issues/388">#388</a> and <a href="https://github.com/gitlabform/gitlabform/issues/95">#95</a>, PR <a href="https://github.com/gitlabform/gitlabform/pull/435">#435</a> and many more.</li>
+<li>A more user-friendly error message when a key is not found. PR <a href="https://github.com/gitlabform/gitlabform/pull/422">#422</a></li>
+<li>Start to edit instead of remove+re-add users as project and group members when changing their access level or expiration time. This should give cleaner audit logs of membership changes and may resolve some issues. Related to issue <a href="https://github.com/gitlabform/gitlabform/issues/466">#466</a>, PR <a href="https://github.com/gitlabform/gitlabform/pull/469">#469</a>.</li>
+<li>Operate on simple dicts and lists instead of more complex ordereddict and CommentedSeq for easier to understand debug output and tests.</li>
+<li>Show the config before and after the internal transformation stage, with the debug output enabled.</li>
+<li>(For contributors) Big refactoring to make the code more logically groupped and contribution documentation updates for easier contributions. Please see the commit messages in the PR <a href="https://github.com/gitlabform/gitlabform/pull/431">#431</a> for more information.</li>
+</ul>
+<p>Thanks to the following contributors of this release: 
+* <a href="https://github.com/weakcamel">Waldek Maleska</a>, <a href="https://github.com/amimas">amimas</a>, <a href="https://github.com/jimisola">Jimisola Laursen</a>, <a href="https://github.com/Siythrun">Siythrun</a> for consulting and testing of the multiple merge request approval rules feature, 
+* <a href="https://github.com/zanella">Rafael Zanella</a> for the development.</p>
 <h2 id="340rc4">3.4.0rc4<a class="headerlink" href="#340rc4" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Fix internal conversion of group names and usernames to ids in some cases for Merge Request approval rules. Reported by <a href="https://github.com/Siythrun">Siythrun</a> in issue <a href="https://github.com/gitlabform/gitlabform/issues/388">#388</a>, PR <a href="https://github.com/gitlabform/gitlabform/pull/467">#467</a>.</li>
