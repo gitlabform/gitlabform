@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.4.1
+
+* Fix for old merge request syntax using inheritance when a sole `approvals_before_merge` setting is inherited/overwritten. PR [#481](https://github.com/gitlabform/gitlabform/pull/481).
+
 ## 3.4.0
 
 * **Add support for [multiple merge request approval rules](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html#add-multiple-approval-rules) and for changing the name of the currently managed single approval rule**. Implements [#388](https://github.com/gitlabform/gitlabform/issues/388) and [#95](https://github.com/gitlabform/gitlabform/issues/95), PR [#435](https://github.com/gitlabform/gitlabform/pull/435) and many more.
