@@ -387,3 +387,50 @@ class TestMergeRequestApprovers:
         assert rule["users"][0]["username"] == user2.name
         assert len(rule["groups"]) == 1
         assert rule["groups"][0]["name"] == group_with_just_owner
+
+    @pytest.mark.skipif(
+        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
+    )
+    def test__inheritance(
+        self,
+        gitlab,
+        group,
+        group_and_project,
+        group_with_one_owner_and_two_developers,
+        group_with_just_owner,
+        make_user,
+    ):
+        user1 = make_user(AccessLevel.DEVELOPER)
+
+        config = f"""
+        projects_and_groups:
+          {group}/*:
+            merge_requests:
+              approvals:
+                approvals_before_merge: 2
+                reset_approvals_on_push: false
+                disable_overriding_approvers_per_merge_request: true
+                merge_requests_author_approval: false
+              approvers:
+                - {user1.name}
+              approver_groups:
+                - {group_with_just_owner}
+
+          {group_and_project}:
+            merge_requests:
+              approvals:
+                approvals_before_merge: 0
+        """
+
+        run_gitlabform(config, group_and_project)
+
+        rules = gitlab.get_approval_rules(group_and_project)
+
+        assert len(rules) == 1
+        rule = rules[0]
+        assert rule["name"] == APPROVAL_RULE_NAME
+        assert rule["approvals_required"] == 0
+        assert len(rule["users"]) == 1
+        assert rule["users"][0]["username"] == user1.name
+        assert len(rule["groups"]) == 1
+        assert rule["groups"][0]["name"] == group_with_just_owner

@@ -278,26 +278,40 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                 mustexist=True,
             ):
                 old_syntax_found = False
-                approvals_required_guessed = False
 
                 where_to_add_new_syntax = node_coordinate.parent
 
                 old_syntax = node_coordinate.node
 
-                # approval rules
-                if "approvers" in old_syntax or "approver_groups" in old_syntax:
+                approvals_required_guessed = True
+                approvals_required = 2
+
+                # approvals configurations
+                if "approvals" in old_syntax:
                     old_syntax_found = True
 
-                    if (
-                        "approvals" in old_syntax
-                        and "approvals_before_merge" in old_syntax["approvals"]
-                    ):
+                    if "approvals_before_merge" in old_syntax["approvals"]:
+                        # this setting is now moved inside the approval rules, so remove it from here
+                        # but store it for adding there
                         approvals_required = old_syntax["approvals"][
                             "approvals_before_merge"
                         ]
-                    else:
-                        approvals_required = 2
-                        approvals_required_guessed = True
+                        approvals_required_guessed = False
+                        old_syntax["approvals"].pop("approvals_before_merge")
+
+                    if old_syntax["approvals"]:
+                        # add the settings, if there are left any after removing 'approvals_before_merge'
+                        where_to_add_new_syntax[
+                            "merge_requests_approvals"
+                        ] = old_syntax["approvals"]
+
+                # approval rules
+                if (
+                    "approvers" in old_syntax
+                    or "approver_groups" in old_syntax
+                    or not approvals_required_guessed
+                ):
+                    old_syntax_found = True
 
                     where_to_add_new_syntax["merge_requests_approval_rules"] = {
                         "legacy": {
@@ -324,20 +338,9 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                             "enforce"
                         ] = True
 
-                # approvals configurations
-                if "approvals" in old_syntax:
-                    old_syntax_found = True
-                    if "approvals_before_merge" in old_syntax["approvals"]:
-                        # this setting is now moved inside the approval rules, so remove it from here
-                        old_syntax["approvals"].pop("approvals_before_merge")
-                    where_to_add_new_syntax["merge_requests_approvals"] = old_syntax[
-                        "approvals"
-                    ]
-
                 if old_syntax_found:
                     where_to_add_new_syntax.pop("merge_requests")
 
-                if old_syntax_found:
                     warning(
                         "The 'merge_requests' configuration section syntax works but is deprecated and will be removed "
                         "in the next major version of GitLabForm. "
