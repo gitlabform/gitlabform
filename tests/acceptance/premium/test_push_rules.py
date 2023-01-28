@@ -1,11 +1,10 @@
 import pytest
 from tests.acceptance import run_gitlabform, gl
 
+pytestmark = pytest.mark.requires_license
+
 
 class TestPushRules:
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__create_push_rules(self, gitlab, group_and_project):
         config = f"""
         projects_and_groups:
@@ -26,9 +25,6 @@ class TestPushRules:
         push_rules = gitlab.get_project_push_rules(group_and_project)
         assert push_rules["max_file_size"] == 0
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__edit_push_rules(self, gitlab, group_and_project):
         self.test__create_push_rules(gitlab, group_and_project)
 

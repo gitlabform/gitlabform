@@ -17,11 +17,3 @@ class GitLabUsers(GitLabCore):
         if not user_id:
             user_id = self._get_user_id(username)
         return self._make_requests_to_api("users/%s", str(user_id), "GET")
-
-    def delete_user(self, username, user_id=None):
-        if not user_id:
-            user_id = self._get_user_id(username)
-        # 404 means that the user does not exist anymore, so let's accept it for idempotency
-        return self._make_requests_to_api(
-            "users/%s", str(user_id), method="DELETE", expected_codes=[204, 404]
-        )

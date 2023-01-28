@@ -2,18 +2,17 @@ from tests.acceptance import run_gitlabform
 
 
 class TestProjectSettings:
-    def test__builds_for_private_projects(self, gitlab, group_and_project):
-        settings = gitlab.get_project_settings(group_and_project)
-        assert settings["visibility"] == "private"
+    def test__builds_for_private_projects(self, gl, project):
+        assert project.visibility == "private"
 
         config_builds_for_private_projects = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               visibility: internal
         """
 
-        run_gitlabform(config_builds_for_private_projects, group_and_project)
+        run_gitlabform(config_builds_for_private_projects, project)
 
-        settings = gitlab.get_project_settings(group_and_project)
-        assert settings["visibility"] == "internal"
+        project = gl.projects.get(project.id)
+        assert project.visibility == "internal"

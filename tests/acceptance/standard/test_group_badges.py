@@ -4,10 +4,11 @@ from tests.acceptance import (
 
 
 class TestGroupBadges:
-    def test__badges_add(self, gitlab, group):
+    def test__badges_add(self, group):
+
         config = f"""
         projects_and_groups:
-          {group}/*:
+          {group.full_path}/*:
             group_badges:
               pipeline-status:
                 name: "Group Badge"
@@ -16,14 +17,15 @@ class TestGroupBadges:
         """
         run_gitlabform(config, group)
 
-        badges = gitlab.get_group_badges(group)
+        badges = group.badges.list()
         assert len(badges) == 1
-        assert badges[0]["name"] == "Group Badge"
+        assert badges[0].name == "Group Badge"
 
-    def test__badges_delete(self, gitlab, group):
+    def test__badges_delete(self, group):
+
         config = f"""
         projects_and_groups:
-          {group}/*:
+          {group.full_path}/*:
             group_badges:
               pipeline-status:
                 name: "Group Badge"
@@ -32,13 +34,13 @@ class TestGroupBadges:
         """
         run_gitlabform(config, group)
 
-        badges = gitlab.get_group_badges(group)
+        badges = group.badges.list()
         assert len(badges) == 1
-        assert badges[0]["name"] == "Group Badge"
+        assert badges[0].name == "Group Badge"
 
         config = f"""
         projects_and_groups:
-          {group}/*:
+          {group.full_path}/*:
             group_badges:
               pipeline-status:
                 name: "Group Badge"
@@ -46,13 +48,14 @@ class TestGroupBadges:
         """
         run_gitlabform(config, group)
 
-        badges = gitlab.get_group_badges(group)
+        badges = group.badges.list()
         assert len(badges) == 0
 
-    def test__badges_update(self, gitlab, group):
+    def test__badges_update(self, group):
+
         config = f"""
         projects_and_groups:
-          {group}/*:
+          {group.full_path}/*:
             group_badges:
               pipeline-status:
                 name: "Group Badge"
@@ -61,13 +64,13 @@ class TestGroupBadges:
         """
         run_gitlabform(config, group)
 
-        badges = gitlab.get_group_badges(group)
+        badges = group.badges.list()
         assert len(badges) == 1
-        assert badges[0]["link_url"].endswith("foo")
+        assert badges[0].link_url.endswith("foo")
 
         config = f"""
         projects_and_groups:
-          {group}/*:
+          {group.full_path}/*:
             group_badges:
               pipeline-status:
                 name: "Group Badge"
@@ -76,14 +79,15 @@ class TestGroupBadges:
         """
         run_gitlabform(config, group)
 
-        badges = gitlab.get_group_badges(group)
+        badges = group.badges.list()
         assert len(badges) == 1
-        assert badges[0]["link_url"].endswith("bar")
+        assert badges[0].link_url.endswith("bar")
 
-    def test__badges_update_choose_the_right_one(self, gitlab, group):
+    def test__badges_update_choose_the_right_one(self, group):
+
         config = f"""
         projects_and_groups:
-          {group}/*:
+          {group.full_path}/*:
             group_badges:
               pipeline-status:
                 name: "Group Badge"
@@ -96,12 +100,12 @@ class TestGroupBadges:
         """
         run_gitlabform(config, group)
 
-        badges = gitlab.get_group_badges(group)
+        badges = group.badges.list()
         assert len(badges) == 2
 
         config = f"""
         projects_and_groups:
-          {group}/*:
+          {group.full_path}/*:
             group_badges:
               a_different_key:
                 name: "Group Badge 2"
@@ -113,13 +117,13 @@ class TestGroupBadges:
         """
         run_gitlabform(config, group)
 
-        badges = gitlab.get_group_badges(group)
+        badges = group.badges.list()
         assert len(badges) == 1
 
         for badge in badges:
-            if badge["name"] == "Group Badge 2":
-                assert badge["link_url"].endswith("foobar")
-                assert badge["image_url"].endswith("foobar")
+            if badge.name == "Group Badge 2":
+                assert badge.link_url.endswith("foobar")
+                assert badge.image_url.endswith("foobar")
             else:
-                assert not badge["link_url"].endswith("foobar")
-                assert not badge["image_url"].endswith("foobar")
+                assert not badge.link_url.endswith("foobar")
+                assert not badge.image_url.endswith("foobar")

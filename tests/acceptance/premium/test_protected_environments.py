@@ -3,11 +3,10 @@ import pytest
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform, gl
 
+pytestmark = pytest.mark.requires_license
+
 
 class TestProtectedEnvironments:
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__protect_a_repository_environment(
         self, gitlab, group_and_project, make_user
     ) -> str:
@@ -36,9 +35,6 @@ class TestProtectedEnvironments:
 
         return config
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__add_user_to_protected_environment(
         self, gitlab, group_and_project, make_user
     ) -> str:
@@ -63,9 +59,6 @@ class TestProtectedEnvironments:
 
         return config
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__remove_user_from_protected_environment(
         self, gitlab, group_and_project, make_user
     ) -> str:
@@ -87,9 +80,6 @@ class TestProtectedEnvironments:
 
         return config
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__protect_a_second_repository_environment(
         self, gitlab, group_and_project, make_user
     ) -> str:
@@ -122,9 +112,6 @@ class TestProtectedEnvironments:
 
         return config
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__unprotect_environment(self, gitlab, group_and_project, make_user):
         self.test__protect_a_second_repository_environment(
             gitlab, group_and_project, make_user

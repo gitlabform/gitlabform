@@ -99,10 +99,6 @@ class GitLabCore:
         result = self.get_project(project_and_group)
         return str(result["id"])
 
-    def has_no_license(self):
-        license = self._make_requests_to_api("license")
-        return not license or license["expired"]
-
     def _make_requests_to_api(
         self,
         path_as_format_string,

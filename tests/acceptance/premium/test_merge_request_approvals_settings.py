@@ -2,11 +2,10 @@ import pytest
 
 from tests.acceptance import run_gitlabform, gl
 
+pytestmark = pytest.mark.requires_license
+
 
 class TestMergeRequestApprovalsSettings:
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__edit_settings(self, gitlab, group_and_project, make_user):
         config = f"""
         projects_and_groups:
@@ -46,9 +45,6 @@ class TestMergeRequestApprovalsSettings:
         assert settings["disable_overriding_approvers_per_merge_request"] is False
         assert settings["merge_requests_author_approval"] is True
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__fail(self, gitlab, group_and_project, make_user):
         config = f"""
         projects_and_groups:

@@ -120,11 +120,6 @@ class GitLabGroups(GitLabCore):
             "groups/%s", project_and_group_name, "PUT", group_settings
         )
 
-    def get_group_shared_with(self, group):
-        group = self.get_group_case_insensitive(group)
-
-        return group["shared_with_groups"]
-
     def add_share_to_group(
         self, group, share_with_group_name, group_access, expires_at=None
     ):

@@ -7,34 +7,35 @@ from tests.acceptance import (
 
 
 class TestMembers:
-    def test__add_user(self, gitlab, group_and_project, three_members, outsider_user):
-        members_before = gitlab.get_project_members(group_and_project)
+    def test__add_user(self, project, three_members, outsider_user):
+        members_before = project.members.list()
         assert len(members_before) > 0
 
-        members_usernames_before = [member["username"] for member in members_before]
-        assert outsider_user not in members_usernames_before
+        members_usernames_before = [member.username for member in members_before]
+        assert outsider_user.username not in members_usernames_before
 
         add_users = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             members:
               users:
-                {outsider_user}: # new user
+                {outsider_user.username}: # new user
                   access_level: {AccessLevel.DEVELOPER.value}
         """
 
-        run_gitlabform(add_users, group_and_project)
+        run_gitlabform(add_users, project)
 
-        members = gitlab.get_project_members(group_and_project)
+        members = project.members.list()
         assert len(members) == len(members_before) + 1
 
-        members_usernames = [member["username"] for member in members]
-        assert outsider_user in members_usernames
+        members_usernames = [member.username for member in members]
+        assert outsider_user.username in members_usernames
 
-    def test__no_groups_and_no_users(self, gitlab, group_and_project):
+    def test__no_groups_and_no_users(self, project):
+
         config_with_error = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             members:
               # there should be a sub-key 'users' here, not directly a user
               some_user1: 
@@ -42,30 +43,30 @@ class TestMembers:
         """
 
         with pytest.raises(SystemExit):
-            run_gitlabform(config_with_error, group_and_project)
+            run_gitlabform(config_with_error, project)
 
     def test__add_user_with_access_level_names(
-        self, gitlab, group_and_project, three_members, outsider_user
+        self, project, three_members, outsider_user
     ):
-        members_before = gitlab.get_project_members(group_and_project)
+        members_before = project.members.list()
         assert len(members_before) > 0
 
-        members_usernames_before = [member["username"] for member in members_before]
-        assert outsider_user not in members_usernames_before
+        members_usernames_before = [member.username for member in members_before]
+        assert outsider_user.username not in members_usernames_before
 
         add_users = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 members:
                   users:
-                    {outsider_user}: # new user
+                    {outsider_user.username}: # new user
                       access_level: maintainer
             """
 
-        run_gitlabform(add_users, group_and_project)
+        run_gitlabform(add_users, project)
 
-        members = gitlab.get_project_members(group_and_project)
+        members = project.members.list()
         assert len(members) == len(members_usernames_before) + 1
 
-        members_usernames = [member["username"] for member in members]
-        assert outsider_user in members_usernames
+        members_usernames = [member.username for member in members]
+        assert outsider_user.username in members_usernames

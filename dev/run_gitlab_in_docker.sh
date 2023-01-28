@@ -78,7 +78,7 @@ fi
 cecho b "Starting GitLab..."
 # run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
 docker run --detach \
-    --hostname gitlab.foobar.com \
+    --hostname localhost \
     --env GITLAB_OMNIBUS_CONFIG="$gitlab_omnibus_config" \
     --publish 443:443 --publish 80:80 --publish 2022:22 \
     --name gitlab \

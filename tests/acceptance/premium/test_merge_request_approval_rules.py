@@ -3,6 +3,8 @@ import pytest
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform, gl
 
+pytestmark = pytest.mark.requires_license
+
 
 @pytest.fixture(scope="function")
 def group_with_one_owner_and_two_developers(gitlab, other_group, users):
@@ -26,9 +28,6 @@ def group_with_one_owner_and_two_developers(gitlab, other_group, users):
 
 
 class TestMergeRequestApprovers:
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__add_single_rule(self, gitlab, group_and_project, make_user):
         user1 = make_user(AccessLevel.DEVELOPER)
 
@@ -58,9 +57,6 @@ class TestMergeRequestApprovers:
                 found = True
         assert found
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__add_two_rules(
         self,
         gitlab,
@@ -124,9 +120,6 @@ class TestMergeRequestApprovers:
 
         assert first_found and second_found
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__enforce(
         self,
         gitlab,
@@ -193,9 +186,6 @@ class TestMergeRequestApprovers:
         assert rule["users"][0]["username"] == user1.name
         assert len(rule["groups"]) == 0
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__edit_rules(
         self,
         gitlab,
@@ -329,9 +319,6 @@ class TestMergeRequestApprovers:
 
         assert first_found and second_found
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__add_any_approver_rule(self, gitlab, group_and_project, make_user):
         config = f"""
             projects_and_groups:

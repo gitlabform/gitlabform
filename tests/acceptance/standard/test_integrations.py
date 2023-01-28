@@ -1,20 +1,20 @@
 import pytest
 
-from gitlabform.gitlab.core import NotFoundException
-from tests.acceptance import run_gitlabform
+from gitlab import GitlabGetError
+from tests.acceptance import allowed_codes, run_gitlabform
 
 
 @pytest.fixture(scope="function")
-def integrations(request, gitlab, group_and_project):
+def integrations(project):
+
     integrations = ["asana", "slack", "redmine", "jira", "mattermost"]
 
-    def fin():
-        # disable test integrations
-        for integration in integrations:
-            gitlab.delete_integration(group_and_project, integration)
+    yield integrations
 
-    request.addfinalizer(fin)
-    return integrations  # provide fixture value
+    # disable test integrations
+    for integration in integrations:
+        with allowed_codes(404):
+            project.integrations.delete(integration)
 
 
 class TestIntegrations:
@@ -22,17 +22,17 @@ class TestIntegrations:
     # then we could end up with running this test after another, and a integration created
     # and then deleted is a different entity in GitLab than a never created one (!).
     # the first one exists but has "active" field set to False, the other throws 404
-    def test__if_they_are_not_set_by_default(self, gitlab, group, other_project):
-        group_and_project = f"{group}/{other_project}"
+    def test__if_they_are_not_set_by_default(self, other_project):
 
         for integration_name in ["asana", "slack", "redmine", "jira"]:
-            with pytest.raises(NotFoundException):
-                gitlab.get_integration(group_and_project, integration_name)
+            with pytest.raises(GitlabGetError):
+                other_project.integrations.get(integration_name)
 
-    def test__if_delete_works(self, gitlab, group_and_project):
+    def test__if_delete_works(self, project):
+
         config_integrations = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               jira:
                 url: http://foo.bar.com
@@ -53,15 +53,15 @@ class TestIntegrations:
                 push_events: true
         """
 
-        run_gitlabform(config_integrations, group_and_project)
+        run_gitlabform(config_integrations, project)
 
         for integration_name in ["jira", "asana", "slack", "redmine"]:
-            integration = gitlab.get_integration(group_and_project, integration_name)
-            assert integration["active"] is True
+            integration = project.integrations.get(integration_name)
+            assert integration.active is True
 
         config_integrations_delete = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               jira:
                 delete: true
@@ -69,16 +69,17 @@ class TestIntegrations:
                 delete: true
         """
 
-        run_gitlabform(config_integrations_delete, group_and_project)
+        run_gitlabform(config_integrations_delete, project)
 
         for integration_name in ["jira", "slack"]:
-            integration = gitlab.get_integration(group_and_project, integration_name)
-            assert integration["active"] is False
+            integration = project.integrations.get(integration_name)
+            assert integration.active is False
 
-    def test__if_push_events_true_works(self, gitlab, group_and_project):
+    def test__if_push_events_true_works(self, project):
+
         config_integration_push_events_true = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               asana:
                 api_key: foo
@@ -93,77 +94,21 @@ class TestIntegrations:
                 push_events: true
         """
 
-        run_gitlabform(config_integration_push_events_true, group_and_project)
+        run_gitlabform(config_integration_push_events_true, project)
 
         integrations = []
         for integration_name in ["asana", "slack", "redmine"]:
-            integration = gitlab.get_integration(group_and_project, integration_name)
+            integration = project.integrations.get(integration_name)
             integrations.append(integration)
 
-        assert all([integration["active"] for integration in integrations]) is True
-        assert all([integration["push_events"] for integration in integrations]) is True
+        assert all([integration.active for integration in integrations]) is True
+        assert all([integration.push_events for integration in integrations]) is True
 
-    def test__if_push_events_false_works(self, gitlab, group_and_project):
-        config_integration_push_events_false = f"""
-        projects_and_groups:
-          {group_and_project}:
-            integrations:
-              asana:
-                api_key: foo
-                push_events: false # changed
-              slack:
-                webhook: http://foo.bar.com
-                push_events: false # changed
-              redmine:
-                new_issue_url: http://foo.bar.com
-                project_url: http://foo.bar.com
-                issues_url: http://foo.bar.com
-                push_events: false # changed
-        """
-
-        run_gitlabform(config_integration_push_events_false, group_and_project)
-
-        integrations = []
-        for integration_name in ["asana", "slack", "redmine"]:
-            integration = gitlab.get_integration(group_and_project, integration_name)
-            integrations.append(integration)
-
-        assert all([integration["active"] for integration in integrations]) is True
-        assert (
-            all([integration["push_events"] for integration in integrations]) is False
-        )
-
-    def test__if_push_events_change_works(self, gitlab, group_and_project):
-        config_integration_push_events_true = f"""
-        projects_and_groups:
-          {group_and_project}:
-            integrations:
-              asana:
-                api_key: foo
-                push_events: true
-              slack:
-                webhook: http://foo.bar.com
-                push_events: true
-              redmine:
-                new_issue_url: http://foo.bar.com
-                project_url: http://foo.bar.com
-                issues_url: http://foo.bar.com
-                push_events: true
-        """
-
-        run_gitlabform(config_integration_push_events_true, group_and_project)
-
-        integrations = []
-        for integration_name in ["asana", "slack", "redmine"]:
-            integration = gitlab.get_integration(group_and_project, integration_name)
-            integrations.append(integration)
-
-        assert all([integration["active"] for integration in integrations]) is True
-        assert all([integration["push_events"] for integration in integrations]) is True
+    def test__if_push_events_false_works(self, project):
 
         config_integration_push_events_false = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               asana:
                 api_key: foo
@@ -178,22 +123,77 @@ class TestIntegrations:
                 push_events: false # changed
         """
 
-        run_gitlabform(config_integration_push_events_false, group_and_project)
+        run_gitlabform(config_integration_push_events_false, project)
 
         integrations = []
         for integration_name in ["asana", "slack", "redmine"]:
-            integration = gitlab.get_integration(group_and_project, integration_name)
+            integration = project.integrations.get(integration_name)
             integrations.append(integration)
 
-        assert all([integration["active"] for integration in integrations]) is True
-        assert (
-            all([integration["push_events"] for integration in integrations]) is False
-        )
+        assert all([integration.active for integration in integrations]) is True
+        assert all([integration.push_events for integration in integrations]) is False
 
-    def test__if_jira_commit_events_true_works(self, gitlab, group_and_project):
+    def test__if_push_events_change_works(self, project):
+
+        config_integration_push_events_true = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            integrations:
+              asana:
+                api_key: foo
+                push_events: true
+              slack:
+                webhook: http://foo.bar.com
+                push_events: true
+              redmine:
+                new_issue_url: http://foo.bar.com
+                project_url: http://foo.bar.com
+                issues_url: http://foo.bar.com
+                push_events: true
+        """
+
+        run_gitlabform(config_integration_push_events_true, project)
+
+        integrations = []
+        for integration_name in ["asana", "slack", "redmine"]:
+            integration = project.integrations.get(integration_name)
+            integrations.append(integration)
+
+        assert all([integration.active for integration in integrations]) is True
+        assert all([integration.push_events for integration in integrations]) is True
+
+        config_integration_push_events_false = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            integrations:
+              asana:
+                api_key: foo
+                push_events: false # changed
+              slack:
+                webhook: http://foo.bar.com
+                push_events: false # changed
+              redmine:
+                new_issue_url: http://foo.bar.com
+                project_url: http://foo.bar.com
+                issues_url: http://foo.bar.com
+                push_events: false # changed
+        """
+
+        run_gitlabform(config_integration_push_events_false, project)
+
+        integrations = []
+        for integration_name in ["asana", "slack", "redmine"]:
+            integration = project.integrations.get(integration_name)
+            integrations.append(integration)
+
+        assert all([integration.active for integration in integrations]) is True
+        assert all([integration.push_events for integration in integrations]) is False
+
+    def test__if_jira_commit_events_true_works(self, project):
+
         config_integration_jira_commit_events_true = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               jira:
                 url: http://foo.bar.com
@@ -203,16 +203,17 @@ class TestIntegrations:
                 commit_events: true
         """
 
-        run_gitlabform(config_integration_jira_commit_events_true, group_and_project)
+        run_gitlabform(config_integration_jira_commit_events_true, project)
 
-        integration = gitlab.get_integration(group_and_project, "jira")
-        assert integration["active"] is True
-        assert integration["commit_events"] is True
+        integration = project.integrations.get("jira")
+        assert integration.active is True
+        assert integration.commit_events is True
 
-    def test__if_jira_commit_events_false_works(self, gitlab, group_and_project):
+    def test__if_jira_commit_events_false_works(self, project):
+
         config_integration_jira_commit_events_false = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               jira:
                 url: http://foo.bar.com
@@ -222,16 +223,17 @@ class TestIntegrations:
                 commit_events: false
         """
 
-        run_gitlabform(config_integration_jira_commit_events_false, group_and_project)
+        run_gitlabform(config_integration_jira_commit_events_false, project)
 
-        integration = gitlab.get_integration(group_and_project, "jira")
-        assert integration["active"] is True
-        assert integration["commit_events"] is False
+        integration = project.integrations.get("jira")
+        assert integration.active is True
+        assert integration.commit_events is False
 
-    def test__if_change_works(self, gitlab, group_and_project):
+    def test__if_change_works(self, project):
+
         config_integration_jira_commit_events_true = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               jira:
                 url: http://foo.bar.com
@@ -241,15 +243,15 @@ class TestIntegrations:
                 commit_events: true
         """
 
-        run_gitlabform(config_integration_jira_commit_events_true, group_and_project)
+        run_gitlabform(config_integration_jira_commit_events_true, project)
 
-        integration = gitlab.get_integration(group_and_project, "jira")
-        assert integration["active"] is True
-        assert integration["commit_events"] is True
+        integration = project.integrations.get("jira")
+        assert integration.active is True
+        assert integration.commit_events is True
 
         config_integration_jira_commit_events_false = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               jira:
                 url: http://foo.bar.com
@@ -259,16 +261,17 @@ class TestIntegrations:
                 commit_events: false
         """
 
-        run_gitlabform(config_integration_jira_commit_events_false, group_and_project)
+        run_gitlabform(config_integration_jira_commit_events_false, project)
 
-        integration = gitlab.get_integration(group_and_project, "jira")
-        assert integration["active"] is True
-        assert integration["commit_events"] is False
+        integration = project.integrations.get("jira")
+        assert integration.active is True
+        assert integration.commit_events is False
 
-    def test__mattermost_confidential_issues_events(self, gitlab, group_and_project):
+    def test__mattermost_confidential_issues_events(self, project):
+
         config_integration_mattermost_confidential_issues_events = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             integrations:
               mattermost:
                 active: true
@@ -288,8 +291,8 @@ class TestIntegrations:
         """
 
         run_gitlabform(
-            config_integration_mattermost_confidential_issues_events, group_and_project
+            config_integration_mattermost_confidential_issues_events, project
         )
 
-        integration = gitlab.get_integration(group_and_project, "mattermost")
-        assert integration["confidential_issues_events"] is False
+        integration = project.integrations.get("mattermost")
+        assert integration.confidential_issues_events is False

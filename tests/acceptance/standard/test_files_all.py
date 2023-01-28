@@ -4,12 +4,10 @@ from tests.acceptance import run_gitlabform
 class TestFilesAll:
     # this test should be in a separate class than other test files as it changes too
     # much for a reasonable setup and cleanup using fixtures
-    def test__set_file_all_branches(
-        self, gitlab, group_and_project, branch, other_branch
-    ):
+    def test__set_file_all_branches(self, project, branch, other_branch):
         set_file_all_branches = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: true
@@ -24,19 +22,19 @@ class TestFilesAll:
                 branches: all
                 content: "Content for all branches"
         """
-        run_gitlabform(set_file_all_branches, group_and_project)
+        run_gitlabform(set_file_all_branches, project.path_with_namespace)
 
         for some_branch in [
             "main",
             branch,
             other_branch,
         ]:
-            file_content = gitlab.get_file(group_and_project, some_branch, "README.md")
-            assert file_content == "Content for all branches"
+            project_file = project.files.get(ref=some_branch, file_path="README.md")
+            assert project_file.decode().decode("utf-8") == "Content for all branches"
 
         # check that this branch remains unprotected
         for some_branch in [
             other_branch,
         ]:
-            some_branch = gitlab.get_branch(group_and_project, some_branch)
-            assert some_branch["protected"] is False
+            some_branch = project.branches.get(some_branch)
+            assert some_branch.protected is False

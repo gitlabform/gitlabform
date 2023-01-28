@@ -4,12 +4,11 @@ from tests.acceptance import run_gitlabform, DEFAULT_README
 class TestFilesProtected:
     # this test should be in a separate class than other test files as it changes too
     # much for a reasonable setup and cleanup using fixtures
-    def test__set_file_protected_branches(
-        self, gitlab, group_and_project, branch, other_branch
-    ):
+    def test__set_file_protected_branches(self, project, branch, other_branch):
+
         set_file_protected_branches = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               main:
                 protected: true
@@ -30,19 +29,22 @@ class TestFilesProtected:
                 content: "Content for protected branches only"
         """
 
-        run_gitlabform(set_file_protected_branches, group_and_project)
+        run_gitlabform(set_file_protected_branches, project.path_with_namespace)
 
         for some_branch in [
             "main",  # main branch is protected by default
             other_branch,
         ]:
-            file_content = gitlab.get_file(group_and_project, some_branch, "README.md")
-            assert file_content == "Content for protected branches only"
-            some_branch = gitlab.get_branch(group_and_project, some_branch)
-            assert some_branch["protected"] is True
+            project_file = project.files.get(ref=some_branch, file_path="README.md")
+            assert (
+                project_file.decode().decode("utf-8")
+                == "Content for protected branches only"
+            )
+            some_branch = project.branches.get(some_branch)
+            assert some_branch.protected is True
 
         for some_branch in [branch]:
-            file_content = gitlab.get_file(group_and_project, some_branch, "README.md")
-            assert file_content == DEFAULT_README
-            some_branch = gitlab.get_branch(group_and_project, some_branch)
-            assert some_branch["protected"] is False
+            project_file = project.files.get(ref=some_branch, file_path="README.md")
+            assert project_file.decode().decode("utf-8") == DEFAULT_README
+            some_branch = project.branches.get(some_branch)
+            assert some_branch.protected is False

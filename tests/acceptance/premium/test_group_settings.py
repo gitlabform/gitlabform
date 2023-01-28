@@ -2,11 +2,10 @@ import pytest
 
 from tests.acceptance import run_gitlabform, gl
 
+pytestmark = pytest.mark.requires_license
+
 
 class TestGroupSettings:
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__edit_new_setting_premium(self, gitlab, project, group):
         project_id = gitlab._get_project_id(f"{group}/{project}")
 

@@ -3,87 +3,96 @@ from tests.acceptance import (
 )
 
 
+def get_project_badges(project):
+    badges = project.badges.list(iterator=True)
+    return [badge for badge in badges if badge.kind == "project"]
+
+
 class TestBadges:
-    def test__badges_add(self, gitlab, group_and_project):
+    def test__badges_add(self, project):
+
         config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             badges:
               pipeline-status:
                 name: "Project Badge"
                 link_url: "https://gitlab.example.com/%{{project_path}}/-/commits/%{{default_branch}}/foo"
                 image_url: "https://gitlab.example.com/%{{project_path}}/badges/%{{default_branch}}/pipeline.svg"
         """
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project)
         assert len(badges) == 1
-        assert badges[0]["name"] == "Project Badge"
+        assert badges[0].name == "Project Badge"
 
-    def test__badges_delete(self, gitlab, group_and_project):
+    def test__badges_delete(self, project):
+
         config = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 badges:
                   pipeline-status:
                     name: "Project Badge"
                     link_url: "https://gitlab.example.com/%{{project_path}}/-/commits/%{{default_branch}}/foo"
                     image_url: "https://gitlab.example.com/%{{project_path}}/badges/%{{default_branch}}/pipeline.svg"
             """
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project)
         assert len(badges) == 1
-        assert badges[0]["name"] == "Project Badge"
+        assert badges[0].name == "Project Badge"
 
         config = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 badges:
                   pipeline-status:
                     name: "Project Badge"
                     delete: true
             """
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project)
         assert len(badges) == 0
 
-    def test__badges_update(self, gitlab, group_and_project):
+    def test__badges_update(self, project):
+
         config = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 badges:
                   pipeline-status:
                     name: "Project Badge"
                     link_url: "https://gitlab.example.com/foo"
                     image_url: "https://gitlab.example.com/pipeline.svg"
             """
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project)
         assert len(badges) == 1
-        assert badges[0]["link_url"].endswith("foo")
+        assert badges[0].link_url.endswith("foo")
 
         config = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 badges:
                   pipeline-status:
                     name: "Project Badge"
                     link_url: "https://gitlab.example.com/bar"
                     image_url: "https://gitlab.example.com/pipeline.svg"
             """
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project)
         assert len(badges) == 1
-        assert badges[0]["link_url"].endswith("bar")
+        assert badges[0].link_url.endswith("bar")
 
-    def test__badges_update_choose_the_right_one(self, gitlab, group_and_project):
+    def test__badges_update_choose_the_right_one(self, project):
+
         config = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 badges:
                   pipeline-status:
                     name: "Project Badge"
@@ -94,14 +103,14 @@ class TestBadges:
                     link_url: "https://gitlab.example.com/second"
                     image_url: "https://gitlab.example.com/second" 
             """
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project)
         assert len(badges) == 2
 
         config = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 badges:
                   a_different_key:
                     name: "Project Badge 2"
@@ -111,25 +120,24 @@ class TestBadges:
                     name: "Project Badge"
                     delete: true
             """
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project)
         assert len(badges) == 1
 
         for badge in badges:
-            if badge["name"] == "Project Badge 2":
-                assert badge["link_url"].endswith("foobar")
-                assert badge["image_url"].endswith("foobar")
+            if badge.name == "Project Badge 2":
+                assert badge.link_url.endswith("foobar")
+                assert badge.image_url.endswith("foobar")
             else:
-                assert not badge["link_url"].endswith("foobar")
-                assert not badge["image_url"].endswith("foobar")
+                assert not badge.link_url.endswith("foobar")
+                assert not badge.image_url.endswith("foobar")
 
-    def test__badges_enforce(self, gitlab, group_and_project_for_function):
-        group_and_project = group_and_project_for_function
+    def test__badges_enforce(self, project_for_function):
 
         config = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project_for_function.path_with_namespace}:
                 badges:
                   pipeline-status:
                     name: "Project Badge"
@@ -140,14 +148,14 @@ class TestBadges:
                     link_url: "https://gitlab.example.com/second"
                     image_url: "https://gitlab.example.com/second" 
             """
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project_for_function.path_with_namespace)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project_for_function)
         assert len(badges) == 2
 
         config2 = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project_for_function.path_with_namespace}:
                 badges:
                   another:
                     name: "Project Badge 2"
@@ -155,7 +163,7 @@ class TestBadges:
                     image_url: "https://gitlab.example.com/foobar"
                   enforce: true
             """
-        run_gitlabform(config2, group_and_project)
+        run_gitlabform(config2, project_for_function.path_with_namespace)
 
-        badges = gitlab.get_project_badges(group_and_project)
+        badges = get_project_badges(project_for_function)
         assert len(badges) == 1

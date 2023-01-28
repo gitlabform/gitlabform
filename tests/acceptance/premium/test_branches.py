@@ -4,11 +4,10 @@ from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform, gl
 
+pytestmark = pytest.mark.requires_license
+
 
 class TestBranches:
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__code_owners_approval(self, gitlab, group_and_project, branch):
         try:
             branch_access_levels = gitlab.get_branch_access_levels(
@@ -40,9 +39,6 @@ class TestBranches:
         )
         assert branch_access_levels["code_owner_approval_required"] is True
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__allow_user_ids(
         self,
         gitlab,
@@ -95,9 +91,6 @@ class TestBranches:
             ]
         )
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__allow_more_than_one_user_by_ids(
         self,
         gitlab,

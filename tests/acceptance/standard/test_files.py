@@ -1,30 +1,32 @@
 import os
 import pytest
-import re
+
+from gitlab import GitlabGetError
 
 from gitlabform.gitlab import AccessLevel
-from gitlabform.gitlab.core import NotFoundException
-from tests.acceptance import run_gitlabform, DEFAULT_README
+from tests.acceptance import (
+    get_only_branch_access_levels,
+    run_gitlabform,
+    DEFAULT_README,
+)
 
 
 @pytest.fixture(scope="function")
-def no_access_branch(request, gitlab, group_and_project):
-    gitlab.create_branch(group_and_project, "no_access_branch", "main")
-    gitlab.protect_branch(
-        group_and_project,
-        "no_access_branch",
+def no_access_branch(project):
+    branch = project.branches.create({"branch": "no_access_branch", "ref": "main"})
+    protected_branch = project.protectedbranches.create(
         {
+            "name": "no_access_branch",
             "push_access_level": AccessLevel.NO_ACCESS.value,
             "merge_access_level": AccessLevel.NO_ACCESS.value,
             "unprotect_access_level": AccessLevel.MAINTAINER.value,
         },
     )
 
-    def fin():
-        gitlab.unprotect_branch(group_and_project, "no_access_branch")
-        gitlab.delete_branch(group_and_project, "no_access_branch")
+    yield branch
 
-    request.addfinalizer(fin)
+    protected_branch.delete()
+    branch.delete()
 
 
 @pytest.fixture(scope="class")
@@ -52,10 +54,11 @@ def file2(request):
 
 
 class TestFiles:
-    def test__set_file_specific_branch(self, gitlab, group_and_project, branch):
+    def test__set_file_specific_branch(self, project, branch):
+
         set_file_specific_branch = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: true
@@ -70,31 +73,30 @@ class TestFiles:
                 content: "Content for {branch} only"
         """
 
-        run_gitlabform(set_file_specific_branch, group_and_project)
+        run_gitlabform(set_file_specific_branch, project.path_with_namespace)
 
-        commit = gitlab.get_last_commit(group_and_project, branch)
+        the_branch = project.branches.get(branch)
         assert all(
-            [text in commit["message"] for text in ["Automated", "made by gitlabform"]]
+            [
+                text in the_branch.commit["message"]
+                for text in ["Automated", "made by gitlabform"]
+            ]
         )
 
-        file_content = gitlab.get_file(group_and_project, branch, "README.md")
-        assert file_content == f"Content for {branch} only"
+        project_file = project.files.get(ref=branch, file_path="README.md")
+        assert project_file.decode().decode("utf-8") == f"Content for {branch} only"
 
-        other_branch_file_content = gitlab.get_file(
-            group_and_project, "main", "README.md"
-        )
-        assert other_branch_file_content == DEFAULT_README
+        project_file = project.files.get(ref="main", file_path="README.md")
+        assert project_file.decode().decode("utf-8") == DEFAULT_README
 
         # check if main stays protected after the file update
-        the_branch = gitlab.get_branch(group_and_project, branch)
-        assert the_branch["protected"] is True
+        assert the_branch.protected is True
 
-    def test__set_file_strongly_protected_branch(
-        self, gitlab, group_and_project, no_access_branch
-    ):
+    def test__set_file_strongly_protected_branch(self, project, no_access_branch):
+
         set_file_specific_branch = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 branches:
                   no_access_branch:
                     protected: true
@@ -109,29 +111,27 @@ class TestFiles:
                     content: "Content for no_access_branch only"
             """
 
-        run_gitlabform(set_file_specific_branch, group_and_project)
+        run_gitlabform(set_file_specific_branch, project)
 
-        commit = gitlab.get_last_commit(group_and_project, "no_access_branch")
-        assert commit["message"] == "Automated change made by gitlabform"
+        branch = project.branches.get(no_access_branch.name)
+        assert branch.commit["message"] == "Automated change made by gitlabform"
 
-        file_content = gitlab.get_file(
-            group_and_project, "no_access_branch", "README.md"
+        project_file = project.files.get(ref="no_access_branch", file_path="README.md")
+        assert (
+            project_file.decode().decode("utf-8") == "Content for no_access_branch only"
         )
-        assert file_content == "Content for no_access_branch only"
 
-        other_branch_file_content = gitlab.get_file(
-            group_and_project, "main", "README.md"
-        )
-        assert other_branch_file_content == DEFAULT_README
+        project_file = project.files.get(ref="main", file_path="README.md")
+        assert project_file.decode().decode("utf-8") == DEFAULT_README
 
         # check if no_access_branch stays protected after the file update
-        branch = gitlab.get_branch(group_and_project, "no_access_branch")
-        assert branch["protected"] is True
+        assert branch.protected is True
 
-    def test__delete_file_specific_branch(self, gitlab, group_and_project, branch):
+    def test__delete_file_specific_branch(self, project, branch):
+
         set_file_specific_branch = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 branches:
                   {branch}:
                     protected: true
@@ -145,22 +145,23 @@ class TestFiles:
                     delete: true
             """
 
-        run_gitlabform(set_file_specific_branch, group_and_project)
+        run_gitlabform(set_file_specific_branch, project)
 
-        commit = gitlab.get_last_commit(group_and_project, branch)
-        assert commit["message"] == "Automated delete made by gitlabform"
+        the_branch = project.branches.get(branch)
+        assert the_branch.commit["message"] == "Automated delete made by gitlabform"
 
-        with pytest.raises(NotFoundException):
-            gitlab.get_file(group_and_project, branch, "README.md")
+        with pytest.raises(GitlabGetError):
+            project.files.get(ref=branch, file_path="README.md")
 
         # check if main stays protected after the file delete
-        the_branch = gitlab.get_branch(group_and_project, branch)
-        assert the_branch["protected"] is True
+        the_branch = project.branches.get(the_branch.name)
+        assert the_branch.protected is True
 
-    def test__custom_commit_message(self, gitlab, group_and_project, branch):
+    def test__custom_commit_message(self, project, branch):
+
         set_file_specific_branch = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: false
@@ -174,15 +175,16 @@ class TestFiles:
                 commit_message: "Preconfigured commit message"
         """
 
-        run_gitlabform(set_file_specific_branch, group_and_project)
+        run_gitlabform(set_file_specific_branch, project)
 
-        commit = gitlab.get_last_commit(group_and_project, branch)
-        assert commit["message"] == "Preconfigured commit message [skip ci]"
+        branch = project.branches.get(branch)
+        assert branch.commit["message"] == "Preconfigured commit message [skip ci]"
 
-    def test__set_file_protected_branches(self, gitlab, group_and_project, branch):
+    def test__set_file_protected_branches(self, project, branch):
+
         test_config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: true
@@ -198,10 +200,10 @@ class TestFiles:
                 content: foobar
         """
 
-        run_gitlabform(test_config, group_and_project)
+        run_gitlabform(test_config, project.path_with_namespace)
 
-        file_content = gitlab.get_file(group_and_project, branch, "anyfile1")
-        assert file_content == "foobar"
+        project_file = project.files.get(ref=branch, file_path="anyfile1")
+        assert project_file.decode().decode("utf-8") == "foobar"
 
         (
             push_access_levels,
@@ -209,19 +211,18 @@ class TestFiles:
             push_access_user_ids,
             merge_access_user_ids,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, branch)
+        ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-    def test__set_file_protected_branches_not_all_levels(
-        self, gitlab, group_and_project, branch
-    ):
+    def test__set_file_protected_branches_not_all_levels(self, project, branch):
+
         test_config = f"""
             projects_and_groups:
-              {group_and_project}:
+              {project.path_with_namespace}:
                 branches:
                   {branch}:
                     protected: true
@@ -237,10 +238,10 @@ class TestFiles:
                     content: barfoo
             """
 
-        run_gitlabform(test_config, group_and_project)
+        run_gitlabform(test_config, project.path_with_namespace)
 
-        file_content = gitlab.get_file(group_and_project, branch, "anyfile2")
-        assert file_content == "barfoo"
+        project_file = project.files.get(ref=branch, file_path="anyfile2")
+        assert project_file.decode().decode("utf-8") == "barfoo"
 
         (
             push_access_levels,
@@ -248,7 +249,7 @@ class TestFiles:
             push_access_user_ids,
             merge_access_user_ids,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, branch)
+        ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
@@ -257,10 +258,10 @@ class TestFiles:
         # according to https://docs.gitlab.com/ee/api/protected_branches.html#protect-repository-branches
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-    def test__set_file_with_chinese_characters(self, gitlab, group_and_project, branch):
+    def test__set_file_with_chinese_characters(self, project, branch):
         set_file_chinese_characters = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             files:
               "README.md":
                 overwrite: true
@@ -271,17 +272,18 @@ class TestFiles:
                     Hanzi (Simplified): 丏丅丙两
         """
 
-        run_gitlabform(set_file_chinese_characters, group_and_project)
+        run_gitlabform(set_file_chinese_characters, project)
 
-        file_content = gitlab.get_file(group_and_project, branch, "README.md")
-        assert file_content == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两\n"
+        file_content = project.files.get(ref=branch, file_path="README.md")
+        assert (
+            file_content.decode().decode("utf-8")
+            == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两\n"
+        )
 
-    def test__set_external_file_with_chinese_characters(
-        self, gitlab, group_and_project, branch, file
-    ):
+    def test__set_external_file_with_chinese_characters(self, project, branch, file):
         set_file_chinese_characters = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             files:
               "README.md":
                 overwrite: true
@@ -290,17 +292,18 @@ class TestFiles:
                 file: file.txt
         """
 
-        run_gitlabform(set_file_chinese_characters, group_and_project)
+        run_gitlabform(set_file_chinese_characters, project.path_with_namespace)
 
-        file_content = gitlab.get_file(group_and_project, branch, "README.md")
-        assert file_content == "Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁"
+        project_file = project.files.get(ref=branch, file_path="README.md")
+        assert (
+            project_file.decode().decode("utf-8")
+            == "Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁"
+        )
 
-    def test__set_external_file_with_utf8_characters(
-        self, gitlab, group_and_project, branch, file2
-    ):
+    def test__set_external_file_with_utf8_characters(self, project, branch, file2):
         set_file_chinese_characters = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             files:
               "README.md":
                 overwrite: true
@@ -309,7 +312,10 @@ class TestFiles:
                 file: file2.txt
         """
 
-        run_gitlabform(set_file_chinese_characters, group_and_project)
+        run_gitlabform(set_file_chinese_characters, project.path_with_namespace)
 
-        file_content = gitlab.get_file(group_and_project, branch, "README.md")
-        assert file_content == "LICENSE\n\n“This is a license file”\n"
+        project_file = project.files.get(ref=branch, file_path="README.md")
+        assert (
+            project_file.decode().decode("utf-8")
+            == "LICENSE\n\n“This is a license file”\n"
+        )
