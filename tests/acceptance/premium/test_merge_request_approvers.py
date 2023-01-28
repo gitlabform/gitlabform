@@ -369,9 +369,6 @@ class TestMergeRequestApprovers:
         assert len(rule["groups"]) == 1
         assert rule["groups"][0]["name"] == group_with_just_owner
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
     def test__inheritance(
         self,
         gitlab,
