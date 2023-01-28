@@ -224,10 +224,11 @@ class TestGroupMembersUsers:
         members_usernames = [member.username for member in members]
         assert members_usernames.count(user_to_add) == 1
 
-    def test__root_as_the_sole_owner(self, gitlab, group):
+    def test__root_as_the_sole_owner(self, group):
+
         config = f"""
             projects_and_groups:
-              {group}/*:
+              {group.full_path}/*:
                 group_members:
                   users:
                     root:
@@ -237,8 +238,8 @@ class TestGroupMembersUsers:
 
         run_gitlabform(config, group)
 
-        members = gitlab.get_group_members(group)
+        members = group.members.list()
         assert len(members) == 1
 
-        assert members[0]["username"] == "root"
-        assert members[0]["access_level"] == AccessLevel.OWNER.value
+        assert members[0].username == "root"
+        assert members[0].access_level == AccessLevel.OWNER.value

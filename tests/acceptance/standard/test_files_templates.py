@@ -104,7 +104,7 @@ class TestFilesTemplates:
                 branches: all
                 template: no
                 content: |
-                  This is a text containing literals: {{ group }}/{{ project }}
+                  This is a text containing literals: {{{{ group }}}}/{{{{ project }}}}
         """
 
         run_gitlabform(config, project.path_with_namespace)

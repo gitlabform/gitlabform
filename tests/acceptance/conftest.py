@@ -248,7 +248,7 @@ def outsider_user(gl):
 
 
 @pytest.fixture(scope="function")
-def public_ssh_key(gitlab):
+def public_ssh_key():
     key = rsa.generate_private_key(
         backend=crypto_default_backend(), public_exponent=65537, key_size=2048
     )

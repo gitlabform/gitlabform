@@ -56,7 +56,7 @@ class TestDeployKeys:
         assert not any([key.title == "some_key" for key in deploy_keys])
 
     def test__deploy_key_add_delete_with_enforce(
-        self, gitlab, project_for_function, public_ssh_key
+        self, project_for_function, public_ssh_key
     ):
         config_add = f"""
         projects_and_groups:
