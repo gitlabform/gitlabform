@@ -28,7 +28,6 @@ def tags(request, gitlab, group_and_project):
 
 class TestTags:
     def test__protect_single_tag(self, gitlab, group_and_project, tags):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:
@@ -56,7 +55,6 @@ class TestTags:
         )
 
     def test__protect_wildcard_tag(self, gitlab, group_and_project, tags):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:
@@ -81,7 +79,6 @@ class TestTags:
         )
 
     def test__unprotect_the_same_tag(self, gitlab, group_and_project, tags):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:
@@ -123,7 +120,6 @@ class TestTags:
         assert len(protected_tags) == 0
 
     def test__protect_single_tag_no_access(self, gitlab, group_and_project, tags):
-
         config = f"""
             projects_and_groups:
               {group_and_project}:

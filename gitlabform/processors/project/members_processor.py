@@ -12,7 +12,6 @@ class MembersProcessor(AbstractProcessor):
         super().__init__("members", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-
         enforce_members = configuration.get("members|enforce", False)
 
         groups = configuration.get("members|groups", {})
@@ -34,7 +33,6 @@ class MembersProcessor(AbstractProcessor):
         self, project_and_group: str, groups: dict, enforce_members: bool
     ):
         if groups:
-
             verbose("Processing groups as members...")
 
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
@@ -74,7 +72,6 @@ class MembersProcessor(AbstractProcessor):
                     )
 
         if enforce_members:
-
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
 
             groups_in_config = groups.keys()
@@ -93,7 +90,6 @@ class MembersProcessor(AbstractProcessor):
         self, project_and_group: str, users: dict, enforce_members: bool
     ):
         if users:
-
             verbose("Processing users as members...")
 
             current_members = self.gitlab.get_members_from_project(project_and_group)
@@ -137,7 +133,6 @@ class MembersProcessor(AbstractProcessor):
                     )
 
         if enforce_members:
-
             current_members = self.gitlab.get_members_from_project(project_and_group)
 
             users_in_config = users.keys()

@@ -6,7 +6,6 @@ from tests.acceptance import run_gitlabform
 
 @pytest.fixture(scope="class")
 def schedules(gitlab, group_and_project):
-
     another_branch = "scheduled/new-feature"
     gitlab.create_branch(group_and_project, another_branch, "main")
 
@@ -42,7 +41,6 @@ def schedules(gitlab, group_and_project):
 
 class TestSchedules:
     def test__add_new_schedule(self, gitlab, group_and_project, schedules):
-
         add_schedule = f"""
         projects_and_groups:
           {group_and_project}:
@@ -69,7 +67,6 @@ class TestSchedules:
     def test__add_new_schedule_with_mandatory_fields_only(
         self, gitlab, group_and_project, schedules
     ):
-
         add_schedule_mandatory_fields_only = f"""
         projects_and_groups:
           {group_and_project}:
@@ -92,7 +89,6 @@ class TestSchedules:
         assert schedule["active"] is True
 
     def test__set_schedule_variables(self, gitlab, group_and_project, schedules):
-
         add_schedule_with_variables = f"""
         projects_and_groups:
           {group_and_project}:
@@ -131,7 +127,6 @@ class TestSchedules:
         assert schedule["variables"][1]["value"] == "value987"
 
     def test__update_existing_schedule(self, gitlab, group_and_project, schedules):
-
         edit_schedule = f"""
         projects_and_groups:
           {group_and_project}:
@@ -156,7 +151,6 @@ class TestSchedules:
         assert schedule["active"] is False
 
     def test__replace_existing_schedules(self, gitlab, group_and_project, schedules):
-
         replace_schedules = f"""
         projects_and_groups:
           {group_and_project}:
@@ -182,7 +176,6 @@ class TestSchedules:
         assert schedules[0]["active"] is True
 
     def test__delete_schedule(self, gitlab, group_and_project, schedules):
-
         delete_schedule = f"""
         projects_and_groups:
           {group_and_project}:

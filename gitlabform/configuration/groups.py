@@ -63,7 +63,6 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         return effective_config_for_group
 
     def _get_effective_subgroup_config(self, subgroup):
-
         #
         # Goes through a subgroups hierarchy, from top to bottom
         #

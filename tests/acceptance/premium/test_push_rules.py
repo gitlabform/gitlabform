@@ -30,7 +30,6 @@ class TestPushRules:
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
     def test__edit_push_rules(self, gitlab, group_and_project):
-
         self.test__create_push_rules(gitlab, group_and_project)
 
         config = f"""

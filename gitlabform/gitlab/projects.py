@@ -9,14 +9,12 @@ from gitlabform.gitlab.core import (
 
 class GitLabProjects(GitLabCore):
     def get_project_case_insensitive(self, some_string):
-
         # maybe "foo/bar" is some project's path
 
         try:
             # try with exact case
             return self.get_project(some_string)
         except NotFoundException:
-
             # try case insensitive
             projects = self._make_requests_to_api(
                 f"projects?search=%s&simple=true",
@@ -45,7 +43,6 @@ class GitLabProjects(GitLabCore):
             data["default_branch"] = default_branch
 
         if wait_if_still_being_deleted:
-
             # GitLab deletes the project asynchronously, it may take a few seconds.
             # So if you are creating new project with the same name as the one
             # that is still being deleted, GitLab returns code 400
@@ -75,7 +72,6 @@ class GitLabProjects(GitLabCore):
                     return response
 
         else:
-
             return self._make_requests_to_api(
                 "projects", data=data, method="POST", expected_codes=201
             )
@@ -94,7 +90,6 @@ class GitLabProjects(GitLabCore):
         )
 
     def delete_project(self, project_and_group_name):
-
         # 404 means that the project does not exist anymore, so let's accept it for idempotency
         return self._make_requests_to_api(
             "projects/%s",

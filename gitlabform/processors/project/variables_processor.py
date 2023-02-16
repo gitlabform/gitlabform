@@ -37,7 +37,6 @@ class VariablesProcessor(MultipleEntitiesProcessor):
             return True
 
     def _print_diff(self, project_and_group: str, configuration):
-
         try:
             current_variables = self.gitlab.get_variables(project_and_group)
 

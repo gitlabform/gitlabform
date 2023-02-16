@@ -27,7 +27,6 @@ class ConfigurationCore(ABC):
     """
 
     def __init__(self, config_path=None, config_string=None):
-
         if config_path and config_string:
             fatal(
                 "Please initialize with either config_path or config_string, not both.",
@@ -75,7 +74,6 @@ class ConfigurationCore(ABC):
 
     @staticmethod
     def _get_config_path(config_path):
-
         if "APP_HOME" in os.environ:
             # using this env var should be considered unofficial, we need this temporarily
             # for backwards compatibility. support for it may be removed without notice, do not use it!
@@ -91,7 +89,6 @@ class ConfigurationCore(ABC):
 
     @staticmethod
     def _parse_yaml(source: str, config_string: bool):
-
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         log = ConsolePrinter(logging_args)
 
@@ -249,7 +246,6 @@ class ConfigurationCore(ABC):
         return False
 
     def _find_almost_duplicates(self):
-
         # in GitLab groups and projects names are de facto case insensitive:
         # you can change the case of both name and path BUT you cannot create
         # 2 groups which names differ only with case and the same thing for
@@ -292,7 +288,6 @@ class ConfigurationCore(ABC):
         # lowering its cardinality if there were elements in it
         # that before lowering differed only in case
         if len(set(items)) != len(set(items_with_lowercase_names)):
-
             # we have some almost duplicates, let's find them
             almost_duplicates = []
             for first_item in items:

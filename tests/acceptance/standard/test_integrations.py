@@ -6,7 +6,6 @@ from tests.acceptance import run_gitlabform
 
 @pytest.fixture(scope="function")
 def integrations(request, gitlab, group_and_project):
-
     integrations = ["asana", "slack", "redmine", "jira", "mattermost"]
 
     def fin():
@@ -31,7 +30,6 @@ class TestIntegrations:
                 gitlab.get_integration(group_and_project, integration_name)
 
     def test__if_delete_works(self, gitlab, group_and_project):
-
         config_integrations = f"""
         projects_and_groups:
           {group_and_project}:
@@ -78,7 +76,6 @@ class TestIntegrations:
             assert integration["active"] is False
 
     def test__if_push_events_true_works(self, gitlab, group_and_project):
-
         config_integration_push_events_true = f"""
         projects_and_groups:
           {group_and_project}:
@@ -107,7 +104,6 @@ class TestIntegrations:
         assert all([integration["push_events"] for integration in integrations]) is True
 
     def test__if_push_events_false_works(self, gitlab, group_and_project):
-
         config_integration_push_events_false = f"""
         projects_and_groups:
           {group_and_project}:
@@ -138,7 +134,6 @@ class TestIntegrations:
         )
 
     def test__if_push_events_change_works(self, gitlab, group_and_project):
-
         config_integration_push_events_true = f"""
         projects_and_groups:
           {group_and_project}:
@@ -196,7 +191,6 @@ class TestIntegrations:
         )
 
     def test__if_jira_commit_events_true_works(self, gitlab, group_and_project):
-
         config_integration_jira_commit_events_true = f"""
         projects_and_groups:
           {group_and_project}:
@@ -216,7 +210,6 @@ class TestIntegrations:
         assert integration["commit_events"] is True
 
     def test__if_jira_commit_events_false_works(self, gitlab, group_and_project):
-
         config_integration_jira_commit_events_false = f"""
         projects_and_groups:
           {group_and_project}:
@@ -236,7 +229,6 @@ class TestIntegrations:
         assert integration["commit_events"] is False
 
     def test__if_change_works(self, gitlab, group_and_project):
-
         config_integration_jira_commit_events_true = f"""
         projects_and_groups:
           {group_and_project}:
@@ -274,7 +266,6 @@ class TestIntegrations:
         assert integration["commit_events"] is False
 
     def test__mattermost_confidential_issues_events(self, gitlab, group_and_project):
-
         config_integration_mattermost_confidential_issues_events = f"""
         projects_and_groups:
           {group_and_project}:

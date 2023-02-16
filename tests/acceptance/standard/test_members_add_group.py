@@ -22,7 +22,6 @@ def two_members_in_other_group(gitlab, other_group, make_user):
 
 
 class TestMembersAddGroup:
-
     # this test should be in a separate class than other test files as it changes too
     # much for a reasonable setup and cleanup using fixtures
     def test__add_group(

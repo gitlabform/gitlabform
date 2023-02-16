@@ -2,7 +2,6 @@ from tests.acceptance import run_gitlabform
 
 
 class TestFilesAll:
-
     # this test should be in a separate class than other test files as it changes too
     # much for a reasonable setup and cleanup using fixtures
     def test__set_file_all_branches(

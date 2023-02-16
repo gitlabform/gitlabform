@@ -2,13 +2,11 @@ from tests.acceptance import run_gitlabform, DEFAULT_README
 
 
 class TestFilesProtected:
-
     # this test should be in a separate class than other test files as it changes too
     # much for a reasonable setup and cleanup using fixtures
     def test__set_file_protected_branches(
         self, gitlab, group_and_project, branch, other_branch
     ):
-
         set_file_protected_branches = f"""
         projects_and_groups:
           {group_and_project}:

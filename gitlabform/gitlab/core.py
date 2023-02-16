@@ -20,7 +20,6 @@ from gitlabform.util import to_str
 
 class GitLabCore:
     def __init__(self, config_path=None, config_string=None):
-
         self.configuration = Configuration(config_path, config_string)
 
         self.url = self.configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
@@ -173,7 +172,6 @@ class GitLabCore:
     def _make_request_to_api(
         self, path_as_format_string, args, method, dict_data, expected_codes, json_data
     ):
-
         """
         Makes a single request to the GitLab API. Takes care of the authentication, basic error processing,
         retries, timeout etc.
@@ -236,7 +234,6 @@ class GitLabCore:
 
     @staticmethod
     def _format_with_url_encoding(format_string, single_arg_or_args_tuple):
-
         # we want to URL-encode all the args, but not the path itself which looks like "/foo/%s/bar"
         # because '/'s here are NOT to be URL-encoded
 

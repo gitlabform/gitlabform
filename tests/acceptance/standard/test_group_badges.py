@@ -5,7 +5,6 @@ from tests.acceptance import (
 
 class TestGroupBadges:
     def test__badges_add(self, gitlab, group):
-
         config = f"""
         projects_and_groups:
           {group}/*:
@@ -22,7 +21,6 @@ class TestGroupBadges:
         assert badges[0]["name"] == "Group Badge"
 
     def test__badges_delete(self, gitlab, group):
-
         config = f"""
         projects_and_groups:
           {group}/*:
@@ -52,7 +50,6 @@ class TestGroupBadges:
         assert len(badges) == 0
 
     def test__badges_update(self, gitlab, group):
-
         config = f"""
         projects_and_groups:
           {group}/*:
@@ -84,7 +81,6 @@ class TestGroupBadges:
         assert badges[0]["link_url"].endswith("bar")
 
     def test__badges_update_choose_the_right_one(self, gitlab, group):
-
         config = f"""
         projects_and_groups:
           {group}/*:

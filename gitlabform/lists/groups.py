@@ -32,7 +32,6 @@ class GroupsProvider:
         return groups
 
     def _get_single_group(self, target: str) -> Groups:
-
         groups = Groups()
 
         # it may be a subgroup or a group...
@@ -47,7 +46,6 @@ class GroupsProvider:
         return groups
 
     def _get_groups(self, target: str) -> Groups:
-
         groups = Groups()
 
         if target == "ALL":

@@ -41,7 +41,6 @@ class ProjectsProvider(GroupsProvider):
         return projects
 
     def _get_single_project(self, target: str) -> Projects:
-
         projects = Projects()
 
         # it may be a single project
@@ -56,7 +55,6 @@ class ProjectsProvider(GroupsProvider):
         return projects
 
     def _get_projects(self, target: str, groups: Groups) -> Projects:
-
         projects = Projects()
 
         # the source of projects are the *effective* requested groups
@@ -68,7 +66,6 @@ class ProjectsProvider(GroupsProvider):
         projects.add_omitted(OmissionReason.ARCHIVED, archived_projects_from_groups)
 
         if target == "ALL_DEFINED":
-
             # in this case we also need to get the list of projects explicitly
             # defined in the configuration
 

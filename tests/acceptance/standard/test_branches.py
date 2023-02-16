@@ -10,7 +10,6 @@ gl = get_gitlab()
 
 class TestBranches:
     def test__protect_and_unprotect(self, gitlab, group_and_project, branch):
-
         config_protect_branch = f"""
         projects_and_groups:
           {group_and_project}:
@@ -64,7 +63,6 @@ class TestBranches:
         assert unprotect_access_level is None
 
     def test__config_with_access_level_names(self, gitlab, group_and_project, branch):
-
         config_with_access_levels_names = f"""
         projects_and_groups:
           {group_and_project}:

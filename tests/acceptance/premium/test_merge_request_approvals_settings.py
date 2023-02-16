@@ -8,7 +8,6 @@ class TestMergeRequestApprovalsSettings:
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
     def test__edit_settings(self, gitlab, group_and_project, make_user):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:
@@ -51,7 +50,6 @@ class TestMergeRequestApprovalsSettings:
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
     def test__fail(self, gitlab, group_and_project, make_user):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:

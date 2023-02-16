@@ -18,7 +18,6 @@ def file3(request):
 
 class TestFilesTemplates:
     def test__default_variables(self, gitlab, group_and_project):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:
@@ -39,7 +38,6 @@ class TestFilesTemplates:
         )
 
     def test__custom_variables(self, gitlab, group_and_project):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:
@@ -79,7 +77,6 @@ class TestFilesTemplates:
         assert file_content == f"{group_and_project}\n\n"
 
     def test__disabled_templating(self, gitlab, group_and_project):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:

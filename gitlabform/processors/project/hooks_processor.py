@@ -10,7 +10,6 @@ class HooksProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for hook in sorted(configuration["hooks"]):
-
             if configuration.get("hooks|" + hook + "|delete"):
                 hook_id = self.gitlab.get_hook_id(project_and_group, hook)
                 if hook_id:

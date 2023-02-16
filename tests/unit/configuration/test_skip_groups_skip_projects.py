@@ -52,7 +52,6 @@ def configuration_for_skip_groups_skip_projects():
     ],
 )
 def test__config_skip_project(project, is_skipped, request):
-
     configuration_for_skip_groups_skip_projects = request.getfixturevalue(
         "configuration_for_skip_groups_skip_projects"
     )
@@ -78,7 +77,6 @@ def test__config_skip_project(project, is_skipped, request):
     ],
 )
 def test__config_skip_group(group, is_skipped, request):
-
     configuration_for_skip_groups_skip_projects = request.getfixturevalue(
         "configuration_for_skip_groups_skip_projects"
     )

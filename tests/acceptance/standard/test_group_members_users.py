@@ -8,7 +8,6 @@ from tests.acceptance import (
 
 @pytest.fixture(scope="function")
 def one_owner_and_two_developers(gitlab, group, users):
-
     gitlab.add_member_to_group(group, users[0], AccessLevel.OWNER.value)
     gitlab.add_member_to_group(group, users[1], AccessLevel.DEVELOPER.value)
     gitlab.add_member_to_group(group, users[2], AccessLevel.DEVELOPER.value)
@@ -30,7 +29,6 @@ def one_owner_and_two_developers(gitlab, group, users):
 
 class TestGroupMembersUsers:
     def test__add_user(self, gitlab, group, users, one_owner_and_two_developers):
-
         no_of_members_before = len(gitlab.get_group_members(group))
         user_to_add = f"{users[3]}"
 
@@ -58,7 +56,6 @@ class TestGroupMembersUsers:
         assert members_usernames.count(user_to_add) == 1
 
     def test__remove_user(self, gitlab, group, users, one_owner_and_two_developers):
-
         no_of_members_before = len(gitlab.get_group_members(group))
         user_to_remove = f"{users[2]}"
 
@@ -85,7 +82,6 @@ class TestGroupMembersUsers:
     def test__not_remove_users_with_enforce_false(
         self, gitlab, group, users, one_owner_and_two_developers
     ):
-
         no_of_members_before = len(gitlab.get_group_members(group))
 
         setups = [
@@ -129,7 +125,6 @@ class TestGroupMembersUsers:
     def test__change_some_users_access(
         self, gitlab, group, users, one_owner_and_two_developers
     ):
-
         new_access_level = AccessLevel.MAINTAINER.value
 
         change_some_users_access = f"""
@@ -157,7 +152,6 @@ class TestGroupMembersUsers:
                 assert member["access_level"] == new_access_level
 
     def test__change_owner(self, gitlab, group, users, one_owner_and_two_developers):
-
         change_owner = f"""
             projects_and_groups:
               {group}/*:
@@ -189,7 +183,6 @@ class TestGroupMembersUsers:
     def test__add_user_with_access_level_name(
         self, gitlab, group, users, one_owner_and_two_developers
     ):
-
         no_of_members_before = len(gitlab.get_group_members(group))
         user_to_add = f"{users[3]}"
 
@@ -216,7 +209,6 @@ class TestGroupMembersUsers:
         assert members_usernames.count(user_to_add) == 1
 
     def test__root_as_the_sole_owner(self, gitlab, group):
-
         config = f"""
             projects_and_groups:
               {group}/*:

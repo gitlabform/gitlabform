@@ -173,18 +173,15 @@ class FilesProcessor(AbstractProcessor):
         # of the branch protection...
 
         try:
-
             self.just_modify_file(
                 project_and_group, branch, file, operation, configuration, new_content
             )
 
         except UnexpectedResponseException as e:
-
             if (
                 e.response_status_code == 400
                 and "You are not allowed to push into this branch" in e.response_text
             ):
-
                 # ...but if not, then we can unprotect the branch, but only if we know how to
                 # protect it again...
 

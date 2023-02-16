@@ -35,7 +35,6 @@ class ConfigurationTransformers:
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
 
     def transform(self, configuration: Configuration) -> None:
-
         config_before = ez_yaml.to_string(obj=configuration.config, options={})
         debug(f"Config BEFORE transformations:\n{config_before}")
 

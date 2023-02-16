@@ -53,7 +53,6 @@ def file2(request):
 
 class TestFiles:
     def test__set_file_specific_branch(self, gitlab, group_and_project, branch):
-
         set_file_specific_branch = f"""
         projects_and_groups:
           {group_and_project}:
@@ -93,7 +92,6 @@ class TestFiles:
     def test__set_file_strongly_protected_branch(
         self, gitlab, group_and_project, no_access_branch
     ):
-
         set_file_specific_branch = f"""
             projects_and_groups:
               {group_and_project}:
@@ -131,7 +129,6 @@ class TestFiles:
         assert branch["protected"] is True
 
     def test__delete_file_specific_branch(self, gitlab, group_and_project, branch):
-
         set_file_specific_branch = f"""
             projects_and_groups:
               {group_and_project}:
@@ -161,7 +158,6 @@ class TestFiles:
         assert the_branch["protected"] is True
 
     def test__custom_commit_message(self, gitlab, group_and_project, branch):
-
         set_file_specific_branch = f"""
         projects_and_groups:
           {group_and_project}:
@@ -184,7 +180,6 @@ class TestFiles:
         assert commit["message"] == "Preconfigured commit message [skip ci]"
 
     def test__set_file_protected_branches(self, gitlab, group_and_project, branch):
-
         test_config = f"""
         projects_and_groups:
           {group_and_project}:
@@ -224,7 +219,6 @@ class TestFiles:
     def test__set_file_protected_branches_not_all_levels(
         self, gitlab, group_and_project, branch
     ):
-
         test_config = f"""
             projects_and_groups:
               {group_and_project}:

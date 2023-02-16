@@ -11,7 +11,6 @@ class TestProtectedEnvironments:
     def test__protect_a_repository_environment(
         self, gitlab, group_and_project, make_user
     ) -> str:
-
         config = f"""
         projects_and_groups:
           {group_and_project}:

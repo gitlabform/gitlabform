@@ -31,7 +31,6 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             self.add_method = noop
 
     def _process_configuration(self, project_or_group: str, configuration: dict):
-
         entity_config = configuration[self.configuration_name]
 
         entity_in_gitlab = self.get_method(project_or_group)
@@ -52,7 +51,6 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             debug(f"{self.configuration_name} AFTER: ^^^")
 
     def _print_diff(self, project_or_project_and_group: str, entity_config):
-
         entity_in_gitlab = self.get_method(project_or_project_and_group)
 
         DifferenceLogger.log_diff(

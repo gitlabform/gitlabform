@@ -21,7 +21,6 @@ class DifferenceLogger:
         hide_entries=None,
         test=False,
     ):
-
         # Compose values in list of `[key, from_config, from_server]``
         changes = [
             [

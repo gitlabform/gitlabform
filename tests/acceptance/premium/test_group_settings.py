@@ -8,7 +8,6 @@ class TestGroupSettings:
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
     def test__edit_new_setting_premium(self, gitlab, project, group):
-
         project_id = gitlab._get_project_id(f"{group}/{project}")
 
         settings = gitlab.get_group_settings(group)

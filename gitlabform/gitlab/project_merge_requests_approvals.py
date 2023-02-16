@@ -5,7 +5,6 @@ from gitlabform.gitlab.core import (
 
 
 class GitLabProjectMergeRequestsApprovals(GitLabCore):
-
     # configuration
 
     def get_approvals_settings(self, project_and_group_name):

@@ -80,7 +80,6 @@ class BranchProtector:
                 )
 
             if "code_owner_approval_required" in requested_configuration:
-
                 self.set_code_owner_approval_required(
                     requested_configuration, project_and_group, branch
                 )
@@ -113,7 +112,6 @@ class BranchProtector:
     def validate_branch_protection_config(
         self, project_and_group, requested_configuration, branch
     ):
-
         # for the new API any key needs to be defined...
         if any(
             key in requested_configuration
@@ -140,9 +138,7 @@ class BranchProtector:
         # replace in our config our custom "user" and "group" entries with supported by
         # the Protected Branches API "user_id" and "group_id"
         for extra_param_key in self.extra_param_keys:
-
             for element in requested_configuration.get(extra_param_key, []):
-
                 if "user" in element.keys():
                     user_id = self.gitlab._get_user_id(element.pop("user"))
                     element["user_id"] = user_id

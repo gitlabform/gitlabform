@@ -15,7 +15,6 @@ class TestDeployKeys:
     def test__deploy_key_add(
         self, gitlab, group_and_project_for_function, public_ssh_key
     ):
-
         config_add = f"""
         projects_and_groups:
           {group_and_project_for_function}:
@@ -32,7 +31,6 @@ class TestDeployKeys:
     def test__deploy_key_add_delete(
         self, gitlab, group_and_project_for_function, public_ssh_key
     ):
-
         config_add = f"""
         projects_and_groups:
           {group_and_project_for_function}:
@@ -62,7 +60,6 @@ class TestDeployKeys:
     def test__deploy_key_add_delete_with_enforce(
         self, gitlab, group_and_project_for_function, public_ssh_key
     ):
-
         config_add = f"""
         projects_and_groups:
           {group_and_project_for_function}:
@@ -91,7 +88,6 @@ class TestDeployKeys:
     def test__deploy_key_add_delete_readd(
         self, gitlab, group_and_project_for_function, public_ssh_key
     ):
-
         config_add = f"""
         projects_and_groups:
           {group_and_project_for_function}:
@@ -125,7 +121,6 @@ class TestDeployKeys:
     def test__deploy_key_add_delete_readd_under_different_name(
         self, gitlab, group_and_project_for_function, public_ssh_key
     ):
-
         config_add = f"""
             projects_and_groups:
               {group_and_project_for_function}:
@@ -167,7 +162,6 @@ class TestDeployKeys:
     def test__deploy_key_update_title(
         self, gitlab, group_and_project_for_function, public_ssh_key
     ):
-
         config = f"""
             projects_and_groups:
               {group_and_project_for_function}:
@@ -207,7 +201,6 @@ class TestDeployKeys:
         public_ssh_key,
         other_public_ssh_key,
     ):
-
         config = f"""
         projects_and_groups:
           {group_and_project_for_function}:

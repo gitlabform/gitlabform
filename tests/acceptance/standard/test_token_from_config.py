@@ -7,7 +7,6 @@ from tests.acceptance import (
 
 class TestTokenFromConfig:
     def test__token_no_quotes(self, gitlab, group_and_project, token_from_env_var):
-
         config = f"""
         gitlab:
           token: {token_from_env_var}
@@ -19,7 +18,6 @@ class TestTokenFromConfig:
         run_gitlabform(config, group_and_project)
 
     def test__token_single_quotes(self, gitlab, group_and_project, token_from_env_var):
-
         config = f"""
         gitlab:
           token: '{token_from_env_var}'
@@ -31,7 +29,6 @@ class TestTokenFromConfig:
         run_gitlabform(config, group_and_project)
 
     def test__token_double_quotes(self, gitlab, group_and_project, token_from_env_var):
-
         config = f"""
         gitlab:
           token: "{token_from_env_var}"

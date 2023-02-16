@@ -48,7 +48,6 @@ from gitlabform.processors.project import ProjectProcessors
 
 class GitLabForm:
     def __init__(self, include_archived_projects=True, target=None, config_string=None):
-
         if target and config_string:
             # this mode is basically only for testing
 
@@ -369,7 +368,6 @@ class GitLabForm:
         effective_configuration = EffectiveConfigurationFile(self.output_file)
 
         for group in groups:
-
             group_number += 1
 
             if group_number < self.start_from_group:
@@ -408,7 +406,6 @@ class GitLabForm:
                 successful_groups += 1
 
             except Exception as e:
-
                 failed_groups[group_number] = group
 
                 trace = traceback.format_exc()
@@ -434,7 +431,6 @@ class GitLabForm:
         failed_projects = {}
 
         for project_and_group in projects:
-
             project_number += 1
 
             if project_number < self.start_from:
@@ -473,7 +469,6 @@ class GitLabForm:
                 successful_projects += 1
 
             except Exception as e:
-
                 failed_projects[project_number] = project_and_group
 
                 trace = traceback.format_exc()
@@ -488,7 +483,6 @@ class GitLabForm:
                     warning(message)
                     debug(trace)
             finally:
-
                 debug(
                     f"* ({project_number}/{len(projects)})"
                     f" FINISHED Processing project: {project_and_group}",

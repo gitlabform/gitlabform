@@ -6,7 +6,6 @@ from tests.acceptance import run_gitlabform, gl
 
 @pytest.fixture(scope="function")
 def group_with_one_owner_and_two_developers(gitlab, other_group, users):
-
     gitlab.add_member_to_group(other_group, users[0], AccessLevel.OWNER.value)
     gitlab.add_member_to_group(other_group, users[1], AccessLevel.DEVELOPER.value)
     gitlab.add_member_to_group(other_group, users[2], AccessLevel.DEVELOPER.value)
@@ -31,7 +30,6 @@ class TestMergeRequestApprovers:
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
     def test__add_single_rule(self, gitlab, group_and_project, make_user):
-
         user1 = make_user(AccessLevel.DEVELOPER)
 
         config = f"""
@@ -71,7 +69,6 @@ class TestMergeRequestApprovers:
         make_user,
         branch,
     ):
-
         user1 = make_user(AccessLevel.DEVELOPER)
 
         config = f"""
@@ -138,7 +135,6 @@ class TestMergeRequestApprovers:
         make_user,
         branch,
     ):
-
         user1 = make_user(AccessLevel.DEVELOPER)
 
         config = f"""
@@ -209,7 +205,6 @@ class TestMergeRequestApprovers:
         branch,
         other_branch,
     ):
-
         user1 = make_user(AccessLevel.DEVELOPER)
 
         config = f"""
@@ -338,7 +333,6 @@ class TestMergeRequestApprovers:
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
     def test__add_any_approver_rule(self, gitlab, group_and_project, make_user):
-
         config = f"""
             projects_and_groups:
               {group_and_project}:
@@ -366,7 +360,6 @@ class TestMergeRequestApprovers:
     def test__add_any_approver_rule_with_non_zero_approvals_required(
         self, gitlab, group_and_project, make_user
     ):
-
         config = f"""
             projects_and_groups:
               {group_and_project}:
@@ -394,7 +387,6 @@ class TestMergeRequestApprovers:
     def test__add_any_approver_rule_with_non_default_name(
         self, gitlab, group_and_project, make_user
     ):
-
         config = f"""
             projects_and_groups:
               {group_and_project}:
@@ -430,7 +422,6 @@ class TestMergeRequestApprovers:
         make_user,
         branch,
     ):
-
         user1 = make_user(AccessLevel.DEVELOPER)
 
         config = f"""

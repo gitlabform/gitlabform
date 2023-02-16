@@ -5,7 +5,6 @@ from tests.acceptance import (
 
 class TestArchiveProject:
     def test__archive_project(self, gitlab, group_and_project):
-
         config = f"""
         projects_and_groups:
           {group_and_project}:
@@ -20,7 +19,6 @@ class TestArchiveProject:
     def test__unarchive_project(
         self, gitlab, group_and_project, other_group, other_project
     ):
-
         archive_project = f"""
         projects_and_groups:
           {group_and_project}:

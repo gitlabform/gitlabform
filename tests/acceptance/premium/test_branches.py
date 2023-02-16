@@ -10,7 +10,6 @@ class TestBranches:
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
     def test__code_owners_approval(self, gitlab, group_and_project, branch):
-
         try:
             branch_access_levels = gitlab.get_branch_access_levels(
                 group_and_project, branch
@@ -51,7 +50,6 @@ class TestBranches:
         branch,
         make_user,
     ):
-
         user_allowed_to_push = make_user(AccessLevel.DEVELOPER)
         user_allowed_to_merge = make_user(AccessLevel.DEVELOPER)
         user_allowed_to_push_and_merge = make_user(AccessLevel.DEVELOPER)

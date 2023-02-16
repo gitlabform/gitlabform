@@ -52,7 +52,6 @@ class AbstractProcessor(ABC):
                     configuration.get(self.configuration_name),
                 )
             else:
-
                 verbose(f"Processing section '{self.configuration_name}'")
                 if self._can_proceed(project_or_project_and_group, configuration):
                     self._process_configuration(

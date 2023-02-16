@@ -12,7 +12,6 @@ class GitLabProjectDeployKeys(GitLabProjects):
         )
 
     def post_deploy_key(self, project_and_group_name, deploy_key_in_config):
-
         # deploy_key_in_config has to be like this:
         # {
         #     'title': title,
@@ -34,7 +33,6 @@ class GitLabProjectDeployKeys(GitLabProjects):
             if e.response_status_code == 400 and (
                 "has already been taken" in e.response_text
             ):
-
                 # Sometimes GitLab throws HTTP 400: {"deploy_key.fingerprint_sha256":["has already been taken"]}
                 # when you try to add an existing SSH key to another project, although according to the API docs
                 # it should work

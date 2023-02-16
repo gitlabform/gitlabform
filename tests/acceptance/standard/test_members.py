@@ -32,7 +32,6 @@ class TestMembers:
         assert outsider_user in members_usernames
 
     def test__no_groups_and_no_users(self, gitlab, group_and_project):
-
         config_with_error = f"""
         projects_and_groups:
           {group_and_project}:

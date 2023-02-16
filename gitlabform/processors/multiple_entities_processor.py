@@ -63,7 +63,6 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             self.edit_method = None
 
     def _process_configuration(self, project_or_group: str, configuration: dict):
-
         entities_in_configuration = configuration[self.configuration_name]
         if "enforce" in entities_in_configuration:
             enforce = entities_in_configuration["enforce"]
@@ -119,7 +118,6 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         # update b), if needed (or delete them if marked as "delete")
 
         for entity_name, entity_config in entities_in_both.items():
-
             entity_in_gitlab = self._is_in(entity_config, entities_in_gitlab)
             if entity_config.get("delete", False):
                 self._validate_required_to_delete(
@@ -154,7 +152,6 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         # add c) (or do nothing if marked as "delete")
 
         for entity_name, entity_config in entities_only_in_configuration.items():
-
             self._validate_required_to_create_or_update(
                 project_or_group, entity_name, entity_config
             )

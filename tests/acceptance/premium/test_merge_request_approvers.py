@@ -11,7 +11,6 @@ from gitlabform.constants import APPROVAL_RULE_NAME
 
 @pytest.fixture(scope="function")
 def group_with_one_owner_and_two_developers(gitlab, other_group, users):
-
     gitlab.add_member_to_group(other_group, users[0], AccessLevel.OWNER.value)
     gitlab.add_member_to_group(other_group, users[1], AccessLevel.DEVELOPER.value)
     gitlab.add_member_to_group(other_group, users[2], AccessLevel.DEVELOPER.value)
@@ -33,7 +32,6 @@ def group_with_one_owner_and_two_developers(gitlab, other_group, users):
 
 @pytest.fixture(scope="function")
 def group_with_just_owner(gitlab, third_group, users):
-
     gitlab.add_member_to_group(third_group, users[0], AccessLevel.OWNER.value)
     gitlab.remove_member_from_group(third_group, "root")
 
@@ -56,7 +54,6 @@ class TestMergeRequestApprovers:
         gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
     )
     def test__only_users(self, gitlab, group_and_project, make_user):
-
         user1 = make_user(AccessLevel.DEVELOPER)
 
         config = f"""
@@ -200,7 +197,6 @@ class TestMergeRequestApprovers:
         group_with_just_owner,
         make_user,
     ):
-
         user1 = make_user(AccessLevel.DEVELOPER)
 
         config__approvers_single_user_and_single_group = f"""
@@ -284,7 +280,6 @@ class TestMergeRequestApprovers:
         group_with_just_owner,
         make_user,
     ):
-
         user1 = make_user(AccessLevel.DEVELOPER)
         user2 = make_user(AccessLevel.DEVELOPER)
 
@@ -341,7 +336,6 @@ class TestMergeRequestApprovers:
         group_with_just_owner,
         make_user,
     ):
-
         user1 = make_user(AccessLevel.DEVELOPER)
         # add some preexisting approval rules
         gitlab.add_approval_rule(
