@@ -68,7 +68,7 @@ setup(
             "pytest-rerunfailures==11.0",
             "cryptography==39.0.1",
             "mypy==0.991",
-            "mypy-extensions==0.4.3",
+            "mypy-extensions==1.0.0",
         ],
         "docs": [
             "mkdocs",
