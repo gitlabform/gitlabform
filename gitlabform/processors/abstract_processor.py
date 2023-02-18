@@ -104,6 +104,10 @@ class AbstractProcessor(ABC):
         # Most possible failures during processing are handled by the HTTP request retries in GitLabCore class,
         # but in some cases we cannot do that on that level.
 
+        # If we already retried on a request level, don't retry again
+        if "Max retries exceeded with url" in str(e):
+            return False
+
         # One case is when a POST request is made and the request is sent, but we got no (or incomplete?) response.
         # Because we don't know if the particular POST request was done under the hood (f.e. an entity was created),
         # we cannot retry just the single request (f.e. if it was created then a retry would either create a duplicate
