@@ -46,7 +46,7 @@ setup(
     install_requires=[
         "certifi",  # we want the latest root certs for security
         "requests==2.28.2",
-        "types-requests==2.28.11.8",
+        "types-requests==2.28.11.13",
         "Jinja2==3.1.2",
         "MarkupSafe==2.1.2",
         "ruamel.yaml==0.17.21",
@@ -62,13 +62,13 @@ setup(
             "pytest==7.2.1",
             "xkcdpass==1.19.3",
             "pre-commit==2.21.0",  # not really for tests, but for development
-            "coverage==7.0.5",
+            "coverage==7.1.0",
             "pytest-cov==4.0.0",
             "deepdiff==6.2.3",
             "pytest-rerunfailures==11.0",
-            "cryptography==39.0.0",
+            "cryptography==39.0.1",
             "mypy==0.991",
-            "mypy-extensions==0.4.3",
+            "mypy-extensions==1.0.0",
         ],
         "docs": [
             "mkdocs",
