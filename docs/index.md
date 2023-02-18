@@ -19,22 +19,22 @@ using hierarchical configuration written in YAML.
 
 A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](configuration_reference/#effective-configuration) .
 ```yaml
-  # configuration shared by all projects in this group...
+projects_and_groups:
+  # configuration shared by all projects in a group named 'a_group'...
   a_group/*:
-    merge_requests:
-      approvals:
-        approvals_before_merge: 2
+    merge_requests_approvals:
+      disable_overriding_approvers_per_merge_request: true
   # ...except this project that has a different config:
   a_group/a_special_project:
-    merge_requests:
-      approvals:
-        approvals_before_merge: 1
+    merge_requests_approvals:
+      disable_overriding_approvers_per_merge_request: false
 ```
 
 ### Dynamic features
 
 GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](configuration_reference/#raw-parameters-passing).
 ```yaml
+projects_and_groups:
   a_group/a_project:
     project_settings:
       # ALL the keys described at
