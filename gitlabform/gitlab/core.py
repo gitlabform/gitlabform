@@ -30,7 +30,9 @@ class GitLabCore:
         self.session = requests.Session()
 
         retries = Retry(
-            total=3, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504]
+            total=3,
+            backoff_factor=0.25,
+            status_forcelist=[500, 502, 503, 504] + list(range(520, 531)),
         )
 
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
