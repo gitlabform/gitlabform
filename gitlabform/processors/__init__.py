@@ -1,5 +1,6 @@
 from abc import ABC
 
+import requests
 from cli_ui import debug as verbose
 
 from typing import List
@@ -27,10 +28,21 @@ class AbstractProcessors(ABC):
     ):
         for processor in self.processors:
             if only_sections == "all" or processor.configuration_name in only_sections:
-                processor.process(
-                    entity_reference, configuration, dry_run, effective_configuration
-                )
-            else:
-                verbose(
-                    f"Skipping section '{processor.configuration_name}' - not in --only-sections list."
-                )
+                try:
+                    processor.process(
+                        entity_reference,
+                        configuration,
+                        dry_run,
+                        effective_configuration,
+                    )
+                except requests.exceptions.ConnectionError as e:
+                    if (
+                        "RemoteDisconnected('Remote end closed connection without response')"
+                        in str(e)
+                    ):
+                        print("thats the case")
+
+        else:
+            verbose(
+                f"Skipping section '{processor.configuration_name}' - not in --only-sections list."
+            )

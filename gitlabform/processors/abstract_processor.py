@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from logging import debug
 from typing import Callable, Union
 
+import requests
 from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
@@ -54,7 +55,7 @@ class AbstractProcessor(ABC):
             else:
                 verbose(f"Processing section '{self.configuration_name}'")
                 if self._can_proceed(project_or_project_and_group, configuration):
-                    self._process_configuration(
+                    self._process_configuration_with_retries(
                         project_or_project_and_group, configuration
                     )
 
@@ -68,6 +69,60 @@ class AbstractProcessor(ABC):
 
     def _section_is_in_config(self, configuration: dict):
         return self.configuration_name in configuration
+
+    def _process_configuration_with_retries(
+        self, project_or_project_and_group: str, configuration: dict
+    ):
+        retry = 1
+        max_retries = 3
+
+        while True:
+            try:
+                if retry > 1:
+                    verbose(
+                        f"Retrying section '{self.configuration_name}' - {retry}/{max_retries}..."
+                    )
+
+                self._process_configuration(
+                    project_or_project_and_group,
+                    configuration,
+                )
+
+                return
+            except Exception as e:
+                if retry > max_retries:
+                    raise MaxProcessorRetriesExceeded from e
+
+                if self._should_retry_processor(e):
+                    retry += 1
+                    continue
+                else:
+                    raise e
+
+    @staticmethod
+    def _should_retry_processor(e: Exception) -> bool:
+        # Most possible failures during processing are handled by the HTTP request retries in GitLabCore class,
+        # but in some cases we cannot do that on that level.
+
+        # If we already retried on a request level, don't retry again
+        if "Max retries exceeded with url" in str(e):
+            return False
+
+        # One case is when a POST request is made and the request is sent, but we got no (or incomplete?) response.
+        # Because we don't know if the particular POST request was done under the hood (f.e. an entity was created),
+        # we cannot retry just the single request (f.e. if it was created then a retry would either create a duplicate
+        # of the entity or fail with an error, if duplicates are not allowed in a given case).
+
+        # Then we need to retry the whole section (f.e. files) for a given entity (f.e. project foo/bar), so the checks
+        # for the initial state will re-run (f.e. checking if that entity already exists or not).
+
+        # fmt: off
+        if type(e) == requests.exceptions.ConnectionError \
+                and "RemoteDisconnected('Remote end closed connection without response')" in str(e):
+            return True
+        # fmt: on
+
+        return False
 
     @abstractmethod
     def _process_configuration(
@@ -147,3 +202,7 @@ class AbstractProcessor(ABC):
 
     def _can_proceed(self, project_or_group: str, configuration: dict):
         return True
+
+
+class MaxProcessorRetriesExceeded(Exception):
+    pass
