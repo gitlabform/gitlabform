@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.2
+
+* Improve the reliability in some cases (PR [#497](https://github.com/gitlabform/gitlabform/pull/497)):
+  * retrying the whole section for a given entity (f.e. `files` for a project `foo/bar`) when it fails on a non-retryable individual HTTP request,
+  * retrying individual HTTP requests on errors that may be returned by gitlab.com's CloudFlare CDN (520-531).
+
 ## 3.4.1
 
 * Fix for old merge request syntax using inheritance when a sole `approvals_before_merge` setting is inherited/overwritten. PR [#481](https://github.com/gitlabform/gitlabform/pull/481).
