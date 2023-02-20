@@ -67,7 +67,7 @@ setup(
             "deepdiff==6.2.3",
             "pytest-rerunfailures==11.0",
             "cryptography==39.0.1",
-            "mypy==0.991",
+            "mypy==1.0.1",
             "mypy-extensions==1.0.0",
         ],
         "docs": [
