@@ -677,6 +677,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#342" class="md-nav__link">
+    3.4.2
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#341" class="md-nav__link">
     3.4.1
   </a>
@@ -1162,6 +1169,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#342" class="md-nav__link">
+    3.4.2
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#341" class="md-nav__link">
     3.4.1
   </a>
@@ -1488,6 +1502,12 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="342">3.4.2<a class="headerlink" href="#342" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Improve the reliability in some cases (PR <a href="https://github.com/gitlabform/gitlabform/pull/497">#497</a>):</li>
+<li>retrying the whole section for a given entity (f.e. <code>files</code> for a project <code>foo/bar</code>) when it fails on a non-retryable individual HTTP request,</li>
+<li>retrying individual HTTP requests on errors that may be returned by gitlab.com's CloudFlare CDN (520-531).</li>
+</ul>
 <h2 id="341">3.4.1<a class="headerlink" href="#341" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Fix for old merge request syntax using inheritance when a sole <code>approvals_before_merge</code> setting is inherited/overwritten. PR <a href="https://github.com/gitlabform/gitlabform/pull/481">#481</a>.</li>
