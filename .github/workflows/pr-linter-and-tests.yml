@@ -166,6 +166,26 @@ jobs:
           attempt_limit: 5
           attempt_delay: 10000
 
+  schemas-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code from the PR
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install test dependencies
+        run: |
+          pip install wheel
+          pip install -e .[test]
+      - name: Run schemas tests
+        run: |
+          pytest schemas/tests
+
   security-tests:
     runs-on: ubuntu-latest
     steps:

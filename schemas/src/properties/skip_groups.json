@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/gitlabform/gitlabform/main/schemas/properties/skip_groups.json",
+  "title": "GitLabForm configuration for skipping groups or namespaces.",
+  "description": "List of groups that will not be processed or updated by GitLabForm.",
+  "type": "array",
+  "minItems": 1,
+  "uniqueItems": true,
+  "items": {
+    "type": "string",
+    "title": "Group or namespace to be skipped.",
+    "description": "Enter complete path to the group or namespace from the root.",
+    "minLength": 1
+  },
+  "examples": [
+    "my-group",
+    "another-group/this-subgroup-only",
+    "another-group/every-subgroups-under-this-subgroup/*"
+  ]
+}

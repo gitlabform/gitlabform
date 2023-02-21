@@ -35,6 +35,7 @@ nav:
   - 🙋 Contributing:
       - contrib/index.md
       - Local Development: contrib/local_development.md
+      - Schema Development: contrib/schema_development.md
       - Implementation Design: contrib/implementation_design.md
       - Coding Guidelines: contrib/coding_guidelines.md
       - Releases: contrib/releases.md
