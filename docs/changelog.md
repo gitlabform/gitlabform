@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.4.3
+
+* Fix: add missing support for using group name when protecting an environment. Fixes [#503](https://github.com/gitlabform/gitlabform/issues/503), PR [#506](https://github.com/gitlabform/gitlabform/pull/506). 
+
 ## 3.4.2
 
 * Improve the reliability in some cases (PR [#497](https://github.com/gitlabform/gitlabform/pull/497)):
