@@ -121,6 +121,19 @@ class GroupTransformer(ConfigurationTransformer):
 
         try:
             for node_coordinate in processor.get_nodes(
+                "projects_and_groups.*.protected_environments.*.deploy_access_levels.group",
+                mustexist=True,
+            ):
+                group = node_coordinate.parent.pop("group")
+                node_coordinate.parent["group_id"] = self.gitlab._get_group_id(group)
+
+        except YAMLPathException as e:
+            # this just means that we haven't found any keys in YAML
+            # under the given path
+            pass
+
+        try:
+            for node_coordinate in processor.get_nodes(
                 "**.merge_requests_approval_rules.*.groups",
                 mustexist=True,
             ):
