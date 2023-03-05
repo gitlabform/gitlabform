@@ -1,4 +1,3 @@
-import json
 from time import sleep
 
 from gitlabform.gitlab.core import (
@@ -10,14 +9,12 @@ from gitlabform.gitlab.core import (
 
 class GitLabProjects(GitLabCore):
     def get_project_case_insensitive(self, some_string):
-
         # maybe "foo/bar" is some project's path
 
         try:
             # try with exact case
             return self.get_project(some_string)
         except NotFoundException:
-
             # try case insensitive
             projects = self._make_requests_to_api(
                 f"projects?search=%s&simple=true",
@@ -46,7 +43,6 @@ class GitLabProjects(GitLabCore):
             data["default_branch"] = default_branch
 
         if wait_if_still_being_deleted:
-
             # GitLab deletes the project asynchronously, it may take a few seconds.
             # So if you are creating new project with the same name as the one
             # that is still being deleted, GitLab returns code 400
@@ -76,7 +72,6 @@ class GitLabProjects(GitLabCore):
                     return response
 
         else:
-
             return self._make_requests_to_api(
                 "projects", data=data, method="POST", expected_codes=201
             )
@@ -95,7 +90,6 @@ class GitLabProjects(GitLabCore):
         )
 
     def delete_project(self, project_and_group_name):
-
         # 404 means that the project does not exist anymore, so let's accept it for idempotency
         return self._make_requests_to_api(
             "projects/%s",
@@ -156,7 +150,7 @@ class GitLabProjects(GitLabCore):
         except NotFoundException:
             return dict()
 
-    def put_project_push_rules(self, project_and_group_name, push_rules):
+    def put_project_push_rules(self, project_and_group_name: str, push_rules):
         # push_rules has to be like this:
         # {
         #     'setting1': value1,
@@ -217,109 +211,6 @@ class GitLabProjects(GitLabCore):
             data,
             expected_codes=201,
         )
-
-    def post_approvals_settings(self, project_and_group_name, data):
-        # for this endpoint GitLab still actually wants pid, not "group/project"...
-        pid = self._get_project_id(project_and_group_name)
-        data_required = {"id": pid}
-        data = {**data, **data_required}
-        self._make_requests_to_api(
-            "projects/%s/approvals", pid, "POST", data, expected_codes=201
-        )
-
-    def get_approvals_settings(self, project_and_group_name):
-        pid = self._get_project_id(project_and_group_name)
-        return self._make_requests_to_api("projects/%s/approvals", pid)
-
-    def get_approvals_rules(self, project_and_group_name):
-        # for this endpoint GitLab still actually wants pid, not "group/project"...
-        pid = self._get_project_id(project_and_group_name)
-        return self._make_requests_to_api("projects/%s/approval_rules", pid)
-
-    def delete_approvals_rule(self, project_and_group_name, approval_rule_id):
-        # for this endpoint GitLab still actually wants pid, not "group/project"...
-        pid = self._get_project_id(project_and_group_name)
-        self._make_requests_to_api(
-            "projects/%s/approval_rules/%s",
-            (pid, approval_rule_id),
-            method="DELETE",
-            expected_codes=[200, 204],
-        )
-
-    def create_approval_rule(
-        self,
-        project_and_group_name,
-        name,
-        approvals_required,
-        approvers,
-        approver_groups,
-    ):
-        pid = self._get_project_id(project_and_group_name)
-
-        data = self._create_approval_rule_data(
-            project_and_group_name, name, approvals_required, approvers, approver_groups
-        )
-
-        self._make_requests_to_api(
-            "projects/%s/approval_rules",
-            pid,
-            method="POST",
-            data=None,
-            expected_codes=201,
-            json=data,
-        )
-
-    def update_approval_rule(
-        self,
-        project_and_group_name,
-        approval_rule_id,
-        name,
-        approvals_required,
-        approvers,
-        approver_groups,
-    ):
-        pid = self._get_project_id(project_and_group_name)
-
-        data = self._create_approval_rule_data(
-            project_and_group_name, name, approvals_required, approvers, approver_groups
-        )
-        data["approval_rule_id"] = approval_rule_id
-
-        self._make_requests_to_api(
-            "projects/%s/approval_rules/%s",
-            (pid, approval_rule_id),
-            method="PUT",
-            data=None,
-            json=data,
-        )
-
-    def _create_approval_rule_data(
-        self,
-        project_and_group_name,
-        name,
-        approvals_required,
-        approvers,
-        approver_groups,
-    ):
-        pid = self._get_project_id(project_and_group_name)
-
-        # gitlab API expects ids, not names of users and groups, so we need to convert first
-        user_ids = []
-        for approver_name in approvers:
-            user_ids.append(self._get_user_id(approver_name))
-        group_ids = []
-        for group_path in approver_groups:
-            group_ids.append(int(self._get_group_id(group_path)))
-
-        data = {
-            "id": int(pid),
-            "name": name,
-            "approvals_required": approvals_required,
-            "user_ids": user_ids,
-            "group_ids": group_ids,
-        }
-
-        return data
 
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly

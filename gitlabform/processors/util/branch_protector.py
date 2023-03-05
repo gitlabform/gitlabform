@@ -1,12 +1,12 @@
 from logging import debug
 from cli_ui import warning, fatal
 
-from gitlabform import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
 
 
-class BranchProtector(object):
+class BranchProtector:
     new_api_keys = [
         "push_access_level",
         "merge_access_level",
@@ -80,7 +80,6 @@ class BranchProtector(object):
                 )
 
             if "code_owner_approval_required" in requested_configuration:
-
                 self.set_code_owner_approval_required(
                     requested_configuration, project_and_group, branch
                 )
@@ -113,7 +112,6 @@ class BranchProtector(object):
     def validate_branch_protection_config(
         self, project_and_group, requested_configuration, branch
     ):
-
         # for the new API any key needs to be defined...
         if any(
             key in requested_configuration
@@ -140,9 +138,7 @@ class BranchProtector(object):
         # replace in our config our custom "user" and "group" entries with supported by
         # the Protected Branches API "user_id" and "group_id"
         for extra_param_key in self.extra_param_keys:
-
             for element in requested_configuration.get(extra_param_key, []):
-
                 if "user" in element.keys():
                     user_id = self.gitlab._get_user_id(element.pop("user"))
                     element["user_id"] = user_id
@@ -277,7 +273,7 @@ class BranchProtector(object):
         for array_element in protected_branches_response.get(
             f"{action}_access_levels", []
         ):
-            if array_element.get("access_level"):
+            if array_element.get("access_level") is not None:
                 levels.add(array_element.get("access_level"))
             elif array_element.get("user_id"):
                 user_ids.add(array_element.get("user_id"))

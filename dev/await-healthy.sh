@@ -14,7 +14,3 @@ done
 
 echo
 echo 'GitLab is healthy'
-
-# Print the version, since it is useful debugging information.
-curl --silent --show-error --header 'PRIVATE-TOKEN: token-string-here123' http://127.0.0.1/api/v4/version
-echo

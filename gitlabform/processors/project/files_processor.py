@@ -8,7 +8,7 @@ from cli_ui import warning, fatal
 
 from jinja2 import Environment, FileSystemLoader
 
-from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
@@ -91,21 +91,26 @@ class FilesProcessor(AbstractProcessor):
                         new_content = configuration.get("files|" + file + "|content")
                     else:
                         path_in_config = Path(
-                            configuration.get("files|" + file + "|file")
+                            str(configuration.get("files|" + file + "|file"))
                         )
                         if path_in_config.is_absolute():
-                            # TODO: does this work? we are reading the content twice in this case...
-                            path = path_in_config.read_text()
+                            effective_path = path_in_config
                         else:
                             # relative paths are relative to config file location
-                            path = Path(
+                            effective_path = Path(
                                 os.path.join(
                                     self.config.config_dir, str(path_in_config)
                                 )
                             )
-                        new_content = path.read_text()
+                        new_content = effective_path.read_text()
 
-                    if configuration.get("files|" + file + "|template", True):
+                    # templating is documented to be enabled by default,
+                    # see https://gitlabform.github.io/gitlabform/reference/files/#files
+                    templating_enabled = True
+
+                    if configuration.get(
+                        "files|" + file + "|template", templating_enabled
+                    ):
                         new_content = self.get_file_content_as_template(
                             new_content,
                             project_and_group,
@@ -168,18 +173,15 @@ class FilesProcessor(AbstractProcessor):
         # of the branch protection...
 
         try:
-
             self.just_modify_file(
                 project_and_group, branch, file, operation, configuration, new_content
             )
 
         except UnexpectedResponseException as e:
-
             if (
                 e.response_status_code == 400
                 and "You are not allowed to push into this branch" in e.response_text
             ):
-
                 # ...but if not, then we can unprotect the branch, but only if we know how to
                 # protect it again...
 
@@ -254,7 +256,9 @@ class FilesProcessor(AbstractProcessor):
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group
         rtemplate = Environment(
-            loader=FileSystemLoader("."), autoescape=True
+            loader=FileSystemLoader("."),
+            autoescape=True,
+            keep_trailing_newline=True,
         ).from_string(template)
         return rtemplate.render(
             project=self.get_project(project_and_group),
@@ -274,7 +278,7 @@ class FilesProcessor(AbstractProcessor):
         skip_build = configuration.get("files|" + file + "|skip_ci")
         skip_build_str = " [skip ci]" if skip_build else ""
 
-        return "%s%s" % (commit_message, skip_build_str)
+        return f"{commit_message}{skip_build_str}"
 
     @staticmethod
     def get_group(project_and_group):

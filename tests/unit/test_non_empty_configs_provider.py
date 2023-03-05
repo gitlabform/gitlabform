@@ -1,8 +1,8 @@
 import pytest
 
 from gitlabform import EXIT_INVALID_INPUT
-from gitlabform.configuration.projects_and_groups import ConfigurationProjectsAndGroups
-from gitlabform.filter import NonEmptyConfigsProvider
+from gitlabform.configuration import Configuration
+from gitlabform.lists.filter import OmitEmptyConfigs
 
 
 def test_error_on_missing_key():
@@ -12,8 +12,8 @@ def test_error_on_missing_key():
     """
 
     with pytest.raises(SystemExit) as e:
-        configuration = ConfigurationProjectsAndGroups(config_string=config_yaml)
-        NonEmptyConfigsProvider(configuration, None, None)
+        configuration = Configuration(config_string=config_yaml)
+        OmitEmptyConfigs(configuration, None, None)
     assert e.value.code == EXIT_INVALID_INPUT
 
 
@@ -24,6 +24,6 @@ def test_error_on_empty_key():
     """
 
     with pytest.raises(SystemExit) as e:
-        configuration = ConfigurationProjectsAndGroups(config_string=config_yaml)
-        NonEmptyConfigsProvider(configuration, None, None)
+        configuration = Configuration(config_string=config_yaml)
+        OmitEmptyConfigs(configuration, None, None)
     assert e.value.code == EXIT_INVALID_INPUT

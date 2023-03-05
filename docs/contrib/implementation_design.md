@@ -15,10 +15,12 @@ by example.
 
 ## Project Structure
 
-### Packages
+### Packages overview
 
-* `gitlabform.*` and `gitlabform.processors.*` - contains the main app logic. It provides the CLI, parsing of the parameters,
-  uses below two packages to apply the configuration to the requested set of projects and groups.
+* `gitlabform.*`, `gitlabform.lists.*` and `gitlabform.processors.*` - these contain the main app logic.
+  They provide the CLI, parsing of the parameters (`gitlabform.*`), getting the input lists of groups and projects
+  to process and omitting unneeded ones to get the effective lists (`gitlabform.lists.*`) and finally processors
+  are used to apply the groups and projects configurations in GitLab,
 
 * `gitlabform.gitlab.*` - contains the GitLab API client code, grouped mostly by the GitLab API 
   [as documented at docs.gitlab.com](https://docs.gitlab.com/ee/api/api_resources.html).
@@ -27,22 +29,26 @@ by example.
   (the latter is only for testing) and getting an effective config per GitLab project by merging
   the config on these levels: common, group and project settings.
 
+Please see the below doc sections for more info about these packages.
+
 ## Common pattern - multiple inheritance
 
 In many of the above packages we are using _multiple inheritance_.
  
-The basic features are implemented in the "core" class defined in `core.py`. Extensions to it are defined in all other
+The basic features are often implemented in the "core" class defined in `core.py`. Extensions to it are defined in all other
 files as "feature" classes that inherit the "core". Finally, there is an "everything" class that groups them all - it is
 defined in the `__init__.py` file.
 
-### gitlabform.* and gitlabform.processors.*
+### gitlabform.*, gitlabform.lists.* and gitlabform.processors.*
 
 The entry point for running the app is in `run.py` and the main logic is in the `GitLabForm` class.
 
 This code boils down to the `run()` method, which for each project that according to the app parameters
 and config should be taken into account, applies the effective config.
 
-The effective config contains what is called the "config sections", which are the YAML keys that can exist under projects
+The code in `gitlabform.lists.*` is used to generate the input lists of groups and projects, omit the ones that can and should be omitted for saving the processing time (f.e. archived projects, groups and projects with empty effective config) and this way generate the effective lists of groups and projects.
+
+The effective config for these contain what is called the "config sections", which are the YAML keys that can exist under projects
 in the config YAML, for example: `deploy_keys`, `variables`, `group_variables` and so on.
 
 Those config sections are processed by the code in the classes inheriting from the `AbstractProcessor` class. This class
@@ -106,4 +112,13 @@ If you want to **add code that operates on the new GitLab API** you should:
 
 ### gitlabform.configuration.*
 
-**TODO**: describe this part. Especially what an "effective project config" is, because that may not be clear.
+The core code in this package contains some share code, which apart from the rather obvious things like parsing the input YAML, getting the value from a specific subkey and merging configs, contains also:
+
+* code for breaking configuration inheritance using `inherit: false`,
+* dealing with groups and project names in GitLab being de facto case-insensitive (you can change case of such entities name, but you cannot have 2 which names differ only in case) (see "almost duplicates" in the code),
+
+The class inheritance order in this package (core -> common -> groups -> projects) is intentional, as common config affects groups configs and this in turn affects projects configs.
+
+The effective configuration for a project may contain elements that are inherited from the common level and from the group level.
+
+A separate module in this package, `transform.py`, contains code that does YAML-level transformation form allow a more user-friendly config syntax that is later replaced with a syntax required by GitLab API. An example of this can be accepting `user: <username>` in the input config syntax but internally transforming it into `user_id: <id_number>`.

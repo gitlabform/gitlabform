@@ -15,12 +15,11 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from gitlabform.configuration import Configuration
-from gitlabform.ui import to_str
+from gitlabform.util import to_str
 
 
 class GitLabCore:
     def __init__(self, config_path=None, config_string=None):
-
         self.configuration = Configuration(config_path, config_string)
 
         self.url = self.configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
@@ -31,7 +30,9 @@ class GitLabCore:
         self.session = requests.Session()
 
         retries = Retry(
-            total=3, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504]
+            total=3,
+            backoff_factor=0.25,
+            status_forcelist=[500, 502, 503, 504] + list(range(520, 531)),
         )
 
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
@@ -67,7 +68,7 @@ class GitLabCore:
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
 
     @functools.lru_cache()
-    def _get_user_id(self, username):
+    def _get_user_id(self, username: str) -> int:
         users = self._make_requests_to_api("users?username=%s", username, "GET")
 
         # this API endpoint is for lookup, not search, so 'username' has to be full and exact username
@@ -78,13 +79,19 @@ class GitLabCore:
                 "No users found when searching for username '%s'" % username
             )
 
-        return users[0]["id"]
+        return int(users[0]["id"])
 
     @functools.lru_cache()
-    def _get_group_id(self, path):
+    def _get_group_id(self, path) -> int:
         group = self._make_requests_to_api("groups/%s", path, "GET")
-        # TODO: add tests for all that uses this and then stop converting these ints to strings here
-        return str(group["id"])
+        return int(group["id"])
+
+    @functools.lru_cache()
+    def _get_protected_branch_id(self, project_and_group_name, branch) -> int:
+        branch = self._make_requests_to_api(
+            "projects/%s/protected_branches/%s", (project_and_group_name, branch)
+        )
+        return int(branch["id"])
 
     @functools.lru_cache()
     def _get_project_id(self, project_and_group):
@@ -167,7 +174,6 @@ class GitLabCore:
     def _make_request_to_api(
         self, path_as_format_string, args, method, dict_data, expected_codes, json_data
     ):
-
         """
         Makes a single request to the GitLab API. Takes care of the authentication, basic error processing,
         retries, timeout etc.
@@ -230,7 +236,6 @@ class GitLabCore:
 
     @staticmethod
     def _format_with_url_encoding(format_string, single_arg_or_args_tuple):
-
         # we want to URL-encode all the args, but not the path itself which looks like "/foo/%s/bar"
         # because '/'s here are NOT to be URL-encoded
 

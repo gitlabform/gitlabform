@@ -1,9 +1,10 @@
 import os
+import random
+import string
 import textwrap
-
 from xkcdpass import xkcd_password as xp
 
-from gitlabform.core import GitLabForm
+from gitlabform import GitLabForm
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 
@@ -29,7 +30,7 @@ for env_var in env_vars_to_files.keys():
             print(f"Trying to read {file_path} ...")
             if os.path.isfile(file_path):
                 try:
-                    with open(file_path, "r") as file:
+                    with open(file_path) as file:
                         os.environ[env_var] = file.read().strip()
                         print(f"{env_var} set!")
                         break
@@ -41,7 +42,7 @@ for env_var in env_vars_to_files.keys():
 gl = GitLab(config_string=CONFIG)
 
 
-def get_random_name(entity: str):
+def get_random_name(entity: str) -> str:
     random_suffix = get_random_suffix()
     return f"gitlabform_{entity}_{random_suffix}"
 
@@ -52,6 +53,17 @@ my_words = xp.generate_wordlist(wordfile=word_file, min_length=5, max_length=8)
 
 def get_random_suffix():
     return xp.generate_xkcdpassword(wordlist=my_words, numwords=1, delimiter="_")
+
+
+def get_random_password():
+    # copied from Ayushi Rawat's article
+    # https://medium.com/analytics-vidhya/create-a-random-password-generator-using-python-2fea485e9da9
+
+    length = 16
+    all_chars = string.ascii_letters + string.digits
+    password = "".join(random.sample(all_chars, length))
+
+    return password
 
 
 def get_gitlab():
@@ -107,7 +119,10 @@ def create_users(user_base_name, no_of_users):
             gl.get_user_by_name(username)
         except NotFoundException:
             gl.create_user(
-                username + "@example.com", username + " Example", username, "password"
+                username + "@example.com",
+                username + " Example",
+                username,
+                get_random_password(),
             )
         users.append(username)
     return users

@@ -1,6 +1,12 @@
-import pytest
+import os
+from typing import Callable, Optional, Generator, List
 
-from gitlabform.gitlab import AccessLevel
+import pytest
+from cryptography.hazmat.primitives import serialization as crypto_serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend as crypto_default_backend
+
+from gitlabform.gitlab import AccessLevel, GitLab
 from tests.acceptance import (
     get_gitlab,
     create_group,
@@ -10,27 +16,28 @@ from tests.acceptance import (
     get_random_name,
     create_users,
     delete_users,
+    get_random_password,
 )
 
 
 @pytest.fixture(scope="session")
-def gitlab():
+def gitlab() -> Generator[GitLab, None, None]:
     gl = get_gitlab()
     yield gl  # provide fixture value
 
 
 @pytest.fixture(scope="class")
-def group_and_project(group, project):
+def group_and_project(group, project) -> str:
     return f"{group}/{project}"
 
 
 @pytest.fixture(scope="function")
-def group_and_project_for_function(group, project_for_function):
+def group_and_project_for_function(group, project_for_function) -> str:
     return f"{group}/{project_for_function}"
 
 
 @pytest.fixture(scope="class")
-def group():
+def group() -> Generator[str, None, None]:
     group_name = get_random_name("group")
     create_group(group_name)
 
@@ -64,7 +71,19 @@ def other_group():
 
 
 @pytest.fixture(scope="class")
-def sub_group(group):
+def third_group():
+    # TODO: deduplicate this - it's a copy and paste from the above fixture
+    group_name = get_random_name("group")
+    create_group(group_name)
+
+    yield group_name
+
+    gl = get_gitlab()
+    gl.delete_group(group_name)
+
+
+@pytest.fixture(scope="class")
+def subgroup(group):
     gl = get_gitlab()
     parent_id = gl.get_group_id_case_insensitive(group)
     group_name = get_random_name("subgroup")
@@ -74,6 +93,17 @@ def sub_group(group):
 
     gl = get_gitlab()
     gl.delete_group(group + "/" + group_name)
+
+
+@pytest.fixture(scope="class")
+def project_in_subgroup(subgroup):
+    project_name = get_random_name("project")
+    create_project(subgroup, project_name)
+
+    yield f"{subgroup}/{project_name}"
+
+    gl = get_gitlab()
+    gl.delete_project(f"{subgroup}/{project_name}")
 
 
 @pytest.fixture(scope="class")
@@ -159,7 +189,7 @@ def branch(gitlab, group_and_project):
 
 @pytest.fixture(scope="class")
 def other_branch(gitlab, group_and_project):
-    # TOOD: deduplicate
+    # TODO: deduplicate
     name = get_random_name("other_branch")
     gitlab.create_branch(group_and_project, name, "main")
 
@@ -175,21 +205,28 @@ class User:
 
 
 @pytest.fixture(scope="class")
-def make_user(gitlab, group_and_project):
+def make_user(
+    gitlab, group_and_project
+) -> Generator[Callable[[AccessLevel, bool], User], None, None]:
     username_base = get_random_name("user")
-    created_users = []
+    created_users: List[User] = []
 
-    def _make_user(level=AccessLevel.DEVELOPER, add_to_project=True):
+    def _make_user(
+        level: AccessLevel = AccessLevel.DEVELOPER, add_to_project: bool = True
+    ) -> User:
         last_id = len(created_users) + 1
         username = f"{username_base}_{last_id}"
         user = gitlab.create_user(
-            username + "@example.com", username + " Example", username, "password"
+            username + "@example.com",
+            username + " Example",
+            username,
+            get_random_password(),
         )
-        user_obj = User(username, user["id"])
+
         if add_to_project:
-            gitlab.add_member_to_project(
-                group_and_project, None, level.value, user_id=user["id"]
-            )
+            gitlab.add_member_to_project(group_and_project, username, level.value)
+
+        user_obj = User(username, user["id"])
         created_users.append(user_obj)
         return user_obj
 
@@ -212,10 +249,50 @@ def three_members(gitlab, group_and_project, make_user):
 def outsider_user(gitlab, group_and_project):
     username = get_random_name("outsider_user")
     user = gitlab.create_user(
-        username + "@example.com", username + " Example", username, "password"
+        username + "@example.com",
+        username + " Example",
+        username,
+        get_random_password(),
     )
     user_obj = User(username, user["id"])
 
     yield user_obj.name
 
     gitlab.delete_user(None, user_id=user_obj.id)
+
+
+@pytest.fixture(scope="function")
+def public_ssh_key(gitlab):
+    key = rsa.generate_private_key(
+        backend=crypto_default_backend(), public_exponent=65537, key_size=2048
+    )
+
+    public_key = key.public_key().public_bytes(
+        crypto_serialization.Encoding.OpenSSH, crypto_serialization.PublicFormat.OpenSSH
+    )
+
+    yield public_key.decode("UTF-8")
+
+
+@pytest.fixture(scope="function")
+def other_public_ssh_key(gitlab):
+    # TODO: deduplicate this - it's a copy and paste from the above fixture
+    key = rsa.generate_private_key(
+        backend=crypto_default_backend(), public_exponent=65537, key_size=2048
+    )
+
+    public_key = key.public_key().public_bytes(
+        crypto_serialization.Encoding.OpenSSH, crypto_serialization.PublicFormat.OpenSSH
+    )
+
+    yield public_key.decode("UTF-8")
+
+
+@pytest.fixture(scope="class")
+def token_from_env_var():
+    token = os.environ["GITLAB_TOKEN"]
+    del os.environ["GITLAB_TOKEN"]
+
+    yield token
+
+    os.environ["GITLAB_TOKEN"] = token

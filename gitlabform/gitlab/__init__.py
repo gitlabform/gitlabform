@@ -12,8 +12,15 @@ from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
 from gitlabform.gitlab.project_badges import GitLabProjectBadges
 from gitlabform.gitlab.project_deploy_keys import GitLabProjectDeployKeys
+from gitlabform.gitlab.project_protected_environments import (
+    GitLabProjectProtectedEnvironments,
+)
+from gitlabform.gitlab.project_merge_requests_approvals import (
+    GitLabProjectMergeRequestsApprovals,
+)
 from gitlabform.gitlab.variables import GitLabVariables
 from gitlabform.gitlab.repositories import GitLabRepositories
+from gitlabform.gitlab.resource_groups import GitLabResourceGroups
 from gitlabform.gitlab.schedules import GitLabPipelineSchedules
 from gitlabform.gitlab.integrations import GitLabIntegrations
 from gitlabform.gitlab.tags import GitLabTags
@@ -50,6 +57,7 @@ class GitLab(
     GitLabCommits,
     GitLabMergeRequests,
     GitLabRepositories,
+    GitLabResourceGroups,
     GitLabIntegrations,
     GitLabTags,
     GitLabGroupLDAPLinks,
@@ -61,6 +69,8 @@ class GitLab(
     GitLabPipelineSchedules,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
+    GitLabProjectProtectedEnvironments,
+    GitLabProjectMergeRequestsApprovals,
     GitLabVariables,
 ):
     pass

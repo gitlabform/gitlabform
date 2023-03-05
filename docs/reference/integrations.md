@@ -11,7 +11,7 @@ Example:
 ```yaml
 projects_and_groups:
   group_1/project_1:
-    services:
+    integrations:
       slack:
         delete: true
       drone-ci:

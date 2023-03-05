@@ -10,14 +10,12 @@ class GitLabGroups(GitLabCore):
         return self.get_group_case_insensitive(some_string)["id"]
 
     def get_group_case_insensitive(self, some_string):
-
         # maybe "foo/bar" is some group's path
 
         try:
             # try with exact case
             return self.get_group(some_string)
         except NotFoundException:
-
             # try case insensitive
             groups = self._make_requests_to_api(
                 "groups?search=%s",

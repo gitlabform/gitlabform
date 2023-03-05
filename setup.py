@@ -17,7 +17,7 @@ def get_version_file_path():
 setup(
     name="gitlabform",
     version=open(get_version_file_path()).read(),
-    description='🏗 Specialized "configuration as a code" tool for GitLab projects, groups and more'
+    description="🏗 Specialized configuration as a code tool for GitLab projects, groups and more"
     " using hierarchical configuration written in YAML",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -29,6 +29,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Information Technology",
         "Intended Audience :: System Administrators",
@@ -44,26 +45,30 @@ setup(
     python_requires=">=3.7.0",
     install_requires=[
         "certifi",  # we want the latest root certs for security
-        "requests==2.28.1",
+        "requests==2.28.2",
+        "types-requests==2.28.11.15",
         "Jinja2==3.1.2",
-        "MarkupSafe==2.1.1",
-        "ruamel.yaml==0.17.17",
+        "MarkupSafe==2.1.2",
+        "ruamel.yaml==0.17.21",
         "luddite==1.0.2",
-        "cli-ui==0.17.0",
-        "packaging==21.3",
+        "cli-ui==0.17.2",
+        "packaging==23.0",
         "mergedeep==1.3.4",
-        "yamlpath==3.6.4",
+        "yamlpath==3.7.0",
         "ez-yaml==1.2.0",
     ],
     extras_require={
         "test": [
-            "pytest==7.1.2",
+            "pytest==7.2.1",
             "xkcdpass==1.19.3",
-            "pre-commit==2.20.0",  # not really for tests, but for development
-            "coverage==6.4.3",
-            "pytest-cov==3.0.0",
-            "deepdiff==5.8.1",
-            "pytest-rerunfailures==10.2",
+            "pre-commit==2.21.0",  # not really for tests, but for development
+            "coverage==7.2.1",
+            "pytest-cov==4.0.0",
+            "deepdiff==6.2.3",
+            "pytest-rerunfailures==11.1.1",
+            "cryptography==39.0.1",
+            "mypy==1.0.1",
+            "mypy-extensions==1.0.0",
         ],
         "docs": [
             "mkdocs",

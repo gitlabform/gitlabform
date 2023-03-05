@@ -1,5 +1,99 @@
 # Changelog
 
+## 3.4.3
+
+* Fix: add missing support for using group name when protecting an environment. Fixes [#503](https://github.com/gitlabform/gitlabform/issues/503), PR [#506](https://github.com/gitlabform/gitlabform/pull/506). 
+
+## 3.4.2
+
+* Improve the reliability in some cases (PR [#497](https://github.com/gitlabform/gitlabform/pull/497)):
+  * retrying the whole section for a given entity (f.e. `files` for a project `foo/bar`) when it fails on a non-retryable individual HTTP request,
+  * retrying individual HTTP requests on errors that may be returned by gitlab.com's CloudFlare CDN (520-531).
+
+## 3.4.1
+
+* Fix for old merge request syntax using inheritance when a sole `approvals_before_merge` setting is inherited/overwritten. PR [#481](https://github.com/gitlabform/gitlabform/pull/481).
+
+## 3.4.0
+
+* **Add support for [multiple merge request approval rules](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html#add-multiple-approval-rules) and for changing the name of the currently managed single approval rule**. Implements [#388](https://github.com/gitlabform/gitlabform/issues/388) and [#95](https://github.com/gitlabform/gitlabform/issues/95), PR [#435](https://github.com/gitlabform/gitlabform/pull/435) and many more.
+* A more user-friendly error message when a key is not found. PR [#422](https://github.com/gitlabform/gitlabform/pull/422)
+* Start to edit instead of remove+re-add users as project and group members when changing their access level or expiration time. This should give cleaner audit logs of membership changes and may resolve some issues. Related to issue [#466](https://github.com/gitlabform/gitlabform/issues/466), PR [#469](https://github.com/gitlabform/gitlabform/pull/469).
+* Operate on simple dicts and lists instead of more complex ordereddict and CommentedSeq for easier to understand debug output and tests.
+* Show the config before and after the internal transformation stage, with the debug output enabled.
+* (For contributors) Big refactoring to make the code more logically groupped and contribution documentation updates for easier contributions. Please see the commit messages in the PR [#431](https://github.com/gitlabform/gitlabform/pull/431) for more information.
+
+Thanks to the following contributors of this release: 
+* [Waldek Maleska](https://github.com/weakcamel), [amimas](https://github.com/amimas), [Jimisola Laursen](https://github.com/jimisola), [Siythrun](https://github.com/Siythrun) for consulting and testing of the multiple merge request approval rules feature, 
+* [Rafael Zanella](https://github.com/zanella) for the development.
+
+## 3.4.0rc4
+
+* Fix internal conversion of group names and usernames to ids in some cases for Merge Request approval rules. Reported by [Siythrun](https://github.com/Siythrun) in issue [#388](https://github.com/gitlabform/gitlabform/issues/388), PR [#467](https://github.com/gitlabform/gitlabform/pull/467).
+* Operate on simple dicts and lists instead of more complex ordereddict and CommentedSeq for easier to understand debug output and tests.
+* Show the config before and after the internal transformation stage, with the debug output enabled.
+
+## 3.3.4
+
+* Fix unnecessary reapply of branch protection when `*_access_levels` is set to `0`. PR [#474](https://github.com/gitlabform/gitlabform/pull/474)
+
+Thanks to [Ben Kuhar](https://github.com/BenKuhar) for his contribution!
+
+## 3.4.0rc3
+
+* Start to edit instead of remove+re-add users as project and group members when changing their access level or expiration time. This should give cleaner audit logs of membership changes and may resolve some issues. Related to issue [#466](https://github.com/gitlabform/gitlabform/issues/466), PR [#469](https://github.com/gitlabform/gitlabform/pull/469).
+
+## 3.3.3
+
+* Fix bug on the first run when both adding project members and the same users as merge request approvers. Fixes [#461](https://github.com/gitlabform/gitlabform/issues/461).
+
+## 3.4.0rc2
+
+* A more user-friendly error message when a key is not found. PR [#422](https://github.com/gitlabform/gitlabform/pull/422)
+* Fix for converting legacy merge request approval into the new setup. PR [#456](https://github.com/gitlabform/gitlabform/pull/456)
+
+Thanks to [Rafael Zanella](https://github.com/zanella) for his contribution!
+
+## 3.3.2
+
+* Don't strip trailing new lines from files. Fixes [#451](https://github.com/gitlabform/gitlabform/issues/451), PR [#452](https://github.com/gitlabform/gitlabform/pull/452).
+
+## 3.3.1
+
+* Fix for setting deploy key in some cases fail with HTTP 400: `{"fingerprint":["has already been taken"]}`. Fixes [#19](https://github.com/gitlabform/gitlabform/issues/19), PR [#441](https://github.com/gitlabform/gitlabform/pull/441).
+
+## 3.4.0rc1
+
+* **Add support for [multiple merge request approval rules](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/rules.html#add-multiple-approval-rules) and for changing the name of the currently managed single approval rule**. Implements [#388](https://github.com/gitlabform/gitlabform/issues/388) and [#95](https://github.com/gitlabform/gitlabform/issues/95), PR [#435](https://github.com/gitlabform/gitlabform/pull/435). The syntax for this feature is shown [here](https://github.com/gitlabform/gitlabform/issues/388#issuecomment-1278213194) for now - it will be moved to the GitHub Pages docs before the final release of v3.4.0.
+* (For contributors) Big refactoring to make the code more logically groupped and contribution documentation updates for easier contributions. Please see the commit messages in the PR [#431](https://github.com/gitlabform/gitlabform/pull/431) for more information.
+
+## 3.3.0
+
+* **Add support for managing project [Protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html#protected-environments).** PR [#423](https://github.com/gitlabform/gitlabform/pull/423) & PR [#430](https://github.com/gitlabform/gitlabform/pull/430)
+* Add support for Python 3.11 and switch to this version in the Docker image.
+* (For contributors) Move all the GitLabForm tests that require GitLab Premium license into a separate module and introduce a new GitHub Actions flow to enable running them for PRs after the maintainer's approval.
+
+Thanks to [Rafael Zanella](https://github.com/zanella) for his contributions!
+
+## 3.2.0
+
+* **Add authoritative mode (`enforce: true`) support to group badges, group LDAP links, group variables, badges, deploy keys, variables.** Implements [#403](https://github.com/gitlabform/gitlabform/issues/403), PR [#419](https://github.com/gitlabform/gitlabform/pull/419).
+
+## 3.1.2
+
+* Make setting project-level CI/CI variables with a non-default different `environment_scope` work again. Fixes [#411](https://github.com/gitlabform/gitlabform/issues/411), PR [#414](https://github.com/gitlabform/gitlabform/pull/414).
+
+## 3.1.1
+
+* Fixed error when passing the GitLab token in the config file with single or double quotes. Fixes [#401](https://github.com/gitlabform/gitlabform/issues/401), PR [#412](https://github.com/gitlabform/gitlabform/pull/412).
+
+## 3.1.0
+
+* **Add support for Resource groups**. Implements [#341](https://github.com/gitlabform/gitlabform/issues/341). PR [#369](https://github.com/gitlabform/gitlabform/pull/369).
+* Fix Integrations documentation. PR [#402](https://github.com/gitlabform/gitlabform/pull/402).  
+
+Thanks to [@ep-linden](https://github.com/ep-linden) from [Elastic Path](https://www.elasticpath.com/) and to [@L154x](https://github.com/L154x) for their contribution!
+
 ## 3.0.0
 
 This is a major new version with some backward incompatibility. Please follow [the upgrade guide](https://gitlabform.github.io/gitlabform/upgrade/) for a fast and safe upgrade.
@@ -52,23 +146,23 @@ Thanks to the contributors of this release: [@ep-linden](https://github.com/ep-l
 Imagine you have a configuration like this:
 ```yaml
 projects_and_groups:
-    *my-group/*:
-    *members:
-    *enforce: true
-    *groups:
-    *regular-developers:
-    *group_access: developer
-    *
-    *my-group/special-private-project:
-    *members:
-    *inherit: false # <--- the new keyword
-    *enforce: true
-    *groups:
-    *special-developers:
-    *group_access: developer
-    *users:
-    *john:
-    *access_level: maintainer
+  my-group/*:
+    members:
+      enforce: true
+      groups:
+        regular-developers:
+          group_access: developer
+
+  my-group/special-private-project:
+    members:
+      inherit: false # <--- the new keyword
+      enforce: true
+      groups:
+        special-developers:
+          group_access: developer
+      users:
+        john:
+          access_level: maintainer
 ```
 With the new `inherit: false` entry used here, the effective members for `my-group/special-private-project` project are ONLY the `special-developers` grup and `john` user.
 
@@ -120,41 +214,41 @@ Big thanks to the [Elastic Path](https://www.elasticpath.com/) team for their co
 ✨ **New** ✨ config syntax example:
 ```yaml
 projects_and_groups:
-    *foo/*:
-    *# below key now includes what used to be under 
-    *# `group_shared_with` and `enforce_group_members` keys
-    *group_members:
-    *# there are only up to 3 direct keys below
-    *groups:
-    *another-group:
-    *# below key's name been changed to the name used in projects `members`
-    *# for groups (and the same as in the API to share group with group)
-    *group_access: 30
-    *users:
-    *my-user:
-    *access_level: 50 # owner
-    *# this will enforce group-level users to be ONLY as defined above
-    *enforce: true
+  foo/*:
+    # below key now includes what used to be under 
+    # `group_shared_with` and `enforce_group_members` keys
+    group_members:
+      # there are only up to 3 direct keys below
+      groups:
+        another-group:
+          # below key's name been changed to the name used in projects `members`
+          # for groups (and the same as in the API to share group with group)
+          group_access: 30
+      users:
+        my-user:
+          access_level: 50 # owner
+      # this will enforce group-level users to be ONLY as defined above
+      enforce: true
 
-    *# this will make the projects in `foo` group not contain any **direct** users or groups other
-    *# (so it will make it contain only the ones inherited from the group `foo`)
-    *members:
-    *enforce: true
+    # this will make the projects in `foo` group not contain any **direct** users or groups other
+    # (so it will make it contain only the ones inherited from the group `foo`)
+    members:
+      enforce: true
 ```
 The 🏚 old and deprecated 🏚 syntax for a similar* config would be:
 ```yaml
 projects_and_groups:
-    *foo/*:
-    *group_shared_with:
-    *groups:
-    *another-group:
-    *group_access_level: 30
-    *group_members:
-    *my-user:
-    *access_level: 50 # owner
-    *enforce_group_members: true
+  foo/*:
+    group_shared_with:
+      groups:
+        another-group:
+          group_access_level: 30
+    group_members:
+      my-user:
+        access_level: 50 # owner
+    enforce_group_members: true
 
-    *# !!! * - there was no enforce project members support before v2.8.0 !!!
+    # !!! * - there was no enforce project members support before v2.8.0 !!!
 ```
 The old syntax works but will generate warnings. Support for it will be removed in one the future major GitLabForm versions.
 
@@ -261,7 +355,7 @@ Thanks to [@Pigueiras](https://github.com/Pigueiras) for his contribution!
 ## 2.0.2
 
 * Fixed issue with `unprotect_branch_new_api`. Fixes [#219](https://github.com/gitlabform/gitlabform/issues/219)
-    *(update: later it turned out that it was not really fixed in 2.0.2 but in 2.0.5 instead)
+    (update: later it turned out that it was not really fixed in 2.0.2 but in 2.0.5 instead)
 
 ## 2.0.1
 

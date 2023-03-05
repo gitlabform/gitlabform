@@ -1,4 +1,4 @@
-from gitlabform.core import GitLabForm
+from gitlabform import GitLabForm
 
 
 def run():

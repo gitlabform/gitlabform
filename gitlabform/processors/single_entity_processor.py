@@ -2,11 +2,15 @@ from logging import debug
 from cli_ui import debug as verbose
 
 import abc
-from typing import Callable
+from typing import Callable, Optional
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.difference_logger import DifferenceLogger
+
+
+def noop():
+    pass
 
 
 class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
@@ -16,7 +20,7 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         gitlab: GitLab,
         get_method_name: str,
         edit_method_name: str,
-        add_method_name: str = None,
+        add_method_name: Optional[str] = None,
     ):
         super().__init__(configuration_name, gitlab)
         self.get_method: Callable = getattr(self.gitlab, get_method_name)
@@ -24,10 +28,9 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         if add_method_name:
             self.add_method: Callable = getattr(self.gitlab, add_method_name)
         else:
-            self.add_method = None
+            self.add_method = noop
 
     def _process_configuration(self, project_or_group: str, configuration: dict):
-
         entity_config = configuration[self.configuration_name]
 
         entity_in_gitlab = self.get_method(project_or_group)
@@ -48,7 +51,6 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             debug(f"{self.configuration_name} AFTER: ^^^")
 
     def _print_diff(self, project_or_project_and_group: str, entity_config):
-
         entity_in_gitlab = self.get_method(project_or_project_and_group)
 
         DifferenceLogger.log_diff(

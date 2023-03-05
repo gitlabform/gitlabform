@@ -4,13 +4,13 @@ import ez_yaml
 from cli_ui import debug as verbose
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
+from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 
 
-class EffectiveConfiguration:
+class EffectiveConfigurationFile:
     """
-    For upgrades and configuration refactoring we want to be able to compare the effective configurations before
-    and after the code/app change. This class provides a feature to write the effective configuration into a YAML
+    For GitLabForm upgrades and configuration refactoring we want to be able to compare the effective configurations
+    before and after the code/app change. This class provides a feature to write the effective configuration into a YAML
     file.
     """
 

@@ -1,7 +1,9 @@
 from logging import debug
+from typing import Dict, Tuple
+
 from cli_ui import fatal
 
-from gitlabform import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
@@ -11,7 +13,6 @@ class GroupMembersProcessor(AbstractProcessor):
         super().__init__("group_members", gitlab)
 
     def _process_configuration(self, group: str, configuration: dict):
-
         enforce_group_members = configuration.get("group_members|enforce", False)
 
         (
@@ -36,8 +37,7 @@ class GroupMembersProcessor(AbstractProcessor):
         self._process_users(group, users_to_set_by_username, enforce_group_members)
 
     @staticmethod
-    def _get_groups_and_users_to_set(configuration: dict) -> (dict, dict):
-
+    def _get_groups_and_users_to_set(configuration: dict) -> Tuple[dict, dict]:
         groups_to_set_by_group_path = configuration.get("group_members|groups", {})
 
         users_to_set_by_username = configuration.get("group_members", {})
@@ -57,7 +57,6 @@ class GroupMembersProcessor(AbstractProcessor):
     def _process_groups(
         self, group: str, groups_to_set_by_group_path: dict, enforce_group_members: bool
     ):
-
         # group users before by group name
         groups_before = self.gitlab.get_group_case_insensitive(group)[
             "shared_with_groups"
@@ -71,7 +70,6 @@ class GroupMembersProcessor(AbstractProcessor):
             ] = share_details
 
         for share_with_group_path in groups_to_set_by_group_path:
-
             group_access_to_set = groups_to_set_by_group_path[share_with_group_path][
                 "group_access"
             ]
@@ -83,7 +81,6 @@ class GroupMembersProcessor(AbstractProcessor):
             )
 
             if share_with_group_path in groups_before_by_group_path:
-
                 group_access_before = groups_before_by_group_path[
                     share_with_group_path
                 ]["group_access_level"]
@@ -142,7 +139,6 @@ class GroupMembersProcessor(AbstractProcessor):
     def _process_users(
         self, group: str, users_to_set_by_username: dict, enforce_group_members: bool
     ):
-
         # group users before by username
         # (note: we DON'T get inherited users as we don't manage them at this level anyway)
         users_before = self.gitlab.get_group_members(group, with_inherited=False)
@@ -152,9 +148,8 @@ class GroupMembersProcessor(AbstractProcessor):
             users_before_by_username[user["username"]] = user
 
         if users_to_set_by_username:
-
             # group users to set by access level
-            users_to_set_by_access_level = dict()
+            users_to_set_by_access_level: Dict[int, list] = dict()
             for user in users_to_set_by_username:
                 access_level = users_to_set_by_username[user]["access_level"]
                 users_to_set_by_access_level.setdefault(access_level, []).append(user)
@@ -162,7 +157,6 @@ class GroupMembersProcessor(AbstractProcessor):
             # we HAVE TO start configuring access from the highest access level - in case of groups this is Owner
             # - to ensure that we won't end up with no Owner in a group
             for level in reversed(sorted(AccessLevel.group_levels())):
-
                 users_to_set_with_this_level = (
                     users_to_set_by_access_level[level]
                     if level in users_to_set_by_access_level
@@ -170,7 +164,6 @@ class GroupMembersProcessor(AbstractProcessor):
                 )
 
                 for user in users_to_set_with_this_level:
-
                     access_level_to_set = users_to_set_by_username[user]["access_level"]
                     expires_at_to_set = (
                         users_to_set_by_username[user]["expires_at"]
@@ -179,7 +172,6 @@ class GroupMembersProcessor(AbstractProcessor):
                     )
 
                     if user in users_before_by_username:
-
                         access_level_before = users_before_by_username[user][
                             "access_level"
                         ]
@@ -195,13 +187,10 @@ class GroupMembersProcessor(AbstractProcessor):
                             )
                         else:
                             debug(
-                                "Re-adding user '%s' to change their access level or expires at.",
+                                "Editing user '%s' membership to change their access level or expires at.",
                                 user,
                             )
-                            # we will remove the user first and then re-add they,
-                            # to ensure that the user has the expected access level
-                            self.gitlab.remove_member_from_group(group, user)
-                            self.gitlab.add_member_to_group(
+                            self.gitlab.edit_member_of_group(
                                 group, user, access_level_to_set, expires_at_to_set
                             )
 

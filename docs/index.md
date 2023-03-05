@@ -2,7 +2,6 @@
 ![release date](https://img.shields.io/github/release-date/gitlabform/gitlabform)
 [![Downloads](https://pepy.tech/badge/gitlabform/month)](https://pepy.tech/project/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/egnyte/gitlabform?label=code%20quality)](https://lgtm.com/projects/g/egnyte/gitlabform/context:python)
 [![codecov](https://codecov.io/gh/gitlabform/gitlabform/branch/main/graph/badge.svg?token=NOMttkpB2A)](https://codecov.io/gh/gitlabform/gitlabform)
 [![gitlabform](https://snyk.io/advisor/python/gitlabform/badge.svg)](https://snyk.io/advisor/python/gitlabform)
 
@@ -10,7 +9,7 @@
   ![GitLabForm logo](images/gitlabform-logo.png)
 </figure>
 
-is a specialized "configuration as a code" tool for GitLab projects, groups and more
+is a specialized configuration as a code tool for GitLab projects, groups and more
 using hierarchical configuration written in YAML.
 
 
@@ -20,22 +19,22 @@ using hierarchical configuration written in YAML.
 
 A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](configuration_reference/#effective-configuration) .
 ```yaml
-  # configuration shared by all projects in this group...
+projects_and_groups:
+  # configuration shared by all projects in a group named 'a_group'...
   a_group/*:
-    merge_requests:
-      approvals:
-        approvals_before_merge: 2
+    merge_requests_approvals:
+      disable_overriding_approvers_per_merge_request: true
   # ...except this project that has a different config:
   a_group/a_special_project:
-    merge_requests:
-      approvals:
-        approvals_before_merge: 1
+    merge_requests_approvals:
+      disable_overriding_approvers_per_merge_request: false
 ```
 
 ### Dynamic features
 
 GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](configuration_reference/#raw-parameters-passing).
 ```yaml
+projects_and_groups:
   a_group/a_project:
     project_settings:
       # ALL the keys described at
@@ -46,9 +45,10 @@ GitLab introduces new features monthly. You can often use them in GitLabForm wit
 ### Stability
 
 We treat our users the way we would like to be treated by other software projects maintainers:
-    * We follow [semver](https://semver.org/) and don't allow _existing features behavior changes_ in minor or patch versions.
-    * Before changing the syntax we start printing _deprecation warnings_ in the versions before.
-    * We use _versioning of the configuration syntax_ for major changes and provide step-by-step upgrade guidelines.
+
+* We follow [semver](https://semver.org/) and don't allow _existing features behavior changes_ in minor or patch versions.
+* Before changing the syntax we start printing _deprecation warnings_ in the versions before.
+* We use _versioning of the configuration syntax_ for major changes and provide step-by-step upgrade guidelines.
 
 ## Quick start
 

@@ -4,7 +4,7 @@ Please do:
 
 * use the common sense,
 * add tests along with the new code that prove that it works:
-    * in case of non-trivial logic add/change please add unit tests,
+    * when adding/changing non-trivial logic please add unit tests,
     * for all bug fixes and new features using GitLab API please add acceptance tests
 * use [Black](https://github.com/psf/black) code formatter:
 ```

@@ -1,13 +1,19 @@
+from abc import ABC
+
 import functools
 from logging import debug
 
-from gitlabform.configuration.core import ConfigurationCore
-from gitlabform.ui import to_str
+from gitlabform.configuration import ConfigurationCommon
+from gitlabform.util import to_str
 
 
-class ConfigurationGroups(ConfigurationCore):
-    def __init__(self, config_path=None, config_string=None):
-        super().__init__(config_path, config_string)
+class ConfigurationGroups(ConfigurationCommon, ABC):
+    """
+    Gets the groups, skipped groups and their effective configuration.
+
+    ConfigurationCommon is an ancestor of this class because the effective group configuration
+    depends on the common configuration.
+    """
 
     def get_groups(self) -> list:
         """
@@ -22,6 +28,13 @@ class ConfigurationGroups(ConfigurationCore):
                 groups.append(group_name)
         return sorted(groups)
 
+    def is_group_skipped(self, group):
+        """
+        :return: if group is defined in the key with groups to skip,
+                 ignoring the case
+        """
+        return self._is_skipped_case_insensitively(self.get("skip_groups", []), group)
+
     @functools.lru_cache()
     def get_effective_config_for_group(self, group) -> dict:
         """
@@ -30,23 +43,26 @@ class ConfigurationGroups(ConfigurationCore):
         """
 
         common_config = self.get_common_config()
-        debug("Common config: %s", to_str(common_config))
+        debug("*Effective* common config: %s", to_str(common_config))
 
         if "/" in group:
-            group_config = self.get_effective_subgroup_config(group)
+            group_config = self._get_effective_subgroup_config(group)
         else:
-            group_config = self.get_group_config(group)
-            if not common_config:
-                self.validate_break_inheritance_flag(group_config, group)
-        debug("Effective group/subgroup config: %s", to_str(group_config))
+            group_config = self._get_group_config(group)
+        debug("*Effective* group/subgroup config: %s", to_str(group_config))
 
-        if not group_config and not common_config:
-            return {}
+        if not common_config and group_config:
+            self._validate_break_inheritance_flag(group_config, group)
 
-        return self.merge_configs(common_config, group_config)
+        effective_config_for_group = self._merge_configs(common_config, group_config)
+        debug(
+            "*Effective* config common+group/subgroup: %s",
+            to_str(effective_config_for_group),
+        )
 
-    def get_effective_subgroup_config(self, subgroup):
+        return effective_config_for_group
 
+    def _get_effective_subgroup_config(self, subgroup):
         #
         # Goes through a subgroups hierarchy, from top to bottom
         #
@@ -67,14 +83,14 @@ class ConfigurationGroups(ConfigurationCore):
         last_element = None
         for element in elements:
             if not last_element:
-                effective_config = self.get_group_config(element)
+                effective_config = self._get_group_config(element)
                 debug(
                     "First level config for '%s': %s", element, to_str(effective_config)
                 )
                 last_element = element
             else:
                 next_level_subgroup = last_element + "/" + element
-                next_level_subgroup_config = self.get_group_config(next_level_subgroup)
+                next_level_subgroup_config = self._get_group_config(next_level_subgroup)
                 debug(
                     "Config for '%s': %s",
                     next_level_subgroup,
@@ -82,13 +98,13 @@ class ConfigurationGroups(ConfigurationCore):
                 )
 
                 if effective_config:
-                    self.validate_break_inheritance_flag(effective_config, subgroup)
+                    self._validate_break_inheritance_flag(effective_config, subgroup)
                 elif not effective_config and next_level_subgroup_config:
-                    self.validate_break_inheritance_flag(
+                    self._validate_break_inheritance_flag(
                         next_level_subgroup_config, next_level_subgroup
                     )
 
-                effective_config = self.merge_configs(
+                effective_config = self._merge_configs(
                     effective_config,
                     next_level_subgroup_config,
                 )
@@ -102,6 +118,12 @@ class ConfigurationGroups(ConfigurationCore):
 
         return effective_config
 
-
-class EmptyConfigException(Exception):
-    pass
+    def _get_group_config(self, group) -> dict:
+        """
+        :param group: group/subgroup
+        :return: configuration for this group/subgroup or empty dict if not defined,
+                 ignoring the case
+        """
+        return self._get_case_insensitively(
+            self.get("projects_and_groups"), f"{group}/*"
+        )

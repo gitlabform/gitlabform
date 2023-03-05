@@ -100,10 +100,12 @@ Syntax for each section is explained in detail on subpages - see links on the le
 
 ### Effective configuration
 
-To generate the effective configuration to apply for a given project or group, if it is configured on more than one level, GitLabForm will **merge** those configurations.
+To generate the effective configuration to apply for a given project or group, if it is configured on more than one level, GitLabForm will merge those configurations.
 
 
-If there are conflicting values in the more general (f.e. common) and more specific level (f.e. group level), then the more specific configuration will **overwrite** the more general one. Example:
+If under the exactly same keys there are different values in the more general (f.e. common) and more specific level (f.e. group level), then the more specific configuration will **overwrite** the more general one.
+
+Example:
 ```yaml
 projects_and_groups:
   # common settings for ALL projects in ALL groups
@@ -114,38 +116,131 @@ projects_and_groups:
 
   group_1/*:
     project_settings:
-      visibility: private
+      visibility: private # <-- different value!
 ``` 
-For this configuration, for a project `group_1/project_1` the effective project settings will be: `default_branch: main`, `visibility: private`.
+With this configuration, for a project `group_1/project_1` the effective configuration will be like:
+```yaml
+project_settings:
+  default_branch: main
+  visibility: private
+```
 
+If there are more keys in the more specific config than in the more general one, then they are **added**. So for example for sections like `deploy_keys`, `variables`, `hooks` on each lower level the effective configuration will contain elements from the higher levels AND the elements from the lower levels.
 
-If the keys are added under different names in the more general and the more specific config, then they are **added**. So for example for sections like `deploy_keys`, `variables`, `hooks` on each lower level the effective configuration will contain elements from the higher levels plus elements from the lower levels. Example:
+Example:
 ```yaml
 projects_and_groups:
   "*":
     deploy_keys:
-      a_shared_key:
+      key_a:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
         title: global_key
         can_push: false
   
   group_1/*:
     deploy_keys:
-      another_key:
+      key_b: # <-- another key under deploy_keys!
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
         title: group_key
         can_push: false
 ```
-For this configuration, for a project `group_1/project_1` the effective configuration will contain 2 keys, `a_shared_key` and `another_key`.
+With this configuration, for a project `group_1/project_1` the effective configuration will be:
+```yaml
+deploy_keys:
+  key_a:
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
+    title: global_key
+    can_push: false
+  key_b:
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
+    title: group_key
+    can_push: false
+```
 
-### Skipping sections
+(What to do if you want have a key **removed**? You will need to use the "breaking inheritance" feature, explained in details below.)
 
-If the only key under a section is `skip: true` then the given config section is not set AT ALL for a given entity. Example:
+
+**Warning**: dicts are additive but arrays are not! The more specific arrays are always overwriting the more general ones.
+
+For example with this config:
+```yaml
+projects_and_groups:
+  "*":
+    merge_requests_approval_rules:
+      default:
+        approvals_required: 2
+        name: "Team X or Y or super-user"
+        groups:
+          - group-x
+          - group-y
+        users:
+          - super-user
+  group_1/*:
+    merge_requests_approval_rules:
+      default:
+        approvals_required: 1
+        name: "Team Z"
+        groups:
+          - group-z
+        users: []
+```
+With this configuration, for a project `group_1/project_1` the effective configuration will be:
+```yaml
+merge_requests_approval_rules:
+  default:
+    approvals_required: 1
+    name: "Team Z"
+    groups:
+      - group-z
+```
+Note that the value of `groups` is an array, so the effective `groups` contains only the single element array from `group_1/*` - the arrays were not added!
+
+Also note that the `users` is a key in the `default` dict, so we could not omit it. If we did that then __adding__ would work here and `users` would be effective set to `[super-user]`. We didn't want that and that's why we did set it an explicitly empty array `[]`.
+
+### Breaking inheritance
+
+You can prevent inheriting configuration from the higher levels by placing `inherit: false` under a given section.
+
+Example:
 ```yaml
 projects_and_groups:
   "*":
     deploy_keys:
-      a_shared_key:
+      key_a:
+        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
+        title: global_key # this name is show in GitLab
+        can_push: false
+  group_1/*:
+    deploy_keys:
+      inherit: false
+      key_b:
+        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
+        title: group_key # this name is show in GitLab
+        can_push: false
+```
+For the above configuration, for a project `group_1/project_1` the effective configuration for section `deploy_keys` is like defined for all projects and groups under `*`, with the more specific config in `group_1/*` ignored. In other words it will be like this:
+```yaml
+deploy_keys:
+  key_a:
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
+    title: global_key # this name is show in GitLab
+    can_push: false
+```
+
+!!! important
+
+    `inherit: false` can be placed at ANY place in the configuration (if it makes sense).
+
+### Skipping sections
+
+If the only key under a section is `skip: true` then the given config section is not set AT ALL for a given entity.
+
+Example:
+```yaml
+projects_and_groups:
+  "*":
+    deploy_keys:
+      key_a:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
         title: global_key
         can_push: false
@@ -153,36 +248,11 @@ projects_and_groups:
     deploy_keys:
       skip: true
 ```
-For the above configuration, for a project `group_1/project_1` the effective configuration is to NOT manage the deploy keys at all.
+For the above configuration, for a project `group_1/project_1` the deploy keys are not managed by GitLabForm all.
 
 !!! important
 
     `skip: true` can be placed ONLY directly under a section name.
-
-### Breaking inheritance
-
-You can prevent inheriting configuration from the higher levels by placing `inherit: false` under a given section. Example:
-```yaml
-projects_and_groups:
-  "*":
-    deploy_keys:
-      a_shared_key:
-        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
-        title: global_key # this name is show in GitLab
-        can_push: false
-  group_1/*:
-    deploy_keys:
-      inherit: false
-      another_key:
-        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
-        title: group_key # this name is show in GitLab
-        can_push: false
-```
-For the above configuration, for a project `group_1/project_1` the effective configuration will contain only 1 key - the `another_key`.
-
-!!! important
-
-    `inherit: false` can be placed at ANY place in the configuration (if it makes sense).
 
 ### Raw parameters passing
 

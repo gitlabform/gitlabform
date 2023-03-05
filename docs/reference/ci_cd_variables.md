@@ -6,7 +6,11 @@ Please note that project-level and group-level [CI/CD variables](https://docs.gi
 
 This section purpose is to manage the **project-level** CI/CD variables.
 
-The keys and values for each variable should be as documented in the [Project-Level Variables API docs](https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable), **except the id**.
+
+Key names here are just any labels, except if the key name is `enforce` and is set to `true` - then only the variables defined here will remain in the project, all other will be deleted.
+
+
+The values are like documented at [Project-Level Variables API docs](https://docs.gitlab.com/ee/api/project_level_variables.html#create-variable), **except the id**.
 
 You can make the:
 
@@ -62,13 +66,18 @@ projects_and_groups:
       a_secret_you_want_to_remove:
         key: MY_SECRET
         delete: true
+
+      enforce: true # optional
 ```
 
 ## Group CI/CD variables
 
 This section purpose is to manage the **group-level** CI/CD variables.
 
-The keys and values for each variable should be as documented in the [Group-Level Variables API docs](https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable), **except the id**.
+Key names here are just any labels, except if the key name is `enforce` and is set to `true` - then only the variables defined here will remain in the group, all other will be deleted.
+
+
+The values are like documented at [Group-Level Variables API docs](https://docs.gitlab.com/ee/api/group_level_variables.html#create-variable), **except the id**.
 
 Although we do not provide examples like for the project-level variables, all the features like above are also supported:
 
@@ -96,4 +105,6 @@ projects_and_groups:
       old_variable:
         key: PASSWORD
         delete: true
+
+      enforce: true # optional
 ```

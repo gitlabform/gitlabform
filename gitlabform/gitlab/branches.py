@@ -3,7 +3,6 @@ from gitlabform.gitlab.core import GitLabCore, NotFoundException
 
 class GitLabBranches(GitLabCore):
     def protect_branch(self, project_and_group_name, branch, protect_settings):
-
         url = "projects/%s/protected_branches?name=%s"
         parameters_list = [
             project_and_group_name,
@@ -136,17 +135,10 @@ class GitLabBranches(GitLabCore):
         )
 
     def get_protected_branches(self, project_and_group_name):
-        branches = self._make_requests_to_api(
-            "projects/%s/repository/branches", project_and_group_name
+        protected_branches = self._make_requests_to_api(
+            "projects/%s/protected_branches", project_and_group_name
         )
-
-        protected_branches = []
-        for branch in branches:
-            if branch["protected"]:
-                name = branch["name"]
-                protected_branches.append(name)
-
-        return protected_branches
+        return [branch["name"] for branch in protected_branches]
 
     def get_unprotected_branches(self, project_and_group_name):
         branches = self._make_requests_to_api(
