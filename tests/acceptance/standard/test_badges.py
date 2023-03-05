@@ -10,7 +10,6 @@ def get_project_badges(project):
 
 class TestBadges:
     def test__badges_add(self, project):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -27,7 +26,6 @@ class TestBadges:
         assert badges[0].name == "Project Badge"
 
     def test__badges_delete(self, project):
-
         config = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -57,7 +55,6 @@ class TestBadges:
         assert len(badges) == 0
 
     def test__badges_update(self, project):
-
         config = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -89,7 +86,6 @@ class TestBadges:
         assert badges[0].link_url.endswith("bar")
 
     def test__badges_update_choose_the_right_one(self, project):
-
         config = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -134,7 +130,6 @@ class TestBadges:
                 assert not badge.image_url.endswith("foobar")
 
     def test__badges_enforce(self, project_for_function):
-
         config = f"""
             projects_and_groups:
               {project_for_function.path_with_namespace}:

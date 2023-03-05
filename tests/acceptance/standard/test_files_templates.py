@@ -30,7 +30,6 @@ def file3(request):
 
 class TestFilesTemplates:
     def test__default_variables(self, project):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -51,7 +50,6 @@ class TestFilesTemplates:
         )
 
     def test__custom_variables(self, project):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -94,7 +92,6 @@ class TestFilesTemplates:
         )
 
     def test__disabled_templating(self, project):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:

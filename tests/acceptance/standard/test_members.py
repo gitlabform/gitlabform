@@ -32,7 +32,6 @@ class TestMembers:
         assert outsider_user.username in members_usernames
 
     def test__no_groups_and_no_users(self, project):
-
         config_with_error = f"""
         projects_and_groups:
           {project.path_with_namespace}:

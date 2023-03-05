@@ -91,7 +91,6 @@ class TestGroupMembersGroups:
         run_gitlabform(add_shared_with, group.full_path)
 
     def test__remove_group(self, gl, group, users, groups, one_owner):
-
         group.share(groups[0].id, AccessLevel.OWNER.value)
         group.share(groups[1].id, AccessLevel.OWNER.value)
 
@@ -124,7 +123,6 @@ class TestGroupMembersGroups:
     def test__not_remove_groups_with_enforce_false(
         self, gl, group, users, groups, one_owner
     ):
-
         no_of_members_before = len(group.members.list())
         no_of_shared_with_before = len(gl.groups.get(group.id).shared_with_groups)
 
@@ -164,7 +162,6 @@ class TestGroupMembersGroups:
             assert len(shared_with) == no_of_shared_with_before
 
     def test__change_group_access(self, gl, group, groups, users, one_owner):
-
         change_some_users_access = f"""
         projects_and_groups:
           {group.full_path}/*:

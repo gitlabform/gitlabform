@@ -24,7 +24,6 @@ class TestRunning:
 
     # noinspection PyPep8Naming
     def test__ALL_DEFINED(self, gl, project, other_project):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:

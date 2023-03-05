@@ -13,7 +13,6 @@ def single_true(iterable):
 
 class TestDeployKeys:
     def test__deploy_key_add(self, project_for_function, public_ssh_key):
-
         config_add = f"""
         projects_and_groups:
           {project_for_function.path_with_namespace}:
@@ -28,7 +27,6 @@ class TestDeployKeys:
         assert single_true([key.title == "some_key" for key in deploy_keys])
 
     def test__deploy_key_add_delete(self, project_for_function, public_ssh_key):
-
         config_add = f"""
         projects_and_groups:
           {project_for_function.path_with_namespace}:
@@ -84,7 +82,6 @@ class TestDeployKeys:
         assert len(deploy_keys) == 0
 
     def test__deploy_key_add_delete_readd(self, project_for_function, public_ssh_key):
-
         config_add = f"""
         projects_and_groups:
           {project_for_function.path_with_namespace}:
@@ -157,7 +154,6 @@ class TestDeployKeys:
         assert single_true([key.title == "another_title" for key in deploy_keys])
 
     def test__deploy_key_update_title(self, project_for_function, public_ssh_key):
-
         config = f"""
             projects_and_groups:
               {project_for_function.path_with_namespace}:

@@ -55,7 +55,6 @@ def file2(request):
 
 class TestFiles:
     def test__set_file_specific_branch(self, project, branch):
-
         set_file_specific_branch = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -93,7 +92,6 @@ class TestFiles:
         assert the_branch.protected is True
 
     def test__set_file_strongly_protected_branch(self, project, no_access_branch):
-
         set_file_specific_branch = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -128,7 +126,6 @@ class TestFiles:
         assert branch.protected is True
 
     def test__delete_file_specific_branch(self, project, branch):
-
         set_file_specific_branch = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -158,7 +155,6 @@ class TestFiles:
         assert the_branch.protected is True
 
     def test__custom_commit_message(self, project, branch):
-
         set_file_specific_branch = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -181,7 +177,6 @@ class TestFiles:
         assert branch.commit["message"] == "Preconfigured commit message [skip ci]"
 
     def test__set_file_protected_branches(self, project, branch):
-
         test_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -219,7 +214,6 @@ class TestFiles:
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
     def test__set_file_protected_branches_not_all_levels(self, project, branch):
-
         test_config = f"""
             projects_and_groups:
               {project.path_with_namespace}:

@@ -9,7 +9,6 @@ from tests.acceptance import (
 
 @pytest.fixture(scope="function")
 def one_owner_and_two_developers(group, root_user, users):
-
     group.members.create(
         {"user_id": users[0].id, "access_level": AccessLevel.OWNER.value}
     )
@@ -40,7 +39,6 @@ def one_owner_and_two_developers(group, root_user, users):
 
 class TestGroupMembersUsers:
     def test__add_user(self, group, users, one_owner_and_two_developers):
-
         no_of_members_before = len(group.members.list())
         user_to_add = f"{users[3].username}"
 
@@ -68,7 +66,6 @@ class TestGroupMembersUsers:
         assert members_usernames.count(user_to_add) == 1
 
     def test__remove_user(self, group, users, one_owner_and_two_developers):
-
         no_of_members_before = len(group.members.list())
         user_to_remove = f"{users[2].username}"
 
@@ -95,7 +92,6 @@ class TestGroupMembersUsers:
     def test__not_remove_users_with_enforce_false(
         self, group, users, one_owner_and_two_developers
     ):
-
         no_of_members_before = len(group.members.list())
 
         setups = [
@@ -166,7 +162,6 @@ class TestGroupMembersUsers:
                 assert member.access_level == new_access_level
 
     def test__change_owner(self, group, users, one_owner_and_two_developers):
-
         change_owner = f"""
             projects_and_groups:
               {group.full_path}/*:
@@ -198,7 +193,6 @@ class TestGroupMembersUsers:
     def test__add_user_with_access_level_name(
         self, group, users, one_owner_and_two_developers
     ):
-
         no_of_members_before = len(group.members.list())
         user_to_add = f"{users[3].username}"
 
@@ -225,7 +219,6 @@ class TestGroupMembersUsers:
         assert members_usernames.count(user_to_add) == 1
 
     def test__root_as_the_sole_owner(self, group):
-
         config = f"""
             projects_and_groups:
               {group.full_path}/*:

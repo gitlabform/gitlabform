@@ -31,7 +31,6 @@ def tags(project):
 
 class TestTags:
     def test__protect_single_tag(self, project, tags):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -59,7 +58,6 @@ class TestTags:
         )
 
     def test__protect_wildcard_tag(self, project, tags):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -84,7 +82,6 @@ class TestTags:
         )
 
     def test__unprotect_the_same_tag(self, project, tags):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -126,7 +123,6 @@ class TestTags:
         assert len(protected_tags) == 0
 
     def test__protect_single_tag_no_access(self, project, tags):
-
         config = f"""
             projects_and_groups:
               {project.path_with_namespace}:

@@ -5,7 +5,6 @@ from tests.acceptance import (
 
 class TestArchiveProject:
     def test__archive_project(self, gl, project):
-
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -18,7 +17,6 @@ class TestArchiveProject:
         assert project.archived is True
 
     def test__unarchive_project(self, gl, project, other_group, other_project):
-
         archive_project = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -53,7 +51,6 @@ class TestArchiveProject:
         assert project.archived is False
 
     def test__dont_edit_archived_project(self, gl, group, project):
-
         archive_project = f"""
         projects_and_groups:
           {project.path_with_namespace}:

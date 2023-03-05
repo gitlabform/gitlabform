@@ -4,7 +4,6 @@ from tests.acceptance import get_only_branch_access_levels, run_gitlabform
 
 class TestBranches:
     def test__protect_and_unprotect(self, project, branch):
-
         config_protect_branch = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -58,7 +57,6 @@ class TestBranches:
         assert unprotect_access_level is None
 
     def test__config_with_access_level_names(self, project, branch):
-
         config_with_access_levels_names = f"""
         projects_and_groups:
           {project.path_with_namespace}:
