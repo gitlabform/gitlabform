@@ -21,6 +21,8 @@ jobs:
     if: github.actor == 'dependabot[bot]' || github.actor == 'gdubicki'
     steps:
       - uses: hmarr/auto-approve-action@v3
+        with:
+          github-token: ${{ secrets.AUTO_APPROVE_PAT }}
 
   black-formatting:
     runs-on: ubuntu-latest
