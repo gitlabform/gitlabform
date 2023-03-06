@@ -29,9 +29,7 @@ def add_gitlab_ci_config(project):
 
 
 class TestResourceGroups:
-    def test__update_resource_group_process_mode(
-        self, gl, project, add_gitlab_ci_config
-    ):
+    def test__update_resource_group_process_mode(self, project, add_gitlab_ci_config):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -43,8 +41,6 @@ class TestResourceGroups:
         time.sleep(5)
         run_gitlabform(update_resource_group_config, project)
 
-        resource_group = gl.http_get(
-            f"/projects/{project.id}/resource_groups/production"
-        )
-        assert resource_group["key"] == "production"
-        assert resource_group["process_mode"] == "newest_first"
+        resource_group = project.resource_groups.get("production")
+        assert resource_group.key == "production"
+        assert resource_group.process_mode == "newest_first"
