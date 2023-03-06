@@ -79,9 +79,9 @@ def other_group(gl: Gitlab):
 def third_group(gl: Gitlab):
     # TODO: deduplicate this - it's a copy and paste from the above fixture
     group_name = get_random_name("group")
-    create_group(group_name)
+    group = create_group(group_name)
 
-    yield group_name
+    yield group
 
     with allowed_codes(404):
         gl.groups.delete(group_name)
@@ -102,6 +102,16 @@ def subgroup(gl: Gitlab, group: Group):
 def project(gl: Gitlab, group: Group):
     project_name = get_random_name("project")
     gitlab_project = create_project(group, project_name)
+
+    yield gitlab_project
+
+    gitlab_project.delete()
+
+
+@pytest.fixture(scope="class")
+def project_in_subgroup(gl: Gitlab, subgroup: Group):
+    project_name = get_random_name("project")
+    gitlab_project = create_project(subgroup, project_name)
 
     yield gitlab_project
 
