@@ -58,7 +58,7 @@ def allowed_codes(codes: Union[int, List[int]]):
 
     try:
         yield
-    except gitlab.GitlabOperationError as e:
+    except (gitlab.GitlabHttpError, gitlab.GitlabOperationError) as e:
         if e.response_code not in codes:
             raise e
 
