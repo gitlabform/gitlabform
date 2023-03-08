@@ -4,7 +4,7 @@
 
 1. Create virtualenv with Python 3, for example in `venv` dir which is in `.gitignore` and activate it:
 ```
-virtualenv -p python3 venv
+python3 -m venv venv
 . venv/bin/activate
 ```
 
@@ -27,7 +27,7 @@ To run unit tests locally:
 
 2. Install the dependencies for tests:
 ```
-pip install -e .[test]
+pip install -e '.[test]'
 ```
 
 3. Run `pytest tests/unit` to run all the unit tests.
