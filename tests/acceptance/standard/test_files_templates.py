@@ -16,18 +16,6 @@ def file3(request):
     request.addfinalizer(fin)
 
 
-@pytest.fixture(scope="class")
-def file3(request):
-    f = open("file3.txt", "a")
-    f.write("{{ group }}/{{ project }}\n\n")
-    f.close()
-
-    def fin():
-        os.remove("file3.txt")
-
-    request.addfinalizer(fin)
-
-
 class TestFilesTemplates:
     def test__default_variables(self, project):
         config = f"""
