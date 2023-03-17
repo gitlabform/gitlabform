@@ -4,10 +4,10 @@ import time
 
 
 @pytest.fixture(scope="function")
-def add_gitlab_ci_config(group_and_project):
+def add_gitlab_ci_config(project):
     add_gitlab_ci_config = f"""
     projects_and_groups:
-      {group_and_project}:
+      {project.path_with_namespace}:
         files:
           ".gitlab-ci.yml":
             branches: 
@@ -24,27 +24,23 @@ def add_gitlab_ci_config(group_and_project):
                 environment: production
                 resource_group: production
         """
-    run_gitlabform(add_gitlab_ci_config, group_and_project)
-    return group_and_project
+    run_gitlabform(add_gitlab_ci_config, project)
+    return project
 
 
 class TestResourceGroups:
-    def test__update_resource_group_process_mode(
-        self, gitlab, group_and_project, add_gitlab_ci_config
-    ):
+    def test__update_resource_group_process_mode(self, project, add_gitlab_ci_config):
         update_resource_group_config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             resource_groups:
               production:
                 process_mode: newest_first
             """
 
         time.sleep(5)
-        run_gitlabform(update_resource_group_config, group_and_project)
+        run_gitlabform(update_resource_group_config, project)
 
-        resource_group = gitlab.get_specific_resource_group(
-            group_and_project, "production"
-        )
-        assert resource_group["key"] == "production"
-        assert resource_group["process_mode"] == "newest_first"
+        resource_group = project.resource_groups.get("production")
+        assert resource_group.key == "production"
+        assert resource_group.process_mode == "newest_first"

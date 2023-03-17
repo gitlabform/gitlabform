@@ -1,15 +1,16 @@
 import pytest
 
+from gitlab import GitlabGetError, GitlabListError
 from gitlabform.gitlab.core import UnexpectedResponseException, NotFoundException
 
 from tests.acceptance import run_gitlabform
 
 
 class TestVariables:
-    def test__builds_disabled(self, gitlab, group_and_project):
+    def test__builds_disabled(self, project):
         config_builds_not_enabled = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: disabled
             variables:
@@ -18,16 +19,16 @@ class TestVariables:
                 value: 123
         """
 
-        run_gitlabform(config_builds_not_enabled, group_and_project)
+        run_gitlabform(config_builds_not_enabled, project)
 
-        with pytest.raises(UnexpectedResponseException):
+        with pytest.raises(GitlabListError):
             # variables will NOT be available without builds_access_level in ['private', 'enabled']
-            gitlab.get_variables(group_and_project)
+            project.variables.list()
 
-    def test__single_variable(self, gitlab, group_and_project):
+    def test__single_variable(self, project):
         config_single_variable = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: enabled
             variables:
@@ -36,15 +37,15 @@ class TestVariables:
                 value: 123
         """
 
-        run_gitlabform(config_single_variable, group_and_project)
+        run_gitlabform(config_single_variable, project)
 
-        variable = gitlab.get_variable(group_and_project, "FOO")
-        assert variable == "123"
+        variable = project.variables.get("FOO")
+        assert variable.value == "123"
 
-    def test__delete_variable(self, gitlab, group_and_project):
+    def test__delete_variable(self, project):
         config_single_variable = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: enabled
             variables:
@@ -53,14 +54,14 @@ class TestVariables:
                 value: 123
         """
 
-        run_gitlabform(config_single_variable, group_and_project)
+        run_gitlabform(config_single_variable, project)
 
-        variable = gitlab.get_variable(group_and_project, "FOO")
-        assert variable == "123"
+        variable = project.variables.get("FOO")
+        assert variable.value == "123"
 
         config_delete_variable = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: enabled
             variables:
@@ -70,15 +71,15 @@ class TestVariables:
                 delete: true
         """
 
-        run_gitlabform(config_delete_variable, group_and_project)
+        run_gitlabform(config_delete_variable, project)
 
-        with pytest.raises(NotFoundException):
-            gitlab.get_variable(group_and_project, "FOO")
+        with pytest.raises(GitlabGetError):
+            project.variables.get("FOO")
 
-    def test__reset_single_variable(self, gitlab, group_and_project):
+    def test__reset_single_variable(self, project):
         config_single_variable = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: enabled
             variables:
@@ -87,14 +88,14 @@ class TestVariables:
                 value: 123
         """
 
-        run_gitlabform(config_single_variable, group_and_project)
+        run_gitlabform(config_single_variable, project)
 
-        variable = gitlab.get_variable(group_and_project, "FOO")
-        assert variable == "123"
+        variable = project.variables.get("FOO")
+        assert variable.value == "123"
 
         config_single_variable2 = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: enabled
             variables:
@@ -103,15 +104,15 @@ class TestVariables:
                 value: 123456
         """
 
-        run_gitlabform(config_single_variable2, group_and_project)
+        run_gitlabform(config_single_variable2, project)
 
-        variable = gitlab.get_variable(group_and_project, "FOO")
-        assert variable == "123456"
+        variable = project.variables.get("FOO")
+        assert variable.value == "123456"
 
-    def test__more_variables(self, gitlab, group_and_project):
+    def test__more_variables(self, project):
         config_more_variables = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: enabled
             variables:
@@ -123,17 +124,17 @@ class TestVariables:
                 value: bleble
         """
 
-        run_gitlabform(config_more_variables, group_and_project)
+        run_gitlabform(config_more_variables, project)
 
-        variable = gitlab.get_variable(group_and_project, "FOO")
-        assert variable == "123456"
-        variable = gitlab.get_variable(group_and_project, "BAR")
-        assert variable == "bleble"
+        variable = project.variables.get("FOO")
+        assert variable.value == "123456"
+        variable = project.variables.get("BAR")
+        assert variable.value == "bleble"
 
-    def test__variable_with_env_scope(self, gitlab, group_and_project):
+    def test__variable_with_env_scope(self, project):
         config_more_variables = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: enabled
             variables:
@@ -144,15 +145,17 @@ class TestVariables:
                 filter[environment_scope]: test/ee
         """
 
-        run_gitlabform(config_more_variables, group_and_project)
+        run_gitlabform(config_more_variables, project)
 
-        variable = gitlab.get_variable(group_and_project, "FOO1", "test/ee")
-        assert variable == "alfa"
+        variable = project.variables.get(
+            "FOO1", filter={"environment_scope": "test/ee"}
+        )
+        assert variable.value == "alfa"
 
-    def test__variables_with_env_scope(self, gitlab, group_and_project):
+    def test__variables_with_env_scope(self, project):
         config_more_variables = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               builds_access_level: enabled
             variables:
@@ -168,13 +171,17 @@ class TestVariables:
                 filter[environment_scope]: test/lv
         """
 
-        run_gitlabform(config_more_variables, group_and_project)
+        run_gitlabform(config_more_variables, project)
 
-        variables = gitlab.get_variables(group_and_project)
-        variables_keys = [variable["key"] for variable in variables]
+        variables = project.variables.list()
+        variables_keys = [variable.key for variable in variables]
         assert "FOO2" in variables_keys
 
-        variable = gitlab.get_variable(group_and_project, "FOO2", "test/ee")
-        assert variable == "alfa"
-        variable = gitlab.get_variable(group_and_project, "FOO2", "test/lv")
-        assert variable == "beta"
+        variable = project.variables.get(
+            "FOO2", filter={"environment_scope": "test/ee"}
+        )
+        assert variable.value == "alfa"
+        variable = project.variables.get(
+            "FOO2", filter={"environment_scope": "test/lv"}
+        )
+        assert variable.value == "beta"

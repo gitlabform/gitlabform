@@ -1,27 +1,25 @@
 import pytest
 
-from gitlabform.gitlab.core import NotFoundException
+import gitlab
+
 from gitlabform.gitlab import AccessLevel
-from tests.acceptance import run_gitlabform, gl
+from tests.acceptance import get_only_branch_access_levels, run_gitlabform
+
+pytestmark = pytest.mark.requires_license
 
 
 class TestBranches:
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
-    def test__code_owners_approval(self, gitlab, group_and_project, branch):
+    def test__code_owners_approval(self, project, branch):
         try:
-            branch_access_levels = gitlab.get_branch_access_levels(
-                group_and_project, branch
-            )
-            assert branch_access_levels["code_owner_approval_required"] is False
-        except NotFoundException:
+            protected_branch = project.protectedbranches.get(branch)
+            assert protected_branch.code_owner_approval_required is False
+        except gitlab.GitlabGetError:
             # this is fine, the branch may not be protected at all yet
             pass
 
         protect_branch_with_code_owner_approval_required = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: true
@@ -31,46 +29,33 @@ class TestBranches:
                 code_owner_approval_required: true
         """
 
-        run_gitlabform(
-            protect_branch_with_code_owner_approval_required, group_and_project
-        )
+        run_gitlabform(protect_branch_with_code_owner_approval_required, project)
 
-        branch_access_levels = gitlab.get_branch_access_levels(
-            group_and_project, branch
-        )
-        assert branch_access_levels["code_owner_approval_required"] is True
+        protected_branch = project.protectedbranches.get(branch)
+        assert protected_branch.code_owner_approval_required is True
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
-    def test__allow_user_ids(
-        self,
-        gitlab,
-        group_and_project,
-        branch,
-        make_user,
-    ):
+    def test__allow_user_ids(self, project, branch, make_user):
         user_allowed_to_push = make_user(AccessLevel.DEVELOPER)
         user_allowed_to_merge = make_user(AccessLevel.DEVELOPER)
         user_allowed_to_push_and_merge = make_user(AccessLevel.DEVELOPER)
 
         config_with_user_ids = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: true
                 allowed_to_push:
                   - user_id: {user_allowed_to_push.id}
                   - access_level: {AccessLevel.NO_ACCESS.value}
-                  - user: {user_allowed_to_push_and_merge.name}
+                  - user: {user_allowed_to_push_and_merge.username}
                 allowed_to_merge:
                   - access_level: {AccessLevel.DEVELOPER.value} 
                   - user_id: {user_allowed_to_merge.id}
-                  - user: {user_allowed_to_push_and_merge.name}
+                  - user: {user_allowed_to_push_and_merge.username}
         """
 
-        run_gitlabform(config_with_user_ids, group_and_project)
+        run_gitlabform(config_with_user_ids, project)
 
         (
             push_access_levels,
@@ -78,7 +63,7 @@ class TestBranches:
             push_access_user_ids,
             merge_access_user_ids,
             _,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, branch)
+        ) = get_only_branch_access_levels(project, branch)
 
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.DEVELOPER.value]
@@ -95,23 +80,14 @@ class TestBranches:
             ]
         )
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
-    def test__allow_more_than_one_user_by_ids(
-        self,
-        gitlab,
-        group_and_project,
-        branch,
-        make_user,
-    ):
+    def test__allow_more_than_one_user_by_ids(self, project, branch, make_user):
         first_user = make_user(AccessLevel.DEVELOPER)
         second_user = make_user(AccessLevel.DEVELOPER)
         third_user = make_user(AccessLevel.DEVELOPER)
 
         config_with_more_user_ids = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: true
@@ -119,12 +95,12 @@ class TestBranches:
                   - access_level: {AccessLevel.MAINTAINER.value} 
                   - user_id: {first_user.id}
                   - user_id: {second_user.id}
-                  - user: {third_user.name}
+                  - user: {third_user.username}
                 allowed_to_merge:
                   - access_level: {AccessLevel.MAINTAINER.value}
         """
 
-        run_gitlabform(config_with_more_user_ids, group_and_project)
+        run_gitlabform(config_with_more_user_ids, project)
 
         (
             push_access_levels,
@@ -132,7 +108,7 @@ class TestBranches:
             push_access_user_ids,
             merge_access_user_ids,
             _,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, branch)
+        ) = get_only_branch_access_levels(project, branch)
 
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]

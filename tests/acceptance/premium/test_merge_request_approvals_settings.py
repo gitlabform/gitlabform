@@ -2,15 +2,14 @@ import pytest
 
 from tests.acceptance import run_gitlabform, gl
 
+pytestmark = pytest.mark.requires_license
+
 
 class TestMergeRequestApprovalsSettings:
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
-    def test__edit_settings(self, gitlab, group_and_project, make_user):
+    def test__edit_settings(self, project, make_user):
         config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               merge_requests_access_level: "enabled"
             merge_requests_approvals:
@@ -19,17 +18,17 @@ class TestMergeRequestApprovalsSettings:
               merge_requests_author_approval: false
         """
 
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        settings = gitlab.get_approvals_settings(group_and_project)
+        settings = project.approvals.get()
 
-        assert settings["reset_approvals_on_push"] is False
-        assert settings["disable_overriding_approvers_per_merge_request"] is True
-        assert settings["merge_requests_author_approval"] is False
+        assert settings.reset_approvals_on_push is False
+        assert settings.disable_overriding_approvers_per_merge_request is True
+        assert settings.merge_requests_author_approval is False
 
         config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               merge_requests_access_level: "enabled"
             merge_requests_approvals:
@@ -38,21 +37,18 @@ class TestMergeRequestApprovalsSettings:
               merge_requests_author_approval: true
         """
 
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        settings = gitlab.get_approvals_settings(group_and_project)
+        settings = project.approvals.get()
 
-        assert settings["reset_approvals_on_push"] is True
-        assert settings["disable_overriding_approvers_per_merge_request"] is False
-        assert settings["merge_requests_author_approval"] is True
+        assert settings.reset_approvals_on_push is True
+        assert settings.disable_overriding_approvers_per_merge_request is False
+        assert settings.merge_requests_author_approval is True
 
-    @pytest.mark.skipif(
-        gl.has_no_license(), reason="this test requires a GitLab license (Paid/Trial)"
-    )
-    def test__fail(self, gitlab, group_and_project, make_user):
+    def test__fail(self, project, make_user):
         config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             project_settings:
               merge_requests_access_level: "enabled"
             merge_requests_approvals:
@@ -60,4 +56,4 @@ class TestMergeRequestApprovalsSettings:
         """
 
         with pytest.raises(SystemExit):
-            run_gitlabform(config, group_and_project)
+            run_gitlabform(config, project)

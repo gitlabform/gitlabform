@@ -1,18 +1,12 @@
 from gitlabform.gitlab import AccessLevel
-from tests.acceptance import (
-    run_gitlabform,
-    get_gitlab,
-)
-
-
-gl = get_gitlab()
+from tests.acceptance import get_only_branch_access_levels, run_gitlabform
 
 
 class TestBranches:
-    def test__protect_and_unprotect(self, gitlab, group_and_project, branch):
+    def test__protect_and_unprotect(self, project, branch):
         config_protect_branch = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: true
@@ -21,7 +15,7 @@ class TestBranches:
                 unprotect_access_level: {AccessLevel.MAINTAINER.value}
         """
 
-        run_gitlabform(config_protect_branch, group_and_project)
+        run_gitlabform(config_protect_branch, project.path_with_namespace)
 
         (
             push_access_levels,
@@ -29,7 +23,7 @@ class TestBranches:
             push_access_user_ids,
             merge_access_user_ids,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, branch)
+        ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
@@ -38,7 +32,7 @@ class TestBranches:
 
         config_unprotect_branch = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: false
@@ -47,7 +41,7 @@ class TestBranches:
                 unprotect_access_level: {AccessLevel.MAINTAINER.value}
         """
 
-        run_gitlabform(config_unprotect_branch, group_and_project)
+        run_gitlabform(config_unprotect_branch, project.path_with_namespace)
 
         (
             push_access_levels,
@@ -55,17 +49,17 @@ class TestBranches:
             push_access_user_ids,
             merge_access_user_ids,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, branch)
+        ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels is None
         assert merge_access_levels is None
         assert push_access_user_ids is None
         assert merge_access_user_ids is None
         assert unprotect_access_level is None
 
-    def test__config_with_access_level_names(self, gitlab, group_and_project, branch):
+    def test__config_with_access_level_names(self, project, branch):
         config_with_access_levels_names = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               {branch}:
                 protected: true
@@ -74,7 +68,7 @@ class TestBranches:
                 unprotect_access_level: MAINTAINER  # matter as we allow any case.
         """
 
-        run_gitlabform(config_with_access_levels_names, group_and_project)
+        run_gitlabform(config_with_access_levels_names, project.path_with_namespace)
 
         (
             push_access_level,
@@ -82,7 +76,7 @@ class TestBranches:
             push_access_user_ids,
             merge_access_user_ids,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, branch)
+        ) = get_only_branch_access_levels(project, branch)
         assert push_access_level == [AccessLevel.NO_ACCESS.value]
         assert merge_access_level == [AccessLevel.DEVELOPER.value]
         assert push_access_user_ids == []

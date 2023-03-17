@@ -9,12 +9,6 @@ class GitLabMembers(GitLabCore):
 
         return self._make_requests_to_api(url_template, project_and_group_name)
 
-    def get_shared_with_groups(self, project_and_group_name):
-        # a dict with groups that this project has been shared with
-        return self._make_requests_to_api("projects/%s", project_and_group_name)[
-            "shared_with_groups"
-        ]
-
     def add_member_to_project(
         self,
         project_and_group_name,

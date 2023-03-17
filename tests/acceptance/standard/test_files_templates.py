@@ -16,11 +16,23 @@ def file3(request):
     request.addfinalizer(fin)
 
 
+@pytest.fixture(scope="class")
+def file3(request):
+    f = open("file3.txt", "a")
+    f.write("{{ group }}/{{ project }}\n\n")
+    f.close()
+
+    def fin():
+        os.remove("file3.txt")
+
+    request.addfinalizer(fin)
+
+
 class TestFilesTemplates:
-    def test__default_variables(self, gitlab, group_and_project):
+    def test__default_variables(self, project):
         config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             files:
               "README.md":
                 overwrite: true
@@ -29,18 +41,18 @@ class TestFilesTemplates:
                   This is a text that contains the default variables: {{{{ group }}}}/{{{{ project }}}}
         """
 
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        file_content = gitlab.get_file(group_and_project, "main", "README.md")
+        project_file = project.files.get(ref="main", file_path="README.md")
         assert (
-            file_content
-            == f"This is a text that contains the default variables: {group_and_project}\n"
+            project_file.decode().decode("utf-8")
+            == f"This is a text that contains the default variables: {project.path_with_namespace}\n"
         )
 
-    def test__custom_variables(self, gitlab, group_and_project):
+    def test__custom_variables(self, project):
         config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             files:
               "README.md":
                 overwrite: true
@@ -52,18 +64,18 @@ class TestFilesTemplates:
                   This is a text that contains custom variables: {{{{ foo }}}}, {{{{ bar }}}}
         """
 
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project)
 
-        file_content = gitlab.get_file(group_and_project, "main", "README.md")
+        project_file = project.files.get(ref="main", file_path="README.md")
         assert (
-            file_content
+            project_file.decode().decode("utf-8")
             == "This is a text that contains custom variables: fooz, barz\n"
         )
 
-    def test__trailing_new_lines(self, gitlab, group_and_project, file3):
+    def test__trailing_new_lines(self, project, file3):
         set_file_chinese_characters = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             files:
               "README.md":
                 overwrite: true
@@ -71,15 +83,18 @@ class TestFilesTemplates:
                 file: file3.txt
         """
 
-        run_gitlabform(set_file_chinese_characters, group_and_project)
+        run_gitlabform(set_file_chinese_characters, project.path_with_namespace)
 
-        file_content = gitlab.get_file(group_and_project, "main", "README.md")
-        assert file_content == f"{group_and_project}\n\n"
+        project_file = project.files.get(ref="main", file_path="README.md")
+        assert (
+            project_file.decode().decode("utf-8")
+            == f"{project.path_with_namespace}\n\n"
+        )
 
-    def test__disabled_templating(self, gitlab, group_and_project):
+    def test__disabled_templating(self, project):
         config = f"""
         projects_and_groups:
-          {group_and_project}:
+          {project.path_with_namespace}:
             files:
               "README.md":
                 overwrite: true
@@ -89,10 +104,10 @@ class TestFilesTemplates:
                   This is a text containing literals: {{{{ group }}}}/{{{{ project }}}}
         """
 
-        run_gitlabform(config, group_and_project)
+        run_gitlabform(config, project.path_with_namespace)
 
-        file_content = gitlab.get_file(group_and_project, "main", "README.md")
+        project_file = project.files.get(ref="main", file_path="README.md")
         assert (
-            file_content
+            project_file.decode().decode("utf-8")
             == "This is a text containing literals: {{ group }}/{{ project }}\n"
         )

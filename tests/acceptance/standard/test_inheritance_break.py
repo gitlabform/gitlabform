@@ -1,25 +1,21 @@
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
     run_gitlabform,
-    get_gitlab,
+    get_only_branch_access_levels,
 )
-
-
-gl = get_gitlab()
 
 
 class TestInheritanceBreak:
     def test__inheritance_break(
         self,
-        gitlab,
         group,
-        group_and_project,
+        project,
         branch,
         other_branch,
     ):
         config_yaml = f"""
         projects_and_groups:
-          {group}/*:
+          {group.full_path}/*:
             branches:   
               {branch}:
                 protected: true
@@ -27,7 +23,7 @@ class TestInheritanceBreak:
                 merge_access_level: developer
                 unprotect_access_level: maintainer
               
-          {group_and_project}:
+          {project.path_with_namespace}:
             branches:
               inherit: false
               {other_branch}:
@@ -37,7 +33,7 @@ class TestInheritanceBreak:
                 unprotect_access_level: maintainer
         """
 
-        run_gitlabform(config_yaml, group_and_project)
+        run_gitlabform(config_yaml, project.path_with_namespace)
 
         (
             push_access_level,
@@ -45,7 +41,7 @@ class TestInheritanceBreak:
             _,
             _,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, branch)
+        ) = get_only_branch_access_levels(project, branch)
         assert push_access_level is None
         assert merge_access_level is None
         assert unprotect_access_level is None
@@ -56,7 +52,7 @@ class TestInheritanceBreak:
             _,
             _,
             unprotect_access_level,
-        ) = gitlab.get_only_branch_access_levels(group_and_project, other_branch)
+        ) = get_only_branch_access_levels(project, other_branch)
         assert push_access_level == [AccessLevel.MAINTAINER.value]
         assert merge_access_level == [AccessLevel.DEVELOPER.value]
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
