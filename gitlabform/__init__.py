@@ -562,7 +562,9 @@ class GitLabForm:
         """
 
         if target == "ALL":
-            info(">>> Getting ALL groups and projects that I can modify...")
+            info(
+                ">>> Getting ALL groups and projects that I have permission to modify..."
+            )
         elif target == "ALL_DEFINED":
             info(">>> Getting ALL groups and projects DEFINED in the configuration...")
         else:
