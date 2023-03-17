@@ -3,6 +3,9 @@
 ## 3.5.0
 
 * **Make running with `ALL` work fast when using gitlab.com or a self-hosted GitLab instance and a non-admin account.** With a non-admin account the app will not try to get all the groups and projects, but only the ones where the used account has at least a Reporter role, which is the lowest level of permissions that allow to make a configuration change. Fixes [#509](https://github.com/gitlabform/gitlabform/issues/509), PR [#518](https://github.com/gitlabform/gitlabform/pull/518).
+* Improved contribution docs. PR [#515](https://github.com/gitlabform/gitlabform/pull/515).
+
+Thanks to [Mirko Friedenhagen](https://github.com/mfriedenhagen) for his contribution!
 
 ## 3.4.3
 
