@@ -1,5 +1,11 @@
 # Changelog
 
+## Future version
+
+* (For contributors) All acceptance tests have been rewritten to use [python-gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) as a first step towards moving the whole project to use it instead of own home-grown library for the GitLab API. PR [#442](https://github.com/gitlabform/gitlabform/pull/442).
+
+BIG thanks to [Nejc Habjan](https://github.com/nejch) for his great work on migrating the tests to python-gitlab!
+
 ## 3.5.0
 
 * **Make running with `ALL` work fast when using gitlab.com or a self-hosted GitLab instance and a non-admin account.** With a non-admin account the app will not try to get all the groups and projects, but only the ones where the used account has at least a Reporter role, which is the lowest level of permissions that allow to make a configuration change. Fixes [#509](https://github.com/gitlabform/gitlabform/issues/509), PR [#518](https://github.com/gitlabform/gitlabform/pull/518).
