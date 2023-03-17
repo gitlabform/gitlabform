@@ -8,7 +8,7 @@ import requests
 
 # noinspection PyPackageRequirements
 import urllib3
-from cli_ui import debug as verbose
+from cli_ui import debug as verbose, warning
 from requests.adapters import HTTPAdapter
 
 # noinspection PyPackageRequirements
@@ -58,6 +58,18 @@ class GitLabCore:
                 f"Connected to GitLab version: {version['version']} ({version['revision']})"
             )
             self.version = version["version"]
+
+            current_user = self._make_requests_to_api("user")
+            if current_user.get("is_admin", False):
+                self.admin = True
+            else:
+                self.admin = False
+            verbose(
+                f"Connected as: {current_user['username']}, admin: {'yes' if self.admin else 'no'}"
+            )
+            if not self.admin:
+                warning("Connected as non-admin. You may encounter permission issues.")
+
         except Exception as e:
             raise TestRequestFailedException(e)
 

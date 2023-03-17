@@ -18,7 +18,7 @@ To apply settings for all groups of projects and projects explicitly defined in 
 gitlabform ALL_DEFINED
 ```
 
-To apply settings for all projects, run:
+To apply settings for all groups and projects that you can modify, run:
 
 ```shell
 gitlabform ALL

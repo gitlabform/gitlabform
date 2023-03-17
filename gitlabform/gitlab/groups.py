@@ -58,7 +58,16 @@ class GitLabGroups(GitLabCore):
         """
         :return: sorted list of groups
         """
-        result = self._make_requests_to_api("groups?all_available=true")
+
+        if self.admin:
+            query = "all_available=true"
+        else:
+            # as a non-admin it's pointless to get groups with a lower role than Reporter
+            # - it's the minimal role that is needed to manage something (f.e. group labels)
+            query = f"min_access_level=20"
+
+        result = self._make_requests_to_api(f"groups?{query}")
+
         return sorted(map(lambda x: x["full_path"], result))
 
     def get_projects(self, group, include_archived=False, only_names=True):
@@ -74,12 +83,19 @@ class GitLabGroups(GitLabCore):
             # there are 3 states of the "archived" flag: true, false, undefined
             # we use the last 2
             if include_archived:
-                query_string = "include_subgroups=true"
+                query1 = "include_subgroups=true"
             else:
-                query_string = "include_subgroups=true&archived=false"
+                query1 = "include_subgroups=true&archived=false"
+
+            if self.admin:
+                query2 = "all_available=true"
+            else:
+                # it's pointless to get projects with a lower role than Reporter
+                # - it's the minimal role that is needed to manage something (f.e. labels)
+                query2 = f"min_access_level=20"
 
             projects = self._make_requests_to_api(
-                f"groups/%s/projects?{query_string}", group
+                f"groups/%s/projects?{query1}&{query2}", group
             )
         except NotFoundException:
             projects = []
