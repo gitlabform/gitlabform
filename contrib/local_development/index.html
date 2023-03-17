@@ -1030,7 +1030,7 @@
 <ol>
 <li>
 <p>Create virtualenv with Python 3, for example in <code>venv</code> dir which is in <code>.gitignore</code> and activate it:
-<div class="highlight"><pre><span></span><code>virtualenv -p python3 venv
+<div class="highlight"><pre><span></span><code>python3 -m venv venv
 . venv/bin/activate
 </code></pre></div></p>
 </li>
@@ -1051,7 +1051,7 @@
 </li>
 <li>
 <p>Install the dependencies for tests:
-<div class="highlight"><pre><span></span><code>pip install -e .[test]
+<div class="highlight"><pre><span></span><code>pip install -e &#39;.[test]&#39;
 </code></pre></div></p>
 </li>
 <li>
