@@ -120,3 +120,36 @@ class TestBranches:
             ]
         )
         assert merge_access_user_ids == []
+
+    def test__allow_exactly_one_user_id(self, project, branch, make_user):
+        first_user = make_user(AccessLevel.DEVELOPER)
+
+        config_with_more_user_ids = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                allowed_to_merge:
+                  - access_level: {AccessLevel.DEVELOPER.value}
+                allowed_to_unprotect:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+                allowed_to_push:
+                  - user: {first_user.username}
+
+        """
+
+        run_gitlabform(config_with_more_user_ids, project)
+
+        (
+            push_access_levels,
+            _,
+            push_access_user_ids,
+            _,
+            _,
+        ) = get_only_branch_access_levels(project, branch)
+
+        assert push_access_levels == []
+        assert push_access_user_ids == [
+            first_user.id,
+        ]
