@@ -679,6 +679,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#future-version" class="md-nav__link">
+    Future version
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#350" class="md-nav__link">
     3.5.0
   </a>
@@ -1185,6 +1192,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#future-version" class="md-nav__link">
+    Future version
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#350" class="md-nav__link">
     3.5.0
   </a>
@@ -1532,6 +1546,11 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="future-version">Future version<a class="headerlink" href="#future-version" title="Permanent link">&para;</a></h2>
+<ul>
+<li>(For contributors) All acceptance tests have been rewritten to use <a href="https://python-gitlab.readthedocs.io/en/stable/index.html">python-gitlab</a> as a first step towards moving the whole project to use it instead of own home-grown library for the GitLab API. PR <a href="https://github.com/gitlabform/gitlabform/pull/442">#442</a>.</li>
+</ul>
+<p>BIG thanks to <a href="https://github.com/nejch">Nejc Habjan</a> for his great work on migrating the tests to python-gitlab!</p>
 <h2 id="350">3.5.0<a class="headerlink" href="#350" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Make running with <code>ALL</code> work fast when using gitlab.com or a self-hosted GitLab instance and a non-admin account.</strong> With a non-admin account the app will not try to get all the groups and projects, but only the ones where the used account has at least a Reporter role, which is the lowest level of permissions that allow to make a configuration change. Fixes <a href="https://github.com/gitlabform/gitlabform/issues/509">#509</a>, PR <a href="https://github.com/gitlabform/gitlabform/pull/518">#518</a>.</li>
