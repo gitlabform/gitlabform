@@ -35,7 +35,9 @@ projects_and_groups:
     * Replace `services:` with `integrations:`,
     * Replace `secret_variables:` with `variables:`,
     * Replace `group_secret_variables:` with `group_variables:`,
-    * Replace `config_version: 2` with `config_version: 3` 
+    * Replace `config_version: 2` with `config_version: 3`
+    * Update `merge_requests:`; `approvals_before_merge:` needs to be defined
+      in specific approval rule
  
 4. Upgrade the app from v2 to v3.
 5. Re-enable v3 to run automatically (if you have such automation).
