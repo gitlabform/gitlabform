@@ -73,6 +73,21 @@ projects_and_groups:
         title: ssh_key_name_that_is_shown_in_gitlab
         can_push: false
 ```
+
+Alternatively, create a `config.yml` file with setting `GITLAB_URL` & `GITLAB_TOKEN` as environment variables
+
+```yaml
+config_version: 3
+
+projects_and_groups:
+  my-group/*:
+    deploy_keys:
+      a_friendly_deploy_key_name:  # this name is only used in GitLabForm config
+        key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3WiHAsm2UTz2dU1vKFYUGfHI1p5fIv84BbtV/9jAKvZhVHDqMa07PgVtkttjvDC8bA1kezhOBKcO0KNzVoDp0ENq7WLxFyLFMQ9USf8LmOY70uV/l8Gpcn1ZT7zRBdEzUUgF/PjZukqVtuHqf9TCO8Ekvjag9XRfVNadKs25rbL60oqpIpEUqAbmQ4j6GFcfBBBPuVlKfidI6O039dAnDUsmeafwCOhEvQmF+N5Diauw3Mk+9TMKNlOWM+pO2DKxX9LLLWGVA9Dqr6dWY0eHjWKUmk2B1h1HYW+aUyoWX2TGsVX9DlNY7CKiQGsL5MRH9IXKMQ8cfMweKoEcwSSXJ
+        title: ssh_key_name_that_is_shown_in_gitlab
+        can_push: false
+```
+
 2. Run:
 ```shell
 docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:latest gitlabform my-group
