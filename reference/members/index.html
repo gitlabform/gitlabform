@@ -933,7 +933,7 @@
 <ul>
 <li><code>groups</code> - to make other groups members of a given group. Here the key names are group paths and values are as described in the <a href="https://docs.gitlab.com/ee/api/groups.html#create-a-link-to-share-a-group-with-another-group">create a link to share a group with another group endpoint of the Groups API</a>,</li>
 <li><code>users</code> - to add single users. Here the key names are usernames and the values are as described in the <a href="https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project">add member to a group or project endpoint of the Group and project members API</a>,</li>
-<li><code>enforce</code> - if set to <code>true</code> then removing a user or group from this config will also remove them from the group; default is <code>false</code>.</li>
+<li><code>enforce</code> - if set to <code>true</code> then removing a user or group from this config will also remove them from the group (so this setting will NOT affect the members inherited f.e. from a group that contains this group); default is <code>false</code>.</li>
 </ul>
 <p>Note: there has to be at least 1 user/group with "owner" access level per group - it's required by GitLab.</p>
 <p>Example:</p>
