@@ -36,7 +36,7 @@ There are 3 keys that can be set in the `group_members` section:
 
 * `groups` - to make other groups members of a given group. Here the key names are group paths and values are as described in the [create a link to share a group with another group endpoint of the Groups API](https://docs.gitlab.com/ee/api/groups.html#create-a-link-to-share-a-group-with-another-group),
 * `users` - to add single users. Here the key names are usernames and the values are as described in the [add member to a group or project endpoint of the Group and project members API](https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project),
-* `enforce` - if set to `true` then removing a user or group from this config will also remove them from the group; default is `false`.
+* `enforce` - if set to `true` then removing a user or group from this config will also remove them from the group (so this setting will NOT affect the members inherited f.e. from a group that contains this group); default is `false`.
 
 Note: there has to be at least 1 user/group with "owner" access level per group - it's required by GitLab.
 
