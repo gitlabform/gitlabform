@@ -12,6 +12,8 @@ class MembersProcessor(AbstractProcessor):
         super().__init__("members", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
+        keep_bots = configuration.get("members|keep_bots", False)
+
         enforce_members = configuration.get("members|enforce", False)
 
         groups = configuration.get("members|groups", {})
@@ -27,7 +29,7 @@ class MembersProcessor(AbstractProcessor):
             )
 
         self._process_groups(project_and_group, groups, enforce_members)
-        self._process_users(project_and_group, users, enforce_members)
+        self._process_users(project_and_group, users, enforce_members, keep_bots)
 
     def _process_groups(
         self, project_and_group: str, groups: dict, enforce_members: bool
@@ -87,7 +89,11 @@ class MembersProcessor(AbstractProcessor):
             debug("Not enforcing group members.")
 
     def _process_users(
-        self, project_and_group: str, users: dict, enforce_members: bool
+        self,
+        project_and_group: str,
+        users: dict,
+        enforce_members: bool,
+        keep_bots: bool,
     ):
         if users:
             verbose("Processing users as members...")
@@ -140,6 +146,15 @@ class MembersProcessor(AbstractProcessor):
             users_not_in_config = set(users_in_gitlab) - set(users_in_config)
 
             for user_not_in_config in users_not_in_config:
+                if (
+                    keep_bots
+                    and self.gitlab.get_user_by_name(user_not_in_config)["bot"]
+                ):
+                    debug(
+                        f"Will not remove bot user '{user_not_in_config}' as the 'keep_bots' option is true."
+                    )
+                    continue
+
                 debug(
                     f"Removing user '{user_not_in_config}' that is not configured to be a member."
                 )
