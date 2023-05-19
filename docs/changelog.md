@@ -1,10 +1,15 @@
 # Changelog
 
-## Future version
+## 3.6.0
 
+* **Enforcing project and group members while keeping the bot users is now easier.** When using `enforce: true` add also `keep_bots: true` at the same level. See [the docs](https://gitlabform.github.io/gitlabform/reference/members/) for more info. Implements [#454](https://github.com/gitlabform/gitlabform/issues/454), PR [#544](https://github.com/gitlabform/gitlabform/pull/544).
 * (For contributors) All acceptance tests have been rewritten to use [python-gitlab](https://python-gitlab.readthedocs.io/en/stable/index.html) as a first step towards moving the whole project to use it instead of own home-grown library for the GitLab API. PR [#442](https://github.com/gitlabform/gitlabform/pull/442).
 
-BIG thanks to [Nejc Habjan](https://github.com/nejch) for his great work on migrating the tests to python-gitlab!
+BIG thanks the contributions of this release:
+* [Nejc Habjan](https://github.com/nejch) for his enormous work on migrating the tests to python-gitlab,
+* [James Gauld](https://github.com/lhokktyn) for brilliantly implementing `keep_bots: true`,
+* [Rajas Gujarathi](https://github.com/RajasGujarathi) for multiple improvements to the docs,
+* [Waldek Maleska](https://github.com/weakcamel) for contribution to docs.
 
 ## 3.5.0
 
