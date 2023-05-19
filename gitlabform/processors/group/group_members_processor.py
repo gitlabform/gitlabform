@@ -13,6 +13,8 @@ class GroupMembersProcessor(AbstractProcessor):
         super().__init__("group_members", gitlab)
 
     def _process_configuration(self, group: str, configuration: dict):
+        keep_bots = configuration.get("group_members|keep_bots", False)
+
         enforce_group_members = configuration.get("group_members|enforce", False)
 
         (
@@ -34,7 +36,9 @@ class GroupMembersProcessor(AbstractProcessor):
 
         self._process_groups(group, groups_to_set_by_group_path, enforce_group_members)
 
-        self._process_users(group, users_to_set_by_username, enforce_group_members)
+        self._process_users(
+            group, users_to_set_by_username, enforce_group_members, keep_bots
+        )
 
     @staticmethod
     def _get_groups_and_users_to_set(configuration: dict) -> Tuple[dict, dict]:
@@ -137,7 +141,11 @@ class GroupMembersProcessor(AbstractProcessor):
         debug("Group shared with AFTER: %s", self.gitlab.get_group_members(group))
 
     def _process_users(
-        self, group: str, users_to_set_by_username: dict, enforce_group_members: bool
+        self,
+        group: str,
+        users_to_set_by_username: dict,
+        enforce_group_members: bool,
+        keep_bots: bool,
     ):
         # group users before by username
         # (note: we DON'T get inherited users as we don't manage them at this level anyway)
@@ -207,6 +215,11 @@ class GroupMembersProcessor(AbstractProcessor):
                 [user["username"] for user in users_before]
             ) - set(users_to_set_by_username.keys())
             for user in users_not_configured:
+                if keep_bots and self.gitlab.get_user_by_name(user)["bot"]:
+                    debug(
+                        f"Will not remove bot user '{user}' as the 'keep_bots' option is true."
+                    )
+                    continue
                 debug("Removing user '%s' who is not configured to be a member.", user)
                 self.gitlab.remove_member_from_group(group, user)
         else:
