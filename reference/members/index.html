@@ -15,7 +15,7 @@
         <link rel="next" href="../merge_requests/">
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.11">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.13">
     
     
       
@@ -912,11 +912,12 @@
 <h1 id="members">Members<a class="headerlink" href="#members" title="Permanent link">&para;</a></h1>
 <p>These sections are for managing the users and groups that are <a href="https://docs.gitlab.com/ee/user/project/members/">members of a projects</a> and <a href="https://docs.gitlab.com/ee/user/group/#add-users-to-a-group">groups</a>.</p>
 <h2 id="project-members">Project members<a class="headerlink" href="#project-members" title="Permanent link">&para;</a></h2>
-<p>There are 3 keys that can be set in the <code>members</code> section:</p>
+<p>There are 4 keys that can be set in the <code>members</code> section:</p>
 <ul>
 <li><code>groups</code> - to make other groups members of a given group. Here the key names are group paths and values are as described in the <a href="https://docs.gitlab.com/ee/api/projects.html#share-project-with-group">share project with a group endpoint of the Projects API</a>,</li>
 <li><code>users</code> - to add single users. Here the key names are usernames and the values are as described in the <a href="https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project">add member to a group or project endpoint of the Group and project members API</a>,</li>
 <li><code>enforce</code> - if set to <code>true</code> then this project will have ONLY the users and groups listed in the configuration as the <em>direct</em> members (so this setting will NOT affect the members inherited f.e. from a group that contains this project); default is <code>false</code>.</li>
+<li><code>keep_bots</code> - if set to <code>true</code> then any existing project members that are bots will <em>not</em> be removed regardless of the <code>enforce</code> setting; default is <code>false</code>.</li>
 </ul>
 <p>Note: there has to be at least 1 user/group with "owner" access level per project - it's required by GitLab.</p>
 <p>Example:</p>
@@ -933,13 +934,15 @@
 <span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
 <span class="w">          </span><span class="nt">expires_at</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2025-09-26</span>
 <span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">keep_bots</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <h2 id="group-members">Group members<a class="headerlink" href="#group-members" title="Permanent link">&para;</a></h2>
-<p>There are 3 keys that can be set in the <code>group_members</code> section:</p>
+<p>There are 4 keys that can be set in the <code>group_members</code> section:</p>
 <ul>
 <li><code>groups</code> - to make other groups members of a given group. Here the key names are group paths and values are as described in the <a href="https://docs.gitlab.com/ee/api/groups.html#create-a-link-to-share-a-group-with-another-group">create a link to share a group with another group endpoint of the Groups API</a>,</li>
 <li><code>users</code> - to add single users. Here the key names are usernames and the values are as described in the <a href="https://docs.gitlab.com/ee/api/members.html#add-a-member-to-a-group-or-project">add member to a group or project endpoint of the Group and project members API</a>,</li>
 <li><code>enforce</code> - if set to <code>true</code> then removing a user or group from this config will also remove them from the group (so this setting will NOT affect the members inherited f.e. from a group that contains this group); default is <code>false</code>.</li>
+<li><code>keep_bots</code> - if set to <code>true</code> then any existing group members that are bots will <em>not</em> be removed regardless of the <code>enforce</code> setting; default is <code>false</code>.</li>
 </ul>
 <p>Note: there has to be at least 1 user/group with "owner" access level per group - it's required by GitLab.</p>
 <p>Example:</p>
@@ -953,6 +956,7 @@
 <span class="w">        </span><span class="nt">my-user</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
 <span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">keep_bots</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </code></pre></div>
 
 
@@ -994,7 +998,7 @@
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.fac441b0.min.js"></script>
+      <script src="../../assets/javascripts/bundle.b4d07000.min.js"></script>
       
     
   </body>
