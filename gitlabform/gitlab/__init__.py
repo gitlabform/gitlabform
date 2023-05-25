@@ -6,6 +6,7 @@ from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
+from gitlabform.gitlab.group_saml_links import GitLabGroupSAMLLinks
 from gitlabform.gitlab.group_variables import GitLabGroupVariables
 from gitlabform.gitlab.members import GitLabMembers
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
@@ -61,6 +62,7 @@ class GitLab(
     GitLabIntegrations,
     GitLabTags,
     GitLabGroupLDAPLinks,
+    GitLabGroupSAMLLinks,
     GitLabGroupBadges,
     GitLabGroupVariables,
     GitLabPipelines,
