@@ -153,6 +153,28 @@ def groups(users):
 
 
 @pytest.fixture(scope="class")
+def group_to_invite_to_project(gl: Gitlab) -> Generator[Optional[Group], None, None]:
+    group_name_base = get_random_name("group")
+    created_groups: List[Group] = []
+
+    def _group_to_invite_to_project(project, access_level):
+        group_index = len(created_groups) + 1
+        group_name = f"{group_name_base}_{group_index}"
+        gitlab_group = create_group(group_name)
+
+        project.share(gitlab_group.id, access_level)
+        created_groups.append(gitlab_group)
+
+        return gitlab_group
+
+    yield _group_to_invite_to_project
+
+    for group in created_groups:
+        with allowed_codes(404):
+            gl.groups.delete(group.id)
+
+
+@pytest.fixture(scope="class")
 def users(group):
     no_of_users = 4
 
@@ -198,6 +220,21 @@ def other_branch(project):
     yield name
 
     branch.delete()
+
+
+@pytest.fixture(scope="class")
+def tag(project):
+    name = get_random_name("tag")
+    tag = project.tags.create({"tag_name": name, "ref": "main"})
+
+    yield name
+
+    # Normally the tag deletion would be here for post-test cleanup.
+    # But protected tags can't be deleted. It has to be unprotect first
+    # and then delete. Since the containing project gets deleted anyways,
+    # it should be fine if the tag deletion doesn't happen from this fixture.
+    #
+    # tag.delete()
 
 
 @pytest.fixture(scope="class")
