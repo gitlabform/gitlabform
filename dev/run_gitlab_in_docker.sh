@@ -55,7 +55,6 @@ if [[ -n $existing_gitlab_container_id ]] ; then
 fi
 
 gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'mK9JnG7jwYdFcBNoQ3W3'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;"
-gitlab_omnibus_config="$gitlab_omnibus_config gitlab_rails['omniauth_enabled'] = true; gitlab_rails['omniauth_providers'] = [{ name: 'group_saml' }]"
 
 if [[ -f Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
 
