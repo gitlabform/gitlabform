@@ -199,6 +199,29 @@ class TestSchedules:
         )
         assert schedule is None
 
+    def test__schedule_enforce(self, project, schedules):
+        new_schedule = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            schedules:
+              enforce: true
+              "One and only schedule":
+                ref: main
+                cron: "30 1 * * *"
+        """
+
+        run_gitlabform(new_schedule, project)
+
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
+            project, "One and only schedule"
+        )
+        assert schedule is not None
+        assert schedule.description == "One and only schedule"
+        assert schedule.ref == "main"
+        assert schedule.cron == "30 1 * * *"
+        assert schedule.cron_timezone == "UTC"
+        assert schedule.active is True
+
     @classmethod
     def __find_pipeline_schedule_by_description_and_get_first(
         cls, project, description
