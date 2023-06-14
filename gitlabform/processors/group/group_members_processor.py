@@ -55,6 +55,7 @@ class GroupMembersProcessor(AbstractProcessor):
                 users_to_set_by_username.pop("enforce", None)
                 users_to_set_by_username.pop("users", None)
                 users_to_set_by_username.pop("groups", None)
+                users_to_set_by_username.pop("keep_bots", None)
 
         return groups_to_set_by_group_path, users_to_set_by_username
 
