@@ -199,7 +199,7 @@ class TestSchedules:
         )
         assert schedule is None
 
-    def test__schedule_enforce(self, project, schedules):
+    def test__schedule_enforce_new_schedule(self, project, schedules):
         new_schedule = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -210,11 +210,17 @@ class TestSchedules:
                 cron: "30 1 * * *"
         """
 
+        schedules_before = project.pipelineschedules.list()
+
         run_gitlabform(new_schedule, project)
+
+        schedules_after = project.pipelineschedules.list()
 
         schedule = self.__find_pipeline_schedule_by_description_and_get_first(
             project, "One and only schedule"
         )
+        assert len(schedules_before) == 6
+        assert len(schedules_after) == 1
         assert schedule is not None
         assert schedule.description == "One and only schedule"
         assert schedule.ref == "main"
