@@ -51,32 +51,37 @@ class MembersProcessor(AbstractProcessor):
                 )
 
                 # we only add the group if it doesn't have the correct settings
+                common_group_name = group.lower()
                 if (
-                    group in current_groups
-                    and expires_at == current_groups[group]["expires_at"]
-                    and access_level == current_groups[group]["group_access_level"]
+                    common_group_name in current_groups
+                    and expires_at == current_groups[common_group_name]["expires_at"]
+                    and access_level
+                    == current_groups[common_group_name]["group_access_level"]
                 ):
-                    debug("Ignoring group '%s' as it is already a member", group)
+                    debug(
+                        "Ignoring group '%s' as it is already a member",
+                        common_group_name,
+                    )
                     debug(
                         "Current settings for '%s' are: %s"
-                        % (group, current_groups[group])
+                        % (common_group_name, current_groups[common_group_name])
                     )
                 else:
-                    debug("Setting group '%s' as a member", group)
+                    debug("Setting group '%s' as a member", common_group_name)
                     access = access_level
                     expiry = expires_at
 
                     # we will remove group access first and then re-add them,
                     # to ensure that the groups have the expected access level
-                    self.gitlab.unshare_with_group(project_and_group, group)
+                    self.gitlab.unshare_with_group(project_and_group, common_group_name)
                     self.gitlab.share_with_group(
-                        project_and_group, group, access, expiry
+                        project_and_group, common_group_name, access, expiry
                     )
 
         if enforce_members:
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
 
-            groups_in_config = groups.keys()
+            groups_in_config = [group_name.lower() for group_name in groups.keys()]
             groups_in_gitlab = current_groups.keys()
             groups_not_in_config = set(groups_in_gitlab) - set(groups_in_config)
 
@@ -110,38 +115,47 @@ class MembersProcessor(AbstractProcessor):
                     if "access_level" in users[user]
                     else None
                 )
-                # we only add the user if it doesn't have the correct settings
-                if user in current_members:
+                # we only add the user if it doesn't have the correct settings.
+                # To make sure that the user hasn't been added in a different
+                # case, we enforce that the username is always in lowercase for
+                # checks.
+                common_username = user.lower()
+                if common_username in current_members:
                     if (
-                        expires_at == current_members[user]["expires_at"]
-                        and access_level == current_members[user]["access_level"]
+                        expires_at == current_members[common_username]["expires_at"]
+                        and access_level
+                        == current_members[common_username]["access_level"]
                     ):
                         debug(
                             "Nothing to change for user '%s' - same config now as to set.",
-                            user,
+                            common_username,
                         )
                         debug(
                             "Current settings for '%s' are: %s"
-                            % (user, current_members[user])
+                            % (common_username, current_members[common_username])
                         )
                     else:
                         debug(
                             "Editing user '%s' membership to change their access level or expires at",
-                            user,
+                            common_username,
                         )
                         self.gitlab.edit_member_of_project(
-                            project_and_group, user, access_level, expires_at
+                            project_and_group, common_username, access_level, expires_at
                         )
                 else:
-                    debug("Adding user '%s' who previously was not a member.", user)
+                    debug(
+                        "Adding user '%s' who previously was not a member.",
+                        common_username,
+                    )
                     self.gitlab.add_member_to_project(
-                        project_and_group, user, access_level, expires_at
+                        project_and_group, common_username, access_level, expires_at
                     )
 
         if enforce_members:
             current_members = self.gitlab.get_members_from_project(project_and_group)
 
-            users_in_config = users.keys()
+            # Enforce that all usernames are lowercase for comparisons.
+            users_in_config = [username.lower() for username in users.keys()]
             users_in_gitlab = current_members.keys()
             users_not_in_config = set(users_in_gitlab) - set(users_in_config)
 
