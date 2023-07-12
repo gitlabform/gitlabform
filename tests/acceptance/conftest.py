@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 import os
 from typing import Callable, Optional, Generator, List
 
@@ -6,7 +7,7 @@ from cryptography.hazmat.primitives import serialization as crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend as crypto_default_backend
 from gitlab import Gitlab
-from gitlab.v4.objects import Group, Project, User
+from gitlab.v4.objects import Group, Project, User, ProjectAccessToken, GroupAccessToken
 
 from gitlabform.gitlab import AccessLevel, GitLab
 from tests.acceptance import (
@@ -229,6 +230,68 @@ def make_user(
     for user in created_users:
         with allowed_codes(404):
             gl.users.delete(user.id)
+
+
+@pytest.fixture(scope="class")
+def make_project_access_token(
+    project,
+) -> Generator[Callable[[AccessLevel, List[str]], ProjectAccessToken], None, None]:
+    token_name_base = get_random_name("user")
+    created_tokens: List[ProjectAccessToken] = []
+
+    def _make_project_access_token(
+        level: AccessLevel = AccessLevel.DEVELOPER, scopes: List[str] = ["api"]
+    ) -> ProjectAccessToken:
+        last_id = len(created_tokens) + 1
+        token_name = f"{token_name_base}_{last_id}_bot"
+        expires_at = (date.today() + timedelta(days=30)).isoformat()
+        token = project.access_tokens.create(
+            {
+                "access_level": level,
+                "name": token_name,
+                "scopes": scopes,
+                "expires_at": expires_at,
+            }
+        )
+        created_tokens.append(token)
+        return token
+
+    yield _make_project_access_token
+
+    for token in created_tokens:
+        with allowed_codes(404):
+            project.access_tokens.delete(token.id)
+
+
+@pytest.fixture(scope="class")
+def make_group_access_token(
+    group,
+) -> Generator[Callable[[AccessLevel, List[str]], GroupAccessToken], None, None]:
+    token_name_base = get_random_name("user")
+    created_tokens: List[GroupAccessToken] = []
+
+    def _make_group_access_token(
+        level: AccessLevel = AccessLevel.DEVELOPER, scopes: List[str] = ["api"]
+    ) -> GroupAccessToken:
+        last_id = len(created_tokens) + 1
+        token_name = f"{token_name_base}_{last_id}_bot"
+        expires_at = (date.today() + timedelta(days=30)).isoformat()
+        token = group.access_tokens.create(
+            {
+                "access_level": level,
+                "name": token_name,
+                "scopes": scopes,
+                "expires_at": expires_at,
+            }
+        )
+        created_tokens.append(token)
+        return token
+
+    yield _make_group_access_token
+
+    for token in created_tokens:
+        with allowed_codes(404):
+            group.access_tokens.delete(token.id)
 
 
 @pytest.fixture(scope="class")
