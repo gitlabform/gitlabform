@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 import os
 from typing import Callable, Optional, Generator, List
 
@@ -243,11 +244,13 @@ def make_project_access_token(
     ) -> ProjectAccessToken:
         last_id = len(created_tokens) + 1
         token_name = f"{token_name_base}_{last_id}_bot"
+        expires_at = (date.today() + timedelta(days=30)).isoformat()
         token = project.access_tokens.create(
             {
                 "access_level": level,
                 "name": token_name,
                 "scopes": scopes,
+                "expires_at": expires_at,
             }
         )
         created_tokens.append(token)
@@ -272,11 +275,13 @@ def make_group_access_token(
     ) -> GroupAccessToken:
         last_id = len(created_tokens) + 1
         token_name = f"{token_name_base}_{last_id}_bot"
+        expires_at = (date.today() + timedelta(days=30)).isoformat()
         token = group.access_tokens.create(
             {
                 "access_level": level,
                 "name": token_name,
                 "scopes": scopes,
+                "expires_at": expires_at,
             }
         )
         created_tokens.append(token)
