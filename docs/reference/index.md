@@ -218,12 +218,16 @@ projects_and_groups:
         title: group_key # this name is show in GitLab
         can_push: false
 ```
-For the above configuration, for a project `group_1/project_1` the effective configuration for section `deploy_keys` is like defined for all projects and groups under `*`, with the more specific config in `group_1/*` ignored. In other words it will be like this:
+
+For the above configuration, for a project `group_1/project_1`, the effective configuration for the section `deploy_keys` is like defined for the project `group_1/project_1` (specific configuration), with the more generic configuration in `"*"` being ignored (_More specific configuration will **overwrite** the more general one_).
+
+In other words, it will be like this:
+
 ```yaml
 deploy_keys:
-  key_a:
-    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
-    title: global_key # this name is show in GitLab
+  key_b:
+    key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtbyEK66RXg...
+    title: group_key # this name is show in GitLab
     can_push: false
 ```
 

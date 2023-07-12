@@ -37,6 +37,16 @@ def one_owner_and_two_developers(group, root_user, users):
             group.members.delete(user.id)
 
 
+@pytest.fixture(scope="function")
+def one_bot_member(gl, make_group_access_token):
+    token = make_group_access_token()
+    bot_user = gl.users.get(token.user_id)
+
+    yield bot_user.username
+
+    token.delete()
+
+
 class TestGroupMembersUsers:
     def test__add_user(self, group, users, one_owner_and_two_developers):
         no_of_members_before = len(group.members.list())
@@ -88,6 +98,35 @@ class TestGroupMembersUsers:
 
         members_usernames = [member.username for member in members]
         assert user_to_remove not in members_usernames
+
+    def test__remove_user_keep_bots(
+        self, group, users, one_owner_and_two_developers, one_bot_member
+    ):
+        no_of_members_before = len(group.members.list())
+        user_to_remove = f"{users[2].username}"
+
+        remove_users = f"""
+            projects_and_groups:
+              {group.full_path}/*:
+                group_members:
+                  users:
+                    {users[0].username}:
+                      access_level: {AccessLevel.OWNER.value}
+                    {users[1].username}:
+                      access_level: {AccessLevel.DEVELOPER.value}
+                  enforce: true
+                  keep_bots: true
+            """
+
+        run_gitlabform(remove_users, group)
+
+        members = group.members.list()
+        assert len(members) == no_of_members_before - 1
+
+        members_usernames = [member.username for member in members]
+        assert user_to_remove not in members_usernames
+
+        assert one_bot_member in members_usernames
 
     def test__not_remove_users_with_enforce_false(
         self, group, users, one_owner_and_two_developers

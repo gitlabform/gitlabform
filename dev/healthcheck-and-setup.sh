@@ -30,7 +30,8 @@ test -f $done || {
     printf 'gitlabform_token = PersonalAccessToken.create('
     printf 'user_id: 1, '
     printf 'scopes: [:api, :read_user], '
-    printf 'name: :gitlabform);'
+    printf 'name: :gitlabform, '
+    printf 'expires_at: 365.days.from_now);'
     printf "gitlabform_token.set_token('token-string-here123');"
     printf 'gitlabform_token.save!;'
   ) | gitlab-rails console
