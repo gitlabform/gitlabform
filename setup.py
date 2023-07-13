@@ -55,7 +55,7 @@ setup(
         "packaging==23.1",
         "mergedeep==1.3.4",
         "yamlpath==3.8.0",
-        "ez-yaml==1.2.0",
+        "ez-yaml==2.0.0",
     ],
     extras_require={
         "test": [
