@@ -15,7 +15,7 @@ class SchedulesProcessor(AbstractProcessor):
 
         # Remove 'enforce' key from the config so that it's not treated as a "schedule"
         if enforce_schedules:
-            configured_schedules.pop('enforce')
+            configured_schedules.pop("enforce")
 
         existing_schedules = self.gitlab.get_all_pipeline_schedules(project_and_group)
         schedule_ids_by_description = self.__group_schedule_ids_by_description(
@@ -25,7 +25,7 @@ class SchedulesProcessor(AbstractProcessor):
         for schedule_description in sorted(configured_schedules):
             schedule_ids = schedule_ids_by_description.get(schedule_description)
 
-            if configured_schedules[schedule_description].get('delete'):
+            if configured_schedules[schedule_description].get("delete"):
                 if schedule_ids:
                     debug("Deleting pipeline schedules '%s'", schedule_description)
                     for schedule_id in schedule_ids:
@@ -78,17 +78,16 @@ class SchedulesProcessor(AbstractProcessor):
             debug("Delete unconfigured schedules because enforce is enabled")
 
             for schedule in existing_schedules:
-                schedule_description = schedule['description']
-                schedule_id = schedule['id']
+                schedule_description = schedule["description"]
+                schedule_id = schedule["id"]
 
                 debug(f"processing {schedule_id}: {schedule_description}")
                 if schedule_description not in configured_schedules:
-                    debug("Deleting pipeline schedule named '%s', because it is not in gitlabform configuration",
-                          schedule_description, 
+                    debug(
+                        "Deleting pipeline schedule named '%s', because it is not in gitlabform configuration",
+                        schedule_description,
                     )
-                    self.gitlab.delete_pipeline_schedule(
-                        project_and_group, schedule_id
-                    )
+                    self.gitlab.delete_pipeline_schedule(project_and_group, schedule_id)
 
     def create_schedule_with_variables(
         self, configuration, project_and_group, schedule_description
