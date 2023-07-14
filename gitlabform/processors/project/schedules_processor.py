@@ -10,7 +10,7 @@ class SchedulesProcessor(AbstractProcessor):
         super().__init__("schedules", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-        configured_schedules = configuration.get("schedules")
+        configured_schedules = configuration.get("schedules", {})
         enforce_schedules = configuration.get("schedules|enforce", False)
 
         # Remove 'enforce' key from the config so that it's not treated as a "schedule"
