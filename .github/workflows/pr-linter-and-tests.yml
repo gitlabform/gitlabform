@@ -39,6 +39,7 @@ jobs:
         run: |
           pip install wheel
           pip install -e .[test]
+          pip install types-setuptools
       - name: Run mypy
         run: |
           mypy . || true
