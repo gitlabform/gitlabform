@@ -78,6 +78,7 @@ jobs:
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
             override_commit: ${{ github.event.pull_request.head.sha }}
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
 
@@ -121,6 +122,7 @@ jobs:
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
             override_commit: ${{ github.event.pull_request.head.sha }}
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
 
@@ -156,6 +158,7 @@ jobs:
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
             override_commit: ${{ github.event.pull_request.head.sha }}
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
 
