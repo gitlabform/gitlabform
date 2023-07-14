@@ -232,3 +232,30 @@ class TestGroupMembersGroups:
 
         shared_with = gl.groups.get(group.id).shared_with_groups
         assert len(shared_with) == 2
+
+    def test__ignore_keep_bots_and_enforce(self, gl, group, users, groups, one_owner):
+        no_of_members_before = len(group.members.list())
+
+        add_shared_with = f"""
+            projects_and_groups:
+              {group.full_path}/*:
+                group_members:
+                  enforce: true
+                  keep_bots: true
+                  users:
+                  {users[0].username}:
+                    access_level: owner
+                  groups:
+                    {groups[0].full_path}:
+                      group_access: developer
+                    {groups[1].full_path}:
+                      group_access: developer
+            """
+
+        run_gitlabform(add_shared_with, group)
+
+        members = group.members.list()
+        assert len(members) == no_of_members_before, members
+
+        shared_with = gl.groups.get(group.id).shared_with_groups
+        assert len(shared_with) == 2
