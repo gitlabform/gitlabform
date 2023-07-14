@@ -17,10 +17,6 @@ There are 2 gitlabform specific keys/configs that can be set under `schedules` o
 - `delete` - set this to `true` under a specific schedule to delete that particular schedule.
 - `enforce` - set this to `true` under `schedules` so that any schedules that are not in `schedules` section are deleted.
 
-    !!! warning
-
-        The `delete` key maybe removed in future version of gitlabform as `enforce` key can be used for deleteing unconfigured schedules and keep gitlabform config cleaner.
-
 
 Example 1:
 ```yaml
