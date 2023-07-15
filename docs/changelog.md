@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.7.0
+
+* **Add `enforce` support to managing pipeline schedules**. PR [#561](https://github.com/gitlabform/gitlabform/pull/561), implements [#539](https://github.com/gitlabform/gitlabform/issues/539).
+* Fix group membership failing to apply when using `keep_bots` attribute. PR [#554](https://github.com/gitlabform/gitlabform/pull/554), fixes [#553](https://github.com/gitlabform/gitlabform/issues/553).
+
+Thanks to the contributors of this release:
+
+* [@amimas](https://github.com/amimas)
+* [Sachin Kumar Singh](https://github.com/SachinKSingh28)
+
 ## 3.6.1
 
 * Fix acceptance tests after GitLab v16 started to require expiration date for all the tokens. PR [#557](https://github.com/gitlabform/gitlabform/pull/557) and [d2b0c81](https://github.com/gitlabform/gitlabform/commit/d2b0c8182b4e12c9aec1e0dc3b83e1c06c2fe3d8).
@@ -49,7 +59,8 @@ Thanks to [Mirko Friedenhagen](https://github.com/mfriedenhagen) for his contrib
 * Show the config before and after the internal transformation stage, with the debug output enabled.
 * (For contributors) Big refactoring to make the code more logically groupped and contribution documentation updates for easier contributions. Please see the commit messages in the PR [#431](https://github.com/gitlabform/gitlabform/pull/431) for more information.
 
-Thanks to the following contributors of this release: 
+Thanks to the following contributors of this release:
+
 * [Waldek Maleska](https://github.com/weakcamel), [amimas](https://github.com/amimas), [Jimisola Laursen](https://github.com/jimisola), [Siythrun](https://github.com/Siythrun) for consulting and testing of the multiple merge request approval rules feature, 
 * [Rafael Zanella](https://github.com/zanella) for the development.
 
