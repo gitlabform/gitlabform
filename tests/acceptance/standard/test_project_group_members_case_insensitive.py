@@ -22,27 +22,7 @@ def two_members_in_other_group(other_group, make_user):
     yield [outsider_user1, outsider_user2]
 
 
-class TestMembersCaseInsensitive:
-    def test__user_case_insensitive(self, project, three_members, outsider_user):
-        no_of_members_before = len(project.members.list())
-
-        change_user_level = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            members:
-              users:
-                {randomize_case(outsider_user.username)}: # refer to a user with a different case
-                  access_level: {AccessLevel.MAINTAINER.value}
-        """
-
-        run_gitlabform(change_user_level, project)
-
-        members = project.members.list()
-        assert len(members) == no_of_members_before + 1
-
-        members_usernames = [member.username for member in members]
-        assert outsider_user.username in members_usernames
-
+class TestGroupMembersOfProjectCaseInsensitive:
     # this test should be in a separate class than other test files as it changes too
     # much for a reasonable setup and cleanup using fixtures
     def test__group_case_insensitive(

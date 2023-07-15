@@ -1,10 +1,10 @@
 import pytest
 
-from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
     run_gitlabform,
     randomize_case,
+    get_only_branch_access_levels,
 )
 
 pytestmark = pytest.mark.requires_license
