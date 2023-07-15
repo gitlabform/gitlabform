@@ -7,7 +7,7 @@
 
 Thanks to the contributors of this release:
 
-* [@amimas](https://github.com/amimas)
+* [amimas](https://github.com/amimas)
 * [Sachin Kumar Singh](https://github.com/SachinKSingh28)
 
 ## 3.6.1
@@ -15,7 +15,7 @@ Thanks to the contributors of this release:
 * Fix acceptance tests after GitLab v16 started to require expiration date for all the tokens. PR [#557](https://github.com/gitlabform/gitlabform/pull/557) and [d2b0c81](https://github.com/gitlabform/gitlabform/commit/d2b0c8182b4e12c9aec1e0dc3b83e1c06c2fe3d8).
 * Dependencies update.
 
-Thanks to [@amimas](https://github.com/amimas) for his contribution!
+Thanks to [amimas](https://github.com/amimas) for his contribution!
 
 ## 3.6.0
 
