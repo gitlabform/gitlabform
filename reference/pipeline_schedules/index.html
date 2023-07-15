@@ -864,7 +864,12 @@
 </li>
 </ul>
 </div>
-<p>Example:
+<p>There are 2 gitlabform specific keys/configs that can be set under <code>schedules</code> or individual schedule:</p>
+<ul>
+<li><code>delete</code> - set this to <code>true</code> under a specific schedule to delete that particular schedule.</li>
+<li><code>enforce</code> - set this to <code>true</code> under <code>schedules</code> so that any schedules that are not in <code>schedules</code> section are deleted.</li>
+</ul>
+<p>Example 1:
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">schedules</span><span class="p">:</span>
@@ -883,7 +888,18 @@
 <span class="w">          </span><span class="nt">other_variable</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">another_value</span>
 <span class="w">      </span><span class="s">&quot;Obsolete</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Delete this schedule</span>
+</code></pre></div></p>
+<p>Example 2:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">schedules</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Delete all other pipeline schedules that exists for this project</span>
+<span class="w">      </span><span class="s">&quot;Some</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">        </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">MON-FRI&quot;</span>
+<span class="w">        </span><span class="nt">cron_timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;London&quot;</span>
+<span class="w">        </span><span class="nt">active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </code></pre></div></p>
 
 
