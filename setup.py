@@ -49,7 +49,7 @@ setup(
         "types-requests==2.28.11.17",
         "Jinja2==3.1.2",
         "MarkupSafe==2.1.2",
-        "ruamel.yaml==0.17.21",
+        "ruamel.yaml==0.17.32",
         "luddite==1.0.2",
         "cli-ui==0.17.2",
         "packaging==23.1",
