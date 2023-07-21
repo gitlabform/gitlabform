@@ -596,9 +596,47 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Tags protection
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Tags protection
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#common-features" class="md-nav__link">
+    Common features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#premium-only-features" class="md-nav__link">
+    Premium-only features
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -833,6 +871,28 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#common-features" class="md-nav__link">
+    Common features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#premium-only-features" class="md-nav__link">
+    Premium-only features
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -852,6 +912,7 @@
 <h1 id="tags-protection">Tags protection<a class="headerlink" href="#tags-protection" title="Permanent link">&para;</a></h1>
 <p>This section purpose is to protect and unprotect the project tags.</p>
 <p>It works using the <a href="https://docs.gitlab.com/ee/api/protected_tags.html#protect-repository-tags">Protected tags API</a> and its syntax is loosely based on it.</p>
+<h2 id="common-features">Common features<a class="headerlink" href="#common-features" title="Permanent link">&para;</a></h2>
 <p>The keys are the exact names of the tag or wildcards.</p>
 <p>The values are:</p>
 <ul>
@@ -867,6 +928,44 @@
 <span class="w">        </span><span class="nt">create_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span>
 <span class="w">      </span><span class="s">&quot;some-old-tag&quot;</span><span class="p p-Indicator">:</span>
 <span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
+<h2 id="premium-only-features">Premium-only features<a class="headerlink" href="#premium-only-features" title="Permanent link">&para;</a></h2>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Below syntax and features require GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
+</div>
+<p>In GitLab Premium instances you can also use the following extra keys under each branch:</p>
+<ul>
+<li><code>allowed_to_create</code> key that can be set to the arrays containing any combination of:<ul>
+<li><code>user</code> set to username,</li>
+<li><code>user_id</code> set to user id,</li>
+<li><code>group</code> set to group name (path),</li>
+<li><code>group_id</code> set to group id,</li>
+<li><code>access_level</code> set to <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access level</a></li>
+</ul>
+</li>
+</ul>
+<p>Note that you should NOT use both <code>create_access_level</code> and <code>access_level</code> key under <code>allowed_to_create</code> - the result could be ambiguous, please choose the first or the second set.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">tags</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># Allow specific users, groups, or roles to create this tag</span>
+<span class="w">      </span><span class="nt">release-*</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">allowed_to_create</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jsmith</span><span class="w"> </span><span class="c1"># you can use usernames...</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bdoe</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">another-group</span><span class="w"> </span><span class="c1"># ...or group names (paths)...</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">user_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span><span class="w"> </span><span class="c1"># ...or user ids, if you know them...</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">456</span><span class="w"> </span><span class="c1"># ...or group ids, if you know them...</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span><span class="w"> </span><span class="c1"># do not allow creating tag by role (only specific user or group)</span>
+<span class="w">      </span><span class="nt">alpha-release-by-devs-*</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">allowed_to_create</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jsmith</span><span class="w"> </span><span class="c1"># you can use usernames...</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span>
 </code></pre></div>
 
 
