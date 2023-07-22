@@ -25,6 +25,7 @@ from gitlabform.gitlab.schedules import GitLabPipelineSchedules
 from gitlabform.gitlab.integrations import GitLabIntegrations
 from gitlabform.gitlab.tags import GitLabTags
 from gitlabform.gitlab.users import GitLabUsers
+from gitlab import Gitlab
 
 
 @enum.unique
@@ -74,3 +75,25 @@ class GitLab(
     GitLabVariables,
 ):
     pass
+
+
+class GitlabWrapper:
+    def __init__(self, gitlabform: GitLab):
+        url = gitlabform.url
+        token = gitlabform.token
+        ssl_verify = gitlabform.ssl_verify
+        timeout = gitlabform.timeout
+        session = gitlabform.session
+
+        self._gitlab: Gitlab = Gitlab(
+            url,
+            token,
+            ssl_verify=ssl_verify,
+            api_version="4",
+            session=session,
+            retry_transient_errors=True,
+            timeout=timeout,
+        )
+
+    def get_gitlab(self):
+        return self._gitlab

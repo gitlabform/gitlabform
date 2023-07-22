@@ -1,5 +1,5 @@
 from typing import Tuple
-
+from logging import debug
 from cli_ui import fatal
 
 from gitlabform.constants import EXIT_INVALID_INPUT
@@ -49,8 +49,28 @@ class ProjectsProvider(GroupsProvider):
             projects.add_requested([maybe_project["path_with_namespace"]])
 
         except NotFoundException:
-            # it's a group or a subgroup - ignore it here
-            pass
+            debug("Could not find '%s'", target)
+            debug(
+                "Checking if it's a project that needs to be transferred from elsewhere"
+            )
+            project_transfer_source = self.configuration.config["projects_and_groups"][
+                target
+            ]["project"]["transfer_from"]
+
+            if project_transfer_source:
+                try:
+                    maybe_project = self.gitlab.get_project_case_insensitive(
+                        project_transfer_source
+                    )
+                    debug(
+                        "Found a project '%s' to be transferred to '%s'",
+                        maybe_project["path_with_namespace"],
+                        target,
+                    )
+                    projects.add_requested([target])
+                except NotFoundException:
+                    # it's a group or a subgroup - ignore it here
+                    pass
 
         return projects
 
