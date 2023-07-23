@@ -153,11 +153,15 @@ def groups(users):
 
 
 @pytest.fixture(scope="class")
-def group_to_invite_to_project(gl: Gitlab) -> Generator[Optional[Group], None, None]:
+def group_to_invite_to_project(
+    gl: Gitlab,
+) -> Generator[Callable[[Project, AccessLevel], Group], None, None]:
     group_name_base = get_random_name("group")
     created_groups: List[Group] = []
 
-    def _group_to_invite_to_project(project, access_level):
+    def _group_to_invite_to_project(
+        project: Project, access_level: AccessLevel = AccessLevel.DEVELOPER
+    ) -> Group:
         group_index = len(created_groups) + 1
         group_name = f"{group_name_base}_{group_index}"
         gitlab_group = create_group(group_name)
