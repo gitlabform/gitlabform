@@ -30,7 +30,11 @@ jobs:
   types:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code from the PR
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
@@ -78,6 +82,7 @@ jobs:
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
             override_commit: ${{ github.event.pull_request.head.sha }}
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
 
@@ -121,6 +126,7 @@ jobs:
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
             override_commit: ${{ github.event.pull_request.head.sha }}
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
 
@@ -156,6 +162,7 @@ jobs:
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
             override_commit: ${{ github.event.pull_request.head.sha }}
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
 

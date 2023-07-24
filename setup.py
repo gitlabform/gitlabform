@@ -46,7 +46,7 @@ setup(
     install_requires=[
         "certifi",  # we want the latest root certs for security
         "requests==2.31.0",
-        "types-requests==2.28.11.17",
+        "types-requests==2.31.0.1",
         "Jinja2==3.1.2",
         "MarkupSafe==2.1.2",
         "ruamel.yaml==0.17.21",
@@ -60,11 +60,11 @@ setup(
     extras_require={
         "test": [
             "python-gitlab==3.13.0",
-            "pytest==7.3.1",
+            "pytest==7.4.0",
             "xkcdpass==1.19.3",
             "pre-commit==2.21.0",  # not really for tests, but for development
             "coverage==7.2.7",
-            "pytest-cov==4.0.0",
+            "pytest-cov==4.1.0",
             "deepdiff==6.3.1",
             "pytest-rerunfailures==11.1.2",
             "cryptography==41.0.2",

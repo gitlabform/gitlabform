@@ -210,6 +210,39 @@ def get_only_branch_access_levels(project: Project, branch):
     )
 
 
+def get_only_tag_access_levels(project: Project, tag):
+    protected_tag = None
+
+    with allowed_codes(404):
+        protected_tag = project.protectedtags.get(tag)
+
+    if not protected_tag:
+        return None, None, None
+
+    allowed_to_create_access_levels = set()
+    allowed_to_create_access_user_ids = set()
+    allowed_to_create_access_group_ids = set()
+
+    tag_details = protected_tag.attributes
+
+    if "create_access_levels" in tag_details:
+        for create_access in tag_details["create_access_levels"]:
+            if create_access["user_id"]:
+                allowed_to_create_access_user_ids.add(create_access["user_id"])
+
+            if create_access["group_id"]:
+                allowed_to_create_access_group_ids.add(create_access["group_id"])
+
+            if not create_access["user_id"] and not create_access["group_id"]:
+                allowed_to_create_access_levels.add(create_access["access_level"])
+
+    return (
+        sorted(allowed_to_create_access_levels),
+        sorted(allowed_to_create_access_user_ids),
+        sorted(allowed_to_create_access_group_ids),
+    )
+
+
 def run_gitlabform(config, target, include_archived_projects=True):
     # f-strings with """ used as configs have the disadvantage of having indentation in them - let's remove it here
     config = textwrap.dedent(config)

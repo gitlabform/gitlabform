@@ -21,16 +21,19 @@ class GitLabTags(GitLabCore):
             project_and_group_name,
         )
 
-    def protect_tag(self, project_and_group_name, tag_name, create_access_level):
-        data = {"name": tag_name}
+    def protect_tag(
+        self, project_and_group_name, tag_name, allowed_to_create, create_access_level
+    ):
+        data = {}
+        if allowed_to_create is not None:
+            data["allowed_to_create"] = allowed_to_create
         if create_access_level is not None:
             data["create_access_level"] = create_access_level
+
+        url = "projects/%s/protected_tags?name=%s"
+        parameters_list = [project_and_group_name, tag_name]
         return self._make_requests_to_api(
-            "projects/%s/protected_tags",
-            project_and_group_name,
-            method="POST",
-            data=data,
-            expected_codes=201,
+            url, tuple(parameters_list), method="POST", expected_codes=201, json=data
         )
 
     def unprotect_tag(self, project_and_group_name, tag_name):
