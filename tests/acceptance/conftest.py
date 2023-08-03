@@ -281,12 +281,12 @@ def make_project_access_token(
     created_tokens: List[ProjectAccessToken] = []
 
     def _make_project_access_token(
-        level: AccessLevel = AccessLevel.DEVELOPER, scopes: List[str] = ["api"]
+        target_project: Project = project, level: AccessLevel = AccessLevel.DEVELOPER, scopes: List[str] = ["api"]
     ) -> ProjectAccessToken:
         last_id = len(created_tokens) + 1
         token_name = f"{token_name_base}_{last_id}_bot"
         expires_at = (date.today() + timedelta(days=30)).isoformat()
-        token = project.access_tokens.create(
+        token = target_project.access_tokens.create(
             {
                 "access_level": level,
                 "name": token_name,
