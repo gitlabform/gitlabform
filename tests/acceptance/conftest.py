@@ -276,12 +276,16 @@ def make_user(
 @pytest.fixture(scope="class")
 def make_project_access_token(
     project,
-) -> Generator[Callable[[AccessLevel, List[str]], ProjectAccessToken], None, None]:
+) -> Generator[
+    Callable[[Project, AccessLevel, List[str]], ProjectAccessToken], None, None
+]:
     token_name_base = get_random_name("user")
     created_tokens: List[ProjectAccessToken] = []
 
     def _make_project_access_token(
-        target_project: Project = project, level: AccessLevel = AccessLevel.DEVELOPER, scopes: List[str] = ["api"]
+        target_project=project,
+        level: AccessLevel = AccessLevel.DEVELOPER,
+        scopes: List[str] = ["api"],
     ) -> ProjectAccessToken:
         last_id = len(created_tokens) + 1
         token_name = f"{token_name_base}_{last_id}_bot"

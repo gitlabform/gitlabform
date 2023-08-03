@@ -8,7 +8,7 @@ from tests.acceptance import (
 
 @pytest.fixture(scope="function")
 def bot_member(gl, make_project_access_token, project_for_function):
-    token = make_project_access_token(target_project = project_for_function)
+    token = make_project_access_token(target_project=project_for_function)
 
     bot_member = gl.users.get(token.user_id)
 
