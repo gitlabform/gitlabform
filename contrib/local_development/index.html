@@ -766,6 +766,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#required-tools" class="md-nav__link">
+    Required tools
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#environment-setup" class="md-nav__link">
     Environment setup
   </a>
@@ -815,6 +822,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#acceptance-tests-for-gitlab-paid-features" class="md-nav__link">
+    Acceptance tests for GitLab paid features
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#running-acceptance-tests-using-your-own-gitlab-instance" class="md-nav__link">
     Running acceptance tests using your own GitLab instance
   </a>
@@ -836,6 +850,13 @@
         <li class="md-nav__item">
   <a href="#testing-types" class="md-nav__link">
     Testing types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code-formatting" class="md-nav__link">
+    Code formatting
   </a>
   
 </li>
@@ -939,6 +960,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#required-tools" class="md-nav__link">
+    Required tools
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#environment-setup" class="md-nav__link">
     Environment setup
   </a>
@@ -988,6 +1016,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#acceptance-tests-for-gitlab-paid-features" class="md-nav__link">
+    Acceptance tests for GitLab paid features
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#running-acceptance-tests-using-your-own-gitlab-instance" class="md-nav__link">
     Running acceptance tests using your own GitLab instance
   </a>
@@ -1013,6 +1048,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#code-formatting" class="md-nav__link">
+    Code formatting
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1032,6 +1074,12 @@
 
 
 <h1 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h1>
+<h2 id="required-tools">Required tools<a class="headerlink" href="#required-tools" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Python 3 and Pip 3 for development</li>
+<li>Docker for running Gitlab on local machine</li>
+<li><code>jq</code> used in local environment setup scripts</li>
+</ul>
 <h2 id="environment-setup">Environment setup<a class="headerlink" href="#environment-setup" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
@@ -1048,7 +1096,7 @@
 </ol>
 <p>Now you can run and debug the app locally.</p>
 <h2 id="running-unit-tests">Running unit tests<a class="headerlink" href="#running-unit-tests" title="Permanent link">&para;</a></h2>
-<p>GitLabForm uses py.test for tests. You can run unit tests directly on your machine or in a Docker container.</p>
+<p>GitLabForm uses <code>pytest</code> for tests. You can run unit tests directly on your machine or in a Docker container.</p>
 <h3 id="running-unit-tests-locally">Running unit tests locally<a class="headerlink" href="#running-unit-tests-locally" title="Permanent link">&para;</a></h3>
 <p>To run unit tests locally:</p>
 <ol>
@@ -1080,15 +1128,7 @@ too, like this:</p>
 against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.</p>
 <h3 id="running-acceptance-tests-using-gitlab-instance-in-docker">Running acceptance tests using GitLab instance in Docker<a class="headerlink" href="#running-acceptance-tests-using-gitlab-instance-in-docker" title="Permanent link">&para;</a></h3>
 <ol>
-<li>
-<p>(optional) If you have it, put your GitLab license in its base64-encoded form into the <code>$GITLAB_EE_LICENSE</code> environment variable or into a git-ignored <code>gitlab-license.json</code> file in the root of the repo with the following content: <code>{"license":"&lt;base64-encoded license file&gt;"}</code>. According to the license
-agreement (as of now and IANAL) you are allowed to use it for testing and development purposes such as this. This will
-make the following script use it to be able to test Premium (paid) features. Of course this license will not leave your
-machine.</p>
-</li>
-<li>
-<p>Run below commands to start GitLab in a container. Note that it may take a few minutes!</p>
-</li>
+<li>Run below command to start GitLab in a docker container. Note that it may take a few minutes!</li>
 </ol>
 <div class="highlight"><pre><span></span><code>./dev/run_gitlab_in_docker.sh
 </code></pre></div>
@@ -1098,6 +1138,12 @@ To run only a single class with tests run f.e.</li>
 <li><code>py.test tests/acceptance -k "TestArchiveProject"</code>.</li>
 <li><code>pytest tests/acceptance/&lt;TEST_FILE&gt;.py::&lt;TestClass&gt;::&lt;TEST_METHOD&gt;</code></li>
 </ol>
+<h3 id="acceptance-tests-for-gitlab-paid-features">Acceptance tests for GitLab paid features<a class="headerlink" href="#acceptance-tests-for-gitlab-paid-features" title="Permanent link">&para;</a></h3>
+<p>To test features that are only available in paid version of Gitlab, you'll need a Gitlab license so that those features are available and the acceptance tests can use it. You can signup for a Gitlab Trial license. Follow the <a href="https://about.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows.html#contributing-to-the-gitlab-enterprise-edition-ee">instructions in Gitlab handbook</a> for details on how to get a license for development purpose. Once you've received a license, take the following step:</p>
+<ol>
+<li>Copy your license and save it as an <code>GITLAB_EE_LICENSE</code> environment variable or in a file named <code>Gitlab.gitlab-license</code>. This file is already in <code>.gitignore</code>; so it will not be included in your commit.</li>
+<li>Follow the steps mentioned in previous section.</li>
+</ol>
 <h3 id="running-acceptance-tests-using-your-own-gitlab-instance">Running acceptance tests using your own GitLab instance<a class="headerlink" href="#running-acceptance-tests-using-your-own-gitlab-instance" title="Permanent link">&para;</a></h3>
 <p><strong>Note</strong>: GitLabForm acceptance tests operate own their own groups, projects and users and it should be safe
 to run them on any GitLab instance. However we do not take any responsibility for it. Please review 
@@ -1105,7 +1151,7 @@ the code to ensure what it does and run it at your own risk!</p>
 <ol>
 <li>
 <p>Get an admin user API token and put it into <code>GITLAB_TOKEN</code> env variable. Do the same with your GitLab instance URL
-and <code>GITLAB_URL</code>:
+and put it into <code>GITLAB_URL</code> env variable:
 <div class="highlight"><pre><span></span><code>export GITLAB_URL=&quot;https://mygitlab.company.com&quot;
 export GITLAB_TOKEN=&quot;&lt;my admin user API token&gt;&quot;
 </code></pre></div></p>
@@ -1123,11 +1169,15 @@ mkdocs<span class="w"> </span>serve
 </code></pre></div>
 ...and open the provided link (probably <a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a>) in your browser.</p>
 <h2 id="testing-types">Testing types<a class="headerlink" href="#testing-types" title="Permanent link">&para;</a></h2>
-<p>Please run mypy to test static types:
+<p>Please run <code>mypy</code> to test static types:
 <div class="highlight"><pre><span></span><code>mypy<span class="w"> </span>.<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
 mypy<span class="w"> </span>--install-types<span class="w"> </span>--non-interactive
 mypy<span class="w"> </span>.
 </code></pre></div></p>
+<h2 id="code-formatting">Code formatting<a class="headerlink" href="#code-formatting" title="Permanent link">&para;</a></h2>
+<p>Please run <code>black</code> to format coding style:</p>
+<div class="highlight"><pre><span></span><code>black<span class="w"> </span>.
+</code></pre></div>
 
 
 
