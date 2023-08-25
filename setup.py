@@ -60,7 +60,7 @@ setup(
         "test": [
             "python-gitlab==3.15.0",
             "pytest==7.4.0",
-            "xkcdpass==1.19.3",
+            "xkcdpass==1.19.4",
             "pre-commit==2.21.0",  # not really for tests, but for development
             "coverage==7.3.0",
             "pytest-cov==4.1.0",
