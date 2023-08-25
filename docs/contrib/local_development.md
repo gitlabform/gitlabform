@@ -1,5 +1,11 @@
 # Local Development
 
+## Required tools
+
+- Python 3 and Pip 3 for development
+- Docker for running Gitlab on local machine
+- `jq` used in local environment setup scripts
+
 ## Environment setup
 
 1. Create virtualenv with Python 3, for example in `venv` dir which is in `.gitignore` and activate it:
@@ -17,7 +23,7 @@ Now you can run and debug the app locally.
 
 ## Running unit tests
 
-GitLabForm uses py.test for tests. You can run unit tests directly on your machine or in a Docker container.
+GitLabForm uses `pytest` for tests. You can run unit tests directly on your machine or in a Docker container.
 
 ### Running unit tests locally
 
@@ -53,21 +59,23 @@ against a disposable GitLab instance running as a Docker container OR use your o
 
 ### Running acceptance tests using GitLab instance in Docker
 
-1. (optional) If you have it, put your GitLab license in its base64-encoded form into the `$GITLAB_EE_LICENSE` environment variable or into a git-ignored `gitlab-license.json` file in the root of the repo with the following content: `{"license":"<base64-encoded license file>"}`. According to the license
-agreement (as of now and IANAL) you are allowed to use it for testing and development purposes such as this. This will
-make the following script use it to be able to test Premium (paid) features. Of course this license will not leave your
-machine.
-
-2. Run below commands to start GitLab in a container. Note that it may take a few minutes!
+1. Run below command to start GitLab in a docker container. Note that it may take a few minutes!
 
 ```
 ./dev/run_gitlab_in_docker.sh
 ```
 
-3. Run `pytest tests/acceptance` to start all tests.
+2. Run `pytest tests/acceptance` to start all tests.
 To run only a single class with tests run f.e.
 - `py.test tests/acceptance -k "TestArchiveProject"`.
 - `pytest tests/acceptance/<TEST_FILE>.py::<TestClass>::<TEST_METHOD>`
+
+### Acceptance tests for GitLab paid features
+
+To test features that are only available in paid version of Gitlab, you'll need a Gitlab license so that those features are available and the acceptance tests can use it. You can signup for a Gitlab Trial license. Follow the [instructions in Gitlab handbook](https://about.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows.html#contributing-to-the-gitlab-enterprise-edition-ee) for details on how to get a license for development purpose. Once you've received a license, take the following step:
+
+1. Copy your license and save it as an `GITLAB_EE_LICENSE` environment variable or in a file named `Gitlab.gitlab-license`. This file is already in `.gitignore`; so it will not be included in your commit.
+2. Follow the steps mentioned in previous section.
 
 ### Running acceptance tests using your own GitLab instance
 
@@ -76,7 +84,7 @@ to run them on any GitLab instance. However we do not take any responsibility fo
 the code to ensure what it does and run it at your own risk!
 
 1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
-and `GITLAB_URL`:
+and put it into `GITLAB_URL` env variable:
 ```
 export GITLAB_URL="https://mygitlab.company.com"
 export GITLAB_TOKEN="<my admin user API token>"
@@ -97,9 +105,17 @@ mkdocs serve
 
 ## Testing types
 
-Please run mypy to test static types:
+Please run `mypy` to test static types:
 ```shell
 mypy . || true
 mypy --install-types --non-interactive
 mypy .
+```
+
+## Code formatting
+
+Please run `black` to format coding style:
+
+```shell
+black .
 ```
