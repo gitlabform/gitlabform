@@ -25,7 +25,6 @@ setup(
     author="Greg Dubicki and Contributors",
     keywords=["cli", "yaml", "gitlab", "configuration-as-code"],
     classifiers=[
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -42,7 +41,7 @@ setup(
     packages=find_packages(),
     package_data={"": ["LICENSE", "version", "*.md", "config.yml"]},
     include_package_data=True,
-    python_requires=">=3.7.0",
+    python_requires=">=3.8.0",
     install_requires=[
         "certifi",  # we want the latest root certs for security
         "requests==2.31.0",
