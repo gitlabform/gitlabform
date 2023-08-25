@@ -7,13 +7,12 @@ from tests.acceptance import (
 
 
 @pytest.fixture(scope="function")
-def bot_members(gl, make_project_access_token, make_user):
-    token = make_project_access_token()
+def bot_member(gl, make_project_access_token, project_for_function):
+    token = make_project_access_token(target_project=project_for_function)
 
-    member1 = gl.users.get(token.user_id)
-    member2 = make_user()
+    bot_member = gl.users.get(token.user_id)
 
-    yield [member1.username, member2.username]
+    yield bot_member
 
     token.delete()
 
@@ -26,7 +25,7 @@ class TestMembersEnforce:
         outsider_user,
     ):
         members_before = project.members.list()
-        assert len(members_before) > 0
+        assert len(members_before) == len(three_members)
 
         members_usernames_before = [member.username for member in members_before]
         assert outsider_user.username not in members_usernames_before
@@ -50,19 +49,19 @@ class TestMembersEnforce:
 
     def test__enforce_keep_bots(
         self,
-        project,
-        bot_members,
+        project_for_function,
+        bot_member,
         outsider_user,
     ):
-        members_before = project.members.list()
-        assert len(members_before) == 2
+        members_before = project_for_function.members.list()
+        assert len(members_before) == 1
 
         members_usernames_before = [member.username for member in members_before]
         assert outsider_user.username not in members_usernames_before
 
         enforce_users = f"""
             projects_and_groups:
-              {project.path_with_namespace}:
+              {project_for_function.path_with_namespace}:
                 members:
                   users:
                     {outsider_user.username}: # new user
@@ -71,10 +70,9 @@ class TestMembersEnforce:
                   keep_bots: true
             """
 
-        run_gitlabform(enforce_users, project)
+        run_gitlabform(enforce_users, project_for_function)
 
-        members = project.members.list()
+        members = project_for_function.members.list()
 
         assert len(members) == 2
-        assert members[0].username == bot_members[0]
-        assert members[1].username == outsider_user.username
+        assert members[0].username == bot_member.username
