@@ -1,6 +1,6 @@
 from logging import debug
 from abc import ABC, abstractmethod
-from ez_yaml import ez_yaml
+import ez_yaml
 from ruamel.yaml import YAML
 from types import SimpleNamespace
 
