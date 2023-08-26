@@ -1,5 +1,6 @@
-from cli_ui import debug as verbose
-from logging import fatal
+import traceback
+from logging import debug
+from cli_ui import debug as verbose, warning
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.gitlab import GitlabWrapper
@@ -59,11 +60,12 @@ class ProjectProcessor(AbstractProcessor):
                     project_to_be_transferred.transfer(
                         project_transfer_destination_group
                     )
-                except GitlabTransferProjectError:
-                    fatal(
-                        "Encountered error transferring project. Please check if project transfer requirements were met. Docs: https://docs.gitlab.com/ee/user/project/settings/index.html#transfer-a-project-to-another-namespace"
-                    )
-                    raise
+                except GitlabTransferProjectError as error:
+                    trace = traceback.format_exc()
+                    message = f"Encountered error transferring project '{project_to_be_transferred.path}'. Please check if project transfer requirements were met. Docs: https://docs.gitlab.com/ee/user/project/settings/index.html#transfer-a-project-to-another-namespace, exception:\n\n{error}"
+
+                    warning(message)
+                    debug(trace)
 
         if configuration["project"].get("archive") is not None:
             if configuration["project"].get("archive") is True:

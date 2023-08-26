@@ -3,8 +3,7 @@ from tests.acceptance import (
     run_gitlabform,
 )
 from gitlabform.gitlab import AccessLevel
-from gitlab import GitlabTransferProjectError
-import pytest
+import re
 
 
 class TestTransferProject:
@@ -299,7 +298,7 @@ class TestTransferProject:
     # Cannot test all the prerequisites because that will require extra
     # fixture or running gitlabform as a different user.
     def test__transfer_without_satisfied_prerequisites(
-        self, gl, project_for_function, group, other_group
+        self, gl, project_for_function, other_group, capsys
     ):
         project_name = project_for_function.name
         project_source_path = project_for_function.path_with_namespace
@@ -315,16 +314,17 @@ class TestTransferProject:
 
         # Before running gitlabform, update the destination group so that
         # new project creation is disabled. Then run gitlabform. This will
-        # violates one of the requirements for project transfer and we'll
+        # violate one of the requirements for project transfer and we'll
         # be able to validate the error handling.
         gl.groups.update(other_group.id, {"project_creation_level": "noone"})
 
-        with pytest.raises(SystemExit):
-            with pytest.raises(
-                GitlabTransferProjectError, match=r".*error transferring project.*"
-            ):
-                run_gitlabform(config, project_new_path_with_namespace)
+        run_gitlabform(config, project_new_path_with_namespace)
+        captured_logs = capsys.readouterr()
 
+        assert re.match(
+            f"^Warning: Encountered error transferring project \\'{project_for_function.path}\\'.*",
+            captured_logs.err,
+        ), "Project transfer error message does not match or no error encountered."
         projects_in_new_path_after_transfer = other_group.projects.list()
         assert len(projects_in_new_path_after_transfer) == len(
             projects_in_new_path_before_transfer
