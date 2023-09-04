@@ -59,7 +59,7 @@ setup(
     extras_require={
         "test": [
             "python-gitlab==3.15.0",
-            "pytest==7.4.0",
+            "pytest==7.4.1",
             "xkcdpass==1.19.4",
             "pre-commit==2.21.0",  # not really for tests, but for development
             "coverage==7.3.0",
