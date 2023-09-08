@@ -61,7 +61,18 @@ class GitLabMembers(GitLabCore):
         if with_inherited:
             url_template += "/all"
 
-        return self._make_requests_to_api(url_template, group_name)
+        members = self._make_requests_to_api(url_template, group_name)
+
+        # it will return {username1: {...api info about username1...}, username2: {...}}
+        # otherwise it can get very long to iterate when checking if a user
+        # is already in the group if there are a lot of users to check.
+        # To enforce case insensitivity, the username is always as lowercase as
+        # it can be for future comparisons.
+        final_members = {}
+        for member in members:
+            final_members[member["username"].lower()] = member
+
+        return final_members
 
     def get_members_from_project(self, project_and_group_name):
         # note that this DOES NOT return inherited users
@@ -70,10 +81,12 @@ class GitLabMembers(GitLabCore):
         )
         # it will return {username1: {...api info about username1...}, username2: {...}}
         # otherwise it can get very long to iterate when checking if a user
-        # is already in the project if there are a lot of users to check
+        # is already in the project if there are a lot of users to check.
+        # To enforce case insensitivity, the username is always as lowercase as
+        # it can be for future comparisons.
         final_members = {}
         for member in members:
-            final_members[member["username"]] = member
+            final_members[member["username"].lower()] = member
 
         return final_members
 

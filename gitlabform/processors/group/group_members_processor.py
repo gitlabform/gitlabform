@@ -151,10 +151,7 @@ class GroupMembersProcessor(AbstractProcessor):
         # group users before by username
         # (note: we DON'T get inherited users as we don't manage them at this level anyway)
         users_before = self.gitlab.get_group_members(group, with_inherited=False)
-        debug("Group members BEFORE: %s", users_before)
-        users_before_by_username = dict()
-        for user in users_before:
-            users_before_by_username[user["username"]] = user
+        debug("Group members BEFORE: %s", users_before.keys())
 
         if users_to_set_by_username:
             # group users to set by access level
@@ -180,11 +177,12 @@ class GroupMembersProcessor(AbstractProcessor):
                         else None
                     )
 
-                    if user in users_before_by_username:
-                        access_level_before = users_before_by_username[user][
+                    common_username = user.lower()
+                    if common_username in users_before:
+                        access_level_before = users_before[common_username][
                             "access_level"
                         ]
-                        expires_at_before = users_before_by_username[user]["expires_at"]
+                        expires_at_before = users_before[common_username]["expires_at"]
 
                         if (
                             access_level_before == access_level_to_set
@@ -192,29 +190,38 @@ class GroupMembersProcessor(AbstractProcessor):
                         ):
                             debug(
                                 "Nothing to change for user '%s' - same config now as to set.",
-                                user,
+                                common_username,
                             )
                         else:
                             debug(
                                 "Editing user '%s' membership to change their access level or expires at.",
-                                user,
+                                common_username,
                             )
                             self.gitlab.edit_member_of_group(
-                                group, user, access_level_to_set, expires_at_to_set
+                                group,
+                                common_username,
+                                access_level_to_set,
+                                expires_at_to_set,
                             )
 
                     else:
-                        debug("Adding user '%s' who previously was not a member.", user)
+                        debug(
+                            "Adding user '%s' who previously was not a member.",
+                            common_username,
+                        )
                         self.gitlab.add_member_to_group(
-                            group, user, access_level_to_set, expires_at_to_set
+                            group,
+                            common_username,
+                            access_level_to_set,
+                            expires_at_to_set,
                         )
 
         if enforce_group_members:
             # remove users not configured explicitly
             # note: only direct members are removed - inherited are left
-            users_not_configured = set(
-                [user["username"] for user in users_before]
-            ) - set(users_to_set_by_username.keys())
+            users_not_configured = set(users_before.keys()) - set(
+                [username.lower() for username in users_to_set_by_username.keys()]
+            )
             for user in users_not_configured:
                 if keep_bots and self.gitlab.get_user_by_name(user)["bot"]:
                     debug(
