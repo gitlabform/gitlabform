@@ -56,14 +56,14 @@ fi
 
 gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'mK9JnG7jwYdFcBNoQ3W3'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;"
 
-if [[ -f Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
+if [[ -f $repo_root_directory/Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
 
   mkdir -p $repo_root_directory/config
   rm -rf $repo_root_directory/config/*
 
-  if [[ -f Gitlab.gitlab-license ]]; then
+  if [[ -f $repo_root_directory/Gitlab.gitlab-license ]]; then
     cecho b "EE license file found - using it..."
-    cp Gitlab.gitlab-license $repo_root_directory/config/
+    cp $repo_root_directory/Gitlab.gitlab-license $repo_root_directory/config/
   else
     cecho b "EE license env variable found - using it..."
     echo "$GITLAB_EE_LICENSE" > $repo_root_directory/config/Gitlab.gitlab-license
@@ -109,7 +109,7 @@ echo ''
 cecho b 'GitLab version:'
 curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/version
 echo ''
-if [[ -f Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
+if [[ -f $repo_root_directory/Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
   cecho b 'GitLab license (plan, is expired?):'
   curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/license | jq '.plan, .expired'
   echo ''
