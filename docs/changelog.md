@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.8.0
+
+* **Add `allowed_to_create` support for tag protection**. PR [#551](https://github.com/gitlabform/gitlabform/pull/551), implements [#505](https://github.com/gitlabform/gitlabform/issues/505).
+* **Require Python version >= 3.8** (as 3.7 is EOL since June 2023) and update dependencies that have required it. PR [#592](https://github.com/gitlabform/gitlabform/pull/592), implements [#576](https://github.com/gitlabform/gitlabform/issues/576).
+* **Usernames in projects and groups should be case-insensitive**. PR [#556](https://github.com/gitlabform/gitlabform/pull/556), implements [#555](https://github.com/gitlabform/gitlabform/issues/555).
+* Update many dependencies to newer version.
+* Various fixes to local dev, tests, and CI of gitlabform.
+
+Thanks to the contributors of this release::
+
+* [amimas](https://github.com/amimas)
+* [J4Numbers](https://github.com/J4Numbers)
+* [gdubicki](https://github.com/gdubicki)
+
 ## 3.7.0
 
 * **Add `enforce` support to managing pipeline schedules**. PR [#561](https://github.com/gitlabform/gitlabform/pull/561), implements [#539](https://github.com/gitlabform/gitlabform/issues/539).
