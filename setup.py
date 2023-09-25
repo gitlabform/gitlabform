@@ -66,7 +66,7 @@ setup(
             "pytest-cov==4.1.0",
             "deepdiff==6.5.0",
             "pytest-rerunfailures==12.0",
-            "cryptography==41.0.3",
+            "cryptography==41.0.4",
             "mypy==1.5.1",
             "mypy-extensions==1.0.0",
         ],
