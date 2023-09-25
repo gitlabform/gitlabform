@@ -45,7 +45,7 @@ setup(
     install_requires=[
         "certifi",  # we want the latest root certs for security
         "requests==2.31.0",
-        "types-requests==2.31.0.2",
+        "types-requests==2.31.0.4",
         "Jinja2==3.1.2",
         "MarkupSafe==2.1.3",
         "ruamel.yaml==0.17.21",
