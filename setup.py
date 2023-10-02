@@ -51,7 +51,7 @@ setup(
         "ruamel.yaml==0.17.21",
         "luddite==1.0.2",
         "cli-ui==0.17.2",
-        "packaging==23.1",
+        "packaging==23.2",
         "mergedeep==1.3.4",
         "yamlpath==3.8.0",
         "ez-yaml==1.2.0",
