@@ -26,9 +26,7 @@ class ProjectProcessor(AbstractProcessor):
                     destination_project_path_with_namespace
                 )
                 verbose(
-                    "Project already exists: '"
-                    + project.path_with_namespace
-                    + "'. Ignoring 'transfer_from' config..."
+                    f"Project already exists: '${project.path_with_namespace}'. Ignoring 'transfer_from' config..."
                 )
             except GitlabGetError:
                 # Project doesn't exist at the destination. Let's process the transfer request
@@ -39,10 +37,7 @@ class ProjectProcessor(AbstractProcessor):
                 # Check if the project path needs to be updated; In Gitlab, path maybe different than name
                 if destination_project_path != project_to_be_transferred.path:
                     verbose(
-                        "Updating the source project path from '"
-                        + project_to_be_transferred.path
-                        + "' to '"
-                        + destination_project_path
+                        f"Updating the source project path from '${project_to_be_transferred.path}' to '${destination_project_path}'"
                     )
                     gl.projects.update(
                         project_to_be_transferred.id, {"path": destination_project_path}
@@ -53,9 +48,7 @@ class ProjectProcessor(AbstractProcessor):
                         "/", 1
                     )
                     verbose(
-                        "Transferring project to '"
-                        + project_transfer_destination_group
-                        + "' group..."
+                        f"Transferring project to '${project_transfer_destination_group}' group..."
                     )
                     project_to_be_transferred.transfer(
                         project_transfer_destination_group
