@@ -45,15 +45,11 @@ class ProjectProcessor(AbstractProcessor):
                 # TODO: Catch GitlabTransferProjectError exception.
                 #  See the next comment for details.
                 # try:
-                project_transfer_destination_group, _ = project_and_group.rsplit(
-                    "/", 1
-                )
+                project_transfer_destination_group, _ = project_and_group.rsplit("/", 1)
                 verbose(
                     f"Transferring project to '{project_transfer_destination_group}' group..."
                 )
-                project_to_be_transferred.transfer(
-                    project_transfer_destination_group
-                )
+                project_to_be_transferred.transfer(project_transfer_destination_group)
                 # TODO: Catch GitlabTransferProjectError exception.
                 #  The above code can run into exception for various reasons.
                 #  We should catch this exception and log a custom error message with hints.

@@ -7,6 +7,7 @@ from gitlab import GitlabTransferProjectError
 import re
 import pytest
 
+
 class TestTransferProject:
     def test__transfer_between_two_root_groups(self, project, group, other_group):
         project_new_path_with_namespace = f"{other_group.path}/{project.name}"
@@ -304,7 +305,9 @@ class TestTransferProject:
     # should be enabled and fixed when 'GitlabTransferProjectError' exception
     # is caught in the code, potentially with custom messages. For more details,
     # see: https://github.com/gitlabform/gitlabform/issues/611
-    @pytest.mark.skip(reason="Need to wait till exception handling with custom message is implemented.")
+    @pytest.mark.skip(
+        reason="Need to wait till exception handling with custom message is implemented."
+    )
     def test__transfer_without_satisfied_prerequisites(
         self, gl, project_for_function, other_group
     ):
@@ -322,10 +325,10 @@ class TestTransferProject:
 
         # Before running gitlabform, update the destination group so that
         # new project creation is disabled. Then run gitlabform. This will
-        # violate one of the requirements for project transfer (access to 
+        # violate one of the requirements for project transfer (access to
         # create project in destination namespace).
         gl.groups.update(other_group.id, {"project_creation_level": "noone"})
-        
+
         with pytest.raises(SystemExit):
             with pytest.raises(
                 GitlabTransferProjectError, match=r".*error transferring project.*"
