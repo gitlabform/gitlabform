@@ -26,6 +26,7 @@ nav:
       - Resource groups: reference/resource_groups.md
       - Settings: reference/settings.md
       - Tags protection: reference/tags_protection.md
+      - Transfer: reference/project_transfer.md
       - Webhooks: reference/webhooks.md
   - 🏃 Running: running.md
   - 🤖 Automation: automation.md
