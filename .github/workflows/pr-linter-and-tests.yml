@@ -35,10 +35,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 2
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
       - name: Install test dependencies
         run: |
           pip install wheel
@@ -54,7 +54,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.8, 3.9, "3.10", 3.11]
+        python-version: [3.8, 3.9, "3.10", 3.11, 3.12]
       fail-fast : false
     steps:
       - name: Checkout code from the PR
@@ -96,7 +96,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.11]
+        python-version: [3.12]
       fail-fast : false
     steps:
       - name: Checkout code from the PR
@@ -135,7 +135,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.8, 3.9, "3.10", 3.11]
+        python-version: [3.8, 3.9, "3.10", 3.11, 3.12]
       fail-fast : false
     steps:
       - name: Checkout code from the PR
@@ -174,10 +174,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 2
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
       - name: Install dependencies
         run: |
           pip install wheel
@@ -191,7 +191,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.8, 3.9, "3.10", 3.11]
+        python-version: [3.8, 3.9, "3.10", 3.11, 3.12]
       fail-fast : false
     steps:
       - name: Checkout code from the PR
