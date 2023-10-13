@@ -6,31 +6,15 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
 
 ## Procedure
 
-1. Commit following changes either as a PR to `main` branch or directly to `main`
-    * Add an entry in [changelog.md](../changelog.md). Remember to give thanks to all the contributors!
-    * Update `tbump` file to bump the version.
+1. Make sure you're on `main` branch and it is up-to-date.
+2. Add an entry in [changelog.md](../changelog.md). Remember to give thanks to all the contributors! Commit this change.
+3. Update version using [`tbump`](https://github.com/your-tools/tbump). Run `pipx run tbump <new-semantic-version-number>`.
 
-        ```toml
-        [version]
-        # Set the new version as `current`
-        current = "1.2.3"
-        ```
+    **Note**: You may need to install `pipx` first if it's not already installed. Follow the instructions at [`pipx` documentation](https://pypa.github.io/pipx/installation/).
 
-    * Update `version` file to bump the version.
+    Executing `tbump` will create a commit containing version updates to necessary files (i.e. `tbump.toml`, `version`), create a new tag from for the new version from the current `ref` in `main` branch, and finally push the commits and tag to remote.
 
-2. Create a tag for the new version, `v1.2.3`, from the latest of `main` that includes the above changes.
-
-    ```shell
-    $ git checkout main
-    Switched to branch 'main'
-    Your branch is up to date with 'upstream/main'.
-    $ git pull
-    Already up to date.
-    $ git tag v1.2.3
-    $ git push upstream v1.2.3
-    ```
-
-    Creating a new tag will launch GitHub Action workflow that will do following:
+    Following the above steps when a new tag is created, GitHub Action workflow will do following:
 
     - Create a docker image containing new version of gitlabform and publish to [github's package registry under gitlabform](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform).
     - Upload new version of gitlabform to [pypi package registry under gitlabform](https://pypi.org/project/gitlabform/).
