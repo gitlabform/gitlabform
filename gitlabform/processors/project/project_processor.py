@@ -61,9 +61,12 @@ class ProjectProcessor(AbstractProcessor):
                 #     raise
 
         if configuration["project"].get("archive") is not None:
+            project_path_with_namespace:str = project_and_group
+            project: Project = self.gl.projects.get(project_path_with_namespace)
+
             if configuration["project"].get("archive") is True:
                 verbose("Archiving project...")
-                self.gitlab.archive(project_and_group)
+                project.archive()
             elif configuration["project"].get("archive") is False:
                 verbose("Unarchiving project...")
-                self.gitlab.unarchive(project_and_group)
+                project.unarchive()

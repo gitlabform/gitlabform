@@ -247,19 +247,3 @@ class GitLabProjects(GitLabCore):
             method="DELETE",
             expected_codes=[204, 404],
         )
-
-    def archive(self, project_and_group_name):
-        return self._make_requests_to_api(
-            "projects/%s/archive",
-            project_and_group_name,
-            method="POST",
-            expected_codes=[200, 201],
-        )
-
-    def unarchive(self, project_and_group_name):
-        return self._make_requests_to_api(
-            "projects/%s/unarchive",
-            project_and_group_name,
-            method="POST",
-            expected_codes=[200, 201],
-        )
