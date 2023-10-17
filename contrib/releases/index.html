@@ -1134,9 +1134,22 @@
 <p>We try to follow the <a href="https://peps.python.org/pep-0440/">PEP 440</a> versioning scheme, which is mostly based on <a href="https://semver.org/">semantic versioning</a>.</p>
 <h2 id="procedure">Procedure<a class="headerlink" href="#procedure" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Add an entry in <a href="../../changelog/">changelog.md</a>. Remember to give thanks to all the contributors!</li>
-<li>Use <code>tbump</code> to bump the version.</li>
-<li>Edit the release in GitHub. Copy the changelog entry into its description</li>
+<li>Make sure you're on <code>main</code> branch and it is up-to-date.</li>
+<li>Add an entry in <a href="../../changelog/">changelog.md</a>. Remember to give thanks to all the contributors! Commit this change.</li>
+<li>
+<p>Update version using <a href="https://github.com/your-tools/tbump"><code>tbump</code></a>. Run <code>pipx run tbump &lt;new-semantic-version-number&gt;</code>.</p>
+<p><strong>Note</strong>: You may need to install <code>pipx</code> first if it's not already installed. Follow the instructions at <a href="https://pypa.github.io/pipx/installation/"><code>pipx</code> documentation</a>.</p>
+<p>Executing <code>tbump</code> will create a commit containing version updates to necessary files (i.e. <code>tbump.toml</code>, <code>version</code>), create a new tag from for the new version from the current <code>ref</code> in <code>main</code> branch, and finally push the commits and tag to remote.</p>
+<p>Following the above steps when a new tag is created, GitHub Action workflow will do following:</p>
+<ul>
+<li>Create a docker image containing new version of gitlabform and publish to <a href="https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform">github's package registry under gitlabform</a>.</li>
+<li>Upload new version of gitlabform to <a href="https://pypi.org/project/gitlabform/">pypi package registry under gitlabform</a>.</li>
+<li>A corresponding <a href="https://github.com/gitlabform/gitlabform/releases">GitHub release</a> will be created that references the new tag.</li>
+</ul>
+</li>
+<li>
+<p>Edit the release in GitHub and copy the changelog entry into its description.</p>
+</li>
 </ol>
 
 
