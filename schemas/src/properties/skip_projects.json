@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/gitlabform/gitlabform/main/schemas/properties/skip_projects.json",
+  "title": "GitLabForm configuration for skipping projects.",
+  "description": "List of projects that will not be processed or updated by GitLabForm.",
+  "type": "array",
+  "minItems": 1,
+  "uniqueItems": true,
+  "items": {
+    "type": "string",
+    "title": "Project to be skipped.",
+    "description": "Enter path to the project including full namespace.",
+    "comment": "Minimum length is set to 3 because all projects must be under a group or namespace. The shortest value can be 'a/b', where 'a' is the group or namespace and 'b' is the project path.",
+    "minLength": 3,
+    "pattern": "^.*\/.*$"
+  },
+  "examples": [
+    "my-group/project-foo",
+    "my-group/project-bar",
+    "another-group/every-projects-under-this-subgroup/*"
+  ]
+}

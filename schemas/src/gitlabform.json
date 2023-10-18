@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/gitlabform/gitlabform/main/schemas/gitlabform.json",
+  "title": "GitLabForm Configuration - v3 (draft)",
+  "description": "Draft Schema of GitLabForm v3 configuration syntax.",
+  "$comment": "The `additionalProperties` is allowed so that users can create yaml anchor and reference them as alias where needed. If it is not allowed, the schema will treat the yaml anchor as additional property and fail validation.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "config_version"
+  ],
+  "properties": {
+    "config_version": { "$ref": "/gitlabform/gitlabform/main/schemas/properties/config_version.json" },
+    "gitlab": { "$ref": "/gitlabform/gitlabform/main/schemas/properties/gitlab.json" },
+    "skip_projects": { "$ref": "/gitlabform/gitlabform/main/schemas/properties/skip_projects.json" },
+    "skip_groups": { "$ref": "/gitlabform/gitlabform/main/schemas/properties/skip_groups.json" }
+  }
+}

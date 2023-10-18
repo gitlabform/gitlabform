@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/gitlabform/gitlabform/main/schemas/properties/config_version.json",
+  "title": "GitLabForm configuration version.",
+  "description": "Required as of GitLabForm v3.x.x. This ensures that if the application behavior changes in a backward-incompatible way you won't apply unwanted configuration to your GitLab instance.",
+  "type": "integer",
+  "const": 3,
+  "default": 3
+}

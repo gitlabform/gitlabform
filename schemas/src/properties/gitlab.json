@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/gitlabform/gitlabform/main/schemas/properties/gitlab.json",
+  "title": "GitLabForm configuration for accessing GitLab API.",
+  "description": "This allows GitLabForm to establish connection with given GitLab instance and perform updates accordingly.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "url": {
+      "type": "string",
+      "title": "GitLab instance URL.",
+      "description": "URL of GitLab instance where configurations will be applied. Alternatively use `GITLAB_URL` environment variable.",
+      "pattern": "^https?:\/\/.+$",
+      "examples": [
+        "https://gitlab.my-domain.com"
+      ]
+    },
+    "token": {
+      "type": "string",
+      "title": "GitLab Access Token with minimum `api` scope.",
+      "description": "Access token from GitLab for applying settings in gitlab. It's recommended to use `GITLAB_TOKEN` environment variable instead.",
+      "comment": "GitLab tokens are 20 characters long according to docs: https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
+      "minLength": 20,
+      "maxLength": 20
+    },
+    "ssl_verify": {
+      "type": "boolean",
+      "title": "Should SSL communication with GitLab be verified?",
+      "description": "Whether the SSL certificate of your GitLab instance should be verified. Set this to `false` if you are using a self-signed certificate (not recommended). No need to configure this unless changing default value.",
+      "default": true
+    },
+    "timeout": {
+      "type": "integer",
+      "title": "Timeout for communication with GitLab.",
+      "description": "Timeout for the whole requests to the GitLab API, in seconds. No need to configure this unless changing default value.",
+      "default": 10
+    }
+  }
+}

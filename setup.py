@@ -63,11 +63,13 @@ setup(
             "coverage==7.3.2",
             "cryptography==41.0.4",
             "deepdiff==6.6.0",
+            "jsonschema==4.18.6",
             "mypy==1.6.0",
             "mypy-extensions==1.0.0",
             "pre-commit==2.21.0",  # not really for tests, but for development
             "pytest==7.4.2",
             "pytest-cov==4.1.0",
+            "pytest-dependency==0.5.1",
             "pytest-rerunfailures==12.0",
             "xkcdpass==1.19.4",
         ],
