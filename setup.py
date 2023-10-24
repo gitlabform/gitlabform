@@ -56,7 +56,7 @@ setup(
         "requests==2.31.0",
         "ruamel.yaml==0.17.21",
         "types-requests==2.31.0.10",
-        "yamlpath==3.8.0",
+        "yamlpath==3.8.1",
     ],
     extras_require={
         "test": [
