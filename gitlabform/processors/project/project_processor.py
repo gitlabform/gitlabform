@@ -11,19 +11,20 @@ class ProjectProcessor(AbstractProcessor):
         super().__init__("project", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
+        project_path_with_namespace: str = project_and_group
+
         if configuration["project"].get("transfer_from") is not None:
             source_project_path_with_namespace = configuration["project"].get(
                 "transfer_from"
             )
-            destination_project_path_with_namespace = project_and_group
 
             # Check if the project was already transfered (i.e. in previous run) or a project with same path already exists
             try:
-                project: Project = self.gl.projects.get(
-                    destination_project_path_with_namespace
+                project_in_config: Project = self.gl.projects.get(
+                    project_path_with_namespace
                 )
                 verbose(
-                    f"Project already exists: '{project.path_with_namespace}'. Ignoring 'transfer_from' config..."
+                    f"Project already exists: '{project_in_config.path_with_namespace}'. Ignoring 'transfer_from' config..."
                 )
             except GitlabGetError:
                 # Project doesn't exist at the destination. Let's process the transfer request
@@ -59,7 +60,6 @@ class ProjectProcessor(AbstractProcessor):
                 #     raise
 
         if configuration["project"].get("archive") is not None:
-            project_path_with_namespace:str = project_and_group
             project: Project = self.gl.projects.get(project_path_with_namespace)
 
             if configuration["project"].get("archive") is True:
