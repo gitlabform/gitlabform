@@ -2,8 +2,7 @@ from cli_ui import debug as verbose
 from logging import fatal
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.gitlab import GitlabWrapper
-from gitlab import Gitlab, GitlabGetError, GitlabTransferProjectError
+from gitlab import GitlabGetError, GitlabTransferProjectError
 from gitlab.v4.objects import Project
 
 
@@ -17,11 +16,10 @@ class ProjectProcessor(AbstractProcessor):
                 "transfer_from"
             )
             destination_project_path_with_namespace = project_and_group
-            gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab
 
             # Check if the project was already transfered (i.e. in previous run) or a project with same path already exists
             try:
-                project: Project = gl.projects.get(
+                project: Project = self.gl.projects.get(
                     destination_project_path_with_namespace
                 )
                 verbose(
@@ -29,7 +27,7 @@ class ProjectProcessor(AbstractProcessor):
                 )
             except GitlabGetError:
                 # Project doesn't exist at the destination. Let's process the transfer request
-                project_to_be_transferred: Project = gl.projects.get(
+                project_to_be_transferred: Project = self.gl.projects.get(
                     source_project_path_with_namespace
                 )
                 destination_project_path = project_and_group.split("/")[-1]
@@ -38,7 +36,7 @@ class ProjectProcessor(AbstractProcessor):
                     verbose(
                         f"Updating the source project path from '{project_to_be_transferred.path}' to '{destination_project_path}'"
                     )
-                    gl.projects.update(
+                    self.gl.projects.update(
                         project_to_be_transferred.id, {"path": destination_project_path}
                     )
 
