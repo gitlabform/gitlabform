@@ -2,8 +2,7 @@ from cli_ui import debug as verbose
 from logging import fatal
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.gitlab import GitlabWrapper
-from gitlab import Gitlab, GitlabGetError, GitlabTransferProjectError
+from gitlab import GitlabGetError, GitlabTransferProjectError
 from gitlab.v4.objects import Project
 
 
@@ -12,24 +11,24 @@ class ProjectProcessor(AbstractProcessor):
         super().__init__("project", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
+        project_path_with_namespace: str = project_and_group
+
         if configuration["project"].get("transfer_from") is not None:
             source_project_path_with_namespace = configuration["project"].get(
                 "transfer_from"
             )
-            destination_project_path_with_namespace = project_and_group
-            gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab
 
             # Check if the project was already transfered (i.e. in previous run) or a project with same path already exists
             try:
-                project: Project = gl.projects.get(
-                    destination_project_path_with_namespace
+                project_in_config: Project = self.gl.projects.get(
+                    project_path_with_namespace
                 )
                 verbose(
-                    f"Project already exists: '{project.path_with_namespace}'. Ignoring 'transfer_from' config..."
+                    f"Project already exists: '{project_in_config.path_with_namespace}'. Ignoring 'transfer_from' config..."
                 )
             except GitlabGetError:
                 # Project doesn't exist at the destination. Let's process the transfer request
-                project_to_be_transferred: Project = gl.projects.get(
+                project_to_be_transferred: Project = self.gl.projects.get(
                     source_project_path_with_namespace
                 )
                 destination_project_path = project_and_group.split("/")[-1]
@@ -38,7 +37,7 @@ class ProjectProcessor(AbstractProcessor):
                     verbose(
                         f"Updating the source project path from '{project_to_be_transferred.path}' to '{destination_project_path}'"
                     )
-                    gl.projects.update(
+                    self.gl.projects.update(
                         project_to_be_transferred.id, {"path": destination_project_path}
                     )
 
@@ -61,9 +60,11 @@ class ProjectProcessor(AbstractProcessor):
                 #     raise
 
         if configuration["project"].get("archive") is not None:
+            project: Project = self.gl.projects.get(project_path_with_namespace)
+
             if configuration["project"].get("archive") is True:
                 verbose("Archiving project...")
-                self.gitlab.archive(project_and_group)
+                project.archive()
             elif configuration["project"].get("archive") is False:
                 verbose("Unarchiving project...")
-                self.gitlab.unarchive(project_and_group)
+                project.unarchive()

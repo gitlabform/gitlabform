@@ -6,6 +6,8 @@ import requests
 from cli_ui import debug as verbose
 
 from gitlabform.gitlab import GitLab
+from gitlab import Gitlab
+from gitlabform.gitlab import GitlabWrapper
 from gitlabform.output import EffectiveConfigurationFile
 from gitlabform.processors.util.decorators import configuration_to_safe_dict
 
@@ -20,6 +22,7 @@ class AbstractProcessor(ABC):
                 [str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool
             ],
         ] = {}
+        self.gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab
 
     @configuration_to_safe_dict
     def process(
