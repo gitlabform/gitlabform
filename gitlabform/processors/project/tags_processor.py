@@ -33,12 +33,12 @@ class TagsProcessor(AbstractProcessor):
                             elif "user_id" in config:
                                 user_ids.add(config["user_id"])
                             elif "user" in config:
-                                user_ids.add(self.gitlab._get_user_id(config["user"]))
+                                user_ids.add(self.gl._get_user_id(config["user"]))
                             elif "group_id" in config:
                                 group_ids.add(config["group_id"])
                             elif "group" in config:
                                 group_ids.add(
-                                    self.gitlab._get_group_id(config["group"])
+                                    self.gl._get_group_id(config["group"])
                                 )
 
                         for val in access_levels:
@@ -58,7 +58,7 @@ class TagsProcessor(AbstractProcessor):
                     debug("Setting tag '%s' as *protected*", tag)
                     try:
                         # try to unprotect first
-                        self.gitlab.unprotect_tag(project_and_group, tag)
+                        self.gl.unprotect_tag(project_and_group, tag)
                     except NotFoundException:
                         pass
                     self.gitlab.protect_tag(
@@ -66,7 +66,7 @@ class TagsProcessor(AbstractProcessor):
                     )
                 else:
                     debug("Setting tag '%s' as *unprotected*", tag)
-                    self.gitlab.unprotect_tag(project_and_group, tag)
+                    self.gl.unprotect_tag(project_and_group, tag)
             except NotFoundException:
                 message = f"Tag '{tag}' not found when trying to set it as protected/unprotected!"
                 if self.strict:
