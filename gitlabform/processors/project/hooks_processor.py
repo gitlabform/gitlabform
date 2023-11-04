@@ -1,7 +1,5 @@
 from logging import debug
 
-from gitlab.v4.objects import Project, ProjectHook
-
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 

@@ -1,24 +1,23 @@
 import logging
-from logging import debug
-import os
 import textwrap
 import time
-import pytest
-from typing import TYPE_CHECKING
 
 import gitlab
-from gitlab.v4.objects import Hook, Group, Project
+from gitlab.v4.objects import ProjectHook
 
 from gitlabform import GitLabForm
 from gitlabform.gitlab import GitlabWrapper
+from gitlabform.gitlab.core import NotFoundException
 
-import tests.acceptance as acc
+from tests.acceptance import (
+    allowed_codes,
+    create_group,
+    delete_groups,
+    create_project,
+)
 
 logger = logging.getLogger(__name__)
 
-conf_path = "/home/godot/Projects/OpenSource/gitlabform/config.yml"
-
-# class TestHooksProcessor:
 
 test_yaml = """
       config_version: 3
@@ -60,7 +59,7 @@ second_hook_dict = {
 }
 
 
-def test_create_update():
+def test_hooks_processor():
     config = textwrap.dedent(test_yaml)
     gf = GitLabForm(
         include_archived_projects=False,
@@ -68,28 +67,14 @@ def test_create_update():
         config_string=config,
     )
     gl = GitlabWrapper(gf.gitlab).get_gitlab()
-    # clean-up in case this runs on a gitlab instance that has the group already
-    try:
-        group = gl.groups.get("test_group")
+
+    with allowed_codes(404):
         gl.groups.delete("test_group")
         # wait for delete to finish
         time.sleep(5)
-    except Exception:
-        pass
-    # set-up the config to modify
-    group = gl.groups.create(
-        {"name": "test_group", "path": "test_group", "visibility": "internal"}
-    )
+    group = create_group("test_group")
 
-    project = gl.projects.create(
-        {
-            "name": "mystery",
-            "path": "mystery",
-            "namespace_id": group.id,
-            "default_branch": "main",
-        }
-    )
-
+    project = create_project(group, "mystery")
     bird_hook = project.hooks.create(
         {
             "url": "http://birdman.chirp/update",
@@ -107,9 +92,6 @@ def test_create_update():
         assert modified_hooks[0].asdict()[key] == value
     for key, value in second_hook_dict.items():
         assert modified_hooks[1].asdict()[key] == value
-    if TYPE_CHECKING:
-        for h in modified_hooks:
-            assert isinstance(h, ProjectHook)
 
     # DELETE ONE PROJECT HOOK
     config = textwrap.dedent(delete_yaml)
@@ -126,4 +108,8 @@ def test_create_update():
     assert len(hooks_after_delete) == len(modified_hooks) - 1
     assert modified_hooks[1] not in hooks_after_delete
 
-    return hooks_after_delete
+    # clean up
+    with allowed_codes(404):
+        gl.groups.delete("test_group")
+    time.sleep(5)
+    return None
