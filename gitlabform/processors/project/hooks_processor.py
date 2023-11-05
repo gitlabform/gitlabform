@@ -1,5 +1,4 @@
 from logging import debug
-from typing import List
 
 from gitlab.v4.objects import Project, ProjectHook
 
@@ -14,7 +13,7 @@ class HooksProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing hooks...")
         project: Project = self.gl.projects.get(project_and_group)
-        hooks_list: List[ProjectHook] = project.hooks.list()
+        hooks_list = project.hooks.list()
 
         for hook in sorted(configuration["hooks"]):
             hook_id = next((h.id for h in hooks_list if h.url == hook), None)
@@ -29,9 +28,9 @@ class HooksProcessor(AbstractProcessor):
                 attr.update(configuration["hooks"][hook])
                 if hook_id:
                     debug("Changing existing hook '%s'", hook)
-                    changed_hook: ProjectHook = project.hooks.update(hook_id, attr)
+                    changed_hook = project.hooks.update(hook_id, attr)
                     debug("Changed hook to '%s'", changed_hook)
                 else:
                     debug("Creating hook '%s'", hook)
-                    created_hook: ProjectHook = project.hooks.create(attr)
+                    created_hook = project.hooks.create(attr)
                     debug("Created hook '%s'", created_hook)

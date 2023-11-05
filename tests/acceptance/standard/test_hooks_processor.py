@@ -2,6 +2,7 @@ import logging
 import pytest
 import textwrap
 import time
+from typing import TYPE_CHECKING
 
 import gitlab
 from gitlab.v4.objects import ProjectHook, Project, Group
@@ -16,13 +17,16 @@ logger = logging.getLogger(__name__)
 
 
 def create_test_hook(project: Project):
-    return project.hooks.create(
+    hook = project.hooks.create(
         {
             "url": "http://birdman.chirp/update",
             "push_events": False,
             "merge_requests_events": False,
         }
     )
+    if TYPE_CHECKING:
+        assert isinstance(hook, ProjectHook)
+    return hook
 
 
 def prepare_project(gl, group: str, project: str):
@@ -31,7 +35,7 @@ def prepare_project(gl, group: str, project: str):
         # wait for delete to finish
         time.sleep(6)
     created_group: Group = create_group(group)
-    created_project: Project = create_project(group, project)
+    created_project: Project = create_project(created_group, project)
     return
 
 
