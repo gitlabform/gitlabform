@@ -10,7 +10,7 @@ class HooksProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing hooks...")
-        project = self.gl.projects.get(project_and_group)
+        project:Project = self.gl.projects.get(project_and_group)
         hooks_list = project.hooks.list()
 
         for hook in sorted(configuration["hooks"]):
