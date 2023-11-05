@@ -6,11 +6,12 @@ from logging import debug
 from cli_ui import debug as verbose
 from cli_ui import warning, fatal
 
+from gitlab import Gitlab
 from jinja2 import Environment, FileSystemLoader
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
-from gitlabform.gitlab import GitLab
+from gitlabform.gitlab import GitLab, GitlabWrapper
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.branch_protector import BranchProtector
@@ -22,8 +23,10 @@ class FilesProcessor(AbstractProcessor):
         self.config = config
         self.strict = strict
         self.branch_protector = BranchProtector(gitlab, strict)
+        self.gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
+        project = self.gl.projects.get(project_and_group)
         for file in sorted(configuration["files"]):
             debug("Processing file '%s'...", file)
 
@@ -32,15 +35,18 @@ class FilesProcessor(AbstractProcessor):
                 continue
 
             if configuration["files"][file]["branches"] == "all":
-                all_branches = self.gitlab.get_branches(project_and_group)
+                all_branches = project.branches.list()
+                # self.gitlab.get_branches(project_and_group)
                 branches = sorted(all_branches)
             elif configuration["files"][file]["branches"] == "protected":
-                protected_branches = self.gitlab.get_protected_branches(
-                    project_and_group
-                )
+                protected_branches = project.protectedbranches.list()
+                # self.gitlab.get_protected_branches(
+                #     project_and_group
+                # )
                 branches = sorted(protected_branches)
             else:
-                all_branches = self.gitlab.get_branches(project_and_group)
+                all_branches = project.branches.list()
+                # self.gitlab.get_branches(project_and_group)
                 branches = []
                 for branch in configuration["files"][file]["branches"]:
                     if branch in all_branches:
