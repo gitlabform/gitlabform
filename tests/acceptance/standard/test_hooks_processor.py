@@ -30,8 +30,8 @@ def prepare_project(gl, group: str, project: str):
         gl.groups.delete(group)
         # wait for delete to finish
         time.sleep(6)
-    group: Group = create_group(group)
-    project: Project = create_project(group, project)
+    created_group: Group = create_group(group)
+    created_project: Project = create_project(group, project)
     return
 
 
