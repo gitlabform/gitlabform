@@ -1,26 +1,50 @@
 import logging
+import pytest
 import textwrap
 import time
 
 import gitlab
-from gitlab.v4.objects import ProjectHook
+from gitlab.v4.objects import ProjectHook, Project, Group
 
 from gitlabform import GitLabForm
 from gitlabform.gitlab import GitlabWrapper
 from gitlabform.gitlab.core import NotFoundException
 
-from tests.acceptance import (
-    allowed_codes,
-    create_group,
-    delete_groups,
-    create_project,
-)
+from tests.acceptance import allowed_codes, run_gitlabform, create_group, create_project
 
 logger = logging.getLogger(__name__)
 
 
-test_yaml = """
-      config_version: 3
+def create_test_hook(project: Project):
+    return project.hooks.create(
+        {
+            "url": "http://birdman.chirp/update",
+            "push_events": False,
+            "merge_requests_events": False,
+        }
+    )
+
+
+def prepare_project(gl, group: str, project: str):
+    with allowed_codes(404):
+        gl.groups.delete(group)
+        # wait for delete to finish
+        time.sleep(6)
+    group: Group = create_group(group)
+    project: Project = create_project(group, project)
+    return
+
+
+def reset_gitlab(gl):
+    with allowed_codes(404):
+        gl.groups.delete("test_group")
+        time.sleep(5)
+    return
+
+
+@pytest.fixture
+def test_yaml():
+    return """
       projects_and_groups:
         "*":
           project_settings:
@@ -36,80 +60,86 @@ test_yaml = """
                 push_events: true
       """
 
-delete_yaml = """
-      config_version: 3
-      projects_and_groups:
-        "*":
-          project_settings:
-            visibility: internal
-        test_group/mystery:
-          project_settings:
-            rick: pickle
-          hooks:
-            "http://plumbus.org/create":
-                delete: true
-      """
 
-first_hook_dict = {"url": "http://birdman.chirp/update", "push_events": True}
-
-second_hook_dict = {
-    "url": "http://plumbus.org/create",
-    "push_events": True,
-    "merge_requests_events": True,
-}
+@pytest.fixture
+def delete_yaml():
+    return """
+    projects_and_groups:
+      "*":
+        project_settings:
+          visibility: internal
+      test_group/mystery:
+        project_settings:
+          rick: pickle
+        hooks:
+          "http://plumbus.org/create":
+              delete: true
+    """
 
 
-def test_hooks_processor():
-    config = textwrap.dedent(test_yaml)
-    gf = GitLabForm(
-        include_archived_projects=False,
-        target="test_group/mystery",
-        config_string=config,
-    )
-    gl = GitlabWrapper(gf.gitlab).get_gitlab()
+@pytest.fixture
+def birdman_dict():
+    return {"url": "http://birdman.chirp/update", "push_events": True}
 
-    with allowed_codes(404):
-        gl.groups.delete("test_group")
-        # wait for delete to finish
-        time.sleep(5)
-    group = create_group("test_group")
 
-    project = create_project(group, "mystery")
-    bird_hook = project.hooks.create(
-        {
-            "url": "http://birdman.chirp/update",
-            "push_events": False,
-            "merge_requests_events": False,
-        }
-    )
+@pytest.fixture
+def plumbus_dict():
+    return {
+        "url": "http://plumbus.org/create",
+        "push_events": True,
+        "merge_requests_events": True,
+    }
 
-    gf.run()
+
+def test_project_hooks_create(gl, plumbus_dict, birdman_dict, test_yaml):
+    prepare_project(gl, "test_group", "mystery")
+    target = "test_group/mystery"
+    run_gitlabform(test_yaml, target, include_archived_projects=False)
 
     project = gl.projects.get("test_group/mystery")
     modified_hooks = project.hooks.list()
 
-    for key, value in first_hook_dict.items():
+    assert len(modified_hooks) == 2
+    for key, value in birdman_dict.items():
         assert modified_hooks[0].asdict()[key] == value
-    for key, value in second_hook_dict.items():
+    for key, value in plumbus_dict.items():
         assert modified_hooks[1].asdict()[key] == value
 
-    # DELETE ONE PROJECT HOOK
-    config = textwrap.dedent(delete_yaml)
-    gf = GitLabForm(
-        include_archived_projects=False,
-        target="test_group/mystery",
-        config_string=config,
-    )
-    gl = GitlabWrapper(gf.gitlab).get_gitlab()
-    gf.run()
+    reset_gitlab(gl)
+
+
+def test_project_hooks_update(gl, birdman_dict, test_yaml):
+    prepare_project(gl, "test_group", "mystery")
+    target = "test_group/mystery"
     project = gl.projects.get("test_group/mystery")
-    hooks_after_delete = project.hooks.list()
+    hook: ProjectHook = create_test_hook(project)
 
-    assert len(hooks_after_delete) == len(modified_hooks) - 1
-    assert modified_hooks[1] not in hooks_after_delete
+    run_gitlabform(test_yaml, target, include_archived_projects=False)
 
-    # clean up
-    with allowed_codes(404):
-        gl.groups.delete("test_group")
-    time.sleep(5)
-    return None
+    project = gl.projects.get("test_group/mystery")
+    modified_hook = next(
+        p for p in project.hooks.list() if p.url == "http://birdman.chirp/update"
+    )
+    for key, value in birdman_dict.items():
+        assert modified_hook.asdict()[key] == value
+
+    reset_gitlab(gl)
+
+
+def test_project_hook_delete(gl, test_yaml, delete_yaml):
+    prepare_project(gl, "test_group", "mystery")
+    target = "test_group/mystery"
+    run_gitlabform(test_yaml, target, include_archived_projects=False)
+    project = gl.projects.get("test_group/mystery")
+    hooks_before = project.hooks.list()
+
+    run_gitlabform(delete_yaml, target, include_archived_projects=False)
+
+    project_after = gl.projects.get("test_group/mystery")
+    hooks_after = project_after.hooks.list()
+
+    assert len(hooks_after) == len(hooks_before) - 1
+    assert hooks_before[1] not in hooks_after
+    assert len([h for h in hooks_after if h.url == "http://plumbus.org/create"]) == 0
+
+    reset_gitlab(gl)
