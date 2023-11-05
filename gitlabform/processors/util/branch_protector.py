@@ -25,6 +25,7 @@ class BranchProtector:
         self, project_and_group, configuration, branch
     ):
         try:
+            debug("")
             requested_configuration = configuration["branches"][branch]
 
             if requested_configuration.get("protected"):
