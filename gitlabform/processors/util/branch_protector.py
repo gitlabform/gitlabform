@@ -1,7 +1,7 @@
 from logging import debug
 from cli_ui import warning, fatal
 
-from gitlab import Gitlab, GitlabDeleteError
+from gitlab import Gitlab, GitlabDeleteError, GitlabHttpError
 
 from gitlabform.gitlab import GitlabWrapper
 from gitlab.v4.objects import ProjectProtectedBranch
@@ -106,9 +106,13 @@ class BranchProtector:
             debug("Setting branch '%s' as unprotected", branch)
             project.protectedbranches.delete(branch)
             # self.gitlab.unprotect_branch(project_and_group, branch)
-        except GitlabDeleteError as gle:
-            if e.response_code == 404:
-                message = f"Branch '{branch}' is already protected."
+        except (GitlabDeleteError, GitlabHttpError) as gle:
+            if gle.response_code == 404:
+                pass
+            else:
+                # FIXME maybe this warning message should be changed. Is this section even needed?
+                # Could keep the warning for 404 and raise everything else?
+                message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
                 if self.strict:
                     fatal(
                         message,
@@ -116,8 +120,6 @@ class BranchProtector:
                     )
                 else:
                     warning(message)
-            else:
-                raise
 
     def validate_branch_protection_config(
         self, project_and_group, requested_configuration, branch
@@ -146,7 +148,7 @@ class BranchProtector:
         project = self.gl.projects.get(project_and_group)
         try:
             project.protectedbranches.delete(branch)
-        except GitlabDeleteError as gle:
+        except (GitlabDeleteError, GitlabHttpError) as gle:
             if gle.response_code == 404:
                 warning(f"Unprotected branch {branch} is already protected.")
                 pass

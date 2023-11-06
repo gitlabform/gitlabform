@@ -1,388 +1,298 @@
+import os
+import re
+from pathlib import Path
+
 from logging import debug
+from cli_ui import debug as verbose
 from cli_ui import warning, fatal
 
-from gitlab import Gitlab, GitlabDeleteError
+from gitlab import Gitlab
+from jinja2 import Environment, FileSystemLoader
 
-from gitlabform.gitlab import GitlabWrapper
-from gitlab.v4.objects import ProjectProtectedBranch
+from gitlabform.constants import EXIT_INVALID_INPUT
+from gitlabform.configuration import Configuration
+from gitlabform.gitlab import GitLab, GitlabWrapper
+from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
+from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.processors.util.branch_protector import BranchProtector
 
-from gitlabform.constants import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
-from gitlabform.gitlab import GitLab
-from gitlabform.gitlab.core import NotFoundException
 
-
-class BranchProtector:
-    new_api_keys = [
-        "push_access_level",
-        "merge_access_level",
-        "unprotect_access_level",
-    ]
-    extra_param_keys = [
-        "allowed_to_push",
-        "allowed_to_merge",
-    ]
-
-    def __init__(self, gitlab: GitLab, strict: bool):
-        self.gitlab = gitlab
+class FilesProcessor(AbstractProcessor):
+    def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
+        super().__init__("files", gitlab)
+        self.config = config
         self.strict = strict
+        self.branch_protector = BranchProtector(gitlab, strict)
         self.gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab
 
-    def apply_branch_protection_configuration(
-        self, project_and_group, configuration, branch
-    ):
-        try:
-            requested_configuration = configuration["branches"][branch]
+    def _process_configuration(self, project_and_group: str, configuration: dict):
+        project = self.gl.projects.get(project_and_group)
+        for file in sorted(configuration["files"]):
+            debug("Processing file '%s'...", file)
 
-            if requested_configuration.get("protected"):
-                self.protect_branch(project_and_group, configuration, branch)
+            if configuration.get("files|" + file + "|skip"):
+                debug("Skipping file '%s'", file)
+                continue
+
+            if configuration["files"][file]["branches"] == "all":
+                branches_list = project.branches.list()
+                all_branches = [b.name for b in branches_list]
+                # self.gitlab.get_branches(project_and_group)
+                branches = sorted(all_branches)
+            elif configuration["files"][file]["branches"] == "protected":
+                protected_branches = project.protectedbranches.list()
+                branch_names = [pb.name for pb in protected_branches]
+                # self.gitlab.get_protected_branches(
+                #     project_and_group
+                # )
+                branches = sorted(branch_names)
             else:
-                self.unprotect_branch(project_and_group, branch)
+                branches_list = project.branches.list()
+                all_branches = [b.name for b in branches_list]
+                # self.gitlab.get_branches(project_and_group)
+                branches = []
+                for branch in configuration["files"][file]["branches"]:
+                    if branch in all_branches:
+                        branches.append(branch)
+                    else:
+                        message = f"! Branch '{branch}' not found, not processing file '{file}' in it"
+                        if self.strict:
+                            fatal(
+                                message,
+                                exit_code=EXIT_INVALID_INPUT,
+                            )
+                        else:
+                            warning(message)
 
-        except NotFoundException:
-            message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
-            if self.strict:
-                fatal(
-                    message,
-                    exit_code=EXIT_PROCESSING_ERROR,
-                )
-            else:
-                warning(message)
+            for branch in branches:
+                verbose(f"Processing file '{file}' in branch '{branch}'")
 
-    def protect_branch(self, project_and_group, configuration, branch):
-        try:
-            requested_configuration = configuration["branches"][branch]
-
-            self.validate_branch_protection_config(
-                project_and_group, requested_configuration, branch
-            )
-
-            if any(
-                extra_key in requested_configuration
-                for extra_key in self.extra_param_keys
-            ):
-                for extra_param_key in self.extra_param_keys:
-                    # check if an extra_param is in config, and it contains the user parameter
-                    if extra_param_key in requested_configuration and any(
-                        "user" in d for d in requested_configuration[extra_param_key]
-                    ):
-                        for extra_config in requested_configuration[extra_param_key]:
-                            # loop over the array of extra param and get the user_id related to user
-                            if "user" in extra_config.keys():
-                                user_id = self.gitlab._get_user_id(
-                                    extra_config.pop("user")
-                                )
-                                extra_config["user_id"] = user_id
-
-            if self.configuration_update_needed(
-                requested_configuration, project_and_group, branch
-            ):
-                self.do_protect_branch(
-                    requested_configuration, project_and_group, branch
-                )
-            else:
-                debug(
-                    "Skipping setting branch '%s' protection configuration because it's already as requested.",
-                    branch,
-                )
-
-            if "code_owner_approval_required" in requested_configuration:
-                self.set_code_owner_approval_required(
-                    requested_configuration, project_and_group, branch
-                )
-
-        except NotFoundException:
-            message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
-            if self.strict:
-                fatal(
-                    message,
-                    exit_code=EXIT_PROCESSING_ERROR,
-                )
-            else:
-                warning(message)
-
-    def unprotect_branch(self, project_and_group, branch):
-        try:
-            project = self.gl.projects.get(project_and_group)
-            debug("Setting branch '%s' as unprotected", branch)
-            project.protectedbranches.delete(branch)
-            # self.gitlab.unprotect_branch(project_and_group, branch)
-        except GitlabDeleteError as gle:
-            if e.response_code == 404:
-                message = f"Branch '{branch}' is already protected."
-                if self.strict:
+                if configuration.get(
+                    "files|" + file + "|content"
+                ) and configuration.get("files|" + file + "|file"):
                     fatal(
-                        message,
-                        exit_code=EXIT_PROCESSING_ERROR,
+                        f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
+                        "use only one of these keys.",
+                        exit_code=EXIT_INVALID_INPUT,
                     )
+
+                if configuration.get("files|" + file + "|delete"):
+                    try:
+                        self.gitlab.get_file(project_and_group, branch, file)
+                        debug("Deleting file '%s' in branch '%s'", file, branch)
+                        self.modify_file_dealing_with_branch_protection(
+                            project_and_group,
+                            branch,
+                            file,
+                            "delete",
+                            configuration,
+                        )
+                    except NotFoundException:
+                        debug(
+                            "Not deleting file '%s' in branch '%s' (already doesn't exist)",
+                            file,
+                            branch,
+                        )
                 else:
-                    warning(message)
-            else:
-                raise
+                    # change or create file
 
-    def validate_branch_protection_config(
-        self, project_and_group, requested_configuration, branch
+                    if configuration.get("files|" + file + "|content"):
+                        new_content = configuration.get("files|" + file + "|content")
+                    else:
+                        path_in_config = Path(
+                            str(configuration.get("files|" + file + "|file"))
+                        )
+                        if path_in_config.is_absolute():
+                            effective_path = path_in_config
+                        else:
+                            # relative paths are relative to config file location
+                            effective_path = Path(
+                                os.path.join(
+                                    self.config.config_dir, str(path_in_config)
+                                )
+                            )
+                        new_content = effective_path.read_text()
+
+                    # templating is documented to be enabled by default,
+                    # see https://gitlabform.github.io/gitlabform/reference/files/#files
+                    templating_enabled = True
+
+                    if configuration.get(
+                        "files|" + file + "|template", templating_enabled
+                    ):
+                        new_content = self.get_file_content_as_template(
+                            new_content,
+                            project_and_group,
+                            **configuration.get("files|" + file + "|jinja_env", dict()),
+                        )
+
+                    try:
+                        current_content = self.gitlab.get_file(
+                            project_and_group, branch, file
+                        )
+                        if current_content != new_content:
+                            if configuration.get("files|" + file + "|overwrite"):
+                                debug("Changing file '%s' in branch '%s'", file, branch)
+                                self.modify_file_dealing_with_branch_protection(
+                                    project_and_group,
+                                    branch,
+                                    file,
+                                    "modify",
+                                    configuration,
+                                    new_content,
+                                )
+                            else:
+                                debug(
+                                    "Not changing file '%s' in branch '%s' - overwrite flag not set.",
+                                    file,
+                                    branch,
+                                )
+                        else:
+                            debug(
+                                "Not changing file '%s' in branch '%s' - it's content is already"
+                                " as provided)",
+                                file,
+                                branch,
+                            )
+                    except NotFoundException:
+                        debug("Creating file '%s' in branch '%s'", file, branch)
+                        self.modify_file_dealing_with_branch_protection(
+                            project_and_group,
+                            branch,
+                            file,
+                            "add",
+                            configuration,
+                            new_content,
+                        )
+
+                if configuration.get("files|" + file + "|only_first_branch"):
+                    verbose("Skipping other branches for this file, as configured.")
+                    break
+
+    def modify_file_dealing_with_branch_protection(
+        self,
+        project_and_group,
+        branch,
+        file,
+        operation,
+        configuration,
+        new_content=None,
     ):
-        # for the new API any key needs to be defined...
-        if any(
-            key in requested_configuration
-            for key in self.new_api_keys + self.extra_param_keys
-        ):
-            return
-        else:
-            fatal(
-                f"Invalid configuration for protecting branches in project '{project_and_group}',"
-                f" branch '{branch}' - missing keys. Required is any of these: "
-                f"{self.new_api_keys + self.extra_param_keys}",
-                exit_code=EXIT_INVALID_INPUT,
+        # perhaps your user permissions are ok to just perform this operation regardless
+        # of the branch protection...
+
+        try:
+            self.just_modify_file(
+                project_and_group, branch, file, operation, configuration, new_content
             )
 
-    def do_protect_branch(self, requested_configuration, project_and_group, branch):
-        debug("Setting branch '%s' access level", branch)
+        except UnexpectedResponseException as e:
+            if (
+                e.response_status_code == 400
+                and "You are not allowed to push into this branch" in e.response_text
+            ):
+                # ...but if not, then we can unprotect the branch, but only if we know how to
+                # protect it again...
 
-        # Protected Branches API is one of those that do not support editing entities
-        # (PUT is not documented for it, at least). so you need to delete existing
-        # branch protection (DELETE) and recreate it (POST) to perform an update
-        # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
-        project = self.gl.projects.get(project_and_group)
-        try:
-            project.protectedbranches.delete(branch)
-        except GitlabDeleteError as gle:
-            if gle.response_code == 404:
-                warning(f"Unprotected branch {branch} is already protected.")
-                pass
-        # self.gitlab.unprotect_branch(project_and_group, branch)
-
-        # replace in our config our custom "user" and "group" entries with supported by
-        # the Protected Branches API "user_id" and "group_id"
-        for extra_param_key in self.extra_param_keys:
-            for element in requested_configuration.get(extra_param_key, []):
-                if "user" in element.keys():
-                    user_id = self.gitlab._get_user_id(element.pop("user"))
-                    element["user_id"] = user_id
-                elif "group" in element.keys():
-                    group_id = self.gitlab._get_group_id(element.pop("group"))
-                    element["group_id"] = group_id
-
-        protect_rules = {
-            key: value
-            for key, value in requested_configuration.items()
-            if key != "protected"
-        }
-
-        branch_dict = {"name": branch}
-        branch_dict.update(protect_rules)
-        project.protectedbranches.create(branch_dict)
-        # self.gitlab.protect_branch(
-        #     project_and_group,
-        #     branch,
-        #     protect_rules,
-        # )
-
-    def set_code_owner_approval_required(
-        self, requested_configuration, project_and_group, branch
-    ):
-        debug(
-            "Setting branch '%s' \"code owner approval required\" option",
-            branch,
-        )
-        project = self.gl.projects.get(project_and_group)
-        protectedbranch = next(
-            pb for pb in project.protectedbranches.list() if pb.name == branch
-        ).asdict()
-        protectedbranch.update(
-            {
-                "code_owner_approval_required": requested_configuration[
-                    "code_owner_approval_required"
-                ]
-            }
-        )
-        project.protectedbranches.update(protectedbranch.name, data)
-        # self.gitlab.set_branch_code_owner_approval_required(
-        #     project_and_group,
-        #     branch,
-        #     requested_configuration["code_owner_approval_required"],
-        # )
-
-    def configuration_update_needed(
-        self, requested_configuration, project_and_group, branch
-    ):
-        # get current configuration of branch access level
-        current = self.get_current_branch_configuration(project_and_group, branch)
-
-        # get requested configuration of branch access level
-        requested = self.get_requested_branch_configuration(requested_configuration)
-
-        debug("Current branch '%s' access levels: %s", branch, current)
-        debug("Requested branch '%s' access levels: %s", branch, requested)
-        return current != requested
-
-    def get_current_branch_configuration(self, project_and_group_name, branch):
-        # from a response for a request to Protected Branches API GET request
-        # (https://docs.gitlab.com/ee/api/protected_branches.html#get-a-single-protected-branch-or-wildcard-protected-branch)
-        # like:
-        #
-        # {
-        #     "id": 1,
-        #     "name": "master",
-        #     "push_access_levels": [
-        #         {
-        #             "access_level": 40,
-        #             "access_level_description": "Maintainers"
-        #         }
-        #     ],
-        #     "merge_access_levels": [
-        #         {
-        #             "access_level": 40,
-        #             "access_level_description": "Maintainers"
-        #         }
-        #     ],
-        #     "allow_force_push":false,
-        #     "code_owner_approval_required": false
-        # }
-        #
-        # ...gets flat tuple of the permissions to perform each kind of 3 actions (push/merge/unprotect) and
-        # the other extra settings that can be applied using Protected Branches API POST request
-        #
-        try:
-            project = self.gl.projects.get(project_and_group_name)
-            protected_branches_response = next(
-                p for p in project.protectedbranches.list() if p.name == branch
-            ).asdict()
-            # protected_branches_response = self.gitlab. get_branch_access_levels(
-            #     project_and_group_name, branch
-            # )
-            return (
-                *(
-                    self.get_current_permissions(protected_branches_response, "push")
-                ),  # tuple of 3
-                *(
-                    self.get_current_permissions(protected_branches_response, "merge")
-                ),  # tuple of 3
-                *(
-                    self.get_current_permissions(
-                        protected_branches_response, "unprotect"
+                if configuration.get("branches|" + branch + "|protected"):
+                    debug(
+                        f"> Temporarily unprotecting the branch to {operation} a file in it..."
                     )
-                ),  # tuple of 3
-                protected_branches_response.get("allow_force_push"),
-                # code_owner_approval_required has to use PATCH request, see set_code_owner_approval_required()
+                    self.branch_protector.unprotect_branch(project_and_group, branch)
+                else:
+                    fatal(
+                        f"Operation {operation} on file {file} in branch {branch} not permitted,"
+                        f" but we don't have a branch protection configuration provided for this"
+                        f" branch. Breaking as we cannot unprotect the branch as we would not know"
+                        f" how to protect it again.",
+                        EXIT_INVALID_INPUT,
+                    )
+
+                try:
+                    self.just_modify_file(
+                        project_and_group,
+                        branch,
+                        file,
+                        operation,
+                        configuration,
+                        new_content,
+                    )
+
+                finally:
+                    # ...and protect the branch again after the operation
+                    if configuration.get("branches|" + branch + "|protected"):
+                        debug("> Protecting the branch again.")
+                        self.branch_protector.protect_branch(
+                            project_and_group, configuration, branch
+                        )
+
+            else:
+                raise e
+
+    def just_modify_file(
+        self,
+        project_and_group,
+        branch,
+        file,
+        operation,
+        configuration,
+        new_content=None,
+    ):
+        if operation == "modify":
+            self.gitlab.set_file(
+                project_and_group,
+                branch,
+                file,
+                new_content,
+                self.get_commit_message_for_file_change("change", file, configuration),
             )
-        except (NotFoundException, StopIteration):
-            return tuple([None] * 10)  # = 3 * 3 + 1
+        elif operation == "add":
+            self.gitlab.add_file(
+                project_and_group,
+                branch,
+                file,
+                new_content,
+                self.get_commit_message_for_file_change("add", file, configuration),
+            )
+        elif operation == "delete":
+            self.gitlab.delete_file(
+                project_and_group,
+                branch,
+                file,
+                self.get_commit_message_for_file_change("delete", file, configuration),
+            )
 
-    def get_current_permissions(self, protected_branches_response, action):
-        # from a response for a request to Protected Branches API GET request
-        # (https://docs.gitlab.com/ee/api/protected_branches.html#get-a-single-protected-branch-or-wildcard-protected-branch)
-        # like:
-        #
-        # {
-        #     "id": 1,
-        #     "name": "master",
-        #     "push_access_levels": [
-        #         {
-        #             "access_level": 40,
-        #             "access_level_description": "Maintainers"
-        #         }
-        #     ],
-        #     "merge_access_levels": [
-        #         {
-        #             "access_level": 40,
-        #             "access_level_description": "Maintainers"
-        #         }
-        #     ],
-        #     "allow_force_push":false,
-        #     "code_owner_approval_required": false
-        # }
-        #
-        # ...gets a tuple of sorted lists, for a given permission in ["push", "merge", "unprotect"],
-        # for example for "push":
-        #
-        # ([40], [], [])
-        #
-
-        levels = set()
-        user_ids = set()
-        group_ids = set()
-        # we ignore the description
-
-        # we use the safe .get() everywhere below as those elements may not exist
-        for array_element in protected_branches_response.get(
-            f"{action}_access_levels", []
-        ):
-            if array_element.get("access_level") is not None:
-                levels.add(array_element.get("access_level"))
-            elif array_element.get("user_id"):
-                user_ids.add(array_element.get("user_id"))
-            elif array_element.get("group_id"):
-                group_ids.add(array_element.get("group_id"))
-
-        return sorted(levels), sorted(user_ids), sorted(group_ids)
-
-    def get_requested_branch_configuration(self, requested_configuration):
-        # from a configuration entry like:
-        #
-        #   # Allow specific users to push and merge to this branch - *** this syntax requires GitLab Premium (paid) ***
-        #   protected: true
-        #   allowed_to_push:
-        #     - user: jsmith # you can use usernames...
-        #     - user: bdoe
-        #   allowed_to_merge:
-        #     - user_id: 15 # ...or user ids, if you know them
-        #
-        # ...gets a flat tuple exactly like get_current_branch_protection_settings(), so they can be compared.
-        #
-
-        return (
-            *(
-                self.get_requested_permissions(requested_configuration, "push")
-            ),  # tuple of 3
-            *(
-                self.get_requested_permissions(requested_configuration, "merge")
-            ),  # tuple of 3
-            *(
-                self.get_requested_permissions(requested_configuration, "unprotect")
-            ),  # tuple of 3
-            requested_configuration.get("allow_force_push", False),
-            # code_owner_approval_required has to use PATCH request, see set_code_owner_approval_required()
+    def get_file_content_as_template(self, template, project_and_group, **kwargs):
+        # Use jinja with variables project and group
+        rtemplate = Environment(
+            loader=FileSystemLoader("."),
+            autoescape=True,
+            keep_trailing_newline=True,
+        ).from_string(template)
+        return rtemplate.render(
+            project=self.get_project(project_and_group),
+            group=self.get_group(project_and_group),
+            **kwargs,
         )
 
-    def get_requested_permissions(self, requested_configuration, action):
-        # from a configuration entry like:
-        #
-        #   protected: true
-        #   allowed_to_push:
-        #     - user: jsmith # you can use usernames...
-        #     - user: bdoe
-        #   allowed_to_merge:
-        #     - user_id: 15 # ...or user ids, if you know them
-        #
-        # ...gets a tuple of sorted lists of entities (levels, users, groups) having the permissions
-        # to do the specific action (push/merge/unprotect).
-        #
-        # for example for "push" action for the config above the return value would be:
-        #
-        # ([], [123, 456], [])
-        #
-        # ...where 123, 456 are ids of users jsmith and bdoe
+    @staticmethod
+    def get_commit_message_for_file_change(operation, file, configuration: dict):
+        commit_message = configuration.get(
+            "files|" + file + "|commit_message",
+            "Automated %s made by gitlabform" % operation,
+        )
 
-        levels = set()
-        user_ids = set()
-        group_ids = set()
-        # we ignore the description
+        # add '[skip ci]' to commit message to skip CI job, as documented at
+        # https://docs.gitlab.com/ee/ci/yaml/README.html#skipping-jobs
+        skip_build = configuration.get("files|" + file + "|skip_ci")
+        skip_build_str = " [skip ci]" if skip_build else ""
 
-        if f"{action}_access_level" in requested_configuration:
-            levels.add(requested_configuration.get(f"{action}_access_level"))
+        return f"{commit_message}{skip_build_str}"
 
-        if f"allowed_to_{action}" in requested_configuration:
-            for config in requested_configuration[f"allowed_to_{action}"]:
-                if "access_level" in config:
-                    levels.add(config["access_level"])
-                elif "user_id" in config:
-                    user_ids.add(config["user_id"])
-                elif "user" in config:
-                    user_ids.add(self.gitlab._get_user_id(config["user"]))
-                elif "group_id" in config:
-                    group_ids.add(config["group_id"])
-                elif "group" in config:
-                    group_ids.add(self.gitlab._get_group_id(config["group"]))
+    @staticmethod
+    def get_group(project_and_group):
+        return re.match("(.*)/.*", project_and_group).group(1)
 
-        return sorted(levels), sorted(user_ids), sorted(group_ids)
+    @staticmethod
+    def get_project(project_and_group):
+        return re.match(".*/(.*)", project_and_group).group(1)
