@@ -39,6 +39,7 @@ def reset_gitlab(gl):
         time.sleep(5)
     return
 
+
 test_yaml = """
       projects_and_groups:
         "*":
@@ -71,10 +72,10 @@ delete_yaml = """
 birdman_dict = {"url": "http://birdman.chirp/update", "push_events": True}
 
 plumbus_dict = {
-        "url": "http://plumbus.org/create",
-        "push_events": True,
-        "merge_requests_events": True,
-    }
+    "url": "http://plumbus.org/create",
+    "push_events": True,
+    "merge_requests_events": True,
+}
 
 
 def test_project_hooks_create(gl):
