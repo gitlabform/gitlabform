@@ -25,7 +25,7 @@ class BranchProtector:
     def __init__(self, gitlab: GitLab, strict: bool):
         self.gitlab = gitlab
         self.strict = strict
-        self.gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab if gitlab else None
+        self.gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab
 
     def apply_branch_protection_configuration(
         self, project_and_group, configuration, branch

@@ -23,7 +23,7 @@ class FilesProcessor(AbstractProcessor):
         self.config = config
         self.strict = strict
         self.branch_protector = BranchProtector(gitlab, strict)
-        self.gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab if gitlab else None
+        self.gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project = self.gl.projects.get(project_and_group)
