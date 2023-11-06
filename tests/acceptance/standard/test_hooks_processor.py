@@ -1,15 +1,9 @@
 import logging
-import pytest
-import textwrap
 import time
 from typing import TYPE_CHECKING
 
 import gitlab
 from gitlab.v4.objects import ProjectHook, Project, Group
-
-from gitlabform import GitLabForm
-from gitlabform.gitlab import GitlabWrapper
-from gitlabform.gitlab.core import NotFoundException
 
 from tests.acceptance import allowed_codes, run_gitlabform, create_group, create_project
 
@@ -45,10 +39,7 @@ def reset_gitlab(gl):
         time.sleep(5)
     return
 
-
-@pytest.fixture
-def test_yaml():
-    return """
+test_yaml = """
       projects_and_groups:
         "*":
           project_settings:
@@ -64,10 +55,7 @@ def test_yaml():
                 push_events: true
       """
 
-
-@pytest.fixture
-def delete_yaml():
-    return """
+delete_yaml = """
     projects_and_groups:
       "*":
         project_settings:
@@ -80,22 +68,16 @@ def delete_yaml():
               delete: true
     """
 
+birdman_dict = {"url": "http://birdman.chirp/update", "push_events": True}
 
-@pytest.fixture
-def birdman_dict():
-    return {"url": "http://birdman.chirp/update", "push_events": True}
-
-
-@pytest.fixture
-def plumbus_dict():
-    return {
+plumbus_dict = {
         "url": "http://plumbus.org/create",
         "push_events": True,
         "merge_requests_events": True,
     }
 
 
-def test_project_hooks_create(gl, plumbus_dict, birdman_dict, test_yaml):
+def test_project_hooks_create(gl):
     prepare_project(gl, "test_group", "mystery")
     target = "test_group/mystery"
     run_gitlabform(test_yaml, target, include_archived_projects=False)
@@ -112,7 +94,7 @@ def test_project_hooks_create(gl, plumbus_dict, birdman_dict, test_yaml):
     reset_gitlab(gl)
 
 
-def test_project_hooks_update(gl, birdman_dict, test_yaml):
+def test_project_hooks_update(gl):
     prepare_project(gl, "test_group", "mystery")
     target = "test_group/mystery"
     project = gl.projects.get("test_group/mystery")
@@ -130,7 +112,7 @@ def test_project_hooks_update(gl, birdman_dict, test_yaml):
     reset_gitlab(gl)
 
 
-def test_project_hook_delete(gl, test_yaml, delete_yaml):
+def test_project_hook_delete(gl):
     prepare_project(gl, "test_group", "mystery")
     target = "test_group/mystery"
     run_gitlabform(test_yaml, target, include_archived_projects=False)
