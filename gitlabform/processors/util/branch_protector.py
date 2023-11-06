@@ -110,7 +110,9 @@ class BranchProtector:
             # even in strict mode. Shouldn't other exceptions cause a fatal anyway,
             # even if not strict?
             if gle.response_code == 404:
-                warning(f"Branch '{branch}' not found when trying to set it as protected/unprotected!")
+                warning(
+                    f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
+                )
                 pass
             else:
                 message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
