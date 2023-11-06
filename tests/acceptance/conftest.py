@@ -8,6 +8,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend as crypto_default_backend
 from gitlab import Gitlab
 from gitlab.v4.objects import Group, Project, User, ProjectAccessToken, GroupAccessToken
+from gitlab import GitlabHttpError, GitlabDeleteError
 
 from gitlabform.gitlab import AccessLevel, GitLab
 from tests.acceptance import (
@@ -107,6 +108,20 @@ def project(gl: Gitlab, group: Group):
     yield gitlab_project
 
     gitlab_project.delete()
+
+
+@pytest.fixture(scope="class")
+def project_hook(gl: Gitlab, project):
+    name = get_random_name("hook")
+    hook = project.hooks.create({"url": f"http://hooks/{name}.org"})
+
+    yield hook
+    # When using in hook deletion test this is Not Found
+    try:
+        hook.delete()
+    except (GitlabDeleteError, GitlabHttpError) as e:
+        if e.response_code == 404:
+            pass
 
 
 @pytest.fixture(scope="class")
