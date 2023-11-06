@@ -187,6 +187,11 @@ class BranchProtector:
         protectedbranch = next(
             pb for pb in project.protectedbranches.list() if pb.name == branch
         ).asdict()
+        try:
+            project.protectedbranches.delete(protectedbranch["name"])
+        except (GitlabDeleteError, GitlabHttpError) as e:
+            if e.response_code == 404:
+                pass
         protectedbranch.update(
             {
                 "code_owner_approval_required": requested_configuration[
@@ -194,7 +199,7 @@ class BranchProtector:
                 ]
             }
         )
-        project.protectedbranches.update(protectedbranch.name, data)
+        project.protectedbranches.create(protectedbranch)
 
     def configuration_update_needed(
         self, requested_configuration, project_and_group, branch
