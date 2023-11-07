@@ -14,7 +14,7 @@ class HooksProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing hooks...")
         project: Project = self.gl.projects.get(project_and_group)
-        hooks_list: List[ProjectHook] = project.hooks.list()
+        hooks_list: List[RESTObject] = project.hooks.list()
 
         for hook in sorted(configuration["hooks"]):
             hook_id = next((h.id for h in hooks_list if h.url == hook), None)
