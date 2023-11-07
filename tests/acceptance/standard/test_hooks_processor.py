@@ -13,12 +13,6 @@ class TestHooksProcessor:
 
         return hook
 
-        # try:
-        #     hook.delete()
-        # except (GitlabDeleteError, GitlabHttpError) as e:
-        #     if e.response_code == 404:
-        #         pass
-
     def test_project_hooks_create_delete(self, gl, project):
         first_hook = self.project_hook(project)
         second_hook = self.project_hook(project)
