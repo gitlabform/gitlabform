@@ -111,20 +111,6 @@ def project(gl: Gitlab, group: Group):
 
 
 @pytest.fixture(scope="class")
-def project_hook(gl: Gitlab, project):
-    name = get_random_name("hook")
-    hook = project.hooks.create({"url": f"http://hooks/{name}.org"})
-
-    yield hook
-    # When using in hook deletion test this is Not Found
-    try:
-        hook.delete()
-    except (GitlabDeleteError, GitlabHttpError) as e:
-        if e.response_code == 404:
-            pass
-
-
-@pytest.fixture(scope="class")
 def project_in_subgroup(gl: Gitlab, subgroup: Group):
     project_name = get_random_name("project")
     gitlab_project = create_project(subgroup, project_name)

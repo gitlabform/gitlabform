@@ -1,5 +1,5 @@
 from logging import debug
-from typing import List, Dict, Any
+from typing import Dict, Any
 
 from gitlab.base import RESTObject
 from gitlab.v4.objects import Project
@@ -15,7 +15,7 @@ class HooksProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing hooks...")
         project: Project = self.gl.projects.get(project_and_group)
-        hooks_list: List[RESTObject] = project.hooks.list()
+        hooks_list: RESTObjectList = project.hooks.list()
 
         for hook in sorted(configuration["hooks"]):
             hook_id = next((h.id for h in hooks_list if h.url == hook), None)
