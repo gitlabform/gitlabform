@@ -1,7 +1,7 @@
 from logging import debug
-from typing import List, Dict
+from typing import List, Dict, Any
 
-from gitlab import RESTObject
+from gitlab.base import RESTObject
 from gitlab.v4.objects import Project, ProjectHook
 
 from gitlabform.gitlab import GitLab
@@ -34,5 +34,5 @@ class HooksProcessor(AbstractProcessor):
                     debug("Changed hook to '%s'", changed_hook)
                 else:
                     debug("Creating hook '%s'", hook)
-                    created_hook: RESTObject = project.hooks.create(attr)
+                    created_hook: ProjectHook = ProjectHook(project.hooks.create(attr))
                     debug("Created hook '%s'", created_hook)
