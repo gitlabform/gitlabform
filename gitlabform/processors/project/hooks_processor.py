@@ -1,5 +1,5 @@
 from logging import debug
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from gitlab.base import RESTObject, RESTObjectList
 from gitlab.v4.objects import Project
