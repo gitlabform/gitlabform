@@ -34,5 +34,5 @@ class HooksProcessor(AbstractProcessor):
                     debug("Changed hook to '%s'", changed_hook)
                 else:
                     debug("Creating hook '%s'", hook)
-                    created_hook: ProjectHook = ProjectHook(project.hooks.create(attr))
+                    created_hook: RESTObject = project.hooks.create(attr)
                     debug("Created hook '%s'", created_hook)
