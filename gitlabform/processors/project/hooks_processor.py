@@ -2,7 +2,7 @@ from logging import debug
 from typing import List, Dict, Any
 
 from gitlab.base import RESTObject
-from gitlab.v4.objects import Project, ProjectHook
+from gitlab.v4.objects import Project
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
