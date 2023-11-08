@@ -8,7 +8,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend as crypto_default_backend
 from gitlab import Gitlab
 from gitlab.v4.objects import Group, Project, User, ProjectAccessToken, GroupAccessToken
-from gitlab import GitlabHttpError, GitlabDeleteError
 
 from gitlabform.gitlab import AccessLevel, GitLab
 from tests.acceptance import (

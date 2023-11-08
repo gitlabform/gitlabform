@@ -26,13 +26,15 @@ class HooksProcessor(AbstractProcessor):
                 else:
                     debug("Not deleting hook '%s', because it doesn't exist", hook)
             else:
-                attr = {"url": hook}
-                attr.update(configuration["hooks"][hook])
+                hook_config = {"url": hook}
+                hook_config.update(configuration["hooks"][hook])
                 if hook_id:
                     debug("Changing existing hook '%s'", hook)
-                    changed_hook: Dict[str, Any] = project.hooks.update(hook_id, attr)
+                    changed_hook: Dict[str, Any] = project.hooks.update(
+                        hook_id, hook_config
+                    )
                     debug("Changed hook to '%s'", changed_hook)
                 else:
                     debug("Creating hook '%s'", hook)
-                    created_hook: RESTObject = project.hooks.create(attr)
+                    created_hook: RESTObject = project.hooks.create(hook_config)
                     debug("Created hook '%s'", created_hook)
