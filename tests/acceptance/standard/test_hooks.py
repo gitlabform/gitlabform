@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 
 from tests.acceptance import run_gitlabform, get_random_name
 
+from logging import debug
+
 
 @pytest.fixture(scope="class")
 def urls():
@@ -27,10 +29,10 @@ class TestHooksProcessor:
                 hooks:
                   {first_url}:
                     push_events: false
-                    merge_requests_events: false
+                    merge_requests_events: true
                   {second_url}:
-                    job_events: false
-                    note_events: false
+                    job_events: true
+                    note_events: true
             """
 
         run_gitlabform(test_yaml, target)
@@ -44,10 +46,10 @@ class TestHooksProcessor:
         assert (
             first_created_hook.push_events,
             first_created_hook.merge_requests_events,
-        ) == (False, False)
+        ) == (False, True)
         assert (second_created_hook.job_events, second_created_hook.note_events) == (
-            False,
-            False,
+            True,
+            True,
         )
 
     def test_hooks_update(self, gl, project, urls):
@@ -62,18 +64,23 @@ class TestHooksProcessor:
                 hooks:
                   {first_url}:
                     id: {first_hook.id}
-                    push_events: true
-                    merge_requests_events: true
+                    merge_requests_events: false
+                    note_events: true
+                  {second_url}:
+                    job_events: true
+                    note_events: true
             """
 
         run_gitlabform(update_yaml, target)
-        modified_hook = self.get_hook_from_url(project, first_url)
-        unchanged_hook = self.get_hook_from_url(project, second_url)
+        updated_first_hook = self.get_hook_from_url(project, first_url)
+        updated_second_hook = self.get_hook_from_url(project, second_url)
 
-        assert modified_hook.asdict() != first_hook.asdict()
-        assert unchanged_hook.asdict() == second_hook.asdict()
-        assert modified_hook.push_events == True
-        assert modified_hook.merge_requests_events == True
+        assert updated_first_hook.asdict() != first_hook.asdict()
+        assert updated_second_hook.asdict() == second_hook.asdict()
+        # push events defaults to True, but it stays False
+        assert updated_first_hook.push_events == False
+        assert updated_first_hook.merge_requests_events == False
+        assert updated_first_hook.note_events == True
 
     def test_hooks_delete(self, gl, project, urls):
         target = project.path_with_namespace
