@@ -48,7 +48,7 @@ setup(
         "cli-ui==0.17.2",
         "ez-yaml==1.2.0",
         "Jinja2==3.1.2",
-        "luddite==1.0.2",
+        "luddite==1.0.3",
         "MarkupSafe==2.1.3",
         "mergedeep==1.3.4",
         "packaging==23.2",
