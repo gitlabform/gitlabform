@@ -25,13 +25,14 @@ class GitLabTags(GitLabCore):
         self, project_and_group_name, tag_name, allowed_to_create, create_access_level
     ):
         data = {}
+        data["name"] = tag_name
         if allowed_to_create is not None:
             data["allowed_to_create"] = allowed_to_create
         if create_access_level is not None:
             data["create_access_level"] = create_access_level
 
-        url = "projects/%s/protected_tags?name=%s"
-        parameters_list = [project_and_group_name, tag_name]
+        url = "projects/%s/protected_tags"
+        parameters_list = [project_and_group_name]
         return self._make_requests_to_api(
             url, tuple(parameters_list), method="POST", expected_codes=201, json=data
         )
