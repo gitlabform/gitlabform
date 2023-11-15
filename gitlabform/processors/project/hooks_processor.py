@@ -35,7 +35,7 @@ class HooksProcessor(AbstractProcessor):
                     debug("Creating hook '%s'", hook)
                     created_hook: RESTObject = project.hooks.create(hook_config)
                     debug("Created hook '%s'", created_hook)
-                elif gitlab_hook.asdict() != hook_config:
+                elif gitlab_hook and gitlab_hook.asdict() != hook_config:
                     debug("Changing existing hook '%s'", hook)
                     changed_hook: Dict[str, Any] = project.hooks.update(
                         hook_id, hook_config
