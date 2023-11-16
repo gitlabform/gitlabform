@@ -23,7 +23,6 @@ from gitlabform.gitlab.repositories import GitLabRepositories
 from gitlabform.gitlab.resource_groups import GitLabResourceGroups
 from gitlabform.gitlab.schedules import GitLabPipelineSchedules
 from gitlabform.gitlab.integrations import GitLabIntegrations
-from gitlabform.gitlab.tags import GitLabTags
 from gitlabform.gitlab.users import GitLabUsers
 from gitlab import Gitlab
 
@@ -60,7 +59,6 @@ class GitLab(
     GitLabRepositories,
     GitLabResourceGroups,
     GitLabIntegrations,
-    GitLabTags,
     GitLabGroupLDAPLinks,
     GitLabGroupBadges,
     GitLabGroupVariables,

@@ -122,6 +122,19 @@ class TestTags:
         protected_tags = project.protectedtags.list()
         assert len(protected_tags) == 0
 
+    def test__unprotect_unknown_tag(self, project, tags):
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            tags:
+              "tag_unknown":
+                protected: false
+        """
+
+        # In strict mode, processor should exit immediately
+        with pytest.raises(SystemExit):
+            run_gitlabform(config, project)
+
     def test__protect_single_tag_no_access(self, project, tags):
         config = f"""
             projects_and_groups:
