@@ -69,7 +69,7 @@ setup(
             "pytest==7.4.3",
             "pytest-cov==4.1.0",
             "pytest-rerunfailures==12.0",
-            "xkcdpass==1.19.5",
+            "xkcdpass==1.19.8",
         ],
         "docs": [
             "mkdocs",
