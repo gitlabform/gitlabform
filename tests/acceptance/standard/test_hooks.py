@@ -58,6 +58,7 @@ class TestHooksProcessor:
         first_hook = self.get_hook_from_url(project, first_url)
         second_hook = self.get_hook_from_url(project, second_url)
 
+        debug("!!!First update!!!")
         update_yaml = f"""
             projects_and_groups:
               {target}:
@@ -81,6 +82,22 @@ class TestHooksProcessor:
         assert updated_first_hook.push_events == False
         assert updated_first_hook.merge_requests_events == False
         assert updated_first_hook.note_events == True
+
+        debug("!!!Second update!!!")
+        update_yaml = f"""
+            projects_and_groups:
+              {target}:
+                hooks:
+                  {first_url}:
+                    id: {first_hook.id}
+                    merge_requests_events: false
+                    note_events: true
+                  {second_url}:
+                    job_events: true
+                    note_events: true
+            """
+
+        run_gitlabform(update_yaml, target)
 
     def test_hooks_delete(self, gl, project, urls):
         target = project.path_with_namespace
