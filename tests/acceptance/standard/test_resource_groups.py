@@ -41,8 +41,8 @@ class TestResourceGroups:
                 process_mode: newest_first
             """
 
-        time.sleep(5)
         run_gitlabform(update_resource_group_config, project)
+        time.sleep(5)
 
         resource_group = project.resource_groups.get("production")
         assert resource_group.key == "production"
