@@ -34,6 +34,8 @@ class TestResourceGroups:
         projects_and_groups:
           {project.path_with_namespace}:
             resource_groups:
+              resource_group_that_dont_exist:
+                process_mode: newest_first
               production:
                 process_mode: newest_first
             """
