@@ -39,6 +39,7 @@ class ResourceGroupsProcessor(AbstractProcessor):
                     raise Exception(message)
                 else:
                     warning(message)
+                    continue
             # compare the resource group process mode between the config entity and gitlab entity
             if config_process_mode != gitlab_resource_group["process_mode"]:
                 try:
