@@ -27,9 +27,11 @@ class ResourceGroupsProcessor(AbstractProcessor):
                     project_and_group, config_resource_group_name
                 )
             except NotFoundException:
-                message = (f"Project is not configured to use resource group: {config_resource_group_name}.\n"
-                           f"Add the resource group in your project's .gitlab-ci.yml file.\n"
-                           f"For more information, visit https://docs.gitlab.com/ee/ci/resource_groups/#add-a-resource-group.")
+                message = (
+                    f"Project is not configured to use resource group: {config_resource_group_name}.\n"
+                    f"Add the resource group in your project's .gitlab-ci.yml file.\n"
+                    f"For more information, visit https://docs.gitlab.com/ee/ci/resource_groups/#add-a-resource-group."
+                )
                 if fail_if_not_exist:
                     raise Exception(message)
                 else:
