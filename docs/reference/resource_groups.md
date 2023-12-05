@@ -12,9 +12,9 @@ This section's purpose is to manage the [resource group process modes](https://d
 
 The key names are the resource group names associated with the project.
 
-The value for each key name is a key-value pair, with `process_mode` as the key and the value is one of the process 
-modes defined [here](https://docs.gitlab.com/ee/ci/resource_groups/#change-the-process-mode).
-
+The values for each key name are dicts with keys like:
+* `process_mode` as the key and the value is one of the process modes defined [here](https://docs.gitlab.com/ee/ci/resource_groups/#change-the-process-mode),
+* (optional) `fail_if_not_exist` - if set to `false` it will not fail when trying to process a non-existent resource group; default is `true`.
 
 Example:
 
@@ -26,4 +26,7 @@ projects_and_groups:
         process_mode: oldest_first
       production: 
         process_mode: newest_first
+      resource_group_that_dont_exist:
+        process_mode: newest_first
+        fail_if_not_exist: false
 ```
