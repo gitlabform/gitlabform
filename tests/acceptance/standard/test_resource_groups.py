@@ -36,6 +36,7 @@ class TestResourceGroups:
             resource_groups:
               resource_group_that_dont_exist:
                 process_mode: newest_first
+                fail_if_not_exist: false
               production:
                 process_mode: newest_first
             """
