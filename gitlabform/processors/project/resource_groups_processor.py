@@ -17,8 +17,11 @@ class ResourceGroupsProcessor(AbstractProcessor):
             ]["process_mode"]
 
             fail_if_not_exist = (
-                configuration["resource_groups"]["fail_if_not_exist"]
-                if "fail_if_not_exist" in configuration["resource_groups"]
+                configuration["resource_groups"][config_resource_group_name][
+                    "fail_if_not_exist"
+                ]
+                if "fail_if_not_exist"
+                in configuration["resource_groups"][config_resource_group_name]
                 else True
             )
 
