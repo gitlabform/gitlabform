@@ -68,7 +68,7 @@ setup(
             "pre-commit==2.21.0",  # not really for tests, but for development
             "pytest==7.4.3",
             "pytest-cov==4.1.0",
-            "pytest-rerunfailures==12.0",
+            "pytest-rerunfailures==13.0",
             "xkcdpass==1.19.8",
         ],
         "docs": [
