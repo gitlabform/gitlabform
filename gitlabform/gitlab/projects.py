@@ -117,8 +117,7 @@ class GitLabProjects(GitLabCore):
                 query_string = "order_by=name&sort=asc&archived=false"
             result = self._make_requests_to_api(f"projects?{query_string}")
             return sorted(map(lambda x: x["path_with_namespace"], result))
-        except NotFoundException as e:
-            print(e.message)
+        except NotFoundException:
             return []
 
     def get_project_settings(self, project_and_group_name):

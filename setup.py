@@ -52,7 +52,7 @@ setup(
         "MarkupSafe==2.1.3",
         "mergedeep==1.3.4",
         "packaging==23.2",
-        "python-gitlab==3.15.0",
+        "python-gitlab==4.1.1",
         "requests==2.31.0",
         "ruamel.yaml==0.17.21",
         "types-requests==2.31.0.10",
@@ -61,15 +61,15 @@ setup(
     extras_require={
         "test": [
             "coverage==7.3.2",
-            "cryptography==41.0.4",
-            "deepdiff==6.6.1",
-            "mypy==1.6.1",
+            "cryptography==41.0.5",
+            "deepdiff==6.7.1",
+            "mypy==1.7.1",
             "mypy-extensions==1.0.0",
             "pre-commit==2.21.0",  # not really for tests, but for development
-            "pytest==7.4.2",
+            "pytest==7.4.3",
             "pytest-cov==4.1.0",
-            "pytest-rerunfailures==12.0",
-            "xkcdpass==1.19.4",
+            "pytest-rerunfailures==13.0",
+            "xkcdpass==1.19.8",
         ],
         "docs": [
             "mkdocs",
