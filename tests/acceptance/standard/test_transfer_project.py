@@ -9,15 +9,17 @@ import pytest
 
 
 class TestTransferProject:
-    def test__transfer_between_two_root_groups(self, project, group, other_group):
-        project_new_path_with_namespace = f"{other_group.path}/{project.name}"
+    def test__transfer_between_two_root_groups(
+        self, project_for_function, group, other_group
+    ):
+        project_new_path_with_namespace = f"{other_group.path}/{project_for_function.name}"
         projects_in_destination_before_transfer = other_group.projects.list()
 
         config = f"""
         projects_and_groups:
           {project_new_path_with_namespace}:
             project:
-              transfer_from: {project.path_with_namespace}
+              transfer_from: {project_for_function.path_with_namespace}
         """
 
         run_gitlabform(config, project_new_path_with_namespace)
@@ -31,8 +33,8 @@ class TestTransferProject:
         # Now test the transfer the opposite direction by transferring the same project back to the original group
         # Transferring the project to the original location also helps because the fixtures used in this test is shared
         # with other tests and they will need the fixture in its original form.
-        project_new_path_with_namespace = f"{group.path}/{project.name}"
-        project_source = f"{other_group.path}/{project.name}"
+        project_new_path_with_namespace = f"{group.path}/{project_for_function.name}"
+        project_source = f"{other_group.path}/{project_for_function.name}"
         projects_in_destination_before_transfer = group.projects.list()
 
         config = f"""
@@ -96,16 +98,16 @@ class TestTransferProject:
         )
 
     def test__transfer_as_same_path_at_namespae_already_exist(
-        self, project, group, other_group
+        self, project_for_function, group, other_group
     ):
-        project_new_path_with_namespace = f"{other_group.path}/{project.name}"
+        project_new_path_with_namespace = f"{other_group.path}/{project_for_function.name}"
         projects_in_destination_before_transfer = other_group.projects.list()
 
         config = f"""
         projects_and_groups:
           {project_new_path_with_namespace}:
             project:
-              transfer_from: {project.path_with_namespace}
+              transfer_from: {project_for_function.path_with_namespace}
         """
 
         run_gitlabform(config, project_new_path_with_namespace)
