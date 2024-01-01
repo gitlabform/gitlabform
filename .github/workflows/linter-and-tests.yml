@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - main
-      - transfer-test
-      - test-transfer
+      - transfer_test
 
 jobs:
   black-formatting:
