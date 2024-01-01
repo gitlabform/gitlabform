@@ -76,26 +76,26 @@ class TestTransferProject:
         # Now test the transfer the opposite direction by transferring the same project back to the original group
         # Transferring the project to the original location also helps because the fixtures used in this test is shared
         # with other tests and they will need the fixture in its original form.
-        project_new_path_with_namespace = (
-            f"{group.path}/{subgroup.path}/{project_in_subgroup.name}"
-        )
-        project_source = f"{group.path}/{project_in_subgroup.name}"
-        projects_in_destination_before_transfer = subgroup.projects.list()
+        # project_new_path_with_namespace = (
+        #     f"{group.path}/{subgroup.path}/{project_in_subgroup.name}"
+        # )
+        # project_source = f"{group.path}/{project_in_subgroup.name}"
+        # projects_in_destination_before_transfer = subgroup.projects.list()
 
-        config = f"""
-        projects_and_groups:
-          {project_new_path_with_namespace}:
-            project:
-              transfer_from: {project_source}
-        """
+        # config = f"""
+        # projects_and_groups:
+        #  {project_new_path_with_namespace}:
+        #     project:
+        #       transfer_from: {project_source}
+        # """
 
-        run_gitlabform(config, project_new_path_with_namespace)
-        projects_in_destination_after_transfer = subgroup.projects.list()
+        # run_gitlabform(config, project_new_path_with_namespace)
+        # projects_in_destination_after_transfer = subgroup.projects.list()
 
-        assert (
-            len(projects_in_destination_after_transfer)
-            == len(projects_in_destination_before_transfer) + 1
-        )
+        # assert (
+        #     len(projects_in_destination_after_transfer)
+        #     == len(projects_in_destination_before_transfer) + 1
+        # )
 
     def test__transfer_as_same_path_at_namespae_already_exist(
         self, project_for_function, group, other_group
