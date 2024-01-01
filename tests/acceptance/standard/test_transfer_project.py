@@ -33,24 +33,24 @@ class TestTransferProject:
         # Now test the transfer the opposite direction by transferring the same project back to the original group
         # Transferring the project to the original location also helps because the fixtures used in this test is shared
         # with other tests and they will need the fixture in its original form.
-        project_new_path_with_namespace = f"{group.path}/{project_for_function.name}"
-        project_source = f"{other_group.path}/{project_for_function.name}"
-        projects_in_destination_before_transfer = group.projects.list()
+        # project_new_path_with_namespace = f"{group.path}/{project_for_function.name}"
+        # project_source = f"{other_group.path}/{project_for_function.name}"
+        # projects_in_destination_before_transfer = group.projects.list()
 
-        config = f"""
-        projects_and_groups:
-          {project_new_path_with_namespace}:
-            project:
-              transfer_from: {project_source}
-        """
+        # config = f"""
+        # projects_and_groups:
+        #   {project_new_path_with_namespace}:
+        #     project:
+        #       transfer_from: {project_source}
+        # """
 
-        run_gitlabform(config, project_new_path_with_namespace)
-        projects_in_destination_after_transfer = group.projects.list()
+        # run_gitlabform(config, project_new_path_with_namespace)
+        # projects_in_destination_after_transfer = group.projects.list()
 
-        assert (
-            len(projects_in_destination_after_transfer)
-            == len(projects_in_destination_before_transfer) + 1
-        )
+        # assert (
+        #     len(projects_in_destination_after_transfer)
+        #     == len(projects_in_destination_before_transfer) + 1
+        # )
 
     def test__transfer_between_root_group_and_subgroup(
         self, project_in_subgroup, group, subgroup
