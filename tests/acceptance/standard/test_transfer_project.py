@@ -12,7 +12,9 @@ class TestTransferProject:
     def test__transfer_between_two_root_groups(
         self, project_for_function, group, other_group
     ):
-        project_new_path_with_namespace = f"{other_group.path}/{project_for_function.name}"
+        project_new_path_with_namespace = (
+            f"{other_group.path}/{project_for_function.name}"
+        )
         projects_in_destination_before_transfer = other_group.projects.list()
 
         config = f"""
