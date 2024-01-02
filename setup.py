@@ -61,7 +61,7 @@ setup(
     extras_require={
         "test": [
             "coverage==7.3.2",
-            "cryptography==41.0.5",
+            "cryptography==41.0.7",
             "deepdiff==6.7.1",
             "mypy==1.7.1",
             "mypy-extensions==1.0.0",
