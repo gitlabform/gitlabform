@@ -15,7 +15,7 @@ jobs:
       - name: Black Code Formatter
         uses: gdubicki/black-action@main
         with:
-          args: ". --check"
+          args: ". --diff"
 
   types:
     runs-on: ubuntu-latest
