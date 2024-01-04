@@ -177,41 +177,6 @@ class GitLabProjects(GitLabCore):
             "projects/%s/push_rule", pid, "POST", push_rules, expected_codes=201
         )
 
-    def get_hook_id(self, project_and_group_name, url):
-        hooks = self._make_requests_to_api(
-            "projects/%s/hooks", project_and_group_name, "GET"
-        )
-        for hook in hooks:
-            if hook["url"] == url:
-                return hook["id"]
-        return None
-
-    def delete_hook(self, project_and_group_name, hook_id):
-        self._make_requests_to_api(
-            "projects/%s/hooks/%s",
-            (project_and_group_name, hook_id),
-            "DELETE",
-            expected_codes=[200, 204],
-        )
-
-    def put_hook(self, project_and_group_name, hook_id, url, data):
-        data_required = {"url": url}
-        data = {**data, **data_required}
-        self._make_requests_to_api(
-            "projects/%s/hooks/%s", (project_and_group_name, hook_id), "PUT", data
-        )
-
-    def post_hook(self, project_and_group_name, url, data):
-        data_required = {"url": url}
-        data = {**data, **data_required}
-        self._make_requests_to_api(
-            "projects/%s/hooks",
-            project_and_group_name,
-            "POST",
-            data,
-            expected_codes=201,
-        )
-
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly
         # the shared groups, so I'm using directly the GET /projects/:id call
