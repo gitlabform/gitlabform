@@ -134,3 +134,18 @@ class TestHooksProcessor:
         assert len(gl_hook_urls) == 1
         assert first_url in gl_hook_urls
         assert second_url not in gl_hook_urls
+
+        not_enforce_yaml = f"""
+                projects_and_groups:
+                  {target}:
+                    hooks:
+                      enforce: false
+                      http://www.newhook.org:
+                        merge_requests_events: false
+                        note_events: true
+                """
+        run_gitlabform(not_enforce_yaml, target)
+        gl_hook_urls = [h.url for h in project.hooks.list()]
+        assert len(gl_hook_urls) == 2
+        assert first_url in gl_hook_urls
+        assert "http://www.newhook.org" in gl_hook_urls

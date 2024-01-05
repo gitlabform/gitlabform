@@ -2,10 +2,8 @@
 
 This section purpose is to manage the [Webhooks](https://docs.gitlab.com/ee/user/project/integrations/webhooks.html) (aka Project Hooks).
 
-The key names here are webhook URLs, except if the key name is `enforce` and is set to `true` - then only the hooks defined here will remain in the project, all other will be deleted.
-The values of the URL keys are parameters described at [edit project hooks endpoint](https://docs.gitlab.com/ee/api/projects.html#edit-project-hook), **except the id and hook_id**.
-
-If the only value is `delete: true` then the given webhook is going to be removed.
+The key names here are webhook URLs, except if the key name is `enforce` and is set to `true` - in this case only the hooks defined here will remain in the project, all other will be deleted. Setting `enforce: false` is the same as omitting it, in which case only webhooks that have the value `delete: true` will be removed.
+The other values of the URL keys are the parameters described at [edit project hooks endpoint](https://docs.gitlab.com/ee/api/projects.html#edit-project-hook), **except the id and hook_id**.
 
 Example:
 ```yaml
