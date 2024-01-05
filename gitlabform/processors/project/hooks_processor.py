@@ -16,8 +16,9 @@ class HooksProcessor(AbstractProcessor):
         debug("Processing hooks...")
         project: Project = self.gl.projects.get(project_and_group)
         hooks_list: RESTObjectList | List[RESTObject] = project.hooks.list()
+        config_hooks = filter(lambda x: x != "enforce", sorted(configuration["hooks"]))
 
-        for hook in sorted(configuration["hooks"]):
+        for hook in config_hooks:
             gitlab_hook: RESTObject | None = next(
                 (h for h in hooks_list if h.url == hook), None
             )
@@ -52,3 +53,12 @@ class HooksProcessor(AbstractProcessor):
                     debug("Changed hook to '%s'", changed_hook)
                 elif hook_id and not any(diffs):
                     debug(f"Hook {hook} remains unchanged")
+
+        if configuration.get("hooks|enforce"):
+            for gh in hooks_list:
+                if gh.url not in config_hooks:
+                    debug(
+                        "Deleting hook '%s' who is not confirmed by configuration",
+                        gh.url,
+                    )
+                    project.hooks.delete(gh.id)

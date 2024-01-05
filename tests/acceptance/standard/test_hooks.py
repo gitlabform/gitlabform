@@ -111,3 +111,26 @@ class TestHooksProcessor:
         assert first_url not in (h.url for h in hooks)
         assert second_hook in hooks
         assert second_hook == orig_second_hook
+
+    def test_hooks_enforce(self, gl, project, urls):
+        target = project.path_with_namespace
+        first_url, second_url = urls
+        gl_hooks = project.hooks.list()
+        assert len(gl_hooks) == 1
+        assert second_url == gl_hooks[0].url
+
+        enforce_yaml = f"""
+                projects_and_groups:
+                  {target}:
+                    hooks:
+                      enforce: true
+                      {first_url}:
+                        merge_requests_events: false
+                        note_events: true
+                """
+
+        run_gitlabform(enforce_yaml, target)
+        gl_hook_urls = [h.url for h in project.hooks.list()]
+        assert len(gl_hook_urls) == 1
+        assert first_url in gl_hook_urls
+        assert second_url not in gl_hook_urls
