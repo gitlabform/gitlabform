@@ -17,7 +17,7 @@ using hierarchical configuration written in YAML.
 
 ### Short and powerful syntax
 
-A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](configuration_reference/#effective-configuration) .
+A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](reference/#effective-configuration) .
 ```yaml
 projects_and_groups:
   # configuration shared by all projects in a group named 'a_group'...
@@ -32,7 +32,7 @@ projects_and_groups:
 
 ### Dynamic features
 
-GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](configuration_reference/#raw-parameters-passing).
+GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](reference/#raw-parameters-passing).
 ```yaml
 projects_and_groups:
   a_group/a_project:
