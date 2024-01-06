@@ -3,7 +3,7 @@ from cli_ui import warning, fatal
 
 from gitlabform.constants import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
-from gitlabform.gitlab.core import NotFoundException
+from gitlab import GitlabDeleteError, GitlabGetError
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
@@ -12,7 +12,17 @@ class TagsProcessor(AbstractProcessor):
         super().__init__("tags", gitlab)
         self.strict = strict
 
+    def _get_user_by_username(self, username):
+        user = self.gl.users.list(username=username)
+        if len(user) == 0:
+            raise GitlabGetError(
+                "No users found when searching for username '%s'" % username, 404
+            )
+        return user[0]
+
     def _process_configuration(self, project_and_group: str, configuration: dict):
+        project = self.gl.projects.get(id=project_and_group, lazy=True)
+
         for tag in sorted(configuration["tags"]):
             try:
                 if configuration["tags"][tag]["protected"]:
@@ -33,13 +43,13 @@ class TagsProcessor(AbstractProcessor):
                             elif "user_id" in config:
                                 user_ids.add(config["user_id"])
                             elif "user" in config:
-                                user_ids.add(self.gitlab._get_user_id(config["user"]))
+                                gitlab_user = self._get_user_by_username(config["user"])
+                                user_ids.add(gitlab_user.get_id())
                             elif "group_id" in config:
                                 group_ids.add(config["group_id"])
                             elif "group" in config:
-                                group_ids.add(
-                                    self.gitlab._get_group_id(config["group"])
-                                )
+                                gitlab_group = self.gl.groups.get(config["group"])
+                                group_ids.add(gitlab_group.get_id())
 
                         for val in access_levels:
                             allowed_to_create.append({"access_level": val})
@@ -55,23 +65,37 @@ class TagsProcessor(AbstractProcessor):
                         if "create_access_level" in configuration["tags"][tag]
                         else None
                     )
+
                     debug("Setting tag '%s' as *protected*", tag)
                     try:
                         # try to unprotect first
-                        self.gitlab.unprotect_tag(project_and_group, tag)
-                    except NotFoundException:
+                        project.protectedtags.delete(tag)
+                    except GitlabDeleteError:
                         pass
-                    self.gitlab.protect_tag(
-                        project_and_group, tag, allowed_to_create, create_access_level
-                    )
+
+                    data = {}
+                    data["name"] = tag
+                    if allowed_to_create is not None:
+                        data["allowed_to_create"] = allowed_to_create
+                    if create_access_level is not None:
+                        data["create_access_level"] = create_access_level
+                    project.protectedtags.create(data)
                 else:
                     debug("Setting tag '%s' as *unprotected*", tag)
-                    self.gitlab.unprotect_tag(project_and_group, tag)
-            except NotFoundException:
-                message = f"Tag '{tag}' not found when trying to set it as protected/unprotected!"
+                    project.protectedtags.delete(tag)
+            except GitlabDeleteError:
+                message = f"Tag '{tag}' not found when trying to unprotect it!"
                 if self.strict:
                     fatal(
                         message,
+                        exit_code=EXIT_PROCESSING_ERROR,
+                    )
+                else:
+                    warning(message)
+            except GitlabGetError as e:
+                if self.strict:
+                    fatal(
+                        e,
                         exit_code=EXIT_PROCESSING_ERROR,
                     )
                 else:
