@@ -58,7 +58,7 @@ class HooksProcessor(AbstractProcessor):
             for gh in hooks_list:
                 if gh.url not in config_hooks:
                     debug(
-                        "Deleting hook '%s' who is not confirmed by configuration",
+                        "Deleting hook '%s' currently setup in the project but it is not in the configuration and enforce is enabled",
                         gh.url,
                     )
                     project.hooks.delete(gh.id)
