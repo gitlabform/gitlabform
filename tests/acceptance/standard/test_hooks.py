@@ -115,9 +115,9 @@ class TestHooksProcessor:
     def test_hooks_enforce(self, gl, project, urls):
         target = project.path_with_namespace
         first_url, second_url = urls
-        gl_hooks = project.hooks.list()
-        assert len(gl_hooks) == 1
-        assert second_url == gl_hooks[0].url
+        hooks_before_test = [h.url for h in project.hooks.list()]
+        assert len(hooks_before_test) == 1
+        assert second_url == hooks_before_test[0]
 
         enforce_yaml = f"""
                 projects_and_groups:
@@ -130,10 +130,10 @@ class TestHooksProcessor:
                 """
 
         run_gitlabform(enforce_yaml, target)
-        gl_hook_urls = [h.url for h in project.hooks.list()]
-        assert len(gl_hook_urls) == 1
-        assert first_url in gl_hook_urls
-        assert second_url not in gl_hook_urls
+        hooks_after_test = [h.url for h in project.hooks.list()]
+        assert len(hooks_after_test) == 1
+        assert first_url in hooks_after_test
+        assert second_url not in hooks_after_test
 
         not_enforce_yaml = f"""
                 projects_and_groups:
@@ -144,8 +144,44 @@ class TestHooksProcessor:
                         merge_requests_events: false
                         note_events: true
                 """
+
         run_gitlabform(not_enforce_yaml, target)
-        gl_hook_urls = [h.url for h in project.hooks.list()]
-        assert len(gl_hook_urls) == 2
-        assert first_url in gl_hook_urls
-        assert "http://www.newhook.org" in gl_hook_urls
+        hooks_after_test = [h.url for h in project.hooks.list()]
+        assert len(hooks_after_test) == 2
+        assert (
+            first_url in hooks_after_test
+            and "http://www.newhook.org" in hooks_after_test
+        )
+
+        enforce_star_yaml = f"""
+                projects_and_groups:
+                  {target.split('/')[0]}/*:
+                    hooks:
+                      enforce: true
+                      {first_url}:
+                        push_events: true
+                  {target}:
+                    hooks:
+                      {second_url}:
+                        job_events: true
+                  """
+
+        run_gitlabform(enforce_star_yaml, target)
+        hooks_after_test = [h.url for h in project.hooks.list()]
+
+        assert len(hooks_after_test) == 2
+        assert first_url in hooks_after_test and second_url in hooks_after_test
+        assert "http://www.newhook.org" not in hooks_after_test
+
+        enforce_delete_yaml = f"""
+                projects_and_groups:
+                  {target}:
+                    hooks:
+                      enforce: true
+                      {first_url}:
+                        delete: true
+                """
+
+        run_gitlabform(enforce_delete_yaml, target)
+        hooks_after_test = [h.url for h in project.hooks.list()]
+        assert len(hooks_after_test) == 0

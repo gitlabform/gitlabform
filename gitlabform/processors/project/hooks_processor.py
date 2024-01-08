@@ -16,7 +16,9 @@ class HooksProcessor(AbstractProcessor):
         debug("Processing hooks...")
         project: Project = self.gl.projects.get(project_and_group)
         hooks_list: RESTObjectList | List[RESTObject] = project.hooks.list()
-        config_hooks = filter(lambda x: x != "enforce", sorted(configuration["hooks"]))
+        config_hooks: tuple[str, ...] = tuple(
+            x for x in sorted(configuration["hooks"]) if x != "enforce"
+        )
 
         for hook in config_hooks:
             gitlab_hook: RESTObject | None = next(
@@ -58,7 +60,7 @@ class HooksProcessor(AbstractProcessor):
             for gh in hooks_list:
                 if gh.url not in config_hooks:
                     debug(
-                        "Deleting hook '%s' who is not confirmed by configuration",
+                        "Deleting hook '%s' currently setup in the project but it is not in the configuration and enforce is enabled",
                         gh.url,
                     )
                     project.hooks.delete(gh.id)
