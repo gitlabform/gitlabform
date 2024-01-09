@@ -7,7 +7,7 @@ The other values of the URL keys are the parameters described at [edit project h
 
 ## Examples:
 
-Example1: only the first hook will be deleted. Here, omitting the `enforce` key altogether achieves the same result.
+Example 1: only the first hook will be deleted. Here, omitting the `enforce` key altogether achieves the same result.
 
 ```yaml
 projects_and_groups:
