@@ -22,7 +22,7 @@ projects_and_groups:
         token: some_secret_auth_token
 ```
 
-Example 2: here all hooks will be removed, except `http://127.0.0.1:5000/hooks/merge-request` will be removed from the project.
+Example 2: here all hooks previously set in the `group_1/project_1` project will be removed, except `http://127.0.0.1:5000/hooks/merge-request` will remain.
 
 ```yaml
 projects_and_groups:
