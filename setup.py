@@ -55,7 +55,7 @@ setup(
         "python-gitlab==4.3.0",
         "requests==2.31.0",
         "ruamel.yaml==0.17.21",
-        "types-requests==2.31.0.10",
+        "types-requests==2.31.0.20240106",
         "yamlpath==3.8.1",
     ],
     extras_require={
