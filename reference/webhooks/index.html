@@ -786,6 +786,17 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Webhooks
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -795,6 +806,34 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples:
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1080,6 +1119,23 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples:
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1098,19 +1154,41 @@
 
 <h1 id="webhooks">Webhooks<a class="headerlink" href="#webhooks" title="Permanent link">&para;</a></h1>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/integrations/webhooks.html">Webhooks</a> (aka Project Hooks).</p>
-<p>The key names here are webhook URLs and values are as parameters described at <a href="https://docs.gitlab.com/ee/api/projects.html#edit-project-hook">edit project hooks endpoint</a>, <strong>except the id and hook_id</strong>.</p>
-<p>If the only value is <code>delete: true</code> then the given webhook is going to be removed.</p>
-<p>Example:
+<p>The key names here are webhook URLs, except if the key name is <code>enforce</code> and is set to <code>true</code> - in this case only the hooks defined here will remain in the project, all others will be deleted. When <code>enforce</code> is false, or not set, individual hooks can be deleted by setting their value to <code>delete: true</code>.
+The other values of the URL keys are the parameters described at <a href="https://docs.gitlab.com/ee/api/projects.html#edit-project-hook">edit project hooks endpoint</a>, <strong>except the id and hook_id</strong>.</p>
+<h2 id="examples">Examples:<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<p>Example 1: only the first hook will be deleted. Here, omitting the <code>enforce</code> key altogether achieves the same result.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">      </span><span class="s">&quot;http://host.domain.com/some-old-hook-you-want-to-remove-from-config&quot;</span><span class="p p-Indicator">:</span>
 <span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="s">&quot;http://127.0.0.1:5000/hooks/merge-request&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">      </span><span class="s">&quot;http://127.0.0.1:5000/hooks/merge_request&quot;</span><span class="p p-Indicator">:</span>
 <span class="w">        </span><span class="nt">push_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"> </span><span class="c1"># this is set to true by GitLab API by default</span>
 <span class="w">        </span><span class="nt">merge_requests_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some_secret_auth_token</span>
-</code></pre></div></p>
+</code></pre></div>
+<p>Example 2: here all hooks previously set in the <code>group_1/project_1</code> project will be removed, except <code>http://127.0.0.1:5000/hooks/merge-request</code> will remain.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="s">&quot;http://127.0.0.1:5000/hooks/merge-request&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">push_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">merge_requests_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>Example 3: here <code>enforce: true</code> is applied to the hooks of all projects within <code>group-1</code>: for each of these the <code>example.hook.url</code> hook will be created/updated and all others will be removed, unless further specified - in <code>project-1</code> the <code>special-hook.net</code> hook will also be added/kept and all others deleted (so that <code>project-1</code> ends up with just these 2 hooks).</p>
+<div class="highlight"><pre><span></span><code><span class="nt">group-1/*</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">https://example.hook.url</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">push_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">group-1/project-1</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">https://special-hook.net</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">job_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
 
 
 
