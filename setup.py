@@ -47,7 +47,7 @@ setup(
         "certifi",  # we want the latest root certs for security
         "cli-ui==0.17.2",
         "ez-yaml==1.2.0",
-        "Jinja2==3.1.2",
+        "Jinja2==3.1.3",
         "luddite==1.0.2",
         "MarkupSafe==2.1.3",
         "mergedeep==1.3.4",
