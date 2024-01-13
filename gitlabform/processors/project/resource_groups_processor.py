@@ -11,19 +11,17 @@ class ResourceGroupsProcessor(AbstractProcessor):
         super().__init__("resource_groups", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
+        ensure_exists = (
+            configuration["resource_groups"]["ensure_exists"]
+            if "ensure_exists" in configuration["resource_groups"]
+            else True
+        )
         for config_resource_group_name in configuration["resource_groups"]:
+            if config_resource_group_name == "ensure_exists":
+                continue
             config_process_mode = configuration["resource_groups"][
                 config_resource_group_name
             ]["process_mode"]
-
-            fail_if_not_exist = (
-                configuration["resource_groups"][config_resource_group_name][
-                    "fail_if_not_exist"
-                ]
-                if "fail_if_not_exist"
-                in configuration["resource_groups"][config_resource_group_name]
-                else True
-            )
 
             try:
                 gitlab_resource_group = self.gitlab.get_specific_resource_group(
@@ -35,7 +33,7 @@ class ResourceGroupsProcessor(AbstractProcessor):
                     f"Add the resource group in your project's .gitlab-ci.yml file.\n"
                     f"For more information, visit https://docs.gitlab.com/ee/ci/resource_groups/#add-a-resource-group."
                 )
-                if fail_if_not_exist:
+                if ensure_exists:
                     raise Exception(message)
                 else:
                     warning(message)
