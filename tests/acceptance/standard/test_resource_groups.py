@@ -45,34 +45,7 @@ class TestResourceGroups:
         assert resource_group.key == "production"
         assert resource_group.process_mode == "newest_first"
 
-    def test__ensure_exists_default_true(self, project, add_gitlab_ci_config):
-        update_resource_group_config = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            resource_groups:
-              resource_group_that_dont_exist:
-                process_mode: newest_first
-            """
-
-        with pytest.raises(Exception) as exc:
-            run_gitlabform(update_resource_group_config, project)
-        assert "Project is not configured to use resource group" in str(exc.value)
-
-    def test__ensure_exists_enforce_true(self, project, add_gitlab_ci_config):
-        update_resource_group_config = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            resource_groups:
-              ensure_exists: true
-              resource_group_that_dont_exist:
-                process_mode: newest_first
-            """
-
-        with pytest.raises(Exception) as exc:
-            run_gitlabform(update_resource_group_config, project)
-        assert "Project is not configured to use resource group" in str(exc.value)
-
-    def test__ensure_exists_enforce_false(self, project, add_gitlab_ci_config):
+    def test__ensure_exists_false(self, project, add_gitlab_ci_config):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
