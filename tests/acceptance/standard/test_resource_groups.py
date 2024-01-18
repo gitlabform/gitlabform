@@ -87,4 +87,6 @@ class TestResourceGroups:
         try:
             run_gitlabform(update_resource_group_config, project)
         except Exception as exc:
-            assert False, f"Test disabling `ensure_exists` raised an exception {exc}, but it shouldn't."  
+            assert (
+                False
+            ), f"Test disabling `ensure_exists` raised an exception {exc}, but it shouldn't."
