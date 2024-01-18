@@ -11,25 +11,19 @@ class ResourceGroupsProcessor(AbstractProcessor):
         super().__init__("resource_groups", gitlab)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-        ensure_exists = (
-            configuration["resource_groups"]["ensure_exists"]
-            if "ensure_exists" in configuration["resource_groups"]
-            else True
-        )
-        for config_resource_group_name in configuration["resource_groups"]:
-            if config_resource_group_name == "ensure_exists":
+        ensure_exists = configuration.get("resource_groups|ensure_exists", True)
+        for config_name, config in configuration["resource_groups"].items():
+            if config_name == "ensure_exists":
                 continue
-            config_process_mode = configuration["resource_groups"][
-                config_resource_group_name
-            ]["process_mode"]
+            config_process_mode = config["process_mode"]
 
             try:
                 gitlab_resource_group = self.gitlab.get_specific_resource_group(
-                    project_and_group, config_resource_group_name
+                    project_and_group, config_name
                 )
             except NotFoundException:
                 message = (
-                    f"Project is not configured to use resource group: {config_resource_group_name}.\n"
+                    f"Project is not configured to use resource group: {config_name}.\n"
                     f"Add the resource group in your project's .gitlab-ci.yml file.\n"
                     f"For more information, visit https://docs.gitlab.com/ee/ci/resource_groups/#add-a-resource-group."
                 )
@@ -43,7 +37,7 @@ class ResourceGroupsProcessor(AbstractProcessor):
                 try:
                     self.gitlab.update_resource_group(
                         project_and_group,
-                        config_resource_group_name,
+                        config_name,
                         {"process_mode": config_process_mode},
                     )
                 except UnexpectedResponseException:
