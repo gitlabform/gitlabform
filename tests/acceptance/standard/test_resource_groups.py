@@ -1,6 +1,8 @@
 import pytest
-from tests.acceptance import run_gitlabform
 import time
+
+from tests.acceptance import run_gitlabform
+from gitlabform.constants import EXIT_PROCESSING_ERROR
 
 
 @pytest.fixture(scope="function")
@@ -54,10 +56,12 @@ class TestResourceGroups:
                 process_mode: newest_first
             """
 
-        with pytest.raises(SystemExit) as exc:
+        with pytest.raises(
+            SystemExit, match="Project is not configured to use resource group"
+        ) as exception:
             run_gitlabform(update_resource_group_config, project)
-        assert exc.type == SystemExit
-        assert "Project is not configured to use resource group" in str(exc.value)
+        assert exception.type == SystemExit
+        assert exception.value.code == EXIT_PROCESSING_ERROR
 
     def test__ensure_exists_enforce_true(self, project, add_gitlab_ci_config):
         update_resource_group_config = f"""
@@ -69,10 +73,12 @@ class TestResourceGroups:
                 process_mode: newest_first
             """
 
-        with pytest.raises(SystemExit) as exc:
+        with pytest.raises(
+            SystemExit, match="Project is not configured to use resource group"
+        ) as exception:
             run_gitlabform(update_resource_group_config, project)
-        assert exc.type == SystemExit
-        assert "Project is not configured to use resource group" in str(exc.value)
+        assert exception.type == SystemExit
+        assert exception.value.code == EXIT_PROCESSING_ERROR
 
     def test__ensure_exists_enforce_false(self, project, add_gitlab_ci_config):
         update_resource_group_config = f"""
@@ -86,7 +92,7 @@ class TestResourceGroups:
 
         try:
             run_gitlabform(update_resource_group_config, project)
-        except Exception as exc:
+        except Exception as exception:
             assert (
                 False
-            ), f"Test disabling `ensure_exists` raised an exception {exc}, but it shouldn't."
+            ), f"Test disabling `ensure_exists` raised an exception {exception}, but it shouldn't."
