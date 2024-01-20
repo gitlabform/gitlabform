@@ -63,7 +63,7 @@ class TestResourceGroups:
         captured = capsys.readouterr()
         assert "Project is not configured to use resource group" in captured.err
 
-    def test__ensure_exists_enforce_true(self, project, add_gitlab_ci_config, capsys):
+    def test__ensure_exists_equals_true(self, project, add_gitlab_ci_config, capsys):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -80,7 +80,7 @@ class TestResourceGroups:
         captured = capsys.readouterr()
         assert "Project is not configured to use resource group" in captured.err
 
-    def test__ensure_exists_enforce_false(self, project, add_gitlab_ci_config):
+    def test__ensure_exists_equals_false(self, project, add_gitlab_ci_config):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
