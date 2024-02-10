@@ -70,9 +70,9 @@ class GroupMembersProcessor(AbstractProcessor):
 
         groups_before_by_group_path = dict()
         for share_details in groups_before:
-            groups_before_by_group_path[
-                share_details["group_full_path"]
-            ] = share_details
+            groups_before_by_group_path[share_details["group_full_path"]] = (
+                share_details
+            )
 
         for share_with_group_path in groups_to_set_by_group_path:
             group_access_to_set = groups_to_set_by_group_path[share_with_group_path][

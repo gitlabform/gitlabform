@@ -43,9 +43,9 @@ class DifferenceLogger:
         if hide_entries:
             changes = list(
                 map(
-                    lambda i: [i[0], hide(i[1]), hide(i[2])]
-                    if i[0] in hide_entries
-                    else i,
+                    lambda i: (
+                        [i[0], hide(i[1]), hide(i[2])] if i[0] in hide_entries else i
+                    ),
                     changes,
                 )
             )
