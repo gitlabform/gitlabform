@@ -17,6 +17,6 @@ class ProtectedEnvironmentsProcessor(MultipleEntitiesProcessor):
             required_to_create_or_update=And(Key("name"), Key("deploy_access_levels")),
         )
 
-        self.custom_diff_analyzers[
-            "deploy_access_levels"
-        ] = self.recursive_diff_analyzer
+        self.custom_diff_analyzers["deploy_access_levels"] = (
+            self.recursive_diff_analyzer
+        )

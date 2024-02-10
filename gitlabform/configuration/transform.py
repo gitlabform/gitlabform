@@ -225,9 +225,9 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                 for node_coordinate in processor.get_nodes(path, mustexist=True):
                     try:
                         access_level_string = str(node_coordinate.node)
-                        node_coordinate.parent[
-                            node_coordinate.parentref
-                        ] = AccessLevel.get_value(access_level_string)
+                        node_coordinate.parent[node_coordinate.parentref] = (
+                            AccessLevel.get_value(access_level_string)
+                        )
                     except KeyError:
                         fatal(
                             f"Configuration string '{access_level_string}' is not one of the valid access levels:"
@@ -255,9 +255,9 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                     if node_coordinate.parentref == "access_level":
                         try:
                             access_level_string = str(node_coordinate.node)
-                            node_coordinate.parent[
-                                node_coordinate.parentref
-                            ] = AccessLevel.get_value(access_level_string)
+                            node_coordinate.parent[node_coordinate.parentref] = (
+                                AccessLevel.get_value(access_level_string)
+                            )
                         except KeyError:
                             fatal(
                                 f"Configuration string '{access_level_string}' is not one of the valid access levels:"
@@ -313,9 +313,9 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
 
                     if old_syntax["approvals"]:
                         # add the settings, if there are left any after removing 'approvals_before_merge'
-                        where_to_add_new_syntax[
-                            "merge_requests_approvals"
-                        ] = old_syntax["approvals"]
+                        where_to_add_new_syntax["merge_requests_approvals"] = (
+                            old_syntax["approvals"]
+                        )
 
                 # approval rules
                 if (
