@@ -1,5 +1,39 @@
 # Changelog
 
+## 3.9.0
+
+### Features
+
+* Ability to transfer projects between groups or namespaces [#582](https://github.com/gitlabform/gitlabform/pull/582) ([amimas](https://github.com/amimas))
+* Add support for Python 3.12 and update to alpine 3.18 [#612](https://github.com/gitlabform/gitlabform/pull/612) ([gdubicki](https://github.com/gitlabform/gitlabform/commits?author=gdubicki))
+* Add `enforce` support for project hooks/webhooks configuration [#664](https://github.com/gitlabform/gitlabform/pull/664)([TigreModerata](https://github.com/TigreModerata))
+
+### Fixes
+
+* JSON data with dates not serialized correctly [#656](https://github.com/gitlabform/gitlabform/pull/656) ([HontoNoRoger](https://github.com/HontoNoRoger))
+
+### Refactor
+
+* Migrate `archive` configuration to use python-gitlab library [#622](https://github.com/gitlabform/gitlabform/pull/622) ([amimas](https://github.com/amimas))
+* Migrate `hooks` configuration feature to use python-gitlab library [#635](https://github.com/gitlabform/gitlabform/pull/635) ([TigreModerata](https://github.com/TigreModerata))
+* Migrate `tags` configuration to use python-gitlab library [#642](https://github.com/gitlabform/gitlabform/pull/642) ([lhokktyn](https://github.com/lhokktyn))
+
+### Documentation
+
+* Clarify gitlabform release procedure steps [#600](https://github.com/gitlabform/gitlabform/pull/600) ([amimas](https://github.com/amimas))
+* Add users' logs to the repo to fix problems with diplaying them [commit](https://github.com/gitlabform/gitlabform/commit/a8f7c6ca5f5f09344eb9887f5ab3fbec0c66cba4) ([gdubicki](https://github.com/gitlabform/gitlabform/commits?author=gdubicki))
+* Fix broken links to references in homepage [#653](https://github.com/gitlabform/gitlabform/pull/653) ([alamirault](https://github.com/alamirault))
+
+### Dependencies
+
+* Update many dependencies to newer version.
+
+### Styles
+
+* Update formats using latest version of `black` (v24.1.1) [#681](https://github.com/gitlabform/gitlabform/pull/681) ([amimas](https://github.com/amimas))
+
+Thank you all to the contributors of this release
+
 ## 3.8.0
 
 * **Add `allowed_to_create` support for tag protection**. PR [#551](https://github.com/gitlabform/gitlabform/pull/551), implements [#505](https://github.com/gitlabform/gitlabform/issues/505).
