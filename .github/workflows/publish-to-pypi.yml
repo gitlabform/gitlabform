@@ -17,7 +17,7 @@ jobs:
           python-version: 3.12
       - name: Build
         run: |
-          pip install wheel
+          pip install wheel setuptools
           python setup.py build sdist bdist_wheel
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@v1.5.0
