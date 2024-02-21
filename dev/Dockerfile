@@ -1,4 +1,4 @@
-FROM python:3.12-alpine3.18
+FROM python:3.13.0a4-alpine3.18
 COPY --from=pandoc/core:2 /usr/bin/pandoc* /usr/bin/
 COPY --from=pandoc/core:2 /usr/lib/libffi* /usr/lib/
 RUN apk add --no-cache \
