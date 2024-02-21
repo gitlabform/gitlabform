@@ -1,11 +1,14 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-
 version: 2
 updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    # We only want security updates + all the updates for the below packages
+    # to lower the constant flow of PRs. But this means that occasionally
+    # we need to check our dependencies for update manually!
+    allow:
+      # we want the latest root certs for security
+      - dependency-name: "certifi"
+      # it's our key library, we want it to be very up-to-date
+      - dependency-name: "python-gitlab"
