@@ -1,12 +1,9 @@
 import logging
 import pytest
 from typing import TYPE_CHECKING
+from gitlab.v4.objects import ProjectHook
 
 from tests.acceptance import run_gitlabform, get_random_name
-
-
-LOGGER = logging.getLogger(__name__)
-
 
 @pytest.fixture(scope="class")
 def urls():
@@ -65,7 +62,6 @@ class TestHooksProcessor:
               {target}:
                 hooks:
                   {first_url}:
-                    id: {first_hook.id}
                     merge_requests_events: false
                     note_events: true
                   {second_url}:
@@ -78,14 +74,16 @@ class TestHooksProcessor:
         updated_second_hook = self.get_hook_from_url(project, second_url)
 
         with caplog.at_level(logging.DEBUG):
-            assert f"Hook {second_url} remains unchanged" in caplog.text
             assert f"Changing existing hook '{first_url}'" in caplog.text
+            assert f"Hook {second_url} remains unchanged" in caplog.text
         assert updated_first_hook.asdict() != first_hook.asdict()
         assert updated_second_hook.asdict() == second_hook.asdict()
-        # push events defaults to True, but it stays False
-        assert updated_first_hook.push_events == False
-        assert updated_first_hook.merge_requests_events == False
-        assert updated_first_hook.note_events == True
+        # For the first hook, push_events stays False from previous test case when it was initially configured
+        assert (
+            updated_first_hook.push_events,
+            updated_first_hook.merge_requests_events,
+            updated_first_hook.note_events
+        ) == ( False, False, True )
 
     def test_hooks_delete(self, gl, project, urls):
         target = project.path_with_namespace
