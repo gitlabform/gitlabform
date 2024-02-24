@@ -76,8 +76,8 @@ class TestHooksProcessor:
         updated_second_hook = self.get_hook_from_url(project, second_url)
 
         with caplog.at_level(logging.DEBUG):
-            assert f"Changing existing hook '{first_url}'" in caplog.text
-            assert f"Hook {second_url} remains unchanged" in caplog.text
+            assert f"Updating hook '{first_url}'" in caplog.text
+            assert f"Hook '{second_url}' remains unchanged" in caplog.text
         assert updated_first_hook.asdict() != first_hook.asdict()
         assert updated_second_hook.asdict() == second_hook.asdict()
         # For the first hook, push_events stays False from previous test case when it was initially configured
