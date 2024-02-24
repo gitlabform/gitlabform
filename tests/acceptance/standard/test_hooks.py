@@ -27,6 +27,7 @@ class TestHooksProcessor:
               {target}:
                 hooks:
                   {first_url}:
+                    token: a1b2c3d4
                     push_events: false
                     merge_requests_events: true
                   {second_url}:
@@ -62,6 +63,7 @@ class TestHooksProcessor:
               {target}:
                 hooks:
                   {first_url}:
+                    token: a1b2c3d4
                     merge_requests_events: false
                     note_events: true
                   {second_url}:
