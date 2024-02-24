@@ -15,16 +15,16 @@ class HooksProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing hooks...")
         project: Project = self.gl.projects.get(project_and_group)
-        hooks_list: RESTObjectList | List[RESTObject] = project.hooks.list()
-        config_hooks: tuple[str, ...] = tuple(
+        project_hooks: RESTObjectList | List[RESTObject] = project.hooks.list()
+        hooks_in_config: tuple[str, ...] = tuple(
             x for x in sorted(configuration["hooks"]) if x != "enforce"
         )
 
-        for hook in config_hooks:
-            gitlab_hook: RESTObject | None = next(
-                (h for h in hooks_list if h.url == hook), None
+        for hook in hooks_in_config:
+            hook_in_gitlab: RESTObject | None = next(
+                (h for h in project_hooks if h.url == hook), None
             )
-            hook_id = gitlab_hook.id if gitlab_hook else None
+            hook_id = hook_in_gitlab.id if hook_in_gitlab else None
             if configuration.get("hooks|" + hook + "|delete"):
                 if hook_id:
                     debug("Deleting hook '%s'", hook)
@@ -34,13 +34,13 @@ class HooksProcessor(AbstractProcessor):
             else:
                 hook_config = {"url": hook}
                 hook_config.update(configuration["hooks"][hook])
-                gl_hook_dict = gitlab_hook.asdict() if gitlab_hook else {}
+                gl_hook: dict = hook_in_gitlab.asdict() if hook_in_gitlab else {}
                 diffs = (
                     map(
-                        lambda k: hook_config[k] != gl_hook_dict[k],
+                        lambda k: hook_config[k] != gl_hook[k],
                         hook_config.keys(),
                     )
-                    if gl_hook_dict
+                    if gl_hook
                     else iter(())
                 )
                 if not hook_id:
@@ -57,8 +57,8 @@ class HooksProcessor(AbstractProcessor):
                     debug(f"Hook {hook} remains unchanged")
 
         if configuration.get("hooks|enforce"):
-            for gh in hooks_list:
-                if gh.url not in config_hooks:
+            for gh in project_hooks:
+                if gh.url not in hooks_in_config:
                     debug(
                         "Deleting hook '%s' currently setup in the project but it is not in the configuration and enforce is enabled",
                         gh.url,
