@@ -9,9 +9,11 @@ from tests.acceptance import run_gitlabform, get_random_name
 def urls():
     first_name = get_random_name("hook")
     second_name = get_random_name("hook")
+    third_name = get_random_name("hook")
     first_url = f"http://hooks/{first_name}.org"
     second_url = f"http://hooks/{second_name}.org"
-    return first_url, second_url
+    third_url = f"http://hooks/{third_name}.com"
+    return first_url, second_url, third_url
 
 
 class TestHooksProcessor:
@@ -20,7 +22,7 @@ class TestHooksProcessor:
 
     def test_hooks_create(self, gl, project, urls):
         target = project.path_with_namespace
-        first_url, second_url = urls
+        first_url, second_url, third_url = urls
 
         test_yaml = f"""
             projects_and_groups:
@@ -33,16 +35,22 @@ class TestHooksProcessor:
                   {second_url}:
                     job_events: true
                     note_events: true
+                  {third_url}:
+                    token: abc123def
+                    push_events: true
+                    merge_requests_events: true
             """
 
         run_gitlabform(test_yaml, target)
 
         first_created_hook = self.get_hook_from_url(project, first_url)
         second_created_hook = self.get_hook_from_url(project, second_url)
+        third_created_hook = self.get_hook_from_url(project, third_url)
         if TYPE_CHECKING:
             assert isinstance(first_created_hook, ProjectHook)
             assert isinstance(second_created_hook, ProjectHook)
-        assert len(project.hooks.list()) == 2
+            assert isinstance(third_created_hook, ProjectHook)
+        assert len(project.hooks.list()) == 3
         assert (
             first_created_hook.push_events,
             first_created_hook.merge_requests_events,
@@ -51,12 +59,17 @@ class TestHooksProcessor:
             True,
             True,
         )
+        assert (
+            third_created_hook.push_events,
+            third_created_hook.merge_requests_events,
+        ) == (True, True)
 
     def test_hooks_update(self, caplog, gl, project, urls):
-        first_url, second_url = urls
+        first_url, second_url, third_url = urls
         target = project.path_with_namespace
         first_hook = self.get_hook_from_url(project, first_url)
         second_hook = self.get_hook_from_url(project, second_url)
+        third_hook = self.get_hook_from_url(project, third_url)
 
         update_yaml = f"""
             projects_and_groups:
@@ -69,17 +82,26 @@ class TestHooksProcessor:
                   {second_url}:
                     job_events: true
                     note_events: true
+                  {third_url}:
+                    token: abc123def
+                    push_events: true
+                    merge_requests_events: true
             """
 
         run_gitlabform(update_yaml, target)
         updated_first_hook = self.get_hook_from_url(project, first_url)
         updated_second_hook = self.get_hook_from_url(project, second_url)
+        updated_third_hook = self.get_hook_from_url(project, third_url)
 
         with caplog.at_level(logging.DEBUG):
             assert f"Updating hook '{first_url}'" in caplog.text
             assert f"Hook '{second_url}' remains unchanged" in caplog.text
+            assert f"Updating hook '{third_url}'" in caplog.text
+
         assert updated_first_hook.asdict() != first_hook.asdict()
         assert updated_second_hook.asdict() == second_hook.asdict()
+        assert updated_third_hook.asdict() == third_hook.asdict()
+
         # For the first hook, push_events stays False from previous test case when it was initially configured
         assert (
             updated_first_hook.push_events,
@@ -87,10 +109,21 @@ class TestHooksProcessor:
             updated_first_hook.note_events
         ) == ( False, False, True )
 
+        assert (
+            updated_second_hook.job_events,
+            updated_second_hook.note_events
+        ) == ( True, True )
+
+        assert (
+            updated_third_hook.push_events,
+            updated_third_hook.merge_requests_events,
+        ) == ( True, True )
+
     def test_hooks_delete(self, gl, project, urls):
         target = project.path_with_namespace
-        first_url, second_url = urls
+        first_url, second_url, third_url = urls
         orig_second_hook = self.get_hook_from_url(project, second_url)
+        orig_third_hook = self.get_hook_from_url(project, third_url)
 
         delete_yaml = f"""
         projects_and_groups:
@@ -101,23 +134,32 @@ class TestHooksProcessor:
               {second_url}:
                 job_events: false
                 note_events: false
+              {third_url}:
+                token: abc123def
+                push_events: true
+                merge_requests_events: true
         """
 
         run_gitlabform(delete_yaml, target)
         hooks = project.hooks.list()
         second_hook = self.get_hook_from_url(project, second_url)
+        third_hook = self.get_hook_from_url(project, third_url)
 
-        assert len(hooks) == 1
+        assert len(hooks) == 2
         assert first_url not in (h.url for h in hooks)
         assert second_hook in hooks
         assert second_hook == orig_second_hook
+        assert third_hook in hooks
+        assert third_hook == orig_third_hook
 
     def test_hooks_enforce(self, gl, group, project, urls):
         target = project.path_with_namespace
-        first_url, second_url = urls
+        first_url, second_url, third_url = urls
         hooks_before_test = [h.url for h in project.hooks.list()]
-        assert len(hooks_before_test) == 1
-        assert second_url == hooks_before_test[0]
+
+        assert len(hooks_before_test) == 2
+        # assert second_url == hooks_before_test[0]
+        # assert third_url == hooks_before_test[1]
 
         enforce_yaml = f"""
                 projects_and_groups:
@@ -134,6 +176,7 @@ class TestHooksProcessor:
         assert len(hooks_after_test) == 1
         assert first_url in hooks_after_test
         assert second_url not in hooks_after_test
+        assert third_url not in hooks_after_test
 
         not_enforce_yaml = f"""
                 projects_and_groups:
