@@ -43,10 +43,10 @@ class HooksProcessor(AbstractProcessor):
                     if "token" in hook_config:
                         debug(f"The hook '{hook}' config includes a token. Diff between config vs gitlab cannot be confirmed")
                         debug(f"Updating hook '{hook}'")
-                        changed_hook: Dict[str, Any] = project.hooks.update(
+                        updated_hook: Dict[str, Any] = project.hooks.update(
                             hook_id, hook_config
                         )
-                        debug(f"Updated hook: {changed_hook}")
+                        debug(f"Updated hook: {updated_hook}")
                     else:
                         gl_hook: dict = hook_in_gitlab.asdict() if hook_in_gitlab else {}
                         diffs = (
@@ -60,10 +60,10 @@ class HooksProcessor(AbstractProcessor):
                         if hook_id and any(diffs):
                             debug(f"The hook '{hook}' config is different from what's in gitlab")
                             debug(f"Updating hook '{hook}'")
-                            changed_hook: Dict[str, Any] = project.hooks.update(
+                            updated_hook = project.hooks.update(
                                 hook_id, hook_config
                             )
-                            debug(f"Updated hook: {changed_hook}")
+                            debug(f"Updated hook: {updated_hook}")
                         elif hook_id and not any(diffs):
                             debug(f"Hook '{hook}' remains unchanged")
 
