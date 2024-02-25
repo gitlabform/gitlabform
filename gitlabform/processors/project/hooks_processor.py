@@ -7,7 +7,6 @@ from gitlab.v4.objects import Project
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
-from cli_ui import info
 
 class HooksProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
@@ -41,14 +40,18 @@ class HooksProcessor(AbstractProcessor):
                     debug(f"Created hook: {created_hook}")
                 else:
                     if "token" in hook_config:
-                        debug(f"The hook '{hook}' config includes a token. Diff between config vs gitlab cannot be confirmed")
+                        debug(
+                            f"The hook '{hook}' config includes a token. Diff between config vs gitlab cannot be confirmed"
+                        )
                         debug(f"Updating hook '{hook}'")
                         updated_hook: Dict[str, Any] = project.hooks.update(
                             hook_id, hook_config
                         )
                         debug(f"Updated hook: {updated_hook}")
                     else:
-                        gl_hook: dict = hook_in_gitlab.asdict() if hook_in_gitlab else {}
+                        gl_hook: dict = (
+                            hook_in_gitlab.asdict() if hook_in_gitlab else {}
+                        )
                         diffs = (
                             map(
                                 lambda k: hook_config[k] != gl_hook[k],
@@ -58,11 +61,11 @@ class HooksProcessor(AbstractProcessor):
                             else iter(())
                         )
                         if hook_id and any(diffs):
-                            debug(f"The hook '{hook}' config is different from what's in gitlab")
-                            debug(f"Updating hook '{hook}'")
-                            updated_hook = project.hooks.update(
-                                hook_id, hook_config
+                            debug(
+                                f"The hook '{hook}' config is different from what's in gitlab"
                             )
+                            debug(f"Updating hook '{hook}'")
+                            updated_hook = project.hooks.update(hook_id, hook_config)
                             debug(f"Updated hook: {updated_hook}")
                         elif hook_id and not any(diffs):
                             debug(f"Hook '{hook}' remains unchanged")

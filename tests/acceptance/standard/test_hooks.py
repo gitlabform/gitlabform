@@ -5,6 +5,7 @@ from gitlab.v4.objects import ProjectHook
 
 from tests.acceptance import run_gitlabform, get_random_name
 
+
 @pytest.fixture(scope="class")
 def urls():
     first_name = get_random_name("hook")
@@ -104,8 +105,8 @@ class TestHooksProcessor:
             assert (
                 updated_first_hook.push_events,
                 updated_first_hook.merge_requests_events,
-                updated_first_hook.note_events
-            ) == ( False, False, True )
+                updated_first_hook.note_events,
+            ) == (False, False, True)
 
             # The second hook should remain unchanged.
             # The hook did not change from the previous test case. So, updating it is not necessary.
@@ -113,8 +114,8 @@ class TestHooksProcessor:
             assert updated_second_hook.asdict() == second_hook.asdict()
             assert (
                 updated_second_hook.job_events,
-                updated_second_hook.note_events
-            ) == ( True, True )
+                updated_second_hook.note_events,
+            ) == (True, True)
 
             # The third hook should remain unchanged.
             # The hook initially had a token when it was created in previous test case.
@@ -126,7 +127,7 @@ class TestHooksProcessor:
             assert (
                 updated_third_hook.push_events,
                 updated_third_hook.merge_requests_events,
-            ) == ( True, True )
+            ) == (True, True)
 
     def test_hooks_delete(self, gl, project, urls):
         target = project.path_with_namespace
