@@ -129,11 +129,12 @@ class TestHooksProcessor:
                 updated_third_hook.merge_requests_events,
             ) == (True, True)
 
-    def test_hooks_delete(self, gl, project, urls):
+    def test_hooks_delete(self, gl, project, urls, caplog):
         target = project.path_with_namespace
         first_url, second_url, third_url = urls
         second_hook_before_test = self.get_hook_from_url(project, second_url)
         third_hook_before_test = self.get_hook_from_url(project, third_url)
+        non_existent_hook_url = f"https://unknown_{get_random_name('hook')}.com"
 
         delete_yaml = f"""
         projects_and_groups:
@@ -148,6 +149,8 @@ class TestHooksProcessor:
                 token: abc123def
                 push_events: true
                 merge_requests_events: true
+              {non_existent_hook_url}:
+                delete: true
         """
 
         run_gitlabform(delete_yaml, target)
@@ -165,6 +168,10 @@ class TestHooksProcessor:
         # The thrid hook should exist and same as it was setup in previous test case.
         assert third_hook_after_test in hooks_after_test
         assert third_hook_after_test.asdict() == third_hook_before_test.asdict()
+        # The last hook configured for deletion but it was never setup in gitlab.
+        # Ensure expected error message is reported.
+        with caplog.at_level(logging.DEBUG):
+            assert f"Not deleting hook '{non_existent_hook_url}', because it doesn't exist" in caplog.text
 
     def test_hooks_enforce(self, gl, group, project, urls):
         target = project.path_with_namespace
