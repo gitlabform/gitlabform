@@ -171,7 +171,10 @@ class TestHooksProcessor:
         # The last hook configured for deletion but it was never setup in gitlab.
         # Ensure expected error message is reported.
         with caplog.at_level(logging.DEBUG):
-            assert f"Not deleting hook '{non_existent_hook_url}', because it doesn't exist" in caplog.text
+            assert (
+                f"Not deleting hook '{non_existent_hook_url}', because it doesn't exist"
+                in caplog.text
+            )
 
     def test_hooks_enforce(self, gl, group, project, urls):
         target = project.path_with_namespace
