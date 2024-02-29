@@ -78,8 +78,8 @@ class HooksProcessor(AbstractProcessor):
 
         GitLab's webhook data does not contain "token" as it is considered a secret.
         If GitLabForm config for a webhook contains a "token", the difference cannot
-        be validated. So, an empty value for "token" is used as GitLab's webhook data,
-        which will always result in configs being different.
+        be validated. In this case, the config is assumed to be different. Otherwise,
+        the config data will be compared and determined if they are different.
 
         Args:
             config_in_gitlab (dict): hook configuration in gitlab
@@ -90,9 +90,9 @@ class HooksProcessor(AbstractProcessor):
         """
         if "token" in config_in_gitlabform:
             debug(
-                f"The hook '{config_in_gitlabform['url']}' config includes a token. Diff between config vs gitlab cannot be confirmed"
+                f"The hook '{config_in_gitlabform['url']}' config includes a token. Diff between config vs gitlab cannot be confirmed."
             )
-            config_in_gitlab["token"] = ""
+            return True
 
         diffs = (
             map(
