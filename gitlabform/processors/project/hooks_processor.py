@@ -103,7 +103,4 @@ class HooksProcessor(AbstractProcessor):
             else iter(())
         )
 
-        if any(diffs):
-            return True
-        else:
-            return False
+        return True if any(diffs) else False
