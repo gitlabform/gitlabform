@@ -15,52 +15,56 @@ class HooksProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing hooks...")
         project: Project = self.gl.projects.get(project_and_group)
-        hooks_list: RESTObjectList | List[RESTObject] = project.hooks.list()
-        config_hooks: tuple[str, ...] = tuple(
+        project_hooks: RESTObjectList | List[RESTObject] = project.hooks.list()
+        hooks_in_config: tuple[str, ...] = tuple(
             x for x in sorted(configuration["hooks"]) if x != "enforce"
         )
 
-        for hook in config_hooks:
-            gitlab_hook: RESTObject | None = next(
-                (h for h in hooks_list if h.url == hook), None
+        for hook in hooks_in_config:
+            hook_in_gitlab: RESTObject | None = next(
+                (h for h in project_hooks if h.url == hook), None
             )
-            hook_id = gitlab_hook.id if gitlab_hook else None
+            hook_config = {"url": hook}
+            hook_config.update(configuration["hooks"][hook])
+
+            hook_id = hook_in_gitlab.id if hook_in_gitlab else None
+
+            # Process hooks configured for deletion
             if configuration.get("hooks|" + hook + "|delete"):
                 if hook_id:
-                    debug("Deleting hook '%s'", hook)
+                    debug(f"Deleting hook '{hook}'")
                     project.hooks.delete(hook_id)
+                    debug(f"Deleted hook '{hook}'")
                 else:
-                    debug("Not deleting hook '%s', because it doesn't exist", hook)
-            else:
-                hook_config = {"url": hook}
-                hook_config.update(configuration["hooks"][hook])
-                gl_hook_dict = gitlab_hook.asdict() if gitlab_hook else {}
-                diffs = (
-                    map(
-                        lambda k: hook_config[k] != gl_hook_dict[k],
-                        hook_config.keys(),
-                    )
-                    if gl_hook_dict
-                    else iter(())
-                )
-                if not hook_id:
-                    debug("Creating hook '%s'", hook)
-                    created_hook: RESTObject = project.hooks.create(hook_config)
-                    debug("Created hook '%s'", created_hook)
-                elif hook_id and any(diffs):
-                    debug("Changing existing hook '%s'", hook)
-                    changed_hook: Dict[str, Any] = project.hooks.update(
-                        hook_id, hook_config
-                    )
-                    debug("Changed hook to '%s'", changed_hook)
-                elif hook_id and not any(diffs):
-                    debug(f"Hook {hook} remains unchanged")
+                    debug(f"Not deleting hook '{hook}', because it doesn't exist")
+                continue
 
+            # Process new hook creation
+            if not hook_id:
+                debug(f"Creating hook '{hook}'")
+                created_hook: RESTObject = project.hooks.create(hook_config)
+                debug(f"Created hook: {created_hook}")
+                continue
+
+            # Processing existing hook updates
+            gl_hook: dict = hook_in_gitlab.asdict() if hook_in_gitlab else {}
+            if self._needs_update(gl_hook, hook_config):
+                debug(
+                    f"The hook '{hook}' config is different from what's in gitlab OR it contains a token"
+                )
+                debug(f"Updating hook '{hook}'")
+                updated_hook: Dict[str, Any] = project.hooks.update(
+                    hook_id, hook_config
+                )
+                debug(f"Updated hook: {updated_hook}")
+            else:
+                debug(f"Hook '{hook}' remains unchanged")
+
+        # Process hook config enforcements
         if configuration.get("hooks|enforce"):
-            for gh in hooks_list:
-                if gh.url not in config_hooks:
+            for gh in project_hooks:
+                if gh.url not in hooks_in_config:
                     debug(
-                        "Deleting hook '%s' currently setup in the project but it is not in the configuration and enforce is enabled",
-                        gh.url,
+                        f"Deleting hook '{gh.url}' currently setup in the project but it is not in the configuration and enforce is enabled"
                     )
                     project.hooks.delete(gh.id)
