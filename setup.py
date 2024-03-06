@@ -52,7 +52,7 @@ setup(
         "MarkupSafe==2.1.5",
         "mergedeep==1.3.4",
         "packaging==23.2",
-        "python-gitlab==4.4.0",
+        "python-gitlab @ git+ssh://git@github.com/TimKnight-DWP/python-gitlab.git@feat/group-allowlist",
         "requests==2.31.0",
         "ruamel.yaml==0.17.21",
         "types-requests==2.31.0.20240218",
