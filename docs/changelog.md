@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.9.1
+
+### Fixes
+
+* Hooks processing fails when config includes token [#693](https://github.com/gitlabform/gitlabform/pull/693) ([amimas](https://github.com/amimas))
+
+### CI
+
+* Install setuptools in github workflow to fix release process [commit](https://github.com/gitlabform/gitlabform/commit/b3eb1648ff18ecd2db799007341986378f0c4d6a) ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update some dependencies to newer version.
+
+Thanks to all the contributors of this release
+
 ## 3.9.0
 
 ### Features
@@ -32,7 +48,7 @@
 
 * Update formats using latest version of `black` (v24.1.1) [#681](https://github.com/gitlabform/gitlabform/pull/681) ([amimas](https://github.com/amimas))
 
-Thank you all to the contributors of this release
+Thanks to all the contributors of this release
 
 ## 3.8.0
 
