@@ -133,6 +133,42 @@ def test__config__with_access_level_names__group_ldap_links():
     assert not ddiff
 
 
+def test__config__with_access_level_names__group_saml_links():
+    config_yaml = f"""
+    projects_and_groups:
+      foobar/*:
+        group_saml_links:
+          # "provider" field should contain a value that you can find in the GitLab web UI,
+          # see https://github.com/gitlabform/gitlabform/issues/261
+          devops_are_maintainers:
+            saml_group_name: "devops"
+            access_level: maintainer
+          developers_are_developers:
+            saml_group_name: "developers"
+            access_level: developer
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+    transformer.transform(configuration)
+
+    config_with_numbers = f"""
+    projects_and_groups:
+      foobar/*:
+        group_saml_links:
+          devops_are_maintainers:
+            saml_group_name: "devops"
+            access_level: 40
+          developers_are_developers:
+            saml_group_name: "developers"
+            access_level: 30
+    """
+    configuration_with_numbers = Configuration(config_string=config_with_numbers)
+
+    ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
+    assert not ddiff
+
+
 def test__config__with_access_level_names__branches_premium_syntax():
     config_yaml = f"""
     projects_and_groups:
