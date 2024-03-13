@@ -1,6 +1,8 @@
 from logging import debug
 from typing import Dict, List
 
+from gitlab.v4.objects import Project, ProjectPipelineSchedule
+
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
@@ -17,8 +19,10 @@ class SchedulesProcessor(AbstractProcessor):
         if enforce_schedules:
             configured_schedules.pop("enforce")
 
-        existing_schedules = self.gitlab.get_all_pipeline_schedules(project_and_group)
-        schedule_ids_by_description = self.__group_schedule_ids_by_description(
+        project: Project = self.gl.projects.get(project_and_group)
+        existing_schedules = project.pipelineschedules.list()
+
+        schedule_ids_by_description = self._group_schedule_ids_by_description(
             existing_schedules
         )
 
@@ -29,9 +33,7 @@ class SchedulesProcessor(AbstractProcessor):
                 if schedule_ids:
                     debug("Deleting pipeline schedules '%s'", schedule_description)
                     for schedule_id in schedule_ids:
-                        self.gitlab.delete_pipeline_schedule(
-                            project_and_group, schedule_id
-                        )
+                        project.pipelineschedules.get(schedule_id).delete()
                 else:
                     debug(
                         "Not deleting pipeline schedules '%s', because none exist",
@@ -42,19 +44,10 @@ class SchedulesProcessor(AbstractProcessor):
                     debug(
                         "Changing existing pipeline schedule '%s'", schedule_description
                     )
-                    schedule_id = schedule_ids[0]
-                    self.gitlab.take_ownership(project_and_group, schedule_id)
-                    self.gitlab.update_pipeline_schedule(
-                        project_and_group,
-                        schedule_id,
-                        configuration.get("schedules|" + schedule_description),
-                    )
-                    self.__set_schedule_variables(
-                        project_and_group,
-                        schedule_id,
-                        configuration.get(
-                            "schedules|" + schedule_description + "|variables"
-                        ),
+                    data = configuration.get("schedules|" + schedule_description)
+                    schedule = project.pipelineschedules.get(schedule_ids[0])
+                    self._update_existing_schedule(
+                        configuration, data, schedule, schedule_description
                     )
                 elif schedule_ids:
                     debug(
@@ -62,82 +55,138 @@ class SchedulesProcessor(AbstractProcessor):
                         schedule_description,
                     )
                     for schedule_id in schedule_ids:
-                        self.gitlab.delete_pipeline_schedule(
-                            project_and_group, schedule_id
-                        )
-                    self.create_schedule_with_variables(
-                        configuration, project_and_group, schedule_description
+                        project.pipelineschedules.get(schedule_id).delete()
+
+                    self._create_schedule_with_variables(
+                        configuration, project, schedule_description
                     )
                 else:
                     debug("Creating pipeline schedule '%s'", schedule_description)
-                    self.create_schedule_with_variables(
-                        configuration, project_and_group, schedule_description
+                    self._create_schedule_with_variables(
+                        configuration, project, schedule_description
                     )
 
         if enforce_schedules:
             debug("Delete unconfigured schedules because enforce is enabled")
 
-            for schedule in existing_schedules:
-                schedule_description = schedule["description"]
-                schedule_id = schedule["id"]
+            self._delete_schedules_no_longer_in_config(
+                configured_schedules, existing_schedules, project
+            )
 
-                debug(f"processing {schedule_id}: {schedule_description}")
-                if schedule_description not in configured_schedules:
-                    debug(
-                        "Deleting pipeline schedule named '%s', because it is not in gitlabform configuration",
-                        schedule_description,
-                    )
-                    self.gitlab.delete_pipeline_schedule(project_and_group, schedule_id)
-
-    def create_schedule_with_variables(
-        self, configuration, project_and_group, schedule_description
+    def _update_existing_schedule(
+        self, configuration, data, schedule, schedule_description
     ):
-        data = configuration.get("schedules|" + schedule_description)
-        created_schedule = self.gitlab.create_pipeline_schedule(
-            project_and_group,
-            schedule_description,
-            data.get("ref"),
-            data.get("cron"),
-            optional_data=data,
-        )
-        self.__set_schedule_variables(
-            project_and_group,
-            created_schedule.get("id"),
+        schedule.take_ownership()
+
+        cron = data.get("cron")
+        schedule.cron = cron
+
+        cron_timezone = data.get("cron_timezone")
+        if cron_timezone:
+            schedule.cron_timezone = cron_timezone
+
+        ref = data.get("ref")
+        schedule.ref = ref
+
+        active = self._get_active_state_from_config(data)
+        schedule.active = active
+
+        self._set_schedule_variables(
+            schedule,
             configuration.get("schedules|" + schedule_description + "|variables"),
         )
 
-    def __set_schedule_variables(self, project_and_group, schedule_id, variables):
-        schedule = self.gitlab.get_pipeline_schedule(project_and_group, schedule_id)
+        schedule.save()
 
-        existing_variables = schedule.get("variables")
+    def _create_schedule_with_variables(
+        self, configuration, project: Project, schedule_description
+    ):
+        data = configuration.get("schedules|" + schedule_description)
+
+        cron_timezone = data.get("cron_timezone")
+        if not cron_timezone:
+            cron_timezone = "UTC"
+
+        active = self._get_active_state_from_config(data)
+
+        schedule_data = {
+            "ref": data.get("ref"),
+            "description": schedule_description,
+            "cron": data.get("cron"),
+            "cron_timezone": cron_timezone,
+            "active": active,
+        }
+        debug("Creating pipeline schedule using data: '%s'", schedule_data)
+
+        created_schedule_id = project.pipelineschedules.create(schedule_data).id
+        created_schedule = project.pipelineschedules.get(created_schedule_id)
+
+        self._set_schedule_variables(
+            created_schedule,
+            data.get("variables"),
+        )
+
+        created_schedule.save()
+
+    @staticmethod
+    def _get_active_state_from_config(data):
+        active = data.get("active")
+        if active is None:
+            active = True
+        return active
+
+    @staticmethod
+    def _set_schedule_variables(schedule: ProjectPipelineSchedule, variables):
+        attributes = schedule.attributes
+        existing_variables = attributes.get("variables")
         if existing_variables:
-            debug(
-                "Deleting variables for pipeline schedule '%s'", schedule["description"]
-            )
+            debug("Deleting variables for pipeline schedule '%s'", schedule.description)
 
             for variable in existing_variables:
-                self.gitlab.delete_pipeline_schedule_variable(
-                    project_and_group, schedule_id, variable.get("key")
-                )
+                schedule.variables.delete(variable.get("key"))
 
         if variables:
             for variable_key, variable_data in variables.items():
-                self.gitlab.create_pipeline_schedule_variable(
-                    project_and_group,
-                    schedule_id,
-                    variable_key,
-                    variable_data.get("value"),
-                    variable_data,
-                )
+                variable_type = variable_data.get("variable_type")
+                if variable_type:
+                    schedule.variables.create(
+                        {
+                            "key": variable_key,
+                            "value": variable_data.get("value"),
+                            "variable_type": variable_data.get("variable_type"),
+                        }
+                    )
+                else:
+                    schedule.variables.create(
+                        {
+                            "key": variable_key,
+                            "value": variable_data.get("value"),
+                        }
+                    )
 
     @staticmethod
-    def __group_schedule_ids_by_description(schedules) -> Dict[str, List[str]]:
+    def _group_schedule_ids_by_description(schedules) -> Dict[str, List[str]]:
         schedule_ids_by_description: Dict[str, List[str]] = {}
 
         for schedule in schedules:
-            description = schedule["description"]
-            schedule_ids_by_description.setdefault(description, []).append(
-                schedule["id"]
-            )
+            description = schedule.description
+            schedule_ids_by_description.setdefault(description, []).append(schedule.id)
 
         return schedule_ids_by_description
+
+    @staticmethod
+    def _delete_schedules_no_longer_in_config(
+        configured_schedules: Dict, existing_schedules, project: Project
+    ):
+        schedule: ProjectPipelineSchedule
+        for schedule in existing_schedules:
+            schedule_description = schedule.description
+            schedule_id = schedule.id
+
+            debug(f"processing {schedule_id}: {schedule_description}")
+            if schedule_description not in configured_schedules:
+                debug(
+                    "Deleting pipeline schedule named '%s', because it is not in gitlabform configuration",
+                    schedule_description,
+                )
+                project.pipelineschedules.get(schedule_id).delete()
