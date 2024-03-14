@@ -58,3 +58,27 @@ class TestRunning:
 
         with pytest.raises(SystemExit):
             run_gitlabform(config, "ALL_DEFINED")
+
+        config = f"""
+                projects_and_groups:
+                  group_to_create/*:
+                    create_if_not_found: true
+                    group_settings:
+                      suggestion_commit_message: 'foobar'
+                """
+
+        run_gitlabform(config, "ALL_DEFINED")
+        created_group = gl.get_group_case_insensitive("group_to_create")
+        assert created_group.suggestion_commit_message == "foobar"
+
+        config = f"""
+                projects_and_groups:
+                  group_to_create/project_to_create:
+                    create_if_not_found: true
+                    project_settings:
+                      suggestion_commit_message: 'foobar'
+                """
+
+        run_gitlabform(config, "ALL_DEFINED")
+        created_project = gl.get_project_case_insensitive("group_to_create/project_to_create")
+        assert created_project.suggestion_commit_message == "foobar"
