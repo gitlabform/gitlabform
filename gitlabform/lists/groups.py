@@ -1,11 +1,10 @@
-from cli_ui import fatal, info
+from cli_ui import fatal
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups
 
 
-from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
-from gitlabform.gitlab.groups import GitLabGroups
+from gitlabform.gitlab.core import NotFoundException
 
 
 class GroupsProvider:
@@ -87,7 +86,9 @@ class GroupsProvider:
                 if parent_name != ""
                 else None
             )
-            self.gitlab.create_group(name=group_name, path=group_name, parent_id=parent_id)
+            self.gitlab.create_group(
+                name=group_name, path=group_name, parent_id=parent_id
+            )
         else:
             raise NotFoundException()
 
