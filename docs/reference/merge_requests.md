@@ -117,7 +117,7 @@ projects_and_groups:
         users:
           - senior-sre-1
           - senior-sre-2
-        branches:
+        protected_branches:
           - production
           - staging
       any: # this is just a label
