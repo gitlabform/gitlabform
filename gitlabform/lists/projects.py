@@ -53,9 +53,13 @@ class ProjectsProvider(GroupsProvider):
             debug(
                 "Checking if it's a project that needs to be transferred from elsewhere"
             )
-            project_transfer_source = self.configuration.config["projects_and_groups"][
-                target
-            ]["project"]["transfer_from"]
+            try:
+                project_transfer_source = self.configuration.config[
+                    "projects_and_groups"
+                ][target]["project"]["transfer_from"]
+            except KeyError:
+                # ignore projects that don't contain transfer_from key
+                project_transfer_source = None
 
             if project_transfer_source:
                 try:
@@ -113,6 +117,39 @@ class ProjectsProvider(GroupsProvider):
                 archived_projects_from_configuration_not_from_groups,
             )
 
+        if target == "ALL":
+            # in this case we also need to get the list of projects being transfered
+            # to a different namespace from the config
+
+            projects_from_configuration = self.configuration.get_projects()
+
+            for project in projects_from_configuration:
+                try:
+                    project_transfer_source = self.configuration.config[
+                        "projects_and_groups"
+                    ][project]["project"]["transfer_from"]
+                except KeyError:
+                    # ignore projects that don't contain transfer_from key
+                    continue
+
+                if project_transfer_source:
+                    if project_transfer_source in projects_from_groups:
+                        maybe_project = self.gitlab.get_project_case_insensitive(
+                            project_transfer_source
+                        )
+                        debug(
+                            "Found a project '%s' to be transferred to '%s'",
+                            maybe_project["path_with_namespace"],
+                            project,
+                        )
+                        projects.add_requested([project])
+                    else:
+                        fatal(
+                            f"""Configuration contains project {project} to be transfered from {maybe_project}
+                                but the source project cannot be found in GitLab!""",
+                            exit_code=EXIT_INVALID_INPUT,
+                        )
+
         # TODO: consider checking for skipped earlier to avoid making requests for projects that will be skipped anyway
         projects.add_omitted(
             OmissionReason.SKIPPED, self._get_skipped_projects(projects.get_effective())
@@ -130,10 +167,38 @@ class ProjectsProvider(GroupsProvider):
                 if project_object["archived"]:
                     archived.append(project_object["path_with_namespace"])
             except NotFoundException:
-                fatal(
-                    f"Configuration contains project {project} but it cannot be found in GitLab!",
-                    exit_code=EXIT_INVALID_INPUT,
+                debug("Could not find '%s'", project)
+                debug(
+                    "Checking if it's a project that needs to be transferred from elsewhere"
                 )
+                try:
+                    project_transfer_source = self.configuration.config[
+                        "projects_and_groups"
+                    ][project]["project"]["transfer_from"]
+                except KeyError:
+                    fatal(
+                        f"Configuration contains project {project} but it cannot be found in GitLab!",
+                        exit_code=EXIT_INVALID_INPUT,
+                    )
+
+                if project_transfer_source:
+                    try:
+                        maybe_project = self.gitlab.get_project_case_insensitive(
+                            project_transfer_source
+                        )
+                        debug(
+                            "Found a project '%s' to be transferred to '%s'",
+                            maybe_project["path_with_namespace"],
+                            project,
+                        )
+                        if maybe_project["archived"]:
+                            archived.append(project)
+                    except NotFoundException:
+                        fatal(
+                            f"""Configuration contains project {project} to be transfered from {project_transfer_source}
+                                but the source project cannot be found in GitLab!""",
+                            exit_code=EXIT_INVALID_INPUT,
+                        )
         return archived
 
     def _get_all_and_archived_projects_from_groups(

@@ -299,3 +299,47 @@ class TestTransferProject:
         assert len(projects_in_new_path_after_transfer) == len(
             projects_in_new_path_before_transfer
         )
+
+    def test__transfer_with_target_all_defined(
+        self, project_for_function, group, other_group
+    ):
+        project_new_path_with_namespace = (
+            f"{other_group.path}/{project_for_function.name}"
+        )
+        projects_in_destination_before_transfer = other_group.projects.list()
+
+        config = f"""
+        projects_and_groups:
+          {project_new_path_with_namespace}:
+            project:
+              transfer_from: {project_for_function.path_with_namespace}
+        """
+
+        run_gitlabform(config, "ALL_DEFINED")
+        projects_in_destination_after_transfer = other_group.projects.list()
+
+        assert (
+            len(projects_in_destination_after_transfer)
+            == len(projects_in_destination_before_transfer) + 1
+        )
+
+    def test__transfer_with_target_all(self, project_for_function, group, other_group):
+        project_new_path_with_namespace = (
+            f"{other_group.path}/{project_for_function.name}"
+        )
+        projects_in_destination_before_transfer = other_group.projects.list()
+
+        config = f"""
+        projects_and_groups:
+          {project_new_path_with_namespace}:
+            project:
+              transfer_from: {project_for_function.path_with_namespace}
+        """
+
+        run_gitlabform(config, "ALL")
+        projects_in_destination_after_transfer = other_group.projects.list()
+
+        assert (
+            len(projects_in_destination_after_transfer)
+            == len(projects_in_destination_before_transfer) + 1
+        )
