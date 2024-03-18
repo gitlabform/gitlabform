@@ -68,7 +68,7 @@ class TestRunning:
         """
 
         run_gitlabform(config, "ALL_DEFINED")
-        created_group = gl.groups.get_group_case_insensitive("group_to_create")
+        created_group = gl.groups.get("group_to_create")
         assert created_group.suggestion_commit_message == "foobar"
 
         config = f"""
@@ -80,7 +80,7 @@ class TestRunning:
         """
 
         run_gitlabform(config, "ALL_DEFINED")
-        created_project = gl.projects.get_project_case_insensitive(
+        created_project = gl.projects.get(
             "group_to_create/project_to_create"
         )
         assert created_project.suggestion_commit_message == "foobar"
