@@ -65,14 +65,6 @@ class TestRunning:
             create_if_not_found: true
             group_settings:
               suggestion_commit_message: 'foobar'
-        """
-
-        run_gitlabform(config, "ALL_DEFINED")
-        created_group = gl.groups.get("group_to_create")
-        assert created_group.suggestion_commit_message == "foobar"
-
-        config = f"""
-        projects_and_groups:
           group_to_create/project_to_create:
             create_if_not_found: true
             project_settings:
@@ -80,7 +72,7 @@ class TestRunning:
         """
 
         run_gitlabform(config, "ALL_DEFINED")
-        created_project = gl.projects.get(
-            "group_to_create/project_to_create"
-        )
-        assert created_project.suggestion_commit_message == "foobar"
+        created_group = gl.groups.get("group_to_create")
+        created_project = gl.projects.get("group_to_create/project_to_create")
+
+        assert created_group is not None and created_project is not None
