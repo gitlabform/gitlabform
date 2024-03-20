@@ -107,9 +107,8 @@ class ProjectsProvider(GroupsProvider):
                 project_transfer_source = self._get_project_transfer_source(project)
 
                 if project_transfer_source:
-                    if project_transfer_source in projects_from_groups:
-                        if self._get_source_project(project, project_transfer_source):
-                            projects.add_requested([project])
+                    if self._get_source_project(project, project_transfer_source):
+                        projects.add_requested([project])
                     else:
                         fatal(
                             f"""Configuration contains project {project} to be transferred from {project_transfer_source}
