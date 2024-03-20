@@ -1,8 +1,7 @@
 from typing import Tuple
-from logging import debug
+from logging import debug, info
 from cli_ui import fatal
 
-from gitlab.v4.objects import Project
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
 from gitlabform.lists.groups import GroupsProvider
@@ -113,15 +112,16 @@ class ProjectsProvider(GroupsProvider):
             for project in projects_from_configuration:
                 project_transfer_source = self._get_project_transfer_source(project)
 
-                if project_transfer_source in projects_from_groups:
-                    if self._get_source_project(project, project_transfer_source):
-                        projects.add_requested([project])
-                else:
-                    fatal(
-                        f"""Configuration contains project {project} to be transferred from {project_transfer_source}
-                            but the source project cannot be found in GitLab!""",
-                        exit_code=EXIT_INVALID_INPUT,
-                    )
+                if project_transfer_source:
+                    if project_transfer_source in projects_from_groups:
+                        if self._get_source_project(project, project_transfer_source):
+                            projects.add_requested([project])
+                    else:
+                        fatal(
+                            f"""Configuration contains project {project} to be transferred from {project_transfer_source}
+                                but the source project cannot be found in GitLab!""",
+                            exit_code=EXIT_INVALID_INPUT,
+                        )
 
         # TODO: consider checking for skipped earlier to avoid making requests for projects that will be skipped anyway
         projects.add_omitted(
