@@ -112,15 +112,13 @@ class ProjectsProvider(GroupsProvider):
 
             for project in projects_from_configuration:
                 project_transfer_source = self._get_project_transfer_source(project)
-                source_project = self._get_source_project(
-                    project, project_transfer_source
-                )
-                if project_transfer_source in projects_from_groups and source_project:
+                
+                if project_transfer_source in projects_from_groups:
                     if self._get_source_project(project, project_transfer_source):
                         projects.add_requested([project])
                 else:
                     fatal(
-                        f"""Configuration contains project {project} to be transferred from {source_project}
+                        f"""Configuration contains project {project} to be transferred from {project_transfer_source}
                             but the source project cannot be found in GitLab!""",
                         exit_code=EXIT_INVALID_INPUT,
                     )
@@ -211,7 +209,7 @@ class ProjectsProvider(GroupsProvider):
 
     def _get_source_project(
         self, project: str, project_transfer_source: str
-    ) -> Project | None:
+    ) -> dict | None:
         try:
             maybe_project = self.gitlab.get_project_case_insensitive(
                 project_transfer_source
