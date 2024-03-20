@@ -77,17 +77,17 @@ class ProjectsProvider(GroupsProvider):
 
         projects_from_configuration = self.configuration.get_projects()
 
+        # TODO: this check should be case-insensitive
+        projects_from_configuration_not_from_groups = [
+            project
+            for project in projects_from_configuration
+            if project not in projects.requested
+        ]
+
         if target == "ALL_DEFINED":
             # in this case we also need to get the list of projects explicitly
             # defined in the configuration, but we don't need to re-check for
             # being archived projects that we already got from groups
-
-            # TODO: this check should be case-insensitive
-            projects_from_configuration_not_from_groups = [
-                project
-                for project in projects_from_configuration
-                if project not in projects.requested
-            ]
 
             archived_projects_from_configuration_not_from_groups = (
                 self._verify_if_projects_exist_and_get_archived_projects(
@@ -103,7 +103,7 @@ class ProjectsProvider(GroupsProvider):
         else:
             # in all other cases, we also need to look for projects in the config
             # that are being transferred to a different namespace
-            for project in projects_from_configuration:
+            for project in projects_from_configuration_not_from_groups:
                 project_transfer_source = self._get_project_transfer_source(project)
 
                 if project_transfer_source:
