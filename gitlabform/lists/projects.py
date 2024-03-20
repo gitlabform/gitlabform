@@ -75,14 +75,12 @@ class ProjectsProvider(GroupsProvider):
         projects.add_requested(projects_from_groups)
         projects.add_omitted(OmissionReason.ARCHIVED, archived_projects_from_groups)
 
+        projects_from_configuration = self.configuration.get_projects()
+
         if target == "ALL_DEFINED":
             # in this case we also need to get the list of projects explicitly
-            # defined in the configuration
-
-            projects_from_configuration = self.configuration.get_projects()
-
-            # ...but we don't need to re-check for being archived projects that we
-            # already got from groups
+            # defined in the configuration, but we don't need to re-check for
+            # being archived projects that we already got from groups
 
             # TODO: this check should be case-insensitive
             projects_from_configuration_not_from_groups = [
@@ -102,13 +100,9 @@ class ProjectsProvider(GroupsProvider):
                 OmissionReason.ARCHIVED,
                 archived_projects_from_configuration_not_from_groups,
             )
-
-        if target == "ALL":
-            # in this case we also need to get the list of projects being transferred
-            # to a different namespace from the config
-
-            projects_from_configuration = self.configuration.get_projects()
-
+        else:
+            # in all other cases, we also need to look for projects in the config
+            # that are being transferred to a different namespace
             for project in projects_from_configuration:
                 project_transfer_source = self._get_project_transfer_source(project)
 
