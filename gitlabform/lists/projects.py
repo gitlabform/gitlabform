@@ -2,6 +2,7 @@ from typing import Tuple
 from logging import debug
 from cli_ui import fatal
 
+from gitlab.v4.objects import Project
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
 from gitlabform.lists.groups import GroupsProvider
@@ -198,7 +199,7 @@ class ProjectsProvider(GroupsProvider):
 
         return skipped
 
-    def _get_project_transfer_source(self, project: str) -> str:
+    def _get_project_transfer_source(self, project: str) -> str | None:
         try:
             project_transfer_source = self.configuration.config["projects_and_groups"][
                 project
@@ -210,7 +211,7 @@ class ProjectsProvider(GroupsProvider):
 
     def _get_source_project(
         self, project: str, project_transfer_source: str
-    ) -> Projects:
+    ) -> Project | None:
         try:
             maybe_project = self.gitlab.get_project_case_insensitive(
                 project_transfer_source
