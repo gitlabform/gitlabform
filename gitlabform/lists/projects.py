@@ -112,7 +112,7 @@ class ProjectsProvider(GroupsProvider):
 
             for project in projects_from_configuration:
                 project_transfer_source = self._get_project_transfer_source(project)
-                
+
                 if project_transfer_source in projects_from_groups:
                     if self._get_source_project(project, project_transfer_source):
                         projects.add_requested([project])
@@ -197,19 +197,17 @@ class ProjectsProvider(GroupsProvider):
 
         return skipped
 
-    def _get_project_transfer_source(self, project: str) -> str | None:
+    def _get_project_transfer_source(self, project: str) -> str:
         try:
             project_transfer_source = self.configuration.config["projects_and_groups"][
                 project
             ]["project"]["transfer_from"]
         except KeyError:
-            return None
+            return ""
 
         return project_transfer_source
 
-    def _get_source_project(
-        self, project: str, project_transfer_source: str
-    ) -> dict | None:
+    def _get_source_project(self, project: str, project_transfer_source: str) -> dict:
         try:
             maybe_project = self.gitlab.get_project_case_insensitive(
                 project_transfer_source
@@ -220,6 +218,6 @@ class ProjectsProvider(GroupsProvider):
                 project,
             )
         except NotFoundException:
-            return None
+            return {}
 
         return maybe_project
