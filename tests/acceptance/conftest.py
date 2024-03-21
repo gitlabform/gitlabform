@@ -101,6 +101,7 @@ def subgroup(gl: Gitlab, group: Group):
 
 @pytest.fixture(scope="class")
 def other_subgroup(gl: Gitlab, group: Group):
+    # TODO: deduplicate this - it's a copy and paste from the above fixture
     subgroup_name = get_random_name("subgroup")
     gitlab_subgroup = create_group(subgroup_name, group.id)
 
@@ -132,6 +133,7 @@ def project_in_subgroup(gl: Gitlab, subgroup: Group):
 
 @pytest.fixture(scope="class")
 def project_in_other_subgroup(gl: Gitlab, other_subgroup: Group):
+    # TODO: deduplicate this - it's a copy and paste from the above fixture
     project_name = get_random_name("project")
     gitlab_project = create_project(other_subgroup, project_name)
 

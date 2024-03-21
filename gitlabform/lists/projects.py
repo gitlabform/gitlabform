@@ -1,5 +1,5 @@
-from typing import Tuple
-from logging import debug, info
+from typing import Optional, Tuple
+from logging import debug
 from cli_ui import fatal
 
 from gitlabform.constants import EXIT_INVALID_INPUT
@@ -50,14 +50,13 @@ class ProjectsProvider(GroupsProvider):
 
         except NotFoundException:
             debug("Could not find '%s'", target)
-            debug(
-                "Checking if it's a project that needs to be transferred from elsewhere"
+            project_transfer_source = self._get_project_transfer_source_from_config(
+                target
             )
-            project_transfer_source = self._get_project_transfer_source(target)
 
             if project_transfer_source:
-                source_project = self._get_source_project(
-                    target, project_transfer_source
+                source_project = self._find_project_transfer_source_in_gitlab(
+                    project_transfer_source
                 )
                 if source_project:
                     projects.add_requested([target])
@@ -104,10 +103,14 @@ class ProjectsProvider(GroupsProvider):
             # in all other cases, we also need to look for projects in the config
             # that are being transferred to a different namespace
             for project in projects_from_configuration_not_from_groups:
-                project_transfer_source = self._get_project_transfer_source(project)
+                project_transfer_source = self._get_project_transfer_source_from_config(
+                    project
+                )
 
                 if project_transfer_source:
-                    if self._get_source_project(project, project_transfer_source):
+                    if self._find_project_transfer_source_in_gitlab(
+                        project_transfer_source
+                    ):
                         projects.add_requested([project])
                     else:
                         fatal(
@@ -134,14 +137,13 @@ class ProjectsProvider(GroupsProvider):
                     archived.append(project_object["path_with_namespace"])
             except NotFoundException:
                 debug("Could not find '%s'", project)
-                debug(
-                    "Checking if it's a project that needs to be transferred from elsewhere"
+                project_transfer_source = self._get_project_transfer_source_from_config(
+                    project
                 )
-                project_transfer_source = self._get_project_transfer_source(project)
 
                 if project_transfer_source:
-                    source_project = self._get_source_project(
-                        project, project_transfer_source
+                    source_project = self._find_project_transfer_source_in_gitlab(
+                        project_transfer_source
                     )
                     if source_project:
                         if source_project["archived"]:
@@ -190,27 +192,46 @@ class ProjectsProvider(GroupsProvider):
 
         return skipped
 
-    def _get_project_transfer_source(self, project: str) -> str:
+    def _get_project_transfer_source_from_config(self, project: str) -> str:
         try:
+            debug(
+                "Checking if project '%s' needs to be transferred from elsewhere",
+                project,
+            )
             project_transfer_source = self.configuration.config["projects_and_groups"][
                 project
             ]["project"]["transfer_from"]
+            debug(
+                "Project '%s' needs to be transferred from '%s'",
+                project,
+                project_transfer_source,
+            )
         except KeyError:
-            return ""
+            debug("'%s' is not a project needing to be transferred", project)
+            return None
 
         return project_transfer_source
 
-    def _get_source_project(self, project: str, project_transfer_source: str) -> dict:
+    def _find_project_transfer_source_in_gitlab(
+        self, project_transfer_source: str
+    ) -> Optional[dict]:
         try:
+            debug(
+                "Checking if project transfer source ('%s') exists in GitLab",
+                project_transfer_source,
+            )
             maybe_project = self.gitlab.get_project_case_insensitive(
                 project_transfer_source
             )
             debug(
-                "Found a project '%s' to be transferred to '%s'",
-                maybe_project["path_with_namespace"],
-                project,
+                "Project transfer source ('%s') exists",
+                project_transfer_source,
             )
         except NotFoundException:
-            return {}
+            debug(
+                "Project transfer source ('%s') does not exist",
+                project_transfer_source,
+            )
+            return None
 
         return maybe_project
