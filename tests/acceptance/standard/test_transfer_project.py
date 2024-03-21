@@ -367,23 +367,21 @@ class TestTransferProject:
             == len(projects_in_destination_before_transfer) + 1
         )
 
-    def test__transfer_with_target_sub_group(
-        self, project_in_other_subgroup, group, other_subgroup
-    ):
+    def test__transfer_with_target_sub_group(self, project_in_subgroup, other_subgroup):
         project_new_path_with_namespace = (
-            f"{group.path}/{project_in_other_subgroup.name}"
+            f"{other_subgroup.path}/{project_in_subgroup.name}"
         )
-        projects_in_destination_before_transfer = group.projects.list()
+        projects_in_destination_before_transfer = other_subgroup.projects.list()
 
         config = f"""
         projects_and_groups:
           {project_new_path_with_namespace}:
             project:
-              transfer_from: {project_in_other_subgroup.path_with_namespace}
+              transfer_from: {project_in_subgroup.path_with_namespace}
         """
 
-        run_gitlabform(config, f"{group.path}/{other_subgroup.path}")
-        projects_in_destination_after_transfer = group.projects.list()
+        run_gitlabform(config, other_subgroup.path)
+        projects_in_destination_after_transfer = other_subgroup.projects.list()
 
         assert (
             len(projects_in_destination_after_transfer)

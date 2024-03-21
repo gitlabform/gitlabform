@@ -103,21 +103,32 @@ class ProjectsProvider(GroupsProvider):
             # in all other cases, we also need to look for projects in the config
             # that are being transferred to a different namespace
             for project in projects_from_configuration_not_from_groups:
-                project_transfer_source = self._get_project_transfer_source_from_config(
-                    project
-                )
+                # if the target is a group, and the project is not in the group
+                if (
+                    len(groups.get_effective()) == 1
+                    and target != project.rsplit("/", 1)[0]
+                ):
+                    debug(
+                        "Ignore project '%s', since it's not in target group '%s",
+                        project,
+                        target,
+                    )
+                else:
+                    project_transfer_source = (
+                        self._get_project_transfer_source_from_config(project)
+                    )
 
-                if project_transfer_source:
-                    if self._find_project_transfer_source_in_gitlab(
-                        project_transfer_source
-                    ):
-                        projects.add_requested([project])
-                    else:
-                        fatal(
-                            f"""Configuration contains project {project} to be transferred from {project_transfer_source}
-                                but the source project cannot be found in GitLab!""",
-                            exit_code=EXIT_INVALID_INPUT,
-                        )
+                    if project_transfer_source:
+                        if self._find_project_transfer_source_in_gitlab(
+                            project_transfer_source
+                        ):
+                            projects.add_requested([project])
+                        else:
+                            fatal(
+                                f"""Configuration contains project {project} to be transferred from {project_transfer_source}
+                                    but the source project cannot be found in GitLab!""",
+                                exit_code=EXIT_INVALID_INPUT,
+                            )
 
         # TODO: consider checking for skipped earlier to avoid making requests for projects that will be skipped anyway
         projects.add_omitted(
