@@ -371,7 +371,7 @@ class TestTransferProject:
         self, project_in_subgroup, group, other_subgroup
     ):
         project_new_path_with_namespace = (
-            f"${group.path}/{other_subgroup.path}/{project_in_subgroup.name}"
+            f"{group.path}/{other_subgroup.path}/{project_in_subgroup.name}"
         )
         projects_in_destination_before_transfer = other_subgroup.projects.list()
 
