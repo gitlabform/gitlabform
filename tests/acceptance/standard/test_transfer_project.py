@@ -382,7 +382,7 @@ class TestTransferProject:
               transfer_from: {project_in_subgroup.path_with_namespace}
         """
 
-        run_gitlabform(config, other_subgroup.path)
+        run_gitlabform(config, f"{group.path}/{other_subgroup.path}")
         projects_in_destination_after_transfer = other_subgroup.projects.list()
 
         assert (
