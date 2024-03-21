@@ -192,7 +192,7 @@ class ProjectsProvider(GroupsProvider):
 
         return skipped
 
-    def _get_project_transfer_source_from_config(self, project: str) -> str:
+    def _get_project_transfer_source_from_config(self, project: str) -> Optional[str]:
         try:
             debug(
                 "Checking if project '%s' needs to be transferred from elsewhere",
