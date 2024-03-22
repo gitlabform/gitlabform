@@ -50,12 +50,19 @@ class ProjectsProvider(GroupsProvider):
 
         except NotFoundException:
             debug("Could not find '%s'", target)
-            if (
-                project_transfer_source := self._get_project_transfer_source_from_config(
-                    target
-                )
-            ) and self._find_project_transfer_source_in_gitlab(project_transfer_source):
-                projects.add_requested([target])
+            if project_transfer_source := self._get_project_transfer_source_from_config(
+                target
+            ):
+                if self._find_project_transfer_source_in_gitlab(
+                    project_transfer_source
+                ):
+                    projects.add_requested([target])
+                else:
+                    fatal(
+                        f"""Configuration contains project {target} to be transferred from {project_transfer_source}
+                            but the source project cannot be found in GitLab!""",
+                        exit_code=EXIT_INVALID_INPUT,
+                    )
 
         return projects
 
@@ -111,19 +118,10 @@ class ProjectsProvider(GroupsProvider):
                         target,
                     )
                 else:
-                    if project_transfer_source := self._get_project_transfer_source_from_config(
-                        project
-                    ):
-                        if self._find_project_transfer_source_in_gitlab(
-                            project_transfer_source
-                        ):
-                            projects.add_requested([project])
-                        else:
-                            fatal(
-                                f"""Configuration contains project {project} to be transferred from {project_transfer_source}
-                                    but the source project cannot be found in GitLab!""",
-                                exit_code=EXIT_INVALID_INPUT,
-                            )
+                    if (maybe_projects := self._get_single_project(project)) and len(
+                        maybe_projects.get_effective()
+                    ) != 0:
+                        projects.add_requested([project])
 
         # TODO: consider checking for skipped earlier to avoid making requests for projects that will be skipped anyway
         projects.add_omitted(
@@ -143,11 +141,9 @@ class ProjectsProvider(GroupsProvider):
                     archived.append(project_object["path_with_namespace"])
             except NotFoundException:
                 debug("Could not find '%s'", project)
-                project_transfer_source = self._get_project_transfer_source_from_config(
+                if project_transfer_source := self._get_project_transfer_source_from_config(
                     project
-                )
-
-                if project_transfer_source:
+                ):
                     source_project = self._find_project_transfer_source_in_gitlab(
                         project_transfer_source
                     )
