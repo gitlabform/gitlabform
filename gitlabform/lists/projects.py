@@ -50,16 +50,12 @@ class ProjectsProvider(GroupsProvider):
 
         except NotFoundException:
             debug("Could not find '%s'", target)
-            project_transfer_source = self._get_project_transfer_source_from_config(
-                target
-            )
-
-            if project_transfer_source:
-                source_project = self._find_project_transfer_source_in_gitlab(
-                    project_transfer_source
+            if (
+                project_transfer_source := self._get_project_transfer_source_from_config(
+                    target
                 )
-                if source_project:
-                    projects.add_requested([target])
+            ) and self._find_project_transfer_source_in_gitlab(project_transfer_source):
+                projects.add_requested([target])
 
         return projects
 
@@ -106,6 +102,7 @@ class ProjectsProvider(GroupsProvider):
                 # if the target is a group, and the project is not in the group
                 if (
                     len(groups.get_effective()) == 1
+                    and target != "ALL"
                     and target != project.rsplit("/", 1)[0]
                 ):
                     debug(
@@ -114,11 +111,9 @@ class ProjectsProvider(GroupsProvider):
                         target,
                     )
                 else:
-                    project_transfer_source = (
-                        self._get_project_transfer_source_from_config(project)
-                    )
-
-                    if project_transfer_source:
+                    if project_transfer_source := self._get_project_transfer_source_from_config(
+                        project
+                    ):
                         if self._find_project_transfer_source_in_gitlab(
                             project_transfer_source
                         ):
