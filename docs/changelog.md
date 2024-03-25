@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.9.2
+
+### Fixes
+
+* Transfer project not working when target is ALL or ALL_DEFINED or group or subgroup [#714](https://github.com/gitlabform/gitlabform/pull/693) ([long-wan-ep](https://github.com/long-wan-ep))
+
+### Documentation
+
+* Fix branches keyword in MR approval rules [#710](https://github.com/gitlabform/gitlabform/pull/710) ([tmeijn](https://github.com/tmeijn))
+
+### Dependencies
+
+* Update some dependencies to newer version.
+
+Thanks to all the contributors of this release
+
 ## 3.9.1
 
 ### Fixes
