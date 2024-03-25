@@ -1,6 +1,7 @@
 from logging import debug
 from typing import Dict, List
 
+from gitlab.base import RESTObjectList
 from gitlab.v4.objects import Project, ProjectPipelineSchedule
 
 from gitlabform.gitlab import GitLab
@@ -13,6 +14,7 @@ class SchedulesProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         configured_schedules = configuration.get("schedules", {})
+
         enforce_schedules = configuration.get("schedules|enforce", False)
 
         # Remove 'enforce' key from the config so that it's not treated as a "schedule"
@@ -20,14 +22,18 @@ class SchedulesProcessor(AbstractProcessor):
             configured_schedules.pop("enforce")
 
         project: Project = self.gl.projects.get(project_and_group)
-        existing_schedules = project.pipelineschedules.list()
+        existing_schedules: List[
+            ProjectPipelineSchedule
+        ] | RESTObjectList = project.pipelineschedules.list()
 
-        schedule_ids_by_description = self._group_schedule_ids_by_description(
+        schedule_ids_by_description: dict = self._group_schedule_ids_by_description(
             existing_schedules
         )
 
         for schedule_description in sorted(configured_schedules):
-            schedule_ids = schedule_ids_by_description.get(schedule_description)
+            schedule_ids: List[int] = schedule_ids_by_description.get(
+                schedule_description
+            )
 
             if configured_schedules[schedule_description].get("delete"):
                 if schedule_ids:
@@ -44,10 +50,9 @@ class SchedulesProcessor(AbstractProcessor):
                     debug(
                         "Changing existing pipeline schedule '%s'", schedule_description
                     )
-                    data = configuration.get("schedules|" + schedule_description)
                     schedule = project.pipelineschedules.get(schedule_ids[0])
                     self._update_existing_schedule(
-                        configuration, data, schedule, schedule_description
+                        configured_schedules, project, schedule, schedule_description
                     )
                 elif schedule_ids:
                     debug(
@@ -58,12 +63,12 @@ class SchedulesProcessor(AbstractProcessor):
                         project.pipelineschedules.get(schedule_id).delete()
 
                     self._create_schedule_with_variables(
-                        configuration, project, schedule_description
+                        configured_schedules, project, schedule_description
                     )
                 else:
                     debug("Creating pipeline schedule '%s'", schedule_description)
                     self._create_schedule_with_variables(
-                        configuration, project, schedule_description
+                        configured_schedules, project, schedule_description
                     )
 
         if enforce_schedules:
@@ -74,48 +79,27 @@ class SchedulesProcessor(AbstractProcessor):
             )
 
     def _update_existing_schedule(
-        self, configuration, data, schedule, schedule_description
+        self,
+        configured_schedules,
+        project: Project,
+        schedule: ProjectPipelineSchedule,
+        schedule_description: str,
     ):
-        schedule.take_ownership()
+        entity_config = configured_schedules[schedule_description]
+        if self._needs_update(entity_config, schedule.asdict()):
+            # Delete and then re-create schedule so we can pass all info in the data to Gitlab in case their APIs change
+            project.pipelineschedules.delete(schedule.id)
 
-        cron = data.get("cron")
-        schedule.cron = cron
-
-        cron_timezone = data.get("cron_timezone")
-        if cron_timezone:
-            schedule.cron_timezone = cron_timezone
-
-        ref = data.get("ref")
-        schedule.ref = ref
-
-        active = self._get_active_state_from_config(data)
-        schedule.active = active
-
-        self._set_schedule_variables(
-            schedule,
-            configuration.get("schedules|" + schedule_description + "|variables"),
-        )
-
-        schedule.save()
+            self._create_schedule_with_variables(
+                configured_schedules, project, schedule_description
+            )
 
     def _create_schedule_with_variables(
-        self, configuration, project: Project, schedule_description
+        self, configured_schedules, project: Project, schedule_description: str
     ):
-        data = configuration.get("schedules|" + schedule_description)
+        data = configured_schedules[schedule_description]
 
-        cron_timezone = data.get("cron_timezone")
-        if not cron_timezone:
-            cron_timezone = "UTC"
-
-        active = self._get_active_state_from_config(data)
-
-        schedule_data = {
-            "ref": data.get("ref"),
-            "description": schedule_description,
-            "cron": data.get("cron"),
-            "cron_timezone": cron_timezone,
-            "active": active,
-        }
+        schedule_data = {"description": schedule_description, **data}
         debug("Creating pipeline schedule using data: '%s'", schedule_data)
 
         created_schedule_id = project.pipelineschedules.create(schedule_data).id
@@ -127,13 +111,6 @@ class SchedulesProcessor(AbstractProcessor):
         )
 
         created_schedule.save()
-
-    @staticmethod
-    def _get_active_state_from_config(data):
-        active = data.get("active")
-        if active is None:
-            active = True
-        return active
 
     @staticmethod
     def _set_schedule_variables(schedule: ProjectPipelineSchedule, variables):
@@ -164,20 +141,24 @@ class SchedulesProcessor(AbstractProcessor):
                         }
                     )
 
+    # schedules: List[ProjectPipelineSchedule] | RESTObjectList -> Incompatible with python 3.9
     @staticmethod
-    def _group_schedule_ids_by_description(schedules) -> Dict[str, List[str]]:
+    def _group_schedule_ids_by_description(
+        schedules,
+    ) -> Dict[str, List[str]]:
         schedule_ids_by_description: Dict[str, List[str]] = {}
 
         for schedule in schedules:
-            description = schedule.description
-            schedule_ids_by_description.setdefault(description, []).append(schedule.id)
+            schedule_ids_by_description.setdefault(schedule.description, []).append(
+                schedule.id
+            )
 
         return schedule_ids_by_description
 
     @staticmethod
     def _delete_schedules_no_longer_in_config(
         configured_schedules: Dict, existing_schedules, project: Project
-    ):
+    ) -> None:
         schedule: ProjectPipelineSchedule
         for schedule in existing_schedules:
             schedule_description = schedule.description
