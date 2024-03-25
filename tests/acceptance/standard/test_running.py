@@ -58,3 +58,21 @@ class TestRunning:
 
         with pytest.raises(SystemExit):
             run_gitlabform(config, "ALL_DEFINED")
+
+        config = f"""
+        projects_and_groups:
+          group_to_create/*:
+            create_if_not_found: true
+            group_settings:
+              suggestion_commit_message: 'foobar'
+          group_to_create/project_to_create:
+            create_if_not_found: true
+            project_settings:
+              suggestion_commit_message: 'foobar'
+        """
+
+        run_gitlabform(config, "ALL_DEFINED")
+        created_group = gl.groups.get("group_to_create")
+        created_project = gl.projects.get("group_to_create/project_to_create")
+
+        assert created_group is not None and created_project is not None

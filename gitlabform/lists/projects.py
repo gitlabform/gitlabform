@@ -130,11 +130,26 @@ class ProjectsProvider(GroupsProvider):
                 if project_object["archived"]:
                     archived.append(project_object["path_with_namespace"])
             except NotFoundException:
-                fatal(
-                    f"Configuration contains project {project} but it cannot be found in GitLab!",
-                    exit_code=EXIT_INVALID_INPUT,
-                )
+                try:
+                    self._create_project_if_needed(project)
+                except:
+                    fatal(
+                        f"Configuration contains project {project} but it cannot be found in GitLab nor could it be created!",
+                        exit_code=EXIT_INVALID_INPUT,
+                    )
         return archived
+
+    def _create_project_if_needed(self, project: str):
+        project_config = self.configuration.get_effective_config_for_project(project)
+        if project_config.get("create_if_not_found", False):
+            path_elements = project.split("/")
+            parent_name, project_name = "/".join(path_elements[:-1]), path_elements[-1]
+            parent_id = self.gitlab.get_group_id_case_insensitive(parent_name)
+            self.gitlab.create_project(
+                name=project_name, path=project_name, namespace_id=parent_id
+            )
+        else:
+            raise NotFoundException()
 
     def _get_all_and_archived_projects_from_groups(
         self, groups: list

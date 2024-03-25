@@ -68,10 +68,29 @@ class GroupsProvider:
             try:
                 self.gitlab.get_group_case_insensitive(group)
             except NotFoundException:
-                fatal(
-                    f"Configuration contains group {group} but it cannot be found in GitLab!",
-                    exit_code=EXIT_INVALID_INPUT,
-                )
+                try:
+                    self._create_group_if_needed(group)
+                except Exception as e:
+                    fatal(
+                        f"Configuration contains group {group} but it cannot be found in GitLab nor could it be created! {e}",
+                        exit_code=EXIT_INVALID_INPUT,
+                    )
+
+    def _create_group_if_needed(self, group: str):
+        group_config = self.configuration.get_effective_config_for_group(group)
+        if group_config.get("create_if_not_found", False):
+            path_elements = group.split("/")
+            parent_name, group_name = "/".join(path_elements[:-1]), path_elements[-1]
+            parent_id = (
+                self.gitlab.get_group_id_case_insensitive(parent_name)
+                if parent_name != ""
+                else None
+            )
+            self.gitlab.create_group(
+                name=group_name, path=group_name, parent_id=parent_id
+            )
+        else:
+            raise NotFoundException()
 
     def _get_skipped_groups(self, groups: list) -> list:
         skipped = []
