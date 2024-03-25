@@ -60,7 +60,7 @@ setup(
     ],
     extras_require={
         "test": [
-            "coverage==7.4.3",
+            "coverage==7.4.4",
             "cryptography==42.0.5",
             "deepdiff==6.7.1",
             "mypy==1.9.0",
@@ -68,7 +68,7 @@ setup(
             "pre-commit==2.21.0",  # not really for tests, but for development
             "pytest==8.1.1",
             "pytest-cov==4.1.0",
-            "pytest-rerunfailures==13.0",
+            "pytest-rerunfailures==14.0",
             "xkcdpass==1.19.8",
         ],
         "docs": [
