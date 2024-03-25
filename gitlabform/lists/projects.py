@@ -158,7 +158,7 @@ class ProjectsProvider(GroupsProvider):
                         )
                 else:
                     fatal(
-                        f"Configuration contains project {project} but it cannot be found in GitLab!",
+                        f"Configuration contains project {project} but it cannot be found in GitLab and it's not a project that is configured to be transferred from elsewhere.",
                         exit_code=EXIT_INVALID_INPUT,
                     )
 
