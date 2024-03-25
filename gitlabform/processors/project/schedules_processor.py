@@ -1,7 +1,7 @@
 from logging import debug
 from typing import Dict, List
 
-from gitlab.base import RESTObjectList
+from gitlab.base import RESTObjectList, RESTObject
 from gitlab.v4.objects import Project, ProjectPipelineSchedule
 
 from gitlabform.gitlab import GitLab
@@ -23,7 +23,7 @@ class SchedulesProcessor(AbstractProcessor):
 
         project: Project = self.gl.projects.get(project_and_group)
         existing_schedules: List[
-            ProjectPipelineSchedule
+            RESTObject
         ] | RESTObjectList = project.pipelineschedules.list()
 
         schedule_ids_by_description: dict = self._group_schedule_ids_by_description(
@@ -31,9 +31,7 @@ class SchedulesProcessor(AbstractProcessor):
         )
 
         for schedule_description in sorted(configured_schedules):
-            schedule_ids: List[int] = schedule_ids_by_description.get(
-                schedule_description
-            )
+            schedule_ids = schedule_ids_by_description.get(schedule_description)
 
             if configured_schedules[schedule_description].get("delete"):
                 if schedule_ids:
