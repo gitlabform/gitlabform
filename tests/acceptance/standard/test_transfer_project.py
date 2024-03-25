@@ -389,3 +389,20 @@ class TestTransferProject:
             len(projects_in_destination_after_transfer)
             == len(projects_in_destination_before_transfer) + 1
         )
+
+    def test__transfer_non_existing_project(
+        self, project_for_function, group, other_group
+    ):
+        project_new_path_with_namespace = (
+            f"{other_group.path}/{project_for_function.name}"
+        )
+
+        config = f"""
+        projects_and_groups:
+          {project_new_path_with_namespace}:
+            project:
+              transfer_from: non/existent_project
+        """
+
+        with pytest.raises(SystemExit):
+            run_gitlabform(config, project_new_path_with_namespace)
