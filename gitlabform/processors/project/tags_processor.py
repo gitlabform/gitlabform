@@ -12,14 +12,6 @@ class TagsProcessor(AbstractProcessor):
         super().__init__("tags", gitlab)
         self.strict = strict
 
-    def _get_user_by_username(self, username):
-        user = self.gl.users.list(username=username)
-        if len(user) == 0:
-            raise GitlabGetError(
-                "No users found when searching for username '%s'" % username, 404
-            )
-        return user[0]
-
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project = self.gl.projects.get(id=project_and_group, lazy=True)
 
@@ -43,12 +35,16 @@ class TagsProcessor(AbstractProcessor):
                             elif "user_id" in config:
                                 user_ids.add(config["user_id"])
                             elif "user" in config:
-                                gitlab_user = self._get_user_by_username(config["user"])
+                                gitlab_user = self.gl.get_user_by_username(
+                                    config["user"]
+                                )
                                 user_ids.add(gitlab_user.get_id())
                             elif "group_id" in config:
                                 group_ids.add(config["group_id"])
                             elif "group" in config:
-                                gitlab_group = self.gl.groups.get(config["group"])
+                                gitlab_group = self.gl.get_group_by_groupname(
+                                    config["group"]
+                                )
                                 group_ids.add(gitlab_group.get_id())
 
                         for val in access_levels:

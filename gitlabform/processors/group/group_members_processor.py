@@ -1,4 +1,4 @@
-from logging import debug
+from logging import debug, warning
 from typing import Dict, Tuple
 
 from cli_ui import fatal
@@ -6,13 +6,15 @@ from cli_ui import fatal
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlab.v4.objects import Group, GroupMember
+from gitlab import GitlabDeleteError
 
 
 class GroupMembersProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_members", gitlab)
 
-    def _process_configuration(self, group: str, configuration: dict):
+    def _process_configuration(self, group_name: str, configuration: dict):
         keep_bots = configuration.get("group_members|keep_bots", False)
 
         enforce_group_members = configuration.get("group_members|enforce", False)
@@ -34,10 +36,15 @@ class GroupMembersProcessor(AbstractProcessor):
                 exit_code=EXIT_INVALID_INPUT,
             )
 
+        group = self.gl.get_group_by_name(group_name)
+
         self._process_groups(group, groups_to_set_by_group_path, enforce_group_members)
 
         self._process_users(
-            group, users_to_set_by_username, enforce_group_members, keep_bots
+            users_to_set_by_username,
+            enforce_group_members,
+            keep_bots,
+            group,
         )
 
     @staticmethod
@@ -60,28 +67,28 @@ class GroupMembersProcessor(AbstractProcessor):
         return groups_to_set_by_group_path, users_to_set_by_username
 
     def _process_groups(
-        self, group: str, groups_to_set_by_group_path: dict, enforce_group_members: bool
+        self,
+        group_being_processed: Group,
+        groups_to_share_with_by_path: dict,
+        enforce_group_members: bool,
     ):
-        # group users before by group name
-        groups_before = self.gitlab.get_group_case_insensitive(group)[
-            "shared_with_groups"
-        ]
-        debug("Group shared with BEFORE: %s", groups_before)
+        shared_with_groups_before = group_being_processed.shared_with_groups
+        debug("Group shared with BEFORE: %s", shared_with_groups_before)
 
         groups_before_by_group_path = dict()
-        for share_details in groups_before:
-            groups_before_by_group_path[share_details["group_full_path"]] = (
-                share_details
+        for shared_with_group in shared_with_groups_before:
+            groups_before_by_group_path[shared_with_group["group_full_path"]] = (
+                shared_with_group
             )
 
-        for share_with_group_path in groups_to_set_by_group_path:
-            group_access_to_set = groups_to_set_by_group_path[share_with_group_path][
+        for share_with_group_path in groups_to_share_with_by_path:
+            group_access_to_set = groups_to_share_with_by_path[share_with_group_path][
                 "group_access"
             ]
 
             expires_at_to_set = (
-                groups_to_set_by_group_path[share_with_group_path]["expires_at"]
-                if "expires_at" in groups_to_set_by_group_path[share_with_group_path]
+                groups_to_share_with_by_path[share_with_group_path]["expires_at"]
+                if "expires_at" in groups_to_share_with_by_path[share_with_group_path]
                 else None
             )
 
@@ -106,14 +113,15 @@ class GroupMembersProcessor(AbstractProcessor):
                         "Re-adding group '%s' to change their access level or expires at.",
                         share_with_group_path,
                     )
+                    share_with_group_id = groups_before_by_group_path[
+                        share_with_group_path
+                    ]["group_id"]
                     # we will remove the group first and then re-add them,
                     # to ensure that the group has the expected access level
-                    self.gitlab.remove_share_from_group(group, share_with_group_path)
-                    self.gitlab.add_share_to_group(
-                        group,
-                        share_with_group_path,
-                        group_access_to_set,
-                        expires_at_to_set,
+                    self._unshare(group_being_processed, share_with_group_id)
+
+                    group_being_processed.share(
+                        share_with_group_id, group_access_to_set, expires_at_to_set
                     )
 
             else:
@@ -121,36 +129,48 @@ class GroupMembersProcessor(AbstractProcessor):
                     "Adding group '%s' who previously was not a member.",
                     share_with_group_path,
                 )
-                self.gitlab.add_share_to_group(
-                    group, share_with_group_path, group_access_to_set, expires_at_to_set
+
+                share_with_group_id = self.gl.get_group_id(share_with_group_path)
+                group_being_processed.share(
+                    share_with_group_id, group_access_to_set, expires_at_to_set
                 )
 
         if enforce_group_members:
             # remove groups not configured explicitly
             groups_not_configured = set(groups_before_by_group_path) - set(
-                groups_to_set_by_group_path
+                groups_to_share_with_by_path
             )
             for group_path in groups_not_configured:
                 debug(
                     "Removing group '%s' who is not configured to be a member.",
                     group_path,
                 )
-                self.gitlab.remove_share_from_group(group, group_path)
+                share_with_group_id = self.gl.get_group_id(group_path)
+                self._unshare(group_being_processed, share_with_group_id)
         else:
             debug("Not enforcing group members.")
 
-        debug("Group shared with AFTER: %s", self.gitlab.get_group_members(group))
+        debug("Group shared with AFTER: %s", group_being_processed.members.list())
+
+    @staticmethod
+    def _unshare(group_being_processed, share_with_group_id):
+        try:
+            group_being_processed.unshare(share_with_group_id)
+        except GitlabDeleteError:
+            debug("Group could not be unshared, likely was never shared to begin with")
+            pass
 
     def _process_users(
         self,
-        group: str,
         users_to_set_by_username: dict,
         enforce_group_members: bool,
         keep_bots: bool,
+        group: Group,
     ):
         # group users before by username
         # (note: we DON'T get inherited users as we don't manage them at this level anyway)
-        users_before = self.gitlab.get_group_members(group, with_inherited=False)
+        users_before = self.get_group_members(group)
+
         debug("Group members BEFORE: %s", users_before.keys())
 
         if users_to_set_by_username:
@@ -178,11 +198,13 @@ class GroupMembersProcessor(AbstractProcessor):
                     )
 
                     common_username = user.lower()
+                    user_id = self.gl.get_user_id(user)
+
                     if common_username in users_before:
-                        access_level_before = users_before[common_username][
-                            "access_level"
-                        ]
-                        expires_at_before = users_before[common_username]["expires_at"]
+                        group_member: GroupMember = group.members.get(user_id)
+
+                        access_level_before = users_before[common_username].access_level
+                        expires_at_before = users_before[common_username].expires_at
 
                         if (
                             access_level_before == access_level_to_set
@@ -197,23 +219,22 @@ class GroupMembersProcessor(AbstractProcessor):
                                 "Editing user '%s' membership to change their access level or expires at.",
                                 common_username,
                             )
-                            self.gitlab.edit_member_of_group(
-                                group,
-                                common_username,
-                                access_level_to_set,
-                                expires_at_to_set,
-                            )
+
+                            group_member.access_level = access_level_to_set
+                            group_member.expires_at = expires_at_to_set
+                            group_member.save()
 
                     else:
                         debug(
                             "Adding user '%s' who previously was not a member.",
                             common_username,
                         )
-                        self.gitlab.add_member_to_group(
-                            group,
-                            common_username,
-                            access_level_to_set,
-                            expires_at_to_set,
+                        group.members.create(
+                            {
+                                "user_id": user_id,
+                                "access_level": access_level_to_set,
+                                "expires_at": expires_at_to_set,
+                            }
                         )
 
         if enforce_group_members:
@@ -229,8 +250,21 @@ class GroupMembersProcessor(AbstractProcessor):
                     )
                     continue
                 debug("Removing user '%s' who is not configured to be a member.", user)
-                self.gitlab.remove_member_from_group(group, user)
+                user_id = self.gl.get_user_id(user)
+                try:
+                    group.members.delete(user_id)
+                except GitlabDeleteError as error:
+                    warning(f"Member could not be deleted: ", error)
+                    pass
         else:
             debug("Not enforcing group members.")
 
-        debug("Group members AFTER: %s", self.gitlab.get_group_members(group))
+        debug("Group members AFTER: %s", group.members.list())
+
+    @staticmethod
+    def get_group_members(group) -> dict:
+        members = group.members.list()
+        users = {}
+        for member in members:
+            users[member.username.lower()] = member
+        return users
