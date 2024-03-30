@@ -5,7 +5,7 @@ import argparse
 import cli_ui
 import logging
 import luddite
-import pkg_resources
+from importlib.metadata import version as package_version
 import textwrap
 import traceback
 from cli_ui import (
@@ -25,7 +25,7 @@ from cli_ui import (
     purple,
     warning,
 )
-from packaging import version as packaging_version
+from packaging import version
 from typing import Any, Tuple
 
 from gitlabform.configuration import Configuration
@@ -508,7 +508,7 @@ class GitLabForm:
         :param skip_version_check: if True then the comparison to the latest versions is skipped
         """
 
-        local_version = pkg_resources.get_distribution("gitlabform").version
+        local_version = package_version("gitlabform")
 
         # fmt: off
         tower_crane = Symbol("🏗", "")
@@ -533,9 +533,7 @@ class GitLabForm:
                 happy = Symbol("😊", ":)")
                 to_show = ["= the latest stable ", happy]
                 # fmt: on
-            elif packaging_version.parse(local_version) < packaging_version.parse(
-                latest_version
-            ):
+            elif version.parse(local_version) < version.parse(latest_version):
                 # fmt: off
                 sad = Symbol("😔", ":(")
                 to_show = ["= outdated ", sad, " , please update! (the latest stable is ", latest_version, ")"]
