@@ -3,7 +3,7 @@ import os
 from logging import debug
 from urllib import parse
 
-import pkg_resources
+from importlib.metadata import version as package_version
 import requests
 
 # noinspection PyPackageRequirements
@@ -42,8 +42,8 @@ class GitLabCore:
         if not self.ssl_verify:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        self.gitlabform_version = pkg_resources.get_distribution("gitlabform").version
-        self.requests_version = pkg_resources.get_distribution("requests").version
+        self.gitlabform_version = package_version("gitlabform")
+        self.requests_version = package_version("requests")
         self.session.headers.update(
             {
                 "private-token": self.token,
