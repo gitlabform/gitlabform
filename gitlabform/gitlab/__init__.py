@@ -18,13 +18,13 @@ from gitlabform.gitlab.project_protected_environments import (
 from gitlabform.gitlab.project_merge_requests_approvals import (
     GitLabProjectMergeRequestsApprovals,
 )
+from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.gitlab.variables import GitLabVariables
 from gitlabform.gitlab.repositories import GitLabRepositories
 from gitlabform.gitlab.resource_groups import GitLabResourceGroups
 from gitlabform.gitlab.schedules import GitLabPipelineSchedules
 from gitlabform.gitlab.integrations import GitLabIntegrations
 from gitlabform.gitlab.users import GitLabUsers
-from gitlab import Gitlab
 
 
 @enum.unique
@@ -83,7 +83,7 @@ class GitlabWrapper:
         timeout = gitlabform.timeout
         session = gitlabform.session
 
-        self._gitlab: Gitlab = Gitlab(
+        self._gitlab: PythonGitlab = PythonGitlab(
             url,
             token,
             ssl_verify=ssl_verify,
