@@ -23,39 +23,23 @@ class PythonGitlab(Gitlab):
 
     @functools.lru_cache()
     def get_group_by_groupname(self, groupname: str) -> RESTObject:
-        groups = self.groups.list(search=groupname)
-        if len(groups) == 0:
-            raise GitlabGetError(
-                "No groups found when searching for groupname '%s'" % groupname, 404
-            )
+        group: Group = self.groups.get(groupname)
+        if group:
+            return group
 
-        # Highly unlikely to ever execute as Gitlab will only return paginated list if we get lots of results
-        # given search is by groupname, we should not expect > 1
-        if isinstance(groups, RESTObjectList):
-            raise GitlabGetError(
-                "Too many groups found using groupname '%s' please specify more accurately in config"
-                % groupname,
-                404,
-            )
-
-        return groups[0]
+        raise GitlabGetError("No group found when getting '%s'" % groupname, 404)
 
     #  Uses "LIST" to get a user by username, to get the full User object, call get using the user's id
     @functools.lru_cache()
     def get_user_by_username(self, username: str) -> RESTObject:
-        users = self.users.list(username=username)
+        # Gitlab API will only ever return 0 or 1 entry when GETting using `username` attribute
+        # https://docs.gitlab.com/ee/api/users.html#for-non-administrator-users
+        # so will always be list[RESTObject] and never RESTObjectList from python-gitlab's api
+        users: list[RESTObject] = self.users.list(username=username)  # type: ignore
+
         if len(users) == 0:
             raise GitlabGetError(
                 "No users found when searching for username '%s'" % username, 404
-            )
-
-        # Highly unlikely to ever execute as Gitlab will only return paginated list if we get lots of results
-        # given search is by username, we should not expect > 1
-        if isinstance(users, RESTObjectList):
-            raise GitlabGetError(
-                "Too many users found using username '%s' please specify more accurately in config"
-                % username,
-                404,
             )
 
         return users[0]
