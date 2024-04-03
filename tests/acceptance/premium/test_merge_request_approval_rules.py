@@ -396,6 +396,9 @@ class TestMergeRequestApprovers:
         assert rule.name == "All project members"
         assert rule.rule_type == "any_approver"
 
+    @pytest.mark.skip(
+        reason="Group level merge_request_approval_rules are Experimental: https://docs.gitlab.com/ee/api/merge_request_approvals.html#group-level-mr-approvals."
+    )
     def test__group_config_with_code_coverage_merge_request_approval_rule(
         self, gl, project, users
     ):
@@ -430,6 +433,9 @@ class TestMergeRequestApprovers:
         assert rule.report_type == "code_coverage"
         assert rule.rule_type == "report_approver"
 
+    @pytest.mark.skip(
+        reason="Group level merge_request_approval_rules are Experimental: https://docs.gitlab.com/ee/api/merge_request_approvals.html#group-level-mr-approvals."
+    )
     def test__project_overriding_group_level_merge_request_approval_rule(
         self, gl, project, users
     ):

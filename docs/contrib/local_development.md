@@ -73,7 +73,7 @@ To run only a single class with tests run f.e.
 
 ### Acceptance tests for GitLab paid features
 
-To test features that are only available in paid version of Gitlab, you'll need a Gitlab license so that those features are available and the acceptance tests can use it. You can signup for a Gitlab Trial license. Follow the [instructions in Gitlab handbook](https://about.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows.html#contributing-to-the-gitlab-enterprise-edition-ee) for details on how to get a license for development purpose. Once you've received a license, take the following step:
+To test features that are only available in paid version of Gitlab, you'll need a Gitlab license so that those features are available and the acceptance tests can use it. You can signup for a Gitlab Trial license. Follow the [instructions in Gitlab handbook](https://handbook.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows/#contributing-to-the-gitlab-enterprise-edition-ee) for details on how to get a license for development purpose. Once you've received a license, take the following step:
 
 1. Copy your license and save it as an `GITLAB_EE_LICENSE` environment variable or in a file named `Gitlab.gitlab-license`. This file is already in `.gitignore`; so it will not be included in your commit.
 2. Follow the steps mentioned in previous section.
