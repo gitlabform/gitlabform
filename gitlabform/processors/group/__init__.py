@@ -8,6 +8,10 @@ from gitlabform.processors.group.group_badges_processor import GroupBadgesProces
 from gitlabform.processors.group.group_ldap_links_processor import (
     GroupLDAPLinksProcessor,
 )
+from gitlabform.processors.group.group_saml_links_processor import (
+    GroupSAMLLinksProcessor,
+)
+
 from gitlabform.processors.group.group_members_processor import (
     GroupMembersProcessor,
 )
@@ -27,5 +31,6 @@ class GroupProcessors(AbstractProcessors):
             GroupSettingsProcessor(gitlab),
             GroupMembersProcessor(gitlab),
             GroupLDAPLinksProcessor(gitlab),
+            GroupSAMLLinksProcessor(gitlab),
             GroupBadgesProcessor(gitlab),
         ]

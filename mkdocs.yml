@@ -16,6 +16,7 @@ nav:
       - CI/CD Variables: reference/ci_cd_variables.md
       - Deploy Keys: reference/deploy_keys.md
       - Files: reference/files.md
+      - Group SAML links: reference/group_saml_links.md
       - Group LDAP links: reference/group_ldap_links.md
       - Integrations: reference/integrations.md
       - Members: reference/members.md

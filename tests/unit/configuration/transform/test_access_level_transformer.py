@@ -132,6 +132,40 @@ def test__config__with_access_level_names__group_ldap_links():
     ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
     assert not ddiff
 
+def test__config__with_access_level_names__group_saml_links():
+    config_yaml = f"""
+    projects_and_groups:
+      foobar/*:
+        group_saml_links:
+          maintainers:
+            saml_group_name: "project:maintainer"
+            access_level: maintainer
+          developers:
+            saml_group_name: "project:developer"
+            access_level: developer 
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+    transformer.transform(configuration)
+
+    config_with_numbers = f"""
+    projects_and_groups:
+      foobar/*:
+        group_saml_links:
+          maintainers:
+            saml_group_name: "project:maintainer"
+            group_access: 40
+          developers:
+            saml_group_name: "project:developer"
+            group_access: 30
+    """
+    configuration_with_numbers = Configuration(config_string=config_with_numbers)
+
+    ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
+    assert not ddiff
+
+
 
 def test__config__with_access_level_names__branches_premium_syntax():
     config_yaml = f"""
