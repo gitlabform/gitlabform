@@ -396,6 +396,101 @@ class TestMergeRequestApprovers:
         assert rule.name == "All project members"
         assert rule.rule_type == "any_approver"
 
+    def test__group_config_with_code_coverage_merge_request_approval_rule(
+        self, gl, project, users
+    ):
+        parent_groups = project.groups.list()
+        group_id = parent_groups[0].id
+
+        parent_group = gl.groups.get(group_id)
+
+        config = f"""
+        projects_and_groups:
+          {parent_group.full_path}/*::
+            merge_requests_approval_rules:
+              enforce: true
+              code_coverage:
+                applies_to_all_protected_branches: true
+                approvals_required: 1
+                name: "Coverage-Check"
+                users:
+                  - {users[0].username}
+                report_type: code_coverage
+                rule_type: report_approver
+        """
+
+        run_gitlabform(config, parent_group)
+
+        rules = project.approvalrules.list()
+
+        assert len(rules) == 1
+        rule = rules[0]
+        assert rule.approvals_required == 1
+        assert rule.name == "Coverage-Check"
+        assert rule.report_type == "code_coverage"
+        assert rule.rule_type == "report_approver"
+
+    def test__project_overriding_group_level_merge_request_approval_rule(
+        self, gl, project, users
+    ):
+        parent_groups = project.groups.list()
+        group_id = parent_groups[0].id
+
+        parent_group = gl.groups.get(group_id)
+
+        other_project_id = gl.projects.create(
+            {"name": "Override-Project", "namespace_id": group_id}
+        ).id
+        other_project = project.projects.get(other_project_id)
+
+        config = f"""
+        projects_and_groups:
+          {parent_group.full_path}/*::
+            merge_requests_approval_rules:
+              enforce: true
+              any:
+                approvals_required: 1
+                rule_type: any_approver
+                name: "Any approver"
+              code_coverage:
+                applies_to_all_protected_branches: true
+                approvals_required: 1
+                name: "Coverage-Check"
+                users:
+                  - {users[0].username}
+                report_type: code_coverage
+                rule_type: report_approver
+          {other_project.path_with_namespace}:
+            merge_requests_approval_rules:
+              any:
+                approvals_required: 0
+                rule_type: any_approver
+                name: "Any approver"
+              enforce: true
+        """
+
+        run_gitlabform(config, parent_group)
+
+        project_rules = project.approvalrules.list()
+
+        assert len(project_rules) == 2
+        any_rule = project_rules[0]
+        assert any_rule.approvals_required == 1
+        assert any_rule.name == "All project members"
+        assert any_rule.rule_type == "any_approver"
+        coverage_rule = project_rules[1]
+        assert coverage_rule.approvals_required == 1
+        assert coverage_rule.name == "Coverage-Check"
+        assert coverage_rule.rule_type == "report_approver"
+
+        other_project_rules = other_project.approvalrules.list()
+
+        assert len(other_project_rules) == 1
+        any_rule = other_project_rules[0]
+        assert any_rule.approvals_required == 1
+        assert any_rule.name == "All project members"
+        assert any_rule.rule_type == "any_approver"
+
     def test__add_rules__common_and_subgroup(
         self,
         project,
