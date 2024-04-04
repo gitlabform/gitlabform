@@ -14,3 +14,5 @@ RUN cd gitlabform \
     && apk --purge del build-base
 
 WORKDIR /config
+
+USER 1000 # do not run as root
