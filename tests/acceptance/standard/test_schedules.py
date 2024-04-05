@@ -133,6 +133,11 @@ class TestSchedules:
         assert variables[1]["value"] == "value987"
 
     def test__update_existing_schedule(self, project, schedules):
+        # Schedules fixture creates some schedules onto project
+        existing_schedule = self.__find_pipeline_schedule_by_description_and_get_first(
+            project, "Existing schedule"
+        )
+
         edit_schedule = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -150,7 +155,15 @@ class TestSchedules:
             project, "Existing schedule"
         )
         assert schedule is not None
-        assert schedule.description == "Existing schedule"
+        schedules = project.pipelineschedules.list()
+        # Only one schedule specified in the new config, so any other existing schedules should be deleted
+        assert len(schedules) == 1
+
+        # Verify it updated the schedule rather than creating/deleting
+        assert schedule.id == existing_schedule.id
+        assert schedule.description == existing_schedule.description
+
+        # Verify updates to schedule
         assert schedule.ref == "scheduled/new-feature"
         assert schedule.cron == "0 */4 * * *"
         assert schedule.cron_timezone == "Stockholm"
