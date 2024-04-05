@@ -45,12 +45,10 @@ class SchedulesProcessor(AbstractProcessor):
                     )
             else:
                 if schedule_ids and len(schedule_ids) == 1:
-                    debug(
-                        "Changing existing pipeline schedule '%s'", schedule_description
-                    )
                     schedule = project.pipelineschedules.get(schedule_ids[0])
+                    entity_config = configured_schedules[schedule_description]
                     self._update_existing_schedule(
-                        configured_schedules, project, schedule, schedule_description
+                        entity_config, project, schedule, schedule_description
                     )
                 elif schedule_ids:
                     debug(
@@ -78,26 +76,25 @@ class SchedulesProcessor(AbstractProcessor):
 
     def _update_existing_schedule(
         self,
-        configured_schedules,
+        entity_config: dict,
         project: Project,
-        schedule: ProjectPipelineSchedule,
+        schedule_in_gitlab: ProjectPipelineSchedule,
         schedule_description: str,
     ):
-        entity_config = configured_schedules[schedule_description]
-        if self._needs_update(entity_config, schedule.asdict()):
+
+        if self._needs_update(schedule_in_gitlab.asdict(), entity_config):
+            debug("Changing existing pipeline schedule '%s'", schedule_description)
             # Delete and then re-create schedule so we can pass all info in the data to Gitlab in case their APIs change
-            project.pipelineschedules.delete(schedule.id)
+            project.pipelineschedules.delete(schedule_in_gitlab.id)
 
             self._create_schedule_with_variables(
-                configured_schedules, project, schedule_description
+                entity_config, project, schedule_description
             )
 
     def _create_schedule_with_variables(
-        self, configured_schedules, project: Project, schedule_description: str
+        self, entity_config: dict, project: Project, schedule_description: str
     ):
-        data = configured_schedules[schedule_description]
-
-        schedule_data = {"description": schedule_description, **data}
+        schedule_data = {"description": schedule_description, **entity_config}
         debug("Creating pipeline schedule using data: '%s'", schedule_data)
 
         created_schedule_id = project.pipelineschedules.create(schedule_data).id
@@ -105,7 +102,7 @@ class SchedulesProcessor(AbstractProcessor):
 
         self._set_schedule_variables(
             created_schedule,
-            data.get("variables"),
+            entity_config.get("variables"),
         )
 
         created_schedule.save()
