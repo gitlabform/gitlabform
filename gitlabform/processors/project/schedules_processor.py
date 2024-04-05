@@ -121,20 +121,9 @@ class SchedulesProcessor(AbstractProcessor):
             for variable_key, variable_data in variables.items():
                 variable_type = variable_data.get("variable_type")
                 if variable_type:
-                    schedule.variables.create(
-                        {
-                            "key": variable_key,
-                            "value": variable_data.get("value"),
-                            "variable_type": variable_data.get("variable_type"),
-                        }
-                    )
+                    schedule.variables.create({"key": variable_key, **variable_data})
                 else:
-                    schedule.variables.create(
-                        {
-                            "key": variable_key,
-                            "value": variable_data.get("value"),
-                        }
-                    )
+                    schedule.variables.create({"key": variable_key, **variable_data})
 
     # schedules: List[ProjectPipelineSchedule] | RESTObjectList -> Incompatible with python 3.9
     @staticmethod
