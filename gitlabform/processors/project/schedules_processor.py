@@ -84,11 +84,13 @@ class SchedulesProcessor(AbstractProcessor):
 
         if self._needs_update(schedule_in_gitlab.asdict(), entity_config):
             debug("Changing existing pipeline schedule '%s'", schedule_description)
-            # Delete and then re-create schedule so we can pass all info in the data to Gitlab in case their APIs change
-            project.pipelineschedules.delete(schedule_in_gitlab.id)
-
-            self._create_schedule_with_variables(
-                entity_config, project, schedule_description
+            project.pipelineschedules.update(
+                schedule_in_gitlab.id,
+                {"description": schedule_description, **entity_config},
+            )
+            self._set_schedule_variables(
+                schedule_in_gitlab,
+                entity_config.get("variables"),
             )
 
     def _create_schedule_with_variables(
