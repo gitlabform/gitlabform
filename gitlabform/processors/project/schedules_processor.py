@@ -44,9 +44,10 @@ class SchedulesProcessor(AbstractProcessor):
                         schedule_description,
                     )
             else:
+                entity_config = configured_schedules[schedule_description]
+
                 if schedule_ids and len(schedule_ids) == 1:
                     schedule = project.pipelineschedules.get(schedule_ids[0])
-                    entity_config = configured_schedules[schedule_description]
                     self._update_existing_schedule(
                         entity_config, project, schedule, schedule_description
                     )
@@ -59,12 +60,12 @@ class SchedulesProcessor(AbstractProcessor):
                         project.pipelineschedules.get(schedule_id).delete()
 
                     self._create_schedule_with_variables(
-                        configured_schedules, project, schedule_description
+                        entity_config, project, schedule_description
                     )
                 else:
                     debug("Creating pipeline schedule '%s'", schedule_description)
                     self._create_schedule_with_variables(
-                        configured_schedules, project, schedule_description
+                        entity_config, project, schedule_description
                     )
 
         if enforce_schedules:
@@ -121,11 +122,10 @@ class SchedulesProcessor(AbstractProcessor):
 
         if variables:
             for variable_key, variable_data in variables.items():
-                variable_type = variable_data.get("variable_type")
-                if variable_type:
-                    schedule.variables.create({"key": variable_key, **variable_data})
-                else:
-                    schedule.variables.create({"key": variable_key, **variable_data})
+                # if variable_type:
+                schedule.variables.create({"key": variable_key, **variable_data})
+                # else:
+                #     schedule.variables.create({"key": variable_key, **variable_data})
 
     # schedules: List[ProjectPipelineSchedule] | RESTObjectList -> Incompatible with python 3.9
     @staticmethod
