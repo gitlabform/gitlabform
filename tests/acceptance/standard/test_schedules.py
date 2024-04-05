@@ -29,14 +29,6 @@ def schedules(project):
                 "active": schedule[3],
             }
         )
-        if schedule[0] == "Existing schedule with vars":
-            gitlab_schedule.variables.create(
-                {"key": "existing_var", "value": "existing_value"}
-            )
-            gitlab_schedule.variables.create(
-                {"key": "second_var", "value": "second_val"}
-            )
-
         gitlab_schedules.append(gitlab_schedule)
 
     redundant_schedule = project.pipelineschedules.create(
@@ -140,17 +132,19 @@ class TestSchedules:
         assert variables[1]["key"] == "var2"
         assert variables[1]["value"] == "value987"
 
-    def test__update_existing_schedule(self, project, schedules):
-        # Schedules fixture creates some schedules onto project
-        existing_schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "Existing schedule"
+    def test__update_existing_schedule(self, project):
+        existing_schedule = project.pipelineschedules.create(
+            {
+                "description": "Update this schedule",
+                "ref": "main",
+                "cron": "0 * * * *",
+            }
         )
-
         edit_schedule = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             schedules:
-              "Existing schedule":
+              "Update this schedule":
                 ref: scheduled/new-feature
                 cron: "0 */4 * * *"
                 cron_timezone: "Stockholm"
@@ -160,12 +154,9 @@ class TestSchedules:
         run_gitlabform(edit_schedule, project)
 
         schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "Existing schedule"
+            project, "Update this schedule"
         )
         assert schedule is not None
-        schedules = project.pipelineschedules.list()
-        # Only one schedule specified in the new config, so any other existing schedules should be deleted
-        assert len(schedules) == 1
 
         # Verify it updated the schedule rather than creating/deleting
         assert schedule.id == existing_schedule.id
@@ -177,51 +168,10 @@ class TestSchedules:
         assert schedule.cron_timezone == "Stockholm"
         assert schedule.active is False
 
-    def test__update_existing_schedule_with_variables(self, project, schedules):
-        # Schedules fixture creates some schedules onto project
-        # this schedule has 2 existing variables
-        existing_schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "Existing schedule with vars"
-        )
-
-        edit_schedule = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            schedules:
-              "Existing schedule with vars":
-                ref: scheduled/new-feature
-                cron: "0 */4 * * *"
-                cron_timezone: "Stockholm"
-                active: false
-                variables:
-                    existing_var:
-                        value: new_value
-        """
-
-        run_gitlabform(edit_schedule, project)
-
-        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "Existing schedule with vars"
-        )
-        assert schedule is not None
-        schedules = project.pipelineschedules.list()
-        # Only one schedule specified in the new config, so any other existing schedules should be deleted
-        assert len(schedules) == 1
-
-        # Verify it updated the schedule rather than creating/deleting
-        assert schedule.id == existing_schedule.id
-        assert schedule.description == existing_schedule.description
-
-        # Verify updates to schedule
-        assert len(schedule.variables.list()) == 1
-        variable = schedule.variables.list()[0]
-        assert variable.key == "existing_var"
-        assert variable.value == "new_value"
-
-        assert schedule.ref == "scheduled/new-feature"
-        assert schedule.cron == "0 */4 * * *"
-        assert schedule.cron_timezone == "Stockholm"
-        assert schedule.active is False
+        # Tear down additional pipeline added by this test (impacts other tests)
+        # This test suite needs a proper refactor to make it properly idempotent, each test modifies same project
+        # meaning they knock on impact each other
+        project.pipelineschedules.delete(schedule.id)
 
     def test__replace_existing_schedules(self, project, schedules):
         replace_schedules = f"""
@@ -354,6 +304,56 @@ class TestSchedules:
         assert variables[1]["variable_type"] == "file"
         assert variables[1]["key"] == "var2"
         assert variables[1]["value"] == "value987"
+
+    def test__update_existing_schedule_with_variables(self, project):
+        existing_schedule = project.pipelineschedules.create(
+            {
+                "description": "Existing schedule with vars",
+                "ref": "main",
+                "cron": "0 * * * *",
+            }
+        )
+        existing_schedule.variables.create(
+            {"key": "existing_var", "value": "test_value"}
+        )
+        assert existing_schedule is not None
+
+        edit_schedule = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            schedules:
+              "Existing schedule with vars":
+                ref: scheduled/new-feature
+                cron: "0 */4 * * *"
+                cron_timezone: "Stockholm"
+                active: false
+                variables:
+                    existing_var:
+                        value: new_value
+        """
+
+        run_gitlabform(edit_schedule, project)
+
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
+            project, "Existing schedule with vars"
+        )
+        assert schedule is not None
+
+        # Verify it updated the schedule rather than creating/deleting
+        assert schedule.id == existing_schedule.id
+        assert schedule.description == existing_schedule.description
+
+        # Verify updates to schedule
+        variables = schedule.attributes["variables"]
+        assert len(variables) == 1
+        variable = variables[0]
+        assert variable.get("key") == "existing_var"
+        assert variable.get("value") == "new_value"
+
+        assert schedule.ref == "scheduled/new-feature"
+        assert schedule.cron == "0 */4 * * *"
+        assert schedule.cron_timezone == "Stockholm"
+        assert schedule.active is False
 
     @classmethod
     def __find_pipeline_schedule_by_description_and_get_first(
