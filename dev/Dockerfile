@@ -15,4 +15,5 @@ RUN cd gitlabform \
 
 WORKDIR /config
 
-USER 1000 # do not run as root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
