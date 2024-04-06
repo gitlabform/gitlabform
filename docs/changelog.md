@@ -1,10 +1,22 @@
 # Changelog
 
+## 3.9.3
+
+### Fixes
+
+* Run app from Docker as non-root [#719](https://github.com/gitlabform/gitlabform/pull/719) ([lkwg82](https://github.com/lkwg82))
+
+### Dependencies
+
+* Update some dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 3.9.2
 
 ### Fixes
 
-* Transfer project not working when target is ALL or ALL_DEFINED or group or subgroup [#714](https://github.com/gitlabform/gitlabform/pull/693) ([long-wan-ep](https://github.com/long-wan-ep))
+* Transfer project not working when target is ALL or ALL_DEFINED or group or subgroup [#714](https://github.com/gitlabform/gitlabform/pull/714) ([long-wan-ep](https://github.com/long-wan-ep))
 
 ### Documentation
 
@@ -14,7 +26,7 @@
 
 * Update some dependencies to newer version.
 
-Thanks to all the contributors of this release
+Thanks to all the contributors of this release!
 
 ## 3.9.1
 
@@ -30,7 +42,7 @@ Thanks to all the contributors of this release
 
 * Update some dependencies to newer version.
 
-Thanks to all the contributors of this release
+Thanks to all the contributors of this release!
 
 ## 3.9.0
 
@@ -64,7 +76,7 @@ Thanks to all the contributors of this release
 
 * Update formats using latest version of `black` (v24.1.1) [#681](https://github.com/gitlabform/gitlabform/pull/681) ([amimas](https://github.com/amimas))
 
-Thanks to all the contributors of this release
+Thanks to all the contributors of this release!
 
 ## 3.8.0
 
