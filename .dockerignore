@@ -1,6 +1,12 @@
+/.git
+/.github
+/.idea
+/.overrides
+/dev
+# only gitlabform directory is needed
+/docs
+/.gitlabform.egg-info
+/tests
+/venv
 .dockerignore
-.git
-.overrides
-docs
-docs_new
 .gitignore
