@@ -77,7 +77,7 @@ class SchedulesProcessor(AbstractProcessor):
 
     def _update_existing_schedule(
         self,
-        entity_config: dict,
+        entity_config: dict[str, dict],
         project: Project,
         schedule_in_gitlab: ProjectPipelineSchedule,
         schedule_description: str,
@@ -89,15 +89,20 @@ class SchedulesProcessor(AbstractProcessor):
                 schedule_in_gitlab.id,
                 {"description": schedule_description, **entity_config},
             )
-            self._set_schedule_variables(
-                schedule_in_gitlab,
-                entity_config.get("variables"),
-            )
+            configured_variables = entity_config.get("variables")
+            if configured_variables is not None:
+                self._set_schedule_variables(
+                    schedule_in_gitlab,
+                    configured_variables,
+                )
         else:
             debug("No update required for pipeline schedule '%s'", schedule_description)
 
     def _create_schedule_with_variables(
-        self, entity_config: dict, project: Project, schedule_description: str
+        self,
+        entity_config: dict[str, dict],
+        project: Project,
+        schedule_description: str,
     ):
         schedule_data = {"description": schedule_description, **entity_config}
         debug("Creating pipeline schedule using data: '%s'", schedule_data)
@@ -105,16 +110,18 @@ class SchedulesProcessor(AbstractProcessor):
         created_schedule_id = project.pipelineschedules.create(schedule_data).id
         created_schedule = project.pipelineschedules.get(created_schedule_id)
 
-        self._set_schedule_variables(
-            created_schedule,
-            entity_config.get("variables"),
-        )
+        configured_variables = entity_config.get("variables")
+        if configured_variables is not None:
+            self._set_schedule_variables(
+                created_schedule,
+                configured_variables,
+            )
 
         created_schedule.save()
 
     @staticmethod
     def _set_schedule_variables(
-        schedule: ProjectPipelineSchedule, variables: dict[str, dict[str, str]]
+        schedule: ProjectPipelineSchedule, variables: dict
     ) -> None:
         attributes = schedule.attributes
         existing_variables = attributes.get("variables")
