@@ -12,7 +12,7 @@ class SchedulesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("schedules", gitlab)
 
-    def _process_configuration(self, project_and_group: str, configuration: dict):
+    def _process_configuration(self, project_and_group: str, configuration: Dict):
         configured_schedules = configuration.get("schedules", {})
 
         enforce_schedules = configuration.get("schedules|enforce", False)
@@ -26,7 +26,7 @@ class SchedulesProcessor(AbstractProcessor):
             project.pipelineschedules.list()
         )
 
-        schedule_ids_by_description: dict = self._group_schedule_ids_by_description(
+        schedule_ids_by_description: Dict = self._group_schedule_ids_by_description(
             existing_schedules
         )
 
@@ -77,7 +77,7 @@ class SchedulesProcessor(AbstractProcessor):
 
     def _update_existing_schedule(
         self,
-        entity_config: dict[str, dict],
+        entity_config: Dict,
         project: Project,
         schedule_in_gitlab: ProjectPipelineSchedule,
         schedule_description: str,
@@ -100,7 +100,7 @@ class SchedulesProcessor(AbstractProcessor):
 
     def _create_schedule_with_variables(
         self,
-        entity_config: dict[str, dict],
+        entity_config: Dict,
         project: Project,
         schedule_description: str,
     ):
@@ -121,7 +121,7 @@ class SchedulesProcessor(AbstractProcessor):
 
     @staticmethod
     def _set_schedule_variables(
-        schedule: ProjectPipelineSchedule, variables: dict
+        schedule: ProjectPipelineSchedule, variables: Dict
     ) -> None:
         attributes = schedule.attributes
         existing_variables = attributes.get("variables")
