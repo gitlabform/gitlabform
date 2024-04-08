@@ -93,6 +93,8 @@ class SchedulesProcessor(AbstractProcessor):
                 schedule_in_gitlab,
                 entity_config.get("variables"),
             )
+        else:
+            debug("No update required for pipeline schedule '%s'", schedule_description)
 
     def _create_schedule_with_variables(
         self, entity_config: dict, project: Project, schedule_description: str
@@ -111,7 +113,9 @@ class SchedulesProcessor(AbstractProcessor):
         created_schedule.save()
 
     @staticmethod
-    def _set_schedule_variables(schedule: ProjectPipelineSchedule, variables):
+    def _set_schedule_variables(
+        schedule: ProjectPipelineSchedule, variables: dict[str, dict[str, str]]
+    ) -> None:
         attributes = schedule.attributes
         existing_variables = attributes.get("variables")
         if existing_variables:
@@ -122,12 +126,8 @@ class SchedulesProcessor(AbstractProcessor):
 
         if variables:
             for variable_key, variable_data in variables.items():
-                # if variable_type:
                 schedule.variables.create({"key": variable_key, **variable_data})
-                # else:
-                #     schedule.variables.create({"key": variable_key, **variable_data})
 
-    # schedules: List[ProjectPipelineSchedule] | RESTObjectList -> Incompatible with python 3.9
     @staticmethod
     def _group_schedule_ids_by_description(
         schedules,
