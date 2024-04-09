@@ -38,6 +38,12 @@ class VariablesProcessor(MultipleEntitiesProcessor):
 
     def _print_diff(self, project_and_group: str, configuration):
         try:
+            project_transfer_source = configuration["project"]["transfer_from"]
+            project_and_group = project_transfer_source
+        except KeyError:
+            pass
+
+        try:
             current_variables = self.gitlab.get_variables(project_and_group)
 
             for variable in current_variables:
@@ -56,7 +62,7 @@ class VariablesProcessor(MultipleEntitiesProcessor):
 
         verbose(f"Variables in {project_and_group} in configuration:")
 
-        configured_variables = copy.deepcopy(configuration)
+        configured_variables = copy.deepcopy(configuration.get(self.configuration_name))
         for key in configured_variables.keys():
             configured_variables[key]["value"] = hide(
                 configured_variables[key]["value"]

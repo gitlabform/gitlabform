@@ -53,7 +53,7 @@ class AbstractProcessor(ABC):
                 )
                 self._print_diff(
                     project_or_project_and_group,
-                    configuration.get(self.configuration_name),
+                    configuration
                 )
             else:
                 verbose(f"Processing section '{self.configuration_name}'")
@@ -133,7 +133,7 @@ class AbstractProcessor(ABC):
     ):
         pass
 
-    def _print_diff(self, project_or_project_and_group: str, entity_config):
+    def _print_diff(self, project_or_project_and_group: str, configuration):
         verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
 
     def _needs_update(
