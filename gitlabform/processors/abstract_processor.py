@@ -51,10 +51,7 @@ class AbstractProcessor(ABC):
                 verbose(
                     f"Processing section '{self.configuration_name}' in dry-run mode."
                 )
-                self._print_diff(
-                    project_or_project_and_group,
-                    configuration
-                )
+                self._print_diff(project_or_project_and_group, configuration)
             else:
                 verbose(f"Processing section '{self.configuration_name}'")
                 if self._can_proceed(project_or_project_and_group, configuration):
