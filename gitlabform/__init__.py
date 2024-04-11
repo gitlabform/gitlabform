@@ -47,7 +47,13 @@ from gitlabform.processors.project import ProjectProcessors
 
 
 class GitLabForm:
-    def __init__(self, include_archived_projects=True, target=None, config_string=None, noop=False):
+    def __init__(
+        self,
+        include_archived_projects=True,
+        target=None,
+        config_string=None,
+        noop=False,
+    ):
         if target and config_string:
             # this mode is basically only for testing
 
