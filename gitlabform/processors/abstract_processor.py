@@ -51,7 +51,20 @@ class AbstractProcessor(ABC):
                 verbose(
                     f"Processing section '{self.configuration_name}' in dry-run mode."
                 )
-                self._print_diff(project_or_project_and_group, configuration)
+                try:
+                    project_transfer_source = configuration["project"]["transfer_from"]
+                    project_or_project_and_group = project_transfer_source
+                    verbose(
+                        f"""Project {project_or_project_and_group} is configured to be transferred, 
+                        diffing config from transfer source project {project_transfer_source}."""
+                    )
+                except KeyError:
+                    pass
+
+                self._print_diff(
+                    project_or_project_and_group,
+                    configuration.get(self.configuration_name),
+                )
             else:
                 verbose(f"Processing section '{self.configuration_name}'")
                 if self._can_proceed(project_or_project_and_group, configuration):
@@ -130,7 +143,7 @@ class AbstractProcessor(ABC):
     ):
         pass
 
-    def _print_diff(self, project_or_project_and_group: str, configuration):
+    def _print_diff(self, project_or_project_and_group: str, entity_config):
         verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
 
     def _needs_update(

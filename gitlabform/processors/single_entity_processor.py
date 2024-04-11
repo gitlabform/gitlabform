@@ -50,15 +50,8 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             self.add_method(project_or_group, entity_config)
             debug(f"{self.configuration_name} AFTER: ^^^")
 
-    def _print_diff(self, project_or_project_and_group: str, configuration):
-        try:
-            project_transfer_source = configuration["project"]["transfer_from"]
-            project_or_project_and_group = project_transfer_source
-        except KeyError:
-            pass
-
+    def _print_diff(self, project_or_project_and_group: str, entity_config):
         entity_in_gitlab = self.get_method(project_or_project_and_group)
-        entity_config = configuration.get(self.configuration_name)
 
         DifferenceLogger.log_diff(
             f"{self.configuration_name} changes",
