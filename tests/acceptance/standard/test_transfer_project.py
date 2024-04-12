@@ -22,6 +22,8 @@ class TestTransferProject:
           {project_new_path_with_namespace}:
             project:
               transfer_from: {project_for_function.path_with_namespace}
+            project_settings:
+              description: test
         """
 
         run_gitlabform(config, project_new_path_with_namespace, noop=True)
