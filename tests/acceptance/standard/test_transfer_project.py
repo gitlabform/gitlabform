@@ -9,6 +9,30 @@ import pytest
 
 
 class TestTransferProject:
+    def test__transfer_between_two_root_groups_dry_run(
+        self, project_for_function, group, other_group
+    ):
+        project_new_path_with_namespace = (
+            f"{other_group.path}/{project_for_function.name}"
+        )
+        projects_in_destination_before_transfer = other_group.projects.list()
+
+        config = f"""
+        projects_and_groups:
+          {project_new_path_with_namespace}:
+            project:
+              transfer_from: {project_for_function.path_with_namespace}
+            project_settings:
+              description: test
+        """
+
+        run_gitlabform(config, project_new_path_with_namespace, noop=True)
+        projects_in_destination_after_transfer = other_group.projects.list()
+
+        assert len(projects_in_destination_after_transfer) == len(
+            projects_in_destination_before_transfer
+        )
+
     def test__transfer_between_two_root_groups(
         self, project_for_function, group, other_group
     ):
