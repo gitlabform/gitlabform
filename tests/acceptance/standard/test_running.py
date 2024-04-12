@@ -23,6 +23,23 @@ class TestRunning:
         assert other_project.request_access_enabled is True
 
     # noinspection PyPep8Naming
+    def test__ALL_dry_run(self, gl, project, other_project):
+        config = f"""
+        projects_and_groups:
+          '*':
+            project_settings:
+              request_access_enabled: false
+        """
+
+        run_gitlabform(config, "ALL", noop=True)
+
+        project = gl.projects.get(project.id)
+        assert project.request_access_enabled is True
+
+        other_project = gl.projects.get(other_project.id)
+        assert other_project.request_access_enabled is True
+
+    # noinspection PyPep8Naming
     def test__ALL_DEFINED(self, gl, project, other_project):
         config = f"""
         projects_and_groups:
