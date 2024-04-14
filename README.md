@@ -1,4 +1,4 @@
-[![version](https://badge.fury.io/py/gitlabform.svg)](https://badge.fury.io/py/gitlabform)
+[![version](https://badge.fury.io/gh/gitlabform%2Fgitlabform.svg)](https://badge.fury.io/gh/gitlabform%2Fgitlabform)
 ![release date](https://img.shields.io/github/release-date/gitlabform/gitlabform)
 [![Downloads](https://static.pepy.tech/badge/gitlabform/month)](https://pepy.tech/project/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
