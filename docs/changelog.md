@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.9.4
+
+### Fixes
+
+* fix: dry run failure when project transfer is configured along with other additional configs [#726](https://github.com/gitlabform/gitlabform/pull/726) ([long-wan-ep](https://github.com/long-wan-ep))
+
+### Chores
+
+* Update badge in project readme [commit](https://github.com/gitlabform/gitlabform/commit/30f199893118941adb86dccba2ee30441ffa8625) ([gdubicki](https://github.com/gitlabform/gitlabform/commits?author=gdubicki))
+
+### Dependencies
+
+* Update some dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 3.9.3
 
 ### Fixes
