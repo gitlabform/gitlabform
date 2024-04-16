@@ -41,7 +41,7 @@ class TestRunning:
         assert other_project.request_access_enabled is True
 
         path = Path("output.yml")
-        yaml = YAML(typ='safe')
+        yaml = YAML(typ="safe")
         assert yaml.load(path)
 
     # noinspection PyPep8Naming
