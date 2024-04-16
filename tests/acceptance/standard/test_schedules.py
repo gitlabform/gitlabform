@@ -1,5 +1,5 @@
+import logging
 import pytest
-
 
 from tests.acceptance import run_gitlabform
 
@@ -165,10 +165,49 @@ class TestSchedules:
         assert schedule.cron_timezone == "Stockholm"
         assert schedule.active is False
 
-        # Tear down additional pipeline added by this test (impacts other tests)
-        # This test suite needs a proper refactor to make it properly idempotent, each test modifies same project
-        # meaning they knock on impact each other
-        project.pipelineschedules.delete(schedule.id)
+    def test__existing_schedule_is_not_modified_when_no_changes_made(
+        self, project_for_function, caplog
+    ):
+        caplog.set_level(logging.DEBUG)
+        existing_schedule = project_for_function.pipelineschedules.create(
+            {
+                "description": "Existing schedule",
+                "ref": "main",
+                "cron": "0 * * * *",
+                "active": True,
+            }
+        )
+
+        edit_schedule = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            schedules:
+              "Existing schedule":
+                ref: {existing_schedule.ref}
+                cron:  {existing_schedule.cron}
+                active: {existing_schedule.active}
+        """
+        run_gitlabform(edit_schedule, project_for_function)
+
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
+            project_for_function, "Existing schedule"
+        )
+        assert schedule is not None
+
+        # Verify it updated the schedule rather than creating/deleting
+        assert schedule.id == existing_schedule.id
+        assert schedule.description == existing_schedule.description
+
+        # Verify schedule
+        assert schedule.ref == "main"
+        assert schedule.cron == "0 * * * *"
+        assert schedule.active is True
+
+        # Verify logged out "No update"; from which we can infer no API actions invoked
+        assert (
+            "No update required for pipeline schedule 'Existing schedule'"
+            in caplog.text
+        )
 
     def test__update_existing_schedule_with_variables(self, project_for_function):
         existing_schedule = project_for_function.pipelineschedules.create(
