@@ -53,6 +53,7 @@ class GitLabForm:
         target=None,
         config_string=None,
         noop=False,
+        output_file=None,
     ):
         if target and config_string:
             # this mode is basically only for testing
@@ -65,7 +66,7 @@ class GitLabForm:
             self.start_from = 1
             self.start_from_group = 1
             self.noop = noop
-            self.output_file = None
+            self.output_file = output_file
             self.skip_version_check = True
             self.include_archived_projects = include_archived_projects
             self.just_show_version = False

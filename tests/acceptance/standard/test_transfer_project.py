@@ -26,7 +26,9 @@ class TestTransferProject:
               description: test
         """
 
-        run_gitlabform(config, project_new_path_with_namespace, noop=True)
+        run_gitlabform(
+            config, project_new_path_with_namespace, noop=True, output_file="output.yml"
+        )
         projects_in_destination_after_transfer = other_group.projects.list()
 
         assert len(projects_in_destination_after_transfer) == len(
