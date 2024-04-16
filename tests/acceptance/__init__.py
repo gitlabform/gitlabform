@@ -247,7 +247,9 @@ def randomize_case(input: str) -> str:
     return "".join(random.choice((str.upper, str.lower))(char) for char in input)
 
 
-def run_gitlabform(config, target, include_archived_projects=True, noop=False):
+def run_gitlabform(
+    config, target, include_archived_projects=True, noop=False, output_file=None
+):
     # f-strings with """ used as configs have the disadvantage of having indentation in them - let's remove it here
     config = textwrap.dedent(config)
 
@@ -265,5 +267,6 @@ def run_gitlabform(config, target, include_archived_projects=True, noop=False):
         config_string=config,
         target=target,
         noop=noop,
+        output_file=output_file,
     )
     gf.run()
