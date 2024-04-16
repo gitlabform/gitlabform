@@ -2,6 +2,8 @@ import pytest
 from tests.acceptance import (
     run_gitlabform,
 )
+from pathlib import Path
+from ruamel.yaml import YAML
 
 
 class TestRunning:
@@ -21,6 +23,26 @@ class TestRunning:
 
         other_project = gl.projects.get(other_project.id)
         assert other_project.request_access_enabled is True
+
+    def test__ALL_output_file(self, gl, project, other_project):
+        config = f"""
+        projects_and_groups:
+          '*':
+            project_settings:
+              request_access_enabled: true
+        """
+
+        run_gitlabform(config, "ALL", output_file="output.yml")
+
+        project = gl.projects.get(project.id)
+        assert project.request_access_enabled is True
+
+        other_project = gl.projects.get(other_project.id)
+        assert other_project.request_access_enabled is True
+
+        path = Path("output.yml")
+        yaml = YAML(typ='safe')
+        assert yaml.load(path)
 
     # noinspection PyPep8Naming
     def test__ALL_dry_run(self, gl, project, other_project):
