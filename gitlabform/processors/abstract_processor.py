@@ -51,18 +51,18 @@ class AbstractProcessor(ABC):
                 verbose(
                     f"Processing section '{self.configuration_name}' in dry-run mode."
                 )
+                project_transfer_source = ""
                 try:
                     project_transfer_source = configuration["project"]["transfer_from"]
                     verbose(
                         f"""Project {project_or_project_and_group} is configured to be transferred, 
                         diffing config from transfer source project {project_transfer_source}."""
                     )
-                    project_or_project_and_group = project_transfer_source
                 except KeyError:
                     pass
 
                 self._print_diff(
-                    project_or_project_and_group,
+                    project_transfer_source or project_or_project_and_group,
                     configuration.get(self.configuration_name),
                 )
             else:
