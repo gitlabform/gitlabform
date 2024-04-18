@@ -85,6 +85,10 @@ class SchedulesProcessor(AbstractProcessor):
 
         if self._needs_update(schedule_in_gitlab.asdict(), entity_config):
             debug("Changing existing pipeline schedule '%s'", schedule_description)
+            # In order to edit a Schedule created by someone else we need to take ownership:
+            # https://docs.gitlab.com/ee/ci/pipelines/schedules.html#take-ownership
+            shedule = project.pipelineschedules.get(schedule_in_gitlab.id)
+            shedule.take_ownership()
             project.pipelineschedules.update(
                 schedule_in_gitlab.id,
                 {"description": schedule_description, **entity_config},
