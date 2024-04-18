@@ -30,27 +30,6 @@ class GitLabGroups(GitLabCore):
                 f"Group/subgroup with path '{some_string}' not found."
             )
 
-    def create_group(self, name, path, parent_id=None, visibility="private"):
-        data = {
-            "name": name,
-            "path": path,
-            "visibility": visibility,
-        }
-        if parent_id is not None:
-            data["parent_id"] = parent_id
-        return self._make_requests_to_api(
-            "groups", data=data, method="POST", expected_codes=201
-        )
-
-    def delete_group(self, group_name):
-        # 404 means that the group does not exist anymore, so let's accept it for idempotency
-        return self._make_requests_to_api(
-            "groups/%s",
-            group_name,
-            method="DELETE",
-            expected_codes=[200, 202, 204, 404],
-        )
-
     def get_group(self, name):
         return self._make_requests_to_api("groups/%s", name)
 
@@ -134,31 +113,4 @@ class GitLabGroups(GitLabCore):
         # ..as documented at: https://docs.gitlab.com/ee/api/groups.html#update-group
         self._make_requests_to_api(
             "groups/%s", project_and_group_name, "PUT", group_settings
-        )
-
-    def add_share_to_group(
-        self, group, share_with_group_name, group_access, expires_at=None
-    ):
-        share_with_group_id = self.get_group_id_case_insensitive(share_with_group_name)
-        data = {"group_id": share_with_group_id, "expires_at": expires_at}
-        if group_access is not None:
-            data["group_access"] = group_access
-
-        return self._make_requests_to_api(
-            "groups/%s/share",
-            group,
-            method="POST",
-            data=data,
-            expected_codes=[200, 201],
-        )
-
-    def remove_share_from_group(self, group, share_with_group_name):
-        share_with_group_id = self.get_group_id_case_insensitive(share_with_group_name)
-
-        # 404 means that the user is already removed, so let's accept it for idempotency
-        return self._make_requests_to_api(
-            "groups/%s/share/%s",
-            (group, share_with_group_id),
-            method="DELETE",
-            expected_codes=[204, 404],
         )
