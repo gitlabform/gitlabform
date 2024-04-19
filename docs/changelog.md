@@ -1,10 +1,23 @@
 # Changelog
 
+## 3.9.5
+
+### Fixes
+
+* Error when running with `--noop` and `--output-file` parameter and config contains project to be transferred [#729](https://github.com/gitlabform/gitlabform/pull/729) ([long-wan-ep](https://github.com/long-wan-ep))
+
+### Refactors
+
+* Migrate `schedules` (pipeline schedules) configuration to use python-gitlab library [#706](https://github.com/gitlabform/gitlabform/pull/706) ([TimKnight-Opencast](https://github.com/TimKnight-Opencast))
+* Migrate `group_members` configuration to use python-gitlab library [#697](https://github.com/gitlabform/gitlabform/pull/697) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+
+Thanks to all the contributors of this release!
+
 ## 3.9.4
 
 ### Fixes
 
-* fix: dry run failure when project transfer is configured along with other additional configs [#726](https://github.com/gitlabform/gitlabform/pull/726) ([long-wan-ep](https://github.com/long-wan-ep))
+* Dry run failure when project transfer is configured along with other additional configs [#726](https://github.com/gitlabform/gitlabform/pull/726) ([long-wan-ep](https://github.com/long-wan-ep))
 
 ### Chores
 
@@ -72,7 +85,7 @@ Thanks to all the contributors of this release!
 
 * JSON data with dates not serialized correctly [#656](https://github.com/gitlabform/gitlabform/pull/656) ([HontoNoRoger](https://github.com/HontoNoRoger))
 
-### Refactor
+### Refactors
 
 * Migrate `archive` configuration to use python-gitlab library [#622](https://github.com/gitlabform/gitlabform/pull/622) ([amimas](https://github.com/amimas))
 * Migrate `hooks` configuration feature to use python-gitlab library [#635](https://github.com/gitlabform/gitlabform/pull/635) ([TigreModerata](https://github.com/TigreModerata))
