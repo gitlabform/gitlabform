@@ -23,7 +23,7 @@ class SchedulesProcessor(AbstractProcessor):
 
         project: Project = self.gl.projects.get(project_and_group)
         existing_schedules: List[RESTObject] | RESTObjectList = (
-            project.pipelineschedules.list()
+            project.pipelineschedules.list(get_all=True)
         )
 
         schedule_ids_by_description: Dict = self._group_schedule_ids_by_description(
