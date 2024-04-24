@@ -13,7 +13,7 @@ class TagsProcessor(AbstractProcessor):
         self.strict = strict
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-        project = self.gl.projects.get(id=project_and_group, lazy=True)
+        project = self.gl.get_project_by_name(name=project_and_group, lazy=True)
 
         for tag in sorted(configuration["tags"]):
             try:
@@ -42,7 +42,7 @@ class TagsProcessor(AbstractProcessor):
                             elif "group_id" in config:
                                 group_ids.add(config["group_id"])
                             elif "group" in config:
-                                gitlab_group = self.gl.get_group_by_groupname(
+                                gitlab_group = self.gl.get_group_by_name(
                                     config["group"]
                                 )
                                 group_ids.add(gitlab_group.get_id())
