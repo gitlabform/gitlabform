@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.9.6
+
+### Fixes
+
+* Process all schedules and not only the first 20 [#731](https://github.com/gitlabform/gitlabform/pull/731) ([Andreas Wirooks](https://github.com/nudgegoonies))
+
+Thanks to all the contributors of this release!
+
 ## 3.9.5
 
 ### Fixes
