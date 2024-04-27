@@ -150,7 +150,10 @@ class GroupMembersProcessor(AbstractProcessor):
         else:
             debug("Not enforcing group members.")
 
-        debug("Group shared with AFTER: %s", group_being_processed.members.list())
+        debug(
+            "Group shared with AFTER: %s",
+            group_being_processed.members.list(get_all=True),
+        )
 
     @staticmethod
     def _unshare(group_being_processed, share_with_group_id):
@@ -259,11 +262,11 @@ class GroupMembersProcessor(AbstractProcessor):
         else:
             debug("Not enforcing group members.")
 
-        debug("Group members AFTER: %s", group.members.list())
+        debug("Group members AFTER: %s", group.members.list(get_all=True))
 
     @staticmethod
     def get_group_members(group) -> dict:
-        members = group.members.list()
+        members = group.members.list(get_all=True)
         users = {}
         for member in members:
             users[member.username.lower()] = member
