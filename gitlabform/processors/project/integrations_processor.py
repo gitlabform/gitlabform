@@ -14,11 +14,15 @@ class IntegrationsProcessor(AbstractProcessor):
         project: Project = self.gl.projects.get(project_and_group)
 
         for integration in sorted(configured_integrations):
-            gl_integration: ProjectIntegration = project.integrations.get(integration, lazy=True)
+            gl_integration: ProjectIntegration = project.integrations.get(
+                integration, lazy=True
+            )
 
             if configured_integrations[integration].get("delete"):
                 verbose(f"Deleting integration: {integration}")
                 gl_integration.delete()
             else:
                 verbose(f"Setting integration: {integration}")
-                project.integrations.update(integration, configured_integrations[integration])
+                project.integrations.update(
+                    integration, configured_integrations[integration]
+                )
