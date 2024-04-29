@@ -14,7 +14,7 @@ class HooksProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing hooks...")
-        project: Project = self.gl.get_project_by_name(project_and_group)
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
         project_hooks: RESTObjectList | List[RESTObject] = project.hooks.list()
         hooks_in_config: tuple[str, ...] = tuple(
             x for x in sorted(configuration["hooks"]) if x != "enforce"
