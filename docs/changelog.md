@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.9.7
+
+### Fixes
+
+* Processing group fails if it has more than 20 members [#732](https://github.com/gitlabform/gitlabform/issue/732), PR [#735](https://github.com/gitlabform/gitlabform/pull/735) ([Sachin Kumar Singh ](https://github.com/SachinKSingh28))
+
+Thanks to all the contributors of this release!
+
 ## 3.9.6
 
 ### Fixes
