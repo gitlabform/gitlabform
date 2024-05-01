@@ -42,6 +42,7 @@ from gitlabform.lists.filter import GroupsAndProjectsFilters
 from gitlabform.lists.groups import GroupsProvider
 from gitlabform.lists.projects import ProjectsProvider
 from gitlabform.output import EffectiveConfigurationFile
+from gitlabform.processors.application import ApplicationProcessors
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
 
@@ -108,6 +109,9 @@ class GitLabForm:
 
         self.gitlab, self.configuration = self._initialize_configuration_and_gitlab()
 
+        self.application_processors = ApplicationProcessors(
+            self.gitlab, self.configuration, self.strict
+        )
         self.group_processors = GroupProcessors(
             self.gitlab, self.configuration, self.strict
         )
@@ -373,6 +377,16 @@ class GitLabForm:
         failed_groups = {}
 
         effective_configuration = EffectiveConfigurationFile(self.output_file)
+
+        application_configuration = self.configuration.get("application", {})
+        if application_configuration:
+            self.application_processors.process_entity(
+                "",
+                application_configuration,
+                dry_run=self.noop,
+                effective_configuration=effective_configuration,
+                only_sections=self.only_sections,
+            )
 
         for group in groups:
             group_number += 1
