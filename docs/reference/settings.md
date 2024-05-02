@@ -1,5 +1,25 @@
 # Settings
 
+## Application Settings
+
+This section purpose it to manage the [Application settings](https://docs.gitlab.com/ee/api/settings.html).
+
+You can provide any number of the settings from there - if you don't provide a setting then it will be not changed.
+
+Example:
+
+```yaml
+application:
+  settings:
+    asset_proxy_allowlist: ["example.com", "*.example.com", "your-instance.com"]
+    require_two_factor_authentication: true
+    two_factor_grace_period: 2
+projects_and_groups:
+  group_1/project_1:
+    project_settings:
+      default_branch: main
+```
+
 ## Project Settings
 
 This section purpose is to manage the [project settings](https://docs.gitlab.com/ee/user/project/settings/).
