@@ -340,6 +340,9 @@ class TestTransferProject:
 
         config = f"""
         projects_and_groups:
+          {group.path}/*:
+            project_settings:
+              description: test
           {project_new_path_with_namespace}:
             project:
               transfer_from: {project_for_function.path_with_namespace}
