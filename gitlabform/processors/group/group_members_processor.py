@@ -36,7 +36,7 @@ class GroupMembersProcessor(AbstractProcessor):
                 exit_code=EXIT_INVALID_INPUT,
             )
 
-        group = self.gl.get_group_by_name(group_name)
+        group = self.gl.get_group_by_path_cached(group_name)
 
         self._process_groups(group, groups_to_set_by_group_path, enforce_group_members)
 

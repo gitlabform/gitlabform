@@ -13,7 +13,7 @@ class TagsProcessor(AbstractProcessor):
         self.strict = strict
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-        project = self.gl.projects.get(id=project_and_group, lazy=True)
+        project = self.gl.get_project_by_path_cached(name=project_and_group, lazy=True)
 
         for tag in sorted(configuration["tags"]):
             try:
@@ -35,14 +35,14 @@ class TagsProcessor(AbstractProcessor):
                             elif "user_id" in config:
                                 user_ids.add(config["user_id"])
                             elif "user" in config:
-                                gitlab_user = self.gl.get_user_by_username(
+                                gitlab_user = self.gl.get_user_by_username_cached(
                                     config["user"]
                                 )
                                 user_ids.add(gitlab_user.get_id())
                             elif "group_id" in config:
                                 group_ids.add(config["group_id"])
                             elif "group" in config:
-                                gitlab_group = self.gl.get_group_by_groupname(
+                                gitlab_group = self.gl.get_group_by_path_cached(
                                     config["group"]
                                 )
                                 group_ids.add(gitlab_group.get_id())

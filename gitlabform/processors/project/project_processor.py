@@ -20,7 +20,7 @@ class ProjectProcessor(AbstractProcessor):
 
             # Check if the project was already transfered (i.e. in previous run) or a project with same path already exists
             try:
-                project_in_config: Project = self.gl.projects.get(
+                project_in_config: Project = self.gl.get_project_by_path_cached(
                     project_path_with_namespace
                 )
                 verbose(
@@ -28,7 +28,7 @@ class ProjectProcessor(AbstractProcessor):
                 )
             except GitlabGetError:
                 # Project doesn't exist at the destination. Let's process the transfer request
-                project_to_be_transferred: Project = self.gl.projects.get(
+                project_to_be_transferred: Project = self.gl.get_project_by_path_cached(
                     source_project_path_with_namespace
                 )
                 destination_project_path = project_and_group.split("/")[-1]
@@ -60,7 +60,9 @@ class ProjectProcessor(AbstractProcessor):
                 #     raise
 
         if configuration["project"].get("archive") is not None:
-            project: Project = self.gl.projects.get(project_path_with_namespace)
+            project: Project = self.gl.get_project_by_path_cached(
+                project_path_with_namespace
+            )
 
             if configuration["project"].get("archive") is True:
                 verbose("Archiving project...")
