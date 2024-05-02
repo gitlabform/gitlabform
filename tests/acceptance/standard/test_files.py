@@ -176,7 +176,7 @@ class TestFiles:
         branch = project.branches.get(branch)
         assert branch.commit["message"] == "Preconfigured commit message [skip ci]"
 
-    def test__set_file_protected_branches(self, project, branch):
+    def test__set_file_single_protected_branch(self, project, branch):
         test_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -213,7 +213,7 @@ class TestFiles:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-    def test__set_file_protected_branches_not_all_levels(self, project, branch):
+    def test__set_file_single_protected_branch_not_all_levels(self, project, branch):
         test_config = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -313,3 +313,90 @@ class TestFiles:
             project_file.decode().decode("utf-8")
             == "LICENSE\n\n“This is a license file”\n"
         )
+
+    def test__set_README_file_content_on_all_protected_branches(
+        self, project_for_function, branch_for_function, other_branch_for_function
+    ):
+        set_file_protected_branches = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            branches:
+              main:
+                protected: true
+                push_access_level: maintainer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
+              {branch_for_function}:
+                protected: false
+              {other_branch_for_function}:
+                protected: true
+                push_access_level: developer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
+            files:
+              "README.md":
+                overwrite: true
+                branches: protected
+                content: "Content for protected branches only"
+        """
+
+        run_gitlabform(
+            set_file_protected_branches, project_for_function.path_with_namespace
+        )
+
+        for some_branch in [
+            "main",  # main branch is protected by default
+            other_branch_for_function,
+        ]:
+            project_file = project_for_function.files.get(
+                ref=some_branch, file_path="README.md"
+            )
+            assert (
+                project_file.decode().decode("utf-8")
+                == "Content for protected branches only"
+            )
+            some_branch = project_for_function.branches.get(some_branch)
+            assert some_branch.protected is True
+
+        project_file = project_for_function.files.get(
+            ref=branch_for_function, file_path="README.md"
+        )
+        assert project_file.decode().decode("utf-8") == DEFAULT_README
+        some_branch = project_for_function.branches.get(branch_for_function)
+        assert some_branch.protected is False
+
+    def test__set_README_file_content_on_all_branches(
+        self, project_for_function, branch_for_function, other_branch_for_function
+    ):
+        set_file_all_branches = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            branches:
+              {branch_for_function}:
+                protected: true
+                push_access_level: maintainer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
+              {other_branch_for_function}:
+                protected: false
+            files:
+              "README.md":
+                overwrite: true
+                branches: all
+                content: "Content for all branches"
+        """
+        run_gitlabform(set_file_all_branches, project_for_function.path_with_namespace)
+
+        for some_branch in [
+            "main",
+            branch_for_function,
+            other_branch_for_function,
+        ]:
+            project_file = project_for_function.files.get(
+                ref=some_branch, file_path="README.md"
+            )
+            assert project_file.decode().decode("utf-8") == "Content for all branches"
+
+        # check that this branch remains unprotected
+        other_branch = project_for_function.branches.get(other_branch_for_function)
+        assert other_branch.protected is False

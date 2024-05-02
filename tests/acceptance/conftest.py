@@ -113,53 +113,33 @@ def other_subgroup(gl: Gitlab, group: Group):
 
 @pytest.fixture(scope="class")
 def project(gl: Gitlab, group: Group):
-    project_name = get_random_name("project")
-    gitlab_project = create_project(group, project_name)
-
-    yield gitlab_project
-
-    gitlab_project.delete()
+    yield from create_project_in_group(group, "project")
 
 
 @pytest.fixture(scope="class")
 def project_in_subgroup(gl: Gitlab, subgroup: Group):
-    project_name = get_random_name("project")
-    gitlab_project = create_project(subgroup, project_name)
-
-    yield gitlab_project
-
-    gitlab_project.delete()
+    yield from create_project_in_group(subgroup, "project_in_subgroup")
 
 
 @pytest.fixture(scope="class")
 def project_in_other_subgroup(gl: Gitlab, other_subgroup: Group):
-    # TODO: deduplicate this - it's a copy and paste from the above fixture
-    project_name = get_random_name("project")
-    gitlab_project = create_project(other_subgroup, project_name)
-
-    yield gitlab_project
-
-    gitlab_project.delete()
+    yield from create_project_in_group(other_subgroup, "project_in_other_subgroup")
 
 
 @pytest.fixture(scope="function")
 def project_for_function(gl: Gitlab, group: Group):
-    project_name = get_random_name("project")
-    gitlab_project = create_project(group, project_name)
-
-    yield gitlab_project
-
-    gitlab_project.delete()
+    yield from create_project_in_group(group, "project_for_function")
 
 
 @pytest.fixture(scope="class")
 def other_project(gl: Gitlab, group):
-    # TODO: deduplicate this - it's a copy and paste from the above fixture
-    project_name = get_random_name("project")
+    yield from create_project_in_group(group, "other_project")
+
+
+def create_project_in_group(group, entity_name):
+    project_name = get_random_name(entity_name)
     gitlab_project = create_project(group, project_name)
-
     yield gitlab_project
-
     gitlab_project.delete()
 
 
@@ -230,22 +210,30 @@ def other_users():
 
 @pytest.fixture(scope="class")
 def branch(project):
-    name = get_random_name("branch")
-    branch = project.branches.create({"branch": name, "ref": "main"})
-
-    yield name
-
-    branch.delete()
+    yield from create_branch(project, "branch")
 
 
 @pytest.fixture(scope="class")
 def other_branch(project):
-    # TODO: deduplicate
-    name = get_random_name("other_branch")
-    branch = project.branches.create({"branch": name, "ref": "main"})
+    yield from create_branch(project, "other_branch")
 
+
+@pytest.fixture(scope="function")
+def branch_for_function(project_for_function):
+    yield from create_branch(project_for_function, "branch_for_function")
+
+
+@pytest.fixture(scope="function")
+def other_branch_for_function(project_for_function):
+    yield from create_branch(project_for_function, "other_branch_for_function")
+
+
+def create_branch(project_to_create_branch_on, entity_name):
+    name = get_random_name(entity_name)
+    branch = project_to_create_branch_on.branches.create(
+        {"branch": name, "ref": "main"}
+    )
     yield name
-
     branch.delete()
 
 
