@@ -17,7 +17,7 @@ by example.
 
 We prefer to call GitLab's REST APIs using [`python-gitlab`](https://python-gitlab.readthedocs.io/en/stable/) rather than creating our own REST implementations.
 
-A [python_gitlab instance](../../gitlabform/gitlab/python_gitlab.py) is provided on `AbstractProcessor`, extending the base functionality to add convenience methods and caching to common GET requests. It will not always be appropriate to call a `_cached` method, as you will require the updated instance of a given Object after performing CRUD operations upon it. 
+A python_gitlab instance `./gitlabform/gitlab/python_gitlab.py` is provided on `AbstractProcessor`, extending the base functionality to add convenience methods and caching to common GET requests. It will not always be appropriate to call a `_cached` method, as you will require the updated instance of a given Object after performing CRUD operations upon it. 
 
 ## Project Structure
 
