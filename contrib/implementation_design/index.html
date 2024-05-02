@@ -1009,6 +1009,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#calling-gitlab-rest-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calling GitLab REST APIs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#project-structure" class="md-nav__link">
     <span class="md-ellipsis">
       Project Structure
@@ -1209,6 +1218,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#calling-gitlab-rest-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calling GitLab REST APIs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#project-structure" class="md-nav__link">
     <span class="md-ellipsis">
       Project Structure
@@ -1333,6 +1351,9 @@
 the expected style of your code etc. - the "<strong>general how</strong>"s.</p>
 <p>This article purpose is to explain "<strong>specific how</strong>"s - explain what is where in the code and how to add features
 by example.</p>
+<h2 id="calling-gitlab-rest-apis">Calling GitLab REST APIs<a class="headerlink" href="#calling-gitlab-rest-apis" title="Permanent link">&para;</a></h2>
+<p>We prefer to call GitLab's REST APIs using <a href="https://python-gitlab.readthedocs.io/en/stable/"><code>python-gitlab</code></a> rather than creating our own REST implementations.</p>
+<p>A python_gitlab instance <code>./gitlabform/gitlab/python_gitlab.py</code> is provided on <code>AbstractProcessor</code>, extending the base functionality to add convenience methods and caching to common GET requests. It will not always be appropriate to call a <code>_cached</code> method, as you will require the updated instance of a given Object after performing CRUD operations upon it. </p>
 <h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">&para;</a></h2>
 <h3 id="packages-overview">Packages overview<a class="headerlink" href="#packages-overview" title="Permanent link">&para;</a></h3>
 <ul>
