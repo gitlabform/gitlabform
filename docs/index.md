@@ -9,8 +9,13 @@
   ![GitLabForm logo](images/gitlabform-logo.png)
 </figure>
 
-is a specialized configuration as a code tool for GitLab projects, groups and more
-using hierarchical configuration written in YAML.
+is a specialized configuration as a code tool for GitLab:
+
+* application settings,
+* groups,
+* projects,
+
+...and more using hierarchical configuration written in YAML.
 
 
 ## Why?
