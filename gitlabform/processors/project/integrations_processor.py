@@ -11,7 +11,7 @@ class IntegrationsProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         configured_integrations = configuration.get("integrations", {})
-        project: Project = self.gl.projects.get(project_and_group)
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
         for integration in sorted(configured_integrations):
             gl_integration: ProjectIntegration = project.integrations.get(
