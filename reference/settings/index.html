@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.20">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
     
     
       
@@ -758,6 +758,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#application-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Settings
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#project-settings" class="md-nav__link">
     <span class="md-ellipsis">
       Project Settings
@@ -1131,6 +1140,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#application-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Settings
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#project-settings" class="md-nav__link">
     <span class="md-ellipsis">
       Project Settings
@@ -1167,6 +1185,20 @@
 
 
 <h1 id="settings">Settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h1>
+<h2 id="application-settings">Application Settings<a class="headerlink" href="#application-settings" title="Permanent link">&para;</a></h2>
+<p>This section purpose it to manage the <a href="https://docs.gitlab.com/ee/api/settings.html">Application settings</a>.</p>
+<p>You can provide any number of the settings from there - if you don't provide a setting then it will be not changed.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">application</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">settings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">asset_proxy_allowlist</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;example.com&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;*.example.com&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;your-instance.com&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">require_two_factor_authentication</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">two_factor_grace_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">project_settings</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">default_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+</code></pre></div>
 <h2 id="project-settings">Project Settings<a class="headerlink" href="#project-settings" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/settings/">project settings</a>.</p>
 <p>The settings should be as documented at GitLab's <a href="https://docs.gitlab.com/ee/api/projects.html#edit-project">Project API docs</a>, <strong>except the id</strong>.</p>
@@ -1255,7 +1287,7 @@
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.dd8806f2.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a7c05c9e.min.js"></script>
       
     
   </body>
