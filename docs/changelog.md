@@ -6,6 +6,11 @@
 
 * Add support for Application Settings [#120](https://github.com/gitlabform/gitlabform/issues/120), PR [#742](https://github.com/gitlabform/gitlabform/pull/742) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
 
+### Fixes
+
+* Improved error handling when processing project already transferred [#745](https://github.com/gitlabform/gitlabform/pull/745) ([long-wan-ep](https://github.com/long-wan-ep))
+
+
 ### Refactors
 
 * Use new convenience methods for getting groups and projects in more places and document them in the contribution docs: PRs [#734](https://github.com/gitlabform/gitlabform/pull/734), [#743](https://github.com/gitlabform/gitlabform/pull/743) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
