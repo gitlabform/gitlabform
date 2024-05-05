@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.10.0
+
+### Features
+
+* Add support for Application Settings [#120](https://github.com/gitlabform/gitlabform/issues/120), PR [#742](https://github.com/gitlabform/gitlabform/pull/742) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Refactors
+
+* Use new convenience methods for getting groups and projects in more places and document them in the contribution docs: PRs [#734](https://github.com/gitlabform/gitlabform/pull/734), [#743](https://github.com/gitlabform/gitlabform/pull/743) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Dependencies
+
+* Update some dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 3.9.7
 
 ### Fixes
