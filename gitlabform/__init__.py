@@ -490,6 +490,12 @@ class GitLabForm:
                 successful_projects += 1
 
             except Exception as e:
+                if "Non GET methods are not allowed for moved projects" in str(e):
+                    info(
+                        "Project has been transferred, no need to process original location"
+                    )
+                    continue
+
                 failed_projects[project_number] = project_and_group
 
                 trace = traceback.format_exc()
