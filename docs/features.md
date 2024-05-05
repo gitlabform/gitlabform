@@ -1,6 +1,6 @@
 # Features
 
-GitLabForm enables you to manage:
+GitLabForm enables you to manage the [(GitLab's) Application Settings](reference/settings.md#application-settings) and:
 
 * Group:
     * [Badges](reference/badges.md#group-badges),
