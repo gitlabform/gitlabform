@@ -1,0 +1,33 @@
+name: Linters
+
+on:
+  workflow_call:
+
+jobs:
+  black-formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Black Code Formatter
+        uses: gdubicki/black-action@main
+        with:
+          args: ". --check"
+
+  types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+      - name: Install test dependencies
+        run: |
+          pip install wheel
+          pip install -e .[test]
+      - name: Run mypy
+        run: |
+          mypy . || true
+          mypy --install-types --non-interactive
+          mypy .
