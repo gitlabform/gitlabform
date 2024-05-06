@@ -1,0 +1,102 @@
+name: Linter and tests (PRs)
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+
+  approve:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Approve
+        run: echo For security reasons, all pull requests need to be approved first before running any automated CI.
+
+  codeql:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+          # If you wish to specify custom queries, you can do so here or in a config file.
+          # By default, queries listed here will override any specified in a config file.
+          # Prefix the list here with "+" to use these queries and those in the config file.
+          # queries: ./path/to/local/query, your-org/your-repo/queries@main
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+      - name: Install dependencies
+        run: |
+          pip install -e .[docs]
+      - name: Build docs
+        run: |
+          mkdocs build
+
+  linters:
+    uses: ./.github/workflows/linters.yml
+
+  tests-standard:
+    uses: ./.github/workflows/tests-standard.yml
+
+  # you cannot use reusable workflows with an "environment" key,
+  # so we have to copy "tests-premium.yml" here :(
+  acceptance-tests-premium:
+    runs-on: ubuntu-latest
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: [3.12]
+      fail-fast : false
+    steps:
+      - name: Checkout code from the PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install test dependencies
+        run: |
+          pip install wheel
+          pip install -e .[test]
+      - name: Run acceptance tests that require premium license
+        env:
+          GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
+        run: |
+          ./dev/run_gitlab_in_docker.sh
+          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
+      - name: Upload coverage to Codecov
+        uses: Wandalen/wretry.action@v1
+        with:
+          action: codecov/codecov-action@v3
+          with: |
+            fail_ci_if_error: true
+            override_pr: ${{ github.event.number }}
+            override_commit: ${{ github.event.pull_request.head.sha }}
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
+          attempt_limit: 5
+          attempt_delay: 10000
