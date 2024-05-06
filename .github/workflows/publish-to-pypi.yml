@@ -23,10 +23,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-      - name: Create release in GitHub
-        uses: ncipollo/release-action@v1
-        with:
-          name: ${{ github.ref }}
-          body: "(this is a placeholder, it will be replaced with a changelog contents)"
-          # This token is provided by Actions, you do not need to create your own token
-          token: ${{ secrets.GITHUB_TOKEN }}
