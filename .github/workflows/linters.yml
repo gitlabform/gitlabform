@@ -10,9 +10,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Black Code Formatter
-        uses: gdubicki/black-action@main
+        uses: psf/black@stable
         with:
-          args: ". --check"
+          options: "--check"
+          src: "."
 
   types:
     runs-on: ubuntu-latest
