@@ -79,7 +79,7 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
-  publish-to-dockerhub:
+  publish-to-ghcr:
     needs:
       - linters
       - tests-standard
