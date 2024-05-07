@@ -6,13 +6,15 @@ from tests.acceptance import (
 
 
 class TestInheritanceBreak:
-    def test__inheritance_break(
+    def test__can_choose_not_to_inherit_branch_protections_from_parent_group(
         self,
         group,
         project,
         branch,
         other_branch,
     ):
+        # project will be created in the group by the fixture in conftest.py
+        # branches will be created on the project by the fixtures
         config_yaml = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -47,12 +49,12 @@ class TestInheritanceBreak:
         assert unprotect_access_level is None
 
         (
-            push_access_level,
-            merge_access_level,
+            other_branch_push_access_level,
+            other_branch_merge_access_level,
             _,
             _,
-            unprotect_access_level,
+            other_branch_unprotect_access_level,
         ) = get_only_branch_access_levels(project, other_branch)
-        assert push_access_level == [AccessLevel.MAINTAINER.value]
-        assert merge_access_level == [AccessLevel.DEVELOPER.value]
-        assert unprotect_access_level is AccessLevel.MAINTAINER.value
+        assert other_branch_push_access_level == [AccessLevel.MAINTAINER.value]
+        assert other_branch_merge_access_level == [AccessLevel.DEVELOPER.value]
+        assert other_branch_unprotect_access_level is AccessLevel.MAINTAINER.value
