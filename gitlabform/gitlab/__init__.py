@@ -22,7 +22,6 @@ from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.gitlab.variables import GitLabVariables
 from gitlabform.gitlab.repositories import GitLabRepositories
 from gitlabform.gitlab.resource_groups import GitLabResourceGroups
-from gitlabform.gitlab.integrations import GitLabIntegrations
 from gitlabform.gitlab.users import GitLabUsers
 
 
@@ -57,7 +56,6 @@ class GitLab(
     GitLabMergeRequests,
     GitLabRepositories,
     GitLabResourceGroups,
-    GitLabIntegrations,
     GitLabGroupLDAPLinks,
     GitLabGroupBadges,
     GitLabGroupVariables,
