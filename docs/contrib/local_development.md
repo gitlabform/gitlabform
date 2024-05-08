@@ -5,6 +5,7 @@
 - Python 3 and Pip 3 for development
 - Docker for running Gitlab on local machine
 - `jq` used in local environment setup scripts
+- [`pre-commit`](https://pre-commit.com/#install) used to run linters and checks prior to commits made locally
 
 ## Environment setup
 
@@ -120,3 +121,6 @@ Please run `black` to format coding style:
 ```shell
 black .
 ```
+
+## Commit message format
+Commit messages should follow [conventional-commit format](https://www.conventionalcommits.org/en/v1.0.0/#summary) in order to produce consistent human and machine-readable commit messages, making it easier for maintainers to produce the CHANGELOG.
