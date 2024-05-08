@@ -6,7 +6,9 @@
 
 This section purpose is to manage [group membership via SAML group links](https://docs.gitlab.com/ee/user/group/saml_sso/group_sync.html#configure-saml-group-links).
 
-Key names here are just any labels, except if the key name is `enforce` and is set to `true` - then only the group SAML links defined here will remain in the group, all other will be deleted.
+Key names here are just any labels.
+
+Except if the key name is `enforce` and is set to `true` - then only the group SAML links defined here will remain in the group, all other will be deleted.
 
 Values are like documented at [SAML Group Links section of the Groups API docs](https://docs.gitlab.com/ee/api/groups.html#saml-group-links), **except the id**.
 
@@ -26,5 +28,6 @@ projects_and_groups:
       developers_are_developers: # this is just a label
         saml_group_name: "developers"
         access_level: developer
+
       enforce: true # optional
 ```

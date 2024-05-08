@@ -51,9 +51,13 @@ class GroupLDAPLinksProcessor(AbstractProcessor):
         return None
 
     def _delete_extra_links(self, group: Group, existing: List[dict], configured: dict):
-        known_cns = [c["cn"] for c in configured.values() if c != "enforce"]
+        known_names = [
+            common_name["cn"]
+            for common_name in configured.values()
+            if common_name != "enforce"
+        ]
 
         for link in existing:
-            if link["cn"] not in known_cns:
+            if link["cn"] not in known_names:
                 debug(f"Deleting extra LDAP link: {link['cn']}")
                 group.ldapgrouplinks.delete(link["id"])

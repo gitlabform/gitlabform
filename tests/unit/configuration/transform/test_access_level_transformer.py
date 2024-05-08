@@ -132,6 +132,7 @@ def test__config__with_access_level_names__group_ldap_links():
     ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
     assert not ddiff
 
+
 def test__config__with_access_level_names__group_saml_links():
     config_yaml = f"""
     projects_and_groups:
@@ -166,6 +167,7 @@ def test__config__with_access_level_names__group_saml_links():
 
     ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
     assert not ddiff
+
 
 def test__config__with_access_level_names__branches_premium_syntax():
     config_yaml = f"""
