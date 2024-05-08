@@ -20,7 +20,6 @@ class TestProjectLabels:
         run_gitlabform(config_for_labels, project_for_function)
 
         updated_project = gl.projects.get(project.id)
-        updated_project = gl.projects.get(project.id)
         updated_labels = updated_project.labels.list()
         assert len(updated_labels) == 1
 
@@ -140,3 +139,35 @@ class TestProjectLabels:
 
         # validate same id is being used
         assert created_label.id == new_label.id
+
+    def test__can_set_project_labels_at_group_level(
+        self, gl, group, project_for_function
+    ):
+        # project_for_function is created in the group fixture
+        project = gl.projects.get(project_for_function.id)
+        labels = project.labels.list()
+        assert len(labels) == 0
+
+        config_for_labels = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            labels:
+              test_label:
+                color: red
+                description: this is a label
+                priority: 1
+        """
+
+        run_gitlabform(config_for_labels, project_for_function)
+
+        updated_project = gl.projects.get(project.id)
+        updated_labels = updated_project.labels.list()
+        assert len(updated_labels) == 1
+
+        updated_label = updated_labels[0]
+        assert updated_label.name == "test_label"
+        assert updated_label.description == "this is a label"
+        assert updated_label.priority == 1
+
+        # text color gets converted to HexCode by GitLab ie red -> #FF0000
+        assert updated_label.color == "#FF0000"
