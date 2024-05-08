@@ -47,7 +47,7 @@ setup(
         "certifi==2024.2.2",
         "cli-ui==0.17.2",
         "ez-yaml==1.2.0",
-        "Jinja2==3.1.3",
+        "Jinja2==3.1.4",
         "luddite==1.0.4",
         "MarkupSafe==2.1.5",
         "mergedeep==1.3.4",
