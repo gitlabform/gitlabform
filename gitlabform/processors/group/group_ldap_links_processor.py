@@ -1,5 +1,5 @@
 from logging import debug
-from typing import List
+from typing import List, Union
 
 from gitlabform.gitlab import GitLab
 from gitlab.v4.objects import Group
@@ -13,17 +13,17 @@ class GroupLDAPLinksProcessor(AbstractProcessor):
 
     def _process_configuration(self, group_path: str, configuration: dict):
 
-        group: Group = self.gl.get_group_by_path_cached(group_path)
-
         configured_links = configuration["group_ldap_links"]
         enforce_links = configuration.get("group_ldap_links|enforce", False)
 
+        group: Group = self.gl.get_group_by_path_cached(group_path)
         existing_links: List[dict] = self._fetch_ldap_links(group)
 
-        for name, link_config in configured_links.items():
-            if name == "enforce":
-                continue
+        # Remove 'enforce' key from the config so that it's not treated as a "link"
+        if enforce_links:
+            configured_links.pop("enforce")
 
+        for name, link_config in configured_links.items():
             self._update_ldap_link(group, existing_links, link_config)
 
         if enforce_links:
@@ -43,7 +43,7 @@ class GroupLDAPLinksProcessor(AbstractProcessor):
             debug(f"Creating new LDAP link: {new['cn']}")
             group.ldapgrouplinks.create(new)
 
-    def _get_link_id(self, existing: List[dict], new: dict) -> int | None:
+    def _get_link_id(self, existing: List[dict], new: dict) -> Union[int, None]:
         for link in existing:
             if link["cn"] == new["cn"]:
                 return link["id"]

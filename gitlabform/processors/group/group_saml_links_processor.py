@@ -25,11 +25,10 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
             configured_links.pop("enforce")
 
         for link_name, link_configuration in configured_links.items():
-            if self._needs_update(link_configuration.as_dict(), enforce_links):
-                if link_name not in [
-                    existing_link["saml_group_name"] for existing_link in existing_links
-                ]:
-                    group.saml_group_links.create(link_configuration)
+            if link_name not in [
+                existing_link["saml_group_name"] for existing_link in existing_links
+            ]:
+                group.saml_group_links.create(link_configuration)
 
         if enforce_links:
             self._delete_extra_links(group, existing_links, configured_links)
