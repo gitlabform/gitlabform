@@ -1,14 +1,16 @@
+name: Release Please
+
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 permissions:
   contents: write
   pull-requests: write
 
-name: release-please
+# Release-Please creates automatic PRs with the next release based on the Commit history, these PRs will show the next
+# version to be created and the updated CHANGELOG.md content
 
+# When merged in by Maintainers it will automatically bump the version and create the new release
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -19,20 +21,3 @@ jobs:
           # This token is provided by Actions, you do not need to create your own token
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: python
-      # Publish to pypi
-      - uses: actions/checkout@v4
-        # these if statements ensure that a publication only occurs when
-        # a new release is created:
-        if: ${{ steps.release.outputs.release_created }}
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
-      - name: Build
-        run: |
-          pip install wheel setuptools
-          python setup.py build sdist bdist_wheel
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.5.0
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
