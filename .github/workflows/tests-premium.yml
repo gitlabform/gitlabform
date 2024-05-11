@@ -1,0 +1,38 @@
+name: Tests premium
+
+on:
+  workflow_call:
+
+jobs:
+  acceptance-tests-premium:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: [3.12]
+      fail-fast : false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install test dependencies
+        run: |
+          pip install wheel
+          pip install -e .[test]
+      - name: Run acceptance tests that require premium license
+        env:
+          GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
+        run: |
+          ./dev/run_gitlab_in_docker.sh
+          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
+      - name: Upload coverage to Codecov
+        uses: Wandalen/wretry.action@v1
+        with:
+          action: codecov/codecov-action@v3
+          with: |
+            fail_ci_if_error: true
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
+          attempt_limit: 5
+          attempt_delay: 10000
