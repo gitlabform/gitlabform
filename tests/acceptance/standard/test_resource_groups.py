@@ -27,6 +27,8 @@ def add_gitlab_ci_config(project):
                 resource_group: production
         """
     run_gitlabform(add_gitlab_ci_config, project)
+    time.sleep(5)
+
     return project
 
 
@@ -41,13 +43,12 @@ class TestResourceGroups:
             """
 
         run_gitlabform(update_resource_group_config, project)
-        time.sleep(5)
 
         resource_group = project.resource_groups.get("production")
         assert resource_group.key == "production"
         assert resource_group.process_mode == "newest_first"
 
-    def test__ensure_exists_default_true(self, project, add_gitlab_ci_config, capsys):
+    def test__ensure_exists_default_true(self, project, capsys):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -63,7 +64,7 @@ class TestResourceGroups:
         captured = capsys.readouterr()
         assert "Project is not configured to use resource group" in captured.err
 
-    def test__ensure_exists_equals_true(self, project, add_gitlab_ci_config, capsys):
+    def test__ensure_exists_equals_true(self, project, capsys):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -80,7 +81,7 @@ class TestResourceGroups:
         captured = capsys.readouterr()
         assert "Project is not configured to use resource group" in captured.err
 
-    def test__ensure_exists_equals_false(self, project, add_gitlab_ci_config):
+    def test__ensure_exists_equals_false(self, project):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
