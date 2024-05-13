@@ -33,3 +33,4 @@ jobs:
 
   release-please:
     uses: ./.github/workflows/release-please.yml
+    needs: [ tests-standard, tests-premium ]
