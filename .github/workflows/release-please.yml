@@ -20,5 +20,3 @@ jobs:
         with:
           # This token is provided by Actions, you do not need to create your own token
           token: ${{ secrets.GITHUB_TOKEN }}
-          release-type: python
-          extra-files: tbump.toml, version
