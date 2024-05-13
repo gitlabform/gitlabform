@@ -5,6 +5,7 @@
 - Python 3 and Pip 3 for development
 - Docker for running Gitlab on local machine
 - `jq` used in local environment setup scripts
+- [`pre-commit`](https://pre-commit.com/#install) used to run linters and checks prior to commits made locally
 
 ## Environment setup
 

@@ -1,0 +1,23 @@
+name: Release Please
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Release-Please creates automatic PRs with the next release based on the Commit history, these PRs will show the next
+# version to be created and the updated CHANGELOG.md content
+
+# When merged in by Maintainers it will automatically bump the version and create the new release
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          # This token is provided by Actions, you do not need to create your own token
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: python
