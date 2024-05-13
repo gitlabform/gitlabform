@@ -1,36 +1,22 @@
 import codecs
-import subprocess
-
+import os
 from setuptools import setup, find_packages
 
 with codecs.open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
 
-def get_version():
-    # this returns something like 'v3.10.0-23-g47040b55' or 'v3.10.0'
-    git_release = (
-        subprocess.run("git describe --tags", shell=True, capture_output=True)
-        .stdout.decode("utf-8")
-        .strip()
-    )
-
-    # remove the leading 'v' for a proper PEP440 version
-    git_release = git_release.replace("v", "")
-
-    # simplify dev versions to PEP440
-    if "-" in git_release:
-        version = git_release.split("-")[0]
-        version = version + ".dev0"
+def get_version_file_path():
+    github_actions_path = "/home/runner/work/gitlabform/gitlabform"
+    if os.path.isfile(github_actions_path + "/version"):
+        return github_actions_path + "/version"
     else:
-        version = git_release
-
-    return version
+        return "version"
 
 
 setup(
     name="gitlabform",
-    version=get_version(),
+    version=open(get_version_file_path()).read(),
     description="🏗 Specialized configuration as a code tool for GitLab projects, groups and more"
     " using hierarchical configuration written in YAML",
     long_description=readme,
