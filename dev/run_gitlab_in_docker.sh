@@ -68,7 +68,7 @@ if [[ -f $repo_root_directory/Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-
     cecho b "EE license env variable found - using it..."
     echo "$GITLAB_EE_LICENSE" > $repo_root_directory/config/Gitlab.gitlab-license
   fi
-
+  gitlab_omnibus_config="$gitlab_omnibus_config gitlab_rails['omniauth_allow_single_sign_on'] = ['saml'];gitlab_rails['omniauth_auto_link_ldap_user'] = true;gitlab_rails['omniauth_block_auto_created_users'] = true;"
   gitlab_omnibus_config="$gitlab_omnibus_config gitlab_rails['initial_license_file'] = '/etc/gitlab/Gitlab.gitlab-license';"
   config_volume="--volume $repo_root_directory/config:/etc/gitlab"
 else
