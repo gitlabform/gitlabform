@@ -21,7 +21,7 @@ Example:
 ```yaml
 projects_and_groups:
   group_1/*:
-    group_saml_links: 
+    saml_group_links: 
       devops_are_maintainers: # this is just a label
         saml_group_name: "devops"
         access_level: maintainer

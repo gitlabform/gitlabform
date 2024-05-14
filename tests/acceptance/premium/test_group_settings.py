@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from tests.acceptance import run_gitlabform
@@ -23,18 +24,16 @@ class TestGroupSettings:
 
     def test__add_saml_links_premium(self, gl, project, group):
 
-        # assert len(group.saml_group_links.list()) == 0, "saml_group_links is not empty"
-
-        add_group_settings = f"""
+        assert len(group.saml_group_links.list()) == 0, "saml_group_links is not empty"
+        add_group_saml_settings = f"""
         projects_and_groups:
-          {group.full_path}/*:
-              group_saml_links: 
-                devops_are_maintainers: 
-                  saml_group_name: devops,
-                  access_level": 50
+          {group.full_path}/*:              
+             saml_group_links: 
+               devops_are_maintainers:
+                 id: {group.id}                
+                 saml_group_name: devops,
+                 access_level: 10
         """
-
-        run_gitlabform(add_group_settings, group)
-
+        run_gitlabform(add_group_saml_settings, group)
         refreshed_group = gl.groups.get(group.id)
         assert len(refreshed_group.saml_group_links.list()) == 1
