@@ -32,6 +32,26 @@ projects_and_groups:
       keep_bots: true
 ```
 
+### Custom Roles (GitLab Ultimate Only)
+Assigning of Custom Roles is supported within GitLabForm configuration.
+
+!!! warning
+
+    * user `access_level` MUST still be supplied and MUST match the base_access_level of the custom role
+
+```yaml
+projects_and_groups:
+  group_1/project_1:
+    members:
+      users:
+        my-user:
+          access_level: maintainer
+          member_role_id: 2
+          expires_at: 2025-09-26
+      enforce: true
+      keep_bots: true
+```
+
 ## Group members
 
 There are 4 keys that can be set in the `group_members` section:

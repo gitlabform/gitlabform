@@ -115,6 +115,11 @@ class MembersProcessor(AbstractProcessor):
                     if "access_level" in users[user]
                     else None
                 )
+                member_role_id = (
+                    users[user]["member_role_id"]
+                    if "member_role_id" in users[user]
+                    else None
+                )
                 # we only add the user if it doesn't have the correct settings.
                 # To make sure that the user hasn't been added in a different
                 # case, we enforce that the username is always in lowercase for
@@ -140,7 +145,11 @@ class MembersProcessor(AbstractProcessor):
                             common_username,
                         )
                         self.gitlab.edit_member_of_project(
-                            project_and_group, common_username, access_level, expires_at
+                            project_and_group,
+                            common_username,
+                            access_level,
+                            member_role_id,
+                            expires_at,
                         )
                 else:
                     debug(
@@ -148,7 +157,11 @@ class MembersProcessor(AbstractProcessor):
                         common_username,
                     )
                     self.gitlab.add_member_to_project(
-                        project_and_group, common_username, access_level, expires_at
+                        project_and_group,
+                        common_username,
+                        access_level,
+                        member_role_id,
+                        expires_at,
                     )
 
         if enforce_members:

@@ -86,6 +86,11 @@ def other_group(gl: Gitlab):
         gl.groups.delete(group_name)
 
 
+@pytest.fixture(scope="function")
+def random_string() -> str:
+    return get_random_name("random_entity")
+
+
 @pytest.fixture(scope="class")
 def third_group(gl: Gitlab):
     # TODO: deduplicate this - it's a copy and paste from the above fixture

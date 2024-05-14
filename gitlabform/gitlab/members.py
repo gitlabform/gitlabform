@@ -1,3 +1,5 @@
+from logging import info
+
 from gitlabform.gitlab.core import GitLabCore
 
 
@@ -8,13 +10,21 @@ class GitLabMembers(GitLabCore):
         project_and_group_name,
         username,
         access_level,
+        member_role_id,
         expires_at=None,
     ):
         user_id = self._get_user_id(username)
-        data = {"user_id": user_id, "access_level": access_level}
+        data = {
+            "user_id": user_id,
+            "access_level": access_level,
+        }
         if expires_at:
             data["expires_at"] = expires_at
 
+        if member_role_id:
+            data["member_role_id"] = member_role_id
+
+        info(f"Adding {username} to Project {project_and_group_name} with: {data}")
         return self._make_requests_to_api(
             "projects/%s/members",
             project_and_group_name,
@@ -35,10 +45,19 @@ class GitLabMembers(GitLabCore):
         )
 
     def edit_member_of_project(
-        self, group_name, username, access_level, expires_at=None
+        self,
+        group_name,
+        username,
+        access_level,
+        member_role_id,
+        expires_at=None,
     ):
         user_id = self._get_user_id(username)
-        data = {"user_id": user_id, "access_level": access_level}
+        data = {
+            "user_id": user_id,
+            "access_level": access_level,
+            "member_role_id": member_role_id,
+        }
         if expires_at:
             data["expires_at"] = expires_at
 
