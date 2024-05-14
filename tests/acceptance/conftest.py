@@ -21,6 +21,16 @@ from tests.acceptance import (
     get_random_password,
 )
 
+from cli_ui.tests import MessageRecorder
+
+
+@pytest.fixture()
+def message_recorder():
+    message_recorder = MessageRecorder()
+    message_recorder.start()
+    yield message_recorder
+    message_recorder.stop()
+
 
 @pytest.fixture(scope="session")
 def gl():
