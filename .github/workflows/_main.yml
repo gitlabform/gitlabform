@@ -1,16 +1,13 @@
----
-name: Publish docs
+name: Main branch
 
 on:
   push:
     branches:
       - main
 
-permissions:
-  contents: write
-
 jobs:
-  build-n-publish:
+
+  build-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,8 +21,16 @@ jobs:
       - name: Build docs
         run: |
           mkdocs build
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
-        with:
-          branch: gh-pages
-          folder: site
+
+  linters:
+    uses: ./.github/workflows/linters.yml
+
+  tests-standard:
+    uses: ./.github/workflows/tests-standard.yml
+
+  tests-premium:
+    uses: ./.github/workflows/tests-premium.yml
+
+  release-please:
+    uses: ./.github/workflows/release-please.yml
+    needs: [ tests-standard, tests-premium ]

@@ -1,22 +1,25 @@
 import codecs
-import os
+import re
 from setuptools import setup, find_packages
 
 with codecs.open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
 
-def get_version_file_path():
-    github_actions_path = "/home/runner/work/gitlabform/gitlabform"
-    if os.path.isfile(github_actions_path + "/version"):
-        return github_actions_path + "/version"
-    else:
-        return "version"
+# Read version from version.py
+VERSIONFILE = "version.py"
+verstrline = open(VERSIONFILE, "rt").read()
+VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+mo = re.search(VSRE, verstrline, re.M)
+if mo:
+    verstr = mo.group(1)
+else:
+    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
 
 setup(
     name="gitlabform",
-    version=open(get_version_file_path()).read(),
+    version=verstr,
     description="🏗 Specialized configuration as a code tool for GitLab projects, groups and more"
     " using hierarchical configuration written in YAML",
     long_description=readme,
