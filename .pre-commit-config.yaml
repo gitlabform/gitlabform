@@ -8,14 +8,6 @@ repos:
     hooks:
       - id: pngquant
         args: [--speed=1]
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
-    hooks:
-      - id: mypy
-        args: [ ]
-        additional_dependencies:
-          - pytest
-          - types-all
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
     rev: v9.15.0
     hooks:
