@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../merge_requests/">
+        <link rel="prev" href="../integrations/">
       
       
-        <link rel="next" href="../protected_environments/">
+        <link rel="next" href="../members/">
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
@@ -20,7 +20,7 @@
     
     
       
-        <title>Pipeline schedules - GitLabForm</title>
+        <title>Labels - GitLabForm</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pipeline-schedules" class="md-skip">
+        <a href="#labels" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Pipeline schedules
+              Labels
             
           </span>
         </div>
@@ -585,10 +585,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../labels/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Labels
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -597,6 +617,44 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#project-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Labels
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#group-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Group Labels
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -648,19 +706,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../pipeline_schedules/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -669,7 +718,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1099,6 +1147,32 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#project-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Project Labels
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#group-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Group Labels
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1115,58 +1189,53 @@
   
 
 
-<h1 id="pipeline-schedules">Pipeline schedules<a class="headerlink" href="#pipeline-schedules" title="Permanent link">&para;</a></h1>
-<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/pipelines/schedules.html">pipeline schedules</a>.</p>
-<p>The key name are schedule description (<em>GitLab Web Console</em>) and values are parameters described in the <a href="https://docs.gitlab.com/ee/api/pipeline_schedules.html#create-a-new-pipeline-schedule">Pipeline schedules API docs</a>, <strong>except the id</strong>.</p>
-<p>Additionally, under a <code>variables</code> key you can add the pipeline schedule variables. The syntax here is that key name is the variable name, the value is under <code>value</code> and the optional <code>variable_type</code> can be set to <code>env_var</code> (default) or <code>file</code>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<ul>
-<li>
-<p>If there are multiple pipeline schedules with the same key name in a single project, this will cause those schedules to be DELETED and replaced with the one from the configuration.</p>
-</li>
-<li>
-<p>Do not set <code>description</code> attribute - see <a href="https://github.com/gitlabform/gitlabform/issues/535#issue-1678509984">#535</a></p>
-</li>
-</ul>
-</div>
-<p>There are 2 gitlabform specific keys/configs that can be set under <code>schedules</code> or individual schedule:</p>
-<ul>
-<li><code>delete</code> - set this to <code>true</code> under a specific schedule to delete that particular schedule.</li>
-<li><code>enforce</code> - set this to <code>true</code> under <code>schedules</code> so that any schedules that are not in <code>schedules</code> section are deleted.</li>
-</ul>
-<p>Example 1:
+<h1 id="labels">Labels<a class="headerlink" href="#labels" title="Permanent link">&para;</a></h1>
+<p>This section purpose is to manage labels both <a href="https://docs.gitlab.com/ee/api/labels.html">project</a> and <a href="https://docs.gitlab.com/ee/api/group_labels.html">group</a></p>
+<h2 id="project-labels">Project Labels<a class="headerlink" href="#project-labels" title="Permanent link">&para;</a></h2>
+<p>The keys name are as in the endpoints described in the <a href="https://docs.gitlab.com/ee/api/labels.html">GitLab Labels API docs</a>, f.e. <code>description</code>, <code>color</code> etc.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">schedules</span><span class="p">:</span>
-<span class="w">      </span><span class="s">&quot;Some</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">        </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
-<span class="w">        </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">MON-FRI&quot;</span>
-<span class="w">        </span><span class="nt">cron_timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;London&quot;</span>
-<span class="w">        </span><span class="nt">active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">      </span><span class="s">&quot;Another</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">        </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">develop</span>
-<span class="w">        </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
-<span class="w">        </span><span class="nt">variables</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">some_variable</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some_value</span>
-<span class="w">            </span><span class="nt">variable_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">          </span><span class="nt">other_variable</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">another_value</span>
-<span class="w">      </span><span class="s">&quot;Obsolete</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Delete this schedule</span>
-</code></pre></div></p>
-<p>Example 2:
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">my_label</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">color</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">red</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello world</span>
+</code></pre></div>
+<p><code>enforce</code> is used to determine whether labels present in GitLab but not the configuration should be deleted or not. Without enabled <code>enforce: true</code> we retain any labels not present in the configuration, to support automated tooling which may apply labels based on user's rulesets and work practices, such as for Compliance Frameworks.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">schedules</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Delete all other pipeline schedules that exists for this project</span>
-<span class="w">      </span><span class="s">&quot;Some</span><span class="nv"> </span><span class="s">schedule&quot;</span><span class="p p-Indicator">:</span>
-<span class="w">        </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
-<span class="w">        </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">MON-FRI&quot;</span>
-<span class="w">        </span><span class="nt">cron_timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;London&quot;</span>
-<span class="w">        </span><span class="nt">active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-</code></pre></div></p>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">my_label</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">color</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">red</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello world</span>
+</code></pre></div>
+<p>The same project labels can be applied to all projects in a group using the following syntax:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">my_label</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">color</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">red</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello world</span>
+</code></pre></div>
+<h2 id="group-labels">Group Labels<a class="headerlink" href="#group-labels" title="Permanent link">&para;</a></h2>
+<p>The keys name are as in the endpoints described in the <a href="https://docs.gitlab.com/ee/api/group_labels.html">GitLab Group Labels API docs</a>, f.e. <code>description</code>, <code>color</code> etc.</p>
+<p>We use <code>group_labels</code> as the key within the configuration to disambiguate from labels being applied to the Group and labels being applied to <strong>all Projects</strong> in a Group.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">group_labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">my_label</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">color</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">red</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello world</span>
+</code></pre></div>
+<p><code>enforce</code> is used to determine whether labels present in GitLab but not the configuration should be deleted or not. Without enabled <code>enforce: true</code> we retain any labels not present in the configuration, to support automated tooling which may apply labels based on user's rulesets and work practices, such as for Compliance Frameworks.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">group_labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">my_label</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">color</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">red</span>
+<span class="w">        </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello world</span>
+</code></pre></div>
 
 
 

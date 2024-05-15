@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -373,6 +373,8 @@
       
         
       
+        
+      
     
     
     
@@ -570,6 +572,27 @@
   
   <span class="md-ellipsis">
     Integrations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labels/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Labels
   </span>
   
 
@@ -1168,20 +1191,24 @@
 
 <h1 id="resource-groups">Resource Groups<a class="headerlink" href="#resource-groups" title="Permanent link">&para;</a></h1>
 <h2 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">&para;</a></h2>
-<p>A resource group must exist before the process mode can be updated. </p>
+<p>A resource group must exist before the process mode can be updated, except if the key name <code>ensure_exists</code> is present and is set to <code>false</code>.</p>
 <p>Add a resource group to a project by configuring it in your project's <code>gitlab-ci.yml</code> file. For more information, visit <a href="https://docs.gitlab.com/ee/ci/resource_groups/#add-a-resource-group">the appropriate GitLab's docs</a>.</p>
 <h2 id="update-process-mode">Update Process Mode<a class="headerlink" href="#update-process-mode" title="Permanent link">&para;</a></h2>
 <p>This section's purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/resource_groups/#process-modes">resource group process modes</a>.</p>
-<p>The key names are the resource group names associated with the project.</p>
-<p>The value for each key name is a key-value pair, with <code>process_mode</code> as the key and the value is one of the process 
+<p>The key name <code>ensure_exists</code> is optional - if set to <code>false</code> it will not fail when trying to process a non-existent resource group; default is <code>true</code>.</p>
+<p>The other key names are the resource group names associated with the project.
+The value for each key name is a key-value pair, with <code>process_mode</code> as the key and the value is one of the process 
 modes defined <a href="https://docs.gitlab.com/ee/ci/resource_groups/#change-the-process-mode">here</a>.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">resource_groups</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ensure_exists</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">      </span><span class="nt">staging</span><span class="p">:</span><span class="w"> </span>
 <span class="w">        </span><span class="nt">process_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oldest_first</span>
 <span class="w">      </span><span class="nt">production</span><span class="p">:</span><span class="w"> </span>
+<span class="w">        </span><span class="nt">process_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">newest_first</span>
+<span class="w">      </span><span class="nt">resource_group_that_dont_exist</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">process_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">newest_first</span>
 </code></pre></div>
 
@@ -1233,7 +1260,7 @@ modes defined <a href="https://docs.gitlab.com/ee/ci/resource_groups/#change-the
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a7c05c9e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
       
     
   </body>

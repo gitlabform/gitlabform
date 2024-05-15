@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -371,6 +371,8 @@
       
         
       
+        
+      
     
     
     
@@ -568,6 +570,27 @@
   
   <span class="md-ellipsis">
     Integrations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/labels/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Labels
   </span>
   
 
@@ -1170,23 +1193,11 @@
 <h2 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h2>
 <p>We try to follow the <a href="https://peps.python.org/pep-0440/">PEP 440</a> versioning scheme, which is mostly based on <a href="https://semver.org/">semantic versioning</a>.</p>
 <h2 id="procedure">Procedure<a class="headerlink" href="#procedure" title="Permanent link">&para;</a></h2>
+<p>The tooling relies on commit messages which follow the <a href="https://www.conventionalcommits.org/en/v1.0.0/#summary">conventional-commit format</a> in order to produce consistent human and machine-readable commit messages.</p>
 <ol>
-<li>Make sure you're on <code>main</code> branch and it is up-to-date.</li>
-<li>Add an entry in <a href="../../changelog/">changelog.md</a>. Remember to give thanks to all the contributors! Commit this change.</li>
-<li>
-<p>Update version using <a href="https://github.com/your-tools/tbump"><code>tbump</code></a>. Run <code>pipx run tbump &lt;new-semantic-version-number&gt;</code>.</p>
-<p><strong>Note</strong>: You may need to install <code>pipx</code> first if it's not already installed. Follow the instructions at <a href="https://pypa.github.io/pipx/installation/"><code>pipx</code> documentation</a>.</p>
-<p>Executing <code>tbump</code> will create a commit containing version updates to necessary files (i.e. <code>tbump.toml</code>, <code>version</code>), create a new tag from for the new version from the current <code>ref</code> in <code>main</code> branch, and finally push the commits and tag to remote.</p>
-<p>Following the above steps when a new tag is created, GitHub Action workflow will do following:</p>
-<ul>
-<li>Create a docker image containing new version of gitlabform and publish to <a href="https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform">github's package registry under gitlabform</a>.</li>
-<li>Upload new version of gitlabform to <a href="https://pypi.org/project/gitlabform/">pypi package registry under gitlabform</a>.</li>
-<li>A corresponding <a href="https://github.com/gitlabform/gitlabform/releases">GitHub release</a> will be created that references the new tag.</li>
-</ul>
-</li>
-<li>
-<p>Edit the release in GitHub and copy the changelog entry into its description.</p>
-</li>
+<li>We use <a href="https://github.com/googleapis/release-please"><code>release-please</code></a> to automate Version Bumps and CHANGELOG updates</li>
+<li>Release-Please reads the commits since last release and automatically generates a Changelog and Opens a PR</li>
+<li>To create a new Release we should merge in the "Release PR" created by <a href="https://github.com/google-github-actions/release-please-action">Release-Please github action</a></li>
 </ol>
 
 
@@ -1237,7 +1248,7 @@
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a7c05c9e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
       
     
   </body>
