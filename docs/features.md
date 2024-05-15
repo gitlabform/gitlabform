@@ -9,6 +9,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [Members using LDAP Group Links](reference/group_ldap_links.md) (**GitLab Premium (paid) only**),
     * [CI/CD variables](reference/ci_cd_variables.md#group-cicd-variables),
     * [Settings](reference/settings.md#group-settings),
+    * [Members using SAML Group Links](reference/group_saml_links.md) (**GitLab Premium (paid) only**),
 
 * Project:
     * [Archive/unarchive](reference/archive_unarchive.md),
