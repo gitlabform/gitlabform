@@ -140,7 +140,7 @@ class TestProjectLabels:
         # validate same id is being used
         assert created_label.id == new_label.id
 
-    def test__can_set_project_labels_at_group_level(
+    def test__project_labels_are_inherited_from_parent_group(
         self, gl, group, project_for_function
     ):
         # project_for_function is created in the group fixture

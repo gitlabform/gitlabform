@@ -15,9 +15,10 @@ class LabelsProcessor:
         group_or_project: Union[
             Group, Project
         ],  # Group | Project -> |: operand not supported in 3.8/3.9
-        needs_update_method: Callable,
+        needs_update: Callable,  # self._needs_update passed from AbstractProcessor called process_labels
     ):
-        existing_labels = group_or_project.labels.list()
+        # python-gitlab/python-gitlab#2843
+        existing_labels = group_or_project.labels.list(get_all=True)
         existing_label_names: List = []
 
         if isinstance(group_or_project, Group):
@@ -31,18 +32,24 @@ class LabelsProcessor:
                 label_name = full_label.name
 
                 if label_name not in configured_labels.keys():
-                    self.process_label_not_in_config(
-                        enforce, full_label, label_name, parent_object_type
-                    )
+                    debug(f"{label_name} not in configured labels")
+                    # only delete labels when enforce is true, because user's maybe automatically applying labels based
+                    # on Repo state, for example: Compliance Framework labels based on language or CI-template status
+                    if enforce:
+                        info(f"Removing {label_name} from {parent_object_type}")
+                        full_label.delete()
                 else:
-                    self.update_existing_label(
-                        configured_labels,
-                        existing_label_names,
-                        full_label,
-                        label_name,
-                        needs_update_method,
-                        parent_object_type,
-                    )
+                    configured_label = configured_labels.get(label_name)
+                    existing_label_names.append(label_name)
+
+                    if needs_update(full_label.asdict(), configured_label):
+                        self.update_existing_label(
+                            configured_label,
+                            full_label,
+                            parent_object_type,
+                        )
+                    else:
+                        debug(f"No update required for label: {label_name}")
 
         # add new labels
         for label_name in configured_labels.keys():
@@ -51,42 +58,22 @@ class LabelsProcessor:
                     configured_labels, group_or_project, label_name, parent_object_type
                 )
 
-    def process_label_not_in_config(
-        self,
-        enforce: bool,
-        full_label: Union[GroupLabel, ProjectLabel],  # GroupLabel | ProjectLabel
-        label_name: str,
-        parent_object_type: str,
-    ):
-        debug(f"{label_name} not in configured labels")
-        # only delete labels when enforce is true, because user's maybe automatically applying labels based
-        # on Repo state, for example: Compliance Framework labels based on language or CI-template status
-        if enforce:
-            info(f"Removing {label_name} from {parent_object_type}")
-            full_label.delete()
-
+    @staticmethod
     def update_existing_label(
-        self,
-        configured_labels,
-        existing_label_names: List,
+        configured_label,
         full_label: Union[GroupLabel, ProjectLabel],  # GroupLabel | ProjectLabel
-        label_name: str,
-        needs_update_method: Callable,
         parent_object_type: str,
     ):
-        info(f"Updating {label_name} on {parent_object_type}")
-        configured_label = configured_labels.get(label_name)
-        existing_label_names.append(label_name)
+        info(f"Updating {full_label.name} on {parent_object_type}")
 
-        if needs_update_method(full_label.asdict(), configured_label):
-            # label APIs in python-gitlab do not supply an update() method
-            for key in configured_label:
-                full_label.__setattr__(key, configured_label[key])
+        # label APIs in python-gitlab do not supply an update() method
+        for key in configured_label:
+            full_label.__setattr__(key, configured_label[key])
 
-            full_label.save()
+        full_label.save()
 
+    @staticmethod
     def create_new_label(
-        self,
         configured_labels,
         group_or_project: Union[Group, Project],  # Group | Project
         label_name: str,
