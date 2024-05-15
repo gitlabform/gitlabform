@@ -17,6 +17,9 @@ from gitlabform.processors.group.group_variables_processor import (
 from gitlabform.processors.group.group_settings_processor import (
     GroupSettingsProcessor,
 )
+from gitlabform.processors.group.group_labels_processor import (
+    GroupLabelsProcessor,
+)
 
 
 class GroupProcessors(AbstractProcessors):
@@ -28,4 +31,5 @@ class GroupProcessors(AbstractProcessors):
             GroupMembersProcessor(gitlab),
             GroupLDAPLinksProcessor(gitlab),
             GroupBadgesProcessor(gitlab),
+            GroupLabelsProcessor(gitlab),
         ]
