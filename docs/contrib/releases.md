@@ -6,20 +6,18 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
 
 ## Procedure
 
-The tooling relies on commit messages which follow the [conventional-commit format](https://www.conventionalcommits.org/en/v1.0.0/#summary) in order to produce consistent human and machine-readable commit messages.
+1. Make sure you're on `main` branch and it is up-to-date.
+2. Add an entry in [changelog.md](../changelog.md). Remember to give thanks to all the contributors! Commit this change.
+3. Update version using [`tbump`](https://github.com/your-tools/tbump). Run `pipx run tbump <new-semantic-version-number>`.
 
-1. We use [`release-please`](https://github.com/googleapis/release-please) to automate Version Bumps and CHANGELOG updates
-2. Release-Please reads the commits since last release and automatically generates a Changelog and Opens a PR
-3. To create a new Release we should merge in the "Release PR" created by [Release-Please github action](https://github.com/google-github-actions/release-please-action)
+    **Note**: You may need to install `pipx` first if it's not already installed. Follow the instructions at [`pipx` documentation](https://pypa.github.io/pipx/installation/).
 
-## [Release-Please Token](https://github.com/marketplace/actions/release-please-action#github-credentials)
-Due to limitations in [GITHUB_TOKEN](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow); 
-it cannot trigger other workflows on branches or tags, we use a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+    Executing `tbump` will create a commit containing version updates to necessary files (i.e. `tbump.toml`, `version`), create a new tag from for the new version from the current `ref` in `main` branch, and finally push the commits and tag to remote.
 
-This token requires the following Permissions
+    Following the above steps when a new tag is created, GitHub Action workflow will do following:
 
-### Permissions
-1. Repo
-2. Write: packages
+    - Create a docker image containing new version of gitlabform and publish to [github's package registry under gitlabform](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform).
+    - Upload new version of gitlabform to [pypi package registry under gitlabform](https://pypi.org/project/gitlabform/).
+    - A corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) will be created that references the new tag.
 
-### This Token Will Expire 15/05/2025
+3. Edit the release in GitHub and copy the changelog entry into its description.
