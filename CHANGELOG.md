@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.1](https://github.com/gitlabform/gitlabform/compare/v3.11.0...v3.11.1) (2024-05-16)
+
+
+### Bug Fixes
+
+* release process and deploy container to GHCR ([741ff75](https://github.com/gitlabform/gitlabform/commit/741ff751fc26f17ccaca51fd8212175e7657839b))
+
 ## [3.11.0](https://github.com/gitlabform/gitlabform/compare/v3.10.0...v3.11.0) (2024-05-15)
 
 
