@@ -12,17 +12,23 @@ The tooling relies on commit messages which follow the [conventional-commit form
 2. Release-Please reads the commits since last release and automatically generates a Changelog and Opens a PR
 3. To create a new Release we should merge in the "Release PR" created by [Release-Please github action](https://github.com/google-github-actions/release-please-action)
 
-## Post GitHub Release Actions
-Actions such as releasing to PyPi and GCHR must take place within `release-please.yml` rather than standalone workflows running on tag pushes because of limitations in the `GITHUB_TOKEN`: [Triggering a workflow from a workflow](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow).
+## Release-Please Token
+Due to limitations in [GITHUB_TOKEN](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow); 
+it cannot trigger other workflows on branches or tags, we use a [fine-grained personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+owned by the gitlabform repository.
 
-A `release_created` boolean is exposed by the `release-please` job to denote if it acted to create a Release PR or to create a GitHub Release, which can be consumed in later Jobs to determine when to trigger, for example:
+This token requires Repository Access to gitlabform/gitlabform.
 
-```yaml
-  publish:
-    needs:
-      - release-please
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        if: ${{ needs.release-please.outputs.release_created }}
-```
+This token requires the following Permissions
+
+### Repository Permissions
+1. Actions: read/write
+2. Attestations: read
+3. Commit statuses: read
+4. Contents: read/write
+5. Metadata: read
+6. Pull Requests: read/write
+7. Secrets: read
+8. Variables: read
+
+### This Token Will Expire 15/04/2025
