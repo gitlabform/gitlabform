@@ -12,23 +12,14 @@ The tooling relies on commit messages which follow the [conventional-commit form
 2. Release-Please reads the commits since last release and automatically generates a Changelog and Opens a PR
 3. To create a new Release we should merge in the "Release PR" created by [Release-Please github action](https://github.com/google-github-actions/release-please-action)
 
-## Release-Please Token
+## [Release-Please Token](https://github.com/marketplace/actions/release-please-action#github-credentials)
 Due to limitations in [GITHUB_TOKEN](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow); 
-it cannot trigger other workflows on branches or tags, we use a [fine-grained personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
-owned by the gitlabform repository.
-
-This token requires Repository Access to gitlabform/gitlabform.
+it cannot trigger other workflows on branches or tags, we use a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
 This token requires the following Permissions
 
-### Repository Permissions
-1. Actions: read/write
-2. Attestations: read
-3. Commit statuses: read
-4. Contents: read/write
-5. Metadata: read
-6. Pull Requests: read/write
-7. Secrets: read
-8. Variables: read
+### Permissions
+1. Repo
+2. Write: packages
 
-### This Token Will Expire 15/04/2025
+### This Token Will Expire 15/05/2025

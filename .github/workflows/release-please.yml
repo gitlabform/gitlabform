@@ -22,9 +22,9 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
+          release-type: python
+          token: ${{ secrets.RP_PAT }}
           # Default GITHUB_TOKEN does not have permission to trigger other Workflows
           # RELEASE_PLEASE_TOKEN is a fine-grained PAT associated with the gitlabform organisation: expires 15/04/25
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          release-type: python
 
 
