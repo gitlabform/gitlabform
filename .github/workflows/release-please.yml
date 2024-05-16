@@ -46,10 +46,10 @@ jobs:
   publish-docs:
     needs:
       - release-please
+    if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        if: ${{ needs.release-please.outputs.release_created }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -69,10 +69,10 @@ jobs:
   publish-to-pypi:
     needs:
       - release-please
+    if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        if: ${{ needs.release-please.outputs.release_created }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -90,9 +90,9 @@ jobs:
     needs:
       - release-please
     runs-on: ubuntu-latest
+    if: ${{ needs.release-please.outputs.release_created }}
     steps:
       - uses: actions/checkout@v4
-        if: ${{ needs.release-please.outputs.release_created }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
