@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.23">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -1091,6 +1091,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#post-github-release-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post GitHub Release Actions
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1171,6 +1180,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#post-github-release-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Post GitHub Release Actions
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1199,6 +1217,17 @@
 <li>Release-Please reads the commits since last release and automatically generates a Changelog and Opens a PR</li>
 <li>To create a new Release we should merge in the "Release PR" created by <a href="https://github.com/google-github-actions/release-please-action">Release-Please github action</a></li>
 </ol>
+<h2 id="post-github-release-actions">Post GitHub Release Actions<a class="headerlink" href="#post-github-release-actions" title="Permanent link">&para;</a></h2>
+<p>Actions such as releasing to PyPi and GCHR must take place within <code>release-please.yml</code> rather than standalone workflows running on tag pushes because of limitations in the <code>GITHUB_TOKEN</code>: <a href="https://docs.github.com/en/actions/using-workflows/triggering-a-workflow">Triggering a workflow from a workflow</a>.</p>
+<p>A <code>release_created</code> boolean is exposed by the <code>release-please</code> job to denote if it acted to create a Release PR or to create a GitHub Release, which can be consumed in later Jobs to determine when to trigger, for example:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">publish</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">needs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">release-please</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">        </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ needs.release-please.outputs.release_created }}</span>
+</code></pre></div>
 
 
 
@@ -1248,7 +1277,7 @@
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ebd0bdb7.min.js"></script>
       
     
   </body>
