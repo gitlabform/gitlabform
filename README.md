@@ -17,4 +17,4 @@
 
 Please see <a href="https://gitlabform.github.io/gitlabform/">the project site</a> for more information.
 
-GitLabForm is built and tested against [`gitlab-ee/16.11.2-ee.0`](https://hub.docker.com/r/gitlab/gitlab-ee/tags), we have not yet patched and verified changes for [GitLab 17.0](https://about.gitlab.com/releases/2024/05/16/gitlab-17-0-released/)
+GitLabForm is built and tested against [`gitlab-ee/latest`](https://hub.docker.com/r/gitlab/gitlab-ee/tags).
