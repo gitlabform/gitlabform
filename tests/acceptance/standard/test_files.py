@@ -124,7 +124,7 @@ class TestFiles:
         # check if no_access_branch stays protected after the file update
         assert branch.protected is True
 
-    def test__delete_file_specific_branch(self, project, branch):
+    def test__delete_file_protected_branch(self, project, branch):
         set_file_specific_branch = f"""
             projects_and_groups:
               {project.path_with_namespace}:
