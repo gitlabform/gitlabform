@@ -14,7 +14,7 @@ from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.branch_protector import BranchProtector
-
+from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
 
 class FilesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
@@ -25,26 +25,36 @@ class FilesProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for file in sorted(configuration["files"]):
+            project: Project = self.gl.get_project_by_path_cached(project_and_group)
             debug("Processing file '%s'...", file)
 
             if configuration.get("files|" + file + "|skip"):
                 debug("Skipping file '%s'", file)
                 continue
 
+            all_branches: list[ProjectBranch] = project.branches.list(get_all=True, lazy=True)
+            branches_to_update: list[str] = []
+
             if configuration["files"][file]["branches"] == "all":
-                all_branches = self.gitlab.get_branches(project_and_group)
+                # all_branches = self.gitlab.get_branches(project_and_group)
                 branches = sorted(all_branches)
+                branches_to_update = sorted(all_branches)
             elif configuration["files"][file]["branches"] == "protected":
-                protected_branches = self.gitlab.get_protected_branches(
-                    project_and_group
-                )
+                # protected_branches = self.gitlab.get_protected_branches(
+                #     project_and_group
+                # )
+                protected_branches: list[ProjectBranch] = project.protectedbranches.list(get_all=True, lazy=True)
                 branches = sorted(protected_branches)
+                branches_to_update = sorted(protected_branches)
             else:
-                all_branches = self.gitlab.get_branches(project_and_group)
+                # all_branches = self.gitlab.get_branches(project_and_group)
                 branches = []
                 for branch in configuration["files"][file]["branches"]:
-                    if branch in all_branches:
+                    # if branch in all_branches:
+                    #     branches.append(branch)
+                    if filter(lambda branch: branch['name'] == branch, all_branches):
                         branches.append(branch)
+                        branches_to_update.append(branch)
                     else:
                         message = f"! Branch '{branch}' not found, not processing file '{file}' in it"
                         if self.strict:
@@ -55,7 +65,7 @@ class FilesProcessor(AbstractProcessor):
                         else:
                             warning(message)
 
-            for branch in branches:
+            for branch in branches_to_update:
                 verbose(f"Processing file '{file}' in branch '{branch}'")
 
                 if configuration.get(
@@ -69,14 +79,15 @@ class FilesProcessor(AbstractProcessor):
 
                 if configuration.get("files|" + file + "|delete"):
                     try:
-                        self.gitlab.get_file(project_and_group, branch, file)
+                        # self.gitlab.get_file(project_and_group, branch, file)
+                        file_to_delete: ProjectFile = project.files.get(file_path=file,ref=branch)
                         debug("Deleting file '%s' in branch '%s'", file, branch)
                         self.modify_file_dealing_with_branch_protection(
-                            project_and_group,
-                            branch,
-                            file,
-                            "delete",
-                            configuration,
+                            project=project,
+                            branch_name=branch,
+                            file_to_operate_on=file_to_delete,
+                            operation="delete",
+                            configuration=configuration,
                         )
                     except NotFoundException:
                         debug(
@@ -162,11 +173,14 @@ class FilesProcessor(AbstractProcessor):
 
     def modify_file_dealing_with_branch_protection(
         self,
-        project_and_group,
-        branch,
-        file,
-        operation,
-        configuration,
+        project_and_group=None,
+        project: Project=None,
+        branch=None,
+        branch_name: str=None,
+        file=None,
+        file_to_operate_on: ProjectFile=None,
+        operation: str=None,
+        configuration: dict=None,
         new_content=None,
     ):
         # perhaps your user permissions are ok to just perform this operation regardless
@@ -174,7 +188,7 @@ class FilesProcessor(AbstractProcessor):
 
         try:
             self.just_modify_file(
-                project_and_group, branch, file, operation, configuration, new_content
+                project_and_group, project, branch, branch_name, file, file_to_operate_on, operation, configuration, new_content
             )
 
         except UnexpectedResponseException as e:
@@ -223,10 +237,13 @@ class FilesProcessor(AbstractProcessor):
     def just_modify_file(
         self,
         project_and_group,
-        branch,
-        file,
-        operation,
-        configuration,
+        project: Project=None,
+        branch=None,
+        branch_name: str=None,
+        file=None,
+        file_to_operate_on: ProjectFile=None,
+        operation: str=None,
+        configuration: dict=None,
         new_content=None,
     ):
         if operation == "modify":
@@ -246,12 +263,13 @@ class FilesProcessor(AbstractProcessor):
                 self.get_commit_message_for_file_change("add", file, configuration),
             )
         elif operation == "delete":
-            self.gitlab.delete_file(
-                project_and_group,
-                branch,
-                file,
-                self.get_commit_message_for_file_change("delete", file, configuration),
-            )
+            # self.gitlab.delete_file(
+            #     project_and_group,
+            #     branch,
+            #     file,
+            #     self.get_commit_message_for_file_change("delete", file, configuration),
+            # )
+            file_to_operate_on.delete(commit_message=self.get_commit_message_for_file_change("delete", file_to_operate_on.file_path, configuration), branch=branch_name)
 
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group
