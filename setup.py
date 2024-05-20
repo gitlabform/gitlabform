@@ -44,10 +44,10 @@ setup(
     include_package_data=True,
     python_requires=">=3.8.0",
     install_requires=[
-        "certifi",  # we want the latest root certs for security
+        "certifi==2024.2.2",
         "cli-ui==0.17.2",
         "ez-yaml==1.2.0",
-        "Jinja2==3.1.3",
+        "Jinja2==3.1.4",
         "luddite==1.0.4",
         "MarkupSafe==2.1.5",
         "mergedeep==1.3.4",
@@ -60,8 +60,8 @@ setup(
     ],
     extras_require={
         "test": [
-            "coverage==7.5.0",
-            "cryptography==42.0.5",
+            "coverage==7.5.1",
+            "cryptography==42.0.7",
             "deepdiff==7.0.1",
             "mypy==1.10.0",
             "mypy-extensions==1.0.0",

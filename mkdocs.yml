@@ -18,6 +18,7 @@ nav:
       - Files: reference/files.md
       - Group LDAP links: reference/group_ldap_links.md
       - Integrations: reference/integrations.md
+      - Labels: reference/labels.md
       - Members: reference/members.md
       - Merge Requests: reference/merge_requests.md
       - Pipeline schedules: reference/pipeline_schedules.md

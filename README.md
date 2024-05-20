@@ -16,3 +16,5 @@
 ...and more using hierarchical configuration written in YAML.
 
 Please see <a href="https://gitlabform.github.io/gitlabform/">the project site</a> for more information.
+
+GitLabForm is built and tested against [`gitlab-ee/latest`](https://hub.docker.com/r/gitlab/gitlab-ee/tags).

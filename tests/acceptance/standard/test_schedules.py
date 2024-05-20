@@ -65,7 +65,9 @@ class TestSchedules:
         )
         assert schedule is not None
         assert schedule.description == "New schedule"
-        assert schedule.ref == "main"
+        # If the Short Version is provided, the Full Version is returned:
+        # https://docs.gitlab.com/ee/api/pipeline_schedules.html#create-a-new-pipeline-schedule
+        assert schedule.ref == "refs/heads/main"
         assert schedule.cron == "0 * * * *"
         assert schedule.cron_timezone == "London"
         assert schedule.active is True
@@ -87,7 +89,7 @@ class TestSchedules:
         )
         assert schedule is not None
         assert schedule.description == "New schedule with mandatory fields"
-        assert schedule.ref == "main"
+        assert schedule.ref == "refs/heads/main"
         assert schedule.cron == "30 1 * * *"
         assert schedule.cron_timezone == "UTC"
         assert schedule.active is True
@@ -115,7 +117,7 @@ class TestSchedules:
         )
         assert schedule is not None
         assert schedule.description == "New schedule with variables"
-        assert schedule.ref == "main"
+        assert schedule.ref == "refs/heads/main"
         assert schedule.cron == "30 1 * * *"
         assert schedule.cron_timezone == "UTC"
         assert schedule.active is True
@@ -160,7 +162,7 @@ class TestSchedules:
         assert schedule.description == existing_schedule.description
 
         # Verify updates to schedule
-        assert schedule.ref == "scheduled/new-feature"
+        assert schedule.ref == "refs/heads/scheduled/new-feature"
         assert schedule.cron == "0 */4 * * *"
         assert schedule.cron_timezone == "Stockholm"
         assert schedule.active is False
@@ -199,7 +201,7 @@ class TestSchedules:
         assert schedule.description == existing_schedule.description
 
         # Verify schedule
-        assert schedule.ref == "main"
+        assert schedule.ref == "refs/heads/main"
         assert schedule.cron == "0 * * * *"
         assert schedule.active is True
 
@@ -209,7 +211,9 @@ class TestSchedules:
             in caplog.text
         )
 
-    def test__update_existing_schedule_with_variables(self, project_for_function):
+    def test__apply_existing_schedule_with_variables_to_new_branch(
+        self, project_for_function, branch_for_function
+    ):
         existing_schedule = project_for_function.pipelineschedules.create(
             {
                 "description": "Existing schedule with vars",
@@ -227,7 +231,7 @@ class TestSchedules:
           {project_for_function.path_with_namespace}:
             schedules:
               "Existing schedule with vars":
-                ref: scheduled/new-feature
+                ref: {branch_for_function}
                 cron: "0 */4 * * *"
                 cron_timezone: "Stockholm"
                 active: false
@@ -254,7 +258,7 @@ class TestSchedules:
         assert variable.get("key") == "existing_var"
         assert variable.get("value") == "new_value"
 
-        assert schedule.ref == "scheduled/new-feature"
+        assert schedule.ref == f"refs/heads/{branch_for_function}"
         assert schedule.cron == "0 */4 * * *"
         assert schedule.cron_timezone == "Stockholm"
         assert schedule.active is False
@@ -281,7 +285,7 @@ class TestSchedules:
 
         schedule = existing_schedules[0]
         assert schedule.description == "Existing schedule to replace"
-        assert schedule.ref == "scheduled/new-feature"
+        assert schedule.ref == "refs/heads/scheduled/new-feature"
         assert schedule.cron == "0 */3 * * *"
         assert schedule.cron_timezone == "London"
         assert schedule.active is True
@@ -326,7 +330,7 @@ class TestSchedules:
         assert len(schedules_after) == 1
         assert schedule is not None
         assert schedule.description == "New schedule to test enforce config"
-        assert schedule.ref == "main"
+        assert schedule.ref == "refs/heads/main"
         assert schedule.cron == "30 1 * * *"
         assert schedule.cron_timezone == "UTC"
         assert schedule.active is True
@@ -368,14 +372,14 @@ class TestSchedules:
 
         assert schedule1 is not None
         assert schedule1.description == "New schedule to test enforce config"
-        assert schedule1.ref == "main"
+        assert schedule1.ref == "refs/heads/main"
         assert schedule1.cron == "30 1 * * *"
         assert schedule1.cron_timezone == "UTC"
         assert schedule1.active is True
 
         assert schedule2 is not None
         assert schedule2.description == "New schedule with variables"
-        assert schedule2.ref == "main"
+        assert schedule2.ref == "refs/heads/main"
         assert schedule2.cron == "30 1 * * *"
         assert schedule2.cron_timezone == "UTC"
         assert schedule2.active is True

@@ -41,5 +41,9 @@ Thank you!
 
 ## GitLab Configuration as Code (GCasC)
 
-To configure your GitLab instance itself (appearance, application settings, features, license) please check out
-the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-configuration-as-code) project!
+Since [v3.10.0](https://github.com/gitlabform/gitlabform/releases/tag/v3.10.0) you can configure the GitLab's application settings too with GitLabForm.
+
+For possibly more instance-wide settings of GitLab (like appearance, features, license, etc.) you can also check out
+the [GitLab Configuration as Code (GCasC)](https://github.com/Roche/gitlab-configuration-as-code) project.
+
+(Although as of May 2024 it looks a bit stale.)

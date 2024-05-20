@@ -21,6 +21,9 @@ from gitlabform.processors.project.project_push_rules_processor import (
 from gitlabform.processors.project.project_settings_processor import (
     ProjectSettingsProcessor,
 )
+from gitlabform.processors.project.project_labels_processor import (
+    ProjectLabelsProcessor,
+)
 from gitlabform.processors.shared.protected_environments_processor import (
     ProtectedEnvironmentsProcessor,
 )
@@ -52,6 +55,7 @@ class ProjectProcessors(AbstractProcessors):
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
+            ProjectLabelsProcessor(gitlab),
             DeployKeysProcessor(gitlab),
             VariablesProcessor(gitlab),
             BranchesProcessor(gitlab, strict),
