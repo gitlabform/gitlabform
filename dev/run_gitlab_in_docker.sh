@@ -34,7 +34,7 @@ repo_root_directory="$script_directory/.."
 if [[ $# == 1 ]] ; then
   gitlab_version="$1"
 else
-  gitlab_version="16.11.2-ee.0"
+  gitlab_version="latest"
 fi
 
 if [[ $(uname -s) == 'Darwin' ]] && [[ $(uname -m) == 'arm64' ]] ; then

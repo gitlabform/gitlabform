@@ -17,6 +17,14 @@ There are 2 gitlabform specific keys/configs that can be set under `schedules` o
 - `delete` - set this to `true` under a specific schedule to delete that particular schedule.
 - `enforce` - set this to `true` under `schedules` so that any schedules that are not in `schedules` section are deleted.
 
+!!! warning
+
+    * Both a short version of a ref (e.g "main") and full version (e.g. "refs/heads/main") is accepted, GitLab will automatically expand short refs into full refs.
+
+    * If the short ref is ambigious it will be rejected: https://docs.gitlab.com/ee/api/pipeline_schedules.html#create-a-new-pipeline-schedule
+
+    * This appears to be more stringently enforced within GitLab 17.x
+
 
 Example 1:
 ```yaml
