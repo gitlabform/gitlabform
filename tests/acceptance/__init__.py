@@ -173,6 +173,9 @@ def get_only_branch_access_levels(project: Project, branch):
     if not protected_branch:
         return None, None, None, None, None
 
+    # !!! Note that this method is very limited - it only returns the state of the below fields,
+    # ignoring what is allowed for groups and very simple info about unprotect permissions !!!
+
     push_access_levels = set()
     merge_access_levels = set()
     push_access_user_ids = set()
@@ -181,6 +184,9 @@ def get_only_branch_access_levels(project: Project, branch):
 
     if "push_access_levels" in protected_branch.attributes:
         for push_access in protected_branch.push_access_levels:
+            # Access level is set automatically by GitLab if you configure to allow pushing for some user ids,
+            # so that's why when user_id is provided, we ignore access level here
+            # (See https://github.com/gitlabform/gitlabform/issues/510#issuecomment-1493421825 for more info)
             if not push_access["user_id"]:
                 push_access_levels.add(push_access["access_level"])
             else:
@@ -188,6 +194,9 @@ def get_only_branch_access_levels(project: Project, branch):
 
     if "merge_access_levels" in protected_branch.attributes:
         for merge_access in protected_branch.merge_access_levels:
+            # Access level is set automatically by GitLab if you configure to allow merging for some user ids,
+            # so that's why when user_id is provided, we ignore access level here
+            # (See https://github.com/gitlabform/gitlabform/issues/510#issuecomment-1493421825 for more info)
             if not merge_access["user_id"]:
                 merge_access_levels.add(merge_access["access_level"])
             else:
