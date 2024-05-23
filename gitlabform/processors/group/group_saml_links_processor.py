@@ -1,6 +1,5 @@
 from logging import debug
-from typing import List
-
+from typing import List, Union
 
 from gitlabform.gitlab import GitLab
 from gitlab.base import RESTObject, RESTObjectList
@@ -20,8 +19,8 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
         enforce_links = configuration.get("saml_group_links|enforce", False)
 
         group: Group = self.gl.get_group_by_path_cached(group_path)
-        existing_links: RESTObjectList | List[RESTObject] = self._fetch_saml_links(
-            group
+        existing_links: Union[RESTObjectList, List[RESTObject]] = (
+            self._fetch_saml_links(group)
         )
         existing_link_names = [existing_link.name for existing_link in existing_links]
 
@@ -44,7 +43,7 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
     def _delete_extra_links(
         self,
         group: Group,
-        existing: RESTObjectList | List[RESTObject],
+        existing: Union[RESTObjectList, List[RESTObject]],
         configured: dict,
     ) -> None:
         """Delete any SAML links that are not in the configuration."""
