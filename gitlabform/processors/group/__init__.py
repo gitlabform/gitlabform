@@ -11,7 +11,9 @@ from gitlabform.processors.group.group_ldap_links_processor import (
 from gitlabform.processors.group.group_members_processor import (
     GroupMembersProcessor,
 )
-from gitlabform.processors.group.group_saml_links_processor import GroupSAMLLinksProcessor
+from gitlabform.processors.group.group_saml_links_processor import (
+    GroupSAMLLinksProcessor,
+)
 from gitlabform.processors.group.group_variables_processor import (
     GroupVariablesProcessor,
 )
