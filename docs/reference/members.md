@@ -33,7 +33,7 @@ projects_and_groups:
 ```
 
 ### Custom Roles (GitLab Ultimate Only)
-Assigning of Custom Roles is supported within GitLabForm configuration.
+Assigning of Custom Roles to Project `members` is supported within GitLabForm configuration.
 
 !!! warning
 
@@ -75,6 +75,28 @@ projects_and_groups:
       users:
         my-user:
           access_level: owner
+      enforce: true
+      keep_bots: false
+```
+
+### Custom Roles (GitLab Ultimate Only)
+Assigning of Custom Roles to `group_members` is supported within GitLabForm configuration.
+
+!!! warning
+
+    * user `access_level` MUST still be supplied and MUST match the base_access_level of the custom role
+
+```yaml
+projects_and_groups:
+group_1/*:
+    group_members:
+      groups:
+        another-group:
+          group_access: no access
+      users:
+        my-user:
+          access_level: owner
+          member_role_id: 2
       enforce: true
       keep_bots: false
 ```
