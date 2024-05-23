@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.12.0
+
+### Features
+
+* support for group SAML links, closes [#549](https://github.com/gitlabform/gitlabform/issues/549), PR [#760](https://github.com/gitlabform/gitlabform/pull/760) ([mahadevan-karthi-dwp](https://github.com/mahadevan-karthi-dwp))
+* support for CI/CD Job Token Scope [#571](https://github.com/gitlabform/gitlabform/issues/571), PR [#758](https://github.com/gitlabform/gitlabform/pull/758) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Dependencies
+
+* Update py-test, python-gitlab, dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## [3.11.1](https://github.com/gitlabform/gitlabform/compare/v3.11.0...v3.11.1) (2024-05-16)
 
 

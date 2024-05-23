@@ -17,7 +17,7 @@ regex = '''
   '''
 
 [git]
-message_template = "Bump to {new_version}"
+message_template = "chore: bump to {new_version}"
 tag_template = "v{new_version}"
 
 # For each file to patch, add a [[file]] config
@@ -32,7 +32,7 @@ src = "version"
 
 [[before_commit]]
 name = "check changelog"
-cmd = "grep -q {new_version} docs/changelog.md"
+cmd = "grep -q {new_version} changelog.md"
 
 # Or run some commands after the git tag and the branch
 # have been pushed:
