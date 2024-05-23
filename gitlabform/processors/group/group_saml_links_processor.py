@@ -37,7 +37,7 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
         if enforce_links:
             self._delete_extra_links(group, existing_links, configured_links)
 
-    def _fetch_saml_links(self, group: Group) -> RESTObjectList | List[RESTObject]:
+    def _fetch_saml_links(self, group: Group):
         """Fetch the existing SAML links for a group."""
         return group.saml_group_links.list()
 
