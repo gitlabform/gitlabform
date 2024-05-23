@@ -1,35 +1,51 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -euo pipefail
+# ============================================================================
+#  GitLab Deployment Script
+#
+#  This script pulls the specified GitLab Docker image, stops and removes any
+#  existing GitLab container, configures the necessary volumes and environment,
+#  and starts a new GitLab container with predefined settings.
+#
+#  It also generates files with the GitLab URL and access token for use in
+#  other scripts or tests.
+# ============================================================================
 
-# based on https://stackoverflow.com/a/28709668/2693875 and https://stackoverflow.com/a/23006365/2693875
+# ============================================================================
+#  Functions
+# ============================================================================
+
+# Print colored output
 cecho() {
+  local color=$1 text=$2
+
   if [[ $TERM == "dumb" ]]; then
-    echo $2
-  else
-    local color=$1
-    local exp=$2
-    if ! [[ $color =~ ^[0-9]$ ]] ; then
-       case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
-        bk | black) color=0 ;;
-        r | red) color=1 ;;
-        g | green) color=2 ;;
-        y | yellow) color=3 ;;
-        b | blue) color=4 ;;
-        m | magenta) color=5 ;;
-        c | cyan) color=6 ;;
-        w | white|*) color=7 ;; # white or invalid color
-       esac
-    fi
-    tput setaf $color
-    # shellcheck disable=SC2086
-    echo $exp
-    tput sgr0
+    echo "$text"
+    return
   fi
+
+  case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
+    bk | black) color=0 ;;
+    r | red)    color=1 ;;
+    g | green)  color=2 ;;
+    y | yellow) color=3 ;;
+    b | blue)   color=4 ;;
+    m | magenta)color=5 ;;
+    c | cyan)   color=6 ;;
+    w | white | *) color=7 ;; # white or invalid color
+  esac
+
+  tput setaf "$color"
+  echo -e "$text"
+  tput sgr0
 }
 
-script_directory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-repo_root_directory="$script_directory/.."
+# ============================================================================
+#  Variables
+# ============================================================================
+
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+repo_root_dir="$script_dir/.."
 
 if [[ $# == 1 ]] ; then
   gitlab_version="$1"
@@ -43,88 +59,96 @@ else
   gitlab_image="gitlab/gitlab-ee"
 fi
 
-cecho b "Pulling GitLab image version '$gitlab_version'..."
-docker pull $gitlab_image:$gitlab_version
+# ============================================================================
+#  Main Logic
+# ============================================================================
 
+# Pull the GitLab Docker image
+cecho b "Pulling GitLab image version '$gitlab_version'..."
+docker pull "$gitlab_image:$gitlab_version"
+
+# Stop and remove any existing GitLab container
 cecho b "Preparing to start GitLab..."
-existing_gitlab_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}")
-if [[ -n $existing_gitlab_container_id ]] ; then
+existing_container_id=$(docker ps -a -f "name=gitlab" --format "{{.ID}}")
+if [[ -n $existing_container_id ]]; then
   cecho b "Stopping and removing existing GitLab container..."
-  docker stop --time=30 "$existing_gitlab_container_id"
-  docker rm "$existing_gitlab_container_id"
+  docker stop --time=30 "$existing_container_id"
+  docker rm "$existing_container_id"
 fi
 
-gitlab_omnibus_config="gitlab_rails['initial_root_password'] = 'mK9JnG7jwYdFcBNoQ3W3'; registry['enable'] = false; grafana['enable'] = false; prometheus_monitoring['enable'] = false;"
+# Configure volumes and environment
+if [[ -f "$repo_root_dir/Gitlab.gitlab-license" || -n "${GITLAB_EE_LICENSE:-}" ]]; then
+  mkdir -p "$repo_root_dir/config"
+  rm -rf "$repo_root_dir/config/*"
 
-if [[ -f $repo_root_directory/Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
-
-  mkdir -p $repo_root_directory/config
-  rm -rf $repo_root_directory/config/*
-
-  if [[ -f $repo_root_directory/Gitlab.gitlab-license ]]; then
+  if [[ -f "$repo_root_dir/Gitlab.gitlab-license" ]]; then
     cecho b "EE license file found - using it..."
-    cp $repo_root_directory/Gitlab.gitlab-license $repo_root_directory/config/
+    cp "$repo_root_dir/Gitlab.gitlab-license" "$repo_root_dir/config/"
   else
     cecho b "EE license env variable found - using it..."
-    echo "$GITLAB_EE_LICENSE" > $repo_root_directory/config/Gitlab.gitlab-license
+    echo "$GITLAB_EE_LICENSE" > "$repo_root_dir/config/Gitlab.gitlab-license"
   fi
 
-  gitlab_omnibus_config="$gitlab_omnibus_config gitlab_rails['initial_license_file'] = '/etc/gitlab/Gitlab.gitlab-license';"
-  config_volume="--volume $repo_root_directory/config:/etc/gitlab"
+  config_volume="--volume $repo_root_dir/config:/etc/gitlab"
 else
   config_volume=""
 fi
 
+# Start a new GitLab container
 cecho b "Starting GitLab..."
-# run GitLab with root password pre-set and as many unnecessary features disabled to speed up the startup
 docker run --detach \
-    --hostname localhost \
-    --env GITLAB_OMNIBUS_CONFIG="$gitlab_omnibus_config" \
-    --publish 443:443 --publish 80:80 --publish 2022:22 \
-    --name gitlab \
-    --restart always \
-    --volume "$repo_root_directory/dev/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
-    $config_volume \
-    --health-cmd '/healthcheck-and-setup.sh' \
-    --health-interval 2s \
-    --health-timeout 2m \
-    $gitlab_image:$gitlab_version
+  --hostname localhost \
+  --publish 443:443 --publish 80:80 --publish 2022:22 \
+  --name gitlab \
+  --restart always \
+  --volume "$repo_root_dir/dev/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
+  --volume "$repo_root_dir/dev/gitlab.rb:/etc/gitlab/gitlab.rb" \
+  $config_volume \
+  --health-cmd '/healthcheck-and-setup.sh' \
+  --health-interval 2s \
+  --health-timeout 2m \
+  "$gitlab_image:$gitlab_version"
 
-cecho b "Waiting 2 minutes before starting to check if GitLab has started..."
-cecho b "(Run this in another terminal you want to follow the instance logs:"
+cecho b "Waiting 2 minutes before checking if GitLab has started..."
+cecho b "(Run this in another terminal to follow the instance logs:"
 cecho y "docker logs -f gitlab"
 cecho b ")"
 sleep 120
 
-$script_directory/await-healthy.sh
+"$script_dir/await-healthy.sh"
 
-# create files with params needed by the tests to access GitLab
-# (we are using these files to pass values from this script to the outside bash shell
-# - we cannot change its env variables from inside it)
-echo "http://localhost" > $repo_root_directory/gitlab_url.txt
-echo "token-string-here123" > $repo_root_directory/gitlab_token.txt
+# Generate files with GitLab URL and access token
+echo "http://localhost" > "$repo_root_dir/gitlab_url.txt"
+echo "token-string-here123" > "$repo_root_dir/gitlab_token.txt"
 
-cecho b 'Starting GitLab complete!'
+# Display GitLab information
+cecho b 'GitLab started successfully!'
 echo ''
 cecho b 'GitLab version:'
-curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/version
+curl -s -H "Authorization:Bearer $(cat "$repo_root_dir/gitlab_token.txt")" http://localhost/api/v4/version
 echo ''
-if [[ -f $repo_root_directory/Gitlab.gitlab-license || -n "${GITLAB_EE_LICENSE:-}" ]] ; then
+
+if [[ -f "$repo_root_dir/Gitlab.gitlab-license" || -n "${GITLAB_EE_LICENSE:-}" ]]; then
   cecho b 'GitLab license (plan, is expired?):'
-  curl -s -H "Authorization:Bearer $(cat $repo_root_directory/gitlab_token.txt)" http://localhost/api/v4/license | jq '.plan, .expired'
+  curl -s -H "Authorization:Bearer $(cat "$repo_root_dir/gitlab_token.txt")" http://localhost/api/v4/license | jq '.plan, .expired'
   echo ''
 fi
+
 cecho b 'GitLab web UI URL (user: root, password: mK9JnG7jwYdFcBNoQ3W3 )'
 echo 'http://localhost'
 echo ''
-cecho b 'You can run these commands to stop and delete the GitLab container:'
+
+# Provide instructions for stopping and starting GitLab
+cecho b 'To stop and delete the GitLab container, run:'
 cecho r "docker stop --time=30 gitlab"
 cecho r "docker rm gitlab"
 echo ''
-cecho b 'To start GitLab container again, re-run this script. Note that GitLab will NOT keep any data'
-cecho b 'so the start will take a lot of time again. (But this is the only way to make GitLab in Docker stable.)'
+
+cecho b 'To start GitLab container again, re-run this script.'
+cecho b 'Note: GitLab will NOT keep any data, so the start will take time.'
+cecho b '(This is the only way to make GitLab in Docker stable.)'
 echo ''
-cecho b 'Run this to start the acceptance tests (it will automatically load GITLAB_URL from gitlab_url.txt'
-cecho b 'and GITLAB_TOKEN from gitlab_token.txt created by this script):'
-echo ''
+
+cecho b 'To start the acceptance tests, run:'
 cecho y 'pytest tests/acceptance'
+echo ''
