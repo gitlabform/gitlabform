@@ -9,10 +9,6 @@
       
       
       
-        <link rel="prev" href="../archive_unarchive/">
-      
-      
-        <link rel="next" href="../protected_branches/">
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
@@ -20,7 +16,7 @@
     
     
       
-        <title>Badges - GitLabForm</title>
+        <title>CI/CD job token scope - GitLabForm</title>
       
     
     
@@ -72,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#badges" class="md-skip">
+        <a href="#cicd-job-token-scope" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Badges
+              CI/CD job token scope
             
           </span>
         </div>
@@ -326,8 +322,6 @@
       
   
   
-    
-  
   
   
     
@@ -378,11 +372,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
           
@@ -404,7 +398,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             📋 Configuration
@@ -438,30 +432,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Badges
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../badges/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -470,44 +444,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#project-badges" class="md-nav__link">
-    <span class="md-ellipsis">
-      Project Badges
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#group-badges" class="md-nav__link">
-    <span class="md-ellipsis">
-      Group Badges
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1154,18 +1090,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#project-badges" class="md-nav__link">
+  <a href="#project-cicd-job-token-scope" class="md-nav__link">
     <span class="md-ellipsis">
-      Project Badges
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#group-badges" class="md-nav__link">
-    <span class="md-ellipsis">
-      Group Badges
+      Project CI/CD job token scope
     </span>
   </a>
   
@@ -1189,39 +1116,31 @@
   
 
 
-<h1 id="badges">Badges<a class="headerlink" href="#badges" title="Permanent link">&para;</a></h1>
-<h2 id="project-badges">Project Badges<a class="headerlink" href="#project-badges" title="Permanent link">&para;</a></h2>
-<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/badges.html#project-badges">project badges</a>.</p>
-<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the badges defined here will remain in the project, all other will be deleted.</p>
-<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/project_badges.html#add-a-badge-to-a-project">add a badge to a project endpoint</a>, with the appropriate <a href="https://docs.gitlab.com/ee/api/project_badges.html#placeholder-tokens">placeholder tokens</a>, but we <strong>require</strong> you to define the <code>name</code> of the badge.
-If the only non-required value is <code>delete: true</code> then the given badge is going to be removed.</p>
+<h1 id="cicd-job-token-scope">CI/CD job token scope<a class="headerlink" href="#cicd-job-token-scope" title="Permanent link">&para;</a></h1>
+<h2 id="project-cicd-job-token-scope">Project CI/CD job token scope<a class="headerlink" href="#project-cicd-job-token-scope" title="Permanent link">&para;</a></h2>
+<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/jobs/ci_job_token.html#control-job-token-access-to-your-project">project CI/CD job token scope</a></p>
+<p>The values are like documented at <a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html">Job Token Scope API docs</a>, <strong>except the Enabled</strong>.</p>
+<p>We use <code>limit_access_to_this_project</code> as the variable name for restricting access to the Project from other projects, rather than <code>inbound_enabled</code> in the GET and <code>enabled</code> in the PATCH requests defined in the api, in line with GitLab's UI and <a href="https://docs.gitlab.com/ee/update/deprecations.html#default-cicd-job-token-ci_job_token-scope-changed-1">intended language</a>.</p>
+<p>You can:</p>
+<ul>
+<li><a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html#patch-a-projects-cicd-job-token-access-settings">Limit access to a project</a></li>
+<li><a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html#add-a-project-to-a-cicd-job-token-inbound-allowlist">Add other projects to the job token allowlist</a></li>
+<li><a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html#add-a-group-to-a-cicd-job-token-allowlist">Add groups to the job token allowlist</a></li>
+</ul>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">badges</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">coverage</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Coverage&quot;</span>
-<span class="w">        </span><span class="nt">link_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://example.com/ci_status.svg?project=%{project_path}&amp;ref=%{default_branch}&quot;</span>
-<span class="w">        </span><span class="nt">image_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://shields.io/my/badge&quot;</span>
-<span class="w">      </span><span class="nt">old-badge-to-delete</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;a-badge&quot;</span>
-<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span>
-</code></pre></div>
-<h2 id="group-badges">Group Badges<a class="headerlink" href="#group-badges" title="Permanent link">&para;</a></h2>
-<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/badges.html#group-badges">group badges</a>.</p>
-<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the badges defined here will remain in the group, all other will be deleted.</p>
-<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/group_badges.html#add-a-badge-to-a-group">add a badge to a group endpoint</a>, with the appropriate <a href="https://docs.gitlab.com/ee/api/group_badges.html#placeholder-tokens">placeholder tokens</a>, but we <strong>require</strong> you to define the <code>name</code> of the badge.
-If the only non-required value is <code>delete: true</code> then the given badge is going to be removed.</p>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">group_badges</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">group-pipeline-status</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Group</span><span class="nv"> </span><span class="s">Badge&quot;</span>
-<span class="w">        </span><span class="nt">link_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://gitlab.yourcompany.com/%{project_path}/-/commits/%{default_branch}&quot;</span>
-<span class="w">        </span><span class="nt">image_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://gitlab.yourcompany.com/%{project_path}/badges/%{default_branch}/pipeline.svg&quot;</span>
-<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span>
+<span class="w">    </span><span class="nt">job_token_scope</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">limit_access_to_this_project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">allowlist</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># When enforce enabled, projects/groups set in GitLab but not in Config will be removed from allowlists</span>
+<span class="w">        </span><span class="nt">projects</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123</span><span class="w"> </span><span class="c1"># Add by project ID</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-bar/project-foo</span><span class="w"> </span><span class="c1"># Add by Path/Name</span>
+<span class="w">        </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span><span class="c1"># Add by group ID</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-bar</span><span class="w"> </span><span class="c1"># Add by Group Name (will include all sub-groups)</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-abc/subgroup-xyz</span><span class="w"> </span><span class="c1"># Add Subgroup </span>
 </code></pre></div>
 
 

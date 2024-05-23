@@ -9,10 +9,6 @@
       
       
       
-        <link rel="prev" href="../archive_unarchive/">
-      
-      
-        <link rel="next" href="../protected_branches/">
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
@@ -20,7 +16,7 @@
     
     
       
-        <title>Badges - GitLabForm</title>
+        <title>Group SAML links - GitLabForm</title>
       
     
     
@@ -72,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#badges" class="md-skip">
+        <a href="#group-saml-links" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Badges
+              Group SAML links
             
           </span>
         </div>
@@ -326,8 +322,6 @@
       
   
   
-    
-  
   
   
     
@@ -378,11 +372,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
           
@@ -404,7 +398,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             📋 Configuration
@@ -438,30 +432,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Badges
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../badges/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -470,44 +444,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#project-badges" class="md-nav__link">
-    <span class="md-ellipsis">
-      Project Badges
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#group-badges" class="md-nav__link">
-    <span class="md-ellipsis">
-      Group Badges
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1147,32 +1083,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#project-badges" class="md-nav__link">
-    <span class="md-ellipsis">
-      Project Badges
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#group-badges" class="md-nav__link">
-    <span class="md-ellipsis">
-      Group Badges
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -1189,38 +1099,28 @@
   
 
 
-<h1 id="badges">Badges<a class="headerlink" href="#badges" title="Permanent link">&para;</a></h1>
-<h2 id="project-badges">Project Badges<a class="headerlink" href="#project-badges" title="Permanent link">&para;</a></h2>
-<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/badges.html#project-badges">project badges</a>.</p>
-<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the badges defined here will remain in the project, all other will be deleted.</p>
-<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/project_badges.html#add-a-badge-to-a-project">add a badge to a project endpoint</a>, with the appropriate <a href="https://docs.gitlab.com/ee/api/project_badges.html#placeholder-tokens">placeholder tokens</a>, but we <strong>require</strong> you to define the <code>name</code> of the badge.
-If the only non-required value is <code>delete: true</code> then the given badge is going to be removed.</p>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">badges</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">coverage</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Coverage&quot;</span>
-<span class="w">        </span><span class="nt">link_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://example.com/ci_status.svg?project=%{project_path}&amp;ref=%{default_branch}&quot;</span>
-<span class="w">        </span><span class="nt">image_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://shields.io/my/badge&quot;</span>
-<span class="w">      </span><span class="nt">old-badge-to-delete</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;a-badge&quot;</span>
-<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span>
-</code></pre></div>
-<h2 id="group-badges">Group Badges<a class="headerlink" href="#group-badges" title="Permanent link">&para;</a></h2>
-<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/badges.html#group-badges">group badges</a>.</p>
-<p>Key names here are just any labels, except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the badges defined here will remain in the group, all other will be deleted.</p>
-<p>The values are as documented at <a href="https://docs.gitlab.com/ee/api/group_badges.html#add-a-badge-to-a-group">add a badge to a group endpoint</a>, with the appropriate <a href="https://docs.gitlab.com/ee/api/group_badges.html#placeholder-tokens">placeholder tokens</a>, but we <strong>require</strong> you to define the <code>name</code> of the badge.
-If the only non-required value is <code>delete: true</code> then the given badge is going to be removed.</p>
+<h1 id="group-saml-links">Group SAML links<a class="headerlink" href="#group-saml-links" title="Permanent link">&para;</a></h1>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
+</div>
+<p>This section purpose is to manage <a href="https://docs.gitlab.com/ee/user/group/saml_sso/group_sync.html#configure-saml-group-links">group membership via SAML group links</a>.</p>
+<p>Key names here are just any labels.</p>
+<p>Except if the key name is <code>enforce</code> and is set to <code>true</code> - then only the group SAML links defined here will remain in the group, all other will be deleted.</p>
+<p>Values are like documented at <a href="https://docs.gitlab.com/ee/api/groups.html#saml-group-links">SAML Group Links section of the Groups API docs</a>, <strong>except the id</strong>.</p>
+<p>The <code>saml_group_name</code> should be set to the SAML group name</p>
+<p>The <code>access_level</code> should be set to one of the <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access levels</a>.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">group_badges</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">group-pipeline-status</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Group</span><span class="nv"> </span><span class="s">Badge&quot;</span>
-<span class="w">        </span><span class="nt">link_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://gitlab.yourcompany.com/%{project_path}/-/commits/%{default_branch}&quot;</span>
-<span class="w">        </span><span class="nt">image_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://gitlab.yourcompany.com/%{project_path}/badges/%{default_branch}/pipeline.svg&quot;</span>
+<span class="w">    </span><span class="nt">saml_group_links</span><span class="p">:</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">devops_are_maintainers</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">saml_group_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">devops</span>
+<span class="w">        </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+<span class="w">      </span><span class="nt">developers_are_developers</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">saml_group_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developers</span>
+<span class="w">        </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span>
+
 <span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># optional</span>
 </code></pre></div>
 
