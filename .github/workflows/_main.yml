@@ -31,3 +31,5 @@ jobs:
   tests-premium:
     uses: ./.github/workflows/tests-premium.yml
 
+  tests-ultimate:
+    uses: ./.github/workflows/tests-ultimate.yml
