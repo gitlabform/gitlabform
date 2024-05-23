@@ -30,6 +30,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [Settings](reference/settings.md#project-settings),
     * [Tags protect/unprotect](reference/tags_protection.md),
     * [Resource groups](reference/resource_groups.md),
+    * [CI/CD Job Token Scope](reference/job_token_scope.md)
 
 ...for:
 

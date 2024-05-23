@@ -14,6 +14,9 @@ from gitlabform.processors.project.deploy_keys_processor import (
 from gitlabform.processors.project.files_processor import FilesProcessor
 from gitlabform.processors.project.hooks_processor import HooksProcessor
 from gitlabform.processors.project.members_processor import MembersProcessor
+from gitlabform.processors.project.job_token_scope_processor import (
+    JobTokenScopeProcessor,
+)
 from gitlabform.processors.project.project_processor import ProjectProcessor
 from gitlabform.processors.project.project_push_rules_processor import (
     ProjectPushRulesProcessor,
@@ -56,6 +59,7 @@ class ProjectProcessors(AbstractProcessors):
             ProjectSettingsProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
             ProjectLabelsProcessor(gitlab),
+            JobTokenScopeProcessor(gitlab),
             DeployKeysProcessor(gitlab),
             VariablesProcessor(gitlab),
             BranchesProcessor(gitlab, strict),
