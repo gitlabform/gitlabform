@@ -106,7 +106,7 @@ class TestProjectJobTokenScope:
         assert len(job_token_scope.allowlist.list()) == 2
         assert len(job_token_scope.groups_allowlist.list()) == 0
 
-        job_token_scope = f"""
+        job_token_scope_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             job_token_scope:
@@ -117,7 +117,7 @@ class TestProjectJobTokenScope:
                   - {other_project.path_with_namespace}
         """
 
-        run_gitlabform(job_token_scope, project)
+        run_gitlabform(job_token_scope_config, project)
 
         scope = project.job_token_scope.get()
 
@@ -364,7 +364,7 @@ class TestProjectJobTokenScope:
         )
         job_token_scope.save()
 
-        job_token_scope = f"""
+        job_token_scope_config = f"""
            projects_and_groups:
              {project.path_with_namespace}:
                job_token_scope:
@@ -374,7 +374,7 @@ class TestProjectJobTokenScope:
                      - {other_group.name}
            """
 
-        run_gitlabform(job_token_scope, project)
+        run_gitlabform(job_token_scope_config, project)
 
         scope = project.job_token_scope.get()
 
