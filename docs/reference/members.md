@@ -35,6 +35,10 @@ projects_and_groups:
 ### Custom Roles (GitLab Ultimate Only)
 Assigning of Custom Roles to Project `members` is supported within GitLabForm configuration.
 
+`member_role` parameter can be supplied as either the name or id. 
+
+Support is provided for both SaaS and Self-Managed/Dedicated deployments of GitLab; GitLabForm will determine which [Member Roles API](https://docs.gitlab.com/ee/api/member_roles.html) to query
+
 !!! warning
 
     * user `access_level` MUST still be supplied and MUST match the base_access_level of the custom role
@@ -46,7 +50,20 @@ projects_and_groups:
       users:
         my-user:
           access_level: maintainer
-          member_role_id: 2
+          member_role: 2
+          expires_at: 2025-09-26
+      enforce: true
+      keep_bots: true
+```
+
+```yaml
+projects_and_groups:
+  group_1/project_1:
+    members:
+      users:
+        my-user:
+          access_level: maintainer
+          member_role: Limited_Maintainer
           expires_at: 2025-09-26
       enforce: true
       keep_bots: true
@@ -82,6 +99,10 @@ projects_and_groups:
 ### Custom Roles (GitLab Ultimate Only)
 Assigning of Custom Roles to `group_members` is supported within GitLabForm configuration.
 
+`member_role` parameter can be supplied as either the name or id. 
+
+Support is provided for both SaaS and Self-Managed/Dedicated deployments of GitLab; GitLabForm will determine which [Member Roles API](https://docs.gitlab.com/ee/api/member_roles.html) to query
+
 !!! warning
 
     * user `access_level` MUST still be supplied and MUST match the base_access_level of the custom role
@@ -96,7 +117,22 @@ group_1/*:
       users:
         my-user:
           access_level: owner
-          member_role_id: 2
+          member_role: 2
+      enforce: true
+      keep_bots: false
+```
+
+```yaml
+projects_and_groups:
+group_1/*:
+    group_members:
+      groups:
+        another-group:
+          group_access: no access
+      users:
+        my-user:
+          access_level: owner
+          member_role: Dev_ReadOnly
       enforce: true
       keep_bots: false
 ```

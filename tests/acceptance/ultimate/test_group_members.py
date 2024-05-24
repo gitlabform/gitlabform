@@ -3,7 +3,7 @@ from tests.acceptance import run_gitlabform
 
 
 class TestGroupMembers:
-    def test__add_user_to_group_members_with_custom_role(
+    def test__add_user_to_group_members_with_custom_role_by_id(
         self, gl, group_for_function, users, random_string
     ):
         base_access_level = AccessLevel.REPORTER.value
@@ -16,7 +16,35 @@ class TestGroupMembers:
                     users:
                       {users[0].username}:
                         access_level: {base_access_level}
-                        member_role_id: {member_role_id}
+                        member_role: {member_role_id}
+              """
+
+        run_gitlabform(add_users, group_for_function)
+
+        members = group_for_function.members.list(get_all=True)
+        assert len(members) == 2
+
+        member = members[1]
+        assert member.username == users[0].username
+        assert member.access_level == base_access_level
+        assert member.get_id() == users[0].get_id()
+        assert member.member_role["id"] == member_role_id
+        assert member.member_role["base_access_level"] == base_access_level
+
+    def test__add_user_to_group_members_with_custom_role_by_name(
+        self, gl, group_for_function, users, random_string
+    ):
+        base_access_level = AccessLevel.REPORTER.value
+        member_role_id = self._create_custom_role(gl, base_access_level, random_string)
+
+        add_users = f"""
+              projects_and_groups:
+                {group_for_function.full_path}/*:
+                  group_members:
+                    users:
+                      {users[0].username}:
+                        access_level: {base_access_level}
+                        member_role: {random_string}
               """
 
         run_gitlabform(add_users, group_for_function)

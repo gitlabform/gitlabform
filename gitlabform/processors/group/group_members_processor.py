@@ -200,10 +200,13 @@ class GroupMembersProcessor(AbstractProcessor):
                         else None
                     )
 
-                    member_role_id_to_set = (
-                        users_to_set_by_username[user]["member_role_id"]
-                        if "member_role_id" in users_to_set_by_username[user]
+                    member_role_id_or_name = (
+                        users_to_set_by_username[user]["member_role"]
+                        if "member_role" in users_to_set_by_username[user]
                         else None
+                    )
+                    member_role_id_to_set = self.gl.get_member_role_id_cached(
+                        member_role_id_or_name, group.get_id()
                     )
 
                     common_username = user.lower()
