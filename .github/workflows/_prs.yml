@@ -100,3 +100,38 @@ jobs:
             token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
+
+  # you cannot use reusable workflows with an "environment" key,
+  # so we have to copy "tests-ultimate.yml" here :(
+  acceptance-tests-ultimate:
+    runs-on: ubuntu-latest
+
+    needs: [ approve ] # Require the first step to finish
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+      
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: [3.12]
+      fail-fast : false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install test dependencies
+        run: |
+          pip install wheel
+          pip install -e .[test]
+      - name: Run acceptance tests that require Ultimate license (OPTIONAL)
+        continue-on-error: true # Ultimate License via link only lasts for 90days so may need renewing, don't block other PRs
+        env:
+          # requested via: https://handbook.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows/#contributing-to-the-gitlab-enterprise-edition-ee
+          # https://gitlab.com/gitlab-org/developer-relations/contributor-success/team-task/-/issues
+          GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_ULTIMATE_LICENSE }}
+        run: |
+          ./dev/run_gitlab_in_docker.sh
+          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate
+      
