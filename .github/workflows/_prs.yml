@@ -133,5 +133,5 @@ jobs:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_ULTIMATE_LICENSE }}
         run: |
           ./dev/run_gitlab_in_docker.sh
-          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate
+          pytest --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate
       
