@@ -74,23 +74,32 @@ class PythonGitlab(Gitlab):
         return self.http_get(path)
 
     @functools.lru_cache()
-    def get_member_role_cached(self, name_or_id, group_id: Union[int, None]):
+    def get_member_role_cached(
+        self, name_or_id: Union[int, str], group_id: Union[int, None]
+    ):
         member_roles = self.get_member_roles_cached(group_id)
         for member_role in member_roles:
-            if member_role["id"] == name_or_id or member_role["name"] == name_or_id:
+            if member_role["id"] == name_or_id:
+                return member_role
+            elif (
+                type(name_or_id) == str
+                and member_role["name"].lower() == name_or_id.lower()
+            ):
                 return member_role
 
-        return None
+        # Failed to find member role so throw an exception explaining such to user
+        raise GitlabGetError(
+            f"Member Role with name or id {name_or_id} could not be found",
+            404,
+        )
 
     @functools.lru_cache()
     def get_member_role_id_cached(
-        self, name_or_id, group_id: Union[int, None]
-    ) -> Union[int, None]:
+        self, name_or_id: Union[int, str], group_id: Union[int, None]
+    ) -> int:
         member_role = self.get_member_role_cached(name_or_id, group_id)
-        if member_role:
-            return member_role["id"]
-        return None
+        return member_role["id"]
 
     @functools.lru_cache()
-    def is_gitlab_saas(self):
+    def is_gitlab_saas(self) -> bool:
         return self.url == gitlab.const.DEFAULT_URL
