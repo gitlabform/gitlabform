@@ -107,8 +107,6 @@ jobs:
     runs-on: ubuntu-latest
 
     needs: [ approve ] # Require the first step to finish
-    environment:
-      name: Integrate Pull Request # Our dummy environment
       
     strategy:
       max-parallel: 5
@@ -116,7 +114,11 @@ jobs:
         python-version: [3.12]
       fail-fast : false
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code from the PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
