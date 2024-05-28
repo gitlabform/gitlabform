@@ -53,7 +53,7 @@ setup(
         "mergedeep==1.3.4",
         "packaging==24.0",
         "python-gitlab==4.5.0",
-        "requests==2.32.0",
+        "requests==2.32.2",
         "ruamel.yaml==0.17.21",
         "types-requests==2.32.0.20240523",
         "yamlpath==3.8.2",
