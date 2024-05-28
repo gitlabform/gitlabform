@@ -107,7 +107,9 @@ jobs:
     runs-on: ubuntu-latest
 
     needs: [ approve ] # Require the first step to finish
-      
+    environment:
+      name: Integrate Pull Request # Our dummy environment
+
     strategy:
       max-parallel: 5
       matrix:
