@@ -1,6 +1,7 @@
 from logging import debug
 from cli_ui import debug as verbose
 from cli_ui import fatal
+from gitlab.v4.objects import Project
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
@@ -115,6 +116,25 @@ class MembersProcessor(AbstractProcessor):
                     if "access_level" in users[user]
                     else None
                 )
+                member_role_id_or_name = (
+                    users[user]["member_role"] if "member_role" in users[user] else None
+                )
+                if member_role_id_or_name:
+                    # For self-managed member_roles are at an instance level, for SaaS on a Group level
+                    if self.gl.is_gitlab_saas():
+                        project: Project = self.gl.get_project_by_path_cached(
+                            project_and_group
+                        )
+                        group_id = project.namespace["id"]
+                    else:
+                        group_id = None
+
+                    member_role_id = self.gl.get_member_role_id_cached(
+                        member_role_id_or_name, group_id
+                    )
+                else:
+                    member_role_id = None
+
                 # we only add the user if it doesn't have the correct settings.
                 # To make sure that the user hasn't been added in a different
                 # case, we enforce that the username is always in lowercase for
@@ -140,7 +160,11 @@ class MembersProcessor(AbstractProcessor):
                             common_username,
                         )
                         self.gitlab.edit_member_of_project(
-                            project_and_group, common_username, access_level, expires_at
+                            project_and_group,
+                            common_username,
+                            access_level,
+                            member_role_id,
+                            expires_at,
                         )
                 else:
                     debug(
@@ -148,7 +172,11 @@ class MembersProcessor(AbstractProcessor):
                         common_username,
                     )
                     self.gitlab.add_member_to_project(
-                        project_and_group, common_username, access_level, expires_at
+                        project_and_group,
+                        common_username,
+                        access_level,
+                        member_role_id,
+                        expires_at,
                     )
 
         if enforce_members:

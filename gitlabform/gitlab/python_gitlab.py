@@ -1,6 +1,7 @@
 import functools
 from typing import Union
 
+import gitlab.const
 from gitlab import Gitlab, GitlabGetError
 from gitlab.base import RESTObject, RESTObjectList
 from gitlab.v4.objects import Group, Project
@@ -50,3 +51,55 @@ class PythonGitlab(Gitlab):
             )
 
         return users[0]
+
+    @functools.lru_cache()
+    def get_member_roles_cached(self, group_id: Union[int, None]):
+        """Python-Gitlab does not natively support Member Roles yet
+        use https://python-gitlab.readthedocs.io/en/stable/api-levels.html#lower-level-api-http-methods
+        to directly invoke member_roles GET endpoint(s) in GitLab
+        https://docs.gitlab.com/ee/api/member_roles.html
+        """
+        if self.is_gitlab_saas():
+            if group_id is None:
+                raise GitlabGetError(
+                    f"Group Id must be provided when getting member roles on GitLab SaaS",
+                    404,
+                )
+            # SAAS
+            path = f"groups/{group_id}/member_roles"
+        else:
+            # Self-Managed & Dedicated
+            path = f"/member_roles"
+
+        return self.http_get(path)
+
+    @functools.lru_cache()
+    def get_member_role_cached(
+        self, name_or_id: Union[int, str], group_id: Union[int, None]
+    ):
+        member_roles = self.get_member_roles_cached(group_id)
+        for member_role in member_roles:
+            if member_role["id"] == name_or_id:
+                return member_role
+            elif (
+                type(name_or_id) == str
+                and member_role["name"].lower() == name_or_id.lower()
+            ):
+                return member_role
+
+        # Failed to find member role so throw an exception explaining such to user
+        raise GitlabGetError(
+            f"Member Role with name or id {name_or_id} could not be found",
+            404,
+        )
+
+    @functools.lru_cache()
+    def get_member_role_id_cached(
+        self, name_or_id: Union[int, str], group_id: Union[int, None]
+    ) -> int:
+        member_role = self.get_member_role_cached(name_or_id, group_id)
+        return member_role["id"]
+
+    @functools.lru_cache()
+    def is_gitlab_saas(self) -> bool:
+        return self.url == gitlab.const.DEFAULT_URL

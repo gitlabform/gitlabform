@@ -200,6 +200,15 @@ class GroupMembersProcessor(AbstractProcessor):
                         else None
                     )
 
+                    member_role_id_or_name = (
+                        users_to_set_by_username[user]["member_role"]
+                        if "member_role" in users_to_set_by_username[user]
+                        else None
+                    )
+                    member_role_id_to_set = self.gl.get_member_role_id_cached(
+                        member_role_id_or_name, group.get_id()
+                    )
+
                     common_username = user.lower()
                     user_id = self.gl.get_user_id(user)
 
@@ -208,10 +217,14 @@ class GroupMembersProcessor(AbstractProcessor):
 
                         access_level_before = users_before[common_username].access_level
                         expires_at_before = users_before[common_username].expires_at
+                        member_role_id_before = users_before[
+                            common_username
+                        ].member_role["id"]
 
                         if (
                             access_level_before == access_level_to_set
                             and expires_at_before == expires_at_to_set
+                            and member_role_id_before == member_role_id_to_set
                         ):
                             debug(
                                 "Nothing to change for user '%s' - same config now as to set.",
@@ -225,6 +238,7 @@ class GroupMembersProcessor(AbstractProcessor):
 
                             group_member.access_level = access_level_to_set
                             group_member.expires_at = expires_at_to_set
+                            group_member.member_role_id = member_role_id_to_set
                             group_member.save()
 
                     else:
@@ -237,6 +251,7 @@ class GroupMembersProcessor(AbstractProcessor):
                                 "user_id": user_id,
                                 "access_level": access_level_to_set,
                                 "expires_at": expires_at_to_set,
+                                "member_role_id": member_role_id_to_set,
                             }
                         )
 
