@@ -24,7 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ BRANCH_REF }}
+          ref: ${{ env.BRANCH_REF }}
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
@@ -65,7 +65,7 @@ jobs:
       - name: Checkout code from the PR
         uses: actions/checkout@v4
         with:
-          ref: ${{ BRANCH_REF }}
+          ref: ${{ env.BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -88,7 +88,7 @@ jobs:
           with: |
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
-            override_commit: ${{ BRANCH_REF }}
+            override_commit: ${{ env.BRANCH_REF }}
             token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
@@ -111,7 +111,7 @@ jobs:
       - name: Checkout code from the PR
         uses: actions/checkout@v4
         with:
-          ref: ${{ BRANCH_REF }}
+          ref: ${{ env.BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
