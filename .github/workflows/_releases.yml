@@ -23,8 +23,32 @@ jobs:
   tests-premium:
     uses: ./.github/workflows/tests-premium.yml
 
-  build-docs:
-    uses: ./.github/workflows/docs.yml
+  publish-docs:
+    needs:
+      - linters
+      - tests-standard
+      - tests-premium
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ BRANCH_REF }}
+          fetch-depth: 2
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+      - name: Install dependencies
+        run: |
+          pip install -e .[docs]
+      - name: Build docs
+        run: |
+          mkdocs build
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          branch: gh-pages
+          folder: site
 
   publish-to-github:
     needs:
