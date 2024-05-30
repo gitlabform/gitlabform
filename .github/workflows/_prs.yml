@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  BRANCH_REF: ${{ github.event.pull_request.head.sha }}
+
 jobs:
 
   approve:
@@ -20,7 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        with:
+          ref: ${{ BRANCH_REF }}
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
@@ -35,19 +39,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
   build-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
-      - name: Install dependencies
-        run: |
-          pip install -e .[docs]
-      - name: Build docs
-        run: |
-          mkdocs build
+    uses: ./.github/workflows/docs.yml
 
   linters:
     uses: ./.github/workflows/linters.yml
@@ -73,7 +65,7 @@ jobs:
       - name: Checkout code from the PR
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -96,7 +88,7 @@ jobs:
           with: |
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
-            override_commit: ${{ github.event.pull_request.head.sha }}
+            override_commit: ${{ BRANCH_REF }}
             token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
@@ -119,7 +111,7 @@ jobs:
       - name: Checkout code from the PR
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -137,5 +129,4 @@ jobs:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_ULTIMATE_LICENSE }}
         run: |
           ./dev/run_gitlab_in_docker.sh
-          pytest --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate
-      
+          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate

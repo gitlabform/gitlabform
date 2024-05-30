@@ -9,6 +9,9 @@ permissions:
   contents: write
   packages: write
 
+env:
+  BRANCH_REF: ${{ github.ref }} # The fully-formed ref of the branch or tag that triggered the workflow run
+
 jobs:
 
   linters:
@@ -20,29 +23,8 @@ jobs:
   tests-premium:
     uses: ./.github/workflows/tests-premium.yml
 
-  publish-docs:
-    needs:
-      - linters
-      - tests-standard
-      - tests-premium
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
-      - name: Install dependencies
-        run: |
-          pip install -e .[docs]
-      - name: Build docs
-        run: |
-          mkdocs build
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
-        with:
-          branch: gh-pages
-          folder: site
+  build-docs:
+    uses: ./.github/workflows/docs.yml
 
   publish-to-github:
     needs:

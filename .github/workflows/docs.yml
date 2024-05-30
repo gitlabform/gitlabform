@@ -1,0 +1,22 @@
+name: Docs
+
+on:
+  workflow_call:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ BRANCH_REF }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+      - name: Install dependencies
+        run: |
+          pip install -e .[docs]
+      - name: Build docs
+        run: |
+          mkdocs build

@@ -5,22 +5,13 @@ on:
     branches:
       - main
 
+env:
+  BRANCH_REF: ${{ github.ref }} # The fully-formed ref of the branch or tag that triggered the workflow run
+
 jobs:
 
   build-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
-      - name: Install dependencies
-        run: |
-          pip install -e .[docs]
-      - name: Build docs
-        run: |
-          mkdocs build
+    uses: ./.github/workflows/docs.yml
 
   linters:
     uses: ./.github/workflows/linters.yml
