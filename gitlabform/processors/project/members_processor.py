@@ -141,10 +141,15 @@ class MembersProcessor(AbstractProcessor):
                 # checks.
                 common_username = user.lower()
                 if common_username in current_members:
+                    current_member = current_members[common_username]
+                    if hasattr(current_member, "member_role"):
+                        member_role_id_before = current_member.member_role["id"]
+                    else:
+                        member_role_id_before = None
                     if (
-                        expires_at == current_members[common_username]["expires_at"]
-                        and access_level
-                        == current_members[common_username]["access_level"]
+                        expires_at == current_member["expires_at"]
+                        and access_level == current_member["access_level"]
+                        and member_role_id == member_role_id_before
                     ):
                         debug(
                             "Nothing to change for user '%s' - same config now as to set.",
