@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  BRANCH_REF: ${{ github.event.pull_request.head.sha }}
+  BRANCH_REF: ${{ github.ref }}
 
 jobs:
 

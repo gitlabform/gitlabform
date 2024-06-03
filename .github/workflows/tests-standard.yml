@@ -4,6 +4,13 @@ on:
   workflow_call:
 
 jobs:
+  reusable-branch-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Running on
+        run: echo ${{ github.ref }}
+
   acceptance-tests:
     runs-on: ubuntu-latest
     strategy:
