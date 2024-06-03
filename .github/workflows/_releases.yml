@@ -13,12 +13,6 @@ env:
   BRANCH_REF: ${{ github.ref }} # The fully-formed ref of the branch or tag that triggered the workflow run
 
 jobs:
-  tag-run:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Running on
-        run: echo ${{ env.BRANCH_REF }}
 
   linters:
     uses: ./.github/workflows/linters.yml

@@ -17,13 +17,6 @@ jobs:
       - name: Approve
         run: echo For security reasons, all pull requests need to be approved first before running the Premium Acceptance Tests.
 
-  branch-run:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Running on
-        run: echo ${{ env.BRANCH_REF }}
-
   codeql:
     runs-on: ubuntu-latest
 
