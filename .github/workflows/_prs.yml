@@ -5,9 +5,6 @@ on:
     branches:
       - main
 
-env:
-  BRANCH_REF: ${{ github.event.pull_request.head.sha }}
-
 jobs:
 
   approve:
@@ -17,6 +14,12 @@ jobs:
       - name: Approve
         run: echo For security reasons, all pull requests need to be approved first before running the Premium Acceptance Tests.
 
+  branch-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Running on
+        run: echo ${{ github.event.pull_request.head.sha }}
+
   codeql:
     runs-on: ubuntu-latest
 
@@ -24,7 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ github.event.pull_request.head.sha }}
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
@@ -40,12 +43,18 @@ jobs:
 
   build-docs:
     uses: ./.github/workflows/docs.yml
+    with:
+      branch_ref: ${{ github.event.pull_request.head.sha }}
 
   linters:
     uses: ./.github/workflows/linters.yml
+    with:
+      branch_ref: ${{ github.event.pull_request.head.sha }}
 
   tests-standard:
     uses: ./.github/workflows/tests-standard.yml
+    with:
+      branch_ref: ${{ github.event.pull_request.head.sha }}
 
   # you cannot use reusable workflows with an "environment" key,
   # so we have to copy "tests-premium.yml" here :(
@@ -65,7 +74,7 @@ jobs:
       - name: Checkout code from the PR
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -88,7 +97,7 @@ jobs:
           with: |
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
-            override_commit: ${{ env.BRANCH_REF }}
+            override_commit: ${{ github.event.pull_request.head.sha }}
             token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
@@ -111,7 +120,7 @@ jobs:
       - name: Checkout code from the PR
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4

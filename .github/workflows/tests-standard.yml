@@ -2,8 +2,18 @@ name: Tests standard
 
 on:
   workflow_call:
+    inputs:
+      BRANCH_REF:
+        required: true
 
 jobs:
+  reusable-branch-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Running on
+        run: echo ${{ inputs.BRANCH_REF }}
+
   acceptance-tests:
     runs-on: ubuntu-latest
     strategy:
@@ -14,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -48,7 +58,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -76,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -100,7 +110,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4

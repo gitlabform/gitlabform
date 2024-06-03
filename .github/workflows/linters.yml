@@ -2,6 +2,10 @@ name: Linters
 
 on:
   workflow_call:
+    inputs:
+      BRANCH_REF:
+        type: string
+        required: true
 
 jobs:
   black-formatting:
@@ -10,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ inputs.BRANCH_REF }}
       - name: Black Code Formatter
         uses: psf/black@stable
         with:
@@ -22,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ inputs.BRANCH_REF }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

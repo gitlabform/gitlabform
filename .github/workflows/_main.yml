@@ -5,22 +5,29 @@ on:
     branches:
       - main
 
-env:
-  BRANCH_REF: ${{ github.ref }} # The fully-formed ref of the branch or tag that triggered the workflow run
-
 jobs:
 
   build-docs:
     uses: ./.github/workflows/docs.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
 
   linters:
     uses: ./.github/workflows/linters.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
 
   tests-standard:
     uses: ./.github/workflows/tests-standard.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
 
   tests-premium:
     uses: ./.github/workflows/tests-premium.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
 
   tests-ultimate:
     uses: ./.github/workflows/tests-ultimate.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}

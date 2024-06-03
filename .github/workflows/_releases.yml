@@ -9,19 +9,28 @@ permissions:
   contents: write
   packages: write
 
-env:
-  BRANCH_REF: ${{ github.ref }} # The fully-formed ref of the branch or tag that triggered the workflow run
-
 jobs:
+
+  tag-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Running on
+        run: echo ${{ github.ref }}
 
   linters:
     uses: ./.github/workflows/linters.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
 
   tests-standard:
     uses: ./.github/workflows/tests-standard.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
 
   tests-premium:
     uses: ./.github/workflows/tests-premium.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
 
   publish-docs:
     needs:
@@ -32,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH_REF }}
+          ref: ${{ github.ref }}
           fetch-depth: 2
       - name: Set up Python
         uses: actions/setup-python@v4

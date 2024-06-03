@@ -2,6 +2,10 @@ name: Tests premium
 
 on:
   workflow_call:
+    inputs:
+      BRANCH_REF:
+        type: string
+        required: true
 
 jobs:
   acceptance-tests-premium:
@@ -13,6 +17,8 @@ jobs:
       fail-fast : false
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
