@@ -97,6 +97,9 @@ class PythonGitlab(Gitlab):
     def get_member_role_id_cached(
         self, name_or_id: Union[int, str], group_id: Union[int, None]
     ) -> int:
+        if type(name_or_id) is int:
+            # Already supplied as an id so no need to go get it from API
+            return name_or_id
         member_role = self.get_member_role_cached(name_or_id, group_id)
         return member_role["id"]
 
