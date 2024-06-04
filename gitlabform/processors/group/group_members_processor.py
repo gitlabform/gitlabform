@@ -205,9 +205,12 @@ class GroupMembersProcessor(AbstractProcessor):
                         if "member_role" in users_to_set_by_username[user]
                         else None
                     )
-                    member_role_id_to_set = self.gl.get_member_role_id_cached(
-                        member_role_id_or_name, group.get_id()
-                    )
+                    if member_role_id_or_name:
+                        member_role_id_to_set = self.gl.get_member_role_id_cached(
+                            member_role_id_or_name, group.get_id()
+                        )
+                    else:
+                        member_role_id_to_set = None
 
                     common_username = user.lower()
                     user_id = self.gl.get_user_id(user)
@@ -215,11 +218,13 @@ class GroupMembersProcessor(AbstractProcessor):
                     if common_username in users_before:
                         group_member: GroupMember = group.members.get(user_id)
 
-                        access_level_before = users_before[common_username].access_level
-                        expires_at_before = users_before[common_username].expires_at
-                        member_role_id_before = users_before[
-                            common_username
-                        ].member_role["id"]
+                        user_before = users_before[common_username]
+                        access_level_before = user_before.access_level
+                        expires_at_before = user_before.expires_at
+                        if hasattr(user_before, "member_role"):
+                            member_role_id_before = user_before.member_role["id"]
+                        else:
+                            member_role_id_before = None
 
                         if (
                             access_level_before == access_level_to_set
