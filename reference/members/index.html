@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.25">
     
     
       
@@ -661,6 +661,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Project members">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-roles-gitlab-ultimate-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Roles (GitLab Ultimate Only)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -669,6 +684,21 @@
       Group members
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Group members">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-roles-gitlab-ultimate-only_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Roles (GitLab Ultimate Only)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1160,6 +1190,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Project members">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-roles-gitlab-ultimate-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Roles (GitLab Ultimate Only)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1168,6 +1213,21 @@
       Group members
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Group members">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-roles-gitlab-ultimate-only_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Roles (GitLab Ultimate Only)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1216,6 +1276,38 @@
 <span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">      </span><span class="nt">keep_bots</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
+<h3 id="custom-roles-gitlab-ultimate-only">Custom Roles (GitLab Ultimate Only)<a class="headerlink" href="#custom-roles-gitlab-ultimate-only" title="Permanent link">&para;</a></h3>
+<p>Assigning of Custom Roles to Project <code>members</code> is supported within GitLabForm configuration.</p>
+<p><code>member_role</code> parameter can be supplied as either the name or id. </p>
+<p>Support is provided for both SaaS and Self-Managed/Dedicated deployments of GitLab; GitLabForm will determine which <a href="https://docs.gitlab.com/ee/api/member_roles.html">Member Roles API</a> to query</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<ul>
+<li>user <code>access_level</code> MUST still be supplied and MUST match the base_access_level of the custom role</li>
+</ul>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">users</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my-user</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+<span class="w">          </span><span class="nt">member_role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">          </span><span class="nt">expires_at</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2025-09-26</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">keep_bots</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">users</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my-user</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+<span class="w">          </span><span class="nt">member_role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Limited_Maintainer</span>
+<span class="w">          </span><span class="nt">expires_at</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2025-09-26</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">keep_bots</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
 <h2 id="group-members">Group members<a class="headerlink" href="#group-members" title="Permanent link">&para;</a></h2>
 <p>There are 4 keys that can be set in the <code>group_members</code> section:</p>
 <ul>
@@ -1235,6 +1327,42 @@
 <span class="w">      </span><span class="nt">users</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">my-user</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">keep_bots</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
+<h3 id="custom-roles-gitlab-ultimate-only_1">Custom Roles (GitLab Ultimate Only)<a class="headerlink" href="#custom-roles-gitlab-ultimate-only_1" title="Permanent link">&para;</a></h3>
+<p>Assigning of Custom Roles to <code>group_members</code> is supported within GitLabForm configuration.</p>
+<p><code>member_role</code> parameter can be supplied as either the name or id. </p>
+<p>Support is provided for both SaaS and Self-Managed/Dedicated deployments of GitLab; GitLabForm will determine which <a href="https://docs.gitlab.com/ee/api/member_roles.html">Member Roles API</a> to query</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<ul>
+<li>user <code>access_level</code> MUST still be supplied and MUST match the base_access_level of the custom role</li>
+</ul>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">group_members</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">another-group</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span>
+<span class="w">      </span><span class="nt">users</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my-user</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
+<span class="w">          </span><span class="nt">member_role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">keep_bots</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">group_members</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">another-group</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">group_access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span>
+<span class="w">      </span><span class="nt">users</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my-user</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
+<span class="w">          </span><span class="nt">member_role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dev_ReadOnly</span>
 <span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">      </span><span class="nt">keep_bots</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </code></pre></div>
