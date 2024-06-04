@@ -1,5 +1,27 @@
 # Changelog
 
+## 3.13.0
+
+### Features
+
+* Add support for setting custom roles (Ultimate only) in project and group members. Creation of custom roles in gitlabform is **NOT SUPPORTED**. [#673](https://github.com/gitlabform/gitlabform/issues/673). PR [759](https://github.com/gitlabform/gitlabform/pull/759), [775](https://github.com/gitlabform/gitlabform/pull/775). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Documentation
+
+* Add info about and link to pyenv PR [#774](https://github.com/gitlabform/gitlabform/pull/774), ([Jimisola Laursen](jimisola@jimisola.com))
+
+### Build Process
+
+* Improvements to codecov reports [43adfb9b](https://github.com/gitlabform/gitlabform/commit/43adfb9b9109d8c90a801787c3c533453642b617). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+* Fixes to PRs workflows to ensure tests/linters run on branch. [7cd1bfc3](https://github.com/gitlabform/gitlabform/commit/7cd1bfc334761e7efaa61306bd421209e3ca2d69) & [c373b54](https://github.com/gitlabform/gitlabform/commit/c373b54f91f6f8cf12a8d3b73bd24cf3d04e9606). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+* Adds suite of Acceptance Tests using Ultimate License. [d33b0928](https://github.com/gitlabform/gitlabform/commit/c836c86f9e857d79af0434ad74a7a5943319f8b0). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Dependencies
+
+* Update certifi, coverage, requests, types-requests to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 3.12.0
 
 ### Features
