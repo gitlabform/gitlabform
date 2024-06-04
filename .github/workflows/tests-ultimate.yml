@@ -36,3 +36,14 @@ jobs:
         run: |
           ./dev/run_gitlab_in_docker.sh
           pytest --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate
+      - name: Upload coverage to Codecov
+        uses: Wandalen/wretry.action@v1
+        continue-on-error: true # Ultimate License via link only lasts for 90days so may need renewing, don't block other PRs
+        with:
+          action: codecov/codecov-action@v3
+          with: |
+            name: codecov-acceptance-test-ultimate
+            flags: integration
+            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
+          attempt_limit: 5
+          attempt_delay: 10000
