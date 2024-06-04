@@ -32,7 +32,7 @@ src = "version"
 
 [[before_commit]]
 name = "check changelog"
-cmd = "grep -q {new_version} changelog.md"
+cmd = "grep -q {new_version} docs/changelog.md"
 
 # Or run some commands after the git tag and the branch
 # have been pushed:

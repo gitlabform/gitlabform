@@ -11,12 +11,6 @@ permissions:
 
 jobs:
 
-  tag-run:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Running on
-        run: echo ${{ github.ref }}
-
   linters:
     uses: ./.github/workflows/linters.yml
     with:
@@ -29,6 +23,11 @@ jobs:
 
   tests-premium:
     uses: ./.github/workflows/tests-premium.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
+
+  tests-ultimate:
+    uses: ./.github/workflows/tests-ultimate.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 
