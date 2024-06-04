@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.13.1
+
+### Bug fixes
+
+* Fix documentation to publish website
+
 ## 3.13.0
 
 ### Features
@@ -8,7 +14,7 @@
 
 ### Documentation
 
-* Add info about and link to pyenv PR [#774](https://github.com/gitlabform/gitlabform/pull/774), ([Jimisola Laursen](jimisola@jimisola.com))
+* Add info about and link to pyenv PR [#774](https://github.com/gitlabform/gitlabform/pull/774), ([Jimisola Laursen](https://github.com/jimisola))
 
 ### Build Process
 
