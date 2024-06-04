@@ -8,12 +8,6 @@ on:
         required: true
 
 jobs:
-  reusable-branch-run:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Running on
-        run: echo ${{ inputs.BRANCH_REF }}
 
   acceptance-tests:
     runs-on: ubuntu-latest

@@ -14,12 +14,6 @@ jobs:
       - name: Approve
         run: echo For security reasons, all pull requests need to be approved first before running the Premium Acceptance Tests.
 
-  branch-run:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Running on
-        run: echo ${{ github.event.pull_request.head.sha }}
-
   codeql:
     runs-on: ubuntu-latest
 

@@ -1,15 +1,67 @@
 # Changelog
 
+## 3.13.0
+
+### Features
+
+* Add support for setting custom roles (Ultimate only) in project and group members. Creation of custom roles in gitlabform is **NOT SUPPORTED**. [#673](https://github.com/gitlabform/gitlabform/issues/673). PR [759](https://github.com/gitlabform/gitlabform/pull/759), [775](https://github.com/gitlabform/gitlabform/pull/775). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Documentation
+
+* Add info about and link to pyenv PR [#774](https://github.com/gitlabform/gitlabform/pull/774), ([Jimisola Laursen](jimisola@jimisola.com))
+
+### Build Process
+
+* Improvements to codecov reports [43adfb9b](https://github.com/gitlabform/gitlabform/commit/43adfb9b9109d8c90a801787c3c533453642b617). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+* Fixes to PRs workflows to ensure tests/linters run on branch. [7cd1bfc3](https://github.com/gitlabform/gitlabform/commit/7cd1bfc334761e7efaa61306bd421209e3ca2d69) & [c373b54](https://github.com/gitlabform/gitlabform/commit/c373b54f91f6f8cf12a8d3b73bd24cf3d04e9606). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+* Adds suite of Acceptance Tests using Ultimate License. [d33b0928](https://github.com/gitlabform/gitlabform/commit/c836c86f9e857d79af0434ad74a7a5943319f8b0). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Dependencies
+
+* Update certifi, coverage, requests, types-requests to newer versions.
+
+Thanks to all the contributors of this release!
+
+## 3.12.0
+
+### Features
+
+* support for group SAML links, closes [#549](https://github.com/gitlabform/gitlabform/issues/549), PR [#760](https://github.com/gitlabform/gitlabform/pull/760) ([mahadevan-karthi-dwp](https://github.com/mahadevan-karthi-dwp))
+* support for CI/CD Job Token Scope [#571](https://github.com/gitlabform/gitlabform/issues/571), PR [#758](https://github.com/gitlabform/gitlabform/pull/758) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Dependencies
+
+* Update py-test, python-gitlab, dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+## [3.11.1](https://github.com/gitlabform/gitlabform/compare/v3.11.0...v3.11.1) (2024-05-16)
+
+
+### Bug Fixes
+
+* release process and deploy container to GHCR ([741ff75](https://github.com/gitlabform/gitlabform/commit/741ff751fc26f17ccaca51fd8212175e7657839b))
+
+## [3.11.0](https://github.com/gitlabform/gitlabform/compare/v3.10.0...v3.11.0) (2024-05-15)
+
+
+### Features
+
+* add option to not fail if configured resource group does not exist ([#650](https://github.com/gitlabform/gitlabform/issues/650)) ([a362d8e](https://github.com/gitlabform/gitlabform/commit/a362d8e41f9b65d2debd86e529d5939cc023dbbe)), closes [#649](https://github.com/gitlabform/gitlabform/issues/649)
+* manage Project and Group Labels via gitlabform ([#751](https://github.com/gitlabform/gitlabform/issues/751)) ([f1be42b](https://github.com/gitlabform/gitlabform/commit/f1be42bd245237f512ff61de9dfb30057bdf1700))
+* use python lib for group settings ([#746](https://github.com/gitlabform/gitlabform/issues/746)) ([03ce3fa](https://github.com/gitlabform/gitlabform/commit/03ce3faf0b01cbda4ff5f9137030a8f2ac159bb0))
+
+
+### Documentation
+
+* add fixes info into changelog for release 3.10.0 ([96a39ee](https://github.com/gitlabform/gitlabform/commit/96a39eee118b6c7e00d6dd1d47d845213876ffb3))
+* move commit message guideline ([c0d3f68](https://github.com/gitlabform/gitlabform/commit/c0d3f68255fb13eb2a769d7df4a6888ffdcc742d))
+
 ## 3.10.0
 
 ### Features
 
 * Add support for Application Settings [#120](https://github.com/gitlabform/gitlabform/issues/120), PR [#742](https://github.com/gitlabform/gitlabform/pull/742) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
-
-### Fixes
-
-* Improved error handling when processing project already transferred [#745](https://github.com/gitlabform/gitlabform/pull/745) ([long-wan-ep](https://github.com/long-wan-ep))
-
 
 ### Refactors
 
