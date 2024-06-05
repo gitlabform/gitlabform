@@ -20,6 +20,7 @@ jobs:
     uses: ./.github/workflows/tests-standard.yml
     with:
       BRANCH_REF: ${{ github.ref }}
+    secrets: inherit
 
   tests-premium:
     uses: ./.github/workflows/tests-premium.yml
