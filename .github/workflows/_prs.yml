@@ -49,6 +49,7 @@ jobs:
     uses: ./.github/workflows/tests-standard.yml
     with:
       branch_ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit
 
   # you cannot use reusable workflows with an "environment" key,
   # so we have to copy "tests-premium.yml" here :(
