@@ -64,7 +64,7 @@ class PythonGitlab(Gitlab):
         if self.is_gitlab_saas():
             if group_id is None:
                 raise GitlabGetError(
-                    f"Group Id must be provided when getting member roles on GitLab SaaS",
+                    "Group Id must be provided when getting member roles on GitLab SaaS",
                     404,
                 )
             # SAAS
