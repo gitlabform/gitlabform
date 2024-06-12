@@ -1,9 +1,11 @@
 import functools
 from typing import Union
 
+from cli_ui import debug
+
 import gitlab.const
 from gitlab import Gitlab, GitlabGetError
-from gitlab.base import RESTObject, RESTObjectList
+from gitlab.base import RESTObject
 from gitlab.v4.objects import Group, Project
 
 
@@ -66,11 +68,12 @@ class PythonGitlab(Gitlab):
                     404,
                 )
             # SAAS
-            path = f"groups/{group_id}/member_roles"
+            path = f"/groups/{group_id}/member_roles"
         else:
             # Self-Managed & Dedicated
             path = f"/member_roles"
 
+        debug(f"Retrieving member roles from: {path}")
         return self.http_get(path)
 
     @functools.lru_cache()
