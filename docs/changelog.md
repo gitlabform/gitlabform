@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.13.2
+
+### Bug fixes
+
+* Fix custom roles for GitLab SaaS users. PR [#787](https://github.com/gitlabform/gitlabform/pull/787). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Dependencies
+
+* Update packaging, cyptography, pytest, types-request, coverage and python-gitlab to newer versions.
+
 ## 3.13.1
 
 ### Bug fixes
