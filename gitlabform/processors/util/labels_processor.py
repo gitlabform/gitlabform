@@ -1,5 +1,5 @@
 from logging import debug, info
-from typing import Dict, List, Callable, Union
+from typing import Dict, List, Callable
 
 from gitlab.base import RESTObject
 from gitlab.v4.objects import Group, Project, ProjectLabel, GroupLabel
@@ -12,9 +12,7 @@ class LabelsProcessor:
         self,
         configured_labels: Dict,
         enforce: bool,
-        group_or_project: Union[
-            Group, Project
-        ],  # Group | Project -> |: operand not supported in 3.8/3.9
+        group_or_project: Group | Project,
         needs_update: Callable,  # self._needs_update passed from AbstractProcessor called process_labels
     ):
         # python-gitlab/python-gitlab#2843
@@ -61,7 +59,7 @@ class LabelsProcessor:
     @staticmethod
     def update_existing_label(
         configured_label,
-        full_label: Union[GroupLabel, ProjectLabel],  # GroupLabel | ProjectLabel
+        full_label: GroupLabel | ProjectLabel,
         parent_object_type: str,
     ):
         info(f"Updating {full_label.name} on {parent_object_type}")
@@ -75,7 +73,7 @@ class LabelsProcessor:
     @staticmethod
     def create_new_label(
         configured_labels,
-        group_or_project: Union[Group, Project],  # Group | Project
+        group_or_project: Group | Project,
         label_name: str,
         parent_object_type: str,
     ):
