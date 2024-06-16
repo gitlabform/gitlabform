@@ -18,7 +18,7 @@ pip install setuptools
 
 2. Install GitLabForm in develop mode:
 ```
-python setup.py develop
+pip install -e .
 ```
 
 Now you can run and debug the app locally.
