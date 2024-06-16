@@ -10,7 +10,7 @@ COPY . /gitlabform
 
 RUN cd gitlabform \
     && apk add --no-cache build-base \
-    && python setup.py develop \
+    && pip install -e . \
     && apk --purge del build-base
 
 WORKDIR /config
