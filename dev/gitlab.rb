@@ -1,6 +1,5 @@
 gitlab_rails['initial_root_password']='mK9JnG7jwYdFcBNoQ3W3'
 registry['enable']=false
-grafana['enable']=false
 prometheus_monitoring['enable']=false
 gitlab_rails['initial_license_file']='/etc/gitlab/Gitlab.gitlab-license'
 gitlab_kas['enable']=false
