@@ -36,12 +36,12 @@ jobs:
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v1
         with:
-          action: codecov/codecov-action@v3
-          with: |
+          action: codecov/codecov-action@v4
+          with:
             name: codecov-acceptance-test-standard
             flags: integration
             fail_ci_if_error: true
-            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
+            token: ${{ secrets.CODECOV_TOKEN }}
           attempt_limit: 5
           attempt_delay: 10000
 
@@ -71,11 +71,11 @@ jobs:
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v1
         with:
-          action: codecov/codecov-action@v3
+          action: codecov/codecov-action@v4
           with: |
             flags: unittests
             fail_ci_if_error: true
-            token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
+            token: ${{ secrets.CODECOV_TOKEN }}
           attempt_limit: 5
           attempt_delay: 10000
 
