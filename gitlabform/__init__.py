@@ -586,6 +586,9 @@ class GitLabForm:
         :return: a tuple of lists of effective projects and effective groups
         """
 
+        if self.noop:
+            info("Running in dry-run mode...")
+
         if target == "ALL":
             info(
                 ">>> Getting ALL groups and projects that I have permission to modify..."
