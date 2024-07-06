@@ -44,7 +44,7 @@ setup(
     include_package_data=True,
     python_requires=">=3.8.0",
     install_requires=[
-        "certifi==2024.6.2",
+        "certifi==2024.7.4",
         "cli-ui==0.17.2",
         "ez-yaml==1.2.0",
         "Jinja2==3.1.4",
