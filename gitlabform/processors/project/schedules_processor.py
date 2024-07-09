@@ -112,11 +112,11 @@ class SchedulesProcessor(AbstractProcessor):
         project: Project,
         schedule_description: str,
     ):
-        schedule_data = {"description": schedule_description, **entity_config}
-        debug("Creating pipeline schedule using data: '%s'", schedule_data)
         entity_config["cron"] = _replace_extended_cron_pattern(
             project.id, entity_config["cron"]
         )
+        schedule_data = {"description": schedule_description, **entity_config}
+        debug("Creating pipeline schedule using data: '%s'", schedule_data)
         created_schedule_id = project.pipelineschedules.create(schedule_data).id
         created_schedule = project.pipelineschedules.get(created_schedule_id)
 
@@ -210,7 +210,7 @@ class ExtendedCronPattern:
         interval = match.group("interval") or ""
         if interval:
             interval = int(interval[1:])
-            times = int((default_max) / int(interval))
+            times = int(default_max / interval)
             first = self._random.randint(0, interval)
             result = [str(first)]
             result.extend(str(first + i * interval) for i in range(1, times))
