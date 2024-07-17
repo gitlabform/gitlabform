@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.14.0
+
+### Features
+
+* Enhanced cron expressions for scheduled pipelines. PRs [#800](https://github.com/gitlabform/gitlabform/pull/800), [801](https://github.com/gitlabform/gitlabform/pull/801), implements [#455](https://github.com/gitlabform/gitlabform/issues/455). ([Mirko Friedenhagen](https://github.com/mfriedenhagen))
+* Show dry-run mode in the output header, if set. PR [#798](https://github.com/gitlabform/gitlabform/pull/798). ([Sebastian Gumprich](https://github.com/rndmh3ro))
+
+### Build Process
+
+* Remove grafana from test GitLab instance. ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+* Stop running setup.py directly, it's deprecated. ([Greg Dubicki](https://github.com/gdubicki))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 3.13.2
 
 ### Bug fixes
@@ -8,7 +26,7 @@
 
 ### Dependencies
 
-* Update packaging, cyptography, pytest, types-request, coverage and python-gitlab to newer versions.
+* Update packaging, cryptography, pytest, types-request, coverage and python-gitlab to newer versions.
 
 ## 3.13.1
 
