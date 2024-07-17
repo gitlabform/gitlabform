@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.26">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.29">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.76a95c52.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -660,6 +660,17 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Pipeline schedules
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -669,6 +680,43 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basic-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic use
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extended-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extended syntax
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1099,6 +1147,32 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basic-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic use
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extended-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extended syntax
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1116,6 +1190,7 @@
 
 
 <h1 id="pipeline-schedules">Pipeline schedules<a class="headerlink" href="#pipeline-schedules" title="Permanent link">&para;</a></h1>
+<h2 id="basic-use">Basic use<a class="headerlink" href="#basic-use" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/pipelines/schedules.html">pipeline schedules</a>.</p>
 <p>The key name are schedule description (<em>GitLab Web Console</em>) and values are parameters described in the <a href="https://docs.gitlab.com/ee/api/pipeline_schedules.html#create-a-new-pipeline-schedule">Pipeline schedules API docs</a>, <strong>except the id</strong>.</p>
 <p>Additionally, under a <code>variables</code> key you can add the pipeline schedule variables. The syntax here is that key name is the variable name, the value is under <code>value</code> and the optional <code>variable_type</code> can be set to <code>env_var</code> (default) or <code>file</code>.</p>
@@ -1181,6 +1256,28 @@
 <span class="w">        </span><span class="nt">cron_timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;London&quot;</span>
 <span class="w">        </span><span class="nt">active</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </code></pre></div></p>
+<h2 id="extended-syntax">Extended syntax<a class="headerlink" href="#extended-syntax" title="Permanent link">&para;</a></h2>
+<ul>
+<li>There is an additional, extended syntax available for distributing pipelines automatically to avoid a pipeline stampede, see the <a href="https://gitlab.com/gitlab-org/gitlab/-/issues/17799">open issue at GitLab</a> for some details.</li>
+<li>For <strong>minutes</strong>, <strong>hours</strong> and <strong>weekdays</strong> the uppercase letter ˚H will be replaced with stable, project specific values in the range of <code>0-59</code>, <code>0-23</code> resp <code>0-6</code>.</li>
+<li>There is a syntax for restricting the range: <code>H(15-20)</code> will return a value between 15 and 20.</li>
+<li>An interval like <code>H/20</code> e.g. in the minute column will firstly determine a value between 0 and 19 and then add corresponding entries to fill the as well, i.e. might give you <code>14,34,54</code> for the minutes. </li>
+<li>This allows you to specify something like <code>H H(1-7) * * *</code> once as expression and each project will nonetheless get a different value for minute and hour, so your pipelines are distributed between 01:00 and 07:59 in above example.</li>
+</ul>
+<p>Examples:</p>
+<ul>
+<li>Project with id 1: <code>H H * * *</code> -&gt; <code>8 18 * * *</code></li>
+<li>Project with id 3: <code>H H * * *</code> -&gt; <code>15 18 * * *</code></li>
+<li>Project with id 3: <code>H(15-20),H(45-50) H(1-7) * * *</code> -&gt; <code>16,49 5 * * *</code></li>
+<li>Project with id 4: <code>H H * * *</code> -&gt; <code>15 9 * * *</code></li>
+</ul>
+<p>There are four (caseinsensitive) <em>aliases</em> for ease of use similar to what exists in Jenkins:</p>
+<ul>
+<li><code>@hourly</code> -&gt; <code>H * * * *</code></li>
+<li><code>@daily</code> -&gt; <code>H H * * *</code></li>
+<li><code>@weekly</code> -&gt; <code>H H * * H</code></li>
+<li><code>@nightly</code> -&gt; <code>H H(00-06) * * *</code></li>
+</ul>
 
 
 
@@ -1230,7 +1327,7 @@
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      <script src="../../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
       
     
   </body>
