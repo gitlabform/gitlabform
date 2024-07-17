@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.14.0
+## 3.14.1
 
 ### Features
 
@@ -17,6 +17,10 @@
 * Update various dependencies to newer version.
 
 Thanks to all the contributors of this release!
+
+## 3.14.0
+
+(Not released because of a build issue, ugh.)
 
 ## 3.13.2
 
