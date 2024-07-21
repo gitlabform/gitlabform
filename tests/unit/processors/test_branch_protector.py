@@ -2,7 +2,6 @@ from gitlabform.processors.util.branch_protector import BranchProtector
 
 
 def test_get_current_permissions_handles_zero_access_level():
-    bp = BranchProtector(None, False)
     test_protected_branches_response = {
         "id": 1,
         "name": "master",
@@ -16,12 +15,12 @@ def test_get_current_permissions_handles_zero_access_level():
         "code_owner_approval_required": False,
     }
 
-    push_levels, _, _ = bp.get_current_permissions(
+    push_levels, _, _ = BranchProtector.get_current_permissions(
         test_protected_branches_response, "push"
     )
     assert push_levels == [0]
 
-    merge_levels, _, _ = bp.get_current_permissions(
+    merge_levels, _, _ = BranchProtector.get_current_permissions(
         test_protected_branches_response, "merge"
     )
     assert merge_levels == [40]
