@@ -81,6 +81,11 @@ jobs:
       - tests-standard
       - tests-premium
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/gitlabform
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -92,9 +97,7 @@ jobs:
           pip install wheel setuptools build
           python -m build
       - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.5.0
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@release/v1
 
   publish-to-ghcr:
     needs:
