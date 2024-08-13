@@ -368,7 +368,7 @@ class GitLabForm:
         The main method.
         """
 
-        projects, groups = self._show_header(
+        projects, groups = self._get_groups_and_projects(
             self.target,
         )
 
@@ -574,7 +574,7 @@ class GitLabForm:
             # complete the line with a line ending
             message(*to_show, sep="")
 
-    def _show_header(
+    def _get_groups_and_projects(
         self,
         target: str,
     ) -> Tuple[list, list]:
@@ -585,6 +585,9 @@ class GitLabForm:
         :param target: what the configuration should be applied to
         :return: a tuple of lists of effective projects and effective groups
         """
+
+        if self.noop:
+            info("Running in dry-run mode...")
 
         if target == "ALL":
             info(

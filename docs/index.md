@@ -22,7 +22,7 @@ is a specialized configuration as a code tool for GitLab:
 
 ### Short and powerful syntax
 
-A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](reference/#effective-configuration) .
+A lot of features with a little amount of YAML thanks to the [hierarchical configuration with inheritance, merging/overwriting and additivity](reference/index.md#effective-configuration) .
 ```yaml
 projects_and_groups:
   # configuration shared by all projects in a group named 'a_group'...
@@ -37,7 +37,7 @@ projects_and_groups:
 
 ### Dynamic features
 
-GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](reference/#raw-parameters-passing).
+GitLab introduces new features monthly. You can often use them in GitLabForm without upgrading the app because we [pass some parameters as-is to GitLab APIs with PUT/POST requests](reference/index.md#raw-parameters-passing).
 ```yaml
 projects_and_groups:
   a_group/a_project:

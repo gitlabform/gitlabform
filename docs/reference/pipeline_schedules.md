@@ -1,5 +1,7 @@
 # Pipeline schedules
 
+## Basic use
+
 This section purpose is to manage the [pipeline schedules](https://docs.gitlab.com/ee/ci/pipelines/schedules.html).
 
 The key name are schedule description (_GitLab Web Console_) and values are parameters described in the [Pipeline schedules API docs](https://docs.gitlab.com/ee/api/pipeline_schedules.html#create-a-new-pipeline-schedule), **except the id**.
@@ -61,3 +63,27 @@ projects_and_groups:
         cron_timezone: "London"
         active: false
 ```
+
+## Extended syntax
+
+* There is an additional, extended syntax available for distributing pipelines automatically to avoid a pipeline stampede, see the [open issue at GitLab](https://gitlab.com/gitlab-org/gitlab/-/issues/17799) for some details.
+* For **minutes**, **hours** and **weekdays** the uppercase letter ˚H will be replaced with stable, project specific values in the range of `0-59`, `0-23` resp `0-6`.
+* There is a syntax for restricting the range: `H(15-20)` will return a value between 15 and 20.
+* An interval like `H/20` e.g. in the minute column will firstly determine a value between 0 and 19 and then add corresponding entries to fill the as well, i.e. might give you `14,34,54` for the minutes. 
+* This allows you to specify something like `H H(1-7) * * *` once as expression and each project will nonetheless get a different value for minute and hour, so your pipelines are distributed between 01:00 and 07:59 in above example.
+
+Examples:
+
+* Project with id 1: `H H * * *` -> `8 18 * * *`
+* Project with id 3: `H H * * *` -> `15 18 * * *`
+* Project with id 3: `H(15-20),H(45-50) H(1-7) * * *` -> `16,49 5 * * *`
+* Project with id 4: `H H * * *` -> `15 9 * * *`
+
+There are four (caseinsensitive) _aliases_ for ease of use similar to what exists in Jenkins:
+
+* `@hourly` -> `H * * * *`
+* `@daily` -> `H H * * *`
+* `@weekly` -> `H H * * H`
+* `@nightly` -> `H H(00-06) * * *`
+
+

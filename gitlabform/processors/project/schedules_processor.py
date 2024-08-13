@@ -1,3 +1,5 @@
+import random
+import re
 from logging import debug
 from typing import Dict, List
 
@@ -82,7 +84,9 @@ class SchedulesProcessor(AbstractProcessor):
         schedule_in_gitlab: ProjectPipelineSchedule,
         schedule_description: str,
     ):
-
+        entity_config["cron"] = _replace_extended_cron_pattern(
+            project.id, entity_config["cron"]
+        )
         if self._needs_update(schedule_in_gitlab.asdict(), entity_config):
             debug("Changing existing pipeline schedule '%s'", schedule_description)
             # In order to edit a Schedule created by someone else we need to take ownership:
@@ -108,9 +112,11 @@ class SchedulesProcessor(AbstractProcessor):
         project: Project,
         schedule_description: str,
     ):
+        entity_config["cron"] = _replace_extended_cron_pattern(
+            project.id, entity_config["cron"]
+        )
         schedule_data = {"description": schedule_description, **entity_config}
         debug("Creating pipeline schedule using data: '%s'", schedule_data)
-
         created_schedule_id = project.pipelineschedules.create(schedule_data).id
         created_schedule = project.pipelineschedules.get(created_schedule_id)
 
@@ -168,3 +174,63 @@ class SchedulesProcessor(AbstractProcessor):
                     schedule_description,
                 )
                 project.pipelineschedules.get(schedule_id).delete()
+
+
+class ExtendedCronPattern:
+
+    def __init__(self, project_id: int, cron_expression: str):
+        self._h_pattern = re.compile(
+            r"H(?:(\((?P<start>\d+)-(?P<end>\d+)\))|(?P<interval>/\d+))?"
+        )
+        # We do use random here to achieve a stable pseudo-random value, this is not security relevant
+        # Seeding with project_id always returns the same numbers, that is what we want here.
+        self._random = random.Random()  # nosec B311
+        self._random.seed(project_id, 2)
+        self._cron_parts = cron_expression.split()
+        if len(self._cron_parts) != 5:
+            raise ValueError(
+                f"Expected 5 parts in the cron expression, got {self._cron_parts}"
+            )
+
+    def render(self) -> str:
+        self._cron_parts[0] = self._detect_and_replace_h(self._cron_parts[0], 60)
+        self._cron_parts[1] = self._detect_and_replace_h(self._cron_parts[1], 24)
+        self._cron_parts[4] = self._detect_and_replace_h(self._cron_parts[4], 7)
+        return " ".join(self._cron_parts)
+
+    def _detect_and_replace_h(self, cron_part: str, default_max: int):
+        parts = cron_part.split(",")
+        for i, _ in enumerate(parts):
+            match = self._h_pattern.match(parts[i])
+            if match:
+                self._replace_h(i, parts, match, default_max)
+        return ",".join(parts)
+
+    def _replace_h(self, i: int, parts: List[str], match: re.Match, default_max: int):
+        interval = match.group("interval") or ""
+        if interval:
+            interval = int(interval[1:])
+            times = int(default_max / interval)
+            first = self._random.randint(0, interval)
+            result = [str(first)]
+            result.extend(str(first + i * interval) for i in range(1, times))
+        else:
+            start = int(match.group("start") or 0)
+            end = int(match.group("end") or default_max - 1)
+            result = [str(self._random.randint(start, end))]
+        parts[i] = parts[i].replace(match.string, ",".join(result))
+
+
+EXTENDED_CRON_PATTERN_ALIASES = {
+    "@hourly": "H * * * *",
+    "@daily": "H H * * *",
+    "@weekly": "H H * * H",
+    "@nightly": "H H(00-06) * * *",
+}
+
+
+def _replace_extended_cron_pattern(project_id: int, cron_expression: str) -> str:
+    cron_expression = EXTENDED_CRON_PATTERN_ALIASES.get(
+        cron_expression.lower(), cron_expression
+    )
+    return ExtendedCronPattern(project_id, cron_expression).render()
