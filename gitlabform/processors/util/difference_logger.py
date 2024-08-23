@@ -3,7 +3,6 @@ import json
 from itertools import starmap
 
 from cli_ui import debug as verbose
-from cli_ui import info
 
 
 # Simple function to create strings for values which should be hidden
@@ -68,12 +67,6 @@ class DifferenceLogger:
         text = "{subject}:\n{diff}".format(
             subject=subject, diff="\n".join(starmap(pattern.format, changes))
         )
-
-        # Setting this for now, but open to change this
-        # This avoids users having to set --verbose to see
-        # the settings that are being changed.
-        if only_changed:
-            info(text)
 
         if test:
             return text
