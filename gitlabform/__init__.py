@@ -220,7 +220,7 @@ class GitLabForm:
             "--diff-only-changed",
             dest="diff_only_changed",
             action="store_true",
-            help="only show items who's values are changing in the diff."
+            help="only show items who's values are changing in the diff.",
         )
 
         parser.add_argument(

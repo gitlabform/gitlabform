@@ -50,7 +50,9 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             self.add_method(project_or_group, entity_config)
             debug(f"{self.configuration_name} AFTER: ^^^")
 
-    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
+    def _print_diff(
+        self, project_or_project_and_group: str, entity_config, diff_only_changed: bool
+    ):
         entity_in_gitlab = self.get_method(project_or_project_and_group)
 
         DifferenceLogger.log_diff(

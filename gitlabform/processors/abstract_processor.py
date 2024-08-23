@@ -144,7 +144,9 @@ class AbstractProcessor(ABC):
     ):
         pass
 
-    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
+    def _print_diff(
+        self, project_or_project_and_group: str, entity_config, diff_only_changed: bool
+    ):
         verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
 
     def _needs_update(
