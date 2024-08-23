@@ -23,13 +23,14 @@ class AbstractProcessors(ABC):
         entity_reference: str,
         configuration: dict,
         dry_run: bool,
+        diff_only_changed: bool,
         effective_configuration: EffectiveConfigurationFile,
         only_sections: List[str],
     ):
         for processor in self.processors:
             if only_sections == "all" or processor.configuration_name in only_sections:
                 processor.process(
-                    entity_reference, configuration, dry_run, effective_configuration
+                    entity_reference, configuration, dry_run, diff_only_changed, effective_configuration
                 )
             else:
                 verbose(

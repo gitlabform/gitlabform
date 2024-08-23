@@ -67,6 +67,7 @@ class GitLabForm:
             self.start_from = 1
             self.start_from_group = 1
             self.noop = noop
+            self.diff_only_changed = False
             self.output_file = output_file
             self.skip_version_check = True
             self.include_archived_projects = include_archived_projects
@@ -87,6 +88,7 @@ class GitLabForm:
                 self.start_from,
                 self.start_from_group,
                 self.noop,
+                self.diff_only_changed,
                 self.output_file,
                 self.skip_version_check,
                 self.include_archived_projects,
@@ -214,6 +216,14 @@ class GitLabForm:
         )
 
         parser.add_argument(
+            "-doc",
+            "--diff-only-changed",
+            dest="diff_only_changed",
+            action="store_true",
+            help="only show items who's values are changing in the diff."
+        )
+
+        parser.add_argument(
             "-o",
             "--output-file",
             dest="output_file",
@@ -284,6 +294,7 @@ class GitLabForm:
             args.start_from,
             args.start_from_group,
             args.noop,
+            args.diff_only_changed,
             args.output_file,
             args.skip_version_check,
             args.include_archived_projects,
@@ -384,6 +395,7 @@ class GitLabForm:
                 "",
                 application_configuration,
                 dry_run=self.noop,
+                diff_only_changed=self.diff_only_changed,
                 effective_configuration=effective_configuration,
                 only_sections=self.only_sections,
             )
@@ -420,6 +432,7 @@ class GitLabForm:
                     group,
                     group_configuration,
                     dry_run=self.noop,
+                    diff_only_changed=self.diff_only_changed,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
                 )
@@ -483,6 +496,7 @@ class GitLabForm:
                     project_and_group,
                     project_configuration,
                     dry_run=self.noop,
+                    diff_only_changed=self.diff_only_changed,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
                 )

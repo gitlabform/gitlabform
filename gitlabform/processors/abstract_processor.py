@@ -29,6 +29,7 @@ class AbstractProcessor(ABC):
         project_or_project_and_group: str,
         configuration,
         dry_run: bool,
+        diff_only_changed: bool,
         effective_configuration: EffectiveConfigurationFile,
     ):
         if self._section_is_in_config(configuration):
@@ -63,6 +64,7 @@ class AbstractProcessor(ABC):
                 self._print_diff(
                     project_transfer_source or project_or_project_and_group,
                     configuration.get(self.configuration_name),
+                    diff_only_changed=diff_only_changed,
                 )
             else:
                 verbose(f"Processing section '{self.configuration_name}'")
@@ -142,7 +144,7 @@ class AbstractProcessor(ABC):
     ):
         pass
 
-    def _print_diff(self, project_or_project_and_group: str, entity_config):
+    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
         verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
 
     def _needs_update(

@@ -3,6 +3,7 @@ import json
 from itertools import starmap
 
 from cli_ui import debug as verbose
+from cli_ui import info
 
 
 # Simple function to create strings for values which should be hidden
@@ -27,7 +28,7 @@ class DifferenceLogger:
                 k,
                 json.dumps(
                     current_config.get(k, "???")
-                    if type(current_config) == dict
+                    if isinstance(current_config, dict)
                     else "???"
                 ),
                 json.dumps(v),
@@ -37,7 +38,10 @@ class DifferenceLogger:
 
         # Remove unchanged if needed
         if only_changed:
-            changes = filter(lambda i: i[1] != i[2], changes)
+            # due to `filter` returning an iterator, we have to wrap it
+            # in `list()` to get the values and assign back to `changes`,
+            # otherwise `changes` is not what we expect it to be later :)
+            changes = list(filter(lambda i: i[1] != i[2], changes))
 
         # Hide secrets
         if hide_entries:
@@ -64,6 +68,13 @@ class DifferenceLogger:
         text = "{subject}:\n{diff}".format(
             subject=subject, diff="\n".join(starmap(pattern.format, changes))
         )
+
+        # Setting this for now, but open to change this
+        # This avoids users having to set --verbose to see
+        # the settings that are being changed.
+        if only_changed:
+            info(text)
+
         if test:
             return text
         else:
