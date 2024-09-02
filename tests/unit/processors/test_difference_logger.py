@@ -42,3 +42,25 @@ def test_none_current():
     """
     ).strip()
     assert result == expected
+
+
+def test_diff_from_current():
+    current_config = {
+        "foo": 456,
+        "bar": "whatever",
+    }
+    config_to_apply = {
+        "foo": 123,
+        "bar": "whatever",
+    }
+    result = DifferenceLogger.log_diff(
+        "test", current_config, config_to_apply, True, None, True
+    )
+    # the whitespace after "123" below is required!
+    expected = textwrap.dedent(
+        """
+        test:
+        foo: 456 => 123       
+    """
+    ).strip()
+    assert result == expected

@@ -24,6 +24,17 @@ To apply settings for all groups and projects that you can modify, run:
 gitlabform ALL
 ```
 
+To see what changes are being made, run:
+
+```shell
+gitlabform ALL_DEFINED --verbose
+```
+
+To see what changes are being made but limit the output to only those settings that are changing, run:
+
+```shell
+gitlabform -c config.yml ALL_DEFINED --verbose --diff-only-changed
+```
 
 Run:
 
