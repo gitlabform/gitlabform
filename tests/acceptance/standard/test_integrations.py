@@ -35,24 +35,20 @@ class TestIntegrations:
                 url: http://foo.bar.com
                 username: foo
                 password: bar
-                active: true
+                active: false
                 commit_events: true
               asana:
                 api_key: foo
                 push_events: true
+                active: true
               slack:
                 webhook: http://foo.bar.com
-                push_events: true
-              redmine:
-                new_issue_url: http://foo.bar.com
-                project_url: http://foo.bar.com
-                issues_url: http://foo.bar.com
                 push_events: true
         """
 
         run_gitlabform(config_integrations, project)
 
-        for integration_name in ["jira", "asana", "slack", "redmine"]:
+        for integration_name in ["jira", "asana", "slack"]:
             integration = project.integrations.get(integration_name)
             assert integration.active is True
 
@@ -83,17 +79,12 @@ class TestIntegrations:
               slack:
                 webhook: http://foo.bar.com
                 push_events: true
-              redmine:
-                new_issue_url: http://foo.bar.com
-                project_url: http://foo.bar.com
-                issues_url: http://foo.bar.com
-                push_events: true
         """
 
         run_gitlabform(config_integration_push_events_true, project)
 
         integrations = []
-        for integration_name in ["asana", "slack", "redmine"]:
+        for integration_name in ["asana", "slack"]:
             integration = project.integrations.get(integration_name)
             integrations.append(integration)
 
@@ -111,17 +102,12 @@ class TestIntegrations:
               slack:
                 webhook: http://foo.bar.com
                 push_events: false # changed
-              redmine:
-                new_issue_url: http://foo.bar.com
-                project_url: http://foo.bar.com
-                issues_url: http://foo.bar.com
-                push_events: false # changed
         """
 
         run_gitlabform(config_integration_push_events_false, project)
 
         integrations = []
-        for integration_name in ["asana", "slack", "redmine"]:
+        for integration_name in ["asana", "slack"]:
             integration = project.integrations.get(integration_name)
             integrations.append(integration)
 
@@ -139,17 +125,12 @@ class TestIntegrations:
               slack:
                 webhook: http://foo.bar.com
                 push_events: true
-              redmine:
-                new_issue_url: http://foo.bar.com
-                project_url: http://foo.bar.com
-                issues_url: http://foo.bar.com
-                push_events: true
         """
 
         run_gitlabform(config_integration_push_events_true, project)
 
         integrations = []
-        for integration_name in ["asana", "slack", "redmine"]:
+        for integration_name in ["asana", "slack"]:
             integration = project.integrations.get(integration_name)
             integrations.append(integration)
 
@@ -166,17 +147,12 @@ class TestIntegrations:
               slack:
                 webhook: http://foo.bar.com
                 push_events: false # changed
-              redmine:
-                new_issue_url: http://foo.bar.com
-                project_url: http://foo.bar.com
-                issues_url: http://foo.bar.com
-                push_events: false # changed
         """
 
         run_gitlabform(config_integration_push_events_false, project)
 
         integrations = []
-        for integration_name in ["asana", "slack", "redmine"]:
+        for integration_name in ["asana", "slack"]:
             integration = project.integrations.get(integration_name)
             integrations.append(integration)
 
