@@ -103,7 +103,7 @@ class MembersProcessor(AbstractProcessor):
         keep_bots: bool,
     ):
 
-        project: Project = self.gl.projects.get(project_and_group)
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
         project_members = project.members.list()
         current_members = dict()
