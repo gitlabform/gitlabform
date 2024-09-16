@@ -52,7 +52,7 @@ setup(
         "MarkupSafe==2.1.5",
         "mergedeep==1.3.4",
         "packaging==24.1",
-        "python-gitlab==4.9.0",
+        "python-gitlab==4.11.1",
         "requests==2.32.3",
         "ruamel.yaml==0.17.21",
         "types-requests==2.32.0.20240712",
