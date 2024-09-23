@@ -33,6 +33,11 @@ class GitLabGroups(GitLabCore):
     def get_group(self, name):
         return self._make_requests_to_api("groups/%s", name)
 
+    def get_group_descendants(self, group_id_or_path):
+        return self._make_requests_to_api(
+            "groups/%s/descendant_groups", group_id_or_path
+        )
+
     def get_groups(self):
         """
         :return: sorted list of groups

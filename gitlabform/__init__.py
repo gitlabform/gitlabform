@@ -55,6 +55,7 @@ class GitLabForm:
         config_string=None,
         noop=False,
         output_file=None,
+        recurse_subgroups=True,
     ):
         if target and config_string:
             # this mode is basically only for testing
@@ -74,6 +75,7 @@ class GitLabForm:
             self.just_show_version = False
             self.terminate_after_error = True
             self.only_sections = "all"
+            self.recurse_subgroups = recurse_subgroups
 
             self._configure_output(tests=True)
         else:
@@ -95,6 +97,7 @@ class GitLabForm:
                 self.just_show_version,
                 self.terminate_after_error,
                 self.only_sections,
+                self.recurse_subgroups,
             ) = self._parse_args()
 
             self._configure_output()
@@ -123,11 +126,13 @@ class GitLabForm:
         self.groups_provider = GroupsProvider(
             self.gitlab,
             self.configuration,
+            self.recurse_subgroups,
         )
         self.projects_provider = ProjectsProvider(
             self.gitlab,
             self.configuration,
             self.include_archived_projects,
+            self.recurse_subgroups,
         )
 
         self.groups_and_projects_filters = GroupsAndProjectsFilters(
@@ -280,6 +285,14 @@ class GitLabForm:
             help="process only section with these names (comma-delimited)",
         )
 
+        parser.add_argument(
+            "-r",
+            "--recurse-subgroups",
+            dest="recurse_subsgroups",
+            action="store_true",
+            help="include all subgroups recursively. Always true for ALL, ALL_DEFINED",
+        )
+
         args = parser.parse_args()
 
         if args.only_sections != "all":
@@ -301,6 +314,7 @@ class GitLabForm:
             args.just_show_version,
             args.terminate_after_error,
             args.only_sections,
+            args.recurse_subsgroups,
         )
 
     def _configure_output(self, tests=False) -> None:
