@@ -1,6 +1,7 @@
 from logging import debug
-from cli_ui import debug as verbose
+from cli_ui import debug as verbose, warning
 from cli_ui import fatal
+from gitlab import GitlabGetError
 from gitlab.v4.objects import Project
 
 from gitlabform.constants import EXIT_INVALID_INPUT
@@ -101,11 +102,25 @@ class MembersProcessor(AbstractProcessor):
         enforce_members: bool,
         keep_bots: bool,
     ):
+
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
+
+        project_members = project.members.list()
+        current_members = dict()
+        for member in project_members:
+            current_members[member.username] = member
+
         if users:
             verbose("Processing users as members...")
 
-            current_members = self.gitlab.get_members_from_project(project_and_group)
             for user in users:
+
+                try:
+                    user_id = self.gl.get_user_by_username_cached(user).get_id()
+                except GitlabGetError:
+                    warning(f"Could not find user '{user}' in Gitlab, skipping...")
+                    continue
+
                 expires_at = (
                     users[user]["expires_at"].strftime("%Y-%m-%d")
                     if "expires_at" in users[user]
@@ -122,9 +137,7 @@ class MembersProcessor(AbstractProcessor):
                 if member_role_id_or_name:
                     # For self-managed member_roles are at an instance level, for SaaS on a Group level
                     if self.gl.is_gitlab_saas():
-                        project: Project = self.gl.get_project_by_path_cached(
-                            project_and_group
-                        )
+                        project = self.gl.get_project_by_path_cached(project_and_group)
                         group_id = project.namespace["id"]
                     else:
                         group_id = None
@@ -140,6 +153,7 @@ class MembersProcessor(AbstractProcessor):
                 # case, we enforce that the username is always in lowercase for
                 # checks.
                 common_username = user.lower()
+
                 if common_username in current_members:
                     current_member = current_members[common_username]
                     if hasattr(current_member, "member_role"):
@@ -147,8 +161,8 @@ class MembersProcessor(AbstractProcessor):
                     else:
                         member_role_id_before = None
                     if (
-                        expires_at == current_member["expires_at"]
-                        and access_level == current_member["access_level"]
+                        expires_at == current_member.expires_at
+                        and access_level == current_member.access_level
                         and member_role_id == member_role_id_before
                     ):
                         debug(
@@ -164,34 +178,41 @@ class MembersProcessor(AbstractProcessor):
                             "Editing user '%s' membership to change their access level or expires at",
                             common_username,
                         )
-                        self.gitlab.edit_member_of_project(
-                            project_and_group,
-                            common_username,
-                            access_level,
-                            member_role_id,
-                            expires_at,
-                        )
+                        update_data = {
+                            "user_id": common_username,
+                            "access_level": access_level,
+                            "member_role_id": member_role_id_before,
+                        }
+
+                        if expires_at:
+                            update_data["expires_at"] = expires_at
+
+                        project.members.update(new_data=update_data)
+
                 else:
                     debug(
                         "Adding user '%s' who previously was not a member.",
                         common_username,
                     )
-                    self.gitlab.add_member_to_project(
-                        project_and_group,
-                        common_username,
-                        access_level,
-                        member_role_id,
-                        expires_at,
-                    )
+                    create_data = {
+                        "user_id": user_id,
+                        "access_level": access_level,
+                    }
+
+                    if expires_at:
+                        create_data["expires_at"] = expires_at
+
+                    if member_role_id:
+                        create_data["member_role_id"] = member_role_id
+
+                    project.members.create(data=create_data)
 
         if enforce_members:
-            current_members = self.gitlab.get_members_from_project(project_and_group)
 
             # Enforce that all usernames are lowercase for comparisons.
             users_in_config = [username.lower() for username in users.keys()]
             users_in_gitlab = current_members.keys()
             users_not_in_config = set(users_in_gitlab) - set(users_in_config)
-
             for user_not_in_config in users_not_in_config:
                 if (
                     keep_bots
@@ -205,8 +226,9 @@ class MembersProcessor(AbstractProcessor):
                 debug(
                     f"Removing user '{user_not_in_config}' that is not configured to be a member."
                 )
-                self.gitlab.remove_member_from_project(
-                    project_and_group, user_not_in_config
-                )
+                cached_user_id = self.gl.get_user_by_username_cached(
+                    user_not_in_config
+                ).get_id()
+                project.members.delete(id=cached_user_id)
         else:
             debug("Not enforcing user members.")
