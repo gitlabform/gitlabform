@@ -65,6 +65,7 @@ def test_diff_from_current():
     ).strip()
     assert result == expected
 
+
 def test_diff_output_no_changes():
     current_config = {
         "foo": 123,
