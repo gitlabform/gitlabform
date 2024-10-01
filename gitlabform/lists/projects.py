@@ -18,8 +18,10 @@ class ProjectsProvider(GroupsProvider):
     Because the projects depend on groups requested, this class inherits GroupsProvider.
     """
 
-    def __init__(self, gitlab, configuration, include_archived_projects):
-        super().__init__(gitlab, configuration)
+    def __init__(
+        self, gitlab, configuration, include_archived_projects, recurse_subgroups
+    ):
+        super().__init__(gitlab, configuration, recurse_subgroups)
         self.include_archived_projects = include_archived_projects
 
     def get_projects(self, target: str) -> Projects:
