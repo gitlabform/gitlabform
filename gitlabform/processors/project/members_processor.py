@@ -105,7 +105,7 @@ class MembersProcessor(AbstractProcessor):
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
-        project_members = project.members.list()
+        project_members = project.members.list(get_all=True)
         current_members = dict()
         for member in project_members:
             current_members[member.username] = member
