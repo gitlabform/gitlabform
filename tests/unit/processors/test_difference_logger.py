@@ -64,3 +64,24 @@ def test_diff_from_current():
     """
     ).strip()
     assert result == expected
+
+
+def test_diff_output_no_changes():
+    current_config = {
+        "foo": 123,
+        "bar": "whatever",
+    }
+    config_to_apply = {
+        "foo": 123,
+        "bar": "whatever",
+    }
+    result = DifferenceLogger.log_diff(
+        "test", current_config, config_to_apply, True, None, True
+    )
+
+    expected = textwrap.dedent(
+        """
+
+    """
+    ).strip()
+    assert result == expected

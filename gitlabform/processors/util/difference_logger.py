@@ -53,6 +53,12 @@ class DifferenceLogger:
                 )
             )
 
+        # There is the potential that no changes need to be shown, which
+        # results in the calls to max() later on to fail. Instead, opting
+        # to return early with an emtpy string, since no changes were identified
+        if len(changes) == 0:
+            return ""
+
         # calculate field size for nice formatting
         max_key_len = str(max(map(lambda i: len(i[0]), changes)))
         max_val_1 = str(max(map(lambda i: len(i[1]), changes)))
