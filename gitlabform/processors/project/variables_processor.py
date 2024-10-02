@@ -59,6 +59,13 @@ class VariablesProcessor(MultipleEntitiesProcessor):
         verbose(f"Variables in {project_and_group} in configuration:")
 
         configured_variables = copy.deepcopy(configuration)
+
+        enforce_variables = configured_variables.get("enforce", False)
+
+        # Remove 'enforce' key from the config so that it's not treated as a "variable"
+        if enforce_variables:
+            configured_variables.pop("enforce")
+
         for key in configured_variables.keys():
             configured_variables[key]["value"] = hide(
                 configured_variables[key]["value"]
