@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.16.0
+
+### Features
+
+* Run gitlabform for a single group and all it's subgroups [#828](https://github.com/gitlabform/gitlabform/pull/828), closes [613](https://github.com/gitlabform/gitlabform/issues/613). ([Patrick Del Conte](https://github.com/exaV))
+
+### Bug Fixes
+
+* return all members when listing for member processor [#838](https://github.com/gitlabform/gitlabform/pull/838) ([Jack Hindley](https://github.com/jackhindleydwp))
+* fix error when --diff-only-changed is set, but no changes are present [#833](https://github.com/gitlabform/gitlabform/pull/833) ([Arden Shackelford](https://github.com/Shackelford-Arden))
+* remove 'enforce' key from the config so that it's not treated as a "variable" [#831](https://github.com/gitlabform/gitlabform/pull/831) ([Philippe Granet](https://github.com/philippe-granet))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
 ## 3.15.0
 
 ### Features
