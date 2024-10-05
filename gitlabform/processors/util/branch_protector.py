@@ -133,6 +133,11 @@ class BranchProtector:
         # (PUT is not documented for it, at least). so you need to delete existing
         # branch protection (DELETE) and recreate it (POST) to perform an update
         # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
+
+        # Update: PATCH for editing the entities has been introduced for this API
+        # in GitLab 15.6 (Nov 2022), but as of Apr 2023 it seems too early
+        # to implement it and thus start to require such a new version of GitLab
+
         self.gitlab.unprotect_branch(project_and_group, branch)
 
         # replace in our config our custom "user" and "group" entries with supported by
@@ -180,9 +185,28 @@ class BranchProtector:
         # get requested configuration of branch access level
         requested = self.get_requested_branch_configuration(requested_configuration)
 
-        debug("Current branch '%s' access levels: %s", branch, current)
-        debug("Requested branch '%s' access levels: %s", branch, requested)
+        debug("Current branch '%s' access levels:", branch)
+        debug(self._get_debug_branch_configuration(current))
+        debug("Requested branch '%s' access levels:", branch)
+        debug(self._get_debug_branch_configuration(requested))
+
         return current != requested
+
+    @staticmethod
+    def _get_debug_branch_configuration(branch_configuration):
+        to_return = (
+            f"push levels = {branch_configuration[0]}\n"
+            f"push user ids = {branch_configuration[1]}\n"
+            f"push group ids = {branch_configuration[2]}\n"
+            f"merge levels = {branch_configuration[3]}\n"
+            f"merge user ids = {branch_configuration[4]}\n"
+            f"merge group ids = {branch_configuration[5]}\n"
+            f"unprotect levels = {branch_configuration[6]}\n"
+            f"unprotect user ids = {branch_configuration[7]}\n"
+            f"unprotect group ids = {branch_configuration[8]}\n"
+            f"allow_force_push = {branch_configuration[9]}\n"
+        )
+        return to_return
 
     def get_current_branch_configuration(self, project_and_group_name, branch):
         # from a response for a request to Protected Branches API GET request
