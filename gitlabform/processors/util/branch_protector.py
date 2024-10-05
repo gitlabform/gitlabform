@@ -1,6 +1,11 @@
 from logging import debug
 from cli_ui import warning, fatal
 
+from gitlab import Gitlab, GitlabDeleteError, GitlabHttpError
+
+from gitlabform.gitlab import GitlabWrapper
+from gitlab.v4.objects import ProjectProtectedBranch
+
 from gitlabform.constants import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import NotFoundException
@@ -20,6 +25,7 @@ class BranchProtector:
     def __init__(self, gitlab: GitLab, strict: bool):
         self.gitlab = gitlab
         self.strict = strict
+        self.gl: Gitlab = GitlabWrapper(self.gitlab)._gitlab
 
     def apply_branch_protection_configuration(
         self, project_and_group, configuration, branch
@@ -96,18 +102,27 @@ class BranchProtector:
 
     def unprotect_branch(self, project_and_group, branch):
         try:
+            project = self.gl.projects.get(project_and_group)
             debug("Setting branch '%s' as unprotected", branch)
-            self.gitlab.unprotect_branch(project_and_group, branch)
-
-        except NotFoundException:
-            message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
-            if self.strict:
-                fatal(
-                    message,
-                    exit_code=EXIT_PROCESSING_ERROR,
+            project.protectedbranches.delete(branch)
+        except (GitlabDeleteError, GitlabHttpError) as gle:
+            # 404 was in the accepted codes of the http call, so should not be fatal,
+            # even in strict mode. Shouldn't other exceptions cause a fatal anyway,
+            # even if not strict?
+            if gle.response_code == 404:
+                warning(
+                    f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
                 )
+                pass
             else:
-                warning(message)
+                message = f"Branch '{branch}' not found when trying to set it as protected/unprotected!"
+                if self.strict:
+                    fatal(
+                        message,
+                        exit_code=EXIT_PROCESSING_ERROR,
+                    )
+                else:
+                    warning(message)
 
     def validate_branch_protection_config(
         self, project_and_group, requested_configuration, branch
@@ -133,7 +148,12 @@ class BranchProtector:
         # (PUT is not documented for it, at least). so you need to delete existing
         # branch protection (DELETE) and recreate it (POST) to perform an update
         # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
-        self.gitlab.unprotect_branch(project_and_group, branch)
+        project = self.gl.projects.get(project_and_group)
+        try:
+            project.protectedbranches.delete(branch)
+        except (GitlabDeleteError, GitlabHttpError) as gle:
+            if gle.response_code == 404:
+                warning(f"Protected branch {branch} not found while unprotecting.")
 
         # replace in our config our custom "user" and "group" entries with supported by
         # the Protected Branches API "user_id" and "group_id"
@@ -152,11 +172,9 @@ class BranchProtector:
             if key != "protected"
         }
 
-        self.gitlab.protect_branch(
-            project_and_group,
-            branch,
-            protect_rules,
-        )
+        branch_dict = {"name": branch}
+        branch_dict.update(protect_rules)
+        project.protectedbranches.create(branch_dict)
 
     def set_code_owner_approval_required(
         self, requested_configuration, project_and_group, branch
@@ -165,11 +183,23 @@ class BranchProtector:
             "Setting branch '%s' \"code owner approval required\" option",
             branch,
         )
-        self.gitlab.set_branch_code_owner_approval_required(
-            project_and_group,
-            branch,
-            requested_configuration["code_owner_approval_required"],
+        project = self.gl.projects.get(project_and_group)
+        protectedbranch = next(
+            pb for pb in project.protectedbranches.list() if pb.name == branch
+        ).asdict()
+        try:
+            project.protectedbranches.delete(protectedbranch["name"])
+        except (GitlabDeleteError, GitlabHttpError) as e:
+            if e.response_code == 404:
+                pass
+        protectedbranch.update(
+            {
+                "code_owner_approval_required": requested_configuration[
+                    "code_owner_approval_required"
+                ]
+            }
         )
+        project.protectedbranches.create(protectedbranch)
 
     def configuration_update_needed(
         self, requested_configuration, project_and_group, branch
@@ -212,9 +242,10 @@ class BranchProtector:
         # the other extra settings that can be applied using Protected Branches API POST request
         #
         try:
-            protected_branches_response = self.gitlab.get_branch_access_levels(
-                project_and_group_name, branch
-            )
+            project = self.gl.projects.get(project_and_group_name)
+            protected_branches_response = next(
+                p for p in project.protectedbranches.list() if p.name == branch
+            ).asdict()
 
             return (
                 *(
@@ -231,10 +262,11 @@ class BranchProtector:
                 protected_branches_response.get("allow_force_push"),
                 # code_owner_approval_required has to use PATCH request, see set_code_owner_approval_required()
             )
-        except NotFoundException:
+        except (NotFoundException, StopIteration):
             return tuple([None] * 10)  # = 3 * 3 + 1
 
-    def get_current_permissions(self, protected_branches_response, action):
+    @staticmethod
+    def get_current_permissions(protected_branches_response, action):
         # from a response for a request to Protected Branches API GET request
         # (https://docs.gitlab.com/ee/api/protected_branches.html#get-a-single-protected-branch-or-wildcard-protected-branch)
         # like:
