@@ -1220,7 +1220,7 @@
 <h1 id="webhooks">Webhooks<a class="headerlink" href="#webhooks" title="Permanent link">&para;</a></h1>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/integrations/webhooks.html">Webhooks</a> (aka Project Hooks).</p>
 <p>The key names here are webhook URLs, except if the key name is <code>enforce</code> and is set to <code>true</code> - in this case only the hooks defined here will remain in the project, all others will be deleted. When <code>enforce</code> is false, or not set, individual hooks can be deleted by setting their value to <code>delete: true</code>.
-The other values of the URL keys are the parameters described at <a href="https://docs.gitlab.com/ee/api/projects.html#edit-project-hook">edit project hooks endpoint</a>, <strong>except the id and hook_id</strong>.</p>
+The other values of the URL keys are the parameters described at <a href="https://docs.gitlab.com/ee/api/project_webhooks.html#edit-a-project-webhook">edit a project webhook</a>, <strong>except the id and hook_id</strong>.</p>
 <h2 id="examples">Examples:<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <p>Example 1: only the first hook will be deleted. Here, omitting the <code>enforce</code> key altogether achieves the same result.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
