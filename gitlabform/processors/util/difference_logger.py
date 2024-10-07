@@ -27,7 +27,7 @@ class DifferenceLogger:
                 k,
                 json.dumps(
                     current_config.get(k, "???")
-                    if type(current_config) == dict
+                    if isinstance(current_config, dict)
                     else "???"
                 ),
                 json.dumps(v),
@@ -37,7 +37,10 @@ class DifferenceLogger:
 
         # Remove unchanged if needed
         if only_changed:
-            changes = filter(lambda i: i[1] != i[2], changes)
+            # due to `filter` returning an iterator, we have to wrap it
+            # in `list()` to get the values and assign back to `changes`,
+            # otherwise `changes` is not what we expect it to be later :)
+            changes = list(filter(lambda i: i[1] != i[2], changes))
 
         # Hide secrets
         if hide_entries:
@@ -49,6 +52,12 @@ class DifferenceLogger:
                     changes,
                 )
             )
+
+        # There is the potential that no changes need to be shown, which
+        # results in the calls to max() later on to fail. Instead, opting
+        # to return early with an emtpy string, since no changes were identified
+        if len(changes) == 0:
+            return ""
 
         # calculate field size for nice formatting
         max_key_len = str(max(map(lambda i: len(i[0]), changes)))
@@ -64,6 +73,7 @@ class DifferenceLogger:
         text = "{subject}:\n{diff}".format(
             subject=subject, diff="\n".join(starmap(pattern.format, changes))
         )
+
         if test:
             return text
         else:

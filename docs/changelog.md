@@ -1,5 +1,50 @@
 # Changelog
 
+## 3.16.0
+
+### Features
+
+* Run gitlabform for a single group and all it's subgroups [#828](https://github.com/gitlabform/gitlabform/pull/828), closes [613](https://github.com/gitlabform/gitlabform/issues/613). ([Patrick Del Conte](https://github.com/exaV))
+
+### Bug Fixes
+
+* return all members when listing for member processor [#838](https://github.com/gitlabform/gitlabform/pull/838) ([Jack Hindley](https://github.com/jackhindleydwp))
+* fix error when --diff-only-changed is set, but no changes are present [#833](https://github.com/gitlabform/gitlabform/pull/833) ([Arden Shackelford](https://github.com/Shackelford-Arden))
+* remove 'enforce' key from the config so that it's not treated as a "variable" [#831](https://github.com/gitlabform/gitlabform/pull/831) ([Philippe Granet](https://github.com/philippe-granet))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+## 3.15.0
+
+### Features
+
+* Add flag to only print settings that are being changed [#815](https://github.com/gitlabform/gitlabform/pull/814) ([Arden Shackelford](https://github.com/Shackelford-Arden))
+
+### Bug Fixes
+
+* Idempotent updating for SAML Group Links [#824](https://github.com/gitlabform/gitlabform/pull/824) ([ItsJustMagic](https://github.com/ItsJustMagic))
+
+### Refactors
+
+* Moving members and members_processor to use python-gitlab [#822](https://github.com/gitlabform/gitlabform/pull/822) ([Arden Shackelford](https://github.com/Shackelford-Arden))
+
+### Build Process
+
+* Switch to Trusted Publishing to PyPi [#805](https://github.com/gitlabform/gitlabform/pull/805) ([Greg Dubicki](https://github.com/gdubicki))
+* Cleanup tests to avoid multiple issue tracking integrations being enabled [#820](https://github.com/gitlabform/gitlabform/pull/820) ([Arden Shackelford](https://github.com/Shackelford-Arden))
+
+### Documentation
+
+* Add new feature docs to navigation of docs about various configuration options [#812](https://github.com/gitlabform/gitlabform/pull/812) ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 3.14.1
 
 ### Features

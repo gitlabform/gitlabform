@@ -36,7 +36,9 @@ class VariablesProcessor(MultipleEntitiesProcessor):
         else:
             return True
 
-    def _print_diff(self, project_and_group: str, configuration):
+    def _print_diff(
+        self, project_and_group: str, configuration, only_changed: bool = False
+    ):
         try:
             current_variables = self.gitlab.get_variables(project_and_group)
 
@@ -57,6 +59,13 @@ class VariablesProcessor(MultipleEntitiesProcessor):
         verbose(f"Variables in {project_and_group} in configuration:")
 
         configured_variables = copy.deepcopy(configuration)
+
+        enforce_variables = configured_variables.get("enforce", False)
+
+        # Remove 'enforce' key from the config so that it's not treated as a "variable"
+        if enforce_variables:
+            configured_variables.pop("enforce")
+
         for key in configured_variables.keys():
             configured_variables[key]["value"] = hide(
                 configured_variables[key]["value"]

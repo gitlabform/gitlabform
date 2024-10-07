@@ -28,8 +28,9 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
         if enforce_links:
             configured_links.pop("enforce")
 
-        for link_name, link_configuration in configured_links.items():
-            if link_name not in existing_link_names:
+        for _, link_configuration in configured_links.items():
+            saml_group_name = link_configuration.get("saml_group_name")
+            if saml_group_name not in existing_link_names:
                 group.saml_group_links.create(link_configuration)
                 group.save()
 
@@ -48,7 +49,7 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
     ) -> None:
         """Delete any SAML links that are not in the configuration."""
         known_names = [
-            common_name["name"]
+            common_name["saml_group_name"]
             for common_name in configured.values()
             if common_name != "enforce"
         ]
@@ -56,4 +57,4 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
         for link in existing:
             if link.name not in known_names:
                 debug(f"Deleting extra SAML link: {link.name}")
-                group.saml_group_links.delete(link.id)
+                group.saml_group_links.delete(link.name)

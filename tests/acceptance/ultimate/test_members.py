@@ -185,7 +185,10 @@ class TestMembers:
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
         captured = capsys.readouterr()
-        assert "access_level is missing" in captured.err
+        assert (
+            "the custom role's base access level does not match the current access level"
+            in captured.err
+        )
 
     def _create_custom_role(self, gl, base_access_level, random_string):
         # Python-Gitlab does not directly support Member Roles

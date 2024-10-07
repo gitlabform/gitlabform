@@ -55,6 +55,7 @@ class GitLabForm:
         config_string=None,
         noop=False,
         output_file=None,
+        recurse_subgroups=True,
     ):
         if target and config_string:
             # this mode is basically only for testing
@@ -67,12 +68,14 @@ class GitLabForm:
             self.start_from = 1
             self.start_from_group = 1
             self.noop = noop
+            self.diff_only_changed = False
             self.output_file = output_file
             self.skip_version_check = True
             self.include_archived_projects = include_archived_projects
             self.just_show_version = False
             self.terminate_after_error = True
             self.only_sections = "all"
+            self.recurse_subgroups = recurse_subgroups
 
             self._configure_output(tests=True)
         else:
@@ -87,12 +90,14 @@ class GitLabForm:
                 self.start_from,
                 self.start_from_group,
                 self.noop,
+                self.diff_only_changed,
                 self.output_file,
                 self.skip_version_check,
                 self.include_archived_projects,
                 self.just_show_version,
                 self.terminate_after_error,
                 self.only_sections,
+                self.recurse_subgroups,
             ) = self._parse_args()
 
             self._configure_output()
@@ -121,11 +126,13 @@ class GitLabForm:
         self.groups_provider = GroupsProvider(
             self.gitlab,
             self.configuration,
+            self.recurse_subgroups,
         )
         self.projects_provider = ProjectsProvider(
             self.gitlab,
             self.configuration,
             self.include_archived_projects,
+            self.recurse_subgroups,
         )
 
         self.groups_and_projects_filters = GroupsAndProjectsFilters(
@@ -214,6 +221,14 @@ class GitLabForm:
         )
 
         parser.add_argument(
+            "-doc",
+            "--diff-only-changed",
+            dest="diff_only_changed",
+            action="store_true",
+            help="only show items who's values are changing in the diff.",
+        )
+
+        parser.add_argument(
             "-o",
             "--output-file",
             dest="output_file",
@@ -270,6 +285,14 @@ class GitLabForm:
             help="process only section with these names (comma-delimited)",
         )
 
+        parser.add_argument(
+            "-r",
+            "--recurse-subgroups",
+            dest="recurse_subsgroups",
+            action="store_true",
+            help="include all subgroups recursively. Always true for ALL, ALL_DEFINED",
+        )
+
         args = parser.parse_args()
 
         if args.only_sections != "all":
@@ -284,12 +307,14 @@ class GitLabForm:
             args.start_from,
             args.start_from_group,
             args.noop,
+            args.diff_only_changed,
             args.output_file,
             args.skip_version_check,
             args.include_archived_projects,
             args.just_show_version,
             args.terminate_after_error,
             args.only_sections,
+            args.recurse_subsgroups,
         )
 
     def _configure_output(self, tests=False) -> None:
@@ -384,6 +409,7 @@ class GitLabForm:
                 "",
                 application_configuration,
                 dry_run=self.noop,
+                diff_only_changed=self.diff_only_changed,
                 effective_configuration=effective_configuration,
                 only_sections=self.only_sections,
             )
@@ -420,6 +446,7 @@ class GitLabForm:
                     group,
                     group_configuration,
                     dry_run=self.noop,
+                    diff_only_changed=self.diff_only_changed,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
                 )
@@ -483,6 +510,7 @@ class GitLabForm:
                     project_and_group,
                     project_configuration,
                     dry_run=self.noop,
+                    diff_only_changed=self.diff_only_changed,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
                 )
