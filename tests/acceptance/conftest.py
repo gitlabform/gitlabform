@@ -300,21 +300,10 @@ def make_user(
 
 
 @pytest.fixture(scope="function")
-def make_project_member_developer(gl, project_for_function) -> User:
+def make_project_member_developer(gl, project_for_function):
     username = get_random_name("user")
 
-    user = gl.users.create(
-        {
-            "username": username,
-            "email": username + "@example.com",
-            "name": username + " Example",
-            "password": get_random_password(),
-        }
-    )
-
-    project_for_function.members.create(
-        {"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value}
-    )
+    user = _create_user_and_add_to_project(gl, project_for_function, username)
 
     yield user
 
@@ -322,9 +311,17 @@ def make_project_member_developer(gl, project_for_function) -> User:
 
 
 @pytest.fixture(scope="function")
-def make_project_member_developer_random_case(gl, project_for_function) -> User:
+def make_project_member_developer_random_case(gl, project_for_function):
     username = randomize_case(get_random_name("user"))
 
+    user = _create_user_and_add_to_project(gl, project_for_function, username)
+
+    yield user
+
+    gl.users.delete(user.id)
+
+
+def _create_user_and_add_to_project(gl, project, username):
     user = gl.users.create(
         {
             "username": username,
@@ -333,14 +330,10 @@ def make_project_member_developer_random_case(gl, project_for_function) -> User:
             "password": get_random_password(),
         }
     )
-
-    project_for_function.members.create(
+    project.members.create(
         {"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value}
     )
-
-    yield user
-
-    gl.users.delete(user.id)
+    return user
 
 
 @pytest.fixture(scope="class")
