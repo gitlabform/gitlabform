@@ -105,10 +105,7 @@ class MembersProcessor(AbstractProcessor):
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
-        project_members = project.members.list(get_all=True)
-        current_members = dict()
-        for member in project_members:
-            current_members[member.username] = member
+        current_members = self._get_members_from_project(project)
 
         if users:
             verbose("Processing users as members...")
@@ -137,7 +134,6 @@ class MembersProcessor(AbstractProcessor):
                 if member_role_id_or_name:
                     # For self-managed member_roles are at an instance level, for SaaS on a Group level
                     if self.gl.is_gitlab_saas():
-                        project = self.gl.get_project_by_path_cached(project_and_group)
                         group_id = project.namespace["id"]
                     else:
                         group_id = None
@@ -232,3 +228,19 @@ class MembersProcessor(AbstractProcessor):
                 project.members.delete(id=cached_user_id)
         else:
             debug("Not enforcing user members.")
+
+    @staticmethod
+    def _get_members_from_project(project):
+        # Only get direct members from Python Gitlab (matches previous implementation)
+        # https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#id14
+        project_members = project.members.list()
+        existing_user_names_lower = dict()
+
+        for member in project_members:
+            # To make sure that the user hasn't been added in a different
+            # case, we enforce that the username is always in lowercase for
+            # checks.
+            existing_user_names_lower[member.username.lower()] = member
+
+        debug(f"Existing project members {existing_user_names_lower}")
+        return existing_user_names_lower

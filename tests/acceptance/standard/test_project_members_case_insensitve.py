@@ -1,4 +1,5 @@
 import pytest
+from gitlab.v4.objects import User, Project
 
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
@@ -42,3 +43,35 @@ class TestProjectMembersCaseInsensitive:
 
         members_usernames = [member.username for member in members]
         assert outsider_user.username in members_usernames
+
+    def test__existing_users_are_not_added_again(
+        self,
+        project_for_function: Project,
+        make_project_member_developer: User,
+        make_project_member_developer_random_case: User,
+        outsider_user: User,
+    ):
+        # Regression test for: https://github.com/gitlabform/gitlabform/issues/836
+
+        change_user_level = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            members:
+              users:
+                {outsider_user.username}:
+                  access_level: {AccessLevel.MAINTAINER.value}
+                {make_project_member_developer.username}:
+                  access_level: {AccessLevel.DEVELOPER.value}
+                {make_project_member_developer_random_case.username.lower()}: # lower case the project member whose actual user name is random case
+                  access_level: {AccessLevel.DEVELOPER.value}
+        """
+
+        run_gitlabform(change_user_level, project_for_function)
+
+        members = project_for_function.members.list()
+        assert len(members) == 3
+
+        members_usernames = [member.username for member in members]
+        assert outsider_user.username in members_usernames
+        assert make_project_member_developer.username in members_usernames
+        assert make_project_member_developer_random_case.username in members_usernames
