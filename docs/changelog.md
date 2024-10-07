@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.16.1
+
+### Bug Fixes
+
+* fix: Adding members who already exist in project [#840](https://github.com/gitlabform/gitlabform/pull/840). Resolves [836](https://github.com/gitlabform/gitlabform/issues/836). ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)) 
+
+### Documentation
+
+* fix "Edit a project webhook" Gitlab link [#839](https://github.com/gitlabform/gitlabform/pull/839) ([Philippe Granet](https://github.com/philippe-granet))
+
 ## 3.16.0
 
 ### Features
