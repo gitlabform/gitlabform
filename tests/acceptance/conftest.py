@@ -19,6 +19,7 @@ from tests.acceptance import (
     get_random_name,
     create_users,
     get_random_password,
+    randomize_case,
 )
 
 from cli_ui.tests import MessageRecorder
@@ -293,10 +294,53 @@ def make_user(
         return user
 
     yield _make_user
-
     for user in created_users:
         with allowed_codes(404):
             gl.users.delete(user.id)
+
+
+@pytest.fixture(scope="function")
+def make_project_member_developer(gl, project_for_function) -> User:
+    username = get_random_name("user")
+
+    user = gl.users.create(
+        {
+            "username": username,
+            "email": username + "@example.com",
+            "name": username + " Example",
+            "password": get_random_password(),
+        }
+    )
+
+    project_for_function.members.create(
+        {"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value}
+    )
+
+    yield user
+
+    gl.users.delete(user.id)
+
+
+@pytest.fixture(scope="function")
+def make_project_member_developer_random_case(gl, project_for_function) -> User:
+    username = randomize_case(get_random_name("user"))
+
+    user = gl.users.create(
+        {
+            "username": username,
+            "email": username + "@example.com",
+            "name": username + " Example",
+            "password": get_random_password(),
+        }
+    )
+
+    project_for_function.members.create(
+        {"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value}
+    )
+
+    yield user
+
+    gl.users.delete(user.id)
 
 
 @pytest.fixture(scope="class")
