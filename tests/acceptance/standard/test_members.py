@@ -1,6 +1,8 @@
 import pytest
 
+from typing import List
 from gitlabform.gitlab import AccessLevel
+from gitlab.v4.objects import User, Project
 from tests.acceptance import (
     run_gitlabform,
 )
@@ -69,3 +71,41 @@ class TestMembers:
 
         members_usernames = [member.username for member in members]
         assert outsider_user.username in members_usernames
+
+    def test__existing_users_are_not_added_again_with_pagination(
+        self,
+        project_for_function: Project,
+        make_multiple_project_members_for_pagination: List[User],
+    ):
+        change_user_level = f"""
+          projects_and_groups:
+            {project_for_function.path_with_namespace}:
+              members:
+                users:
+                  {make_multiple_project_members_for_pagination[-1].username}:
+                    access_level: {AccessLevel.DEVELOPER.value}
+          """
+
+        run_gitlabform(change_user_level, project_for_function)
+
+        members = project_for_function.members.list(iterator=True)
+        members_usernames = [member.username for member in members]
+        members_usernames_from_fixture = [
+            member.username for member in make_multiple_project_members_for_pagination
+        ]
+
+        print(len(members_usernames))
+        print(members_usernames)
+        print(len(make_multiple_project_members_for_pagination))
+        print(make_multiple_project_members_for_pagination)
+
+        assert (",").join(members_usernames) == (",").join(
+            members_usernames_from_fixture
+        )
+
+        assert len(members) == len(make_multiple_project_members_for_pagination)
+
+        assert (
+            make_multiple_project_members_for_pagination[-1].username
+            in members_usernames
+        )

@@ -233,7 +233,7 @@ class MembersProcessor(AbstractProcessor):
     def _get_members_from_project(project):
         # Only get direct members from Python Gitlab (matches previous implementation)
         # https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#id14
-        project_members = project.members.list()
+        project_members = project.members.list(iterator=True)
         existing_user_names_lower = dict()
 
         for member in project_members:
