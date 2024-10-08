@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.16.2
+
+### Bug Fixes
+
+* fix: iterates through project list to check and add members [#843](https://github.com/gitlabform/gitlabform/pull/843). Resolves [836](https://github.com/gitlabform/gitlabform/issues/836). ([Sachin Kumar Singh](https://github.com/SachinKSingh28)) 
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
 ## 3.16.1
 
 ### Bug Fixes
@@ -25,6 +35,8 @@
 ### Dependencies
 
 * Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
 
 ## 3.15.0
 
