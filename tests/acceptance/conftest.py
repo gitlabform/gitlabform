@@ -321,6 +321,21 @@ def make_project_member_developer_random_case(gl, project_for_function):
     gl.users.delete(user.id)
 
 
+@pytest.fixture(scope="function")
+def make_multiple_project_members_for_pagination(gl, project_for_function):
+    users = create_users(randomize_case(get_random_name("user")), 25)
+
+    for user in users:
+        project_for_function.members.create(
+            {"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value}
+        )
+
+    yield users
+
+    for user in users:
+        user.delete()
+
+
 def _create_user_and_add_to_project(gl, project, username):
     user = gl.users.create(
         {
