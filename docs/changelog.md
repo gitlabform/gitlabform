@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.16.3
+
+### Bug Fixes
+
+* fix: only unprotect branch right before protecting again [#830](https://github.com/gitlabform/gitlabform/pull/830) ([Chris Hill](https://github.com/chrishill-1))
+* fix: VariablesProcessor._print_diff() got an unexpected keyword argument 'diff_only_changed' [#852](https://github.com/gitlabform/gitlabform/pull/852), closes [#851](https://github.com/gitlabform/gitlabform/issues/851) ([kriko](https://github.com/kriko))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 3.16.2
 
 ### Bug Fixes
