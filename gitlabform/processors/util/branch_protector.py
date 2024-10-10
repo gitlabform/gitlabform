@@ -1,4 +1,4 @@
-from logging import debug
+from logging import debug, info
 from cli_ui import warning, fatal
 
 from gitlabform.constants import EXIT_PROCESSING_ERROR, EXIT_INVALID_INPUT
@@ -70,7 +70,7 @@ class BranchProtector:
             if self.configuration_update_needed(
                 requested_configuration, project_and_group, branch
             ):
-                self.do_protect_branch(
+                self._do_protect_branch(
                     requested_configuration, project_and_group, branch
                 )
             else:
@@ -126,14 +126,11 @@ class BranchProtector:
                 exit_code=EXIT_INVALID_INPUT,
             )
 
-    def do_protect_branch(self, requested_configuration, project_and_group, branch):
-        debug("Setting branch '%s' access level", branch)
-
-        # Protected Branches API is one of those that do not support editing entities
-        # (PUT is not documented for it, at least). so you need to delete existing
-        # branch protection (DELETE) and recreate it (POST) to perform an update
-        # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
-        self.gitlab.unprotect_branch(project_and_group, branch)
+    def _do_protect_branch(
+        self, requested_configuration, project_and_group, branch_name
+    ):
+        # _do_protect_branch is only called after checking an update actually needs to be made
+        info(f"Updating protected branch {branch_name} access levels")
 
         # replace in our config our custom "user" and "group" entries with supported by
         # the Protected Branches API "user_id" and "group_id"
@@ -152,9 +149,17 @@ class BranchProtector:
             if key != "protected"
         }
 
+        # Could be updated to python-gitlab project.protectedbranches.delete(branch_name) and create
+
+        # Protected Branches API is one of those that do not support editing entities
+        # (PUT is not documented for it, at least). so you need to delete existing
+        # branch protection (DELETE) and recreate it (POST) to perform an update
+        # (otherwise you get HTTP 409 "Protected branch 'foo' already exists")
+        self.gitlab.unprotect_branch(project_and_group, branch_name)
+
         self.gitlab.protect_branch(
             project_and_group,
-            branch,
+            branch_name,
             protect_rules,
         )
 
