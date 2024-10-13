@@ -23,9 +23,7 @@ class ResourceGroupsProcessor(AbstractProcessor):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
         for config_resource_group_name in sorted(configured_resource_groups):
-            config_resource_group_process_mode = configured_resource_groups[
-                config_resource_group_name
-            ]["process_mode"]
+            resource_group_in_config = configured_resource_groups[config_resource_group_name]
             try:
                 resource_group_in_gitlab: ProjectResourceGroup = (
                     project.resource_groups.get(config_resource_group_name)
@@ -45,19 +43,14 @@ class ResourceGroupsProcessor(AbstractProcessor):
                     continue
 
             if (
-                resource_group_in_gitlab
-                and resource_group_in_gitlab.process_mode
-                != config_resource_group_process_mode
+                self._needs_update(resource_group_in_gitlab.asdict(), resource_group_in_config)
             ):
                 verbose(
-                    f"Updating process mode of '{config_resource_group_name}' resource group to '{config_resource_group_process_mode}'"
+                    f"Updating resource group '{config_resource_group_name}'"
                 )
 
                 try:
-                    resource_group_in_gitlab.process_mode = (
-                        config_resource_group_process_mode
-                    )
-                    resource_group_in_gitlab.save()
+                    project.resource_groups.update(resource_group_in_gitlab.key, **resource_group_in_config)
                 except GitlabUpdateError as error:
                     warning(f"Resource group update failed. Error: '{error}'")
                     raise GitlabUpdateError
