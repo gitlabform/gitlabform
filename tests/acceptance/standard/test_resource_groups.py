@@ -48,6 +48,25 @@ class TestResourceGroups:
         assert resource_group.key == "production"
         assert resource_group.process_mode == "newest_first"
 
+    def test__resource_group_process_mode_invalid_value(
+        self, project, add_gitlab_ci_config, capsys
+    ):
+        update_resource_group_config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            resource_groups:
+              production:
+                process_mode: foo
+            """
+
+        with pytest.raises(SystemExit) as exception:
+            run_gitlabform(update_resource_group_config, project)
+
+        assert exception.type == SystemExit
+        assert exception.value.code == EXIT_PROCESSING_ERROR
+        captured = capsys.readouterr()
+        assert "Resource group update failed" in captured.err
+
     def test__ensure_exists_default_true(self, project, capsys):
         update_resource_group_config = f"""
         projects_and_groups:
