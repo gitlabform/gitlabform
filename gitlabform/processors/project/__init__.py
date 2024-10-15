@@ -57,6 +57,7 @@ class ProjectProcessors(AbstractProcessors):
         self.processors: List[AbstractProcessor] = [
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab),
+            MembersProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
             ProjectLabelsProcessor(gitlab),
             JobTokenScopeProcessor(gitlab),
@@ -67,7 +68,6 @@ class ProjectProcessors(AbstractProcessors):
             IntegrationsProcessor(gitlab),
             FilesProcessor(gitlab, config, strict),
             HooksProcessor(gitlab),
-            MembersProcessor(gitlab),
             SchedulesProcessor(gitlab),
             BadgesProcessor(gitlab),
             ResourceGroupsProcessor(gitlab),
