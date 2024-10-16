@@ -171,27 +171,33 @@ def get_only_branch_access_levels(project: Project, branch):
         protected_branch = project.protectedbranches.get(branch)
 
     if not protected_branch:
-        return None, None, None, None, None
+        return None, None, None, None, None, None, None
 
     push_access_levels = set()
     merge_access_levels = set()
     push_access_user_ids = set()
     merge_access_user_ids = set()
+    push_access_group_ids = set()
+    merge_access_group_ids = set()
     unprotect_access_level = None
 
     if "push_access_levels" in protected_branch.attributes:
         for push_access in protected_branch.push_access_levels:
-            if not push_access["user_id"]:
+            if not push_access["user_id"] and not push_access["group_id"]:
                 push_access_levels.add(push_access["access_level"])
-            else:
+            elif push_access["user_id"]:
                 push_access_user_ids.add(push_access["user_id"])
+            elif push_access["group_id"]:
+                push_access_group_ids.add(push_access["group_id"])
 
     if "merge_access_levels" in protected_branch.attributes:
         for merge_access in protected_branch.merge_access_levels:
-            if not merge_access["user_id"]:
+            if not merge_access["user_id"] and not merge_access["group_id"]:
                 merge_access_levels.add(merge_access["access_level"])
-            else:
+            elif merge_access["user_id"]:
                 merge_access_user_ids.add(merge_access["user_id"])
+            elif merge_access["group_id"]:
+                merge_access_group_ids.add(merge_access["group_id"])
 
     if (
         "unprotect_access_levels" in protected_branch.attributes
@@ -206,6 +212,8 @@ def get_only_branch_access_levels(project: Project, branch):
         sorted(merge_access_levels),
         sorted(push_access_user_ids),
         sorted(merge_access_user_ids),
+        sorted(push_access_group_ids),
+        sorted(merge_access_group_ids),
         unprotect_access_level,
     )
 
