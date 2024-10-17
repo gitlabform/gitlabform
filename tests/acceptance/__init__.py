@@ -251,6 +251,59 @@ def get_only_tag_access_levels(project: Project, tag):
     )
 
 
+def get_only_environment_access_levels(project: Project, environment):
+    """
+    Retrieve details of a given protected environments so that
+    tests can easily validate those accordingly.
+    TODO: Should also return details about `required_approvals`
+    and `group_inheritance_type` for each
+    access levels or approval rules.
+    """
+    protected_environment = None
+
+    with allowed_codes(404):
+        protected_environment = project.protected_environments.get(environment)
+
+    if not protected_environment:
+        return None, None, None, None, None, None, None
+
+    deploy_access_levels = set()
+    deploy_access_user_ids = set()
+    deploy_access_group_ids = set()
+    approval_rules_access_levels = set()
+    approval_rules_user_ids = set()
+    approval_rules_group_ids = set()
+    required_approval_count = 0
+
+    if "deploy_access_levels" in protected_environment.attributes:
+        for deploy_access in protected_environment.deploy_access_levels:
+            if not deploy_access["user_id"] and not deploy_access["group_id"]:
+                deploy_access_levels.add(deploy_access["access_level"])
+            elif deploy_access["user_id"]:
+                deploy_access_user_ids.add(deploy_access["user_id"])
+            elif deploy_access["group_id"]:
+                deploy_access_group_ids.add(deploy_access["group_id"])
+
+    if "approval_rules" in protected_environment.attributes:
+        for approval_rules in protected_environment.approval_rules:
+            if not approval_rules["user_id"] and not approval_rules["group_id"]:
+                approval_rules_access_levels.add(approval_rules["access_level"])
+            elif approval_rules["user_id"]:
+                approval_rules_user_ids.add(approval_rules["user_id"])
+            elif approval_rules["group_id"]:
+                approval_rules_group_ids.add(approval_rules["group_id"])
+
+    return (
+        sorted(deploy_access_levels),
+        sorted(deploy_access_user_ids),
+        sorted(deploy_access_group_ids),
+        sorted(approval_rules_access_levels),
+        sorted(approval_rules_user_ids),
+        sorted(approval_rules_group_ids),
+        required_approval_count,
+    )
+
+
 def randomize_case(input: str) -> str:
     return "".join(random.choice((str.upper, str.lower))(char) for char in input)
 
