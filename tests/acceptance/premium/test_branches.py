@@ -57,31 +57,29 @@ class TestBranches:
         """
 
         run_gitlabform(config_with_user_ids, project)
-        assert True
-        # time.sleep(5)
 
-        # (
-        #     push_access_levels,
-        #     merge_access_levels,
-        #     push_access_user_ids,
-        #     merge_access_user_ids,
-        #     _,
-        # ) = get_only_branch_access_levels(project, branch)
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+        ) = get_only_branch_access_levels(project, branch)
 
-        # assert push_access_levels == [AccessLevel.NO_ACCESS.value]
-        # assert merge_access_levels == [AccessLevel.DEVELOPER.value]
-        # assert push_access_user_ids == sorted(
-        #     [
-        #         user_allowed_to_push.id,
-        #         user_allowed_to_push_and_merge.id,
-        #     ]
-        # )
-        # assert merge_access_user_ids == sorted(
-        #     [
-        #         user_allowed_to_merge.id,
-        #         user_allowed_to_push_and_merge.id,
-        #     ]
-        # )
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.DEVELOPER.value]
+        assert push_access_user_ids == sorted(
+            [
+                user_allowed_to_push.id,
+                user_allowed_to_push_and_merge.id,
+            ]
+        )
+        assert merge_access_user_ids == sorted(
+            [
+                user_allowed_to_merge.id,
+                user_allowed_to_push_and_merge.id,
+            ]
+        )
 
     def test__allow_more_than_one_user_by_ids(self, project, branch, make_user):
         first_user = make_user(AccessLevel.DEVELOPER)
