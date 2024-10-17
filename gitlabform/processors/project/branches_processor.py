@@ -1,7 +1,6 @@
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.branch_protector import BranchProtector
-from cli_ui import debug as verbose, warning
 import time
 
 
