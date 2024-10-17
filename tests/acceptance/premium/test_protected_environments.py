@@ -1,7 +1,7 @@
 import pytest
 
 from gitlabform.gitlab import AccessLevel
-from tests.acceptance import run_gitlabform, gl
+from tests.acceptance import run_gitlabform, get_only_environment_access_levels
 
 pytestmark = pytest.mark.requires_license
 
@@ -158,4 +158,86 @@ class TestProtectedEnvironments:
         assert (
             protected_envs_under_this_project[0].deploy_access_levels[0]["group_id"]
             == other_group.id
+        )
+
+    def test__environment_protection_dependent_on_members(self, project_for_function, group_for_function, make_user):
+        """
+        Configure an environment protection setting that depends on users or groups (i.e. allowed_to_deploy)
+        Make sure the setting is applied successfully because users must be members
+        before they can be configured in environment protection setting.
+        """
+
+        user_for_group_to_share_project_with = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
+        project_user_allowed_to_deploy = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
+        project_user_allowed_to_approve = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
+
+        config_branch_protection = f"""
+        projects_and_groups:
+          {group_for_function.full_path}/*:
+            group_members:
+              users:
+                {user_for_group_to_share_project_with.username}:
+                  access_level: {AccessLevel.DEVELOPER.value}
+          {project_for_function.path_with_namespace}:
+            members:
+              users:
+                {project_user_allowed_to_deploy.username}:
+                  access_level: {AccessLevel.DEVELOPER.value}
+                {project_user_allowed_to_approve.username}:
+                  access_level: {AccessLevel.DEVELOPER.value}
+              groups:
+                {group_for_function.full_path}:
+                  group_access: {AccessLevel.DEVELOPER.value}
+            protected_environments:
+              production:
+                deploy_access_levels:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+                  - user_id: {project_user_allowed_to_deploy.id}
+                  - group_id: {group_for_function.id}
+                approval_rules:
+                  - access_level: {AccessLevel.DEVELOPER.value}
+                    required_approvals: 2
+                  - user_id: {project_user_allowed_to_approve.id}
+                  - group_id: {group_for_function.id}
+        """
+
+        run_gitlabform(config_branch_protection, project_for_function)
+        
+        protected_envs_under_this_project = project_for_function.protected_environments.list()
+        assert len(protected_envs_under_this_project) == 1
+        production_env_protection_details = protected_envs_under_this_project[0]
+        assert production_env_protection_details.name == "production"
+        assert len(production_env_protection_details.deploy_access_levels) == 3
+
+        (
+            deploy_access_levels,
+            deploy_access_user_ids,
+            deploy_access_group_ids,
+            approval_rules_access_levels,
+            approval_rules_user_ids,
+            approval_rules_group_ids,
+            _,
+        ) = get_only_environment_access_levels(project_for_function, "production")
+
+        assert deploy_access_levels == [AccessLevel.MAINTAINER.value]
+        assert deploy_access_user_ids == sorted(
+            [
+                project_user_allowed_to_deploy.id,
+            ]
+        )
+        assert deploy_access_group_ids == sorted(
+            [
+                group_for_function.id,
+            ]
+        )
+        assert approval_rules_access_levels == [AccessLevel.DEVELOPER.value]
+        assert approval_rules_user_ids == sorted(
+            [
+                project_user_allowed_to_approve.id,
+            ]
+        )
+        assert approval_rules_group_ids == sorted(
+            [
+                group_for_function.id
+            ]
         )
