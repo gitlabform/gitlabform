@@ -70,7 +70,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         else:
             enforce = False
 
-        if "members" in configuration and "protected_environments" in configuration:
+        if "members" in configuration and ("protected_environments" or "merge_requests_approval_rules") in configuration:
             # When gitlabform needs to update project membership and also
             # configure environment protection, there seems to be a race condition
             # or delay in GitLab. Automated acceptance tests in gitlabform 
@@ -80,6 +80,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             # the API does not include that user in protected environment config and
             # does not return any error either"
             time.sleep(2)
+
         # TODO: move/convert this to a configuration validation phase
         self._find_duplicates(project_or_group, entities_in_configuration)
 

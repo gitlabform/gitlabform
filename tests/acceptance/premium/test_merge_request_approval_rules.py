@@ -466,3 +466,53 @@ class TestMergeRequestApprovers:
                 second_found = True
 
         assert first_found and second_found
+
+    def test__merge_request_approval_rule_dependent_on_members(self, project_for_function, group_for_function, make_user):
+        """
+        Configure merge request approval rule setting that depends on users or groups,
+        Make sure the setting is applied successfully because users must be members
+        before they can be configured in approval rule setting.
+        """
+
+        user_for_group_to_share_project_with = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
+        project_user_for_approval_rule = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
+        # project_user_allowed_to_approve = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
+
+        config_branch_protection = f"""
+        projects_and_groups:
+          {group_for_function.full_path}/*:
+            group_members:
+              users:
+                {user_for_group_to_share_project_with.username}:
+                  access_level: {AccessLevel.DEVELOPER.value}
+          {project_for_function.path_with_namespace}:
+            members:
+              users:
+                {project_user_for_approval_rule.username}:
+                  access_level: {AccessLevel.DEVELOPER.value}
+              groups:
+                {group_for_function.full_path}:
+                  group_access: {AccessLevel.DEVELOPER.value}
+            merge_requests_approval_rules:
+              default:
+                name: "Special approvers"
+                approvals_required: 2
+                users:
+                  - {project_user_for_approval_rule.username}
+                groups:
+                  - {group_for_function.full_path}
+        """
+
+        run_gitlabform(config_branch_protection, project_for_function)
+        
+        mr_approval_rules_under_this_project = project_for_function.approvalrules.list()
+        assert len(mr_approval_rules_under_this_project) == 1
+        default_mr_approval_rule_details = mr_approval_rules_under_this_project[0]
+        assert default_mr_approval_rule_details.name == "Special approvers"
+        print("approval rule details:", default_mr_approval_rule_details)
+
+        assert default_mr_approval_rule_details.approvals_required == 2
+        assert len(default_mr_approval_rule_details.users) == 1
+        assert default_mr_approval_rule_details.users[0]["username"] == project_user_for_approval_rule.username
+        assert len(default_mr_approval_rule_details.groups) == 1
+        assert default_mr_approval_rule_details.groups[0]["path"] == group_for_function.full_path
