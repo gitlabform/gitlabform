@@ -160,16 +160,24 @@ class TestProtectedEnvironments:
             == other_group.id
         )
 
-    def test__environment_protection_dependent_on_members(self, project_for_function, group_for_function, make_user):
+    def test__environment_protection_dependent_on_members(
+        self, project_for_function, group_for_function, make_user
+    ):
         """
         Configure an environment protection setting that depends on users or groups (i.e. allowed_to_deploy)
         Make sure the setting is applied successfully because users must be members
         before they can be configured in environment protection setting.
         """
 
-        user_for_group_to_share_project_with = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
-        project_user_allowed_to_deploy = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
-        project_user_allowed_to_approve = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
+        user_for_group_to_share_project_with = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
+        project_user_allowed_to_deploy = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
+        project_user_allowed_to_approve = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
 
         config_branch_protection = f"""
         projects_and_groups:
@@ -202,8 +210,10 @@ class TestProtectedEnvironments:
         """
 
         run_gitlabform(config_branch_protection, project_for_function)
-        
-        protected_envs_under_this_project = project_for_function.protected_environments.list()
+
+        protected_envs_under_this_project = (
+            project_for_function.protected_environments.list()
+        )
         assert len(protected_envs_under_this_project) == 1
         production_env_protection_details = protected_envs_under_this_project[0]
         assert production_env_protection_details.name == "production"
@@ -236,8 +246,4 @@ class TestProtectedEnvironments:
                 project_user_allowed_to_approve.id,
             ]
         )
-        assert approval_rules_group_ids == sorted(
-            [
-                group_for_function.id
-            ]
-        )
+        assert approval_rules_group_ids == sorted([group_for_function.id])

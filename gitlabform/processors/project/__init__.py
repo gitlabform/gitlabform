@@ -59,7 +59,7 @@ class ProjectProcessors(AbstractProcessors):
             # in the order listed below. Settings that are related to each other,
             # should be ordered accordingly. For example, branch protection or MR
             # approvals can configure specific users, but the user must be a
-            # member of the project. So, project membership must be processed 
+            # member of the project. So, project membership must be processed
             # before those processors.
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab),

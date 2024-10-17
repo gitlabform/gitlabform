@@ -124,16 +124,24 @@ class TestBranches:
         )
         assert merge_access_user_ids == []
 
-    def test__branch_protection_dependent_on_members(self, project_for_function, group_for_function, branch_for_function, make_user):
+    def test__branch_protection_dependent_on_members(
+        self, project_for_function, group_for_function, branch_for_function, make_user
+    ):
         """
         Configure a branch protection setting that depends on users or groups (i.e. allowed_to_merge)
         Make sure the setting is applied successfully because users must be members
         before they can be configured in branch protection setting.
         """
 
-        user_for_group_to_share_project_with = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
-        project_user_allowed_to_push = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
-        project_user_allowed_to_merge = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
+        user_for_group_to_share_project_with = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
+        project_user_allowed_to_push = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
+        project_user_allowed_to_merge = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
 
         config_branch_protection = f"""
         projects_and_groups:
@@ -194,8 +202,4 @@ class TestBranches:
                 project_user_allowed_to_merge.id,
             ]
         )
-        assert merge_access_group_ids == sorted(
-            [
-                group_for_function.id
-            ]
-        )
+        assert merge_access_group_ids == sorted([group_for_function.id])
