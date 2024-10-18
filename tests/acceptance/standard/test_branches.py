@@ -138,6 +138,8 @@ class TestBranches:
             other_branch_merge_access_level,
             _,
             _,
+            _,
+            _,
             other_branch_unprotect_access_level,
         ) = get_only_branch_access_levels(
             project_for_function, other_branch_for_function
