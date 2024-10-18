@@ -75,10 +75,10 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             and ("protected_environments" or "merge_requests_approval_rules")
             in configuration
         ):
-            # When gitlabform needs to update project membership and also configure 
-            # settings that are dependent on the members (i.e. environment protection 
-            # or MR approval rule), there seems to be an issue in GitLab. Automated 
-            # acceptance tests in gitlabform creates new user and adds to the project 
+            # When gitlabform needs to update project membership and also configure
+            # settings that are dependent on the members (i.e. environment protection
+            # or MR approval rule), there seems to be an issue in GitLab. Automated
+            # acceptance tests in gitlabform creates new user and adds to the project
             # followed by configuring other setting. In that scenario need to wait a little
             # before calling GitLab's REST API for processing other settings. Otherwise
             # the users are not available to be configured in other settings and it
