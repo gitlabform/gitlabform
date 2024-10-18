@@ -64,6 +64,8 @@ class TestBranches:
             push_access_user_ids,
             merge_access_user_ids,
             _,
+            _,
+            _,
         ) = get_only_branch_access_levels(project, branch)
 
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
@@ -108,6 +110,8 @@ class TestBranches:
             merge_access_levels,
             push_access_user_ids,
             merge_access_user_ids,
+            _,
+            _,
             _,
         ) = get_only_branch_access_levels(project, branch)
 

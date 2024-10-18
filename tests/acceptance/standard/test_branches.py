@@ -22,6 +22,8 @@ class TestBranches:
             merge_access_levels,
             push_access_user_ids,
             merge_access_user_ids,
+            _,
+            _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
@@ -48,6 +50,8 @@ class TestBranches:
             merge_access_levels,
             push_access_user_ids,
             merge_access_user_ids,
+            _,
+            _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels is None
@@ -75,6 +79,8 @@ class TestBranches:
             merge_access_level,
             push_access_user_ids,
             merge_access_user_ids,
+            _,
+            _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project, branch)
         assert push_access_level == [AccessLevel.NO_ACCESS.value]
@@ -117,6 +123,8 @@ class TestBranches:
         (
             push_access_level,
             merge_access_level,
+            _,
+            _,
             _,
             _,
             unprotect_access_level,
