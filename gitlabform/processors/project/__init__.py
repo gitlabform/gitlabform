@@ -55,8 +55,15 @@ class ProjectProcessors(AbstractProcessors):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
         super().__init__(gitlab, config, strict)
         self.processors: List[AbstractProcessor] = [
+            # Order of processors matter. GitLabForm will process config sections
+            # in the order listed below. Settings that are related to each other,
+            # should be ordered accordingly. For example, branch protection or MR
+            # approvals can configure specific users, but the user must be a
+            # member of the project. So, project membership must be processed
+            # before those processors.
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab),
+            MembersProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
             ProjectLabelsProcessor(gitlab),
             JobTokenScopeProcessor(gitlab),
@@ -67,7 +74,6 @@ class ProjectProcessors(AbstractProcessors):
             IntegrationsProcessor(gitlab),
             FilesProcessor(gitlab, config, strict),
             HooksProcessor(gitlab),
-            MembersProcessor(gitlab),
             SchedulesProcessor(gitlab),
             BadgesProcessor(gitlab),
             ResourceGroupsProcessor(gitlab),
