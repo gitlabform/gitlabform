@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.16.4
+
+### Bug Fixes
+
+* fix: print out to info level - user being processed [#864](https://github.com/gitlabform/gitlabform/pull/864), closes [#863](https://github.com/gitlabform/gitlabform/issues/863) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Refactors
+
+* refactor: migrate 'resource_groups' config to be managed by python-gitlab [#854](https://github.com/gitlabform/gitlabform/pull/854), closes [#628](https://github.com/gitlabform/gitlabform/issues/628) ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 3.16.3
 
 ### Bug Fixes
