@@ -1,5 +1,4 @@
-from logging import debug
-from cli_ui import debug as verbose, warning
+from cli_ui import debug as verbose, warning, info
 from cli_ui import fatal
 from gitlab import GitlabGetError
 from gitlab.v4.objects import Project
@@ -41,6 +40,7 @@ class MembersProcessor(AbstractProcessor):
 
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
             for group in groups:
+                info(f"Processing group {group}...")
                 expires_at = (
                     groups[group]["expires_at"].strftime("%Y-%m-%d")
                     if "expires_at" in groups[group]
@@ -60,16 +60,16 @@ class MembersProcessor(AbstractProcessor):
                     and access_level
                     == current_groups[common_group_name]["group_access_level"]
                 ):
-                    debug(
+                    verbose(
                         "Ignoring group '%s' as it is already a member",
                         common_group_name,
                     )
-                    debug(
+                    verbose(
                         "Current settings for '%s' are: %s"
                         % (common_group_name, current_groups[common_group_name])
                     )
                 else:
-                    debug("Setting group '%s' as a member", common_group_name)
+                    verbose("Setting group '%s' as a member", common_group_name)
                     access = access_level
                     expiry = expires_at
 
@@ -88,12 +88,12 @@ class MembersProcessor(AbstractProcessor):
             groups_not_in_config = set(groups_in_gitlab) - set(groups_in_config)
 
             for group_not_in_config in groups_not_in_config:
-                debug(
+                verbose(
                     f"Removing group '{group_not_in_config}' that is not configured to be a member."
                 )
                 self.gitlab.unshare_with_group(project_and_group, group_not_in_config)
         else:
-            debug("Not enforcing group members.")
+            verbose("Not enforcing group members.")
 
     def _process_users(
         self,
@@ -111,7 +111,7 @@ class MembersProcessor(AbstractProcessor):
             verbose("Processing users as members...")
 
             for user in users:
-
+                info(f"Processing user '{user}'...")
                 try:
                     user_id = self.gl.get_user_by_username_cached(user).get_id()
                 except GitlabGetError:
@@ -161,16 +161,16 @@ class MembersProcessor(AbstractProcessor):
                         and access_level == current_member.access_level
                         and member_role_id == member_role_id_before
                     ):
-                        debug(
+                        verbose(
                             "Nothing to change for user '%s' - same config now as to set.",
                             common_username,
                         )
-                        debug(
+                        verbose(
                             "Current settings for '%s' are: %s"
                             % (common_username, current_members[common_username])
                         )
                     else:
-                        debug(
+                        verbose(
                             "Editing user '%s' membership to change their access level or expires at",
                             common_username,
                         )
@@ -186,7 +186,7 @@ class MembersProcessor(AbstractProcessor):
                         project.members.update(new_data=update_data)
 
                 else:
-                    debug(
+                    verbose(
                         "Adding user '%s' who previously was not a member.",
                         common_username,
                     )
@@ -214,12 +214,12 @@ class MembersProcessor(AbstractProcessor):
                     keep_bots
                     and self.gitlab.get_user_by_name(user_not_in_config)["bot"]
                 ):
-                    debug(
+                    verbose(
                         f"Will not remove bot user '{user_not_in_config}' as the 'keep_bots' option is true."
                     )
                     continue
 
-                debug(
+                verbose(
                     f"Removing user '{user_not_in_config}' that is not configured to be a member."
                 )
                 cached_user_id = self.gl.get_user_by_username_cached(
@@ -227,7 +227,7 @@ class MembersProcessor(AbstractProcessor):
                 ).get_id()
                 project.members.delete(id=cached_user_id)
         else:
-            debug("Not enforcing user members.")
+            verbose("Not enforcing user members.")
 
     @staticmethod
     def _get_members_from_project(project):
@@ -242,5 +242,5 @@ class MembersProcessor(AbstractProcessor):
             # checks.
             existing_user_names_lower[member.username.lower()] = member
 
-        debug(f"Existing project members {existing_user_names_lower}")
+        verbose(f"Existing project members {existing_user_names_lower}")
         return existing_user_names_lower
