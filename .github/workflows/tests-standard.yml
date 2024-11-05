@@ -34,7 +34,7 @@ jobs:
           ./dev/run_gitlab_in_docker.sh
           pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
       - name: Upload coverage to Codecov
-        uses: Wandalen/wretry.action@v1
+        uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v3
           with: |
@@ -69,7 +69,7 @@ jobs:
         run: |
           pytest --cov=. --cov-report=xml tests/unit
       - name: Upload coverage to Codecov
-        uses: Wandalen/wretry.action@v1
+        uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v3
           with: |
