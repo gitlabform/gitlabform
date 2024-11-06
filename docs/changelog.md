@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.16.5
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
 ## 3.16.4
 
 ### Bug Fixes
