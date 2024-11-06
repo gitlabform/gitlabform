@@ -25,10 +25,6 @@ setup(
     author="Greg Dubicki and Contributors",
     keywords=["cli", "yaml", "gitlab", "configuration-as-code"],
     classifiers=[
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Information Technology",
@@ -42,7 +38,7 @@ setup(
     packages=find_packages(),
     package_data={"": ["LICENSE", "version", "*.md", "config.yml"]},
     include_package_data=True,
-    python_requires=">=3.8.0",
+    python_requires=">=3.12.0",
     install_requires=[
         "certifi==2024.8.30",
         "cli-ui==0.17.2",
