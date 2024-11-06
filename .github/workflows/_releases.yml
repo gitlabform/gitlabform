@@ -147,7 +147,7 @@ jobs:
           # This token is provided by Actions, you do not need to create your own token
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish image to registries
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           push: true
           context: .
