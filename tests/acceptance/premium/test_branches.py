@@ -1,4 +1,5 @@
 import pytest
+import time
 
 import gitlab
 
@@ -63,6 +64,8 @@ class TestBranches:
             push_access_user_ids,
             merge_access_user_ids,
             _,
+            _,
+            _,
         ) = get_only_branch_access_levels(project, branch)
 
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
@@ -108,6 +111,8 @@ class TestBranches:
             push_access_user_ids,
             merge_access_user_ids,
             _,
+            _,
+            _,
         ) = get_only_branch_access_levels(project, branch)
 
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
@@ -120,3 +125,83 @@ class TestBranches:
             ]
         )
         assert merge_access_user_ids == []
+
+    def test__branch_protection_dependent_on_members(
+        self, project_for_function, group_for_function, branch_for_function, make_user
+    ):
+        """
+        Configure a branch protection setting that depends on users or groups (i.e. allowed_to_merge)
+        Make sure the setting is applied successfully because users must be members
+        before they can be configured in branch protection setting.
+        """
+
+        user_for_group_to_share_project_with = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
+        project_user_allowed_to_push = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
+        project_user_allowed_to_merge = make_user(
+            level=AccessLevel.DEVELOPER, add_to_project=False
+        )
+
+        config_branch_protection = f"""
+        projects_and_groups:
+          {group_for_function.full_path}/*:
+            group_members:
+              users:
+                {user_for_group_to_share_project_with.username}:
+                  access_level: {AccessLevel.DEVELOPER.value}
+          {project_for_function.path_with_namespace}:
+            members:
+              users:
+                {project_user_allowed_to_push.username}:
+                  access_level: developer
+                {project_user_allowed_to_merge.username}:
+                  access_level: developer
+              groups:
+                {group_for_function.full_path}:
+                  group_access: {AccessLevel.DEVELOPER.value}
+            branches:
+              {branch_for_function}:
+                protected: true
+                allowed_to_push:
+                  - access_level: {AccessLevel.NO_ACCESS.value}
+                  - user_id: {project_user_allowed_to_push.id}
+                  - group_id: {group_for_function.id}
+                allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+                  - user: {project_user_allowed_to_merge.username}
+                  - group_id: {group_for_function.id}
+        """
+
+        run_gitlabform(config_branch_protection, project_for_function)
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            push_access_group_ids,
+            merge_access_group_ids,
+            _,
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert push_access_user_ids == sorted(
+            [
+                project_user_allowed_to_push.id,
+            ]
+        )
+        assert push_access_group_ids == sorted(
+            [
+                group_for_function.id,
+            ]
+        )
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_user_ids == sorted(
+            [
+                project_user_allowed_to_merge.id,
+            ]
+        )
+        assert merge_access_group_ids == sorted([group_for_function.id])

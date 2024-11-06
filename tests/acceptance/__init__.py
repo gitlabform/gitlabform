@@ -171,27 +171,33 @@ def get_only_branch_access_levels(project: Project, branch):
         protected_branch = project.protectedbranches.get(branch)
 
     if not protected_branch:
-        return None, None, None, None, None
+        return None, None, None, None, None, None, None
 
     push_access_levels = set()
     merge_access_levels = set()
     push_access_user_ids = set()
     merge_access_user_ids = set()
+    push_access_group_ids = set()
+    merge_access_group_ids = set()
     unprotect_access_level = None
 
     if "push_access_levels" in protected_branch.attributes:
         for push_access in protected_branch.push_access_levels:
-            if not push_access["user_id"]:
+            if not push_access["user_id"] and not push_access["group_id"]:
                 push_access_levels.add(push_access["access_level"])
-            else:
+            elif push_access["user_id"]:
                 push_access_user_ids.add(push_access["user_id"])
+            elif push_access["group_id"]:
+                push_access_group_ids.add(push_access["group_id"])
 
     if "merge_access_levels" in protected_branch.attributes:
         for merge_access in protected_branch.merge_access_levels:
-            if not merge_access["user_id"]:
+            if not merge_access["user_id"] and not merge_access["group_id"]:
                 merge_access_levels.add(merge_access["access_level"])
-            else:
+            elif merge_access["user_id"]:
                 merge_access_user_ids.add(merge_access["user_id"])
+            elif merge_access["group_id"]:
+                merge_access_group_ids.add(merge_access["group_id"])
 
     if (
         "unprotect_access_levels" in protected_branch.attributes
@@ -206,6 +212,8 @@ def get_only_branch_access_levels(project: Project, branch):
         sorted(merge_access_levels),
         sorted(push_access_user_ids),
         sorted(merge_access_user_ids),
+        sorted(push_access_group_ids),
+        sorted(merge_access_group_ids),
         unprotect_access_level,
     )
 
@@ -240,6 +248,59 @@ def get_only_tag_access_levels(project: Project, tag):
         sorted(allowed_to_create_access_levels),
         sorted(allowed_to_create_access_user_ids),
         sorted(allowed_to_create_access_group_ids),
+    )
+
+
+def get_only_environment_access_levels(project: Project, environment):
+    """
+    Retrieve details of a given protected environments so that
+    tests can easily validate those accordingly.
+    TODO: Should also return details about `required_approvals`
+    and `group_inheritance_type` for each
+    access levels or approval rules.
+    """
+    protected_environment = None
+
+    with allowed_codes(404):
+        protected_environment = project.protected_environments.get(environment)
+
+    if not protected_environment:
+        return None, None, None, None, None, None, None
+
+    deploy_access_levels = set()
+    deploy_access_user_ids = set()
+    deploy_access_group_ids = set()
+    approval_rules_access_levels = set()
+    approval_rules_user_ids = set()
+    approval_rules_group_ids = set()
+    required_approval_count = 0
+
+    if "deploy_access_levels" in protected_environment.attributes:
+        for deploy_access in protected_environment.deploy_access_levels:
+            if not deploy_access["user_id"] and not deploy_access["group_id"]:
+                deploy_access_levels.add(deploy_access["access_level"])
+            elif deploy_access["user_id"]:
+                deploy_access_user_ids.add(deploy_access["user_id"])
+            elif deploy_access["group_id"]:
+                deploy_access_group_ids.add(deploy_access["group_id"])
+
+    if "approval_rules" in protected_environment.attributes:
+        for approval_rules in protected_environment.approval_rules:
+            if not approval_rules["user_id"] and not approval_rules["group_id"]:
+                approval_rules_access_levels.add(approval_rules["access_level"])
+            elif approval_rules["user_id"]:
+                approval_rules_user_ids.add(approval_rules["user_id"])
+            elif approval_rules["group_id"]:
+                approval_rules_group_ids.add(approval_rules["group_id"])
+
+    return (
+        sorted(deploy_access_levels),
+        sorted(deploy_access_user_ids),
+        sorted(deploy_access_group_ids),
+        sorted(approval_rules_access_levels),
+        sorted(approval_rules_user_ids),
+        sorted(approval_rules_group_ids),
+        required_approval_count,
     )
 
 
