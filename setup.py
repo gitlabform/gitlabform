@@ -45,7 +45,7 @@ setup(
         "ez-yaml==1.2.0",
         "Jinja2==3.1.4",
         "luddite==1.0.4",
-        "MarkupSafe==2.1.5",
+        "MarkupSafe==3.0.2",
         "mergedeep==1.3.4",
         "packaging==24.1",
         "python-gitlab==5.0.0",
