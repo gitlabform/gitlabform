@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0.0
+
+### BREAKING CHANGES
+
+- Stop supporting Python older than 3.12 [#789](https://github.com/gitlabform/gitlabform/pull/789), closes [#754](https://github.com/gitlabform/gitlabform/issues/754). ([Greg Dubicki](https://github.com/gdubicki)) 
+
+### Dependencies
+
+* Update various dependencies reliant on dropping python3.8 support; to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 3.16.5
 
 ### Dependencies
