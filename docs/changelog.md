@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.1
+
+### Bug Fixes
+
+* fix: project settings failing to apply because membership config is not processed [#857](https://github.com/gitlabform/gitlabform/pull/857), closes [#765](https://github.com/gitlabform/gitlabform/issues/765). ([amimas](https://github.com/amimas))
+
 ## 4.0.0
 
 ### BREAKING CHANGES
