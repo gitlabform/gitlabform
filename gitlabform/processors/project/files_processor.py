@@ -5,17 +5,19 @@ from pathlib import Path
 from logging import debug
 from cli_ui import debug as verbose
 from cli_ui import warning, fatal
+from typing import List
 
 from jinja2 import Environment, FileSystemLoader
 from gitlab import GitlabGetError, GitlabUpdateError
+from gitlab.v4.objects import Project, ProjectFile
+from gitlab.base import RESTObject
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
-from gitlabform.gitlab.core import NotFoundException, UnexpectedResponseException
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.branch_protector import BranchProtector
-from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
+
 
 class FilesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
@@ -34,17 +36,21 @@ class FilesProcessor(AbstractProcessor):
                 continue
 
             config_target_ref = configuration["files"][file]["branches"]
-            branches_to_update: list[ProjectBranch] = []
+            branches_to_update: List[RESTObject] = []
 
             if isinstance(config_target_ref, str):
                 # Target ref could be either 'all' or 'protected'.
-                # Get a list of branches and update them accordingly.
+                # Get a list of branches that should be updated.
                 if config_target_ref == "all":
-                    branches_to_update = project.branches.list(get_all=True, lazy=True)
+                    branches_to_update.extend(
+                        project.branches.list(get_all=True, lazy=True)
+                    )
                 elif config_target_ref == "protected":
-                    branches_to_update = project.protectedbranches.list(get_all=True, lazy=True)
+                    branches_to_update.extend(
+                        project.protectedbranches.list(get_all=True, lazy=True)
+                    )
             elif isinstance(config_target_ref, list):
-                # Get a list of branches from the config and update accordingly.
+                # Get a list of branches from the config that should be updated.
                 for branch_name in config_target_ref:
                     try:
                         branches_to_update.append(project.branches.get(branch_name))
@@ -58,7 +64,11 @@ class FilesProcessor(AbstractProcessor):
                         else:
                             warning(message)
 
-            debug("File '%s' to be updated in '%s' branche(s)", file, len(branches_to_update))
+            debug(
+                "File '%s' to be updated in '%s' branche(s)",
+                file,
+                len(branches_to_update),
+            )
 
             for branch in branches_to_update:
                 verbose(f"Processing file '{file}' in branch '{branch.name}'")
@@ -74,15 +84,16 @@ class FilesProcessor(AbstractProcessor):
 
                 if configuration.get("files|" + file + "|delete"):
                     try:
-                        # self.gitlab.get_file(project_and_group, branch, file)
-                        file_to_delete: ProjectFile = project.files.get(file_path=file,ref=branch.name)
+                        file_to_delete: ProjectFile = project.files.get(
+                            file_path=file, ref=branch.name
+                        )
                         debug("Deleting file '%s' in branch '%s'", file, branch.name)
                         self.modify_file_dealing_with_branch_protection(
                             project,
                             branch,
                             file_to_delete,
                             "delete",
-                            configuration=configuration,
+                            configuration,
                         )
                     except GitlabGetError:
                         debug(
@@ -124,15 +135,18 @@ class FilesProcessor(AbstractProcessor):
                         )
 
                     try:
-                        # current_content = self.gitlab.get_file(
-                        #     project_and_group, branch, file
-                        # )
-                        repo_file: ProjectFile = project.files.get(file_path=file, ref=branch.name)
+                        repo_file: ProjectFile = project.files.get(
+                            file_path=file, ref=branch.name
+                        )
                         current_content = repo_file.content
 
                         if current_content != new_content:
                             if configuration.get("files|" + file + "|overwrite"):
-                                debug("Changing file '%s' in branch '%s'", file, branch.name)
+                                debug(
+                                    "Changing file '%s' in branch '%s'",
+                                    file,
+                                    branch.name,
+                                )
                                 self.modify_file_dealing_with_branch_protection(
                                     project,
                                     branch,
@@ -171,11 +185,11 @@ class FilesProcessor(AbstractProcessor):
 
     def modify_file_dealing_with_branch_protection(
         self,
-        project: Project=None,
-        branch: ProjectBranch=None,
-        file_to_operate_on: str | ProjectFile=None,
-        operation: str=None,
-        configuration: dict=None,
+        project: Project,
+        branch: RESTObject,
+        file_to_operate_on: str | ProjectFile,
+        operation: str,
+        configuration: dict,
         new_content=None,
     ):
         # perhaps your user permissions are ok to just perform this operation regardless
@@ -183,12 +197,15 @@ class FilesProcessor(AbstractProcessor):
 
         try:
             self.just_modify_file(
-                project, branch, file_to_operate_on, operation, configuration, new_content
+                project,
+                branch,
+                file_to_operate_on,
+                operation,
+                configuration,
+                new_content,
             )
 
         except GitlabUpdateError as e:
-            debug("could not modify file!!!!!!")
-            debug(e)
             if (
                 e.response_code == 400
                 and "You are not allowed to push into this branch" in e.error_message
@@ -200,8 +217,6 @@ class FilesProcessor(AbstractProcessor):
                     debug(
                         f"> Temporarily unprotecting the branch to {operation} a file in it..."
                     )
-                    debug(branch)
-                    # self.branch_protector.unprotect_branch(project_and_group, branch)
                     # Delete operation on protected branch removes the protection only
                     project.protectedbranches.delete(branch.name)
                 else:
@@ -237,45 +252,39 @@ class FilesProcessor(AbstractProcessor):
 
     def just_modify_file(
         self,
-        project: Project=None,
-        branch: ProjectBranch=None,
-        file_to_operate_on: str | ProjectFile=None,
-        operation: str=None,
-        configuration: dict=None,
+        project: Project,
+        branch: RESTObject,
+        file_to_operate_on: str | ProjectFile,
+        operation: str,
+        configuration: dict,
         new_content=None,
     ):
-        if operation == "modify":
-            # self.gitlab.set_file(
-            #     project_and_group,
-            #     branch,
-            #     file,
-            #     new_content,
-            #     self.get_commit_message_for_file_change("change", file, configuration),
-            # )
+        if operation == "modify" and isinstance(file_to_operate_on, ProjectFile):
             file_to_operate_on.content = new_content
-            file_to_operate_on.save(commit_message=self.get_commit_message_for_file_change("change", file_to_operate_on.file_path, configuration), branch=branch.name)
-        elif operation == "add":
-            # self.gitlab.add_file(
-            #     project_and_group,
-            #     branch,
-            #     file,
-            #     new_content,
-            #     self.get_commit_message_for_file_change("add", file, configuration),
-            # )
-            project.files.create({
-                'file_path': file_to_operate_on,
-                'branch': branch.name,
-                'content': new_content,
-                'commit_message': self.get_commit_message_for_file_change("delete", file_to_operate_on, configuration)
-            })
-        elif operation == "delete":
-            # self.gitlab.delete_file(
-            #     project_and_group,
-            #     branch,
-            #     file,
-            #     self.get_commit_message_for_file_change("delete", file, configuration),
-            # )
-            file_to_operate_on.delete(commit_message=self.get_commit_message_for_file_change("delete", file_to_operate_on.file_path, configuration), branch=branch.name)
+            file_to_operate_on.save(
+                commit_message=self.get_commit_message_for_file_change(
+                    "change", file_to_operate_on.file_path, configuration
+                ),
+                branch=branch.name,
+            )
+        elif operation == "add" and isinstance(file_to_operate_on, str):
+            project.files.create(
+                {
+                    "file_path": file_to_operate_on,
+                    "branch": branch.name,
+                    "content": new_content,
+                    "commit_message": self.get_commit_message_for_file_change(
+                        "delete", file_to_operate_on, configuration
+                    ),
+                }
+            )
+        elif operation == "delete" and isinstance(file_to_operate_on, ProjectFile):
+            file_to_operate_on.delete(
+                commit_message=self.get_commit_message_for_file_change(
+                    "delete", file_to_operate_on.file_path, configuration
+                ),
+                branch=branch.name,
+            )
 
     def get_file_content_as_template(self, template, project_and_group, **kwargs):
         # Use jinja with variables project and group

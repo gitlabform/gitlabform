@@ -28,6 +28,7 @@ def no_access_branch(project):
     protected_branch.delete()
     branch.delete()
 
+
 @pytest.fixture(scope="class")
 def file(request):
     f = open("file.txt", "a")
@@ -153,7 +154,9 @@ class TestFiles:
         the_branch = project.branches.get(the_branch.name)
         assert the_branch.protected is True
 
-    def test__delete_file_unprotected_branch(self, project_for_function, branch_for_function):
+    def test__delete_file_unprotected_branch(
+        self, project_for_function, branch_for_function
+    ):
         set_file_specific_branch = f"""
             projects_and_groups:
               {project_for_function.path_with_namespace}:
