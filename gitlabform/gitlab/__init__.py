@@ -19,7 +19,6 @@ from gitlabform.gitlab.project_merge_requests_approvals import (
 )
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.gitlab.variables import GitLabVariables
-from gitlabform.gitlab.repositories import GitLabRepositories
 from gitlabform.gitlab.users import GitLabUsers
 
 
@@ -52,7 +51,6 @@ class GitLab(
     GitLabBranches,
     GitLabCommits,
     GitLabMergeRequests,
-    GitLabRepositories,
     GitLabGroupLDAPLinks,
     GitLabGroupBadges,
     GitLabGroupVariables,
