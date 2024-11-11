@@ -47,7 +47,7 @@ setup(
         "luddite==1.0.4",
         "MarkupSafe==3.0.2",
         "mergedeep==1.3.4",
-        "packaging==24.1",
+        "packaging==24.2",
         "python-gitlab==5.0.0",
         "requests==2.32.3",
         "ruamel.yaml==0.17.21",
