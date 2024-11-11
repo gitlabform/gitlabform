@@ -125,7 +125,7 @@ class TestFiles:
         # check if no_access_branch stays protected after the file update
         assert branch.protected is True
 
-    def test__delete_file_specific_branch(self, project, branch):
+    def test__delete_file_protected_branch(self, project, branch):
         set_file_specific_branch = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -153,6 +153,24 @@ class TestFiles:
         # check if main stays protected after the file delete
         the_branch = project.branches.get(the_branch.name)
         assert the_branch.protected is True
+
+    def test__delete_file_unprotected_branch(
+        self, project_for_function, branch_for_function
+    ):
+        set_file_specific_branch = f"""
+            projects_and_groups:
+              {project_for_function.path_with_namespace}:
+                files:
+                  "README.md":
+                    branches:
+                      - {branch_for_function}
+                    delete: true
+            """
+
+        run_gitlabform(set_file_specific_branch, project_for_function)
+
+        the_branch = project_for_function.branches.get(branch_for_function)
+        assert the_branch.commit["message"] == "Automated delete made by gitlabform"
 
     def test__custom_commit_message(self, project, branch):
         set_file_specific_branch = f"""
