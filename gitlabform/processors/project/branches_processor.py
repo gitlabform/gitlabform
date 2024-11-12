@@ -10,7 +10,6 @@ from gitlab import (
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.util.branch_protector import BranchProtector
 import time
 
 
@@ -118,8 +117,6 @@ class BranchesProcessor(AbstractProcessor):
         debug("Setting branch '%s' as protected", branch.name)
 
         try:
-            # Remove the 'protected' key from the config because it's not needed by GitLab API
-            branch_config.pop("protected", None)
             project.protectedbranches.create({"name": branch.name, **branch_config})
         except GitlabCreateError as e:
             message = (

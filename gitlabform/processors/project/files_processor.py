@@ -9,14 +9,14 @@ from typing import List
 
 from jinja2 import Environment, FileSystemLoader
 from gitlab import GitlabGetError, GitlabUpdateError
-from gitlab.v4.objects import Project, ProjectFile
+from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
 from gitlab.base import RESTObject
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.util.branch_protector import BranchProtector
+from gitlabform.processors.project.branches_processor import BranchesProcessor
 
 
 class FilesProcessor(AbstractProcessor):
@@ -24,7 +24,7 @@ class FilesProcessor(AbstractProcessor):
         super().__init__("files", gitlab)
         self.config = config
         self.strict = strict
-        self.branch_protector = BranchProtector(gitlab, strict)
+        self.branch_processor = BranchesProcessor(gitlab, strict)
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for file in sorted(configuration["files"]):
@@ -215,14 +215,14 @@ class FilesProcessor(AbstractProcessor):
 
                 if configuration.get("branches|" + branch.name + "|protected"):
                     debug(
-                        f"> Temporarily unprotecting the branch to {operation} a file in it..."
+                        f"> Temporarily unprotecting the branch to '{operation}' a file in it..."
                     )
                     # Delete operation on protected branch removes the protection only
                     project.protectedbranches.delete(branch.name)
                 else:
                     fatal(
-                        f"Operation {operation} on file in branch {branch.name} not permitted,"
-                        f" but we don't have a branch protection configuration provided for this"
+                        f"Operation '{operation}' on file in branch {branch.name} not permitted."
+                        f" We don't have a branch protection configuration provided for this"
                         f" branch. Breaking as we cannot unprotect the branch as we would not know"
                         f" how to protect it again.",
                         EXIT_INVALID_INPUT,
@@ -243,8 +243,12 @@ class FilesProcessor(AbstractProcessor):
                     # ...and protect the branch again after the operation
                     if configuration.get("branches|" + branch.name + "|protected"):
                         debug("> Protecting the branch again.")
-                        self.branch_protector.protect_branch(
-                            project.path_with_namespace, configuration, branch.name
+                        project_branch: ProjectBranch = project.branches.get(
+                            branch.name
+                        )
+                        branch_config: dict = configuration["branches"][branch.name]
+                        self.branch_processor.protect_branch(
+                            project, project_branch, branch_config
                         )
 
             else:
