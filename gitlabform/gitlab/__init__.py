@@ -2,7 +2,6 @@ import enum
 
 from typing import List
 
-from gitlabform.gitlab.branches import GitLabBranches
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
@@ -48,7 +47,6 @@ class AccessLevel(enum.IntEnum):
 
 
 class GitLab(
-    GitLabBranches,
     GitLabCommits,
     GitLabMergeRequests,
     GitLabGroupLDAPLinks,

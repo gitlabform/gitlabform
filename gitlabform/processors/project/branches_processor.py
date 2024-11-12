@@ -68,30 +68,10 @@ class BranchesProcessor(AbstractProcessor):
             message = f"The branch '{branch_name}' is not protected!"
             debug(message)
 
-        # debug("---- branch config in gitlabform ----")
-        # debug(branch_config)
-
-        # debug("**** branch config in gitlab ****")
-        # debug(branch.attributes)
-
         if branch and branch_config.get("protected"):
-            # # Try to retrieve protected branch's config in gitlab
-            # # If the protected branch is not found, that means the
-            # # branch needs to be protected.
-            # protected_branch: ProjectProtectedBranch = None
-
-            # try:
-            #     protected_branch = project.protectedbranches.get(branch.name)
-            # except GitlabGetError:
-            #     message = f"Protected branch '{branch_name}' not found but it should be protected!"
-            #     debug(message)
-
             if protected_branch and self._needs_update(
                 protected_branch.attributes, branch_config
             ):
-                # debug("**** protected branch config in gitlab ****")
-                # debug(protected_branch.attributes)
-
                 # Need to unprotect the branch and then re-protect again using current config
                 # Another option would be to "update" protected branch. But, GitLab's API for
                 # updating protected branch requires retrieving id of the existing rule/config
