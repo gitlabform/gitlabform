@@ -19,22 +19,21 @@ class BranchesProcessor(AbstractProcessor):
         self.strict = strict
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
+        if "members" in configuration:
+            # When gitlabform needs to update project membership and also
+            # configure branch protection, there seems to be a race condition
+            # or delay in GitLab. Automated acceptance tests in gitlabform
+            # creates new user and adds to the project followed by configuring
+            # branch protection setting. In that scenario need to wait a little
+            # before calling GitLab's REST API for branch protection. Otherwise
+            # the API returns error code 422 with an message like "Push access
+            # levels user is not a member of the project"
+
+            time.sleep(2)
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
         for branch in sorted(configuration["branches"]):
-            if "members" in configuration:
-                # When gitlabform needs to update project membership and also
-                # configure branch protection, there seems to be a race condition
-                # or delay in GitLab. Automated acceptance tests in gitlabform
-                # creates new user and adds to the project followed by configuring
-                # branch protection setting. In that scenario need to wait a little
-                # before calling GitLab's REST API for branch protection. Otherwise
-                # the API returns error code 422 with an message like "Push access
-                # levels user is not a member of the project"
-
-                time.sleep(2)
-
             branch_configuration: dict = self.transform_branch_config(
                 configuration["branches"][branch]
             )
