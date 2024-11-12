@@ -150,7 +150,9 @@ class TestTransferProject:
             == project_new_path_with_namespace
         )
 
-    def test__transfer_and_update(self, gl, project_for_function, group, other_group):
+    def test__transfer_and_update(
+        self, gl, project_for_function, branch_for_function, group, other_group
+    ):
         assert project_for_function.visibility == "private"
         assert project_for_function.description is None
 
@@ -169,7 +171,7 @@ class TestTransferProject:
               visibility: internal
               description: {project_description}
             branches:
-              foo-bar:
+              {branch_for_function}:
                 protected: true
                 merge_access_level: {AccessLevel.DEVELOPER.value}
         """
@@ -187,7 +189,10 @@ class TestTransferProject:
         # When a project is created, it already comes with 'main' as default protected branch.
         # We want to assert that we have an additional protected branch
         assert len(project_after_transfer.protectedbranches.list()) == 2
-        assert project_after_transfer.protectedbranches.list()[1].name == "foo-bar"
+        assert (
+            project_after_transfer.protectedbranches.list()[1].name
+            == branch_for_function
+        )
 
     def test__transfer_and_archive(self, gl, project_for_function, group, other_group):
         project_name = project_for_function.name

@@ -404,7 +404,6 @@ class TestMergeRequestApprovers:
         other_group,
         third_group,
         make_user,
-        branch,
     ):
         user1 = make_user(AccessLevel.DEVELOPER)
 
@@ -425,7 +424,7 @@ class TestMergeRequestApprovers:
                       access_level: {AccessLevel.DEVELOPER.value}
 
                 branches:
-                  {branch}:
+                  main:
                     protected: true
                     push_access_level: no access
                     merge_access_level: developer
@@ -440,7 +439,7 @@ class TestMergeRequestApprovers:
                     users:
                       - {user1.username}
                     protected_branches:
-                      - {branch}
+                      - main
                   enforce: true
             """
 
@@ -462,7 +461,7 @@ class TestMergeRequestApprovers:
                 assert len(rule.users) == 1
                 assert rule.users[0]["username"] == user1.username
                 assert len(rule.protected_branches) == 1
-                assert rule.protected_branches[0]["name"] == branch
+                assert rule.protected_branches[0]["name"] == "main"
                 second_found = True
 
         assert first_found and second_found
