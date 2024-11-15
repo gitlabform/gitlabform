@@ -1,5 +1,5 @@
 import pytest
-
+import time
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
     run_gitlabform,
@@ -20,6 +20,9 @@ class TestBranchesUsersCaseInsensitive:
         first_user = make_user(AccessLevel.DEVELOPER)
         second_user = make_user(AccessLevel.DEVELOPER)
         third_user = make_user(AccessLevel.DEVELOPER)
+
+        # Wait a little for newly created users to be available.
+        time.sleep(2)
 
         config_with_more_user_ids = f"""
         projects_and_groups:

@@ -4,7 +4,6 @@ from cli_ui import fatal
 
 import abc
 from typing import Callable, Union, Any
-import time
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -69,21 +68,6 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             del entities_in_configuration["enforce"]
         else:
             enforce = False
-
-        if (
-            "members" in configuration
-            and ("protected_environments" or "merge_requests_approval_rules")
-            in configuration
-        ):
-            # When gitlabform needs to update project membership and also configure
-            # settings that are dependent on the members (i.e. environment protection
-            # or MR approval rule), there seems to be an issue in GitLab. Automated
-            # acceptance tests in gitlabform creates new user and adds to the project
-            # followed by configuring other setting. In that scenario need to wait a little
-            # before calling GitLab's REST API for processing other settings. Otherwise
-            # the users are not available to be configured in other settings and it
-            # does not return any error either"
-            time.sleep(2)
 
         # TODO: move/convert this to a configuration validation phase
         self._find_duplicates(project_or_group, entities_in_configuration)
