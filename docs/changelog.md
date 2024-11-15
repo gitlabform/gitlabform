@@ -1,5 +1,26 @@
 # Changelog
 
+## 4.0.2
+
+### Performance
+
+* Reduce execution time of branch processor [#878](https://github.com/gitlabform/gitlabform/pull/878) ([amimas](https://github.com/amimas))
+
+### Refactors
+
+* Migrate branches processor to python-gitlab [#876](https://github.com/gitlabform/gitlabform/pull/876) ([amimas](https://github.com/amimas))
+* Migrate files processor to python-gitlab [#874](https://github.com/gitlabform/gitlabform/pull/874) ([amimas](https://github.com/amimas))
+
+### Build Process
+
+* Fix codecov notification [8e89932](https://github.com/gitlabform/gitlabform/commit/8e89932d27c51001c1d04ca85c044797935532a5) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.0.1
 
 ### Bug Fixes
