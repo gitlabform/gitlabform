@@ -39,7 +39,7 @@ to GitLabForm, then it's hard to forget to actually run it...)
 
 ## Using system hooks
 
-Probably all the methods to achieve this will use GitLab [system hooks feature](https://docs.gitlab.com/ee/system_hooks/system_hooks.html)
+Probably all the methods to achieve this will use GitLab [system hooks feature](https://docs.gitlab.com/ee/administration/system_hooks.html)
 which makes GitLab perform HTTP POST request on - among other ones - these events:
 
 * `project_create`
