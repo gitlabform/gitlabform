@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.0.3
+
+### Performance
+
+* Reduce execution time due to project members config [#885](https://github.com/gitlabform/gitlabform/pull/885) ([amimas](https://github.com/amimas))
+
+### Documentation
+
+* Fix Gitlab System hooks doc link [#883](https://github.com/gitlabform/gitlabform/pull/883) ([Philippe Granet](https://github.com/philippe-granet))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+
 ## 4.0.2
 
 ### Performance
