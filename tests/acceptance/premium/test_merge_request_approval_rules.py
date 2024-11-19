@@ -481,7 +481,6 @@ class TestMergeRequestApprovers:
         project_user_for_approval_rule = make_user(
             level=AccessLevel.DEVELOPER, add_to_project=False
         )
-        # project_user_allowed_to_approve = make_user(level = AccessLevel.DEVELOPER, add_to_project = False)
 
         config_branch_protection = f"""
         projects_and_groups:

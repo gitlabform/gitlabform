@@ -40,6 +40,9 @@ class TestBranches:
         user_allowed_to_merge = make_user(AccessLevel.DEVELOPER)
         user_allowed_to_push_and_merge = make_user(AccessLevel.DEVELOPER)
 
+        # Wait a little for newly created users to be available.
+        time.sleep(2)
+
         config_with_user_ids = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -144,6 +147,9 @@ class TestBranches:
         project_user_allowed_to_merge = make_user(
             level=AccessLevel.DEVELOPER, add_to_project=False
         )
+
+        # Wait a little for newly created users to be available.
+        time.sleep(2)
 
         config_branch_protection = f"""
         projects_and_groups:
