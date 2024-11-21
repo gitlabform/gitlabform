@@ -73,9 +73,7 @@ class BranchesProcessor(AbstractProcessor):
         elif protected_branch and not branch_config.get("protected"):
             self.unprotect_branch(protected_branch)
 
-    def protect_branch(
-        self, project: Project, branch: str, branch_config: dict
-    ):
+    def protect_branch(self, project: Project, branch: str, branch_config: dict):
         """
         Protect a branch using given config.
         Raise exception if running in strict mode.
@@ -86,9 +84,7 @@ class BranchesProcessor(AbstractProcessor):
         try:
             project.protectedbranches.create({"name": branch, **branch_config})
         except GitlabCreateError as e:
-            message = (
-                f"Protecting branch '{branch}' failed! Error '{e.error_message}"
-            )
+            message = f"Protecting branch '{branch}' failed! Error '{e.error_message}"
 
             if self.strict:
                 fatal(
