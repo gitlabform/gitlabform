@@ -36,11 +36,11 @@ class BranchesProcessor(AbstractProcessor):
         """
         protected_branch: Optional[ProjectProtectedBranch] = None
 
-        if not self.check_for_wildcard(branch_name):
+        if not self.is_branch_name_wildcard(branch_name):
             try:
                 branch = project.branches.get(branch_name)
             except GitlabGetError:
-                message = f"Branch '{branch_name}' not found when trying to processing it to be protected/unprotected!"
+                message = f"Branch '{branch_name}' not found when processing it to be protected/unprotected!"
                 if self.strict:
                     fatal(
                         message,
@@ -135,5 +135,5 @@ class BranchesProcessor(AbstractProcessor):
         return branch_config
 
     @staticmethod
-    def check_for_wildcard(branch):
+    def is_branch_name_wildcard(branch):
         return re.fullmatch(".*\\*.*", branch)
