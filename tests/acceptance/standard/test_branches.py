@@ -90,6 +90,11 @@ class TestBranches:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
+        wildcard_matching_branch = project.branches.create(
+            {"branch": "r-1", "ref": "main"}
+        )
+        assert wildcard_matching_branch.protected is True
+
     def test__config_with_access_level_names(self, project, branch):
         config_with_access_levels_names = f"""
         projects_and_groups:
