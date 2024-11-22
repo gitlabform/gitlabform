@@ -1,4 +1,3 @@
-import re
 from typing import Optional
 from logging import debug, info
 from cli_ui import warning, fatal
@@ -138,4 +137,4 @@ class BranchesProcessor(AbstractProcessor):
 
     @staticmethod
     def is_branch_name_wildcard(branch):
-        return re.fullmatch(".*\\*.*", branch)
+        return "*" in branch

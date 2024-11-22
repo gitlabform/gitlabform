@@ -66,7 +66,7 @@ class TestBranches:
         projects_and_groups:
           {project.path_with_namespace}:
             branches:
-              {branch_wildcard}:
+              "{branch_wildcard}":
                 protected: true
                 push_access_level: {AccessLevel.NO_ACCESS.value}
                 merge_access_level: {AccessLevel.MAINTAINER.value}
