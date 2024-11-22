@@ -137,4 +137,4 @@ class BranchesProcessor(AbstractProcessor):
 
     @staticmethod
     def is_branch_name_wildcard(branch):
-        return "*" in branch
+        return "*" in branch or "?" in branch
