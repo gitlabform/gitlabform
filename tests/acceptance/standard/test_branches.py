@@ -60,6 +60,41 @@ class TestBranches:
         assert merge_access_user_ids is None
         assert unprotect_access_level is None
 
+    def test__protect_with_wildcard(self, project):
+        branch_wildcard = "r-*"
+        config_protect_branch = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              "{branch_wildcard}":
+                protected: true
+                push_access_level: {AccessLevel.NO_ACCESS.value}
+                merge_access_level: {AccessLevel.MAINTAINER.value}
+                unprotect_access_level: {AccessLevel.MAINTAINER.value}
+        """
+
+        run_gitlabform(config_protect_branch, project.path_with_namespace)
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            unprotect_access_level,
+        ) = get_only_branch_access_levels(project, branch_wildcard)
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
+        assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+        wildcard_matching_branch = project.branches.create(
+            {"branch": "r-1", "ref": "main"}
+        )
+        assert wildcard_matching_branch.protected is True
+
     def test__config_with_access_level_names(self, project, branch):
         config_with_access_levels_names = f"""
         projects_and_groups:

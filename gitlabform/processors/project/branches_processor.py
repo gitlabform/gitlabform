@@ -1,7 +1,7 @@
 from typing import Optional
 from logging import debug, info
 from cli_ui import warning, fatal
-from gitlab.v4.objects import Project, ProjectBranch, ProjectProtectedBranch
+from gitlab.v4.objects import Project, ProjectProtectedBranch
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
@@ -33,20 +33,20 @@ class BranchesProcessor(AbstractProcessor):
         """
         Process branch protection according to gitlabform config.
         """
-        branch: Optional[ProjectBranch] = None
         protected_branch: Optional[ProjectProtectedBranch] = None
 
-        try:
-            branch = project.branches.get(branch_name)
-        except GitlabGetError:
-            message = f"Branch '{branch_name}' not found when trying to processing it to be protected/unprotected!"
-            if self.strict:
-                fatal(
-                    message,
-                    exit_code=EXIT_INVALID_INPUT,
-                )
-            else:
-                warning(message)
+        if not self.is_branch_name_wildcard(branch_name):
+            try:
+                branch = project.branches.get(branch_name)
+            except GitlabGetError:
+                message = f"Branch '{branch_name}' not found when processing it to be protected/unprotected!"
+                if self.strict:
+                    fatal(
+                        message,
+                        exit_code=EXIT_INVALID_INPUT,
+                    )
+                else:
+                    warning(message)
 
         try:
             protected_branch = project.protectedbranches.get(branch_name)
@@ -54,7 +54,7 @@ class BranchesProcessor(AbstractProcessor):
             message = f"The branch '{branch_name}' is not protected!"
             debug(message)
 
-        if branch and branch_config.get("protected"):
+        if branch_config.get("protected"):
             if protected_branch and self._needs_update(
                 protected_branch.attributes, branch_config
             ):
@@ -66,27 +66,25 @@ class BranchesProcessor(AbstractProcessor):
                 # protected branch is not the same. So, removing existing branch protection and
                 # reconfiguring branch protection seems simpler.
                 self.unprotect_branch(protected_branch)
-                self.protect_branch(project, branch, branch_config)
+                self.protect_branch(project, branch_name, branch_config)
             elif not protected_branch:
-                self.protect_branch(project, branch, branch_config)
+                self.protect_branch(project, branch_name, branch_config)
         elif protected_branch and not branch_config.get("protected"):
             self.unprotect_branch(protected_branch)
 
-    def protect_branch(
-        self, project: Project, branch: ProjectBranch, branch_config: dict
-    ):
+    def protect_branch(self, project: Project, branch_name: str, branch_config: dict):
         """
         Protect a branch using given config.
         Raise exception if running in strict mode.
         """
 
-        debug("Setting branch '%s' as protected", branch.name)
+        debug("Setting branch '%s' as protected", branch_name)
 
         try:
-            project.protectedbranches.create({"name": branch.name, **branch_config})
+            project.protectedbranches.create({"name": branch_name, **branch_config})
         except GitlabCreateError as e:
             message = (
-                f"Protecting branch '{branch.name}' failed! Error '{e.error_message}"
+                f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
             )
 
             if self.strict:
@@ -136,3 +134,7 @@ class BranchesProcessor(AbstractProcessor):
                             item["group_id"] = self.gl.get_group_id(item.pop("group"))
 
         return branch_config
+
+    @staticmethod
+    def is_branch_name_wildcard(branch):
+        return "*" in branch or "?" in branch
