@@ -135,10 +135,12 @@ class FilesProcessor(AbstractProcessor):
                         )
 
                     try:
+                        # Returns base64 encoded content: https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#project-files
                         repo_file: ProjectFile = project.files.get(
                             file_path=file, ref=branch.name
                         )
-                        current_content = repo_file.content
+                        decoded_file: bytes = repo_file.decode()
+                        current_content: str = decoded_file.decode("utf-8")
 
                         if current_content != new_content:
                             if configuration.get("files|" + file + "|overwrite"):

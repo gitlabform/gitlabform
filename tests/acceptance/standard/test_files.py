@@ -91,6 +91,42 @@ class TestFiles:
         # check if main stays protected after the file update
         assert the_branch.protected is True
 
+    def test__does_not_commit_file_if_content_matches(self, project_for_function):
+        set_file_specific_branch = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            branches:
+              main:
+                protected: true
+                push_access_level: maintainer
+                merge_access_level: developer
+                unprotect_access_level: maintainer
+            files:
+              "README.md":
+                overwrite: true
+                branches:
+                  - main
+                content: {DEFAULT_README}
+        """
+
+        run_gitlabform(
+            set_file_specific_branch, project_for_function.path_with_namespace
+        )
+
+        the_branch = project_for_function.branches.get("main")
+        assert not any(
+            [
+                text in the_branch.commit["message"]
+                for text in ["Automated", "made by gitlabform"]
+            ]
+        )
+
+        project_file = project_for_function.files.get(ref="main", file_path="README.md")
+        assert project_file.decode().decode("utf-8") == DEFAULT_README
+
+        # check if main stays protected after the file update
+        assert the_branch.protected is True
+
     def test__set_file_strongly_protected_branch(self, project, no_access_branch):
         set_file_specific_branch = f"""
             projects_and_groups:
