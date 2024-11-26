@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.0.4
+
+### Bug Fixes
+
+* reduce unnecessary commits when modifying files [#892](https://github.com/gitlabform/gitlabform/pull/892), closes [#891](https://github.com/gitlabform/gitlabform/issues/891) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+* wildcard based branch protection config fails to apply [#887](https://github.com/gitlabform/gitlabform/pull/887) ([KieranSt97](https://github.com/KieranSt97))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.0.3
 
 ### Performance
