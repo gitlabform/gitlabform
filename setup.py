@@ -62,7 +62,7 @@ setup(
             "mypy==1.13.0",
             "mypy-extensions==1.0.0",
             "pre-commit==2.21.0",  # not really for tests, but for development
-            "pytest==8.3.3",
+            "pytest==8.3.4",
             "pytest-cov==6.0.0",
             "pytest-rerunfailures==15.0",
             "xkcdpass==1.19.9",
