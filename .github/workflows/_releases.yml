@@ -55,7 +55,7 @@ jobs:
         run: |
           mkdocs build
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.6.8
+        uses: JamesIves/github-pages-deploy-action@v4.7.1
         with:
           branch: gh-pages
           folder: site
