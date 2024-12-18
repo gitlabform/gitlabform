@@ -41,7 +41,7 @@ setup(
     python_requires=">=3.12.0",
     install_requires=[
         "certifi==2024.12.14",
-        "cli-ui==0.17.2",
+        "cli-ui==0.18.0",
         "ez-yaml==1.2.0",
         "Jinja2==3.1.4",
         "luddite==1.0.4",
