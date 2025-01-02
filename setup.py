@@ -58,7 +58,7 @@ setup(
         "test": [
             "coverage==7.6.9",
             "cryptography==44.0.0",
-            "deepdiff==8.0.1",
+            "deepdiff==8.1.1",
             "mypy==1.13.0",
             "mypy-extensions==1.0.0",
             "pre-commit==2.21.0",  # not really for tests, but for development
