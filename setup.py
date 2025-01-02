@@ -59,7 +59,7 @@ setup(
             "coverage==7.6.10",
             "cryptography==44.0.0",
             "deepdiff==8.1.1",
-            "mypy==1.13.0",
+            "mypy==1.14.1",
             "mypy-extensions==1.0.0",
             "pre-commit==2.21.0",  # not really for tests, but for development
             "pytest==8.3.4",
