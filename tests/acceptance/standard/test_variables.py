@@ -7,6 +7,13 @@ from tests.acceptance import run_gitlabform
 
 
 class TestVariables:
+    @pytest.mark.skip(
+        reason=(
+            "GitLab API behaviour changed in version 17.7.0."
+            " Disable this test until more clarification is available."
+            " Track this issue in GitLab at https://gitlab.com/gitlab-org/gitlab/-/issues/511237"
+        )
+    )
     def test__builds_disabled(self, project):
         config_builds_not_enabled = f"""
         projects_and_groups:
@@ -23,7 +30,8 @@ class TestVariables:
 
         with pytest.raises(GitlabListError):
             # variables will NOT be available without builds_access_level in ['private', 'enabled']
-            project.variables.list()
+            vars = project.variables.list()
+            print("vars: ", type(vars), vars)
 
     def test__single_variable(self, project):
         config_single_variable = f"""
