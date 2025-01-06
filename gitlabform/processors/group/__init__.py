@@ -24,8 +24,9 @@ from gitlabform.processors.group.group_labels_processor import (
     GroupLabelsProcessor,
 )
 from gitlabform.processors.group.group_push_rules_processor import (
-    GroupPushRulesProcessor
+    GroupPushRulesProcessor,
 )
+
 
 class GroupProcessors(AbstractProcessors):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):

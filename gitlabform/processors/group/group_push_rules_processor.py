@@ -7,7 +7,7 @@ class GroupPushRulesProcessor(SingleEntityProcessor):
         super().__init__(
             "group_push_rules",
             gitlab,
-            get_method_name="get_group_push_rules", 
+            get_method_name="get_group_push_rules",
             edit_method_name="put_group_push_rules",
             add_method_name="post_group_push_rules",
         )
