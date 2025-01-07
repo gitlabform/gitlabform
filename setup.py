@@ -43,12 +43,12 @@ setup(
         "certifi==2024.12.14",
         "cli-ui==0.18.0",
         "ez-yaml==1.2.0",
-        "Jinja2==3.1.4",
+        "Jinja2==3.1.5",
         "luddite==1.0.4",
         "MarkupSafe==3.0.2",
         "mergedeep==1.3.4",
         "packaging==24.2",
-        "python-gitlab==5.1.0",
+        "python-gitlab==5.3.0",
         "requests==2.32.3",
         "ruamel.yaml==0.17.21",
         "types-requests==2.32.0.20241016",
@@ -56,10 +56,10 @@ setup(
     ],
     extras_require={
         "test": [
-            "coverage==7.6.9",
+            "coverage==7.6.10",
             "cryptography==44.0.0",
-            "deepdiff==8.0.1",
-            "mypy==1.13.0",
+            "deepdiff==8.1.1",
+            "mypy==1.14.1",
             "mypy-extensions==1.0.0",
             "pre-commit==2.21.0",  # not really for tests, but for development
             "pytest==8.3.4",
