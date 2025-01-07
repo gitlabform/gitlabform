@@ -7,6 +7,7 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlab.v4.objects.groups import Group
 from gitlab.exceptions import GitlabGetError
 
+
 class GroupPushRulesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_push_rules", gitlab)
@@ -15,18 +16,24 @@ class GroupPushRulesProcessor(AbstractProcessor):
         configured_group_push_rules = configuration.get("group_push_rules", {})
 
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
-        
+
         try:
             existing_push_rules = gitlab_group.pushrules.get()
         except GitlabGetError as e:
             if e.response_code == 404:
-                print(f"No existing push rules for {gitlab_group.name}, creating new push rules.")
+                print(
+                    f"No existing push rules for {gitlab_group.name}, creating new push rules."
+                )
                 self.create_group_push_rules(gitlab_group, configured_group_push_rules)
                 return
 
-        if self._needs_update(existing_push_rules.asdict(), configured_group_push_rules):
+        if self._needs_update(
+            existing_push_rules.asdict(), configured_group_push_rules
+        ):
             print(f"Updating group push rules for group {gitlab_group.name}")
-            self.update_group_push_rules(existing_push_rules, configured_group_push_rules)
+            self.update_group_push_rules(
+                existing_push_rules, configured_group_push_rules
+            )
         else:
             print("No update needed for Group Push Rules")
 
