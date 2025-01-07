@@ -234,7 +234,7 @@ class MembersProcessor(AbstractProcessor):
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
                     # be completely deleted from gitlab.com
                     error(
-                        f"Could find User '{user_not_in_config}' on the Instance so can not remove User from Project '{project_and_group}'"
+                        f"Could not find User '{user_not_in_config}' on the Instance so can not remove User from Project '{project_and_group}'"
                     )
                     pass
 

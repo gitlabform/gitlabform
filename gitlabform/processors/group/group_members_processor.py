@@ -274,7 +274,6 @@ class GroupMembersProcessor(AbstractProcessor):
                     )
                     continue
                 debug("Removing user '%s' who is not configured to be a member.", user)
-                user_id = self.gl.get_user_id(user)
                 try:
                     user_id = self.gl.get_user_id(user)
                     try:
@@ -288,7 +287,7 @@ class GroupMembersProcessor(AbstractProcessor):
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
                     # be completely deleted from gitlab.com
                     error(
-                        f"Could find User '{user}' on the Instance so can not remove User"
+                        f"Could not find User '{user}' on the Instance so can not remove User"
                     )
                     pass
 
