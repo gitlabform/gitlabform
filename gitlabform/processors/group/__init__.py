@@ -23,6 +23,12 @@ from gitlabform.processors.group.group_settings_processor import (
 from gitlabform.processors.group.group_labels_processor import (
     GroupLabelsProcessor,
 )
+from gitlabform.processors.group.group_merge_requests_approval_settings import (
+    GroupMergeRequestsApprovalSettings,
+)
+from gitlabform.processors.group.group_merge_requests_approval_rules import (
+    GroupMergeRequestsApprovalRules,
+)
 
 
 class GroupProcessors(AbstractProcessors):
@@ -36,4 +42,6 @@ class GroupProcessors(AbstractProcessors):
             GroupBadgesProcessor(gitlab),
             GroupSAMLLinksProcessor(gitlab),
             GroupLabelsProcessor(gitlab),
+            GroupMergeRequestsApprovalSettings(gitlab),
+            GroupMergeRequestsApprovalRules(gitlab),
         ]
