@@ -1,5 +1,27 @@
 # Changelog
 
+## 4.0.5
+
+### Bug Fixes
+
+* fix: gracefully handle "missing" Users when trying to remove from Project or Group [#913](https://github.com/gitlabform/gitlabform/pull/913), closes [#912](https://github.com/gitlabform/gitlabform/issues/912) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Build Fixes
+
+* test: mark 'TestVariables::test__builds_disabled' as skipped [#909](https://github.com/gitlabform/gitlabform/pull/909) ([amimas](https://github.com/amimas))
+  ```
+  GitLab API behaviour changed in current latest version (17.7.0) for listing project ci variables. 
+  This is causing test failure and blocking changes from merging. The API changes do not have any breaking impact for gitlabform. 
+  So, marking the currently failing test to be skipped. 
+  It can be re-enabled again based on findings from the issue created in GitLab's backlog at https://gitlab.com/gitlab-org/gitlab/-/issues/511237
+  ```
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.0.4
 
 ### Bug Fixes
