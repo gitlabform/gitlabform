@@ -1,12 +1,14 @@
+from logging import debug
 from typing import Optional
-from logging import debug, info
-from cli_ui import warning, fatal
-from gitlab.v4.objects import Project, ProjectProtectedBranch
+from cli_ui import warning, fatal, debug as verbose
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
     GitlabCreateError,
 )
+from gitlab.v4.objects import Project, ProjectProtectedBranch
+
+from gitlabform import gitlab
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -123,13 +125,16 @@ class BranchesProcessor(AbstractProcessor):
         or group name but GitLab only supports their id. This method will transform the
         config by replacing them with ids.
         """
+        verbose("Transforming User and Group names in Branch configuration to Ids")
 
         for key in branch_config:
             if isinstance(branch_config[key], list):
                 for item in branch_config[key]:
                     if isinstance(item, dict):
                         if "user" in item:
-                            item["user_id"] = self.gl.get_user_id(item.pop("user"))
+                            item["user_id"] = self.gl.get_user_id_cached(
+                                item.pop("user")
+                            )
                         elif "group" in item:
                             item["group_id"] = self.gl.get_group_id(item.pop("group"))
 

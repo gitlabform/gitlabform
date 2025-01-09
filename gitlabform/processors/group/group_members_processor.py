@@ -214,7 +214,7 @@ class GroupMembersProcessor(AbstractProcessor):
                         member_role_id_to_set = None
 
                     common_username = user.lower()
-                    user_id = self.gl.get_user_id(user)
+                    user_id = self.gl.get_user_id_cached(user)
 
                     if common_username in users_before:
                         group_member: GroupMember = group.members.get(user_id)
@@ -275,12 +275,7 @@ class GroupMembersProcessor(AbstractProcessor):
                     continue
                 debug("Removing user '%s' who is not configured to be a member.", user)
                 try:
-                    user_id = self.gl.get_user_id(user)
-                    try:
-                        group.members.delete(user_id)
-                    except GitlabDeleteError as delete_error:
-                        warning(f"Member '{user}' could not be deleted: {delete_error}")
-                        pass
+                    user_id = self.gl.get_user_id_cached(user)
                 except gitlab.GitlabGetError:
                     # User does not exist an instance level but is for whatever reason present on a Group/Project
                     # We should raise error into Logs but not prevent the rest of GitLabForm from executing
@@ -289,6 +284,12 @@ class GroupMembersProcessor(AbstractProcessor):
                     error(
                         f"Could not find User '{user}' on the Instance so can not remove User"
                     )
+                    continue
+
+                try:
+                    group.members.delete(user_id)
+                except GitlabDeleteError as delete_error:
+                    warning(f"Member '{user}' could not be deleted: {delete_error}")
                     pass
 
         else:

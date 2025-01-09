@@ -11,8 +11,9 @@ from gitlab.v4.objects import Group, Project
 
 # Extends the python-gitlab class to add convenience wrappers for common functionality used within gitlabform
 class PythonGitlab(Gitlab):
-    def get_user_id(self, username) -> int:
-        user = self.get_user_by_username_cached(username)
+    @functools.lru_cache()
+    def get_user_id_cached(self, username) -> int:
+        user = self._get_user_by_username_cached(username)
         return user.id
 
     def get_group_id(self, groupname) -> int:
@@ -41,7 +42,7 @@ class PythonGitlab(Gitlab):
 
     #  Uses "LIST" to get a user by username, to get the full User object, call get using the user's id
     @functools.lru_cache()
-    def get_user_by_username_cached(self, username: str) -> RESTObject:
+    def _get_user_by_username_cached(self, username: str) -> RESTObject:
         # Gitlab API will only ever return 0 or 1 entry when GETting using `username` attribute
         # https://docs.gitlab.com/ee/api/users.html#for-non-administrator-users
         # so will always be list[RESTObject] and never RESTObjectList from python-gitlab's api
