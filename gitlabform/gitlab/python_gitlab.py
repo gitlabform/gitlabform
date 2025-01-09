@@ -146,7 +146,7 @@ class PythonGitlab(Gitlab):
         ):
             member_role_nodes = result["group"]["memberRoles"]["nodes"]
         else:
-            raise GitlabGetError(f"Failed to get Member Roles from instance: {query}")
+            raise GitlabGetError(f"Failed to get Member Roles from Group: {query}")
 
         return self._convert_result_to_member_roles(member_role_nodes)
 
