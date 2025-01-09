@@ -208,7 +208,7 @@ class GroupMembersProcessor(AbstractProcessor):
                     )
                     if member_role_id_or_name:
                         member_role_id_to_set = self.gl.get_member_role_id_cached(
-                            member_role_id_or_name, group.get_id()
+                            member_role_id_or_name, group.full_path
                         )
                     else:
                         member_role_id_to_set = None

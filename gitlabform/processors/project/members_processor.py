@@ -132,14 +132,9 @@ class MembersProcessor(AbstractProcessor):
                     users[user]["member_role"] if "member_role" in users[user] else None
                 )
                 if member_role_id_or_name:
-                    # For self-managed member_roles are at an instance level, for SaaS on a Group level
-                    if self.gl.is_gitlab_saas():
-                        group_id = project.namespace["id"]
-                    else:
-                        group_id = None
-
+                    group_name_and_path = project.namespace["full_path"]
                     member_role_id = self.gl.get_member_role_id_cached(
-                        member_role_id_or_name, group_id
+                        member_role_id_or_name, group_name_and_path
                     )
                 else:
                     member_role_id = None
