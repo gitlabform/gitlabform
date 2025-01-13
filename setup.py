@@ -49,7 +49,7 @@ setup(
         "mergedeep==1.3.4",
         "packaging==24.2",
         "python-gitlab==5.3.1",
-        "python-gitlab[graphql]==5.3.0",
+        "python-gitlab[graphql]==5.3.1",
         "requests==2.32.3",
         "ruamel.yaml==0.17.21",
         "types-requests==2.32.0.20241016",
