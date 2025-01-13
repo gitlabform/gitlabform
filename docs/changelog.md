@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.0.6
+
+### Refactors
+
+* use graphql to get member_roles to reduce permission level required [#915](https://github.com/gitlabform/gitlabform/pull/915), relates to [Gitlab Issue 511919](https://gitlab.com/gitlab-org/gitlab/-/issues/511919#note_2287581884) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+  - graph ql GET member_roles only needs Guest+ permissions
+  - REST requires significantly higher permission sets which not all users maybe comfortable running with
+  -  improve error handling and logging when users etc are not found
+
 ## 4.0.5
 
 ### Bug Fixes
