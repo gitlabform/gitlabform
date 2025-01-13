@@ -14,7 +14,7 @@ Example:
 
 ```yaml
 projects_and_groups:
-  group_1/project_1:
+  group_1/*:
     group_push_rules:
       commit_message_regex: '(.|\s)*\S(.|\s)*'
       member_check: false
