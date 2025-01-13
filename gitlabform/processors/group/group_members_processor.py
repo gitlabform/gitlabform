@@ -2,13 +2,13 @@ from logging import debug, warning
 from typing import Dict, Tuple
 
 import gitlab
-from cli_ui import fatal, error
+from cli_ui import fatal, error, debug as verbose
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlab.v4.objects import Group, GroupMember
-from gitlab import GitlabDeleteError
+from gitlab import GitlabDeleteError, GitlabGetError
 
 
 class GroupMembersProcessor(AbstractProcessor):
@@ -214,7 +214,13 @@ class GroupMembersProcessor(AbstractProcessor):
                         member_role_id_to_set = None
 
                     common_username = user.lower()
-                    user_id = self.gl.get_user_id_cached(user)
+                    try:
+                        user_id = self.gl.get_user_id_cached(user)
+                    except gitlab.GitlabGetError as e:
+                        error(
+                            f"Could not find User '{user}' on the Instance so can not configure User defined in Config"
+                        )
+                        raise e
 
                     if common_username in users_before:
                         group_member: GroupMember = group.members.get(user_id)
@@ -273,10 +279,10 @@ class GroupMembersProcessor(AbstractProcessor):
                         f"Will not remove bot user '{user}' as the 'keep_bots' option is true."
                     )
                     continue
-                debug("Removing user '%s' who is not configured to be a member.", user)
+                verbose(f"Removing user {user} who is not configured to be a member.")
                 try:
                     user_id = self.gl.get_user_id_cached(user)
-                except gitlab.GitlabGetError:
+                except GitlabGetError:
                     # User does not exist an instance level but is for whatever reason present on a Group/Project
                     # We should raise error into Logs but not prevent the rest of GitLabForm from executing
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
@@ -289,8 +295,8 @@ class GroupMembersProcessor(AbstractProcessor):
                 try:
                     group.members.delete(user_id)
                 except GitlabDeleteError as delete_error:
-                    warning(f"Member '{user}' could not be deleted: {delete_error}")
-                    pass
+                    error(f"Member '{user}' could not be deleted: {delete_error}")
+                    raise delete_error
 
         else:
             debug("Not enforcing group members.")

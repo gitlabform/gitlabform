@@ -224,8 +224,9 @@ class MembersProcessor(AbstractProcessor):
                     # We should raise error into Logs but not prevent the rest of GitLabForm from executing
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
                     # be completely deleted from gitlab.com
-                    warning(
-                        f"Could not find User '{user_not_in_config}' on the Instance so can not remove User from Project '{project_and_group}'"
+                    error(
+                        f"Could not find User '{user_not_in_config}' on the Instance so can not remove User from "
+                        f"Project '{project_and_group}'"
                     )
                     continue
 
