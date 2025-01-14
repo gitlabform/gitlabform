@@ -214,13 +214,12 @@ class GroupMembersProcessor(AbstractProcessor):
                         member_role_id_to_set = None
 
                     common_username = user.lower()
-                    try:
-                        user_id = self.gl.get_user_id_cached(user)
-                    except gitlab.GitlabGetError as e:
-                        error(
-                            f"Could not find User '{user}' on the Instance so can not configure User defined in Config"
-                        )
-                        raise e
+
+                    user_id = self.gl.get_user_id_cached(user)
+                    if user_id is None:
+                        message = f"Could not find User '{user}' on the Instance"
+                        error(message)
+                        raise GitlabGetError(message, 404)
 
                     if common_username in users_before:
                         group_member: GroupMember = group.members.get(user_id)
@@ -280,17 +279,16 @@ class GroupMembersProcessor(AbstractProcessor):
                     )
                     continue
                 verbose(f"Removing user {user} who is not configured to be a member.")
-                try:
-                    user_id = self.gl.get_user_id_cached(user)
-                except GitlabGetError:
+
+                user_id = self.gl.get_user_id_cached(user)
+
+                if user_id is None:
                     # User does not exist an instance level but is for whatever reason present on a Group/Project
                     # We should raise error into Logs but not prevent the rest of GitLabForm from executing
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
                     # be completely deleted from gitlab.com
-                    error(
-                        f"Could not find User '{user}' on the Instance so can not remove User"
-                    )
-                    continue
+                    message = f"Could not find User '{user}' on the Instance so can not remove User"
+                    error(message)
 
                 try:
                     group.members.delete(user_id)

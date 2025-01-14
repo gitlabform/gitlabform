@@ -53,13 +53,17 @@ class PythonGitlab(Gitlab):
         # https://python-gitlab.readthedocs.io/en/stable/api-usage-graphql.html
         self.graphql = graphql
 
-    def get_user_id_cached(self, username) -> int:
+    def get_user_id_cached(self, username) -> int | None:
         """
         Get user id from username
         API call layer "get_user_by_username" is cached, we do not cache at this level as it would add
-        duplication and potentially obfuscate exceptions
+        duplication of data into the cache
         """
         user = self._get_user_by_username_cached(username)
+
+        if user is None:
+            return None
+
         return user.id
 
     def get_group_id(self, groupname) -> int:
@@ -88,16 +92,14 @@ class PythonGitlab(Gitlab):
 
     #  Uses "LIST" to get a user by username, to get the full User object, call get using the user's id
     @functools.lru_cache()
-    def _get_user_by_username_cached(self, username: str) -> RESTObject:
+    def _get_user_by_username_cached(self, username: str) -> RESTObject | None:
         # Gitlab API will only ever return 0 or 1 entry when GETting using `username` attribute
         # https://docs.gitlab.com/ee/api/users.html#for-non-administrator-users
         # so will always be list[RESTObject] and never RESTObjectList from python-gitlab's api
         users: list[RESTObject] = self.users.list(username=username)  # type: ignore
 
         if len(users) == 0:
-            raise GitlabGetError(
-                "No users found when searching for username '%s'" % username, 404
-            )
+            return None
 
         return users[0]
 

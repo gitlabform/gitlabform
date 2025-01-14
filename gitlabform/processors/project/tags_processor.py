@@ -35,14 +35,16 @@ class TagsProcessor(AbstractProcessor):
                             elif "user_id" in config:
                                 user_ids.add(config["user_id"])
                             elif "user" in config:
-                                try:
-                                    user_id = self.gl.get_user_id_cached(config["user"])
-                                except GitlabGetError as e:
+                                user_id = self.gl.get_user_id_cached(config["user"])
+                                if user_id is None:
                                     error(
                                         f"Could not find User '{config["user"]}' on the Instance, cannot Protect "
                                         f"Tag with them"
                                     )
-                                    raise e
+                                    raise GitlabGetError(
+                                        f"_process_configuration - No users found when searching for username {config["user"]}",
+                                        404,
+                                    )
 
                                 user_ids.add(user_id)
                             elif "group_id" in config:
