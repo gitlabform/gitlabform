@@ -289,6 +289,7 @@ class GroupMembersProcessor(AbstractProcessor):
                     # be completely deleted from gitlab.com
                     message = f"Could not find User '{user}' on the Instance so can not remove User"
                     error(message)
+                    continue
 
                 try:
                     group.members.delete(user_id)
