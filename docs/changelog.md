@@ -1,5 +1,24 @@
 # Changelog
 
+## 4.0.7
+
+### Bug Fixes
+
+* fix: remove caching on get_user_id_cached [#918](https://github.com/gitlabform/gitlabform/pull/918) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+  - the get user by username is already cached, so this reduces redundant data in the cache
+  - adds extra logging to help users debug effectively
+
+### Refactors
+
+* refactor: do not throw exception from get_user_id [#918](https://github.com/gitlabform/gitlabform/pull/918) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+  - pass None up and let upstream throw exception if it wants
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.0.6
 
 ### Refactors
