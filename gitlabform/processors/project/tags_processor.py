@@ -1,5 +1,5 @@
 from logging import debug
-from cli_ui import warning, fatal
+from cli_ui import warning, fatal, error
 
 from gitlabform.constants import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
@@ -35,16 +35,32 @@ class TagsProcessor(AbstractProcessor):
                             elif "user_id" in config:
                                 user_ids.add(config["user_id"])
                             elif "user" in config:
-                                gitlab_user = self.gl.get_user_by_username_cached(
-                                    config["user"]
-                                )
-                                user_ids.add(gitlab_user.get_id())
+                                user_id = self.gl.get_user_id_cached(config["user"])
+                                if user_id is None:
+                                    error(
+                                        f"Could not find User '{config["user"]}' on the Instance, cannot Protect "
+                                        f"Tag with them"
+                                    )
+                                    raise GitlabGetError(
+                                        f"_process_configuration - No users found when searching for username {config["user"]}",
+                                        404,
+                                    )
+
+                                user_ids.add(user_id)
                             elif "group_id" in config:
                                 group_ids.add(config["group_id"])
                             elif "group" in config:
-                                gitlab_group = self.gl.get_group_by_path_cached(
-                                    config["group"]
-                                )
+                                try:
+                                    gitlab_group = self.gl.get_group_by_path_cached(
+                                        config["group"]
+                                    )
+                                except GitlabGetError as e:
+                                    error(
+                                        f"Could not find Group '{config["group"]}' on the Instance, cannot Protect "
+                                        f"Tag with them"
+                                    )
+                                    raise e
+
                                 group_ids.add(gitlab_group.get_id())
 
                         for val in access_levels:
