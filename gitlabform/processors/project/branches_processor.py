@@ -132,9 +132,13 @@ class BranchesProcessor(AbstractProcessor):
                 for item in branch_config[key]:
                     if isinstance(item, dict):
                         if "user" in item:
-                            item["user_id"] = self.gl.get_user_id_cached(
-                                item.pop("user")
-                            )
+                            user_id = self.gl.get_user_id_cached(item.pop("user"))
+                            if user_id is None:
+                                raise GitlabGetError(
+                                    f"transform_branch_config - No users found when searching for username {item.pop("user")}",
+                                    404,
+                                )
+                            item["user_id"] = user_id
                         elif "group" in item:
                             item["group_id"] = self.gl.get_group_id(item.pop("group"))
 

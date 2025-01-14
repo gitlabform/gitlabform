@@ -112,9 +112,9 @@ class MembersProcessor(AbstractProcessor):
 
             for user in users:
                 info(f"Processing user '{user}'...")
-                try:
-                    user_id = self.gl.get_user_id_cached(user)
-                except GitlabGetError:
+
+                user_id = self.gl.get_user_id_cached(user)
+                if user_id is None:
                     warning(f"Could not find user '{user}' in Gitlab, skipping...")
                     continue
 
@@ -217,15 +217,15 @@ class MembersProcessor(AbstractProcessor):
                 verbose(
                     f"Removing user '{user_not_in_config}' that is not configured to be a member."
                 )
-                try:
-                    user_id = self.gl.get_user_id_cached(user_not_in_config)
-                except GitlabGetError:
+                user_id = self.gl.get_user_id_cached(user_not_in_config)
+                if user_id is None:
                     # User does not exist an instance level but is for whatever reason present on a Group/Project
                     # We should raise error into Logs but not prevent the rest of GitLabForm from executing
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
                     # be completely deleted from gitlab.com
-                    warning(
-                        f"Could not find User '{user_not_in_config}' on the Instance so can not remove User from Project '{project_and_group}'"
+                    error(
+                        f"Could not find User '{user_not_in_config}' on the Instance so can not remove User from "
+                        f"Project '{project_and_group}'"
                     )
                     continue
 
