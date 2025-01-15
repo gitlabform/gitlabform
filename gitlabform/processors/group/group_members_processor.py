@@ -7,7 +7,7 @@ from cli_ui import fatal, error, debug as verbose
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlab.v4.objects import Group, GroupMember
+from gitlab.v4.objects import Group, GroupMember, User
 from gitlab import GitlabDeleteError, GitlabGetError
 
 
@@ -273,26 +273,28 @@ class GroupMembersProcessor(AbstractProcessor):
                 [username.lower() for username in users_to_set_by_username.keys()]
             )
             for user in users_not_configured:
-                if keep_bots and self.gitlab.get_user_by_name(user)["bot"]:
-                    debug(
-                        f"Will not remove bot user '{user}' as the 'keep_bots' option is true."
-                    )
-                    continue
                 verbose(f"Removing user {user} who is not configured to be a member.")
 
-                user_id = self.gl.get_user_id_cached(user)
+                gl_user: User | None = self.gl.get_user_by_username_cached(user)
 
-                if user_id is None:
+                if gl_user is None:
                     # User does not exist an instance level but is for whatever reason present on a Group/Project
                     # We should raise error into Logs but not prevent the rest of GitLabForm from executing
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
                     # be completely deleted from gitlab.com
-                    message = f"Could not find User '{user}' on the Instance so can not remove User"
-                    error(message)
+                    error(
+                        f"Could not find User '{user}' on the Instance so can not remove User from Group"
+                    )
+                    continue
+
+                if keep_bots and gl_user.bot:
+                    debug(
+                        f"Will not remove bot user '{user}' as the 'keep_bots' option is true."
+                    )
                     continue
 
                 try:
-                    group.members.delete(user_id)
+                    group.members.delete(gl_user.id)
                 except GitlabDeleteError as delete_error:
                     error(f"Member '{user}' could not be deleted: {delete_error}")
                     raise delete_error
