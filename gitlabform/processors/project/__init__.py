@@ -50,6 +50,10 @@ from gitlabform.processors.project.merge_requests_approvals import (
     MergeRequestsApprovals,
 )
 
+from gitlabform.processors.project.project_security_settings import (
+    ProjectSecuritySettingsProcessor,
+)
+
 
 class ProjectProcessors(AbstractProcessors):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
@@ -63,6 +67,7 @@ class ProjectProcessors(AbstractProcessors):
             # before those processors.
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab),
+            ProjectSecuritySettingsProcessor(gitlab),
             MembersProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
             ProjectLabelsProcessor(gitlab),
