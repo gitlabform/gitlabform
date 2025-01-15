@@ -785,6 +785,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#group-push-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Group Push rules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#project-push-rules" class="md-nav__link">
     <span class="md-ellipsis">
       Project Push rules
@@ -1191,6 +1200,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#group-push-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Group Push rules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#project-push-rules" class="md-nav__link">
     <span class="md-ellipsis">
       Project Push rules
@@ -1222,6 +1240,18 @@
 <p class="admonition-title">Info</p>
 <p>This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
 </div>
+<h2 id="group-push-rules">Group Push rules<a class="headerlink" href="#group-push-rules" title="Permanent link">&para;</a></h2>
+<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/repository/push_rules.html">group push rules</a>.</p>
+<p>The settings should be as documented at GitLab's <a href="https://docs.gitlab.com/ee/api/group_push_rules.html#add-push-rules-to-a-group">Push rules section of the Groups API docs</a>, <strong>except the id</strong>.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">group_push_rules</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">commit_message_regex</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;(.|\s)*\S(.|\s)*&#39;</span>
+<span class="w">      </span><span class="nt">member_check</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">commit_committer_check</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">commit_committer_name_check</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
 <h2 id="project-push-rules">Project Push rules<a class="headerlink" href="#project-push-rules" title="Permanent link">&para;</a></h2>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/repository/push_rules.html#override-global-push-rules-per-project">project push rules</a>.</p>
 <p>The settings should be as documented at GitLab's <a href="https://docs.gitlab.com/ee/api/projects.html#add-project-push-rule">Push rules section of the Projects API docs</a>, <strong>except the id</strong>.</p>
