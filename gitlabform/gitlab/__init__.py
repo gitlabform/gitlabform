@@ -20,7 +20,6 @@ from gitlabform.gitlab.project_merge_requests_approvals import (
 )
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.gitlab.variables import GitLabVariables
-from gitlabform.gitlab.users import GitLabUsers
 
 
 @enum.unique
@@ -55,7 +54,6 @@ class GitLab(
     GitLabGroupBadges,
     GitLabGroupVariables,
     GitLabPipelines,
-    GitLabUsers,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
     GitLabProjectProtectedEnvironments,
