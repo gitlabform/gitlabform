@@ -7,47 +7,61 @@ from unittest.mock import MagicMock
 
 class TestPythonGitlab:
 
-    def test_get_member_roles_cached_uses_correct_path_for_saas(self):
-        group_id = 2
-        python_gitlab = PythonGitlab()
-        # Don't make a real HTTP call
-        python_gitlab.http_get = MagicMock(return_value=None)
+    def test_get_member_role_id_cached_gets_role_id_from_roles_in_group_on_saas(self):
+        group_name = "Test"
+        role_name = "custom_role"
+        member_role_id = "1"
+
+        python_gitlab = PythonGitlab(MagicMock())
+        # Don't make a real GraphQl call
+        python_gitlab._get_member_roles_from_group_cached = MagicMock(
+            return_value=[dict(id=member_role_id, name=role_name)]
+        )
 
         # Return we are in GitLab SaaS
-        python_gitlab.is_gitlab_saas = MagicMock(return_value=True)
+        python_gitlab._is_gitlab_saas = MagicMock(return_value=True)
 
-        python_gitlab.get_member_roles_cached(group_id)
+        role_id = python_gitlab.get_member_role_id_cached(role_name, group_name)
 
-        python_gitlab.http_get.assert_called_with(f"/groups/{group_id}/member_roles")
+        python_gitlab._get_member_roles_from_group_cached.assert_called_with(group_name)
+        assert role_id == int(member_role_id)
 
-    def test_get_member_roles_cached_throws_404_error_when_invoked_on_saas_without_group_id(
+    def test_get_member_role_id_cached_gets_role_id_from_roles_on_instance_on_self_hosted(
         self,
     ):
-        python_gitlab = PythonGitlab()
-        # Don't make a real HTTP call
-        python_gitlab.http_get = MagicMock(return_value=None)
+        group_name = "Test"
+        role_name = "custom_role_two"
+        member_role_id = "5"
+
+        python_gitlab = PythonGitlab(MagicMock())
+        # Don't make a real GraphQl call
+        python_gitlab._get_member_roles_from_instance_cached = MagicMock(
+            return_value=[dict(id=member_role_id, name=role_name)]
+        )
 
         # Return we are in GitLab SaaS
-        python_gitlab.is_gitlab_saas = MagicMock(return_value=True)
+        python_gitlab._is_gitlab_saas = MagicMock(return_value=False)
 
-        with pytest.raises(GitlabGetError) as exception:
-            python_gitlab.get_member_roles_cached(None)
+        role_id = python_gitlab.get_member_role_id_cached(role_name, group_name)
 
-        assert exception.value.error_message is not None
-        assert exception.value.response_code == 404
-        python_gitlab.http_get.assert_not_called()
+        python_gitlab._get_member_roles_from_instance_cached.assert_called()
+        assert role_id == int(member_role_id)
 
-    def test_get_member_roles_cached_uses_correct_path_for_self_managed_and_dedicated(
+    def test_convert_result_to_member_roles_removes_GitlabGraphQl_specific_prefix_from_member_role_id(
         self,
     ):
-        group_id = 2
-        python_gitlab = PythonGitlab()
-        # Don't make a real HTTP call
-        python_gitlab.http_get = MagicMock(return_value=None)
+        role_name = "custom_role"
+        member_role_id = "1"
 
-        # Return we are not in GitLab SaaS
-        python_gitlab.is_gitlab_saas = MagicMock(return_value=False)
+        member_role_id_prefix = "gid://gitlab/MemberRole/"
 
-        python_gitlab.get_member_roles_cached(group_id)
+        member_role_nodes = [
+            dict(id=f"{member_role_id_prefix}{member_role_id}", name=role_name)
+        ]
 
-        python_gitlab.http_get.assert_called_with(f"/member_roles")
+        python_gitlab = PythonGitlab(MagicMock())
+
+        member_roles = python_gitlab._convert_result_to_member_roles(member_role_nodes)
+
+        expected = [dict(id=member_role_id, name=role_name)]
+        assert member_roles == expected
