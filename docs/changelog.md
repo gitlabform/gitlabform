@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.1.1
+
+### Refactors
+
+* refactor: migrate project push rules processor to python-gitlab [#923](https://github.com/gitlabform/gitlabform/pull/923) ([amimas](https://github.com/amimas)).
+  - This PR refactors the processor used for managing project level push rules. The methods for managing this resource is removed and switched to use python-gitlab.
+
+### Acceptance Tests
+
+* test: add author email regex acceptance test [#924](https://github.com/gitlabform/gitlabform/pull/924) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+
+Thanks to all the contributors of this release!
+
 ## 4.1.0
 
 ### Features
