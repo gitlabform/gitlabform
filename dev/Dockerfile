@@ -1,6 +1,4 @@
-FROM python:3.12-alpine3.18
-COPY --from=pandoc/core:2 /usr/bin/pandoc* /usr/bin/
-COPY --from=pandoc/core:2 /usr/lib/libffi* /usr/lib/
+FROM python:3.12-alpine3.21
 RUN apk add --no-cache \
     gmp \
     lua5.3 \
