@@ -20,8 +20,6 @@ class ProjectTopicsProcessor(AbstractProcessor):
 
         existing_topics: List[str] = project.topics
 
-        # needs update takes a dict but existing_push_topics is a List
-
         # List of topics not having delete = true or no delete attribute at all
         topics_to_add: List[str] = [
             t if isinstance(t, str) else list(t.keys())[0]

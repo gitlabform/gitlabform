@@ -23,6 +23,9 @@ class TestProjectTopics:
         assert "topicB" in project_topics
 
     def test__update_project_topics(self, gl, project):
+        project.topics = ["topicA", "topicB"]
+        project.save()
+
         self.test__create_project_topics(gl, project)
 
         config = f"""
@@ -46,7 +49,8 @@ class TestProjectTopics:
         assert "topicC" in project_topics
 
     def test__delete_project_topics(self, gl, project):
-        self.test__create_project_topics(gl, project)
+        project.topics = ["topicA", "topicB"]
+        project.save()
 
         config = f"""
         projects_and_groups:
@@ -65,7 +69,8 @@ class TestProjectTopics:
         assert "topicB" in project_topics
 
     def test__enforce_project_topics(self, gl, project):
-        self.test__create_project_topics(gl, project)
+        project.topics = ["topicA", "topicB"]
+        project.save()
 
         config = f"""
         projects_and_groups:
