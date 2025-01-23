@@ -59,6 +59,7 @@ class TestProjectTopics:
               topics:
                 - topicA:
                     delete: true
+                - topicC
         """
 
         run_gitlabform(config, project)
@@ -66,8 +67,9 @@ class TestProjectTopics:
         updated_project = gl.projects.get(project.id)
         project_topics: List[str] = updated_project.topics
 
-        assert len(project_topics) == 1
+        assert len(project_topics) == 2
         assert "topicB" in project_topics
+        assert "topicC" in project_topics
 
     def test__enforce_project_topics(self, gl, project):
         project.topics = ["topicA", "topicB"]
