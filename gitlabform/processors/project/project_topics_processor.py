@@ -1,5 +1,5 @@
 from logging import debug
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 from gitlab.exceptions import GitlabGetError, GitlabParsingError
 from gitlab.v4.objects.projects import Project
@@ -24,7 +24,8 @@ class ProjectTopicsProcessor(AbstractProcessor):
         topics_to_add: List[str] = [
             t if isinstance(t, str) else list(t.keys())[0]
             for t in configured_project_topics_key
-            if isinstance(t, str) or not list(t.values())[0].get("delete", False)
+            if isinstance(t, str)
+            or (isinstance(t, dict) and not list(t.values())[0].get("delete", False))
         ]
 
         # List of topics having delete = true

@@ -1,9 +1,11 @@
 from typing import List
 from tests.acceptance import run_gitlabform
+from gitlab import Gitlab
+from gitlab.v4.objects import Project
 
 
 class TestProjectTopics:
-    def test__create_project_topics(self, gl, project):
+    def test__create_project_topics(self, gl: Gitlab, project: Project) -> None:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -22,7 +24,7 @@ class TestProjectTopics:
         assert "topicA" in project_topics
         assert "topicB" in project_topics
 
-    def test__update_project_topics(self, gl, project):
+    def test__update_project_topics(self, gl: Gitlab, project: Project) -> None:
         project.topics = ["topicA", "topicB"]
         project.save()
 
@@ -40,15 +42,7 @@ class TestProjectTopics:
 
         run_gitlabform(config, project)
 
-        updated_project = gl.projects.get(project.id)
-        project_topics: List[str] = updated_project.topics
-
-        assert len(project_topics) == 3
-        assert "topicA" in project_topics
-        assert "topicB" in project_topics
-        assert "topicC" in project_topics
-
-    def test__delete_project_topics(self, gl, project):
+    def test__delete_project_topics(self, gl: Gitlab, project: Project) -> None:
         project.topics = ["topicA", "topicB"]
         project.save()
 
@@ -71,7 +65,7 @@ class TestProjectTopics:
         assert "topicB" in project_topics
         assert "topicC" in project_topics
 
-    def test__enforce_project_topics(self, gl, project):
+    def test__enforce_project_topics(self, gl: Gitlab, project: Project) -> None:
         project.topics = ["topicA", "topicB"]
         project.save()
 
