@@ -40,7 +40,7 @@ class TestProjectTopics:
         updated_project = gl.projects.get(project.id)
         project_topics: List[str] = updated_project.topics
 
-        assert len(project_topics) == 2
+        assert len(project_topics) == 3
         assert "topicA" in project_topics
         assert "topicB" in project_topics
         assert "topicC" in project_topics

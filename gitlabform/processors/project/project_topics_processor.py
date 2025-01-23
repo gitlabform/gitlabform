@@ -44,7 +44,9 @@ class ProjectTopicsProcessor(AbstractProcessor):
             self.set_project_topics(project, topics_to_add)
             return
 
-        self.update_project_topics(existing_topics, topics_to_add, topics_to_delete)
+        self.update_project_topics(
+            project, existing_topics, topics_to_add, topics_to_delete
+        )
 
     @staticmethod
     def update_project_topics(
@@ -53,7 +55,7 @@ class ProjectTopicsProcessor(AbstractProcessor):
         topics_to_add: List[str],
         topics_to_delete: List[str],
     ):
-        topics: List[str] = list(str)
+        topics: List[str] = []
 
         topics.extend(existing_topics)
         topics.extend(topics_to_add)
