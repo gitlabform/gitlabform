@@ -1,9 +1,11 @@
 from logging import debug
-from typing import List
+from typing import List, Tuple, Union
+
+from gitlab.exceptions import GitlabGetError, GitlabParsingError
+from gitlab.v4.objects.projects import Project
+
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlab.v4.objects.projects import Project
-from gitlab.exceptions import GitlabGetError, GitlabParsingError
 
 
 class ProjectTopicsProcessor(AbstractProcessor):
@@ -16,36 +18,58 @@ class ProjectTopicsProcessor(AbstractProcessor):
 
         existing_topics: List[str] = project.topics
 
-        if not existing_topics:
-            debug(f"No existing topics for '{project.name}', creating new topics.")
-            self.create_project_topics(project, configured_project_topics)
-            return
-
         # needs update takes a dict but existing_push_topics is a List
 
-        if self._needs_update(existing_topics, configured_project_topics):
-            self.update_project_topics(existing_topics, configured_project_topics)
-        else:
-            debug("No update needed for Project Topics")
+        # List of topics not having delete = true or no delete attribute at all
+        topics_to_add: List[str] = [
+            t if isinstance(t, str) else list(t.keys())[0]
+            for t in configured_project_topics
+            if isinstance(t, str) or not list(t.values())[0].get("delete", False)
+        ]
+
+        # List of topics having delete = true
+        topics_to_delete: List[str] = [
+            list(t.keys())[0]
+            for t in configured_project_topics
+            if isinstance(t, dict) and list(t.values())[0].get("delete") is True
+        ]
+
+        # if no pre-existing topics or enforce is set to true, just set topics
+        if not existing_topics or configured_project_topics.get("enforce", False):
+            debug(
+                f"No existing topics for '{project.name} or enforce: true', setting topics."
+            )
+            self.set_project_topics(project, topics_to_add)
+            return
+
+        self.update_project_topics(existing_topics, topics_to_add, topics_to_delete)
 
     @staticmethod
     def update_project_topics(
         project: Project,
-        push_topics: List[str],
-        configured_project_push_topics: List[str],
+        existing_topics: List[str],
+        topics_to_add: List[str],
+        topics_to_delete: List[str],
     ):
         topics: List[str] = list(str)
 
-        topics.extend(push_topics)
-        topics.extend(configured_project_push_topics)
+        topics.extend(existing_topics)
+        topics.extend(topics_to_add)
+
+        topics = [topic for topic in topics if topic not in topics_to_delete]
+
+        if not topics:
+            debug("No update needed for Project Topics")
+            return
 
         debug(f"Updating topics to {str(topics)}")
-        project.topics = topics
 
+        # Save the updated topics to the project
+        project.topics = topics
         project.save()
 
     @staticmethod
-    def create_project_topics(project: Project, project_topics: list):
+    def set_project_topics(project: Project, project_topics: list):
         debug(f"Creating topics with configuration: {project_topics}")
         project.topics = project_topics
         project.save()
