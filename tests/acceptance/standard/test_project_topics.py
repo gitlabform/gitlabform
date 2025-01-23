@@ -56,8 +56,9 @@ class TestProjectTopics:
         projects_and_groups:
           {project.path_with_namespace}:
             project_topics:
-              - topicA
-                delete: true
+              topics:
+                - topicA:
+                    delete: true
         """
 
         run_gitlabform(config, project)
@@ -76,9 +77,10 @@ class TestProjectTopics:
         projects_and_groups:
           {project.path_with_namespace}:
             project_topics:
-              - topicC
-              - topicD
-            enforce: true
+              topics:
+                - topicC
+                - topicD
+              enforce: true
         """
 
         run_gitlabform(config, project)
