@@ -1,0 +1,78 @@
+from typing import List
+from tests.acceptance import run_gitlabform
+
+
+class TestProjectTopics:
+    def test__create_project_topics(self, project):
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_topics:
+              topics:
+                - topicA
+                - topicB
+        """
+
+        run_gitlabform(config, project)
+
+        project_topics: List[str] = project.topics.get()
+        assert len(project_topics) == 2
+        assert "topicA" in project_topics
+        assert "topicB" in project_topics
+
+    def test__update_project_topics(self, project):
+        self.test__create_project_topics(project)
+
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_topics:
+              topics:
+                - topicA
+                - topicB
+                - topicC
+        """
+
+        run_gitlabform(config, project)
+
+        project_topics: List[str] = project.topics.get()
+        assert len(project_topics) == 2
+        assert "topicA" in project_topics
+        assert "topicB" in project_topics
+        assert "topicC" in project_topics
+
+    def test__delete_project_topics(self, project):
+        self.test__create_project_topics(project)
+
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_topics:
+              - topicA
+                delete: true
+        """
+
+        run_gitlabform(config, project)
+
+        project_topics: List[str] = project.topics.get()
+        assert len(project_topics) == 1
+        assert "topicB" in project_topics
+
+    def test__enforce_project_topics(self, project):
+        self.test__create_project_topics(project)
+
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_topics:
+              - topicC
+              - topicD
+            enforce: true
+        """
+
+        run_gitlabform(config, project)
+
+        project_topics: List[str] = project.topics.get()
+        assert len(project_topics) == 2
+        assert "topicC" in project_topics
+        assert "topicD" in project_topics
