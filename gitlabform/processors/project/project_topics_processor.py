@@ -13,7 +13,9 @@ class ProjectTopicsProcessor(AbstractProcessor):
         super().__init__("project_topics", gitlab)
 
     def _process_configuration(self, project_path: str, configuration: dict):
-        configured_project_topics: List[str] = configuration.get("project_topics", {})
+        project_topics: Dict = configuration.get("project_topics", {})
+        configured_project_topics_key: List[str] = project_topics.get("topics", [])
+
         project: Project = self.gl.get_project_by_path_cached(project_path)
 
         existing_topics: List[str] = project.topics
@@ -23,19 +25,19 @@ class ProjectTopicsProcessor(AbstractProcessor):
         # List of topics not having delete = true or no delete attribute at all
         topics_to_add: List[str] = [
             t if isinstance(t, str) else list(t.keys())[0]
-            for t in configured_project_topics
+            for t in configured_project_topics_key
             if isinstance(t, str) or not list(t.values())[0].get("delete", False)
         ]
 
         # List of topics having delete = true
         topics_to_delete: List[str] = [
             list(t.keys())[0]
-            for t in configured_project_topics
+            for t in configured_project_topics_key
             if isinstance(t, dict) and list(t.values())[0].get("delete") is True
         ]
 
         # if no pre-existing topics or enforce is set to true, just set topics
-        if not existing_topics or configured_project_topics.get("enforce", False):
+        if not existing_topics or project_topics.get("enforce", False):
             debug(
                 f"No existing topics for '{project.name} or enforce: true', setting topics."
             )
