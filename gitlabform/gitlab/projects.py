@@ -1,10 +1,16 @@
 from time import sleep
+from typing import Dict, List, Tuple, Union
 
+from gitlab.exceptions import GitlabGetError, GitlabParsingError
+from gitlab.v4.objects.projects import Project
+
+from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import (
     GitLabCore,
     NotFoundException,
     TimeoutWaitingForDeletion,
 )
+from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
 class GitLabProjects(GitLabCore):
@@ -133,13 +139,60 @@ class GitLabProjects(GitLabCore):
         #     'setting2': value2,
         # }
         # ..as documented at: https://docs.gitlab.com/ce/api/projects.html#edit-project
+
+        api_adjusted_project_settings: Dict[str, str] = self._process_project_settings(
+            project_and_group_name, project_settings
+        )
+
         return self._make_requests_to_api(
             "projects/%s",
             project_and_group_name,
             "PUT",
             data=None,
-            json=project_settings,
+            json=api_adjusted_project_settings,
         )
+
+    def _process_project_settings(self, project_and_group_name, project_settings):
+        project_topics: Dict = project_settings.get("topics", {})
+        configured_project_topics_key: List[str] = project_topics.get("topics", [])
+
+        project: Project = self.gl.get_project_by_path_cached(project_and_group_name)
+
+        existing_topics: List[str] = project.topics
+
+        # List of topics not having delete = true or no delete attribute at all
+        topics_to_add: List[str] = [
+            list(t.keys())[0] if isinstance(t, dict) else t
+            for t in configured_project_topics_key
+            if isinstance(t, str)
+            or (isinstance(t, dict) and not list(t.values())[0].get("delete", False))
+        ]
+
+        # List of topics having delete = true
+        topics_to_delete: List[str] = [
+            list(t.keys())[0]
+            for t in configured_project_topics_key
+            if isinstance(t, dict) and list(t.values())[0].get("delete") is True
+        ]
+
+        # if no pre-existing topics or keep_existin is set to False, just set topics
+        if not existing_topics or project_topics.get("keep_existing", False):
+            debug(
+                f"No existing topics for '{project.name} or keep_existing: false', setting topics."
+            )
+            self.set_project_topics(project, topics_to_add)
+            return
+
+        topics: List[str] = []
+
+        topics.extend(existing_topics)
+        topics.extend(topics_to_add)
+
+        topics = [topic for topic in topics if topic not in topics_to_delete]
+
+        project_settings.topcis = topics
+
+        return project_settings
 
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly
@@ -176,3 +229,27 @@ class GitLabProjects(GitLabCore):
             method="DELETE",
             expected_codes=[204, 404],
         )
+
+    @staticmethod
+    def update_project_topics(
+        project: Project,
+        existing_topics: List[str],
+        topics_to_add: List[str],
+        topics_to_delete: List[str],
+    ):
+        topics: List[str] = []
+
+        topics.extend(existing_topics)
+        topics.extend(topics_to_add)
+
+        topics = [topic for topic in topics if topic not in topics_to_delete]
+
+        if not topics:
+            debug("No update needed for Project Topics")
+            return
+
+        debug(f"Updating topics to {str(topics)}")
+
+        # Save the updated topics to the project
+        project.topics = topics
+        project.save()
