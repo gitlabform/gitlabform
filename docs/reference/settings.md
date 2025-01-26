@@ -56,6 +56,25 @@ projects_and_groups:
       # (...)
 ```
 
+### Project Settings - Topics
+
+Using [Project Settings](./settings.md#project-settings) only allows for topics to be overwritten.GitLabForm allows for additional syntax with `keep_existing` and `delete`.
+
+Examples:
+
+```yaml
+projects_and_groups:
+  group_1/project_1:
+    projects_settings:
+      topics:
+        keep_existing: true
+        - topicA
+        - topicB
+        - topicC
+            delete: true
+```
+
+
 ## Group Settings
 
 This section purpose is to manage the [group settings](https://docs.gitlab.com/ee/user/group/).

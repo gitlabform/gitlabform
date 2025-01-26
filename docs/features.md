@@ -30,7 +30,6 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [Push Rules](reference/push_rules.md) (**GitLab Premium (paid) only**)
     * [Integrations](reference/integrations.md)
     * [Settings](reference/settings.md#project-settings)
-    * [Settings](reference/topics.md#project-topics)
 
     * [Tags protect/unprotect](reference/tags_protection.md)
     * [Resource groups](reference/resource_groups.md)
