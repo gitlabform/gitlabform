@@ -1,16 +1,13 @@
 from time import sleep
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List
 
-from gitlab.exceptions import GitlabGetError, GitlabParsingError
 from gitlab.v4.objects.projects import Project
 
-from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import (
     GitLabCore,
     NotFoundException,
     TimeoutWaitingForDeletion,
 )
-from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
 class GitLabProjects(GitLabCore):
