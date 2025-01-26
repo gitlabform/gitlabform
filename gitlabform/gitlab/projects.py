@@ -149,7 +149,9 @@ class GitLabProjects(GitLabCore):
             json=api_adjusted_project_settings,
         )
 
-    def _process_project_settings(self, project_and_group_name, project_settings):
+    def _process_project_settings(
+        self, project_and_group_name, project_settings
+    ) -> List:
         project_topics: Dict = project_settings.get("topics", {})
         configured_project_topics_key: List[str] = project_topics.get("topics", [])
 
@@ -172,17 +174,13 @@ class GitLabProjects(GitLabCore):
             if isinstance(t, dict) and list(t.values())[0].get("delete") is True
         ]
 
-        # if no pre-existing topics or keep_existin is set to False, just set topics
-        if not existing_topics or project_topics.get("keep_existing", False):
-            debug(
-                f"No existing topics for '{project.name} or keep_existing: false', setting topics."
-            )
-            self.set_project_topics(project, topics_to_add)
-            return
+        keep_existing: bool = project_topics.get("keep_existing", False)
 
         topics: List[str] = []
 
-        topics.extend(existing_topics)
+        if keep_existing:
+            topics.extend(existing_topics)
+
         topics.extend(topics_to_add)
 
         topics = [topic for topic in topics if topic not in topics_to_delete]
@@ -226,27 +224,3 @@ class GitLabProjects(GitLabCore):
             method="DELETE",
             expected_codes=[204, 404],
         )
-
-    @staticmethod
-    def update_project_topics(
-        project: Project,
-        existing_topics: List[str],
-        topics_to_add: List[str],
-        topics_to_delete: List[str],
-    ):
-        topics: List[str] = []
-
-        topics.extend(existing_topics)
-        topics.extend(topics_to_add)
-
-        topics = [topic for topic in topics if topic not in topics_to_delete]
-
-        if not topics:
-            debug("No update needed for Project Topics")
-            return
-
-        debug(f"Updating topics to {str(topics)}")
-
-        # Save the updated topics to the project
-        project.topics = topics
-        project.save()
