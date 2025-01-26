@@ -27,9 +27,6 @@ from gitlabform.processors.project.project_settings_processor import (
 from gitlabform.processors.project.project_labels_processor import (
     ProjectLabelsProcessor,
 )
-from gitlabform.processors.project.project_topics_processor import (
-    ProjectTopicsProcessor,
-)
 from gitlabform.processors.shared.protected_environments_processor import (
     ProtectedEnvironmentsProcessor,
 )
@@ -66,7 +63,6 @@ class ProjectProcessors(AbstractProcessors):
             # before those processors.
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab),
-            ProjectTopicsProcessor(gitlab),
             MembersProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
             ProjectLabelsProcessor(gitlab),
