@@ -188,30 +188,19 @@ class GitLabProjects(GitLabCore):
     def _process_project_settings(
         self, project_and_group_name, project_settings
     ) -> List:
-        project_settings_topics: Dict = project_settings.get("topics", [])
+        project_topics: Dict = project_settings.get("topics", {})
+        configured_project_topics_key: List[str] = project_topics.get("topics", [])
 
-        keep_existing: bool = False
+        project: Project = self.gl.get_project_by_path_cached(project_and_group_name)
 
-        for i, topic in enumerate(project_settings_topics):
-            if isinstance(topic, dict) and "keep_existing" in topic:
-                value = topic["keep_existing"]
-                if isinstance(value, bool):
-                    keep_existing = value
-                    del project_settings_topics[i]
-                    break
 
-        api_adjusted_topics: List[str] = []
 
-        if keep_existing:
-            project: Project = self.gl.get_project_by_path_cached(
-                project_and_group_name
-            )
-            api_adjusted_topics.extend(project.topics)
+        existing_topics: List[str] = project.topics
 
         # List of topics not having delete = true or no delete attribute at all
         topics_to_add: List[str] = [
             list(t.keys())[0] if isinstance(t, dict) else t
-            for t in project_settings_topics
+            for t in configured_project_topics_key
             if isinstance(t, str)
             or (isinstance(t, dict) and not list(t.values())[0].get("delete", False))
         ]
@@ -219,16 +208,21 @@ class GitLabProjects(GitLabCore):
         # List of topics having delete = true
         topics_to_delete: List[str] = [
             list(t.keys())[0]
-            for t in project_settings_topics
+            for t in configured_project_topics_key
             if isinstance(t, dict) and list(t.values())[0].get("delete") is True
         ]
 
-        api_adjusted_topics.extend(topics_to_add)
+        keep_existing: bool = project_topics.get("keep_existing", False)
 
-        api_adjusted_topics = [
-            topic for topic in api_adjusted_topics if topic not in topics_to_delete
-        ]
+        topics: List[str] = []
 
-        project_settings.topics = api_adjusted_topics
+        if keep_existing:
+            topics.extend(existing_topics)
+
+        topics.extend(topics_to_add)
+
+        topics = [topic for topic in topics if topic not in topics_to_delete]
+
+        project_settings.topcis = topics
 
         return project_settings
