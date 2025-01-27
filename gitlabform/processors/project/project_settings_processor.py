@@ -35,7 +35,6 @@ class ProjectSettingsProcessor(AbstractProcessor):
             debug("No update needed for project settings")
 
     def get_project_settings(self, project_path: str):
-        # return self.get_entity_in_gitlab(project_path)
         return self.gl.get_project_by_path_cached(project_path).asdict()
 
     def _print_diff(
