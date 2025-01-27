@@ -27,6 +27,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [Members (groups) {share/unshare with group, change access level, optional enforce}](reference/members.md#project-members)
     * [Merge Requests project-level configuration and approval rules](reference/merge_requests.md) (**GitLab Premium (paid) only**)
     * [Pipeline schedules](reference/pipeline_schedules.md)
+    * [Project security settings](reference/project_security_settings.md)
     * [Push Rules](reference/push_rules.md) (**GitLab Premium (paid) only**)
     * [Integrations](reference/integrations.md)
     * [Settings](reference/settings.md#project-settings)
