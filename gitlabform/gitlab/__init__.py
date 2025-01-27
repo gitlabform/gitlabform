@@ -56,7 +56,6 @@ class GitLab(
     GitLabGroupBadges,
     GitLabGroupVariables,
     GitLabPipelines,
-    GitLabUsers,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
     GitLabProjectProtectedEnvironments,

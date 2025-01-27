@@ -4,7 +4,7 @@ from typing import Union, Any, Optional, Dict, List
 import gitlab.const
 from gitlab import Gitlab, GitlabGetError, GraphQL
 from gitlab.base import RESTObject
-from gitlab.v4.objects import Group, Project
+from gitlab.v4.objects import Group, Project, User
 
 from cli_ui import debug as verbose
 
@@ -59,7 +59,7 @@ class PythonGitlab(Gitlab):
         API call layer "get_user_by_username" is cached, we do not cache at this level as it would add
         duplication of data into the cache
         """
-        user = self._get_user_by_username_cached(username)
+        user = self.get_user_by_username_cached(username)
 
         if user is None:
             return None
@@ -92,7 +92,7 @@ class PythonGitlab(Gitlab):
 
     #  Uses "LIST" to get a user by username, to get the full User object, call get using the user's id
     @functools.lru_cache()
-    def _get_user_by_username_cached(self, username: str) -> RESTObject | None:
+    def get_user_by_username_cached(self, username: str) -> User | None:
         # Gitlab API will only ever return 0 or 1 entry when GETting using `username` attribute
         # https://docs.gitlab.com/ee/api/users.html#for-non-administrator-users
         # so will always be list[RESTObject] and never RESTObjectList from python-gitlab's api
@@ -101,7 +101,8 @@ class PythonGitlab(Gitlab):
         if len(users) == 0:
             return None
 
-        return users[0]
+        user = users[0]
+        return self.users.get(user.id)
 
     @functools.lru_cache()
     def _get_member_roles_from_group_cached(
