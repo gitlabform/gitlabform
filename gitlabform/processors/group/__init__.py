@@ -23,6 +23,9 @@ from gitlabform.processors.group.group_settings_processor import (
 from gitlabform.processors.group.group_labels_processor import (
     GroupLabelsProcessor,
 )
+from gitlabform.processors.group.group_push_rules_processor import (
+    GroupPushRulesProcessor,
+)
 
 from gitlabform.processors.group.group_hooks_processor import (
     GroupHooksProcessor,
@@ -41,4 +44,5 @@ class GroupProcessors(AbstractProcessors):
             GroupSAMLLinksProcessor(gitlab),
             GroupLabelsProcessor(gitlab),
             GroupHooksProcessor(gitlab),
+            GroupPushRulesProcessor(gitlab),
         ]

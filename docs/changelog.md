@@ -1,5 +1,83 @@
 # Changelog
 
+## 4.1.1
+
+### Refactors
+
+* refactor: migrate project push rules processor to python-gitlab [#923](https://github.com/gitlabform/gitlabform/pull/923) ([amimas](https://github.com/amimas)).
+  - This PR refactors the processor used for managing project level push rules. The methods for managing this resource is removed and switched to use python-gitlab.
+
+### Acceptance Tests
+
+* test: add author email regex acceptance test [#924](https://github.com/gitlabform/gitlabform/pull/924) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+
+Thanks to all the contributors of this release!
+
+## 4.1.0
+
+### Features
+
+* feat: add support for group push rules [#911](https://github.com/gitlabform/gitlabform/pull/911) ([szEvEz](https://github.com/szEvEz)).
+
+### Refactors
+
+* refactor: use python-gitlab when checking Bot user [#921](https://github.com/gitlabform/gitlabform/pull/921) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+  - means only one API call when enforcing members
+  - fully cached
+  - should remove exceptions for missing Users - as old REST api was throwing them too
+
+Thanks to all the contributors of this release!
+
+## 4.0.7
+
+### Bug Fixes
+
+* fix: remove caching on get_user_id_cached [#918](https://github.com/gitlabform/gitlabform/pull/918) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+  - the get user by username is already cached, so this reduces redundant data in the cache
+  - adds extra logging to help users debug effectively
+
+### Refactors
+
+* refactor: do not throw exception from get_user_id [#918](https://github.com/gitlabform/gitlabform/pull/918) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+  - pass None up and let upstream throw exception if it wants
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+## 4.0.6
+
+### Refactors
+
+* use graphql to get member_roles to reduce permission level required [#915](https://github.com/gitlabform/gitlabform/pull/915), relates to [Gitlab Issue 511919](https://gitlab.com/gitlab-org/gitlab/-/issues/511919#note_2287581884) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP)).
+  - graph ql GET member_roles only needs Guest+ permissions
+  - REST requires significantly higher permission sets which not all users maybe comfortable running with
+  -  improve error handling and logging when users etc are not found
+
+## 4.0.5
+
+### Bug Fixes
+
+* fix: gracefully handle "missing" Users when trying to remove from Project or Group [#913](https://github.com/gitlabform/gitlabform/pull/913), closes [#912](https://github.com/gitlabform/gitlabform/issues/912) ([Tim Knight (DWP)](https://github.com/TimKnight-DWP))
+
+### Build Fixes
+
+* test: mark 'TestVariables::test__builds_disabled' as skipped [#909](https://github.com/gitlabform/gitlabform/pull/909) ([amimas](https://github.com/amimas))
+  ```
+  GitLab API behaviour changed in current latest version (17.7.0) for listing project ci variables. 
+  This is causing test failure and blocking changes from merging. The API changes do not have any breaking impact for gitlabform. 
+  So, marking the currently failing test to be skipped. 
+  It can be re-enabled again based on findings from the issue created in GitLab's backlog at https://gitlab.com/gitlab-org/gitlab/-/issues/511237
+  ```
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.0.4
 
 ### Bug Fixes

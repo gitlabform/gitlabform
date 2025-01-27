@@ -1,7 +1,7 @@
-from cli_ui import debug as verbose, warning, info
+from cli_ui import debug as verbose, warning, info, error
 from cli_ui import fatal
-from gitlab import GitlabGetError
-from gitlab.v4.objects import Project
+from gitlab import GitlabGetError, GitlabDeleteError
+from gitlab.v4.objects import Project, User
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
@@ -112,9 +112,9 @@ class MembersProcessor(AbstractProcessor):
 
             for user in users:
                 info(f"Processing user '{user}'...")
-                try:
-                    user_id = self.gl.get_user_by_username_cached(user).get_id()
-                except GitlabGetError:
+
+                user_id = self.gl.get_user_id_cached(user)
+                if user_id is None:
                     warning(f"Could not find user '{user}' in Gitlab, skipping...")
                     continue
 
@@ -132,14 +132,9 @@ class MembersProcessor(AbstractProcessor):
                     users[user]["member_role"] if "member_role" in users[user] else None
                 )
                 if member_role_id_or_name:
-                    # For self-managed member_roles are at an instance level, for SaaS on a Group level
-                    if self.gl.is_gitlab_saas():
-                        group_id = project.namespace["id"]
-                    else:
-                        group_id = None
-
+                    group_name_and_path = project.namespace["full_path"]
                     member_role_id = self.gl.get_member_role_id_cached(
-                        member_role_id_or_name, group_id
+                        member_role_id_or_name, group_name_and_path
                     )
                 else:
                     member_role_id = None
@@ -204,28 +199,43 @@ class MembersProcessor(AbstractProcessor):
                     project.members.create(data=create_data)
 
         if enforce_members:
-
+            verbose("Enforcing Project members")
             # Enforce that all usernames are lowercase for comparisons.
             users_in_config = [username.lower() for username in users.keys()]
             users_in_gitlab = current_members.keys()
             users_not_in_config = set(users_in_gitlab) - set(users_in_config)
             for user_not_in_config in users_not_in_config:
-                if (
-                    keep_bots
-                    and self.gitlab.get_user_by_name(user_not_in_config)["bot"]
-                ):
+                verbose(
+                    f"Removing user '{user_not_in_config}' that is not configured to be a member."
+                )
+                gl_user: User | None = self.gl.get_user_by_username_cached(
+                    user_not_in_config
+                )
+
+                if gl_user is None:
+                    # User does not exist an instance level but is for whatever reason present on a Group/Project
+                    # We should raise error into Logs but not prevent the rest of GitLabForm from executing
+                    # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
+                    # be completely deleted from gitlab.com
+                    error(
+                        f"Could not find User '{user_not_in_config}' on the Instance so can not remove User from "
+                        f"Project '{project_and_group}'"
+                    )
+                    continue
+
+                if keep_bots and gl_user.bot:
                     verbose(
                         f"Will not remove bot user '{user_not_in_config}' as the 'keep_bots' option is true."
                     )
                     continue
 
-                verbose(
-                    f"Removing user '{user_not_in_config}' that is not configured to be a member."
-                )
-                cached_user_id = self.gl.get_user_by_username_cached(
-                    user_not_in_config
-                ).get_id()
-                project.members.delete(id=cached_user_id)
+                try:
+                    project.members.delete(id=gl_user.id)
+                except GitlabDeleteError as delete_error:
+                    error(
+                        f"Member '{user_not_in_config}' could not be deleted: {delete_error}"
+                    )
+                    raise delete_error
         else:
             verbose("Not enforcing user members.")
 

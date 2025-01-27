@@ -2,6 +2,8 @@ import enum
 
 from typing import List
 
+from gitlab import GraphQL
+
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
@@ -18,7 +20,6 @@ from gitlabform.gitlab.project_merge_requests_approvals import (
 )
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.gitlab.variables import GitLabVariables
-from gitlabform.gitlab.users import GitLabUsers
 
 
 @enum.unique
@@ -53,7 +54,6 @@ class GitLab(
     GitLabGroupBadges,
     GitLabGroupVariables,
     GitLabPipelines,
-    GitLabUsers,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
     GitLabProjectProtectedEnvironments,
@@ -71,14 +71,17 @@ class GitlabWrapper:
         timeout = gitlabform.timeout
         session = gitlabform.session
 
+        graphql = GraphQL(url=url, token=token)
+
         self._gitlab: PythonGitlab = PythonGitlab(
-            url,
-            token,
+            url=url,
+            private_token=token,
             ssl_verify=ssl_verify,
-            api_version="4",
-            session=session,
-            retry_transient_errors=True,
             timeout=timeout,
+            api_version="4",
+            retry_transient_errors=True,
+            graphql=graphql,
+            session=session,
         )
 
     def get_gitlab(self):
