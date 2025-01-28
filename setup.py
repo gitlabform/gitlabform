@@ -48,7 +48,7 @@ setup(
         "MarkupSafe==3.0.2",
         "mergedeep==1.3.4",
         "packaging==24.2",
-        "python-gitlab==5.3.1",
+        "python-gitlab==5.6.0",
         "python-gitlab[graphql]==5.3.1",
         "requests==2.32.3",
         "ruamel.yaml==0.17.21",
