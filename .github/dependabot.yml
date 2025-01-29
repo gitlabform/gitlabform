@@ -17,3 +17,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      python-gitlab:
+        patterns:
+          - "python-gitlab"
