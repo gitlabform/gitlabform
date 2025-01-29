@@ -156,8 +156,7 @@ projects_and_groups:
       allow_author_approval: false
       require_reauthentication_to_approve: true
     group_merge_requests_approval_rules:
-      any:
+      rulename:
         approvals_required: 1
-        name: "Developer Approval"
         rule_type: any_approver
 ```

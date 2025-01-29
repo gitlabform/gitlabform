@@ -1,9 +1,6 @@
 import pytest
 
 from tests.acceptance import run_gitlabform
-from gitlabform.gitlab.group_merge_requests_approvals import (
-    GitLabGroupMergeRequestsApprovals,
-)
 
 pytestmark = pytest.mark.requires_license
 
@@ -15,19 +12,54 @@ class TestGroupMergeRequestApprovalRules:
         projects_and_groups:
           {group.full_path}/*:
             group_merge_requests_approval_rules:
-              any:
+              rulename1:
                 approvals_required: 5
-                name: "Regular approvers"
+                rule_type: regular
+        """
+
+        run_gitlabform(config, group)
+        rules = group.approval_rules.list()
+        assert len(rules) == 1
+
+        for rule in rules:
+          assert rule.name == "rulename1"
+          assert rule.approvals_required == 5
+          assert rule.rule_type == "regular"
+
+    def test__edit_rule(self, group):
+
+        config = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_merge_requests_approval_rules:
+              rulename1:
+                approvals_required: 1
                 rule_type: any_approver
         """
 
         run_gitlabform(config, group)
-        rules = GitLabGroupMergeRequestsApprovals(
-            config_string=config
-        ).get_group_approval_rules(group.full_path)
-        assert len(rules) >= 1
+        rules = group.approval_rules.list()
+        assert len(rules) == 1
 
         for rule in rules:
-            assert rule["name"] == "Regular approvers"
-            assert rule["approvals_required"] == 5
-            assert rule["rule_type"] == "any_approver"
+          assert rule.name == "rulename1"
+          assert rule.approvals_required == 1
+          assert rule.rule_type == "any_approver"
+
+    def test__add_multiple_rules(self, group):
+
+        config = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_merge_requests_approval_rules:
+              rulename1:
+                approvals_required: 1
+                rule_type: any_approver
+              rulename2:
+                approvals_required: 2
+                rule_type: regular
+        """
+
+        run_gitlabform(config, group)
+        rules = group.approval_rules.list()
+        assert len(rules) == 2
