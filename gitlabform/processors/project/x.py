@@ -1,4 +1,7 @@
 from time import sleep
+from typing import Dict, List
+
+from gitlab.v4.objects.projects import Project
 
 from gitlabform.gitlab.core import (
     GitLabCore,
@@ -126,6 +129,26 @@ class GitLabProjects(GitLabCore):
         except NotFoundException:
             return dict()
 
+    def put_project_settings(self, project_and_group_name, project_settings):
+        # project_settings has to be like this:
+        # {
+        #     'setting1': value1,
+        #     'setting2': value2,
+        # }
+        # ..as documented at: https://docs.gitlab.com/ce/api/projects.html#edit-project
+
+        api_adjusted_project_settings: Dict[str, str] = self._process_project_settings(
+            project_and_group_name, project_settings
+        )
+
+        return self._make_requests_to_api(
+            "projects/%s",
+            project_and_group_name,
+            "PUT",
+            data=None,
+            json=api_adjusted_project_settings,
+        )
+
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly
         # the shared groups, so I'm using directly the GET /projects/:id call
@@ -161,3 +184,51 @@ class GitLabProjects(GitLabCore):
             method="DELETE",
             expected_codes=[204, 404],
         )
+
+    def _process_project_settings(
+        self, project_and_group_name, project_settings
+    ) -> List:
+        project_settings_topics: Dict = project_settings.get("topics", [])
+
+        keep_existing: bool = False
+
+        for i, topic in enumerate(project_settings_topics):
+            if isinstance(topic, dict) and "keep_existing" in topic:
+                value = topic["keep_existing"]
+                if isinstance(value, bool):
+                    keep_existing = value
+                    del project_settings_topics[i]
+                    break
+
+        api_adjusted_topics: List[str] = []
+
+        if keep_existing:
+            project: Project = self.gl.get_project_by_path_cached(
+                project_and_group_name
+            )
+            api_adjusted_topics.extend(project.topics)
+
+        # List of topics not having delete = true or no delete attribute at all
+        topics_to_add: List[str] = [
+            list(t.keys())[0] if isinstance(t, dict) else t
+            for t in project_settings_topics
+            if isinstance(t, str)
+            or (isinstance(t, dict) and not list(t.values())[0].get("delete", False))
+        ]
+
+        # List of topics having delete = true
+        topics_to_delete: List[str] = [
+            list(t.keys())[0]
+            for t in project_settings_topics
+            if isinstance(t, dict) and list(t.values())[0].get("delete") is True
+        ]
+
+        api_adjusted_topics.extend(topics_to_add)
+
+        api_adjusted_topics = [
+            topic for topic in api_adjusted_topics if topic not in topics_to_delete
+        ]
+
+        project_settings.topics = api_adjusted_topics
+
+        return project_settings
