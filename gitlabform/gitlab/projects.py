@@ -126,57 +126,6 @@ class GitLabProjects(GitLabCore):
         except NotFoundException:
             return dict()
 
-    def put_project_settings(self, project_and_group_name, project_settings):
-        # project_settings has to be like this:
-        # {
-        #     'setting1': value1,
-        #     'setting2': value2,
-        # }
-        # ..as documented at: https://docs.gitlab.com/ce/api/projects.html#edit-project
-        return self._make_requests_to_api(
-            "projects/%s",
-            project_and_group_name,
-            "PUT",
-            data=None,
-            json=project_settings,
-        )
-
-    def get_project_push_rules(self, project_and_group_name: str):
-        try:
-            # for this endpoint GitLab fails if project name contains ".", so lets use pid instead
-            pid: str = self._get_project_id(project_and_group_name)
-
-            return self._make_requests_to_api("projects/%s/push_rule", pid)
-        except NotFoundException:
-            return dict()
-
-    def put_project_push_rules(self, project_and_group_name: str, push_rules):
-        # push_rules has to be like this:
-        # {
-        #     'setting1': value1,
-        #     'setting2': value2,
-        # }
-        # ..as documented at: https://docs.gitlab.com/ee/api/projects.html#edit-project-push-rule
-
-        # for this endpoint GitLab fails if project name contains ".", so lets use pid instead
-        pid: str = self._get_project_id(project_and_group_name)
-
-        self._make_requests_to_api("projects/%s/push_rule", pid, "PUT", push_rules)
-
-    def post_project_push_rules(self, project_and_group_name: str, push_rules):
-        # push_rules has to be like this:
-        # {
-        #     'setting1': value1,
-        #     'setting2': value2,
-        # }
-        # ..as documented at: https://docs.gitlab.com/ee/api/projects.html#edit-project-push-rule
-
-        pid: str = self._get_project_id(project_and_group_name)
-
-        self._make_requests_to_api(
-            "projects/%s/push_rule", pid, "POST", push_rules, expected_codes=201
-        )
-
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly
         # the shared groups, so I'm using directly the GET /projects/:id call

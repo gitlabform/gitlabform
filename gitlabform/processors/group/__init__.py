@@ -29,6 +29,9 @@ from gitlabform.processors.group.group_merge_requests_approval_settings import (
 from gitlabform.processors.group.group_merge_requests_approval_rules import (
     GroupMergeRequestsApprovalRules,
 )
+from gitlabform.processors.group.group_push_rules_processor import (
+    GroupPushRulesProcessor,
+)
 
 
 class GroupProcessors(AbstractProcessors):
@@ -44,4 +47,5 @@ class GroupProcessors(AbstractProcessors):
             GroupLabelsProcessor(gitlab),
             GroupMergeRequestsApprovalSettings(gitlab),
             GroupMergeRequestsApprovalRules(gitlab),
+            GroupPushRulesProcessor(gitlab),
         ]
