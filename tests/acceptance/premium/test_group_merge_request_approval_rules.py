@@ -23,9 +23,9 @@ class TestGroupMergeRequestApprovalRules:
         assert len(rules) == 1
 
         for rule in rules:
-          assert rule.name == "Any Approver"
-          assert rule.approvals_required == 5
-          assert rule.rule_type == "regular"
+            assert rule.name == "Any Approver"
+            assert rule.approvals_required == 5
+            assert rule.rule_type == "regular"
 
     def test__edit_rule(self, group):
 
@@ -44,9 +44,9 @@ class TestGroupMergeRequestApprovalRules:
         assert len(rules) == 1
 
         for rule in rules:
-          assert rule.name == "Any Approver"
-          assert rule.approvals_required == 1
-          assert rule.rule_type == "any_approver"
+            assert rule.name == "Any Approver"
+            assert rule.approvals_required == 1
+            assert rule.rule_type == "any_approver"
 
     def test__add_multiple_rules(self, group):
 

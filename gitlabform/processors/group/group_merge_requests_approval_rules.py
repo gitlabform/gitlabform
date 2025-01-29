@@ -6,16 +6,21 @@ from gitlabform.gitlab import GitLab
 from gitlab.v4.objects.groups import Group
 from gitlab.exceptions import GitlabGetError, GitlabCreateError, GitlabUpdateError
 
+
 class GroupMergeRequestsApprovalRules(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_merge_requests_approval_rules", gitlab)
 
     def _process_configuration(self, group_path: str, configuration: Dict):
-        configured_mr_rules = configuration.get("group_merge_requests_approval_rules", {})
+        configured_mr_rules = configuration.get(
+            "group_merge_requests_approval_rules", {}
+        )
         group: Group = self.gl.get_group_by_path_cached(group_path)
 
         try:
-            existing_mr_rules = {rule.name: rule for rule in group.approval_rules.list()}
+            existing_mr_rules = {
+                rule.name: rule for rule in group.approval_rules.list()
+            }
         except GitlabGetError as e:
             debug(f"Error retrieving existing approval rules: {e}")
             raise
