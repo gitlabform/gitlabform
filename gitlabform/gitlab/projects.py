@@ -129,26 +129,6 @@ class GitLabProjects(GitLabCore):
         except NotFoundException:
             return dict()
 
-    def put_project_settings(self, project_and_group_name, project_settings):
-        # project_settings has to be like this:
-        # {
-        #     'setting1': value1,
-        #     'setting2': value2,
-        # }
-        # ..as documented at: https://docs.gitlab.com/ce/api/projects.html#edit-project
-
-        api_adjusted_project_settings: Dict[str, str] = self._process_project_settings(
-            project_and_group_name, project_settings
-        )
-
-        return self._make_requests_to_api(
-            "projects/%s",
-            project_and_group_name,
-            "PUT",
-            data=None,
-            json=api_adjusted_project_settings,
-        )
-
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly
         # the shared groups, so I'm using directly the GET /projects/:id call
