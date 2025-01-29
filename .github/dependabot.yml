@@ -20,4 +20,4 @@ updates:
     groups:
       python-gitlab:
         patterns:
-          - "python-gitlab"
+          - "python-gitlab*"
