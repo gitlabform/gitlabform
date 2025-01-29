@@ -12,9 +12,10 @@ class TestGroupMergeRequestApprovalRules:
         projects_and_groups:
           {group.full_path}/*:
             group_merge_requests_approval_rules:
-              rulename1:
+              any:
                 approvals_required: 5
                 rule_type: regular
+                name: "Any Approver"
         """
 
         run_gitlabform(config, group)
@@ -22,7 +23,7 @@ class TestGroupMergeRequestApprovalRules:
         assert len(rules) == 1
 
         for rule in rules:
-          assert rule.name == "rulename1"
+          assert rule.name == "Any Approver"
           assert rule.approvals_required == 5
           assert rule.rule_type == "regular"
 
@@ -32,9 +33,10 @@ class TestGroupMergeRequestApprovalRules:
         projects_and_groups:
           {group.full_path}/*:
             group_merge_requests_approval_rules:
-              rulename1:
+              any:
                 approvals_required: 1
                 rule_type: any_approver
+                name: "Any Approver"
         """
 
         run_gitlabform(config, group)
@@ -42,7 +44,7 @@ class TestGroupMergeRequestApprovalRules:
         assert len(rules) == 1
 
         for rule in rules:
-          assert rule.name == "rulename1"
+          assert rule.name == "Any Approver"
           assert rule.approvals_required == 1
           assert rule.rule_type == "any_approver"
 
@@ -52,12 +54,14 @@ class TestGroupMergeRequestApprovalRules:
         projects_and_groups:
           {group.full_path}/*:
             group_merge_requests_approval_rules:
-              rulename1:
+              any:
                 approvals_required: 1
                 rule_type: any_approver
-              rulename2:
-                approvals_required: 2
+                name: "Any Approver"
+              any1:
+                approvals_required: 1
                 rule_type: regular
+                name: "Regular"
         """
 
         run_gitlabform(config, group)

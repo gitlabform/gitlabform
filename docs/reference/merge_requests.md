@@ -156,7 +156,12 @@ projects_and_groups:
       allow_author_approval: false
       require_reauthentication_to_approve: true
     group_merge_requests_approval_rules:
-      rulename:
-        approvals_required: 1
+      any: # this is just a label
+        approvals_required: 0
+        name: "Any member"
         rule_type: any_approver
+      any2:
+        approvals_required: 1
+        name: "Regular"
+        rule_type: regular
 ```

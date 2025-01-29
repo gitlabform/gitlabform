@@ -15,20 +15,17 @@ class GroupMergeRequestsApprovalRules(AbstractProcessor):
         group: Group = self.gl.get_group_by_path_cached(group_path)
 
         try:
-            existing_mr_rules = group.approval_rules.list(all=True)
+            existing_mr_rules = {rule.name: rule for rule in group.approval_rules.list()}
         except GitlabGetError as e:
             debug(f"Error retrieving existing approval rules: {e}")
             raise
 
-        existing_mr_rules_map = {rule.name: rule for rule in existing_mr_rules}
-
-        for rule_key, rule_config in configured_mr_rules.items():
-            rule_name = rule_config.get("name", rule_key)
+        for rule_config in configured_mr_rules.values():
+            rule_name = rule_config.get("name")
             rule_config = rule_config.copy()
-            rule_config["name"] = rule_name
 
-            if rule_name in existing_mr_rules_map:
-                existing_rule = existing_mr_rules_map[rule_name]
+            if rule_name in existing_mr_rules:
+                existing_rule = existing_mr_rules[rule_name]
                 if self._needs_update(existing_rule.asdict(), rule_config):
                     self._update_rule(existing_rule, rule_config)
             else:
