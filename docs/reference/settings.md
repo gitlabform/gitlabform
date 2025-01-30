@@ -67,10 +67,10 @@ projects_and_groups:
   group_1/project_1:
     projects_settings:
       topics:
-        keep_existing: true
+        - keep_existing: true
         - topicA
         - topicB
-        - topicC
+        - topicC:
             delete: true
 ```
 
