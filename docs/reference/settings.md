@@ -58,7 +58,13 @@ projects_and_groups:
 
 ### Project Settings - Topics
 
-Using [Project Settings](./settings.md#project-settings) only allows for topics to be overwritten.GitLabForm allows for additional syntax with `keep_existing` and `delete`.
+GitLab's [project settings API](https://docs.gitlab.com/ee/api/projects.html#edit-a-project) takes a list of string to be used as project topics. It will overwrite any existing topics that may exist. GitLabForm allows special configuration if finer control is needed for managing project topics.
+
+Generally a list of string under `topics` will be used as-is. Those strings will be set as project topics.
+
+GitLabForm will accept additional configuration under `topics`. An item in the list can be an object whose key is `keep_existing` that expects boolean value. If this object is set and the value is set to `true`, existing topics will be kept by including them in the list of project topics when they are updated via GitLab API.
+
+If a specific topic should be deleted, it can be configured as an object containing `delete: true`. See the example below.
 
 Examples:
 
