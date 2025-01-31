@@ -85,3 +85,36 @@ def test__config_skip_group(group, is_skipped, request):
         configuration_for_skip_groups_skip_projects.is_group_skipped(group)
         == is_skipped
     )
+
+
+def test__config_skip_group_configuration():
+    config_yaml = """
+    ---
+    projects_and_groups:
+      "*":
+        group_settings:
+          default: setting
+      "parent-group/*":
+        group_settings:
+          specific: setting
+
+    skip_groups:
+    - parent-group/skip-group/*
+    """
+
+    configuration = Configuration(config_string=config_yaml)
+
+    normal_config = configuration.get_effective_config_for_group(
+        "parent-group/normal-group"
+    )
+    assert normal_config.get("group_settings", {}).get("specific") == "setting"
+
+    skipped_config = configuration.get_effective_config_for_group(
+        "parent-group/skip-group"
+    )
+    assert skipped_config == {}
+
+    skipped_subgroup_config = configuration.get_effective_config_for_group(
+        "parent-group/skip-group/subgroup"
+    )
+    assert skipped_subgroup_config == {}
