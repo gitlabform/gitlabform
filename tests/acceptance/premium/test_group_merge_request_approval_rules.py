@@ -42,11 +42,9 @@ class TestGroupMergeRequestApprovalRules:
         run_gitlabform(config, group)
         rules = group.approval_rules.list()
         assert len(rules) == 1
-
-        for rule in rules:
-            assert rule.name == "Any Approver"
-            assert rule.approvals_required == 1
-            assert rule.rule_type == "any_approver"
+        assert rules[0].name == "Any Approver"
+        assert rules[0].approvals_required == 1
+        assert rules[0].rule_type == "any_approver"
 
     def test__add_multiple_rules(self, group):
 
@@ -67,3 +65,6 @@ class TestGroupMergeRequestApprovalRules:
         run_gitlabform(config, group)
         rules = group.approval_rules.list()
         assert len(rules) == 2
+        assert rules[1].name == "Regular"
+        assert rules[1].approvals_required == 1
+        assert rules[1].rule_type == "regular"
