@@ -1,7 +1,8 @@
 from typing import List
-from tests.acceptance import run_gitlabform
+
 from gitlab import Gitlab
 from gitlab.v4.objects import Project
+from tests.acceptance import run_gitlabform
 
 
 class TestProjectSettings:
@@ -44,7 +45,7 @@ class TestProjectSettings:
         assert "topicC" in project_topics
         assert "topicD" in project_topics
 
-    def test__edit_project_settings_topics_keep_existing(
+    def test__edit_project_settings_topics_keep_existing_true(
         self, gl: Gitlab, project: Project
     ) -> None:
         project.topics = ["topicA", "topicB"]
@@ -71,7 +72,34 @@ class TestProjectSettings:
         assert "topicC" in project_topics
         assert "topicD" in project_topics
 
-    def test__delete_project_topics(self, gl: Gitlab, project: Project) -> None:
+    def test__edit_project_settings_topics_keep_existing_false(
+        self, gl: Gitlab, project: Project
+    ) -> None:
+        project.topics = ["topicA", "topicB"]
+        project.save()
+
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_settings:
+              topics:
+                - keep_existing: false
+                - topicC
+                - topicD
+        """
+
+        run_gitlabform(config, project)
+
+        updated_project = gl.projects.get(project.id)
+        project_topics: List[str] = updated_project.topics
+
+        assert len(project_topics) == 2
+        assert "topicC" in project_topics
+        assert "topicD" in project_topics
+
+    def test__edit_project_settings_topics_delete(
+        self, gl: Gitlab, project: Project
+    ) -> None:
         project.topics = ["topicA", "topicB"]
         project.save()
 
@@ -84,6 +112,9 @@ class TestProjectSettings:
                 - topicA:
                     delete: true
                 - topicC
+                - topicD:
+                    delete: false
+
         """
 
         run_gitlabform(config, project)
@@ -91,6 +122,7 @@ class TestProjectSettings:
         updated_project = gl.projects.get(project.id)
         project_topics: List[str] = updated_project.topics
 
-        assert len(project_topics) == 2
+        assert len(project_topics) == 3
         assert "topicB" in project_topics
         assert "topicC" in project_topics
+        assert "topicD" in project_topics
