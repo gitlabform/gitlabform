@@ -6,10 +6,10 @@ from tests.acceptance import run_gitlabform
 
 
 class TestProjectSettings:
-    def test__builds_for_private_projects(self, gl, project):
+    def test__builds_for_private_projects(self, gl: Gitlab, project: Project) -> None:
         assert project.visibility == "private"
 
-        config_builds_for_private_projects = f"""
+        config_builds_for_private_projects: str = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             project_settings:
@@ -18,8 +18,8 @@ class TestProjectSettings:
 
         run_gitlabform(config_builds_for_private_projects, project)
 
-        project = gl.projects.get(project.id)
-        assert project.visibility == "internal"
+        updated_project: Project = gl.projects.get(project.id)
+        assert updated_project.visibility == "internal"
 
     def test__edit_project_settings_topics_default(
         self, gl: Gitlab, project: Project
@@ -27,7 +27,7 @@ class TestProjectSettings:
         project.topics = ["topicA", "topicB"]
         project.save()
 
-        config = f"""
+        config: str = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             project_settings:
@@ -38,7 +38,7 @@ class TestProjectSettings:
 
         run_gitlabform(config, project)
 
-        updated_project = gl.projects.get(project.id)
+        updated_project: Project = gl.projects.get(project.id)
         project_topics: List[str] = updated_project.topics
 
         assert len(project_topics) == 2
@@ -51,7 +51,7 @@ class TestProjectSettings:
         project.topics = ["topicA", "topicB"]
         project.save()
 
-        config = f"""
+        config: str = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             project_settings:
@@ -63,7 +63,7 @@ class TestProjectSettings:
 
         run_gitlabform(config, project)
 
-        updated_project = gl.projects.get(project.id)
+        updated_project: Project = gl.projects.get(project.id)
         project_topics: List[str] = updated_project.topics
 
         assert len(project_topics) == 4
@@ -78,7 +78,7 @@ class TestProjectSettings:
         project.topics = ["topicA", "topicB"]
         project.save()
 
-        config = f"""
+        config: str = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             project_settings:
@@ -90,7 +90,7 @@ class TestProjectSettings:
 
         run_gitlabform(config, project)
 
-        updated_project = gl.projects.get(project.id)
+        updated_project: Project = gl.projects.get(project.id)
         project_topics: List[str] = updated_project.topics
 
         assert len(project_topics) == 2
@@ -103,7 +103,7 @@ class TestProjectSettings:
         project.topics = ["topicA", "topicB"]
         project.save()
 
-        config = f"""
+        config: str = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             project_settings:
@@ -114,12 +114,11 @@ class TestProjectSettings:
                 - topicC
                 - topicD:
                     delete: false
-
         """
 
         run_gitlabform(config, project)
 
-        updated_project = gl.projects.get(project.id)
+        updated_project: Project = gl.projects.get(project.id)
         project_topics: List[str] = updated_project.topics
 
         assert len(project_topics) == 3

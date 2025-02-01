@@ -1,18 +1,18 @@
 from logging import debug
 from typing import Callable, Dict, List
+
+from gitlab.v4.objects import Project
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.difference_logger import DifferenceLogger
 
-from gitlab.v4.objects import Project
-
 
 class ProjectSettingsProcessor(AbstractProcessor):
-    def __init__(self, gitlab: GitLab):
+    def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("project_settings", gitlab)
         self.get_entity_in_gitlab: Callable = getattr(self, "get_project_settings")
 
-    def _process_configuration(self, project_path: str, configuration: dict):
+    def _process_configuration(self, project_path: str, configuration: dict) -> None:
         debug("Processing project settings...")
         project: Project = self.gl.get_project_by_path_cached(project_path)
 
@@ -93,5 +93,7 @@ class ProjectSettingsProcessor(AbstractProcessor):
         api_adjusted_topics = [
             topic for topic in api_adjusted_topics if topic not in topics_to_delete
         ]
+
+        debug(f"topics after extra processing: {api_adjusted_topics}")
 
         project_settings_in_config["topics"] = api_adjusted_topics
