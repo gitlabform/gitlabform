@@ -2,6 +2,7 @@ from logging import debug
 from typing import Callable, Dict, List
 
 from gitlab.v4.objects import Project
+
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.difference_logger import DifferenceLogger
@@ -68,10 +69,12 @@ class ProjectSettingsProcessor(AbstractProcessor):
                     del project_settings_topics[i]
                     break
 
-        api_adjusted_topics: List[str] = []
+        adjusted_project_topics_to_set: List[str] = []
 
         if keep_existing:
-            api_adjusted_topics.extend(project_settings_in_gitlab.get("topics", []))
+            adjusted_project_topics_to_set.extend(
+                project_settings_in_gitlab.get("topics", [])
+            )
 
         # List of topics not having delete = true or no delete attribute at all
         topics_to_add: List[str] = [
@@ -88,12 +91,14 @@ class ProjectSettingsProcessor(AbstractProcessor):
             if isinstance(t, dict) and list(t.values())[0].get("delete") is True
         ]
 
-        api_adjusted_topics.extend(topics_to_add)
+        adjusted_project_topics_to_set.extend(topics_to_add)
 
-        api_adjusted_topics = [
-            topic for topic in api_adjusted_topics if topic not in topics_to_delete
+        adjusted_project_topics_to_set = [
+            topic
+            for topic in adjusted_project_topics_to_set
+            if topic not in topics_to_delete
         ]
 
-        debug(f"topics after extra processing: {api_adjusted_topics}")
+        debug(f"topics after adjustment: {adjusted_project_topics_to_set}")
 
-        project_settings_in_config["topics"] = api_adjusted_topics
+        project_settings_in_config["topics"] = adjusted_project_topics_to_set
