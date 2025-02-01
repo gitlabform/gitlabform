@@ -54,6 +54,7 @@ setup(
         "requests==2.32.3",
         "ruamel.yaml==0.17.21",
         "types-requests==2.32.0.20241016",
+        "types-setuptools==75.8.0.20250110",
         "yamlpath==3.8.2",
     ],
     extras_require={
@@ -67,7 +68,6 @@ setup(
             "pytest==8.3.4",
             "pytest-cov==6.0.0",
             "pytest-rerunfailures==15.0",
-            "types-setuptools==75.8.0.20250110",
             "xkcdpass==1.19.9",
         ],
         "docs": [
