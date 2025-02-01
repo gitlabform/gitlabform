@@ -3,12 +3,13 @@ import random
 import string
 import textwrap
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union, cast
 
 import gitlab
 from gitlab.v4.objects import Group, Project  # You may also import User if available
-from gitlabform import GitLabForm
 from xkcdpass import xkcd_password as xp
+
+from gitlabform import GitLabForm
 
 CONFIG: str = """
 config_version: 3
@@ -16,7 +17,7 @@ config_version: 3
 
 DEFAULT_README: str = "Default README content."
 
-# automate reading files created by run_gitlab_in_docker.sh to run tests in PyCharm / IntelliJ
+# Automate reading files created by run_gitlab_in_docker.sh to run tests in PyCharm / IntelliJ
 # (workaround for lack of this feature: https://youtrack.jetbrains.com/issue/PY-5543 )
 
 env_vars_to_files: dict[str, str] = {
@@ -82,17 +83,15 @@ def get_random_suffix() -> str:
 def get_random_password() -> str:
     # copied from Ayushi Rawat's article
     # https://medium.com/analytics-vidhya/create-a-random-password-generator-using-python-2fea485e9da9
-
     length: int = 16
     all_chars: str = string.ascii_letters + string.digits
     password: str = "".join(random.sample(all_chars, length))
-
     return password
 
 
 def create_group(group_name: str, parent_id: Optional[int] = None) -> Group:
     with allowed_codes(404):
-        group: Group = gl.groups.create(
+        group_obj = gl.groups.create(
             {
                 "name": group_name,
                 "path": group_name,
@@ -100,6 +99,8 @@ def create_group(group_name: str, parent_id: Optional[int] = None) -> Group:
                 "visibility": "internal",
             }
         )
+    # Cast the returned RESTObject to Group
+    group: Group = cast(Group, group_obj)
     if TYPE_CHECKING:
         assert isinstance(group, Group)
     return group
@@ -110,7 +111,9 @@ def create_groups(group_base_name: str, no_of_groups: int) -> List[Group]:
     for group_no in range(1, no_of_groups + 1):
         group_name: str = group_base_name + str(group_no)
         try:
-            group: Group = gl.groups.get(group_name)
+            # Cast the returned object to Group
+            group_obj = gl.groups.get(group_name)
+            group = cast(Group, group_obj)
         except gitlab.GitlabGetError:
             group = create_group(group_name)
         groups.append(group)
@@ -125,7 +128,7 @@ def delete_groups(group_base_name: str, no_of_groups: int) -> None:
 
 
 def create_project(group: Group, project_name: str) -> Project:
-    project: Project = gl.projects.create(
+    project_obj = gl.projects.create(
         {
             "name": project_name,
             "path": project_name,
@@ -133,6 +136,8 @@ def create_project(group: Group, project_name: str) -> Project:
             "default_branch": "main",
         }
     )
+    # Cast the returned RESTObject to Project
+    project: Project = cast(Project, project_obj)
 
     project.files.create(
         {
@@ -155,7 +160,8 @@ def create_users(user_base_name: str, no_of_users: int) -> List[Any]:
     users: List[Any] = []
     for user_no in range(1, no_of_users + 1):
         username: str = user_base_name + str(user_no)
-        existing: List[Any] = gl.users.list(username=username)
+        # Convert the returned RESTObjectList (or list) into a regular list
+        existing: List[Any] = list(gl.users.list(username=username))
         try:
             user = existing[0]
         except IndexError:
@@ -279,8 +285,7 @@ def get_only_environment_access_levels(project: Project, environment: str) -> Tu
     Retrieve details of a given protected environment so that
     tests can easily validate those accordingly.
     TODO: Should also return details about `required_approvals`
-    and `group_inheritance_type` for each
-    access level or approval rule.
+    and `group_inheritance_type` for each access level or approval rule.
     """
     protected_environment: Optional[Any] = None
 
@@ -343,13 +348,12 @@ def run_gitlabform(
     Runs GitLabForm with the given configuration and target.
     If target is a Group or Project, the full path is used.
     """
-    # f-strings with """ used as configs have the disadvantage of having indentation in them - let's remove it here
+    # Remove any unwanted indentation from multi-line config strings.
     config = textwrap.dedent(config)
-
-    # we don't want to repeat ourselves in the tests, so prefix the configs with this mandatory part here
+    # Prefix the config with the mandatory part.
     config = CONFIG + config
 
-    # allow passing in gitlab REST objects; assume a full path string otherwise
+    # Allow passing in GitLab REST objects; assume a full path string otherwise.
     if isinstance(target, Group):
         target = target.full_path  # type: ignore
     elif isinstance(target, Project):

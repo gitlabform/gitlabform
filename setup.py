@@ -1,6 +1,7 @@
 import codecs
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 with codecs.open("README.md", encoding="utf-8") as f:
     readme = f.read()
@@ -66,6 +67,7 @@ setup(
             "pytest==8.3.4",
             "pytest-cov==6.0.0",
             "pytest-rerunfailures==15.0",
+            "types-setuptools==75.8.0.20250110",
             "xkcdpass==1.19.9",
         ],
         "docs": [
