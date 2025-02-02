@@ -1,4 +1,5 @@
 import pytest
+
 from tests.acceptance import run_gitlabform
 
 pytestmark = pytest.mark.requires_license
@@ -49,7 +50,7 @@ class TestPushRules:
 
     def test__changing_author_email_regex(self, project):
         initial_regex = (
-            "\@(?:(?:engineering\.digital\.)?co\.uk|(?:users\.)?noreply\.gitlab\.com)$"
+            r"\@(?:(?:engineering\.digital\.)?co\.uk|(?:users\.)?noreply\.gitlab\.com)$"
         )
         initial_config = f"""
                 projects_and_groups:
@@ -69,7 +70,8 @@ class TestPushRules:
         initial_push_rules = project.pushrules.get()
         assert initial_push_rules.author_email_regex == initial_regex
 
-        updated_regex = "\@(?:(?:engineering\.digital\.)?co\.uk|(?:users\.)?noreply\.gitlab-dedicated\.com)$"
+        updated_regex = r"\@(?:(?:engineering\.digital\.)?co\.uk|(?:users\.)?noreply\.gitlab-dedicated\.com)$"
+
         updated_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
