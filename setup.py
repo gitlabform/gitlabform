@@ -1,6 +1,7 @@
 import codecs
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 with codecs.open("README.md", encoding="utf-8") as f:
     readme = f.read()
@@ -53,6 +54,7 @@ setup(
         "requests==2.32.3",
         "ruamel.yaml==0.17.21",
         "types-requests==2.32.0.20241016",
+        "types-setuptools==75.8.0.20250110",
         "yamlpath==3.8.2",
     ],
     extras_require={
