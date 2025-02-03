@@ -1,5 +1,26 @@
 # Changelog
 
+## 4.1.2
+
+### Features
+
+* feat: Add custom project settings topics and its test by @Jimisola Laursen in https://github.com/gitlabform/gitlabform/pull/931
+
+### Refactor
+
+* refactor: update 'project_settings_processor' to use python-gitlab by @amimas in https://github.com/gitlabform/gitlabform/pull/929
+
+### Build
+
+* chore: update base image to Alpine 3.21 by @rroesch1 in https://github.com/gitlabform/gitlabform/pull/930
+
+### New Contributors
+* @rroesch1 made their first contribution in https://github.com/gitlabform/gitlabform/pull/930
+
+**Full Changelog**: https://github.com/gitlabform/gitlabform/compare/v4.1.1...v4.1.2
+
+Thanks to all the contributors of this release!
+
 ## 4.1.1
 
 ### Refactors
