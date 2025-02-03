@@ -41,6 +41,10 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         :param group: "group_name"
         :return: merged configuration for this group, from common, group. Merging is additive.
         """
+        # Check if group must be skipped
+        if self.is_group_skipped(group):
+            debug(f"Group {group} is skipped, returning empty config")
+            return {}
 
         common_config = self.get_common_config()
         debug("*Effective* common config: %s", to_str(common_config))

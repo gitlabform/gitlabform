@@ -1,6 +1,7 @@
 import codecs
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 with codecs.open("README.md", encoding="utf-8") as f:
     readme = f.read()
@@ -48,11 +49,12 @@ setup(
         "MarkupSafe==3.0.2",
         "mergedeep==1.3.4",
         "packaging==24.2",
-        "python-gitlab==5.3.1",
-        "python-gitlab[graphql]==5.3.1",
+        "python-gitlab==5.6.0",
+        "python-gitlab[graphql]==5.6.0",
         "requests==2.32.3",
         "ruamel.yaml==0.17.21",
         "types-requests==2.32.0.20241016",
+        "types-setuptools==75.8.0.20250110",
         "yamlpath==3.8.2",
     ],
     extras_require={
