@@ -19,7 +19,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Topic :: Software Development :: Version Control :: Git",
 ]
-urls = { Homepage = "https://gitlabform.github.io/gitlabform" }
 requires-python = ">=3.12.0"
 dependencies = [
     "certifi==2025.1.31",
@@ -38,6 +37,12 @@ dependencies = [
     "types-setuptools==75.8.0.20250110",
     "yamlpath==3.8.2",
 ]
+
+[project.urls]
+Homepage = "https://gitlabform.github.io/gitlabform/"
+Repository = "https://github.com/gitlabform/gitlabform.git"
+Issues = "https://github.com/gitlabform/gitlabform/issues"
+Changelog = "https://gitlabform.github.io/gitlabform/changelog/"
 
 [project.readme]
 file = "README.md"
