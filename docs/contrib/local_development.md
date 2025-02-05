@@ -68,7 +68,7 @@ against a disposable GitLab instance running as a Docker container OR use your o
 
 2. Run `pytest tests/acceptance` to start all tests.
 To run only a single class with tests run f.e.
-- `py.test tests/acceptance -k "TestArchiveProject"`.
+- `pytest tests/acceptance -k "TestArchiveProject"`.
 - `pytest tests/acceptance/<TEST_FILE>.py::<TestClass>::<TEST_METHOD>`
 
 ### Acceptance tests for GitLab paid features
@@ -92,7 +92,7 @@ export GITLAB_TOKEN="<my admin user API token>"
 ```
 
 2. Run `pytest tests/acceptance` to start all tests
-To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
+To run only a single class with tests run f.e. `pytest tests/acceptance -k "TestArchiveProject"`.
 
 ## Preview docs website locally
 
