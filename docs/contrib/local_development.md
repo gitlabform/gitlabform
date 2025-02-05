@@ -13,7 +13,6 @@
 ```
 python3 -m venv venv
 . venv/bin/activate
-pip install setuptools
 ```
 
 2. Install GitLabForm in develop mode:
