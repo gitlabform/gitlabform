@@ -66,8 +66,9 @@ docs = ["mkdocs", "mkdocs-material"]
 [project.scripts]
 gitlabform = "gitlabform.run:run"
 
-[tool.setuptools.packages]
-find = { namespaces = false }
+[tool.setuptools.packages.find]
+namespaces = false
+exclude = ["tests*"]
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
