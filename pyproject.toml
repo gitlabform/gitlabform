@@ -72,12 +72,6 @@ include-package-data = true
 [tool.setuptools.packages]
 find = { namespaces = false }
 
-[tool.setuptools.package-data]
-gitlabform = [
-    "LICENSE",
-    "README.md",
-]
-
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
 
