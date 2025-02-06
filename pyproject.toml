@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gitlabform"
+version = "4.1.2"
+authors = [{ name = "Greg Dubicki and Contributors" }]
+description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
+keywords = ["cli", "yaml", "gitlab", "configuration-as-code"]
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Software Development :: Version Control :: Git",
+]
+requires-python = ">=3.12.0"
+dependencies = [
+    "certifi==2025.1.31",
+    "cli-ui==0.18.0",
+    "ez-yaml==1.2.0",
+    "Jinja2==3.1.5",
+    "luddite==1.0.4",
+    "MarkupSafe==3.0.2",
+    "mergedeep==1.3.4",
+    "packaging==24.2",
+    "python-gitlab==5.6.0",
+    "python-gitlab[graphql]==5.6.0",
+    "requests==2.32.3",
+    "ruamel.yaml==0.17.21",
+    "types-requests==2.32.0.20241016",
+    "types-setuptools==75.8.0.20250110",
+    "yamlpath==3.8.2",
+]
+
+[project.urls]
+Homepage = "https://gitlabform.github.io/gitlabform/"
+Repository = "https://github.com/gitlabform/gitlabform.git"
+Issues = "https://github.com/gitlabform/gitlabform/issues"
+Changelog = "https://gitlabform.github.io/gitlabform/changelog/"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.optional-dependencies]
+test = [
+    "coverage==7.6.10",
+    "cryptography==44.0.0",
+    "deepdiff==8.1.1",
+    "mypy==1.14.1",
+    "mypy-extensions==1.0.0",
+    "pre-commit==2.21.0",
+    "pytest==8.3.4",
+    "pytest-cov==6.0.0",
+    "pytest-rerunfailures==15.0",
+    "xkcdpass==1.19.9",
+]
+docs = ["mkdocs", "mkdocs-material"]
+
+[project.scripts]
+gitlabform = "gitlabform.run:run"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages]
+find = { namespaces = false }
+
+[tool.setuptools.package-data]
+gitlabform = [
+    "LICENSE",
+    "README.md",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+#uncomment below for debug logging ALWAYS, even if the tests are passing
+#log_cli = True
+#log_cli_level = DEBUG

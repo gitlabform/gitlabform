@@ -12,7 +12,7 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
 
     **Note**: You may need to install `pipx` first if it's not already installed. Follow the instructions at [`pipx` documentation](https://pypa.github.io/pipx/installation/).
 
-    Executing `tbump` will create a commit containing version updates to necessary files (i.e. `tbump.toml`, `version`), create a new tag from for the new version from the current `ref` in `main` branch, and finally push the commits and tag to remote.
+    Executing `tbump` will create a commit containing version updates to necessary files (i.e. `tbump.toml`, `pyproject.toml`), create a new tag from for the new version from the current `ref` in `main` branch, and finally push the commits and tag to remote.
 
     Following the above steps when a new tag is created, GitHub Action workflow will do following:
 

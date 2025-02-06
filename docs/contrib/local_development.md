@@ -13,7 +13,6 @@
 ```
 python3 -m venv venv
 . venv/bin/activate
-pip install setuptools
 ```
 
 2. Install GitLabForm in develop mode:
@@ -69,7 +68,7 @@ against a disposable GitLab instance running as a Docker container OR use your o
 
 2. Run `pytest tests/acceptance` to start all tests.
 To run only a single class with tests run f.e.
-- `py.test tests/acceptance -k "TestArchiveProject"`.
+- `pytest tests/acceptance -k "TestArchiveProject"`.
 - `pytest tests/acceptance/<TEST_FILE>.py::<TestClass>::<TEST_METHOD>`
 
 ### Acceptance tests for GitLab paid features
@@ -93,7 +92,7 @@ export GITLAB_TOKEN="<my admin user API token>"
 ```
 
 2. Run `pytest tests/acceptance` to start all tests
-To run only a single class with tests run f.e. `py.test tests/acceptance -k "TestArchiveProject"`.
+To run only a single class with tests run f.e. `pytest tests/acceptance -k "TestArchiveProject"`.
 
 ## Preview docs website locally
 
@@ -109,10 +108,9 @@ mkdocs serve
 
 Please run `mypy` to test static types:
 ```shell
-mypy . || true
-mypy --install-types --non-interactive
 mypy .
 ```
+(You may also need to run `mypy --install-types --non-interactive`)
 
 ## Code formatting
 
