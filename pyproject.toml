@@ -66,9 +66,6 @@ docs = ["mkdocs", "mkdocs-material"]
 [project.scripts]
 gitlabform = "gitlabform.run:run"
 
-[tool.setuptools]
-include-package-data = true
-
 [tool.setuptools.packages]
 find = { namespaces = false }
 
