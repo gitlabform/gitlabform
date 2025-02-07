@@ -4,20 +4,25 @@
 
 ### Features
 
-* feat: Add custom project settings topics and its test by @Jimisola Laursen in https://github.com/gitlabform/gitlabform/pull/931
+* feat: Add enhanced support for managing project topics [#931](https://github.com/gitlabform/gitlabform/pull/931) ([@Jimisola](https://github.com/jimisola))
 
-### Refactor
+### Fixes
 
-* refactor: update 'project_settings_processor' to use python-gitlab by @amimas in https://github.com/gitlabform/gitlabform/pull/929
+* fix: respect skip_groups when applying group configurations [#939](https://github.com/gitlabform/gitlabform/pull/939) ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Refactors
+
+* refactor: update 'project_settings_processor' to use python-gitlab [#929](https://github.com/gitlabform/gitlabform/pull/929) ([amimas](https://github.com/amimas))
 
 ### Build
 
-* chore: update base image to Alpine 3.21 by @rroesch1 in https://github.com/gitlabform/gitlabform/pull/930
+* chore: update base image to Alpine 3.21 [#930](https://github.com/gitlabform/gitlabform/pull/930) ([rroesch1](https://github.com/rroesch1))
+* chore(ci): configure dependabot to group python-gitlab packages [#935](https://github.com/gitlabform/gitlabform/pull/935) ([amimas](https://github.com/amimas))
 
-### New Contributors
-* @rroesch1 made their first contribution in https://github.com/gitlabform/gitlabform/pull/930
+### Dependencies
 
-**Full Changelog**: https://github.com/gitlabform/gitlabform/compare/v4.1.1...v4.1.2
+* Update various dependencies to newer version.
+
 
 Thanks to all the contributors of this release!
 
