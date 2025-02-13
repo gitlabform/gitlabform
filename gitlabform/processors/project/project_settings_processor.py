@@ -59,6 +59,9 @@ class ProjectSettingsProcessor(AbstractProcessor):
     ) -> None:
         project_settings_topics: Dict = project_settings_in_config.get("topics", [])
 
+        if not project_settings_topics:
+            return
+
         keep_existing: bool = False
 
         for i, topic in enumerate(project_settings_topics):
