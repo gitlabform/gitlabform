@@ -151,14 +151,16 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         # add c) (or do nothing if marked as "delete")
 
         for entity_name, entity_config in entities_only_in_configuration.items():
-            self._validate_required_to_create_or_update(
-                project_or_group, entity_name, entity_config
-            )
-            verbose(
-                f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}"
-            )
-            self.add_method(project_or_group, entity_config)
-            debug(f"{self.configuration_name} AFTER: ^^^")
+            # Do nothing if entity is marked as "delete"
+            if entity_config.get("delete", False):
+                self._validate_required_to_create_or_update(
+                    project_or_group, entity_name, entity_config
+                )
+                verbose(
+                    f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}"
+                )
+                self.add_method(project_or_group, entity_config)
+                debug(f"{self.configuration_name} AFTER: ^^^")
 
     def _find_duplicates(self, project_or_group: str, entities_in_configuration: dict):
         for first_key, first_value in entities_in_configuration.items():
