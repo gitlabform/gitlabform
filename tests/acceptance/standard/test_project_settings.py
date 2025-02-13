@@ -21,6 +21,31 @@ class TestProjectSettings:
         updated_project: Project = gl.projects.get(project.id)
         assert updated_project.visibility == "internal"
 
+    def test__edit_project_settings_topics_default_no_topics_config(
+        self, gl: Gitlab, project: Project
+    ) -> None:
+        """
+        Test that the topics are not changed when no topics are specified in the config
+        """
+        project.topics = ["topicA", "topicB"]
+        project.save()
+
+        config: str = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_settings:
+              visibility: internal
+        """
+
+        run_gitlabform(config, project)
+
+        updated_project: Project = gl.projects.get(project.id)
+        project_topics: List[str] = updated_project.topics
+
+        assert len(project_topics) == 2
+        assert "topicA" in project_topics
+        assert "topicB" in project_topics
+
     def test__edit_project_settings_topics_default(
         self, gl: Gitlab, project: Project
     ) -> None:
