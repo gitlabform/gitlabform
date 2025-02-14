@@ -1,5 +1,6 @@
 import os
 import pytest
+import time
 
 from gitlab import GitlabGetError
 
@@ -158,7 +159,12 @@ class TestFiles:
         project_file = project.files.get(ref="main", file_path="README.md")
         assert project_file.decode().decode("utf-8") == DEFAULT_README
 
-        # check if no_access_branch stays protected after the file update
+        # Retry mechanism to check if no_access_branch stays protected after the file update
+        for _ in range(5):
+            branch = project.branches.get(no_access_branch.name)
+            if branch.protected:
+                break
+            time.sleep(2)
         assert branch.protected is True
 
     def test__delete_file_protected_branch(self, project, branch):
