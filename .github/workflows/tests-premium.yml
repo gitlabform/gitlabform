@@ -27,12 +27,12 @@ jobs:
         run: |
           pip install wheel
           pip install -e .[test]
-      - name: Run acceptance tests that require premium license
+      - name: Start GitLab in Docker
         env:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
-        run: |
-          ./dev/run_gitlab_in_docker.sh
-          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
+        run: ./dev/run_gitlab_in_docker.sh
+      - name: Run acceptance tests that require premium license
+        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:

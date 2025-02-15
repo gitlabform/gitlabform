@@ -29,10 +29,10 @@ jobs:
         run: |
           pip install wheel
           pip install -e .[test]
+      - name: Start GitLab in Docker
+        run: ./dev/run_gitlab_in_docker.sh
       - name: Run acceptance tests
-        run: |
-          ./dev/run_gitlab_in_docker.sh
-          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
+        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
