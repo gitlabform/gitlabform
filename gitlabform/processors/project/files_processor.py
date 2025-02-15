@@ -42,13 +42,9 @@ class FilesProcessor(AbstractProcessor):
                 # Target ref could be either 'all' or 'protected'.
                 # Get a list of branches that should be updated.
                 if config_target_ref == "all":
-                    branches_to_update.extend(
-                        project.branches.list(get_all=True, lazy=True)
-                    )
+                    branches_to_update.extend(project.branches.list(get_all=True, lazy=True))
                 elif config_target_ref == "protected":
-                    branches_to_update.extend(
-                        project.protectedbranches.list(get_all=True, lazy=True)
-                    )
+                    branches_to_update.extend(project.protectedbranches.list(get_all=True, lazy=True))
             elif isinstance(config_target_ref, list):
                 # Get a list of branches from the config that should be updated.
                 for branch_name in config_target_ref:
@@ -73,9 +69,7 @@ class FilesProcessor(AbstractProcessor):
             for branch in branches_to_update:
                 verbose(f"Processing file '{file}' in branch '{branch.name}'")
 
-                if configuration.get(
-                    "files|" + file + "|content"
-                ) and configuration.get("files|" + file + "|file"):
+                if configuration.get("files|" + file + "|content") and configuration.get("files|" + file + "|file"):
                     fatal(
                         f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
                         "use only one of these keys.",
@@ -84,9 +78,7 @@ class FilesProcessor(AbstractProcessor):
 
                 if configuration.get("files|" + file + "|delete"):
                     try:
-                        file_to_delete: ProjectFile = project.files.get(
-                            file_path=file, ref=branch.name
-                        )
+                        file_to_delete: ProjectFile = project.files.get(file_path=file, ref=branch.name)
                         debug("Deleting file '%s' in branch '%s'", file, branch.name)
                         self.modify_file_dealing_with_branch_protection(
                             project,
@@ -107,27 +99,19 @@ class FilesProcessor(AbstractProcessor):
                     if configuration.get("files|" + file + "|content"):
                         new_content = configuration.get("files|" + file + "|content")
                     else:
-                        path_in_config = Path(
-                            str(configuration.get("files|" + file + "|file"))
-                        )
+                        path_in_config = Path(str(configuration.get("files|" + file + "|file")))
                         if path_in_config.is_absolute():
                             effective_path = path_in_config
                         else:
                             # relative paths are relative to config file location
-                            effective_path = Path(
-                                os.path.join(
-                                    self.config.config_dir, str(path_in_config)
-                                )
-                            )
+                            effective_path = Path(os.path.join(self.config.config_dir, str(path_in_config)))
                         new_content = effective_path.read_text()
 
                     # templating is documented to be enabled by default,
                     # see https://gitlabform.github.io/gitlabform/reference/files/#files
                     templating_enabled = True
 
-                    if configuration.get(
-                        "files|" + file + "|template", templating_enabled
-                    ):
+                    if configuration.get("files|" + file + "|template", templating_enabled):
                         new_content = self.get_file_content_as_template(
                             new_content,
                             project_and_group,
@@ -136,9 +120,7 @@ class FilesProcessor(AbstractProcessor):
 
                     try:
                         # Returns base64 encoded content: https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#project-files
-                        repo_file: ProjectFile = project.files.get(
-                            file_path=file, ref=branch.name
-                        )
+                        repo_file: ProjectFile = project.files.get(file_path=file, ref=branch.name)
                         decoded_file: bytes = repo_file.decode()
                         current_content: str = decoded_file.decode("utf-8")
 
@@ -165,8 +147,7 @@ class FilesProcessor(AbstractProcessor):
                                 )
                         else:
                             debug(
-                                "Not changing file '%s' in branch '%s' - it's content is already"
-                                " as provided)",
+                                "Not changing file '%s' in branch '%s' - it's content is already" " as provided)",
                                 file,
                                 branch.name,
                             )
@@ -208,17 +189,12 @@ class FilesProcessor(AbstractProcessor):
             )
 
         except GitlabUpdateError as e:
-            if (
-                e.response_code == 400
-                and "You are not allowed to push into this branch" in e.error_message
-            ):
+            if e.response_code == 400 and "You are not allowed to push into this branch" in e.error_message:
                 # ...but if not, then we can unprotect the branch, but only if we know how to
                 # protect it again...
 
                 if configuration.get("branches|" + branch.name + "|protected"):
-                    debug(
-                        f"> Temporarily unprotecting the branch to '{operation}' a file in it..."
-                    )
+                    debug(f"> Temporarily unprotecting the branch to '{operation}' a file in it...")
                     # Delete operation on protected branch removes the protection only
                     project.protectedbranches.delete(branch.name)
                 else:
@@ -246,9 +222,7 @@ class FilesProcessor(AbstractProcessor):
                     if configuration.get("branches|" + branch.name + "|protected"):
                         debug("> Protecting the branch again.")
                         branch_config: dict = configuration["branches"][branch.name]
-                        self.branch_processor.protect_branch(
-                            project, branch.name, branch_config
-                        )
+                        self.branch_processor.protect_branch(project, branch.name, branch_config)
 
             else:
                 raise e

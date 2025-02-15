@@ -105,9 +105,7 @@ class PythonGitlab(Gitlab):
         return self.users.get(user.id)
 
     @functools.lru_cache()
-    def _get_member_roles_from_group_cached(
-        self, group_full_path: str
-    ) -> List[Dict[str, str]]:
+    def _get_member_roles_from_group_cached(self, group_full_path: str) -> List[Dict[str, str]]:
         """Query GraphQL using Python Gitlab
         https://python-gitlab.readthedocs.io/en/stable/api-usage-graphql.html
 
@@ -140,9 +138,7 @@ class PythonGitlab(Gitlab):
         }
         """
         )
-        verbose(
-            f"Executing graphQl query to get Member Roles for Group '{group_full_path}'"
-        )
+        verbose(f"Executing graphQl query to get Member Roles for Group '{group_full_path}'")
         result = self.graphql.execute(query)
 
         # Validate Group / MemberRoles exist
@@ -187,10 +183,7 @@ class PythonGitlab(Gitlab):
             """
         result = self.graphql.execute(query)
 
-        if (
-            result["memberRoles"] is not None
-            and result["memberRoles"]["edges"] is not None
-        ):
+        if result["memberRoles"] is not None and result["memberRoles"]["edges"] is not None:
             member_role_edges = result["memberRoles"]["edges"]
         else:
             raise GitlabGetError(f"Failed to get Member Roles from instance: {query}")
@@ -203,9 +196,7 @@ class PythonGitlab(Gitlab):
         return self._convert_result_to_member_roles(member_role_nodes)
 
     @staticmethod
-    def _convert_result_to_member_roles(
-        member_role_nodes: List[Dict[str, str]]
-    ) -> List[Dict[str, str]]:
+    def _convert_result_to_member_roles(member_role_nodes: List[Dict[str, str]]) -> List[Dict[str, str]]:
         # Unwrap Ids from GraphQl Gids
         member_role_id_prefix = "gid://gitlab/MemberRole/"
 
@@ -235,9 +226,7 @@ class PythonGitlab(Gitlab):
             404,
         )
 
-    def get_member_role_id_cached(
-        self, name_or_id: Union[int, str], group_full_path: str
-    ) -> int:
+    def get_member_role_id_cached(self, name_or_id: Union[int, str], group_full_path: str) -> int:
         """
         GETs a member role id set in the config by the Name of the Member Role (by calling out to API) or by Id
 

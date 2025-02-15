@@ -31,9 +31,7 @@ class TestProjectLabels:
         # text color gets converted to HexCode by GitLab ie red -> #FF0000
         assert updated_label.color == "#FF0000"
 
-    def test__removes_existing_label_when_enforce_is_true(
-        self, gl, project_for_function
-    ):
+    def test__removes_existing_label_when_enforce_is_true(self, gl, project_for_function):
         project = gl.projects.get(project_for_function.id)
         project.labels.create({"name": "delete_this", "color": "red"})
         labels = project.labels.list()
@@ -64,9 +62,7 @@ class TestProjectLabels:
         # text color gets converted to HexCode by GitLab ie red -> #FF0000
         assert updated_label.color == "#FF0000"
 
-    def test__leaves_existing_label_when_enforce_is_false(
-        self, gl, project_for_function
-    ):
+    def test__leaves_existing_label_when_enforce_is_false(self, gl, project_for_function):
         project = gl.projects.get(project_for_function.id)
         project.labels.create({"name": "delete_this", "color": "red"})
         labels = project.labels.list()
@@ -140,9 +136,7 @@ class TestProjectLabels:
         # validate same id is being used
         assert created_label.id == new_label.id
 
-    def test__project_labels_are_inherited_from_parent_group(
-        self, gl, group, project_for_function
-    ):
+    def test__project_labels_are_inherited_from_parent_group(self, gl, group, project_for_function):
         # project_for_function is created in the group fixture
         project = gl.projects.get(project_for_function.id)
         labels = project.labels.list()

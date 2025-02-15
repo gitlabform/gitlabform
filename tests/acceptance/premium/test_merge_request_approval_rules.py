@@ -8,15 +8,9 @@ pytestmark = pytest.mark.requires_license
 
 @pytest.fixture(scope="function")
 def group_with_one_owner_and_two_developers(other_group, root_user, users):
-    other_group.members.create(
-        {"user_id": users[0].id, "access_level": AccessLevel.OWNER.value}
-    )
-    other_group.members.create(
-        {"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value}
-    )
-    other_group.members.create(
-        {"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value}
-    )
+    other_group.members.create({"user_id": users[0].id, "access_level": AccessLevel.OWNER.value})
+    other_group.members.create({"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value})
+    other_group.members.create({"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value})
     other_group.members.delete(root_user.id)
 
     yield other_group
@@ -25,9 +19,7 @@ def group_with_one_owner_and_two_developers(other_group, root_user, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    other_group.members.create(
-        {"user_id": root_user.id, "access_level": AccessLevel.OWNER.value}
-    )
+    other_group.members.create({"user_id": root_user.id, "access_level": AccessLevel.OWNER.value})
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -119,10 +111,7 @@ class TestMergeRequestApprovers:
                 assert len(rule.users) == 1
                 assert rule.users[0]["username"] == user1.username
                 assert len(rule.groups) == 1
-                assert (
-                    rule.groups[0]["name"]
-                    == group_with_one_owner_and_two_developers.name
-                )
+                assert rule.groups[0]["name"] == group_with_one_owner_and_two_developers.name
                 assert len(rule.protected_branches) == 1
                 assert rule.protected_branches[0]["name"] == branch
                 second_found = True
@@ -254,13 +243,8 @@ class TestMergeRequestApprovers:
                 assert len(rule.users) == 1
                 assert rule.users[0]["username"] == user1.username
                 assert len(rule.groups) == 1
-                assert (
-                    rule.groups[0]["name"]
-                    == group_with_one_owner_and_two_developers.full_path
-                )
-                protected_branches_name = [
-                    branch["name"] for branch in rule.protected_branches
-                ]
+                assert rule.groups[0]["name"] == group_with_one_owner_and_two_developers.full_path
+                protected_branches_name = [branch["name"] for branch in rule.protected_branches]
                 assert protected_branches_name == [branch]
                 second_found = True
 
@@ -311,13 +295,8 @@ class TestMergeRequestApprovers:
                 assert rule.approvals_required == 1  # changed
                 assert len(rule.users) == 0  # changed
                 assert len(rule.groups) == 1
-                assert (
-                    rule.groups[0]["name"]
-                    == group_with_one_owner_and_two_developers.full_path
-                )
-                protected_branches_name = sorted(
-                    [branch["name"] for branch in rule.protected_branches]
-                )
+                assert rule.groups[0]["name"] == group_with_one_owner_and_two_developers.full_path
+                protected_branches_name = sorted([branch["name"] for branch in rule.protected_branches])
                 assert protected_branches_name == sorted(
                     [
                         branch,
@@ -350,9 +329,7 @@ class TestMergeRequestApprovers:
         assert rule.name == "Any approver"
         assert rule.rule_type == "any_approver"
 
-    def test__add_any_approver_rule_with_non_zero_approvals_required(
-        self, project, make_user
-    ):
+    def test__add_any_approver_rule_with_non_zero_approvals_required(self, project, make_user):
         config = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -475,12 +452,8 @@ class TestMergeRequestApprovers:
         before they can be configured in approval rule setting.
         """
 
-        user_for_group_to_share_project_with = make_user(
-            level=AccessLevel.DEVELOPER, add_to_project=False
-        )
-        project_user_for_approval_rule = make_user(
-            level=AccessLevel.DEVELOPER, add_to_project=False
-        )
+        user_for_group_to_share_project_with = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
+        project_user_for_approval_rule = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
 
         config_branch_protection = f"""
         projects_and_groups:
@@ -517,12 +490,6 @@ class TestMergeRequestApprovers:
 
         assert default_mr_approval_rule_details.approvals_required == 2
         assert len(default_mr_approval_rule_details.users) == 1
-        assert (
-            default_mr_approval_rule_details.users[0]["username"]
-            == project_user_for_approval_rule.username
-        )
+        assert default_mr_approval_rule_details.users[0]["username"] == project_user_for_approval_rule.username
         assert len(default_mr_approval_rule_details.groups) == 1
-        assert (
-            default_mr_approval_rule_details.groups[0]["path"]
-            == group_for_function.full_path
-        )
+        assert default_mr_approval_rule_details.groups[0]["path"] == group_for_function.full_path

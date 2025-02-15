@@ -82,3 +82,6 @@ markers = [
 #uncomment below for debug logging ALWAYS, even if the tests are passing
 #log_cli = true
 #log_cli_level = "DEBUG"
+
+[tool.black]
+line-length = 120

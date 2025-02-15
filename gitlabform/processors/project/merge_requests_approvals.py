@@ -10,25 +10,19 @@ from gitlabform.processors.util.difference_logger import DifferenceLogger
 class MergeRequestsApprovals(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("merge_requests_approvals", gitlab)
-        self.get_entity_in_gitlab: Callable = getattr(
-            self, "get_project_mr_approvals_settings"
-        )
+        self.get_entity_in_gitlab: Callable = getattr(self, "get_project_mr_approvals_settings")
 
     def _process_configuration(self, project_path: str, configuration: dict) -> None:
         debug("Processing project merge requests approvals settings...")
         project: Project = self.gl.get_project_by_path_cached(project_path)
 
-        mr_approval_settings_in_config: dict = configuration.get(
-            "merge_requests_approvals", {}
-        )
+        mr_approval_settings_in_config: dict = configuration.get("merge_requests_approvals", {})
         mr_approval_settings_in_gitlab: dict = project.approvals.get().asdict()
 
         debug(mr_approval_settings_in_gitlab)
         debug("merge_requests_approvals BEFORE: ^^^")
 
-        if self._needs_update(
-            mr_approval_settings_in_gitlab, mr_approval_settings_in_config
-        ):
+        if self._needs_update(mr_approval_settings_in_gitlab, mr_approval_settings_in_config):
             debug("Updating project merge requests approvals settings")
             project.approvals.update(**mr_approval_settings_in_config)
 
@@ -51,12 +45,8 @@ class MergeRequestsApprovals(AbstractProcessor):
             return True
 
     # TODO: duplicated logic with project_settings_processor.py. Should be refactored - ideally in the AbstractProcessor
-    def _print_diff(
-        self, project_or_project_and_group: str, entity_config, diff_only_changed: bool
-    ):
-        entity_in_gitlab = self.get_project_mr_approvals_settings(
-            project_or_project_and_group
-        )
+    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
+        entity_in_gitlab = self.get_project_mr_approvals_settings(project_or_project_and_group)
 
         DifferenceLogger.log_diff(
             f"{self.configuration_name} changes",

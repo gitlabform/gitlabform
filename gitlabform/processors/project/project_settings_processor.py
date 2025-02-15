@@ -22,9 +22,7 @@ class ProjectSettingsProcessor(AbstractProcessor):
         debug(project_settings_in_gitlab)
         debug("project_settings BEFORE: ^^^")
 
-        self._process_project_topics(
-            project_settings_in_config, project_settings_in_gitlab
-        )
+        self._process_project_topics(project_settings_in_config, project_settings_in_gitlab)
 
         if self._needs_update(project_settings_in_gitlab, project_settings_in_config):
             debug("Updating project settings")
@@ -42,9 +40,7 @@ class ProjectSettingsProcessor(AbstractProcessor):
     def get_project_settings(self, project_path: str):
         return self.gl.get_project_by_path_cached(project_path).asdict()
 
-    def _print_diff(
-        self, project_or_project_and_group: str, entity_config, diff_only_changed: bool
-    ):
+    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
         entity_in_gitlab = self.get_project_settings(project_or_project_and_group)
 
         DifferenceLogger.log_diff(
@@ -54,9 +50,7 @@ class ProjectSettingsProcessor(AbstractProcessor):
             only_changed=diff_only_changed,
         )
 
-    def _process_project_topics(
-        self, project_settings_in_config: Dict, project_settings_in_gitlab: Dict
-    ) -> None:
+    def _process_project_topics(self, project_settings_in_config: Dict, project_settings_in_gitlab: Dict) -> None:
         project_settings_topics: Dict = project_settings_in_config.get("topics", [])
 
         if not project_settings_topics:
@@ -75,16 +69,13 @@ class ProjectSettingsProcessor(AbstractProcessor):
         adjusted_project_topics_to_set: List[str] = []
 
         if keep_existing:
-            adjusted_project_topics_to_set.extend(
-                project_settings_in_gitlab.get("topics", [])
-            )
+            adjusted_project_topics_to_set.extend(project_settings_in_gitlab.get("topics", []))
 
         # List of topics not having delete = true or no delete attribute at all
         topics_to_add: List[str] = [
             list(t.keys())[0] if isinstance(t, dict) else t
             for t in project_settings_topics
-            if isinstance(t, str)
-            or (isinstance(t, dict) and not list(t.values())[0].get("delete", False))
+            if isinstance(t, str) or (isinstance(t, dict) and not list(t.values())[0].get("delete", False))
         ]
 
         # List of topics having delete = true
@@ -97,9 +88,7 @@ class ProjectSettingsProcessor(AbstractProcessor):
         adjusted_project_topics_to_set.extend(topics_to_add)
 
         adjusted_project_topics_to_set = [
-            topic
-            for topic in adjusted_project_topics_to_set
-            if topic not in topics_to_delete
+            topic for topic in adjusted_project_topics_to_set if topic not in topics_to_delete
         ]
 
         debug(f"topics after adjustment: {adjusted_project_topics_to_set}")

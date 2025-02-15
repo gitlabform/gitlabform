@@ -34,26 +34,16 @@ class JobTokenScopeProcessor(AbstractProcessor):
 
         enforce = allowlist_config.get("enforce", False)
 
-        self._process_groups(
-            job_token_scope, allowlist_config.get("groups", []), enforce
-        )
+        self._process_groups(job_token_scope, allowlist_config.get("groups", []), enforce)
 
-        self._process_projects(
-            project, job_token_scope, allowlist_config.get("projects", []), enforce
-        )
+        self._process_projects(project, job_token_scope, allowlist_config.get("projects", []), enforce)
 
     @staticmethod
-    def _process_limit_access_to_this_project_setting(
-        configuration: dict, job_token_scope: ProjectJobTokenScope
-    ):
-        limit_access_to_this_project: bool = configuration.get(
-            "limit_access_to_this_project", True
-        )
+    def _process_limit_access_to_this_project_setting(configuration: dict, job_token_scope: ProjectJobTokenScope):
+        limit_access_to_this_project: bool = configuration.get("limit_access_to_this_project", True)
 
         if limit_access_to_this_project != job_token_scope.inbound_enabled:
-            info(
-                f"Updating project job token scope to limit access: {limit_access_to_this_project}"
-            )
+            info(f"Updating project job token scope to limit access: {limit_access_to_this_project}")
             job_token_scope.enabled = limit_access_to_this_project
             job_token_scope.save()
             return True
@@ -69,15 +59,11 @@ class JobTokenScopeProcessor(AbstractProcessor):
         enforce: bool,
     ):
         if not projects_allowlist and enforce:
-            warning(
-                "Process will remove existing projects from allowlist, as none set in configuration"
-            )
+            warning("Process will remove existing projects from allowlist, as none set in configuration")
 
         existing_allowlist = job_token_scope.allowlist.list(get_all=True)
 
-        project_ids_to_allow = self._get_target_project_ids_from_config(
-            projects_allowlist
-        )
+        project_ids_to_allow = self._get_target_project_ids_from_config(projects_allowlist)
 
         allowlist_updated = False
         if len(project_ids_to_allow) > 0:
@@ -91,12 +77,8 @@ class JobTokenScopeProcessor(AbstractProcessor):
                 # -> refreshes job_token_scope state with latest changes
                 job_token_scope.refresh()
 
-            info(
-                "Enforce enabled, removing projects no longer defined in config from allowlist"
-            )
-            self._remove_projects_from_allowlist(
-                project, job_token_scope, existing_allowlist, project_ids_to_allow
-            )
+            info("Enforce enabled, removing projects no longer defined in config from allowlist")
+            self._remove_projects_from_allowlist(project, job_token_scope, existing_allowlist, project_ids_to_allow)
 
     def _process_groups(
         self,
@@ -105,9 +87,7 @@ class JobTokenScopeProcessor(AbstractProcessor):
         enforce: bool,
     ):
         if not groups_allowlist and enforce:
-            warning(
-                "Process will remove existing groups from allowlist, as none set in configuration"
-            )
+            warning("Process will remove existing groups from allowlist, as none set in configuration")
 
         existing_allowlist = job_token_scope.groups_allowlist.list(get_all=True)
 
@@ -115,9 +95,7 @@ class JobTokenScopeProcessor(AbstractProcessor):
 
         allowlist_updated = False
         if len(group_ids_to_allow) > 0:
-            allowlist_updated = self._add_groups_to_allowlist(
-                job_token_scope, existing_allowlist, group_ids_to_allow
-            )
+            allowlist_updated = self._add_groups_to_allowlist(job_token_scope, existing_allowlist, group_ids_to_allow)
 
         if enforce:
             if allowlist_updated:
@@ -125,12 +103,8 @@ class JobTokenScopeProcessor(AbstractProcessor):
                 # -> refreshes job_token_scope state with latest changes
                 job_token_scope.refresh()
 
-            info(
-                "Enforce enabled, removing groups no longer defined in config from allowlist"
-            )
-            self._remove_groups_from_allowlist(
-                job_token_scope, existing_allowlist, group_ids_to_allow
-            )
+            info("Enforce enabled, removing groups no longer defined in config from allowlist")
+            self._remove_groups_from_allowlist(job_token_scope, existing_allowlist, group_ids_to_allow)
 
     def _remove_groups_from_allowlist(
         self,
@@ -139,9 +113,7 @@ class JobTokenScopeProcessor(AbstractProcessor):
         target_group_ids: List,
     ):
         allowlist_updated = False
-        group_ids_to_remove = self._get_ids_to_remove_from_allowlist(
-            existing_allowlist, target_group_ids
-        )
+        group_ids_to_remove = self._get_ids_to_remove_from_allowlist(existing_allowlist, target_group_ids)
         for group_id in group_ids_to_remove:
             allowlist_updated = True
             job_token_scope.groups_allowlist.delete(group_id)
@@ -152,9 +124,7 @@ class JobTokenScopeProcessor(AbstractProcessor):
             job_token_scope.save()
 
     @staticmethod
-    def _add_groups_to_allowlist(
-        job_token_scope, existing_allowlist, group_ids_listed_in_config
-    ):
+    def _add_groups_to_allowlist(job_token_scope, existing_allowlist, group_ids_listed_in_config):
         allowlist_updated = False
 
         for group_id in group_ids_listed_in_config:
@@ -176,16 +146,12 @@ class JobTokenScopeProcessor(AbstractProcessor):
             return False
 
     @staticmethod
-    def _add_projects_to_allowlist(
-        project, job_token_scope, existing_allowlist, project_ids_listed_in_config
-    ):
+    def _add_projects_to_allowlist(project, job_token_scope, existing_allowlist, project_ids_listed_in_config):
         allowlist_state_updated = False
 
         for project_id in project_ids_listed_in_config:
             if project_id != project.id:
-                if any(
-                    allowed.get_id() == project_id for allowed in existing_allowlist
-                ):
+                if any(allowed.get_id() == project_id for allowed in existing_allowlist):
                     # If already in allowlist, do nothing
                     debug(f"{project_id} already in Projects allowlist")
                     continue
@@ -210,9 +176,7 @@ class JobTokenScopeProcessor(AbstractProcessor):
         target_project_ids: List,
     ):
         removed_items_from_allowlist = False
-        project_ids_to_remove = self._get_ids_to_remove_from_allowlist(
-            existing_allowlist, target_project_ids
-        )
+        project_ids_to_remove = self._get_ids_to_remove_from_allowlist(existing_allowlist, target_project_ids)
         for project_id in project_ids_to_remove:
             if project_id != project.id:
                 removed_items_from_allowlist = True

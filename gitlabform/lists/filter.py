@@ -16,9 +16,7 @@ class GroupsAndProjectsFilters:
     def __init__(self, configuration, group_processors, project_processors):
         self.configuration = configuration
 
-        self.omit_empty_configs = OmitEmptyConfigs(
-            configuration, group_processors, project_processors
-        )
+        self.omit_empty_configs = OmitEmptyConfigs(configuration, group_processors, project_processors)
         # add next filters here
 
     def filter(self, groups: Groups, projects: Projects):
@@ -96,9 +94,7 @@ class OmitEmptyConfigs(GroupsAndProjectsFilter):
         :return: if given project has no config that can be processed
                  by any project-level processors
         """
-        config_for_project = self.configuration.get_effective_config_for_project(
-            project
-        )
+        config_for_project = self.configuration.get_effective_config_for_project(project)
         for configuration_name in config_for_project.keys():
             if configuration_name in self.project_processors.get_configuration_names():
                 return False

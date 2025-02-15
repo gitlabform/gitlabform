@@ -48,9 +48,7 @@ class TestResourceGroups:
         assert resource_group.key == "production"
         assert resource_group.process_mode == "newest_first"
 
-    def test__resource_group_process_mode_invalid_value(
-        self, project, add_gitlab_ci_config, capsys
-    ):
+    def test__resource_group_process_mode_invalid_value(self, project, add_gitlab_ci_config, capsys):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -113,6 +111,4 @@ class TestResourceGroups:
         try:
             run_gitlabform(update_resource_group_config, project)
         except Exception as exception:
-            assert (
-                False
-            ), f"Test disabling `ensure_exists` raised an exception {exception}, but it shouldn't."
+            assert False, f"Test disabling `ensure_exists` raised an exception {exception}, but it shouldn't."

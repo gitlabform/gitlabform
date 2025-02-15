@@ -256,9 +256,7 @@ class TestIntegrations:
                 branches_to_be_notified: "all"
         """
 
-        run_gitlabform(
-            config_integration_mattermost_confidential_issues_events, project
-        )
+        run_gitlabform(config_integration_mattermost_confidential_issues_events, project)
 
         integration = project.integrations.get("mattermost")
         assert integration.confidential_issues_events is False

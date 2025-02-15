@@ -39,9 +39,7 @@ class TestGroupSettings:
 
     def test__enforce_saml_links_premium(self, gl, group_for_function):
 
-        assert (
-            len(group_for_function.saml_group_links.list()) == 0
-        ), "saml_group_links is not empty"
+        assert len(group_for_function.saml_group_links.list()) == 0, "saml_group_links is not empty"
 
         add_group_saml_settings = f"""
           projects_and_groups:

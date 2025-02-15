@@ -155,9 +155,7 @@ class TestVariables:
 
         run_gitlabform(config_more_variables, project)
 
-        variable = project.variables.get(
-            "FOO1", filter={"environment_scope": "test/ee"}
-        )
+        variable = project.variables.get("FOO1", filter={"environment_scope": "test/ee"})
         assert variable.value == "alfa"
 
     def test__variables_with_env_scope(self, project):
@@ -185,11 +183,7 @@ class TestVariables:
         variables_keys = [variable.key for variable in variables]
         assert "FOO2" in variables_keys
 
-        variable = project.variables.get(
-            "FOO2", filter={"environment_scope": "test/ee"}
-        )
+        variable = project.variables.get("FOO2", filter={"environment_scope": "test/ee"})
         assert variable.value == "alfa"
-        variable = project.variables.get(
-            "FOO2", filter={"environment_scope": "test/lv"}
-        )
+        variable = project.variables.get("FOO2", filter={"environment_scope": "test/lv"})
         assert variable.value == "beta"

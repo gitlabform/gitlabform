@@ -52,10 +52,7 @@ class TestTags:
         protected_tags = project.protectedtags.list()
         assert len(protected_tags) == 1
         assert protected_tags[0].name == "tag1"
-        assert (
-            protected_tags[0].create_access_levels[0]["access_level"]
-            == AccessLevel.MAINTAINER.value
-        )
+        assert protected_tags[0].create_access_levels[0]["access_level"] == AccessLevel.MAINTAINER.value
 
     def test__protect_wildcard_tag(self, project, tags):
         config = f"""
@@ -76,10 +73,7 @@ class TestTags:
         protected_tags = project.protectedtags.list()
         assert len(protected_tags) == 1
         assert protected_tags[0].name == "tag*"
-        assert (
-            protected_tags[0].create_access_levels[0]["access_level"]
-            == AccessLevel.MAINTAINER.value
-        )
+        assert protected_tags[0].create_access_levels[0]["access_level"] == AccessLevel.MAINTAINER.value
 
     def test__unprotect_the_same_tag(self, project, tags):
         config = f"""
@@ -100,10 +94,7 @@ class TestTags:
         protected_tags = project.protectedtags.list()
         assert len(protected_tags) == 1
         assert protected_tags[0].name == "tag*"
-        assert (
-            protected_tags[0].create_access_levels[0]["access_level"]
-            == AccessLevel.MAINTAINER.value
-        )
+        assert protected_tags[0].create_access_levels[0]["access_level"] == AccessLevel.MAINTAINER.value
 
         config = f"""
         projects_and_groups:
@@ -157,10 +148,7 @@ class TestTags:
         protected_tags = project.protectedtags.list()
         assert len(protected_tags) == 1
         assert protected_tags[0].name == "tag1"
-        assert (
-            protected_tags[0].create_access_levels[0]["access_level"]
-            == AccessLevel.NO_ACCESS.value
-        )
+        assert protected_tags[0].create_access_levels[0]["access_level"] == AccessLevel.NO_ACCESS.value
 
     def test__protect_single_tag_with_access_level_names(self, project, tags):
         config = f"""
@@ -184,7 +172,4 @@ class TestTags:
         protected_tags = project.protectedtags.list()
         assert len(protected_tags) == 1
         assert protected_tags[0].name == "tag1"
-        assert (
-            protected_tags[0].create_access_levels[0]["access_level"]
-            == AccessLevel.MAINTAINER.value
-        )
+        assert protected_tags[0].create_access_levels[0]["access_level"] == AccessLevel.MAINTAINER.value
