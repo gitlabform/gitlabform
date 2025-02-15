@@ -12,8 +12,6 @@ class BadgesProcessor(MultipleEntitiesProcessor):
             add_method_name="add_project_badge",
             delete_method_name="delete_project_badge",
             defining=Key("name"),
-            required_to_create_or_update=And(
-                Key("name"), Key("link_url"), Key("image_url")
-            ),
+            required_to_create_or_update=And(Key("name"), Key("link_url"), Key("image_url")),
             edit_method_name="edit_project_badge",
         )

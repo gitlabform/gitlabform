@@ -3,9 +3,7 @@ from gitlabform.gitlab.projects import GitLabProjects
 
 class GitLabVariables(GitLabProjects):
     def get_variables(self, project_and_group_name):
-        return self._make_requests_to_api(
-            "projects/%s/variables", project_and_group_name
-        )
+        return self._make_requests_to_api("projects/%s/variables", project_and_group_name)
 
     def post_variable(self, project_and_group_name, variable_in_config):
         # variable has to be like documented at:
@@ -46,6 +44,4 @@ class GitLabVariables(GitLabProjects):
             url = "projects/%s/variables/%s"
         else:
             url = f"projects/%s/variables/%s?filter[environment_scope]={environment_scope}"
-        return self._make_requests_to_api(url, (project_and_group_name, variable_key))[
-            "value"
-        ]
+        return self._make_requests_to_api(url, (project_and_group_name, variable_key))["value"]

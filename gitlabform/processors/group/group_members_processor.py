@@ -25,11 +25,7 @@ class GroupMembersProcessor(AbstractProcessor):
             users_to_set_by_username,
         ) = self._get_groups_and_users_to_set(configuration)
 
-        if (
-            enforce_group_members
-            and not groups_to_set_by_group_path
-            and not users_to_set_by_username
-        ):
+        if enforce_group_members and not groups_to_set_by_group_path and not users_to_set_by_username:
             fatal(
                 "Group members configuration section has to contain"
                 " some 'users' or 'groups' defined as Owners,"
@@ -54,9 +50,7 @@ class GroupMembersProcessor(AbstractProcessor):
 
         users_to_set_by_username = configuration.get("group_members", {})
         if users_to_set_by_username:
-            proper_users_to_set_by_username = configuration.get(
-                "group_members|users", {}
-            )
+            proper_users_to_set_by_username = configuration.get("group_members|users", {})
             if proper_users_to_set_by_username:
                 users_to_set_by_username = proper_users_to_set_by_username
             else:
@@ -78,14 +72,10 @@ class GroupMembersProcessor(AbstractProcessor):
 
         groups_before_by_group_path = dict()
         for shared_with_group in shared_with_groups_before:
-            groups_before_by_group_path[shared_with_group["group_full_path"]] = (
-                shared_with_group
-            )
+            groups_before_by_group_path[shared_with_group["group_full_path"]] = shared_with_group
 
         for share_with_group_path in groups_to_share_with_by_path:
-            group_access_to_set = groups_to_share_with_by_path[share_with_group_path][
-                "group_access"
-            ]
+            group_access_to_set = groups_to_share_with_by_path[share_with_group_path]["group_access"]
 
             expires_at_to_set = (
                 groups_to_share_with_by_path[share_with_group_path]["expires_at"]
@@ -94,17 +84,10 @@ class GroupMembersProcessor(AbstractProcessor):
             )
 
             if share_with_group_path in groups_before_by_group_path:
-                group_access_before = groups_before_by_group_path[
-                    share_with_group_path
-                ]["group_access_level"]
-                expires_at_before = groups_before_by_group_path[share_with_group_path][
-                    "expires_at"
-                ]
+                group_access_before = groups_before_by_group_path[share_with_group_path]["group_access_level"]
+                expires_at_before = groups_before_by_group_path[share_with_group_path]["expires_at"]
 
-                if (
-                    group_access_before == group_access_to_set
-                    and expires_at_before == expires_at_to_set
-                ):
+                if group_access_before == group_access_to_set and expires_at_before == expires_at_to_set:
                     debug(
                         "Nothing to change for group '%s' - same config now as to set.",
                         share_with_group_path,
@@ -114,16 +97,12 @@ class GroupMembersProcessor(AbstractProcessor):
                         "Re-adding group '%s' to change their access level or expires at.",
                         share_with_group_path,
                     )
-                    share_with_group_id = groups_before_by_group_path[
-                        share_with_group_path
-                    ]["group_id"]
+                    share_with_group_id = groups_before_by_group_path[share_with_group_path]["group_id"]
                     # we will remove the group first and then re-add them,
                     # to ensure that the group has the expected access level
                     self._unshare(group_being_processed, share_with_group_id)
 
-                    group_being_processed.share(
-                        share_with_group_id, group_access_to_set, expires_at_to_set
-                    )
+                    group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
 
             else:
                 debug(
@@ -132,15 +111,11 @@ class GroupMembersProcessor(AbstractProcessor):
                 )
 
                 share_with_group_id = self.gl.get_group_id(share_with_group_path)
-                group_being_processed.share(
-                    share_with_group_id, group_access_to_set, expires_at_to_set
-                )
+                group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
 
         if enforce_group_members:
             # remove groups not configured explicitly
-            groups_not_configured = set(groups_before_by_group_path) - set(
-                groups_to_share_with_by_path
-            )
+            groups_not_configured = set(groups_before_by_group_path) - set(groups_to_share_with_by_path)
             for group_path in groups_not_configured:
                 debug(
                     "Removing group '%s' who is not configured to be a member.",
@@ -188,9 +163,7 @@ class GroupMembersProcessor(AbstractProcessor):
             # - to ensure that we won't end up with no Owner in a group
             for level in reversed(sorted(AccessLevel.group_levels())):
                 users_to_set_with_this_level = (
-                    users_to_set_by_access_level[level]
-                    if level in users_to_set_by_access_level
-                    else []
+                    users_to_set_by_access_level[level] if level in users_to_set_by_access_level else []
                 )
 
                 for user in users_to_set_with_this_level:
@@ -282,15 +255,11 @@ class GroupMembersProcessor(AbstractProcessor):
                     # We should raise error into Logs but not prevent the rest of GitLabForm from executing
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
                     # be completely deleted from gitlab.com
-                    error(
-                        f"Could not find User '{user}' on the Instance so can not remove User from Group"
-                    )
+                    error(f"Could not find User '{user}' on the Instance so can not remove User from Group")
                     continue
 
                 if keep_bots and gl_user.bot:
-                    debug(
-                        f"Will not remove bot user '{user}' as the 'keep_bots' option is true."
-                    )
+                    debug(f"Will not remove bot user '{user}' as the 'keep_bots' option is true.")
                     continue
 
                 try:

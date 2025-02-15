@@ -53,9 +53,7 @@ class TestDeployKeys:
         deploy_keys = project_for_function.keys.list()
         assert not any([key.title == "some_key" for key in deploy_keys])
 
-    def test__deploy_key_add_delete_with_enforce(
-        self, project_for_function, public_ssh_key
-    ):
+    def test__deploy_key_add_delete_with_enforce(self, project_for_function, public_ssh_key):
         config_add = f"""
         projects_and_groups:
           {project_for_function.path_with_namespace}:
@@ -112,9 +110,7 @@ class TestDeployKeys:
         deploy_keys = project_for_function.keys.list()
         assert single_true([key.title == "some_key" for key in deploy_keys])
 
-    def test__deploy_key_add_delete_readd_under_different_name(
-        self, project_for_function, public_ssh_key
-    ):
+    def test__deploy_key_add_delete_readd_under_different_name(self, project_for_function, public_ssh_key):
         config_add = f"""
             projects_and_groups:
               {project_for_function.path_with_namespace}:

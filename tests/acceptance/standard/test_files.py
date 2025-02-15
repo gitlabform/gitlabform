@@ -76,12 +76,7 @@ class TestFiles:
         run_gitlabform(set_file_specific_branch, project.path_with_namespace)
 
         the_branch = project.branches.get(branch)
-        assert all(
-            [
-                text in the_branch.commit["message"]
-                for text in ["Automated", "made by gitlabform"]
-            ]
-        )
+        assert all([text in the_branch.commit["message"] for text in ["Automated", "made by gitlabform"]])
 
         project_file = project.files.get(ref=branch, file_path="README.md")
         assert project_file.decode().decode("utf-8") == f"Content for {branch} only"
@@ -110,17 +105,10 @@ class TestFiles:
                 content: {DEFAULT_README}
         """
 
-        run_gitlabform(
-            set_file_specific_branch, project_for_function.path_with_namespace
-        )
+        run_gitlabform(set_file_specific_branch, project_for_function.path_with_namespace)
 
         the_branch = project_for_function.branches.get("main")
-        assert not any(
-            [
-                text in the_branch.commit["message"]
-                for text in ["Automated", "made by gitlabform"]
-            ]
-        )
+        assert not any([text in the_branch.commit["message"] for text in ["Automated", "made by gitlabform"]])
 
         project_file = project_for_function.files.get(ref="main", file_path="README.md")
         assert project_file.decode().decode("utf-8") == DEFAULT_README
@@ -152,9 +140,7 @@ class TestFiles:
         assert branch.commit["message"] == "Automated change made by gitlabform"
 
         project_file = project.files.get(ref="no_access_branch", file_path="README.md")
-        assert (
-            project_file.decode().decode("utf-8") == "Content for no_access_branch only"
-        )
+        assert project_file.decode().decode("utf-8") == "Content for no_access_branch only"
 
         project_file = project.files.get(ref="main", file_path="README.md")
         assert project_file.decode().decode("utf-8") == DEFAULT_README
@@ -201,9 +187,7 @@ class TestFiles:
         the_branch = project.branches.get(the_branch.name)
         assert the_branch.protected is True
 
-    def test__delete_file_unprotected_branch(
-        self, project_for_function, branch_for_function
-    ):
+    def test__delete_file_unprotected_branch(self, project_for_function, branch_for_function):
         set_file_specific_branch = f"""
             projects_and_groups:
               {project_for_function.path_with_namespace}:
@@ -338,10 +322,7 @@ class TestFiles:
         run_gitlabform(set_file_chinese_characters, project)
 
         file_content = project.files.get(ref=branch, file_path="README.md")
-        assert (
-            file_content.decode().decode("utf-8")
-            == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两\n"
-        )
+        assert file_content.decode().decode("utf-8") == "Hanzi (Traditional): 丕不丈丁\nHanzi (Simplified): 丏丅丙两\n"
 
     def test__set_external_file_with_chinese_characters(self, project, branch, file):
         set_file_chinese_characters = f"""
@@ -358,10 +339,7 @@ class TestFiles:
         run_gitlabform(set_file_chinese_characters, project.path_with_namespace)
 
         project_file = project.files.get(ref=branch, file_path="README.md")
-        assert (
-            project_file.decode().decode("utf-8")
-            == "Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁"
-        )
+        assert project_file.decode().decode("utf-8") == "Hanzi (Simplified): 丏丅丙两\nHanzi (Traditional): 丕不丈丁"
 
     def test__set_external_file_with_utf8_characters(self, project, branch, file2):
         set_file_chinese_characters = f"""
@@ -378,10 +356,7 @@ class TestFiles:
         run_gitlabform(set_file_chinese_characters, project.path_with_namespace)
 
         project_file = project.files.get(ref=branch, file_path="README.md")
-        assert (
-            project_file.decode().decode("utf-8")
-            == "LICENSE\n\n“This is a license file”\n"
-        )
+        assert project_file.decode().decode("utf-8") == "LICENSE\n\n“This is a license file”\n"
 
     def test__set_README_file_content_on_all_protected_branches(
         self, project_for_function, branch_for_function, other_branch_for_function
@@ -409,27 +384,18 @@ class TestFiles:
                 content: "Content for protected branches only"
         """
 
-        run_gitlabform(
-            set_file_protected_branches, project_for_function.path_with_namespace
-        )
+        run_gitlabform(set_file_protected_branches, project_for_function.path_with_namespace)
 
         for some_branch in [
             "main",  # main branch is protected by default
             other_branch_for_function,
         ]:
-            project_file = project_for_function.files.get(
-                ref=some_branch, file_path="README.md"
-            )
-            assert (
-                project_file.decode().decode("utf-8")
-                == "Content for protected branches only"
-            )
+            project_file = project_for_function.files.get(ref=some_branch, file_path="README.md")
+            assert project_file.decode().decode("utf-8") == "Content for protected branches only"
             some_branch = project_for_function.branches.get(some_branch)
             assert some_branch.protected is True
 
-        project_file = project_for_function.files.get(
-            ref=branch_for_function, file_path="README.md"
-        )
+        project_file = project_for_function.files.get(ref=branch_for_function, file_path="README.md")
         assert project_file.decode().decode("utf-8") == DEFAULT_README
         some_branch = project_for_function.branches.get(branch_for_function)
         assert some_branch.protected is False
@@ -461,9 +427,7 @@ class TestFiles:
             branch_for_function,
             other_branch_for_function,
         ]:
-            project_file = project_for_function.files.get(
-                ref=some_branch, file_path="README.md"
-            )
+            project_file = project_for_function.files.get(ref=some_branch, file_path="README.md")
             assert project_file.decode().decode("utf-8") == "Content for all branches"
 
         # check that this branch remains unprotected

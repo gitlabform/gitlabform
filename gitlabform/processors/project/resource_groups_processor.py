@@ -23,13 +23,9 @@ class ResourceGroupsProcessor(AbstractProcessor):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
         for config_resource_group_name in sorted(configured_resource_groups):
-            resource_group_in_config = configured_resource_groups[
-                config_resource_group_name
-            ]
+            resource_group_in_config = configured_resource_groups[config_resource_group_name]
             try:
-                resource_group_in_gitlab: ProjectResourceGroup = (
-                    project.resource_groups.get(config_resource_group_name)
-                )
+                resource_group_in_gitlab: ProjectResourceGroup = project.resource_groups.get(config_resource_group_name)
             except GitlabGetError:
                 message = (
                     f"Project is not configured to use resource group: {config_resource_group_name}.\n"
@@ -44,15 +40,11 @@ class ResourceGroupsProcessor(AbstractProcessor):
                     warning(message)
                     continue
 
-            if self._needs_update(
-                resource_group_in_gitlab.asdict(), resource_group_in_config
-            ):
+            if self._needs_update(resource_group_in_gitlab.asdict(), resource_group_in_config):
                 verbose(f"Updating resource group '{config_resource_group_name}'")
 
                 try:
-                    project.resource_groups.update(
-                        resource_group_in_gitlab.key, **resource_group_in_config
-                    )
+                    project.resource_groups.update(resource_group_in_gitlab.key, **resource_group_in_config)
                 except GitlabUpdateError as error:
                     warning(f"Resource group update failed. Error: '{error}'")
                     raise GitlabUpdateError

@@ -55,10 +55,7 @@ class TestFilesTemplates:
         run_gitlabform(config, project)
 
         project_file = project.files.get(ref="main", file_path="README.md")
-        assert (
-            project_file.decode().decode("utf-8")
-            == "This is a text that contains custom variables: fooz, barz\n"
-        )
+        assert project_file.decode().decode("utf-8") == "This is a text that contains custom variables: fooz, barz\n"
 
     def test__trailing_new_lines(self, project, file3):
         set_file_chinese_characters = f"""
@@ -74,10 +71,7 @@ class TestFilesTemplates:
         run_gitlabform(set_file_chinese_characters, project.path_with_namespace)
 
         project_file = project.files.get(ref="main", file_path="README.md")
-        assert (
-            project_file.decode().decode("utf-8")
-            == f"{project.path_with_namespace}\n\n"
-        )
+        assert project_file.decode().decode("utf-8") == f"{project.path_with_namespace}\n\n"
 
     def test__disabled_templating(self, project):
         config = f"""
@@ -96,6 +90,5 @@ class TestFilesTemplates:
 
         project_file = project.files.get(ref="main", file_path="README.md")
         assert (
-            project_file.decode().decode("utf-8")
-            == "This is a text containing literals: {{ group }}/{{ project }}\n"
+            project_file.decode().decode("utf-8") == "This is a text containing literals: {{ group }}/{{ project }}\n"
         )

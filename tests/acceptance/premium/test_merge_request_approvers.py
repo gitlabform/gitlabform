@@ -13,15 +13,9 @@ pytestmark = pytest.mark.requires_license
 
 @pytest.fixture(scope="function")
 def group_with_one_owner_and_two_developers(other_group, root_user, users):
-    other_group.members.create(
-        {"user_id": users[0].id, "access_level": AccessLevel.OWNER.value}
-    )
-    other_group.members.create(
-        {"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value}
-    )
-    other_group.members.create(
-        {"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value}
-    )
+    other_group.members.create({"user_id": users[0].id, "access_level": AccessLevel.OWNER.value})
+    other_group.members.create({"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value})
+    other_group.members.create({"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value})
     other_group.members.delete(root_user.id)
 
     yield other_group
@@ -30,9 +24,7 @@ def group_with_one_owner_and_two_developers(other_group, root_user, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    other_group.members.create(
-        {"user_id": root_user.id, "access_level": AccessLevel.OWNER.value}
-    )
+    other_group.members.create({"user_id": root_user.id, "access_level": AccessLevel.OWNER.value})
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -43,9 +35,7 @@ def group_with_one_owner_and_two_developers(other_group, root_user, users):
 
 @pytest.fixture(scope="function")
 def group_with_just_owner(third_group, root_user, users):
-    third_group.members.create(
-        {"user_id": users[0].id, "access_level": AccessLevel.OWNER.value}
-    )
+    third_group.members.create({"user_id": users[0].id, "access_level": AccessLevel.OWNER.value})
     third_group.members.delete(root_user.id)
 
     yield third_group
@@ -54,9 +44,7 @@ def group_with_just_owner(third_group, root_user, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    third_group.members.create(
-        {"user_id": root_user.id, "access_level": AccessLevel.OWNER.value}
-    )
+    third_group.members.create({"user_id": root_user.id, "access_level": AccessLevel.OWNER.value})
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -160,10 +148,7 @@ class TestMergeRequestApprovers:
             if rule.name == APPROVAL_RULE_NAME:
                 assert len(rule.users) == 0
                 assert len(rule.groups) == 1
-                assert (
-                    rule.groups[0]["name"]
-                    == group_with_one_owner_and_two_developers.name
-                )
+                assert rule.groups[0]["name"] == group_with_one_owner_and_two_developers.name
                 found = True
         assert found
 
@@ -232,10 +217,7 @@ class TestMergeRequestApprovers:
                 assert len(rule.users) == 1
                 assert rule.users[0]["username"] == user1.username
                 assert len(rule.groups) == 1
-                assert (
-                    rule.groups[0]["name"]
-                    == group_with_one_owner_and_two_developers.name
-                )
+                assert rule.groups[0]["name"] == group_with_one_owner_and_two_developers.name
                 found = True
         assert found
 

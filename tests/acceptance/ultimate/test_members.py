@@ -126,10 +126,7 @@ class TestMembers:
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
         captured = capsys.readouterr()
-        assert (
-            f"Member Role with name or id {random_string} could not be found"
-            in captured.err
-        )
+        assert f"Member Role with name or id {random_string} could not be found" in captured.err
 
     def test__cannot_add_user_to_project_with_different_access_than_base_custom_role(
         self, gl, group, project_for_function, outsider_user, random_string, capsys
@@ -156,10 +153,7 @@ class TestMembers:
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
         captured = capsys.readouterr()
-        assert (
-            "the custom role's base access level does not match the current access level"
-            in captured.err
-        )
+        assert "the custom role's base access level does not match the current access level" in captured.err
 
     def test__cannot_add_user_to_project_with_custom_role_but_no_access_level(
         self, gl, group, project_for_function, outsider_user, random_string, capsys
@@ -185,10 +179,7 @@ class TestMembers:
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
         captured = capsys.readouterr()
-        assert (
-            "the custom role's base access level does not match the current access level"
-            in captured.err
-        )
+        assert "the custom role's base access level does not match the current access level" in captured.err
 
     def _create_custom_role(self, gl, base_access_level, random_string):
         # Python-Gitlab does not directly support Member Roles

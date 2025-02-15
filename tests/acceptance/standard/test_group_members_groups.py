@@ -9,9 +9,7 @@ from tests.acceptance import (
 
 @pytest.fixture(scope="function")
 def one_owner(root_user, group, groups, subgroup, users):
-    group.members.create(
-        {"user_id": users[0].id, "access_level": AccessLevel.OWNER.value}
-    )
+    group.members.create({"user_id": users[0].id, "access_level": AccessLevel.OWNER.value})
     group.members.delete(root_user.id)
 
     yield group
@@ -20,9 +18,7 @@ def one_owner(root_user, group, groups, subgroup, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    group.members.create(
-        {"user_id": root_user.id, "access_level": AccessLevel.OWNER.value}
-    )
+    group.members.create({"user_id": root_user.id, "access_level": AccessLevel.OWNER.value})
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -120,9 +116,7 @@ class TestGroupMembersGroups:
 
         assert [sw["group_name"] for sw in shared_with] == [groups[0].name]
 
-    def test__not_remove_groups_with_enforce_false(
-        self, gl, group, users, groups, one_owner
-    ):
+    def test__not_remove_groups_with_enforce_false(self, gl, group, users, groups, one_owner):
         no_of_members_before = len(group.members.list())
         no_of_shared_with_before = len(gl.groups.get(group.id).shared_with_groups)
 
@@ -181,14 +175,9 @@ class TestGroupMembersGroups:
         shared_with = gl.groups.get(group.id).shared_with_groups
         for shared_with_group in shared_with:
             if shared_with_group["group_name"] == f"{groups[0]}":
-                assert (
-                    shared_with_group["group_access_level"]
-                    == AccessLevel.DEVELOPER.value
-                )
+                assert shared_with_group["group_access_level"] == AccessLevel.DEVELOPER.value
             if shared_with_group["group_name"] == f"{groups[1].full_path}":
-                assert (
-                    shared_with_group["group_access_level"] == AccessLevel.OWNER.value
-                )
+                assert shared_with_group["group_access_level"] == AccessLevel.OWNER.value
 
     def test__remove_all(self, gl, group, users, one_owner):
         no_shared_with = f"""
@@ -206,9 +195,7 @@ class TestGroupMembersGroups:
         shared_with = gl.groups.get(group.id).shared_with_groups
         assert len(shared_with) == 0
 
-    def test__add_group_with_access_level_names(
-        self, gl, group, users, groups, one_owner
-    ):
+    def test__add_group_with_access_level_names(self, gl, group, users, groups, one_owner):
         no_of_members_before = len(group.members.list())
 
         add_shared_with = f"""

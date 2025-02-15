@@ -17,9 +17,7 @@ class ProjectPushRulesProcessor(AbstractProcessor):
             existing_push_rules = project.pushrules.get()
         except GitlabGetError as e:
             if e.response_code == 404:
-                debug(
-                    f"No existing push rules for '{project.name}', creating new push rules."
-                )
+                debug(f"No existing push rules for '{project.name}', creating new push rules.")
                 self.create_project_push_rules(project, configured_project_push_rules)
                 return
         except GitlabParsingError as e:
@@ -36,9 +34,7 @@ class ProjectPushRulesProcessor(AbstractProcessor):
             self.create_project_push_rules(project, configured_project_push_rules)
             return
 
-        if self._needs_update(
-            existing_push_rules.asdict(), configured_project_push_rules
-        ):
+        if self._needs_update(existing_push_rules.asdict(), configured_project_push_rules):
             self.update_push_rules(existing_push_rules, configured_project_push_rules)
         else:
             debug("No update needed for Project Push Rules")

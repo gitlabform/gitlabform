@@ -81,9 +81,7 @@ class TestProtectedEnvironments:
         protected_envs_under_this_project = project.protected_environments.list()
 
         assert len(protected_envs_under_this_project) == 2
-        blah_retrieved_info = [
-            x for x in protected_envs_under_this_project if x.name == "blah"
-        ]
+        blah_retrieved_info = [x for x in protected_envs_under_this_project if x.name == "blah"]
         assert len(blah_retrieved_info) == 1
         assert len(blah_retrieved_info[0].deploy_access_levels) == 1
         assert blah_retrieved_info[0].deploy_access_levels[0]["user_id"] == user1.id
@@ -128,10 +126,7 @@ class TestProtectedEnvironments:
         assert len(protected_envs_under_this_project) == 1
         assert protected_envs_under_this_project[0].name == "foo"
         assert len(protected_envs_under_this_project[0].deploy_access_levels) == 1
-        assert (
-            protected_envs_under_this_project[0].deploy_access_levels[0]["group_id"]
-            == other_group.id
-        )
+        assert protected_envs_under_this_project[0].deploy_access_levels[0]["group_id"] == other_group.id
 
     def test__protect_a_repository_environment_group_id(self, project, other_group):
         config = f"""
@@ -155,29 +150,18 @@ class TestProtectedEnvironments:
         assert len(protected_envs_under_this_project) == 1
         assert protected_envs_under_this_project[0].name == "foo"
         assert len(protected_envs_under_this_project[0].deploy_access_levels) == 1
-        assert (
-            protected_envs_under_this_project[0].deploy_access_levels[0]["group_id"]
-            == other_group.id
-        )
+        assert protected_envs_under_this_project[0].deploy_access_levels[0]["group_id"] == other_group.id
 
-    def test__environment_protection_dependent_on_members(
-        self, project_for_function, group_for_function, make_user
-    ):
+    def test__environment_protection_dependent_on_members(self, project_for_function, group_for_function, make_user):
         """
         Configure an environment protection setting that depends on users or groups (i.e. allowed_to_deploy)
         Make sure the setting is applied successfully because users must be members
         before they can be configured in environment protection setting.
         """
 
-        user_for_group_to_share_project_with = make_user(
-            level=AccessLevel.DEVELOPER, add_to_project=False
-        )
-        project_user_allowed_to_deploy = make_user(
-            level=AccessLevel.DEVELOPER, add_to_project=False
-        )
-        project_user_allowed_to_approve = make_user(
-            level=AccessLevel.DEVELOPER, add_to_project=False
-        )
+        user_for_group_to_share_project_with = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
+        project_user_allowed_to_deploy = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
+        project_user_allowed_to_approve = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
 
         config_branch_protection = f"""
         projects_and_groups:
@@ -211,9 +195,7 @@ class TestProtectedEnvironments:
 
         run_gitlabform(config_branch_protection, project_for_function)
 
-        protected_envs_under_this_project = (
-            project_for_function.protected_environments.list()
-        )
+        protected_envs_under_this_project = project_for_function.protected_environments.list()
         assert len(protected_envs_under_this_project) == 1
         production_env_protection_details = protected_envs_under_this_project[0]
         assert production_env_protection_details.name == "production"

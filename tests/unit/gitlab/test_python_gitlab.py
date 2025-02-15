@@ -55,9 +55,7 @@ class TestPythonGitlab:
 
         member_role_id_prefix = "gid://gitlab/MemberRole/"
 
-        member_role_nodes = [
-            dict(id=f"{member_role_id_prefix}{member_role_id}", name=role_name)
-        ]
+        member_role_nodes = [dict(id=f"{member_role_id_prefix}{member_role_id}", name=role_name)]
 
         python_gitlab = PythonGitlab(MagicMock())
 

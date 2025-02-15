@@ -17,9 +17,7 @@ class AbstractProcessor(ABC):
         self.gitlab = gitlab
         self.custom_diff_analyzers: dict[
             str,
-            Callable[
-                [str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool
-            ],
+            Callable[[str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool],
         ] = {}
         self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
 
@@ -34,23 +32,14 @@ class AbstractProcessor(ABC):
     ):
         if self._section_is_in_config(configuration):
             if configuration.get(f"{self.configuration_name}|skip"):
-                verbose(
-                    f"Skipping section '{self.configuration_name}' - explicitly configured to do so."
-                )
+                verbose(f"Skipping section '{self.configuration_name}' - explicitly configured to do so.")
                 return
-            elif (
-                configuration.get("project|archive")
-                and self.configuration_name != "project"
-            ):
-                verbose(
-                    f"Skipping section '{self.configuration_name}' - it is configured to be archived."
-                )
+            elif configuration.get("project|archive") and self.configuration_name != "project":
+                verbose(f"Skipping section '{self.configuration_name}' - it is configured to be archived.")
                 return
 
             if dry_run:
-                verbose(
-                    f"Processing section '{self.configuration_name}' in dry-run mode."
-                )
+                verbose(f"Processing section '{self.configuration_name}' in dry-run mode.")
                 project_transfer_source = ""
                 try:
                     project_transfer_source = configuration["project"]["transfer_from"]
@@ -69,9 +58,7 @@ class AbstractProcessor(ABC):
             else:
                 verbose(f"Processing section '{self.configuration_name}'")
                 if self._can_proceed(project_or_project_and_group, configuration):
-                    self._process_configuration_with_retries(
-                        project_or_project_and_group, configuration
-                    )
+                    self._process_configuration_with_retries(project_or_project_and_group, configuration)
 
             effective_configuration.add_configuration(
                 project_or_project_and_group,
@@ -84,18 +71,14 @@ class AbstractProcessor(ABC):
     def _section_is_in_config(self, configuration: dict):
         return self.configuration_name in configuration
 
-    def _process_configuration_with_retries(
-        self, project_or_project_and_group: str, configuration: dict
-    ):
+    def _process_configuration_with_retries(self, project_or_project_and_group: str, configuration: dict):
         retry = 1
         max_retries = 3
 
         while True:
             try:
                 if retry > 1:
-                    verbose(
-                        f"Retrying section '{self.configuration_name}' - {retry}/{max_retries}..."
-                    )
+                    verbose(f"Retrying section '{self.configuration_name}' - {retry}/{max_retries}...")
 
                 self._process_configuration(
                     project_or_project_and_group,
@@ -139,14 +122,10 @@ class AbstractProcessor(ABC):
         return False
 
     @abstractmethod
-    def _process_configuration(
-        self, project_or_project_and_group: str, configuration: dict
-    ):
+    def _process_configuration(self, project_or_project_and_group: str, configuration: dict):
         pass
 
-    def _print_diff(
-        self, project_or_project_and_group: str, entity_config, diff_only_changed: bool
-    ):
+    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
         verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
 
     def _needs_update(
@@ -161,20 +140,14 @@ class AbstractProcessor(ABC):
         # a) we look for ANY settings that are ONLY in configuration,
         # a) we compare the settings that are in both configuration and gitlab,
 
-        keys_only_in_configuration = set(entity_in_configuration.keys()) - set(
-            entity_in_gitlab.keys()
-        )
+        keys_only_in_configuration = set(entity_in_configuration.keys()) - set(entity_in_gitlab.keys())
         if len(keys_only_in_configuration) > 0:
             return True
 
-        keys_on_both_sides = set(entity_in_configuration.keys()) & set(
-            entity_in_gitlab.keys()
-        )
+        keys_on_both_sides = set(entity_in_configuration.keys()) & set(entity_in_gitlab.keys())
         for key in keys_on_both_sides:
             if key in self.custom_diff_analyzers:
-                return self.custom_diff_analyzers[key](
-                    key, entity_in_gitlab[key], entity_in_configuration[key]
-                )
+                return self.custom_diff_analyzers[key](key, entity_in_gitlab[key], entity_in_configuration[key])
 
             if entity_in_gitlab[key] != entity_in_configuration[key]:
                 debug(
@@ -193,25 +166,17 @@ class AbstractProcessor(ABC):
             return True
 
         for index in range(len(cfg_in_gitlab)):
-            from_gitlab = {
-                k: v for k, v in cfg_in_gitlab[index].items() if v is not None
-            }
+            from_gitlab = {k: v for k, v in cfg_in_gitlab[index].items() if v is not None}
             from_local_cfg = local_cfg[index]
 
             keys_on_both_sides = set(from_gitlab.keys()) & set(from_local_cfg.keys())
 
             for key in keys_on_both_sides:
-                if isinstance(from_gitlab[key], list) and isinstance(
-                    from_local_cfg[key], list
-                ):
-                    AbstractProcessor.recursive_diff_analyzer(
-                        key, from_gitlab[key], from_local_cfg[key]
-                    )
+                if isinstance(from_gitlab[key], list) and isinstance(from_local_cfg[key], list):
+                    AbstractProcessor.recursive_diff_analyzer(key, from_gitlab[key], from_local_cfg[key])
 
                 if from_gitlab[key] != from_local_cfg[key]:
-                    debug(
-                        f"* A <{key}> in [{cfg_key}] differs:\n GitLab :: {from_gitlab} != Local :: {from_local_cfg}"
-                    )
+                    debug(f"* A <{key}> in [{cfg_key}] differs:\n GitLab :: {from_gitlab} != Local :: {from_local_cfg}")
                     return True
 
         return False

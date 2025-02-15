@@ -138,15 +138,9 @@ class TestBranches:
         before they can be configured in branch protection setting.
         """
 
-        user_for_group_to_share_project_with = make_user(
-            level=AccessLevel.DEVELOPER, add_to_project=False
-        )
-        project_user_allowed_to_push = make_user(
-            level=AccessLevel.DEVELOPER, add_to_project=False
-        )
-        project_user_allowed_to_merge = make_user(
-            level=AccessLevel.DEVELOPER, add_to_project=False
-        )
+        user_for_group_to_share_project_with = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
+        project_user_allowed_to_push = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
+        project_user_allowed_to_merge = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
 
         # Wait a little for newly created users to be available.
         time.sleep(2)

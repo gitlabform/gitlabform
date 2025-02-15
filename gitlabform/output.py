@@ -18,9 +18,7 @@ class EffectiveConfigurationFile:
         if output_file:
             try:
                 self.output_file = open(output_file, "w")
-                debug(
-                    f"Opened file {self.output_file} to write the effective configs to."
-                )
+                debug(f"Opened file {self.output_file} to write the effective configs to.")
             except Exception as e:
                 fatal(
                     f"Error when trying to open {self.output_file} to write the effective configs to: {e}",
@@ -35,9 +33,7 @@ class EffectiveConfigurationFile:
         if self.output_file:
             self.config[project_or_group] = {}
 
-    def add_configuration(
-        self, project_or_group: str, configuration_name: str, configuration: dict
-    ):
+    def add_configuration(self, project_or_group: str, configuration_name: str, configuration: dict):
         if self.output_file:
             verbose(f"Adding effective configuration for {configuration_name}.")
             self.config[project_or_group][configuration_name] = configuration

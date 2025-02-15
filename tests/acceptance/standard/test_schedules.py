@@ -60,9 +60,7 @@ class TestSchedules:
 
         run_gitlabform(add_schedule, project)
 
-        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "New schedule"
-        )
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(project, "New schedule")
         assert schedule is not None
         assert schedule.description == "New schedule"
         # If the Short Version is provided, the Full Version is returned:
@@ -112,9 +110,7 @@ class TestSchedules:
 
         run_gitlabform(add_schedule_with_variables, project)
 
-        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "New schedule with variables"
-        )
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(project, "New schedule with variables")
         assert schedule is not None
         assert schedule.description == "New schedule with variables"
         assert schedule.ref == "refs/heads/main"
@@ -135,9 +131,7 @@ class TestSchedules:
         assert variables[1]["value"] == "value987"
 
     def test__update_existing_schedule(self, project, schedules):
-        existing_schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "Existing schedule"
-        )
+        existing_schedule = self.__find_pipeline_schedule_by_description_and_get_first(project, "Existing schedule")
 
         edit_schedule = f"""
         projects_and_groups:
@@ -152,9 +146,7 @@ class TestSchedules:
 
         run_gitlabform(edit_schedule, project)
 
-        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "Existing schedule"
-        )
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(project, "Existing schedule")
         assert schedule is not None
 
         # Verify it updated the schedule rather than creating/deleting
@@ -167,9 +159,7 @@ class TestSchedules:
         assert schedule.cron_timezone == "Stockholm"
         assert schedule.active is False
 
-    def test__existing_schedule_is_not_modified_when_no_changes_made(
-        self, project_for_function, caplog
-    ):
+    def test__existing_schedule_is_not_modified_when_no_changes_made(self, project_for_function, caplog):
         caplog.set_level(logging.DEBUG)
         existing_schedule = project_for_function.pipelineschedules.create(
             {
@@ -191,9 +181,7 @@ class TestSchedules:
         """
         run_gitlabform(edit_schedule, project_for_function)
 
-        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project_for_function, "Existing schedule"
-        )
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(project_for_function, "Existing schedule")
         assert schedule is not None
 
         # Verify it updated the schedule rather than creating/deleting
@@ -206,14 +194,9 @@ class TestSchedules:
         assert schedule.active is True
 
         # Verify logged out "No update"; from which we can infer no API actions invoked
-        assert (
-            "No update required for pipeline schedule 'Existing schedule'"
-            in caplog.text
-        )
+        assert "No update required for pipeline schedule 'Existing schedule'" in caplog.text
 
-    def test__apply_existing_schedule_with_variables_to_new_branch(
-        self, project_for_function, branch_for_function
-    ):
+    def test__apply_existing_schedule_with_variables_to_new_branch(self, project_for_function, branch_for_function):
         existing_schedule = project_for_function.pipelineschedules.create(
             {
                 "description": "Existing schedule with vars",
@@ -221,9 +204,7 @@ class TestSchedules:
                 "cron": "0 * * * *",
             }
         )
-        existing_schedule.variables.create(
-            {"key": "existing_var", "value": "test_value"}
-        )
+        existing_schedule.variables.create({"key": "existing_var", "value": "test_value"})
         assert existing_schedule is not None
 
         edit_schedule = f"""
@@ -277,9 +258,7 @@ class TestSchedules:
 
         run_gitlabform(replace_schedules, project)
 
-        existing_schedules = self.__find_pipeline_schedules_by_description(
-            project, "Existing schedule to replace"
-        )
+        existing_schedules = self.__find_pipeline_schedules_by_description(project, "Existing schedule to replace")
         assert existing_schedules is not None
         assert len(existing_schedules) == 1
 
@@ -301,9 +280,7 @@ class TestSchedules:
 
         run_gitlabform(delete_schedule, project)
 
-        schedule = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "Redundant schedule"
-        )
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(project, "Redundant schedule")
         assert schedule is None
 
     def test__schedule_enforce_new_schedule(self, project, schedules):
@@ -364,9 +341,7 @@ class TestSchedules:
         schedule1 = self.__find_pipeline_schedule_by_description_and_get_first(
             project, "New schedule to test enforce config"
         )
-        schedule2 = self.__find_pipeline_schedule_by_description_and_get_first(
-            project, "New schedule with variables"
-        )
+        schedule2 = self.__find_pipeline_schedule_by_description_and_get_first(project, "New schedule with variables")
         assert len(schedules_before) == 1
         assert len(schedules_after) == 2
 
@@ -396,9 +371,7 @@ class TestSchedules:
         assert variables[1]["value"] == "value987"
 
     @classmethod
-    def __find_pipeline_schedule_by_description_and_get_first(
-        cls, project, description
-    ):
+    def __find_pipeline_schedule_by_description_and_get_first(cls, project, description):
         try:
             return cls.__find_pipeline_schedules_by_description(project, description)[0]
         except IndexError:

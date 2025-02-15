@@ -18,9 +18,7 @@ class ProjectsProvider(GroupsProvider):
     Because the projects depend on groups requested, this class inherits GroupsProvider.
     """
 
-    def __init__(
-        self, gitlab, configuration, include_archived_projects, recurse_subgroups
-    ):
+    def __init__(self, gitlab, configuration, include_archived_projects, recurse_subgroups):
         super().__init__(gitlab, configuration, recurse_subgroups)
         self.include_archived_projects = include_archived_projects
 
@@ -52,12 +50,8 @@ class ProjectsProvider(GroupsProvider):
 
         except NotFoundException:
             debug("Could not find '%s'", target)
-            if project_transfer_source := self._get_project_transfer_source_from_config(
-                target
-            ):
-                if self._find_project_transfer_source_in_gitlab(
-                    project_transfer_source
-                ):
+            if project_transfer_source := self._get_project_transfer_source_from_config(target):
+                if self._find_project_transfer_source_in_gitlab(project_transfer_source):
                     projects.add_requested([target])
                 else:
                     fatal(
@@ -83,9 +77,7 @@ class ProjectsProvider(GroupsProvider):
 
         # TODO: this check should be case-insensitive
         projects_from_configuration_not_from_groups = [
-            project
-            for project in projects_from_configuration
-            if project not in projects.requested
+            project for project in projects_from_configuration if project not in projects.requested
         ]
 
         if target == "ALL_DEFINED":
@@ -94,9 +86,7 @@ class ProjectsProvider(GroupsProvider):
             # being archived projects that we already got from groups
 
             archived_projects_from_configuration_not_from_groups = (
-                self._verify_if_projects_exist_and_get_archived_projects(
-                    projects_from_configuration_not_from_groups
-                )
+                self._verify_if_projects_exist_and_get_archived_projects(projects_from_configuration_not_from_groups)
             )
 
             projects.add_requested(projects_from_configuration_not_from_groups)
@@ -109,11 +99,7 @@ class ProjectsProvider(GroupsProvider):
             # that are being transferred to a different namespace
             for project in projects_from_configuration_not_from_groups:
                 # if the target is a group, and the project is not in the group
-                if (
-                    len(groups.get_effective()) == 1
-                    and target != "ALL"
-                    and target != project.rsplit("/", 1)[0]
-                ):
+                if len(groups.get_effective()) == 1 and target != "ALL" and target != project.rsplit("/", 1)[0]:
                     debug(
                         "Ignore project '%s', since it's not in target group '%s",
                         project,
@@ -126,15 +112,11 @@ class ProjectsProvider(GroupsProvider):
                         projects.add_requested([project])
 
         # TODO: consider checking for skipped earlier to avoid making requests for projects that will be skipped anyway
-        projects.add_omitted(
-            OmissionReason.SKIPPED, self._get_skipped_projects(projects.get_effective())
-        )
+        projects.add_omitted(OmissionReason.SKIPPED, self._get_skipped_projects(projects.get_effective()))
 
         return projects
 
-    def _verify_if_projects_exist_and_get_archived_projects(
-        self, projects: list
-    ) -> list:
+    def _verify_if_projects_exist_and_get_archived_projects(self, projects: list) -> list:
         archived = []
         for project in projects:
             try:
@@ -143,12 +125,8 @@ class ProjectsProvider(GroupsProvider):
                     archived.append(project_object["path_with_namespace"])
             except NotFoundException:
                 debug("Could not find '%s'", project)
-                if project_transfer_source := self._get_project_transfer_source_from_config(
-                    project
-                ):
-                    source_project = self._find_project_transfer_source_in_gitlab(
-                        project_transfer_source
-                    )
+                if project_transfer_source := self._get_project_transfer_source_from_config(project):
+                    source_project = self._find_project_transfer_source_in_gitlab(project_transfer_source)
                     if source_project:
                         if source_project["archived"]:
                             archived.append(project)
@@ -166,18 +144,14 @@ class ProjectsProvider(GroupsProvider):
 
         return archived
 
-    def _get_all_and_archived_projects_from_groups(
-        self, groups: list
-    ) -> Tuple[list, list]:
+    def _get_all_and_archived_projects_from_groups(self, groups: list) -> Tuple[list, list]:
         all = []
         archived = []
         for group in groups:
             if self.include_archived_projects:
                 all += self.gitlab.get_projects(group, include_archived=True)
             else:
-                project_objects = self.gitlab.get_projects(
-                    group, include_archived=True, only_names=False
-                )
+                project_objects = self.gitlab.get_projects(group, include_archived=True, only_names=False)
                 for project_object in project_objects:
                     project = project_object["path_with_namespace"]
                     all.append(project)
@@ -202,9 +176,9 @@ class ProjectsProvider(GroupsProvider):
                 "Checking if project '%s' needs to be transferred from elsewhere",
                 project,
             )
-            project_transfer_source = self.configuration.config["projects_and_groups"][
-                project
-            ]["project"]["transfer_from"]
+            project_transfer_source = self.configuration.config["projects_and_groups"][project]["project"][
+                "transfer_from"
+            ]
             debug(
                 "Project '%s' needs to be transferred from '%s'",
                 project,
@@ -216,17 +190,13 @@ class ProjectsProvider(GroupsProvider):
 
         return project_transfer_source
 
-    def _find_project_transfer_source_in_gitlab(
-        self, project_transfer_source: str
-    ) -> Optional[dict]:
+    def _find_project_transfer_source_in_gitlab(self, project_transfer_source: str) -> Optional[dict]:
         try:
             debug(
                 "Checking if project transfer source ('%s') exists in GitLab",
                 project_transfer_source,
             )
-            maybe_project = self.gitlab.get_project_case_insensitive(
-                project_transfer_source
-            )
+            maybe_project = self.gitlab.get_project_case_insensitive(project_transfer_source)
             debug(
                 "Project transfer source ('%s') exists",
                 project_transfer_source,

@@ -32,10 +32,8 @@ def configuration_with_only_group_and_project():
 def test__get_effective_config_for_project__other_project(
     configuration_with_only_group_and_project,
 ):
-    effective_config = (
-        configuration_with_only_group_and_project.get_effective_config_for_project(
-            "project_not_in_config/group_not_in_config"
-        )
+    effective_config = configuration_with_only_group_and_project.get_effective_config_for_project(
+        "project_not_in_config/group_not_in_config"
     )
 
     assert effective_config == {}
@@ -44,10 +42,8 @@ def test__get_effective_config_for_project__other_project(
 def test__get_effective_config_for_project__project_from_config__additive_project_settings(
     configuration_with_only_group_and_project,
 ):
-    effective_config = (
-        configuration_with_only_group_and_project.get_effective_config_for_project(
-            "some_group/some_project"
-        )
+    effective_config = configuration_with_only_group_and_project.get_effective_config_for_project(
+        "some_group/some_project"
     )
 
     additive__project_settings = effective_config["project_settings"]
@@ -59,10 +55,8 @@ def test__get_effective_config_for_project__project_from_config__additive_projec
 def test__get_effective_config_for_project__project_from_config__additive_hooks(
     configuration_with_only_group_and_project,
 ):
-    effective_config = (
-        configuration_with_only_group_and_project.get_effective_config_for_project(
-            "some_group/some_project"
-        )
+    effective_config = configuration_with_only_group_and_project.get_effective_config_for_project(
+        "some_group/some_project"
     )
 
     additive__hooks = effective_config["hooks"]
@@ -99,9 +93,9 @@ def test__get_effective_config_for_project__with_multiple_levels():
             - project_approvers
     """
 
-    effective_config = Configuration(
-        config_string=config_yaml
-    ).get_effective_config_for_project("some_group/my_project")
+    effective_config = Configuration(config_string=config_yaml).get_effective_config_for_project(
+        "some_group/my_project"
+    )
 
     assert effective_config == {
         "merge_requests": {
@@ -136,9 +130,9 @@ def test__get_effective_config_for_project__configuration_for_other_project():
             value: bar
     """
 
-    effective_config = Configuration(
-        config_string=config_yaml
-    ).get_effective_config_for_project("some_group/some_project_after_defined")
+    effective_config = Configuration(config_string=config_yaml).get_effective_config_for_project(
+        "some_group/some_project_after_defined"
+    )
 
     assert effective_config == {
         "variables": {

@@ -89,8 +89,6 @@ class GitLabProjectMergeRequestsApprovals(GitLabCore):
         data.pop("protected_branches")
         protected_branch_ids = []
         for branch_name in protected_branches_name:
-            branch_id = self._get_protected_branch_id(
-                project_and_group_name, branch_name
-            )
+            branch_id = self._get_protected_branch_id(project_and_group_name, branch_name)
             protected_branch_ids.append(branch_id)
         data["protected_branch_ids"] = protected_branch_ids
