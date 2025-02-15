@@ -99,12 +99,13 @@ jobs:
           bandit -r gitlabform
 
   smoke-tests:
-    runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.12]
-      fail-fast : false
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [ 3.12 ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
