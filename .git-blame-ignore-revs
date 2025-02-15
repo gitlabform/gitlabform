@@ -1,3 +1,4 @@
 # Migrate code style to Black
 c4ee3944829eda31699d63f55afc2d1a174fc12c
-
+# Reformat to the latest version of Black with 120 chars per line
+c909ea634c45e357af47c85f8f0d064fc437c43c
