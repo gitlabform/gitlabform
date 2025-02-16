@@ -33,7 +33,7 @@ class VariablesProcessor(AbstractProcessor):
         """
         try:
             project: Project = self.gl.get_project_by_path_cached(project_and_group)
-            current_variables: list[ProjectVariable] = project.variables.list()
+            existing_variables: list[ProjectVariable] = project.variables.list()
             
             configured_variables = configuration.get("variables", {})
             enforce_mode: bool = configured_variables.get("enforce", False)
@@ -43,30 +43,37 @@ class VariablesProcessor(AbstractProcessor):
                 # Remove 'enforce' key from the config so that it's not treated as a variable
                 configured_variables.pop("enforce")
 
-            # Create a lookup dictionary for faster access to existing variables
-            current_vars_lookup = {
+            # Create lookup of existing variables for faster access
+            existing_vars_lookup = {
                 (var.key, getattr(var, "environment_scope", "*")): var
-                for var in current_variables
+                for var in existing_variables
             }
 
-            # Log the current state
-            verbose(f"Found {len(current_variables)} existing variables in {project_and_group}")
-            verbose(f"Processing {len(configured_variables)} variables from configuration")
+            verbose(f"Found {len(existing_variables)} existing variables in {project_and_group}")
             
-            # Process variables if any are configured
-            processed_vars = set()
+            # Process all configured variables (both new and existing)
+            processed_existing_vars = set()
             if configured_variables:
-                processed_vars = self._process_variables(project, configured_variables, current_vars_lookup)
+                verbose(f"Processing {len(configured_variables)} variables from configuration")
+                # This will:
+                # 1. Create any new variables defined in configuration
+                # 2. Update any existing variables that need changes
+                # 3. Track which existing variables were processed (for enforce mode)
+                processed_existing_vars = self._process_variables(
+                    project, 
+                    configured_variables, 
+                    existing_vars_lookup
+                )
 
-            # Handle enforce mode (even if no variables are configured)
+            # Handle cleanup of unprocessed existing variables
             if enforce_mode:
-                unprocessed_count = len(current_variables) - len(processed_vars)
-                if unprocessed_count > 0:
+                vars_to_delete = len(existing_variables) - len(processed_existing_vars)
+                if vars_to_delete > 0:
                     verbose(
-                        f"Enforce mode will delete {unprocessed_count} variables "
-                        f"not in configuration from {project_and_group}"
+                        f"Enforce mode will delete {vars_to_delete} existing variables "
+                        f"that were not in configuration from {project_and_group}"
                     )
-                self._delete_unconfigured_variables(current_variables, processed_vars)
+                self._delete_unconfigured_variables(existing_variables, processed_existing_vars)
 
         except Exception as e:
             warning(f"Failed to process variables for {project_and_group}: {str(e)}")
