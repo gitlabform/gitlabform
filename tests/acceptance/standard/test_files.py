@@ -165,7 +165,12 @@ class TestFiles:
         # note: the code above often does not work when running GitLab
         # in a resource-constrained container during tests, but the below one does!
         protected_branches = project.protectedbranches.list()
-        assert protected_branches[1].name == no_access_branch.name
+        is_protected = False
+        for protected_branch in protected_branches:
+            if protected_branch.name == no_access_branch.name:
+                is_protected = True
+                break
+        assert is_protected == True
 
     def test__delete_file_protected_branch(self, project, branch):
         set_file_specific_branch = f"""
