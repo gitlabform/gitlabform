@@ -40,23 +40,25 @@ class TestVariables:
     @pytest.mark.parametrize(
         "initial_vars, config_vars, expected",
         [
-            # Single variable - testing create, update, delete
+            # Test case 1: Single variable - no change
             (
                 [{"key": "FOO", "value": "123"}],
                 [{"key": "FOO", "value": "123"}],
                 [("FOO", "123")],
             ),
+            # Test case 2: Single variable - update
             (
                 [{"key": "FOO", "value": "123"}],
                 [{"key": "FOO", "value": "123456"}],
                 [("FOO", "123456")],
             ),
+            # Test case 3: Single variable - delete
             (
                 [{"key": "FOO", "value": "123"}],
                 [{"key": "FOO", "value": "123", "delete": True}],
-                None,
+                [("FOO", None)],
             ),
-            # Multiple variables - testing create, update, and delete together
+            # Test case 4: Multiple variables - all operations
             (
                 [
                     {"key": "FOO", "value": "123"},  # will be updated
@@ -71,27 +73,110 @@ class TestVariables:
                 ],
                 [
                     ("FOO", "123456"),  # updated
+                    ("BAR", None),  # deleted
                     ("BAZ", "old"),  # unchanged
                     ("QUX", "new"),  # newly created
                 ],
             ),
-            # Environment scopes - testing variables with different environment scopes
-            (
-                [{"key": "FOO1", "value": "alfa", "environment_scope": "test/ee"}],
-                [{"key": "FOO1", "value": "alfa", "environment_scope": "test/ee"}],
-                [("FOO1", "alfa", "test/ee")],
-            ),
+            # Test case 5: Single variable with multiple scopes
             (
                 [
-                    {"key": "FOO2", "value": "alfa", "environment_scope": "test/ee"},
-                    {"key": "FOO2", "value": "beta", "environment_scope": "test/lv"},
+                    {
+                        "key": "FOO",
+                        "value": "prod-val",
+                        "environment_scope": "prod",
+                    },  # will be updated
+                    {
+                        "key": "FOO",
+                        "value": "dev-val",
+                        "environment_scope": "dev",
+                    },  # will stay same
                 ],
                 [
-                    {"key": "FOO2", "value": "alfa", "environment_scope": "test/ee"},
-                    {"key": "FOO2", "value": "beta", "environment_scope": "test/lv"},
+                    {
+                        "key": "FOO",
+                        "value": "new-prod",
+                        "environment_scope": "prod",
+                    },  # update
+                    {
+                        "key": "FOO",
+                        "value": "dev-val",
+                        "environment_scope": "dev",
+                    },  # no change
+                    {
+                        "key": "FOO",
+                        "value": "test-val",
+                        "environment_scope": "test",
+                    },  # create new
                 ],
-                [("FOO2", "alfa", "test/ee"), ("FOO2", "beta", "test/lv")],
+                [
+                    ("FOO", "new-prod", "prod"),  # updated
+                    ("FOO", "dev-val", "dev"),  # unchanged
+                    ("FOO", "test-val", "test"),  # newly created
+                ],
             ),
+            # Test case 6: Multiple variables with multiple scopes
+            (
+                [
+                    {
+                        "key": "DB_URL",
+                        "value": "prod-db",
+                        "environment_scope": "prod",
+                    },  # will be updated
+                    {
+                        "key": "API_KEY",
+                        "value": "prod-key",
+                        "environment_scope": "prod",
+                    },  # will stay same
+                    {
+                        "key": "API_KEY",
+                        "value": "stage-key",
+                        "environment_scope": "stage",
+                    },  # will be updated
+                ],
+                [
+                    {
+                        "key": "DB_URL",
+                        "value": "new-prod-db",
+                        "environment_scope": "prod",
+                    },  # update
+                    {
+                        "key": "DB_URL",
+                        "value": "dev-db",
+                        "environment_scope": "dev",
+                    },  # create new
+                    {
+                        "key": "API_KEY",
+                        "value": "prod-key",
+                        "environment_scope": "prod",
+                    },  # no change
+                    {
+                        "key": "API_KEY",
+                        "value": "new-stage-key",
+                        "environment_scope": "stage",
+                    },  # update
+                    {
+                        "key": "API_KEY",
+                        "value": "test-key",
+                        "environment_scope": "test",
+                    },  # create new
+                ],
+                [
+                    ("DB_URL", "new-prod-db", "prod"),  # updated
+                    ("DB_URL", "dev-db", "dev"),  # newly created
+                    ("API_KEY", "prod-key", "prod"),  # unchanged
+                    ("API_KEY", "new-stage-key", "stage"),  # updated
+                    ("API_KEY", "test-key", "test"),  # newly created
+                ],
+            ),
+        ],
+        ids=[
+            "test_case_1_single_var_no_change",
+            "test_case_2_single_var_update",
+            "test_case_3_single_var_delete",
+            "test_case_4_multiple_vars_all_operations",
+            "test_case_5_single_var_multiple_scopes",
+            "test_case_6_multiple_vars_multiple_scopes",
         ],
     )
     def test__variables(
@@ -103,9 +188,8 @@ class TestVariables:
             project_for_function: GitLab project fixture
             initial_vars: List of variables to create initially using GitLab API
             config_vars: List of variables to configure using gitlabform
-            expected: Expected state after gitlabform execution
-                     None for deletion tests
-                     List of (key, value) or (key, value, scope) tuples for other tests
+            expected: List of (key, value) or (key, value, scope) tuples
+                     value is None for variables that should be deleted
         """
         # Set initial variables
         for var in initial_vars:
@@ -116,18 +200,18 @@ class TestVariables:
         run_gitlabform(config, project_for_function)
 
         # Verify results
-        if expected is None:
-            with pytest.raises(GitlabGetError):
-                project_for_function.variables.get(config_vars[0]["key"])
-            return
-
         for expected_var in expected:
             key, value, *env_scope = expected_var
             get_params = (
                 {"filter": {"environment_scope": env_scope[0]}} if env_scope else {}
             )
-            variable = project_for_function.variables.get(key, **get_params)
-            assert variable.value == value
+
+            if value is None:
+                with pytest.raises(GitlabGetError):
+                    project_for_function.variables.get(key, **get_params)
+            else:
+                variable = project_for_function.variables.get(key, **get_params)
+                assert variable.value == value
 
     def _create_config(self, project_for_function, variables):
         """Creates YAML configuration for GitLab project variables.
