@@ -159,13 +159,13 @@ class TestFiles:
         project_file = project.files.get(ref="main", file_path="README.md")
         assert project_file.decode().decode("utf-8") == DEFAULT_README
 
-        # Retry mechanism to check if no_access_branch stays protected after the file update
-        for _ in range(5):
-            branch = project.branches.get(no_access_branch.name)
-            if branch.protected:
-                break
-            time.sleep(2)
-        assert branch.protected is True
+        # branch = project.branches.get(no_access_branch.name)
+        # assert branch.protected is True
+
+        # note: the code above often does not work when running GitLab
+        # in a resource-constrained container during tests, but the below one does!
+        protected_branches = project.protectedbranches.list()
+        assert protected_branches[1].name == no_access_branch.name
 
     def test__delete_file_protected_branch(self, project, branch):
         set_file_specific_branch = f"""
