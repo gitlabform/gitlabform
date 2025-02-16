@@ -1,12 +1,16 @@
 import pytest
-
 from gitlab import GitlabGetError, GitlabListError
-from gitlabform.gitlab.core import UnexpectedResponseException, NotFoundException
 
 from tests.acceptance import run_gitlabform
 
 
 class TestVariables:
+    """Test suite for GitLab project variable operations.
+
+    Tests variable creation, updates, deletion, and environment-scoped variables
+    using gitlabform configuration.
+    """
+
     @pytest.mark.skip(
         reason=(
             "GitLab API behaviour changed in version 17.7.0."
@@ -14,10 +18,10 @@ class TestVariables:
             " Track this issue in GitLab at https://gitlab.com/gitlab-org/gitlab/-/issues/511237"
         )
     )
-    def test__builds_disabled(self, project):
+    def test__builds_disabled(self, project_for_function):
         config_builds_not_enabled = f"""
         projects_and_groups:
-          {project.path_with_namespace}:
+          {project_for_function.path_with_namespace}:
             project_settings:
               builds_access_level: disabled
             variables:
@@ -26,164 +30,190 @@ class TestVariables:
                 value: 123
         """
 
-        run_gitlabform(config_builds_not_enabled, project)
+        run_gitlabform(config_builds_not_enabled, project_for_function)
 
         with pytest.raises(GitlabListError):
             # variables will NOT be available without builds_access_level in ['private', 'enabled']
-            vars = project.variables.list()
+            vars = project_for_function.variables.list()
             print("vars: ", type(vars), vars)
 
-    def test__single_variable(self, project):
-        config_single_variable = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              builds_access_level: enabled
-            variables:
-              foo:
-                key: FOO
-                value: 123
+    @pytest.mark.parametrize(
+        "initial_vars, config_vars, expected",
+        [
+            # Single variable - testing create, update, delete
+            (
+                [{"key": "FOO", "value": "123"}],
+                [{"key": "FOO", "value": "123"}],
+                [("FOO", "123")],
+            ),
+            (
+                [{"key": "FOO", "value": "123"}],
+                [{"key": "FOO", "value": "123456"}],
+                [("FOO", "123456")],
+            ),
+            (
+                [{"key": "FOO", "value": "123"}],
+                [{"key": "FOO", "value": "123", "delete": True}],
+                None,
+            ),
+            # Multiple variables - testing create, update, and delete together
+            (
+                [
+                    {"key": "FOO", "value": "123"},  # will be updated
+                    {"key": "BAR", "value": "bleble"},  # will be deleted
+                    {"key": "BAZ", "value": "old"},  # will stay the same
+                ],
+                [
+                    {"key": "FOO", "value": "123456"},  # update
+                    {"key": "BAR", "value": "bleble", "delete": True},  # delete
+                    {"key": "BAZ", "value": "old"},  # no change
+                    {"key": "QUX", "value": "new"},  # create new
+                ],
+                [
+                    ("FOO", "123456"),  # updated
+                    ("BAZ", "old"),  # unchanged
+                    ("QUX", "new"),  # newly created
+                ],
+            ),
+            # Environment scopes - testing variables with different environment scopes
+            (
+                [{"key": "FOO1", "value": "alfa", "environment_scope": "test/ee"}],
+                [{"key": "FOO1", "value": "alfa", "environment_scope": "test/ee"}],
+                [("FOO1", "alfa", "test/ee")],
+            ),
+            (
+                [
+                    {"key": "FOO2", "value": "alfa", "environment_scope": "test/ee"},
+                    {"key": "FOO2", "value": "beta", "environment_scope": "test/lv"},
+                ],
+                [
+                    {"key": "FOO2", "value": "alfa", "environment_scope": "test/ee"},
+                    {"key": "FOO2", "value": "beta", "environment_scope": "test/lv"},
+                ],
+                [("FOO2", "alfa", "test/ee"), ("FOO2", "beta", "test/lv")],
+            ),
+        ],
+    )
+    def test__variables(
+        self, project_for_function, initial_vars, config_vars, expected
+    ):
+        """Test variable operations using gitlabform.
+
+        Args:
+            project_for_function: GitLab project fixture
+            initial_vars: List of variables to create initially using GitLab API
+            config_vars: List of variables to configure using gitlabform
+            expected: Expected state after gitlabform execution
+                     None for deletion tests
+                     List of (key, value) or (key, value, scope) tuples for other tests
         """
+        # Set initial variables
+        for var in initial_vars:
+            project_for_function.variables.create(var)
 
-        run_gitlabform(config_single_variable, project)
+        # Apply gitlabform config
+        config = self._create_config(project_for_function, config_vars)
+        run_gitlabform(config, project_for_function)
 
-        variable = project.variables.get("FOO")
-        assert variable.value == "123"
+        # Verify results
+        if expected is None:
+            with pytest.raises(GitlabGetError):
+                project_for_function.variables.get(config_vars[0]["key"])
+            return
 
-    def test__delete_variable(self, project):
-        config_single_variable = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              builds_access_level: enabled
-            variables:
-              foo:
-                key: FOO
-                value: 123
+        for expected_var in expected:
+            key, value, *env_scope = expected_var
+            get_params = (
+                {"filter": {"environment_scope": env_scope[0]}} if env_scope else {}
+            )
+            variable = project_for_function.variables.get(key, **get_params)
+            assert variable.value == value
+
+    def _create_config(self, project_for_function, variables):
+        """Creates YAML configuration for GitLab project variables.
+
+        Generates a YAML configuration string for gitlabform that defines project
+        variables with their properties. Supports regular variables, environment-scoped
+        variables, and variable deletion.
+
+        Args:
+            project_for_function: GitLab project instance
+            variables: List of variable configurations, each containing:
+                - key: Variable name
+                - value: Variable value
+                - environment_scope: Optional environment scope
+                - delete: Optional deletion flag
+
+        Returns:
+            str: YAML configuration string
+
+        Example YAML structure:
+            projects_and_groups:
+              project_path:
+                project_settings:
+                  builds_access_level: enabled
+                variables:
+                  var_name:
+                    key: VAR_NAME
+                    value: var_value
+                    [environment_scope: scope]
+                    [filter[environment_scope]: scope]
+                    [delete: true]
         """
+        # Main configuration template
+        template = """\
+projects_and_groups:
+  {project}:
+    project_settings:
+      builds_access_level: enabled
+    variables:
+{variables}"""
 
-        run_gitlabform(config_single_variable, project)
+        # Variable entry template
+        var_template = """\
+      {name}:
+        key: {key}
+        value: {value}{env_scope}{delete}"""
 
-        variable = project.variables.get("FOO")
-        assert variable.value == "123"
+        # Environment scope template
+        env_scope_template = """\
+        environment_scope: {scope}
+        filter[environment_scope]: {scope}"""
 
-        config_delete_variable = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              builds_access_level: enabled
-            variables:
-              foo:
-                key: FOO
-                value: 123
-                delete: true
-        """
+        # Delete flag template
+        delete_template = """\
+        delete: true"""
 
-        run_gitlabform(config_delete_variable, project)
+        # Build variables section
+        var_configs = []
+        for var in variables:
+            # Create unique name for variable (including scope if present)
+            name = var["key"].lower()
+            if "environment_scope" in var:
+                name = f"{name}_{var['environment_scope'].replace('/', '_')}"
 
-        with pytest.raises(GitlabGetError):
-            project.variables.get("FOO")
+            # Add environment scope config if present
+            env_scope = ""
+            if "environment_scope" in var:
+                env_scope = "\n" + env_scope_template.format(
+                    scope=var["environment_scope"]
+                )
 
-    def test__reset_single_variable(self, project):
-        config_single_variable = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              builds_access_level: enabled
-            variables:
-              foo:
-                key: FOO
-                value: 123
-        """
+            # Add delete flag if present
+            delete = "\n" + delete_template if var.get("delete") else ""
 
-        run_gitlabform(config_single_variable, project)
+            # Format variable config
+            var_config = var_template.format(
+                name=name,
+                key=var["key"],
+                value=var["value"],
+                env_scope=env_scope,
+                delete=delete,
+            )
+            var_configs.append(var_config)
 
-        variable = project.variables.get("FOO")
-        assert variable.value == "123"
-
-        config_single_variable2 = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              builds_access_level: enabled
-            variables:
-              foo:
-                key: FOO
-                value: 123456
-        """
-
-        run_gitlabform(config_single_variable2, project)
-
-        variable = project.variables.get("FOO")
-        assert variable.value == "123456"
-
-    def test__more_variables(self, project):
-        config_more_variables = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              builds_access_level: enabled
-            variables:
-              foo:
-                key: FOO
-                value: 123456
-              bar:
-                key: BAR
-                value: bleble
-        """
-
-        run_gitlabform(config_more_variables, project)
-
-        variable = project.variables.get("FOO")
-        assert variable.value == "123456"
-        variable = project.variables.get("BAR")
-        assert variable.value == "bleble"
-
-    def test__variable_with_env_scope(self, project):
-        config_more_variables = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              builds_access_level: enabled
-            variables:
-              foo_ee:
-                key: FOO1
-                value: alfa
-                environment_scope: test/ee
-                filter[environment_scope]: test/ee
-        """
-
-        run_gitlabform(config_more_variables, project)
-
-        variable = project.variables.get("FOO1", filter={"environment_scope": "test/ee"})
-        assert variable.value == "alfa"
-
-    def test__variables_with_env_scope(self, project):
-        config_more_variables = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              builds_access_level: enabled
-            variables:
-              foo_ee:
-                key: FOO2
-                value: alfa
-                environment_scope: test/ee
-                filter[environment_scope]: test/ee
-              foo_lv:
-                key: FOO2
-                value: beta
-                environment_scope: test/lv
-                filter[environment_scope]: test/lv
-        """
-
-        run_gitlabform(config_more_variables, project)
-
-        variables = project.variables.list()
-        variables_keys = [variable.key for variable in variables]
-        assert "FOO2" in variables_keys
-
-        variable = project.variables.get("FOO2", filter={"environment_scope": "test/ee"})
-        assert variable.value == "alfa"
-        variable = project.variables.get("FOO2", filter={"environment_scope": "test/lv"})
-        assert variable.value == "beta"
+        # Combine all configs
+        return template.format(
+            project=project_for_function.path_with_namespace,
+            variables="\n".join(var_configs),
+        )
