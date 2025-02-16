@@ -88,6 +88,11 @@ class TestVariables:
                     },  # will be updated
                     {
                         "key": "FOO",
+                        "value": "stage-val",
+                        "environment_scope": "stage",
+                    },  # will be deleted
+                    {
+                        "key": "FOO",
                         "value": "dev-val",
                         "environment_scope": "dev",
                     },  # will stay same
@@ -98,6 +103,12 @@ class TestVariables:
                         "value": "new-prod",
                         "environment_scope": "prod",
                     },  # update
+                    {
+                        "key": "FOO",
+                        "value": "stage-val",
+                        "environment_scope": "stage",
+                        "delete": True,
+                    },  # delete
                     {
                         "key": "FOO",
                         "value": "dev-val",
@@ -111,6 +122,7 @@ class TestVariables:
                 ],
                 [
                     ("FOO", "new-prod", "prod"),  # updated
+                    ("FOO", None, "stage"),  # deleted
                     ("FOO", "dev-val", "dev"),  # unchanged
                     ("FOO", "test-val", "test"),  # newly created
                 ],
@@ -123,6 +135,11 @@ class TestVariables:
                         "value": "prod-db",
                         "environment_scope": "prod",
                     },  # will be updated
+                    {
+                        "key": "DB_URL",
+                        "value": "stage-db",
+                        "environment_scope": "stage",
+                    },  # will be deleted
                     {
                         "key": "API_KEY",
                         "value": "prod-key",
@@ -140,6 +157,12 @@ class TestVariables:
                         "value": "new-prod-db",
                         "environment_scope": "prod",
                     },  # update
+                    {
+                        "key": "DB_URL",
+                        "value": "stage-db",
+                        "environment_scope": "stage",
+                        "delete": True,
+                    },  # delete
                     {
                         "key": "DB_URL",
                         "value": "dev-db",
@@ -163,6 +186,7 @@ class TestVariables:
                 ],
                 [
                     ("DB_URL", "new-prod-db", "prod"),  # updated
+                    ("DB_URL", None, "stage"),  # deleted
                     ("DB_URL", "dev-db", "dev"),  # newly created
                     ("API_KEY", "prod-key", "prod"),  # unchanged
                     ("API_KEY", "new-stage-key", "stage"),  # updated
