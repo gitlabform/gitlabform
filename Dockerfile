@@ -1,14 +1,10 @@
 FROM python:3.12-alpine
-RUN apk add --no-cache \
-    gmp \
-    lua5.3 \
-    lua5.3-lpeg
-RUN mkdir gitlabform
-COPY . /gitlabform
 
+# delete the pip cache because even with `--no-cache-dir` pip still creates ~1.4MB of cache...
 RUN cd gitlabform \
     && apk add --no-cache build-base \
-    && pip install -e . \
+    && pip install --no-cache-dir  -e . \
+    && rm -rf /root/.cache/pip \
     && apk --purge del build-base
 
 WORKDIR /config
