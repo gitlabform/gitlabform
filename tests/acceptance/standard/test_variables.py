@@ -193,6 +193,88 @@ class TestVariables:
                     ("API_KEY", "test-key", "test"),  # newly created
                 ],
             ),
+            # Test case 7: Enforce mode - delete unspecified variables
+            (
+                [
+                    {"key": "FOO", "value": "123"},  # will stay
+                    {"key": "BAR", "value": "456"},  # will be deleted
+                    {"key": "BAZ", "value": "789"},  # will be deleted
+                ],
+                {
+                    "enforce": True,
+                    "foo": {"key": "FOO", "value": "123"},  # only keep this one
+                },
+                [("FOO", "123")],  # BAR and BAZ are deleted
+            ),
+            
+            # Test case 8: Enforce mode - with updates and new variables
+            (
+                [
+                    {"key": "FOO", "value": "123"},  # will be updated
+                    {"key": "BAR", "value": "456"},  # will be deleted
+                ],
+                {
+                    "enforce": True,
+                    "foo": {"key": "FOO", "value": "new123"},  # update this
+                    "baz": {"key": "BAZ", "value": "789"},     # create this
+                },
+                [
+                    ("FOO", "new123"),  # updated
+                    ("BAZ", "789"),     # newly created
+                ],  # BAR is deleted
+            ),
+            
+            # Test case 9: Enforce mode - with environment scopes
+            (
+                [
+                    {"key": "FOO", "value": "prod-val", "environment_scope": "prod"},  # will stay
+                    {"key": "FOO", "value": "stage-val", "environment_scope": "stage"},  # will be deleted
+                    {"key": "BAR", "value": "test-val", "environment_scope": "test"},  # will be deleted
+                ],
+                {
+                    "enforce": True,
+                    "foo_prod": {
+                        "key": "FOO",
+                        "value": "prod-val",
+                        "environment_scope": "prod",
+                    },  # keep this
+                },
+                [("FOO", "prod-val", "prod")],  # only prod scope remains
+            ),
+            
+            # Test case 10: Enforce mode - multiple variables with multiple scopes
+            (
+                [
+                    {"key": "DB_URL", "value": "prod-db", "environment_scope": "prod"},    # will stay
+                    {"key": "DB_URL", "value": "stage-db", "environment_scope": "stage"},  # will be deleted
+                    {"key": "API_KEY", "value": "prod-key", "environment_scope": "prod"},  # will stay
+                    {"key": "API_KEY", "value": "stage-key", "environment_scope": "stage"},  # will be updated
+                    {"key": "SECRET", "value": "123", "environment_scope": "prod"},        # will be deleted
+                ],
+                {
+                    "enforce": True,
+                    "db_url_prod": {
+                        "key": "DB_URL",
+                        "value": "prod-db",
+                        "environment_scope": "prod",
+                    },  # keep this
+                    "api_key_prod": {
+                        "key": "API_KEY",
+                        "value": "prod-key",
+                        "environment_scope": "prod",
+                    },  # keep this
+                    "api_key_stage": {
+                        "key": "API_KEY",
+                        "value": "new-stage-key",
+                        "environment_scope": "stage",
+                    },  # update this
+                },
+                [
+                    ("DB_URL", "prod-db", "prod"),          # unchanged
+                    ("API_KEY", "prod-key", "prod"),        # unchanged
+                    ("API_KEY", "new-stage-key", "stage"),  # updated
+                ],  # DB_URL stage and SECRET prod are deleted
+            ),
         ],
         ids=[
             "test_case_1_single_var_no_change",
@@ -201,6 +283,10 @@ class TestVariables:
             "test_case_4_multiple_vars_all_operations",
             "test_case_5_single_var_multiple_scopes",
             "test_case_6_multiple_vars_multiple_scopes",
+            "test_case_7_enforce_mode_delete_unspecified",
+            "test_case_8_enforce_mode_with_updates_and_new",
+            "test_case_9_enforce_mode_with_environment_scopes",
+            "test_case_10_enforce_mode_multiple_vars_multiple_scopes",
         ],
     )
     def test__variables(
@@ -240,17 +326,10 @@ class TestVariables:
     def _create_config(self, project_for_function, variables):
         """Creates YAML configuration for GitLab project variables.
 
-        Generates a YAML configuration string for gitlabform that defines project
-        variables with their properties. Supports regular variables, environment-scoped
-        variables, and variable deletion.
-
         Args:
             project_for_function: GitLab project instance
-            variables: List of variable configurations, each containing:
-                - key: Variable name
-                - value: Variable value
-                - environment_scope: Optional environment scope
-                - delete: Optional deletion flag
+            variables: Dictionary with variable configurations and optional enforce mode
+                      or List of variable configurations
 
         Returns:
             str: YAML configuration string
@@ -261,6 +340,7 @@ class TestVariables:
                 project_settings:
                   builds_access_level: enabled
                 variables:
+                  enforce: true  # Optional. If true, deletes variables not in config
                   var_name:
                     key: VAR_NAME
                     value: var_value
@@ -292,9 +372,23 @@ projects_and_groups:
         delete_template = """\
         delete: true"""
 
+        # Enforce mode template
+        enforce_template = """\
+      enforce: true"""
+
         # Build variables section
         var_configs = []
-        for var in variables:
+
+        # Handle enforce mode
+        if isinstance(variables, dict) and "enforce" in variables:
+            var_configs.append(enforce_template)
+            # Extract the variable configurations, excluding 'enforce'
+            var_list = [variables[k] for k in variables if k != "enforce"]
+        else:
+            var_list = variables
+
+        # Process each variable
+        for var in var_list:
             # Create unique name for variable (including scope if present)
             name = var["key"].lower()
             if "environment_scope" in var:
