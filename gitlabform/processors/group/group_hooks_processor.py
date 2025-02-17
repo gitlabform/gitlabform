@@ -17,14 +17,10 @@ class GroupHooksProcessor(AbstractProcessor):
         group: Group = self.gl.get_group_by_path_cached(group_path_and_name)
         group_hooks: RESTObjectList | List[RESTObject] = group.hooks.list(get_all=True)
 
-        hooks_in_config: tuple[str, ...] = tuple(
-            x for x in sorted(configuration["group_hooks"]) if x != "enforce"
-        )
+        hooks_in_config: tuple[str, ...] = tuple(x for x in sorted(configuration["group_hooks"]) if x != "enforce")
 
         for hook in hooks_in_config:
-            hook_in_gitlab: RESTObject | None = next(
-                (h for h in group_hooks if h.url == hook), None
-            )
+            hook_in_gitlab: RESTObject | None = next((h for h in group_hooks if h.url == hook), None)
             hook_config = {"url": hook}
             hook_config.update(configuration["group_hooks"][hook])
 
@@ -50,9 +46,7 @@ class GroupHooksProcessor(AbstractProcessor):
             # Processing existing hook updates
             gl_hook: dict = hook_in_gitlab.asdict() if hook_in_gitlab else {}
             if self._needs_update(gl_hook, hook_config):
-                debug(
-                    f"The group hook '{hook}' config is different from what's in gitlab OR it contains a token"
-                )
+                debug(f"The group hook '{hook}' config is different from what's in gitlab OR it contains a token")
                 debug(f"Updating group hook '{hook}'")
                 updated_hook: Dict[str, Any] = group.hooks.update(hook_id, hook_config)
                 debug(f"Updated group hook: {updated_hook}")
