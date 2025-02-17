@@ -1,4 +1,5 @@
 import pytest
+import yaml
 from gitlab import GitlabGetError, GitlabListError
 
 from tests.acceptance import run_gitlabform
@@ -206,7 +207,6 @@ class TestVariables:
                 },
                 [("FOO", "123")],  # BAR and BAZ are deleted
             ),
-            
             # Test case 8: Enforce mode - with updates and new variables
             (
                 [
@@ -216,20 +216,31 @@ class TestVariables:
                 {
                     "enforce": True,
                     "foo": {"key": "FOO", "value": "new123"},  # update this
-                    "baz": {"key": "BAZ", "value": "789"},     # create this
+                    "baz": {"key": "BAZ", "value": "789"},  # create this
                 },
                 [
                     ("FOO", "new123"),  # updated
-                    ("BAZ", "789"),     # newly created
+                    ("BAZ", "789"),  # newly created
                 ],  # BAR is deleted
             ),
-            
             # Test case 9: Enforce mode - with environment scopes
             (
                 [
-                    {"key": "FOO", "value": "prod-val", "environment_scope": "prod"},  # will stay
-                    {"key": "FOO", "value": "stage-val", "environment_scope": "stage"},  # will be deleted
-                    {"key": "BAR", "value": "test-val", "environment_scope": "test"},  # will be deleted
+                    {
+                        "key": "FOO",
+                        "value": "prod-val",
+                        "environment_scope": "prod",
+                    },  # will stay
+                    {
+                        "key": "FOO",
+                        "value": "stage-val",
+                        "environment_scope": "stage",
+                    },  # will be deleted
+                    {
+                        "key": "BAR",
+                        "value": "test-val",
+                        "environment_scope": "test",
+                    },  # will be deleted
                 ],
                 {
                     "enforce": True,
@@ -241,15 +252,34 @@ class TestVariables:
                 },
                 [("FOO", "prod-val", "prod")],  # only prod scope remains
             ),
-            
             # Test case 10: Enforce mode - multiple variables with multiple scopes
             (
                 [
-                    {"key": "DB_URL", "value": "prod-db", "environment_scope": "prod"},    # will stay
-                    {"key": "DB_URL", "value": "stage-db", "environment_scope": "stage"},  # will be deleted
-                    {"key": "API_KEY", "value": "prod-key", "environment_scope": "prod"},  # will stay
-                    {"key": "API_KEY", "value": "stage-key", "environment_scope": "stage"},  # will be updated
-                    {"key": "SECRET", "value": "123", "environment_scope": "prod"},        # will be deleted
+                    {
+                        "key": "DB_URL",
+                        "value": "prod-db",
+                        "environment_scope": "prod",
+                    },  # will stay
+                    {
+                        "key": "DB_URL",
+                        "value": "stage-db",
+                        "environment_scope": "stage",
+                    },  # will be deleted
+                    {
+                        "key": "API_KEY",
+                        "value": "prod-key",
+                        "environment_scope": "prod",
+                    },  # will stay
+                    {
+                        "key": "API_KEY",
+                        "value": "stage-key",
+                        "environment_scope": "stage",
+                    },  # will be updated
+                    {
+                        "key": "SECRET",
+                        "value": "123",
+                        "environment_scope": "prod",
+                    },  # will be deleted
                 ],
                 {
                     "enforce": True,
@@ -270,10 +300,104 @@ class TestVariables:
                     },  # update this
                 },
                 [
-                    ("DB_URL", "prod-db", "prod"),          # unchanged
-                    ("API_KEY", "prod-key", "prod"),        # unchanged
+                    ("DB_URL", "prod-db", "prod"),  # unchanged
+                    ("API_KEY", "prod-key", "prod"),  # unchanged
                     ("API_KEY", "new-stage-key", "stage"),  # updated
                 ],  # DB_URL stage and SECRET prod are deleted
+            ),
+            # Test case 11: Raw parameters (protected, masked)
+            (
+                [],  # no initial vars
+                [
+                    {
+                        "key": "PROTECTED_VAR",
+                        "value": "secret123",
+                        "protected": True,
+                        "masked": True,
+                    }
+                ],
+                [
+                    ("PROTECTED_VAR", "secret123", "*", True, True)
+                ],  # (key, value, scope, protected, masked)
+            ),
+            # Test case 12: Preserve protected status on update
+            (
+                [
+                    {
+                        "key": "PROTECTED_VAR",
+                        "value": "secret123",
+                        "protected": True,
+                    }
+                ],
+                [
+                    {
+                        "key": "PROTECTED_VAR",
+                        "value": "newvalue",
+                    }
+                ],
+                [
+                    ("PROTECTED_VAR", "newvalue", "*", True)
+                ],  # protected status should remain True
+            ),
+            # Test case 13: Update masked status
+            (
+                [
+                    {
+                        "key": "MASKED_VAR",
+                        "value": "secret123",
+                        "masked": True,
+                    }
+                ],
+                [
+                    {
+                        "key": "MASKED_VAR",
+                        "value": "newvalue",
+                    }
+                ],
+                [
+                    ("MASKED_VAR", "newvalue", "*", False, True)
+                ],  # masked status should remain True
+            ),
+            # Test case 14: Environment scope with enforce mode and protected/masked variables
+            (
+                [
+                    {
+                        "key": "SECRET_KEY",
+                        "value": "prod-secret",
+                        "environment_scope": "prod",
+                        "protected": True,
+                        "masked": True,
+                    },
+                    {
+                        "key": "SECRET_KEY",
+                        "value": "stage-secret",
+                        "environment_scope": "stage",
+                        "protected": True,
+                        "masked": True,
+                    },
+                ],
+                {
+                    "enforce": True,
+                    "secret_key_prod": {
+                        "key": "SECRET_KEY",
+                        "value": "new-prod-secret",
+                        "environment_scope": "prod",
+                    },
+                },
+                [
+                    ("SECRET_KEY", "new-prod-secret", "prod", True, True)
+                ],  # protected and masked status preserved
+            ),
+            # Test case 15: Variable value with special characters
+            (
+                [],
+                [
+                    {
+                        "key": "SPECIAL_CHARS",
+                        "value": "!@#$%^&*()_+-=[]{}|;:,.<>?",
+                    }
+                ],
+                [("SPECIAL_CHARS", "!@#$%^&*()_+-=[]{}|;:,.<>?")],
             ),
         ],
         ids=[
@@ -287,6 +411,11 @@ class TestVariables:
             "test_case_8_enforce_mode_with_updates_and_new",
             "test_case_9_enforce_mode_with_environment_scopes",
             "test_case_10_enforce_mode_multiple_vars_multiple_scopes",
+            "test_case_11_raw_params",
+            "test_case_12_preserve_protected",
+            "test_case_13_preserve_masked",
+            "test_case_14_enforce_mode_with_protected_masked_scoped",
+            "test_case_15_special_characters",
         ],
     )
     def test__variables(
@@ -299,7 +428,8 @@ class TestVariables:
             initial_vars: List of variables to create initially using GitLab API
             config_vars: List of variables to configure using gitlabform
             expected: List of (key, value) or (key, value, scope) tuples
-                     value is None for variables that should be deleted
+                     representing expected variable states after configuration.
+                     Value is None for variables that should be deleted.
         """
         # Set initial variables
         for var in initial_vars:
@@ -310,8 +440,8 @@ class TestVariables:
         run_gitlabform(config, project_for_function)
 
         # Verify results
-        for expected_var in expected:
-            key, value, *env_scope = expected_var
+        for expected_var_state in expected:
+            key, value, *env_scope = expected_var_state
             get_params = (
                 {"filter": {"environment_scope": env_scope[0]}} if env_scope else {}
             )
@@ -321,101 +451,69 @@ class TestVariables:
                     project_for_function.variables.get(key, **get_params)
             else:
                 variable = project_for_function.variables.get(key, **get_params)
+                # Check value for all cases
                 assert variable.value == value
 
+                # Check additional attributes based on expected variable format:
+                # (key, value)                              - Basic variable
+                # (key, value, scope)                       - With environment scope
+                # (key, value, scope, protected)            - With protected flag
+                # (key, value, scope, protected, masked)    - With masked flag
+                has_scope = len(expected_var_state) > 2
+                has_protected = len(expected_var_state) > 3
+                has_masked = len(expected_var_state) > 4
+
+                if has_scope:
+                    assert variable.environment_scope == expected_var_state[2]
+                if has_protected:
+                    assert variable.protected == expected_var_state[3]
+                if has_masked:
+                    assert variable.masked == expected_var_state[4]
+
     def _create_config(self, project_for_function, variables):
-        """Creates YAML configuration for GitLab project variables.
+        """Creates YAML configuration for GitLab project variables."""
+        # Base configuration in YAML format
+        base_config = f"""
+          projects_and_groups:
+            {project_for_function.path_with_namespace}:
+              project_settings:
+                builds_access_level: enabled
+              variables: {{}}
+          """
+        config = yaml.safe_load(base_config)
 
-        Args:
-            project_for_function: GitLab project instance
-            variables: Dictionary with variable configurations and optional enforce mode
-                      or List of variable configurations
-
-        Returns:
-            str: YAML configuration string
-
-        Example YAML structure:
-            projects_and_groups:
-              project_path:
-                project_settings:
-                  builds_access_level: enabled
-                variables:
-                  enforce: true  # Optional. If true, deletes variables not in config
-                  var_name:
-                    key: VAR_NAME
-                    value: var_value
-                    [environment_scope: scope]
-                    [filter[environment_scope]: scope]
-                    [delete: true]
-        """
-        # Main configuration template
-        template = """\
-projects_and_groups:
-  {project}:
-    project_settings:
-      builds_access_level: enabled
-    variables:
-{variables}"""
-
-        # Variable entry template
-        var_template = """\
-      {name}:
-        key: {key}
-        value: {value}{env_scope}{delete}"""
-
-        # Environment scope template
-        env_scope_template = """\
-        environment_scope: {scope}
-        filter[environment_scope]: {scope}"""
-
-        # Delete flag template
-        delete_template = """\
-        delete: true"""
-
-        # Enforce mode template
-        enforce_template = """\
-      enforce: true"""
-
-        # Build variables section
-        var_configs = []
-
-        # Handle enforce mode
-        if isinstance(variables, dict) and "enforce" in variables:
-            var_configs.append(enforce_template)
-            # Extract the variable configurations, excluding 'enforce'
-            var_list = [variables[k] for k in variables if k != "enforce"]
+        # Handle enforce mode and get variable list
+        if isinstance(variables, dict):
+            if "enforce" in variables:
+                config["projects_and_groups"][project_for_function.path_with_namespace][
+                    "variables"
+                ]["enforce"] = True
+                var_list = [variables[k] for k in variables if k != "enforce"]
+            else:
+                var_list = variables
         else:
             var_list = variables
 
-        # Process each variable
+        # Process variables
+        vars_section = {}
         for var in var_list:
-            # Create unique name for variable (including scope if present)
+            # Create unique name for variable
             name = var["key"].lower()
             if "environment_scope" in var:
                 name = f"{name}_{var['environment_scope'].replace('/', '_')}"
 
-            # Add environment scope config if present
-            env_scope = ""
-            if "environment_scope" in var:
-                env_scope = "\n" + env_scope_template.format(
-                    scope=var["environment_scope"]
-                )
+            # Copy variable config and handle special cases
+            var_config = var.copy()
+            if "environment_scope" in var_config:
+                var_config["filter[environment_scope]"] = var_config[
+                    "environment_scope"
+                ]
 
-            # Add delete flag if present
-            delete = "\n" + delete_template if var.get("delete") else ""
+            vars_section[name] = var_config
 
-            # Format variable config
-            var_config = var_template.format(
-                name=name,
-                key=var["key"],
-                value=var["value"],
-                env_scope=env_scope,
-                delete=delete,
-            )
-            var_configs.append(var_config)
+        config["projects_and_groups"][project_for_function.path_with_namespace][
+            "variables"
+        ].update(vars_section)
 
-        # Combine all configs
-        return template.format(
-            project=project_for_function.path_with_namespace,
-            variables="\n".join(var_configs),
-        )
+        # Convert to YAML with proper formatting
+        return yaml.dump(config, default_flow_style=False, sort_keys=False)
