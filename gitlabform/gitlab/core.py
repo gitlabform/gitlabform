@@ -54,9 +54,7 @@ class GitLabCore:
 
         try:
             version = self._make_requests_to_api("version")
-            verbose(
-                f"Connected to GitLab version: {version['version']} ({version['revision']})"
-            )
+            verbose(f"Connected to GitLab version: {version['version']} ({version['revision']})")
             self.version = version["version"]
 
             current_user = self._make_requests_to_api("user")
@@ -64,9 +62,7 @@ class GitLabCore:
                 self.admin = True
             else:
                 self.admin = False
-            verbose(
-                f"Connected as: {current_user['username']}, admin: {'yes' if self.admin else 'no'}"
-            )
+            verbose(f"Connected as: {current_user['username']}, admin: {'yes' if self.admin else 'no'}")
             if not self.admin:
                 warning("Connected as non-admin. You may encounter permission issues.")
 
@@ -87,9 +83,7 @@ class GitLabCore:
         # also it's not possible to get more than 1 user as a result
 
         if len(users) == 0:
-            raise NotFoundException(
-                "No users found when searching for username '%s'" % username
-            )
+            raise NotFoundException("No users found when searching for username '%s'" % username)
 
         return int(users[0]["id"])
 
@@ -100,9 +94,7 @@ class GitLabCore:
 
     @functools.lru_cache()
     def _get_protected_branch_id(self, project_and_group_name, branch) -> int:
-        branch = self._make_requests_to_api(
-            "projects/%s/protected_branches/%s", (project_and_group_name, branch)
-        )
+        branch = self._make_requests_to_api("projects/%s/protected_branches/%s", (project_and_group_name, branch))
         return int(branch["id"])
 
     @functools.lru_cache()
@@ -139,9 +131,7 @@ class GitLabCore:
                  objects.
         """
         if method != "GET":
-            response = self._make_request_to_api(
-                path_as_format_string, args, method, data, expected_codes, json
-            )
+            response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
             return response.json()
         else:
             if "?" in path_as_format_string:
@@ -149,9 +139,7 @@ class GitLabCore:
             else:
                 path_as_format_string += "?per_page=100"
 
-            first_response = self._make_request_to_api(
-                path_as_format_string, args, method, data, expected_codes, json
-            )
+            first_response = self._make_request_to_api(path_as_format_string, args, method, data, expected_codes, json)
             results = first_response.json()
 
             # In newer versions of GitLab the 'x-total-pages' may not be available
@@ -160,10 +148,7 @@ class GitLabCore:
 
             response = first_response
             while True:
-                if (
-                    "x-next-page" in response.headers
-                    and response.headers["x-next-page"]
-                ):
+                if "x-next-page" in response.headers and response.headers["x-next-page"]:
                     next_page = response.headers["x-next-page"]
                     response = self._make_request_to_api(
                         path_as_format_string + "&page=" + str(next_page),
@@ -179,9 +164,7 @@ class GitLabCore:
 
         return results
 
-    def _make_request_to_api(
-        self, path_as_format_string, args, method, dict_data, expected_codes, json_data
-    ):
+    def _make_request_to_api(self, path_as_format_string, args, method, dict_data, expected_codes, json_data):
         """
         Makes a single request to the GitLab API. Takes care of the authentication, basic error processing,
         retries, timeout etc.
@@ -193,20 +176,14 @@ class GitLabCore:
         expected_codes = self._listify(expected_codes)
 
         if dict_data and json_data:
-            raise Exception(
-                "You need to pass the data either as dict (dict_data) or JSON (json_data), not both!"
-            )
+            raise Exception("You need to pass the data either as dict (dict_data) or JSON (json_data), not both!")
 
         url = f"{self.url}/api/v4/{self._format_with_url_encoding(path_as_format_string, args)}"
         if dict_data:
-            response = self.session.request(
-                method, url, data=dict_data, timeout=self.timeout
-            )
+            response = self.session.request(method, url, data=dict_data, timeout=self.timeout)
             debug(f"===> data = {to_str(dict_data)}")
         elif json_data:
-            response = self.session.request(
-                method, url, json=json_data, timeout=self.timeout
-            )
+            response = self.session.request(method, url, json=json_data, timeout=self.timeout)
             debug(f"===> json = {to_str(json_data)}")
         else:
             response = self.session.request(method, url, timeout=self.timeout)
@@ -218,9 +195,7 @@ class GitLabCore:
                 response.json = lambda: {}
         else:
             if response.status_code == 404:
-                raise NotFoundException(
-                    f"Resource with url='{url}' not found (HTTP 404)!"
-                )
+                raise NotFoundException(f"Resource with url='{url}' not found (HTTP 404)!")
             else:
                 if dict_data:
                     data_output = f"data='{to_str(dict_data)}' "

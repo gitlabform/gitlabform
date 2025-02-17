@@ -92,9 +92,7 @@ class TestGroupLabels:
 
     def test__updates_existing_label(self, gl, group_for_function):
         group = gl.groups.get(group_for_function.id)
-        created_label = group.labels.create(
-            {"name": "update_this", "color": "red", "description": "hello world"}
-        )
+        created_label = group.labels.create({"name": "update_this", "color": "red", "description": "hello world"})
 
         labels = group.labels.list()
         assert len(labels) == 1

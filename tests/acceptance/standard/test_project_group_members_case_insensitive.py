@@ -12,12 +12,8 @@ def two_members_in_other_group(other_group, make_user):
     outsider_user1 = make_user(add_to_project=False)
     outsider_user2 = make_user(add_to_project=False)
 
-    other_group.members.create(
-        {"access_level": AccessLevel.OWNER.value, "user_id": outsider_user1.id}
-    )
-    other_group.members.create(
-        {"access_level": AccessLevel.DEVELOPER.value, "user_id": outsider_user2.id}
-    )
+    other_group.members.create({"access_level": AccessLevel.OWNER.value, "user_id": outsider_user1.id})
+    other_group.members.create({"access_level": AccessLevel.DEVELOPER.value, "user_id": outsider_user2.id})
 
     yield [outsider_user1, outsider_user2]
 

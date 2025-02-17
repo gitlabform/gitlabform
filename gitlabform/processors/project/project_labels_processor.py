@@ -24,6 +24,4 @@ class ProjectLabelsProcessor(AbstractProcessor):
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
-        self._labels_processor.process_labels(
-            configured_labels, enforce, project, self._needs_update
-        )
+        self._labels_processor.process_labels(configured_labels, enforce, project, self._needs_update)

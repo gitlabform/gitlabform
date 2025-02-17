@@ -12,8 +12,6 @@ class GroupBadgesProcessor(MultipleEntitiesProcessor):
             add_method_name="add_group_badge",
             delete_method_name="delete_group_badge",
             defining=Key("name"),
-            required_to_create_or_update=And(
-                Key("name"), Key("link_url"), Key("image_url")
-            ),
+            required_to_create_or_update=And(Key("name"), Key("link_url"), Key("image_url")),
             edit_method_name="edit_group_badge",
         )

@@ -35,9 +35,7 @@ class TestTags:
         assert allowed_to_create_access_user_ids == sorted([user1.id, user2.id])
         assert allowed_to_create_access_group_ids == []
 
-    def test__allowed_to_create_by_user_but_without_explicit_role_config(
-        self, project, tag, make_user
-    ):
+    def test__allowed_to_create_by_user_but_without_explicit_role_config(self, project, tag, make_user):
         user1 = make_user(AccessLevel.DEVELOPER)
         user2 = make_user(AccessLevel.DEVELOPER)
 
@@ -92,9 +90,7 @@ class TestTags:
         assert allowed_to_create_access_user_ids == sorted([user1.id])
         assert allowed_to_create_access_group_ids == []
 
-    def test__allowed_to_create_by_group_only(
-        self, project, tag, group_to_invite_to_project
-    ):
+    def test__allowed_to_create_by_group_only(self, project, tag, group_to_invite_to_project):
         shared_group1 = group_to_invite_to_project(project, AccessLevel.DEVELOPER)
         shared_group2 = group_to_invite_to_project(project, AccessLevel.MAINTAINER)
 
@@ -123,13 +119,9 @@ class TestTags:
             ]
         )
         assert allowed_to_create_access_user_ids == []
-        assert allowed_to_create_access_group_ids == sorted(
-            [shared_group1.id, shared_group2.id]
-        )
+        assert allowed_to_create_access_group_ids == sorted([shared_group1.id, shared_group2.id])
 
-    def test__allowed_to_create_by_user_and_group_only(
-        self, project, tag, make_user, group_to_invite_to_project
-    ):
+    def test__allowed_to_create_by_user_and_group_only(self, project, tag, make_user, group_to_invite_to_project):
         user1 = make_user(AccessLevel.DEVELOPER)
         user2 = make_user(AccessLevel.DEVELOPER)
         shared_group1 = group_to_invite_to_project(project, AccessLevel.DEVELOPER)
@@ -162,13 +154,9 @@ class TestTags:
             ]
         )
         assert allowed_to_create_access_user_ids == sorted([user1.id, user2.id])
-        assert allowed_to_create_access_group_ids == sorted(
-            [shared_group1.id, shared_group2.id]
-        )
+        assert allowed_to_create_access_group_ids == sorted([shared_group1.id, shared_group2.id])
 
-    def test__allowed_to_create_by_user_and_group_and_role(
-        self, project, tag, make_user, group_to_invite_to_project
-    ):
+    def test__allowed_to_create_by_user_and_group_and_role(self, project, tag, make_user, group_to_invite_to_project):
         user1 = make_user(AccessLevel.DEVELOPER)
         user2 = make_user(AccessLevel.DEVELOPER)
         shared_group1 = group_to_invite_to_project(project, AccessLevel.DEVELOPER)
@@ -196,13 +184,9 @@ class TestTags:
             allowed_to_create_access_group_ids,
         ) = get_only_tag_access_levels(project, tag)
 
-        assert allowed_to_create_access_levels == sorted(
-            [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
-        )
+        assert allowed_to_create_access_levels == sorted([AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value])
         assert allowed_to_create_access_user_ids == sorted([user1.id, user2.id])
-        assert allowed_to_create_access_group_ids == sorted(
-            [shared_group1.id, shared_group2.id]
-        )
+        assert allowed_to_create_access_group_ids == sorted([shared_group1.id, shared_group2.id])
 
     def test__allowed_to_create_by_dev_role_only(self, project, tag):
         config_tag_protection_allowed_to_create = f"""
@@ -242,17 +226,13 @@ class TestTags:
                   - access_level: {AccessLevel.DEVELOPER.value}
         """
 
-        run_gitlabform(
-            config_tag_protection_allowed_to_create_and_create_access_level, project
-        )
+        run_gitlabform(config_tag_protection_allowed_to_create_and_create_access_level, project)
         (
             allowed_to_create_access_levels,
             allowed_to_create_access_user_ids,
             allowed_to_create_access_group_ids,
         ) = get_only_tag_access_levels(project, tag)
 
-        assert allowed_to_create_access_levels == sorted(
-            [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
-        )
+        assert allowed_to_create_access_levels == sorted([AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value])
         assert allowed_to_create_access_user_ids == []
         assert allowed_to_create_access_group_ids == []

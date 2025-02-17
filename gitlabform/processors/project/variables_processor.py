@@ -25,20 +25,13 @@ class VariablesProcessor(MultipleEntitiesProcessor):
         )
 
     def _can_proceed(self, project_or_group: str, configuration: dict):
-        if (
-            self.gitlab.get_project_settings(project_or_group).get(
-                "builds_access_level"
-            )
-            == "disabled"
-        ):
+        if self.gitlab.get_project_settings(project_or_group).get("builds_access_level") == "disabled":
             warning("Builds disabled in this project so I can't set variables here.")
             return False
         else:
             return True
 
-    def _print_diff(
-        self, project_and_group: str, configuration, diff_only_changed: bool = False
-    ):
+    def _print_diff(self, project_and_group: str, configuration, diff_only_changed: bool = False):
         try:
             current_variables = self.gitlab.get_variables(project_and_group)
 
@@ -67,9 +60,7 @@ class VariablesProcessor(MultipleEntitiesProcessor):
             configured_variables.pop("enforce")
 
         for key in configured_variables.keys():
-            configured_variables[key]["value"] = hide(
-                configured_variables[key]["value"]
-            )
+            configured_variables[key]["value"] = hide(configured_variables[key]["value"])
 
         verbose(
             textwrap.indent(

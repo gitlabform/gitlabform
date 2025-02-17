@@ -44,9 +44,7 @@ def test__transform_for_merge_request_approvals() -> None:
               - 123
     """
 
-    expected_transformed_config = Configuration(
-        config_string=expected_transformed_config_yaml
-    )
+    expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
     transformer.convert_to_simple_types(expected_transformed_config)
 
     assert not DeepDiff(configuration.config, expected_transformed_config.config)

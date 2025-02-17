@@ -3,13 +3,9 @@ from gitlabform.gitlab.core import GitLabCore
 
 class GitLabCommits(GitLabCore):
     def get_commit(self, project_and_group_name, sha):
-        return self._make_requests_to_api(
-            "projects/%s/repository/commits/%s", (project_and_group_name, sha)
-        )
+        return self._make_requests_to_api("projects/%s/repository/commits/%s", (project_and_group_name, sha))
 
-    def get_ahead_and_behind(
-        self, project_and_group_name, protected_branch, feature_branch
-    ):
+    def get_ahead_and_behind(self, project_and_group_name, protected_branch, feature_branch):
         ahead = 0
         behind = 0
 
@@ -30,9 +26,7 @@ class GitLabCommits(GitLabCore):
         return ahead, behind
 
     def get_last_commit(self, project_and_group_name, branch_name):
-        branch = self._make_requests_to_api(
-            "projects/%s/repository/branches/%s", (project_and_group_name, branch_name)
-        )
+        branch = self._make_requests_to_api("projects/%s/repository/branches/%s", (project_and_group_name, branch_name))
         last_commit_hash = branch["commit"]["id"]
         return self.get_commit(project_and_group_name, last_commit_hash)
 

@@ -88,9 +88,7 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         for element in elements:
             if not last_element:
                 effective_config = self._get_group_config(element)
-                debug(
-                    "First level config for '%s': %s", element, to_str(effective_config)
-                )
+                debug("First level config for '%s': %s", element, to_str(effective_config))
                 last_element = element
             else:
                 next_level_subgroup = last_element + "/" + element
@@ -104,9 +102,7 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
                 if effective_config:
                     self._validate_break_inheritance_flag(effective_config, subgroup)
                 elif not effective_config and next_level_subgroup_config:
-                    self._validate_break_inheritance_flag(
-                        next_level_subgroup_config, next_level_subgroup
-                    )
+                    self._validate_break_inheritance_flag(next_level_subgroup_config, next_level_subgroup)
 
                 effective_config = self._merge_configs(
                     effective_config,
@@ -128,6 +124,4 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         :return: configuration for this group/subgroup or empty dict if not defined,
                  ignoring the case
         """
-        return self._get_case_insensitively(
-            self.get("projects_and_groups"), f"{group}/*"
-        )
+        return self._get_case_insensitively(self.get("projects_and_groups"), f"{group}/*")

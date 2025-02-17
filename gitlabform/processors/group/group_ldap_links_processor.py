@@ -12,7 +12,5 @@ class GroupLDAPLinksProcessor(MultipleEntitiesProcessor):
             add_method_name="add_ldap_group_link",
             delete_method_name="delete_ldap_group_link",
             defining=And(Key("provider"), Or(Key("cn"), Key("filter"))),
-            required_to_create_or_update=And(
-                Key("provider"), Xor(Key("cn"), Key("filter"))
-            ),
+            required_to_create_or_update=And(Key("provider"), Xor(Key("cn"), Key("filter"))),
         )

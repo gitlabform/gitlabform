@@ -26,17 +26,13 @@ class GitLabGroups(GitLabCore):
             for group in groups:
                 if group["full_path"].lower() == some_string.lower():
                     return group
-            raise NotFoundException(
-                f"Group/subgroup with path '{some_string}' not found."
-            )
+            raise NotFoundException(f"Group/subgroup with path '{some_string}' not found.")
 
     def get_group(self, name):
         return self._make_requests_to_api("groups/%s", name)
 
     def get_group_descendants(self, group_id_or_path):
-        return self._make_requests_to_api(
-            "groups/%s/descendant_groups", group_id_or_path
-        )
+        return self._make_requests_to_api("groups/%s/descendant_groups", group_id_or_path)
 
     def get_groups(self):
         """
@@ -78,16 +74,12 @@ class GitLabGroups(GitLabCore):
                 # - it's the minimal role that is needed to manage something (f.e. labels)
                 query2 = f"min_access_level=20"
 
-            projects = self._make_requests_to_api(
-                f"groups/%s/projects?{query1}&{query2}", group
-            )
+            projects = self._make_requests_to_api(f"groups/%s/projects?{query1}&{query2}", group)
         except NotFoundException:
             projects = []
 
         project_and_groups_in_group_namespace = [
-            project
-            for project in projects
-            if project["path_with_namespace"].startswith(group + "/")
+            project for project in projects if project["path_with_namespace"].startswith(group + "/")
         ]
 
         if only_names:

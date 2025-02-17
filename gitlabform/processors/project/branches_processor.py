@@ -23,15 +23,11 @@ class BranchesProcessor(AbstractProcessor):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
         for branch in sorted(configuration["branches"]):
-            branch_configuration: dict = self.transform_branch_config(
-                configuration["branches"][branch]
-            )
+            branch_configuration: dict = self.transform_branch_config(configuration["branches"][branch])
 
             self.process_branch_protection(project, branch, branch_configuration)
 
-    def process_branch_protection(
-        self, project: Project, branch_name: str, branch_config: dict
-    ):
+    def process_branch_protection(self, project: Project, branch_name: str, branch_config: dict):
         """
         Process branch protection according to gitlabform config.
         """
@@ -57,9 +53,7 @@ class BranchesProcessor(AbstractProcessor):
             debug(message)
 
         if branch_config.get("protected"):
-            if protected_branch and self._needs_update(
-                protected_branch.attributes, branch_config
-            ):
+            if protected_branch and self._needs_update(protected_branch.attributes, branch_config):
                 # Need to unprotect the branch and then re-protect again using current config
                 # Another option would be to "update" protected branch. But, GitLab's API for
                 # updating protected branch requires retrieving id of the existing rule/config
@@ -85,9 +79,7 @@ class BranchesProcessor(AbstractProcessor):
         try:
             project.protectedbranches.create({"name": branch_name, **branch_config})
         except GitlabCreateError as e:
-            message = (
-                f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
-            )
+            message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
 
             if self.strict:
                 fatal(

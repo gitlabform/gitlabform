@@ -31,9 +31,7 @@ class ConfigurationProjects(ConfigurationGroups, ABC):
         :return: if project is defined in the key with projects to skip,
                  ignoring the case
         """
-        return self._is_skipped_case_insensitively(
-            self.get("skip_projects", []), project
-        )
+        return self._is_skipped_case_insensitively(self.get("skip_projects", []), project)
 
     @functools.lru_cache()
     def get_effective_config_for_project(self, group_and_project) -> dict:
@@ -72,6 +70,4 @@ class ConfigurationProjects(ConfigurationGroups, ABC):
         :return: configuration for this project or empty dict if not defined,
                  ignoring the case
         """
-        return self._get_case_insensitively(
-            self.get("projects_and_groups"), group_and_project
-        )
+        return self._get_case_insensitively(self.get("projects_and_groups"), group_and_project)

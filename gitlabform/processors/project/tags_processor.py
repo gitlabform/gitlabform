@@ -25,9 +25,7 @@ class TagsProcessor(AbstractProcessor):
                         user_ids = set()
                         group_ids = set()
 
-                        requested_configuration = configuration["tags"][tag][
-                            "allowed_to_create"
-                        ]
+                        requested_configuration = configuration["tags"][tag]["allowed_to_create"]
 
                         for config in requested_configuration:
                             if "access_level" in config:
@@ -51,9 +49,7 @@ class TagsProcessor(AbstractProcessor):
                                 group_ids.add(config["group_id"])
                             elif "group" in config:
                                 try:
-                                    gitlab_group = self.gl.get_group_by_path_cached(
-                                        config["group"]
-                                    )
+                                    gitlab_group = self.gl.get_group_by_path_cached(config["group"])
                                 except GitlabGetError as e:
                                     error(
                                         f"Could not find Group '{config["group"]}' on the Instance, cannot Protect "

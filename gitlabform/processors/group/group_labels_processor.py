@@ -25,6 +25,4 @@ class GroupLabelsProcessor(AbstractProcessor):
 
         group: Group = self.gl.get_group_by_path_cached(group_path_and_name)
 
-        self._labels_processor.process_labels(
-            configured_labels, enforce, group, self._needs_update
-        )
+        self._labels_processor.process_labels(configured_labels, enforce, group, self._needs_update)

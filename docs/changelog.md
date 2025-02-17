@@ -1,5 +1,58 @@
 # Changelog
 
+## 4.1.3
+
+### Fixes
+
+* fix: project topics should not be removed if topics are not in the config [#954](https://github.com/gitlabform/gitlabform/pull/954) ([amimas](https://github.com/amimas))
+
+### Refactors
+
+* refactor: migrate 'merge_requests_approvals' processor to python-gitlab [#955](https://github.com/gitlabform/gitlabform/pull/955) ([amimas](https://github.com/amimas))
+
+### Build / CI
+
+* chore(dev): add options in dev script to use gitlab-ce [#941](https://github.com/gitlabform/gitlabform/pull/941) ([@Jimisola](https://github.com/jimisola))
+* chore: migrate project to pyproject.toml [#943](https://github.com/gitlabform/gitlabform/pull/943) ([Greg Dubicki](https://github.com/gdubicki))
+* tests: stablize intermittent failure from TestFiles acceptance tests [#956](https://github.com/gitlabform/gitlabform/pull/956) ([amimas](https://github.com/amimas))
+
+### Documentation
+
+* docs: update v4.1.2 changelog [#947](https://github.com/gitlabform/gitlabform/pull/947) ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+
+Thanks to all the contributors of this release!
+
+## 4.1.2
+
+### Features
+
+* feat: Add enhanced support for managing project topics [#931](https://github.com/gitlabform/gitlabform/pull/931) ([@Jimisola](https://github.com/jimisola))
+
+### Fixes
+
+* fix: respect skip_groups when applying group configurations [#939](https://github.com/gitlabform/gitlabform/pull/939) ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Refactors
+
+* refactor: update 'project_settings_processor' to use python-gitlab [#929](https://github.com/gitlabform/gitlabform/pull/929) ([amimas](https://github.com/amimas))
+
+### Build
+
+* chore: update base image to Alpine 3.21 [#930](https://github.com/gitlabform/gitlabform/pull/930) ([rroesch1](https://github.com/rroesch1))
+* chore(ci): configure dependabot to group python-gitlab packages [#935](https://github.com/gitlabform/gitlabform/pull/935) ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+
+Thanks to all the contributors of this release!
+
 ## 4.1.1
 
 ### Refactors

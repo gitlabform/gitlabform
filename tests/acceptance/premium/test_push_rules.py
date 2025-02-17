@@ -49,9 +49,7 @@ class TestPushRules:
         assert push_rules.max_file_size == 2
 
     def test__changing_author_email_regex(self, project):
-        initial_regex = (
-            r"\@(?:(?:engineering\.digital\.)?co\.uk|(?:users\.)?noreply\.gitlab\.com)$"
-        )
+        initial_regex = r"\@(?:(?:engineering\.digital\.)?co\.uk|(?:users\.)?noreply\.gitlab\.com)$"
         initial_config = f"""
                 projects_and_groups:
                   {project.path_with_namespace}:

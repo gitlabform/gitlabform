@@ -21,19 +21,13 @@ class GroupPushRulesProcessor(AbstractProcessor):
             existing_push_rules = gitlab_group.pushrules.get()
         except GitlabGetError as e:
             if e.response_code == 404:
-                debug(
-                    f"No existing push rules for {gitlab_group.name}, creating new push rules."
-                )
+                debug(f"No existing push rules for {gitlab_group.name}, creating new push rules.")
                 self.create_group_push_rules(gitlab_group, configured_group_push_rules)
                 return
 
-        if self._needs_update(
-            existing_push_rules.asdict(), configured_group_push_rules
-        ):
+        if self._needs_update(existing_push_rules.asdict(), configured_group_push_rules):
             debug(f"Updating group push rules for group {gitlab_group.name}")
-            self.update_group_push_rules(
-                existing_push_rules, configured_group_push_rules
-            )
+            self.update_group_push_rules(existing_push_rules, configured_group_push_rules)
         else:
             debug("No update needed for Group Push Rules")
 

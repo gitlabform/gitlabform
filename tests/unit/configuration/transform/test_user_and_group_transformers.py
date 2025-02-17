@@ -68,15 +68,11 @@ def test__transform_for_merge_request_approvals() -> None:
               - 2
     """
 
-    expected_transformed_config = Configuration(
-        config_string=expected_transformed_config_yaml
-    )
+    expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
 
     ut.convert_to_simple_types(expected_transformed_config)
 
-    effective_config_yaml_str = ez_yaml.to_string(
-        obj=expected_transformed_config.config, options={}
-    )
+    effective_config_yaml_str = ez_yaml.to_string(obj=expected_transformed_config.config, options={})
     print("!!!After:")
     print(effective_config_yaml_str)
 

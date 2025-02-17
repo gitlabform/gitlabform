@@ -37,6 +37,4 @@ class AbstractProcessors(ABC):
                     effective_configuration,
                 )
             else:
-                verbose(
-                    f"Skipping section '{processor.configuration_name}' - not in --only-sections list."
-                )
+                verbose(f"Skipping section '{processor.configuration_name}' - not in --only-sections list.")

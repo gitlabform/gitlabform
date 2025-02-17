@@ -141,9 +141,7 @@ class OptionalKey(AbstractKey):
     def matches(self, e1, e2):
         only_in_e1 = self.name in e1 and self.name not in e2
         only_in_e2 = self.name not in e1 and self.name in e2
-        in_both_and_equal = (
-            self.name in e1 and self.name in e2 and e1[self.name] == e2[self.name]
-        )
+        in_both_and_equal = self.name in e1 and self.name in e2 and e1[self.name] == e2[self.name]
         return only_in_e1 or only_in_e2 or in_both_and_equal
 
     def contains(self, entity):

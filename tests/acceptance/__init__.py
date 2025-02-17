@@ -71,9 +71,7 @@ def get_random_name(entity: str) -> str:
 
 
 word_file: str = xp.locate_wordfile()
-my_words: List[str] = xp.generate_wordlist(
-    wordfile=word_file, min_length=5, max_length=8
-)
+my_words: List[str] = xp.generate_wordlist(wordfile=word_file, min_length=5, max_length=8)
 
 
 def get_random_suffix() -> str:
@@ -220,13 +218,8 @@ def get_only_branch_access_levels(project: Project, branch: str) -> Tuple[
             elif merge_access["group_id"]:
                 merge_access_group_ids.add(merge_access["group_id"])
 
-    if (
-        "unprotect_access_levels" in protected_branch.attributes
-        and len(protected_branch.unprotect_access_levels) == 1
-    ):
-        unprotect_access_level = protected_branch.unprotect_access_levels[0][
-            "access_level"
-        ]
+    if "unprotect_access_levels" in protected_branch.attributes and len(protected_branch.unprotect_access_levels) == 1:
+        unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
 
     return (
         sorted(push_access_levels),

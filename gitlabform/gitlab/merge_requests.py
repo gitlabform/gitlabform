@@ -51,11 +51,7 @@ class GitLabMergeRequests(GitLabCore):
         )
 
     def get_mr(self, project_and_group_name, mr_iid):
-        return self._make_requests_to_api(
-            "projects/%s/merge_requests/%s", (project_and_group_name, mr_iid)
-        )
+        return self._make_requests_to_api("projects/%s/merge_requests/%s", (project_and_group_name, mr_iid))
 
     def get_mr_approvals(self, project_and_group_name, mr_iid):
-        return self._make_requests_to_api(
-            "projects/%s/merge_requests/%s/approvals", (project_and_group_name, mr_iid)
-        )
+        return self._make_requests_to_api("projects/%s/merge_requests/%s/approvals", (project_and_group_name, mr_iid))

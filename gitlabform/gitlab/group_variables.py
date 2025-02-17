@@ -20,9 +20,7 @@ class GitLabGroupVariables(GitLabCore):
         # workaround for the GitLab bug
         variable = {k: to_string(v) for k, v in variable.items()}
 
-        self._make_requests_to_api(
-            "groups/%s/variables", group, "POST", variable, expected_codes=201
-        )
+        self._make_requests_to_api("groups/%s/variables", group, "POST", variable, expected_codes=201)
 
     def delete_group_variable(self, group, variable_object):
         self._make_requests_to_api(
@@ -47,11 +45,7 @@ class GitLabGroupVariables(GitLabCore):
         )
 
     def get_group_variable(self, group, variable_key):
-        return self._make_requests_to_api(
-            "groups/%s/variables/%s", (group, variable_key)
-        )["value"]
+        return self._make_requests_to_api("groups/%s/variables/%s", (group, variable_key))["value"]
 
     def get_group_variable_object(self, group, variable_key):
-        return self._make_requests_to_api(
-            "groups/%s/variables/%s", (group, variable_key)
-        )
+        return self._make_requests_to_api("groups/%s/variables/%s", (group, variable_key))
