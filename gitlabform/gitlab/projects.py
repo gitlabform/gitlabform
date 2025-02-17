@@ -116,7 +116,6 @@ class GitLabProjects(GitLabCore):
         except NotFoundException:
             return []
 
-
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly
         # the shared groups, so I'm using directly the GET /projects/:id call
