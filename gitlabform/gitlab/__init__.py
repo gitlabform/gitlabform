@@ -7,7 +7,6 @@ from gitlab import GraphQL
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
-from gitlabform.gitlab.group_variables import GitLabGroupVariables
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
 from gitlabform.gitlab.project_badges import GitLabProjectBadges
@@ -52,7 +51,6 @@ class GitLab(
     GitLabMergeRequests,
     GitLabGroupLDAPLinks,
     GitLabGroupBadges,
-    GitLabGroupVariables,
     GitLabPipelines,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
