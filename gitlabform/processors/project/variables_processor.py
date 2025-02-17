@@ -23,9 +23,7 @@ class VariablesProcessor(AbstractProcessor):
         variables: List[RESTObject] | RESTObjectList = project.variables.list()
         return [cast(ProjectVariable, var) for var in variables]
 
-    def _process_configuration(
-        self, project_and_group: str, configuration: Dict[str, Any]
-    ) -> None:
+    def _process_configuration(self, project_and_group: str, configuration: Dict[str, Any]) -> None:
         """Process variables configuration for a project.
 
         This method:
@@ -53,27 +51,20 @@ class VariablesProcessor(AbstractProcessor):
 
             # Create lookup of existing variables for faster access
             existing_vars_lookup = {
-                (var.key, getattr(var, "environment_scope", "*")): var
-                for var in existing_variables
+                (var.key, getattr(var, "environment_scope", "*")): var for var in existing_variables
             }
 
-            verbose(
-                f"Found {len(existing_variables)} existing variables in {project_and_group}"
-            )
+            verbose(f"Found {len(existing_variables)} existing variables in {project_and_group}")
 
             # Process all configured variables (both new and existing)
             processed_existing_vars = set()
             if configured_variables:
-                verbose(
-                    f"Processing {len(configured_variables)} variables from configuration"
-                )
+                verbose(f"Processing {len(configured_variables)} variables from configuration")
                 # This will:
                 # 1. Create any new variables defined in configuration
                 # 2. Update any existing variables that need changes
                 # 3. Track which existing variables were processed (for enforce mode)
-                processed_existing_vars = self._process_variables(
-                    project, configured_variables, existing_vars_lookup
-                )
+                processed_existing_vars = self._process_variables(project, configured_variables, existing_vars_lookup)
 
             # Handle cleanup of unprocessed existing variables
             if enforce_mode:
@@ -83,9 +74,7 @@ class VariablesProcessor(AbstractProcessor):
                         f"Enforce mode will delete {vars_to_delete} existing variables "
                         f"that were not in configuration from {project_and_group}"
                     )
-                self._delete_unconfigured_variables(
-                    existing_variables, processed_existing_vars
-                )
+                self._delete_unconfigured_variables(existing_variables, processed_existing_vars)
 
         except Exception as e:
             warning(f"Failed to process variables for {project_and_group}: {str(e)}")
@@ -203,16 +192,12 @@ class VariablesProcessor(AbstractProcessor):
             if var_key not in processed_vars:
                 var.delete()
 
-    def _can_proceed(
-        self, project_or_group: str, configuration: Dict[str, Any]
-    ) -> bool:
+    def _can_proceed(self, project_or_group: str, configuration: Dict[str, Any]) -> bool:
         """Check if builds are enabled for the project."""
         try:
             project: Project = self.gl.get_project_by_path_cached(project_or_group)
             if project.builds_access_level == "disabled":
-                warning(
-                    "Builds disabled in this project so I can't set variables here."
-                )
+                warning("Builds disabled in this project so I can't set variables here.")
                 return False
             return True
         except GitlabGetError:
@@ -228,9 +213,7 @@ class VariablesProcessor(AbstractProcessor):
         """Print current and configured variables for comparison."""
         try:
             project: Project = self.gl.get_project_by_path_cached(project_and_group)
-            current_variables: list[ProjectVariable] = self._get_project_variables(
-                project
-            )
+            current_variables: list[ProjectVariable] = self._get_project_variables(project)
             variables_list: list[Dict[str, str]] = []
 
             for variable in current_variables:
