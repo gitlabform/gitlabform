@@ -241,9 +241,7 @@ class TestVariables:
             "test_case_16_complex_yaml_config",
         ],
     )
-    def test__variables(
-        self, project_for_function, initial_vars, config_vars, expected
-    ):
+    def test__variables(self, project_for_function, initial_vars, config_vars, expected):
         """Test variable operations using gitlabform.
 
         Args:
@@ -265,9 +263,7 @@ class TestVariables:
         # Verify results
         for expected_var_state in expected:
             key, value, *env_scope = expected_var_state
-            get_params = (
-                {"filter": {"environment_scope": env_scope[0]}} if env_scope else {}
-            )
+            get_params = {"filter": {"environment_scope": env_scope[0]}} if env_scope else {}
 
             if value is None:
                 with pytest.raises(GitlabGetError):
@@ -312,9 +308,7 @@ projects_and_groups:
         # Handle enforce mode and get variable list
         if isinstance(variables, dict):
             if "enforce" in variables:
-                config["projects_and_groups"][project_for_function.path_with_namespace][
-                    "variables"
-                ]["enforce"] = True
+                config["projects_and_groups"][project_for_function.path_with_namespace]["variables"]["enforce"] = True
                 var_list = [variables[k] for k in variables if k != "enforce"]
             else:
                 var_list = list(variables.values())  # Convert dict values to list
@@ -332,15 +326,11 @@ projects_and_groups:
             # Copy variable config and handle special cases
             var_config = var.copy()
             if "environment_scope" in var_config:
-                var_config["filter[environment_scope]"] = var_config[
-                    "environment_scope"
-                ]
+                var_config["filter[environment_scope]"] = var_config["environment_scope"]
 
             vars_section[name] = var_config
 
-        config["projects_and_groups"][project_for_function.path_with_namespace][
-            "variables"
-        ].update(vars_section)
+        config["projects_and_groups"][project_for_function.path_with_namespace]["variables"].update(vars_section)
 
         # Convert to YAML with proper formatting
         output = StringIO()
