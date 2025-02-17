@@ -116,11 +116,6 @@ class GitLabProjects(GitLabCore):
         except NotFoundException:
             return []
 
-    def get_project_settings(self, project_and_group_name):
-        try:
-            return self._make_requests_to_api("projects/%s", project_and_group_name)
-        except NotFoundException:
-            return dict()
 
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly
