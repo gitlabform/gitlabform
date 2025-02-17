@@ -1,5 +1,8 @@
+from typing import Any, Dict, List, Optional, Tuple, Union
+from io import StringIO
+
 import pytest
-import yaml
+from ruamel.yaml import YAML
 from gitlab import GitlabGetError, GitlabListError
 
 from tests.acceptance import run_gitlabform
@@ -11,6 +14,11 @@ class TestVariables:
     Tests variable creation, updates, deletion, and environment-scoped variables
     using gitlabform configuration.
     """
+
+    def setup_method(self, method):
+        """Set up test method."""
+        self.yaml = YAML()
+        self.yaml.indent(mapping=2, sequence=4, offset=2)
 
     @pytest.mark.skip(
         reason=(
@@ -470,17 +478,21 @@ class TestVariables:
                 if has_masked:
                     assert variable.masked == expected_var_state[4]
 
-    def _create_config(self, project_for_function, variables):
+    def _create_config(
+        self,
+        project_for_function,
+        variables: Union[List[Dict[str, Any]], Dict[str, Any]],
+    ) -> str:
         """Creates YAML configuration for GitLab project variables."""
         # Base configuration in YAML format
         base_config = f"""
-          projects_and_groups:
-            {project_for_function.path_with_namespace}:
-              project_settings:
-                builds_access_level: enabled
-              variables: {{}}
-          """
-        config = yaml.safe_load(base_config)
+projects_and_groups:
+  {project_for_function.path_with_namespace}:
+    project_settings:
+      builds_access_level: enabled
+    variables: {{}}
+"""
+        config = self.yaml.load(base_config)
 
         # Handle enforce mode and get variable list
         if isinstance(variables, dict):
@@ -490,7 +502,7 @@ class TestVariables:
                 ]["enforce"] = True
                 var_list = [variables[k] for k in variables if k != "enforce"]
             else:
-                var_list = variables
+                var_list = list(variables.values())  # Convert dict values to list
         else:
             var_list = variables
 
@@ -516,4 +528,6 @@ class TestVariables:
         ].update(vars_section)
 
         # Convert to YAML with proper formatting
-        return yaml.dump(config, default_flow_style=False, sort_keys=False)
+        output = StringIO()
+        self.yaml.dump(config, output)
+        return output.getvalue()
