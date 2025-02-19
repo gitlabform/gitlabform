@@ -1,9 +1,10 @@
+from logging import warning, fatal
 from typing import Any, Dict, List, Union
 from io import StringIO
 
 import pytest
 from ruamel.yaml import YAML
-from gitlab import GitlabGetError, GitlabListError
+from gitlab.exceptions import GitlabGetError, GitlabListError, GitlabDeleteError
 
 from tests.acceptance import run_gitlabform
 
@@ -15,10 +16,28 @@ class TestGroupVariables:
     using gitlabform configuration.
     """
 
-    def setup_method(self, method):
+    @pytest.fixture(autouse=True)
+    def setup_method(self, request):
         """Set up test method."""
         self.yaml = YAML()
         self.yaml.indent(mapping=2, sequence=4, offset=2)
+
+        # Access the 'group' fixture
+        self.group = request.getfixturevalue("group")
+
+        # Cleanup: Delete all variables in the group
+        # This is to ensure that the group is clean before each test
+        try:
+            variables = self.group.variables.list(get_all=True)
+        except GitlabListError:
+            warning(f"Failed to list variables for group {self.group.full_path}")
+
+        for var in variables:
+            print(f"Deleting variable {var}")
+            try:
+                self.group.variables.delete(var.key, filter={"environment_scope": var.environment_scope})
+            except GitlabDeleteError as error:
+                fatal(f"Unexpected error occurred while deleting existing variables: {error}")
 
     @pytest.mark.parametrize(
         "initial_vars, config_vars, expected",
@@ -215,11 +234,10 @@ class TestGroupVariables:
             "test_case_16_complex_yaml_config",
         ],
     )
-    def test__variables(self, group_for_function, initial_vars, config_vars, expected):
+    def test__variables(self, initial_vars, config_vars, expected):
         """Test variable operations using gitlabform.
 
         Args:
-            group_for_function: GitLab project fixture
             initial_vars: List of variables to create initially using GitLab API
             config_vars: List of variables to configure using gitlabform
             expected: List of (key, value) or (key, value, scope) tuples
@@ -228,11 +246,11 @@ class TestGroupVariables:
         """
         # Set initial variables
         for var in initial_vars:
-            group_for_function.variables.create(var)
+            self.group.variables.create(var)
 
         # Apply gitlabform config
-        config = self._create_config(group_for_function, config_vars)
-        run_gitlabform(config, group_for_function)
+        config = self._create_config(self.group, config_vars)
+        run_gitlabform(config, self.group)
 
         # Verify results
         for expected_var_state in expected:
@@ -241,9 +259,9 @@ class TestGroupVariables:
 
             if value is None:
                 with pytest.raises(GitlabGetError):
-                    group_for_function.variables.get(key, **get_params)
+                    self.group.variables.get(key, **get_params)
             else:
-                variable = group_for_function.variables.get(key, **get_params)
+                variable = self.group.variables.get(key, **get_params)
                 # Check value for all cases
                 assert variable.value == value
 
@@ -265,14 +283,14 @@ class TestGroupVariables:
 
     def _create_config(
         self,
-        group_for_function,
+        group,
         variables: Union[List[Dict[str, Any]], Dict[str, Any]],
     ) -> str:
         """Creates YAML configuration for GitLab project variables."""
         # Base configuration in YAML format
         base_config = f"""
 projects_and_groups:
-  {group_for_function.full_path}/*:
+  {group.full_path}/*:
     group_variables: {{}}
 """
         config = self.yaml.load(base_config)
@@ -280,7 +298,7 @@ projects_and_groups:
         # Handle enforce mode and get variable list
         if isinstance(variables, dict):
             if "enforce" in variables:
-                config["projects_and_groups"][f"{group_for_function.full_path}/*"]["group_variables"]["enforce"] = True
+                config["projects_and_groups"][f"{group.full_path}/*"]["group_variables"]["enforce"] = True
                 var_list = [variables[k] for k in variables if k != "enforce"]
             else:
                 var_list = list(variables.values())  # Convert dict values to list
@@ -302,7 +320,7 @@ projects_and_groups:
 
             vars_section[name] = var_config
 
-        config["projects_and_groups"][f"{group_for_function.full_path}/*"]["group_variables"].update(vars_section)
+        config["projects_and_groups"][f"{group.full_path}/*"]["group_variables"].update(vars_section)
 
         # Convert to YAML with proper formatting
         output = StringIO()
