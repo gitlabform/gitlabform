@@ -1,4 +1,5 @@
 from logging import warning, fatal
+from time import sleep
 from typing import Any, Dict, List, Union
 from io import StringIO
 
@@ -38,6 +39,9 @@ class TestGroupVariables:
                 self.group.variables.delete(var.key, filter={"environment_scope": var.environment_scope})
             except GitlabDeleteError as error:
                 fatal(f"Unexpected error occurred while deleting existing variables: {error}")
+            print(f"Deleted variable {var}")
+
+        sleep(2)  # Sleep to allow GitLab to finish processing variable deletions
 
     @pytest.mark.parametrize(
         "initial_vars, config_vars, expected",
