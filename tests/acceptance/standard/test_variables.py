@@ -1,9 +1,10 @@
+from logging import warning, fatal
 from typing import Any, Dict, List, Union
 from io import StringIO
 
 import pytest
 from ruamel.yaml import YAML
-from gitlab import GitlabGetError, GitlabListError
+from gitlab.exceptions import GitlabGetError, GitlabListError, GitlabDeleteError
 
 from tests.acceptance import run_gitlabform
 
@@ -15,10 +16,28 @@ class TestVariables:
     using gitlabform configuration.
     """
 
-    def setup_method(self, method):
+    @pytest.fixture(autouse=True)
+    def setup_method(self, request):
         """Set up test method."""
         self.yaml = YAML()
         self.yaml.indent(mapping=2, sequence=4, offset=2)
+
+        # Access the 'project' fixture
+        self.project = request.getfixturevalue("project")
+
+        # Cleanup: Delete all variables in the project
+        # This is to ensure that the project is clean before each test
+        try:
+            variables = self.project.variables.list(get_all=True)
+        except GitlabListError:
+            warning(f"Failed to list variables for project {self.project.path_with_namespace}")
+
+        for var in variables:
+            print(f"Deleting variable {var}")
+            try:
+                self.project.variables.delete(var.key, filter={"environment_scope": var.environment_scope})
+            except GitlabDeleteError as error:
+                fatal(f"Unexpected error occurred while deleting existing variables: {error}")
 
     @pytest.mark.skip(
         reason=(
@@ -27,10 +46,10 @@ class TestVariables:
             " Track this issue in GitLab at https://gitlab.com/gitlab-org/gitlab/-/issues/511237"
         )
     )
-    def test__builds_disabled(self, project_for_function):
+    def test__builds_disabled(self, project):
         config_builds_not_enabled = f"""
         projects_and_groups:
-          {project_for_function.path_with_namespace}:
+          {self.project.path_with_namespace}:
             project_settings:
               builds_access_level: disabled
             variables:
@@ -39,11 +58,11 @@ class TestVariables:
                 value: 123
         """
 
-        run_gitlabform(config_builds_not_enabled, project_for_function)
+        run_gitlabform(config_builds_not_enabled, project)
 
         with pytest.raises(GitlabListError):
             # variables will NOT be available without builds_access_level in ['private', 'enabled']
-            vars = project_for_function.variables.list()
+            vars = self.project.variables.list()
             print("vars: ", type(vars), vars)
 
     @pytest.mark.parametrize(
@@ -241,11 +260,11 @@ class TestVariables:
             "test_case_16_complex_yaml_config",
         ],
     )
-    def test__variables(self, project_for_function, initial_vars, config_vars, expected):
+    def test__variables(self, initial_vars, config_vars, expected):
         """Test variable operations using gitlabform.
 
         Args:
-            project_for_function: GitLab project fixture
+            project: GitLab project fixture
             initial_vars: List of variables to create initially using GitLab API
             config_vars: List of variables to configure using gitlabform
             expected: List of (key, value) or (key, value, scope) tuples
@@ -254,11 +273,11 @@ class TestVariables:
         """
         # Set initial variables
         for var in initial_vars:
-            project_for_function.variables.create(var)
+            self.project.variables.create(var)
 
         # Apply gitlabform config
-        config = self._create_config(project_for_function, config_vars)
-        run_gitlabform(config, project_for_function)
+        config = self._create_config(self.project, config_vars)
+        run_gitlabform(config, self.project)
 
         # Verify results
         for expected_var_state in expected:
@@ -267,9 +286,9 @@ class TestVariables:
 
             if value is None:
                 with pytest.raises(GitlabGetError):
-                    project_for_function.variables.get(key, **get_params)
+                    self.project.variables.get(key, **get_params)
             else:
-                variable = project_for_function.variables.get(key, **get_params)
+                variable = self.project.variables.get(key, **get_params)
                 # Check value for all cases
                 assert variable.value == value
 
@@ -291,14 +310,14 @@ class TestVariables:
 
     def _create_config(
         self,
-        project_for_function,
+        project,
         variables: Union[List[Dict[str, Any]], Dict[str, Any]],
     ) -> str:
         """Creates YAML configuration for GitLab project variables."""
         # Base configuration in YAML format
         base_config = f"""
 projects_and_groups:
-  {project_for_function.path_with_namespace}:
+  {project.path_with_namespace}:
     project_settings:
       builds_access_level: enabled
     variables: {{}}
@@ -308,7 +327,7 @@ projects_and_groups:
         # Handle enforce mode and get variable list
         if isinstance(variables, dict):
             if "enforce" in variables:
-                config["projects_and_groups"][project_for_function.path_with_namespace]["variables"]["enforce"] = True
+                config["projects_and_groups"][project.path_with_namespace]["variables"]["enforce"] = True
                 var_list = [variables[k] for k in variables if k != "enforce"]
             else:
                 var_list = list(variables.values())  # Convert dict values to list
@@ -330,7 +349,7 @@ projects_and_groups:
 
             vars_section[name] = var_config
 
-        config["projects_and_groups"][project_for_function.path_with_namespace]["variables"].update(vars_section)
+        config["projects_and_groups"][project.path_with_namespace]["variables"].update(vars_section)
 
         # Convert to YAML with proper formatting
         output = StringIO()
