@@ -1,4 +1,4 @@
-from logging import warning, fatal
+from logging import debug, warning, fatal
 from time import sleep
 from typing import Any, Dict, List, Union
 from io import StringIO
@@ -40,6 +40,15 @@ class TestGroupVariables:
             except GitlabDeleteError as error:
                 fatal(f"Unexpected error occurred while deleting existing variables: {error}")
             print(f"Deleted variable {var}")
+
+
+        for var in variables:
+            print(f"Checking previously deleted variable {var}")
+            try:
+                v = self.group.variables.get(var.key, filter={"environment_scope": var.environment_scope})
+                print(f"Variable still exists: {v}")
+            except:
+                debug(f"The variable {var} was deleted successfully")
 
         sleep(2)  # Sleep to allow GitLab to finish processing variable deletions
 
