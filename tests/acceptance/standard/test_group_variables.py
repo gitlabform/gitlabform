@@ -26,14 +26,19 @@ class TestGroupVariables:
         # Access the 'group' fixture
         self.group = request.getfixturevalue("group")
 
+        # Print test case name for debugging
+        print(f"\nRunning test: {request.node.name}")
+
         # Cleanup: Delete all variables in the group
         # This is to ensure that the group is clean before each test
         retries = 5
         for _ in range(retries):
             try:
                 variables = self.group.variables.list(get_all=True)
+                print(f"Found {len(variables)} variables in group {self.group.full_path}")
+                print(variables)
             except GitlabListError:
-                warning(f"Failed to list variables for group {self.group.full_path}")
+                print(f"Failed to list variables for group {self.group.full_path}")
                 break
 
             all_deleted = True
@@ -43,7 +48,7 @@ class TestGroupVariables:
                     self.group.variables.delete(var.key, filter={"environment_scope": var.environment_scope})
                     print(f"Deleted variable {var}")
                 except GitlabDeleteError as error:
-                    fatal(f"Unexpected error occurred while deleting existing variables: {error}")
+                    print(f"Unexpected error occurred while deleting existing variables: {error}")
                     all_deleted = False
 
             if all_deleted:
@@ -53,6 +58,7 @@ class TestGroupVariables:
             fatal("Failed to delete all variables after retries")
 
         sleep(5)  # Increase sleep to allow GitLab to finish processing variable deletions
+
 
     @pytest.mark.parametrize(
         "initial_vars, config_vars, expected",
