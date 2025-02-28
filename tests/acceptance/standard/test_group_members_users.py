@@ -9,15 +9,9 @@ from tests.acceptance import (
 
 @pytest.fixture(scope="function")
 def one_owner_and_two_developers(group, root_user, users):
-    group.members.create(
-        {"user_id": users[0].id, "access_level": AccessLevel.OWNER.value}
-    )
-    group.members.create(
-        {"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value}
-    )
-    group.members.create(
-        {"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value}
-    )
+    group.members.create({"user_id": users[0].id, "access_level": AccessLevel.OWNER.value})
+    group.members.create({"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value})
+    group.members.create({"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value})
     group.members.delete(root_user.id)
 
     yield group
@@ -26,9 +20,7 @@ def one_owner_and_two_developers(group, root_user, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    group.members.create(
-        {"user_id": root_user.id, "access_level": AccessLevel.OWNER.value}
-    )
+    group.members.create({"user_id": root_user.id, "access_level": AccessLevel.OWNER.value})
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -99,9 +91,7 @@ class TestGroupMembersUsers:
         members_usernames = [member.username for member in members]
         assert user_to_remove not in members_usernames
 
-    def test__remove_user_keep_bots(
-        self, group, users, one_owner_and_two_developers, one_bot_member
-    ):
+    def test__remove_user_keep_bots(self, group, users, one_owner_and_two_developers, one_bot_member):
         no_of_members_before = len(group.members.list())
         user_to_remove = f"{users[2].username}"
 
@@ -128,9 +118,7 @@ class TestGroupMembersUsers:
 
         assert one_bot_member in members_usernames
 
-    def test__not_remove_users_with_enforce_false(
-        self, group, users, one_owner_and_two_developers
-    ):
+    def test__not_remove_users_with_enforce_false(self, group, users, one_owner_and_two_developers):
         no_of_members_before = len(group.members.list())
 
         setups = [
@@ -171,9 +159,7 @@ class TestGroupMembersUsers:
                 f"{users[2].username}",
             }
 
-    def test__change_some_users_access(
-        self, group, users, one_owner_and_two_developers
-    ):
+    def test__change_some_users_access(self, group, users, one_owner_and_two_developers):
         new_access_level = AccessLevel.MAINTAINER.value
 
         change_some_users_access = f"""
@@ -221,17 +207,13 @@ class TestGroupMembersUsers:
 
         for member in members:
             if member.username == f"{users[0].username}":
-                assert (
-                    member.access_level == AccessLevel.DEVELOPER.value
-                )  # only developer now
+                assert member.access_level == AccessLevel.DEVELOPER.value  # only developer now
             if member.username == f"{users[1].username}":
                 assert member.access_level == AccessLevel.OWNER.value  # new owner
             if member.username == f"{users[2].username}":
                 assert member.access_level == AccessLevel.DEVELOPER.value
 
-    def test__add_user_with_access_level_name(
-        self, group, users, one_owner_and_two_developers
-    ):
+    def test__add_user_with_access_level_name(self, group, users, one_owner_and_two_developers):
         no_of_members_before = len(group.members.list())
         user_to_add = f"{users[3].username}"
 

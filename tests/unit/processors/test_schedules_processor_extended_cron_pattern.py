@@ -28,14 +28,10 @@ from gitlabform.processors.project import schedules_processor
     ],
 )
 def test_cron_expressions(project_id, cron, expected):
-    assert (
-        schedules_processor._replace_extended_cron_pattern(project_id, cron) == expected
-    )
+    assert schedules_processor._replace_extended_cron_pattern(project_id, cron) == expected
 
 
 def test_invalid_cron_expression():
     with pytest.raises(ValueError) as exc_info:
         schedules_processor.ExtendedCronPattern(1, "* * *")
-    assert str(exc_info.value) == str(
-        ValueError("Expected 5 parts in the cron expression, got ['*', '*', '*']")
-    )
+    assert str(exc_info.value) == str(ValueError("Expected 5 parts in the cron expression, got ['*', '*', '*']"))

@@ -37,10 +37,8 @@ def configuration_with_subgroups_and_projects():
 def test__get_effective_config_for_project__level1(
     configuration_with_subgroups_and_projects,
 ):
-    effective_config = (
-        configuration_with_subgroups_and_projects.get_effective_config_for_project(
-            "some_group/subgroup_level_1/some_project"
-        )
+    effective_config = configuration_with_subgroups_and_projects.get_effective_config_for_project(
+        "some_group/subgroup_level_1/some_project"
     )
 
     additive__project_settings = effective_config["project_settings"]
@@ -56,10 +54,8 @@ def test__get_effective_config_for_project__level1(
 def test__get_effective_config_for_project__level2(
     configuration_with_subgroups_and_projects,
 ):
-    effective_config = (
-        configuration_with_subgroups_and_projects.get_effective_config_for_project(
-            "some_group/subgroup_level_1/subgroup_level_2/some_project"
-        )
+    effective_config = configuration_with_subgroups_and_projects.get_effective_config_for_project(
+        "some_group/subgroup_level_1/subgroup_level_2/some_project"
     )
 
     additive__project_settings = effective_config["project_settings"]
@@ -96,9 +92,7 @@ def configuration_with_subgroups_only():
 
 
 def test__get_effective_config_for_group__level1(configuration_with_subgroups_only):
-    effective_config = configuration_with_subgroups_only.get_effective_config_for_group(
-        "some_group/subgroup"
-    )
+    effective_config = configuration_with_subgroups_only.get_effective_config_for_group("some_group/subgroup")
 
     # the settings should be inherited from all levels
     assert effective_config == {

@@ -6,9 +6,7 @@ from tests.acceptance import run_gitlabform
 
 
 class TestGroupMembers:
-    def test__add_user_to_group_members_with_custom_role_by_id(
-        self, gl, group_for_function, users, random_string
-    ):
+    def test__add_user_to_group_members_with_custom_role_by_id(self, gl, group_for_function, users, random_string):
         base_access_level = AccessLevel.REPORTER.value
         member_role_id = self._create_custom_role(gl, base_access_level, random_string)
 
@@ -34,9 +32,7 @@ class TestGroupMembers:
         assert member.member_role["id"] == member_role_id
         assert member.member_role["base_access_level"] == base_access_level
 
-    def test__add_user_to_group_members_with_custom_role_by_name(
-        self, gl, group_for_function, users, random_string
-    ):
+    def test__add_user_to_group_members_with_custom_role_by_name(self, gl, group_for_function, users, random_string):
         base_access_level = AccessLevel.REPORTER.value
         member_role_id = self._create_custom_role(gl, base_access_level, random_string)
 
@@ -111,10 +107,7 @@ class TestGroupMembers:
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
         captured = capsys.readouterr()
-        assert (
-            f"Member Role with name or id {random_string} could not be found"
-            in captured.err
-        )
+        assert f"Member Role with name or id {random_string} could not be found" in captured.err
 
     def _create_custom_role(self, gl, base_access_level, random_string):
         # Python-Gitlab does not directly support Member Roles

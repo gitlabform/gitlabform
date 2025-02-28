@@ -25,9 +25,7 @@ class TestInheritanceBreakSubgroups:
 
         configuration = Configuration(config_string=config_yaml)
 
-        effective_config = configuration.get_effective_config_for_group(
-            "some_group/some_subgroup"
-        )
+        effective_config = configuration.get_effective_config_for_group("some_group/some_subgroup")
 
         assert effective_config == {
             "project_settings": {"fizz": "buzz"},
@@ -75,8 +73,10 @@ class TestInheritanceBreakSubgroups:
         self,
         configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
-        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_group(
-            "some_group/subgroup_level_1"
+        effective_config = (
+            configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_group(
+                "some_group/subgroup_level_1"
+            )
         )
 
         assert effective_config == {
@@ -91,8 +91,10 @@ class TestInheritanceBreakSubgroups:
         self,
         configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
-        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_project(
-            "some_group/subgroup_level_1/some_project"
+        effective_config = (
+            configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_project(
+                "some_group/subgroup_level_1/some_project"
+            )
         )
 
         assert effective_config == {
@@ -106,8 +108,10 @@ class TestInheritanceBreakSubgroups:
         self,
         configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
-        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_group(
-            "some_group/subgroup_level_1/subgroup_level_2"
+        effective_config = (
+            configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_group(
+                "some_group/subgroup_level_1/subgroup_level_2"
+            )
         )
 
         assert effective_config == {
@@ -121,8 +125,10 @@ class TestInheritanceBreakSubgroups:
         self,
         configuration_with_inheritance_break_set_at_subgroup_and_project_level,
     ):
-        effective_config = configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_project(
-            "some_group/subgroup_level_1/subgroup_level_2/some_project"
+        effective_config = (
+            configuration_with_inheritance_break_set_at_subgroup_and_project_level.get_effective_config_for_project(
+                "some_group/subgroup_level_1/subgroup_level_2/some_project"
+            )
         )
 
         assert effective_config == {

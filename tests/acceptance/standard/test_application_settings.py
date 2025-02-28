@@ -30,9 +30,7 @@ class TestApplicationSettings:
         updated_settings.two_factor_grace_period = 0
         updated_settings.save()
 
-    def test__can_set_asset_proxy_allowlist_array_field_into_application_settings(
-        self, gl, project
-    ):
+    def test__can_set_asset_proxy_allowlist_array_field_into_application_settings(self, gl, project):
         initial_settings = gl.settings.get()
         assert initial_settings is not None
         assert initial_settings.asset_proxy_allowlist is not None
@@ -60,9 +58,7 @@ class TestApplicationSettings:
         updated_settings.asset_proxy_allowlist = initial_settings.asset_proxy_allowlist
         updated_settings.save()
 
-    def test__can_detect_when_no_changes_required_to_application_settings(
-        self, gl, project, caplog
-    ):
+    def test__can_detect_when_no_changes_required_to_application_settings(self, gl, project, caplog):
         caplog.set_level(logging.DEBUG)
         initial_settings = gl.settings.get()
 

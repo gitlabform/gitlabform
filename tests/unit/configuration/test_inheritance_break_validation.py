@@ -124,8 +124,6 @@ class TestInheritanceBreakValidation:
 
         configuration = Configuration(config_string=config_yaml)
         with pytest.raises(SystemExit) as exception:
-            configuration.get_effective_config_for_project(
-                "some_group/subgroup1/subgroup2/*"
-            )
+            configuration.get_effective_config_for_project("some_group/subgroup1/subgroup2/*")
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_INVALID_INPUT

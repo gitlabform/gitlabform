@@ -46,9 +46,7 @@ class TestMembers:
         with pytest.raises(SystemExit):
             run_gitlabform(config_with_error, project)
 
-    def test__add_user_with_access_level_names(
-        self, project, three_members, outsider_user
-    ):
+    def test__add_user_with_access_level_names(self, project, three_members, outsider_user):
         members_before = project.members.list()
         assert len(members_before) > 0
 
@@ -90,22 +88,15 @@ class TestMembers:
 
         members = project_for_function.members.list(iterator=True)
         members_usernames = [member.username for member in members]
-        members_usernames_from_fixture = [
-            member.username for member in make_multiple_project_members_for_pagination
-        ]
+        members_usernames_from_fixture = [member.username for member in make_multiple_project_members_for_pagination]
 
         print(len(members_usernames))
         print(members_usernames)
         print(len(make_multiple_project_members_for_pagination))
         print(make_multiple_project_members_for_pagination)
 
-        assert (",").join(members_usernames) == (",").join(
-            members_usernames_from_fixture
-        )
+        assert (",").join(members_usernames) == (",").join(members_usernames_from_fixture)
 
         assert len(members) == len(make_multiple_project_members_for_pagination)
 
-        assert (
-            make_multiple_project_members_for_pagination[-1].username
-            in members_usernames
-        )
+        assert make_multiple_project_members_for_pagination[-1].username in members_usernames

@@ -14,15 +14,11 @@ class ProjectProcessor(AbstractProcessor):
         project_path_with_namespace: str = project_and_group
 
         if configuration["project"].get("transfer_from") is not None:
-            source_project_path_with_namespace = configuration["project"].get(
-                "transfer_from"
-            )
+            source_project_path_with_namespace = configuration["project"].get("transfer_from")
 
             # Check if the project was already transfered (i.e. in previous run) or a project with same path already exists
             try:
-                project_in_config: Project = self.gl.get_project_by_path_cached(
-                    project_path_with_namespace
-                )
+                project_in_config: Project = self.gl.get_project_by_path_cached(project_path_with_namespace)
                 verbose(
                     f"Project already exists: '{project_in_config.path_with_namespace}'. Ignoring 'transfer_from' config..."
                 )
@@ -37,17 +33,13 @@ class ProjectProcessor(AbstractProcessor):
                     verbose(
                         f"Updating the source project path from '{project_to_be_transferred.path}' to '{destination_project_path}'"
                     )
-                    self.gl.projects.update(
-                        project_to_be_transferred.id, {"path": destination_project_path}
-                    )
+                    self.gl.projects.update(project_to_be_transferred.id, {"path": destination_project_path})
 
                 # TODO: Catch GitlabTransferProjectError exception.
                 #  See the next comment for details.
                 # try:
                 project_transfer_destination_group, _ = project_and_group.rsplit("/", 1)
-                verbose(
-                    f"Transferring project to '{project_transfer_destination_group}' group..."
-                )
+                verbose(f"Transferring project to '{project_transfer_destination_group}' group...")
                 project_to_be_transferred.transfer(project_transfer_destination_group)
                 # TODO: Catch GitlabTransferProjectError exception.
                 #  The above code can run into exception for various reasons.
@@ -60,9 +52,7 @@ class ProjectProcessor(AbstractProcessor):
                 #     raise
 
         if configuration["project"].get("archive") is not None:
-            project: Project = self.gl.get_project_by_path_cached(
-                project_path_with_namespace
-            )
+            project: Project = self.gl.get_project_by_path_cached(project_path_with_namespace)
 
             if configuration["project"].get("archive") is True:
                 verbose("Archiving project...")

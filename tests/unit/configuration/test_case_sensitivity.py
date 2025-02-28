@@ -16,17 +16,13 @@ def test__config_with_different_case_group():
 
     group_name_with_other_case = group_name_with_varying_case.lower()
 
-    effective_configuration = configuration.get_effective_config_for_group(
-        group_name_with_other_case
-    )
+    effective_configuration = configuration.get_effective_config_for_group(group_name_with_other_case)
 
     assert effective_configuration["project_settings"] == {"visibility": "internal"}
 
 
 def test__config_with_different_case_project():
-    group_and_project_name_with_varying_case = (
-        "GroupNameWithVaryingCase/projectwithvaryingcase"
-    )
+    group_and_project_name_with_varying_case = "GroupNameWithVaryingCase/projectwithvaryingcase"
     config_yaml = f"""
     projects_and_groups:
       {group_and_project_name_with_varying_case}: 
@@ -35,13 +31,9 @@ def test__config_with_different_case_project():
     """
     configuration = Configuration(config_string=config_yaml)
 
-    group_and_project_name_with_other_case = (
-        group_and_project_name_with_varying_case.upper()
-    )
+    group_and_project_name_with_other_case = group_and_project_name_with_varying_case.upper()
 
-    effective_configuration = configuration.get_effective_config_for_project(
-        group_and_project_name_with_other_case
-    )
+    effective_configuration = configuration.get_effective_config_for_project(group_and_project_name_with_other_case)
 
     assert effective_configuration["project_settings"] == {"visibility": "public"}
 

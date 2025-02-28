@@ -90,9 +90,7 @@ class TestBranches:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-        wildcard_matching_branch = project.branches.create(
-            {"branch": "r-1", "ref": "main"}
-        )
+        wildcard_matching_branch = project.branches.create({"branch": "r-1", "ref": "main"})
         assert wildcard_matching_branch.protected is True
 
     def test__config_with_access_level_names(self, project, branch):
@@ -176,9 +174,7 @@ class TestBranches:
             _,
             _,
             other_branch_unprotect_access_level,
-        ) = get_only_branch_access_levels(
-            project_for_function, other_branch_for_function
-        )
+        ) = get_only_branch_access_levels(project_for_function, other_branch_for_function)
         assert other_branch_push_access_level == [AccessLevel.MAINTAINER.value]
         assert other_branch_merge_access_level == [AccessLevel.DEVELOPER.value]
         assert other_branch_unprotect_access_level is AccessLevel.MAINTAINER.value

@@ -29,9 +29,7 @@ def test__transform_for_protected_environments():
             name: foo
     """
 
-    expected_transformed_config = Configuration(
-        config_string=expected_transformed_config_yaml
-    )
+    expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
 
     assert not DeepDiff(configuration.config, expected_transformed_config.config)
 
@@ -47,8 +45,6 @@ def test__transform_for_protected_environments_sanity_check():
             name: blah
     """
 
-    expected_transformed_config = Configuration(
-        config_string=expected_transformed_config_yaml
-    )
+    expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
 
     assert DeepDiff(configuration.config, expected_transformed_config.config)

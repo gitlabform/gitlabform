@@ -61,9 +61,7 @@ class GitLabProjects(GitLabCore):
                 if retry > max_retries:
                     raise TimeoutWaitingForDeletion
 
-                response = self._make_requests_to_api(
-                    "projects", data=data, method="POST", expected_codes=[201, 400]
-                )
+                response = self._make_requests_to_api("projects", data=data, method="POST", expected_codes=[201, 400])
                 if self._is_project_still_deleted(response):
                     # wait & retry
                     sleep(wait_before_retry)
@@ -72,9 +70,7 @@ class GitLabProjects(GitLabCore):
                     return response
 
         else:
-            return self._make_requests_to_api(
-                "projects", data=data, method="POST", expected_codes=201
-            )
+            return self._make_requests_to_api("projects", data=data, method="POST", expected_codes=201)
 
     @staticmethod
     def _is_project_still_deleted(response):
@@ -126,21 +122,6 @@ class GitLabProjects(GitLabCore):
         except NotFoundException:
             return dict()
 
-    def put_project_settings(self, project_and_group_name, project_settings):
-        # project_settings has to be like this:
-        # {
-        #     'setting1': value1,
-        #     'setting2': value2,
-        # }
-        # ..as documented at: https://docs.gitlab.com/ce/api/projects.html#edit-project
-        return self._make_requests_to_api(
-            "projects/%s",
-            project_and_group_name,
-            "PUT",
-            data=None,
-            json=project_settings,
-        )
-
     def get_groups_from_project(self, project_and_group_name):
         # couldn't find an API call that was giving me directly
         # the shared groups, so I'm using directly the GET /projects/:id call
@@ -153,9 +134,7 @@ class GitLabProjects(GitLabCore):
 
         return groups
 
-    def share_with_group(
-        self, project_and_group_name, group_name, group_access, expires_at
-    ):
+    def share_with_group(self, project_and_group_name, group_name, group_access, expires_at):
         data = {"group_id": self._get_group_id(group_name), "expires_at": expires_at}
         if group_access is not None:
             data["group_access"] = group_access

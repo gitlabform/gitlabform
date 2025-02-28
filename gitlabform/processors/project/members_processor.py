@@ -32,41 +32,29 @@ class MembersProcessor(AbstractProcessor):
         self._process_groups(project_and_group, groups, enforce_members)
         self._process_users(project_and_group, users, enforce_members, keep_bots)
 
-    def _process_groups(
-        self, project_and_group: str, groups: dict, enforce_members: bool
-    ):
+    def _process_groups(self, project_and_group: str, groups: dict, enforce_members: bool):
         if groups:
             verbose("Processing groups as members...")
 
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
             for group in groups:
                 info(f"Processing group {group}...")
-                expires_at = (
-                    groups[group]["expires_at"].strftime("%Y-%m-%d")
-                    if "expires_at" in groups[group]
-                    else None
-                )
-                access_level = (
-                    groups[group]["group_access"]
-                    if "group_access" in groups[group]
-                    else None
-                )
+                expires_at = groups[group]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in groups[group] else None
+                access_level = groups[group]["group_access"] if "group_access" in groups[group] else None
 
                 # we only add the group if it doesn't have the correct settings
                 common_group_name = group.lower()
                 if (
                     common_group_name in current_groups
                     and expires_at == current_groups[common_group_name]["expires_at"]
-                    and access_level
-                    == current_groups[common_group_name]["group_access_level"]
+                    and access_level == current_groups[common_group_name]["group_access_level"]
                 ):
                     verbose(
                         "Ignoring group '%s' as it is already a member",
                         common_group_name,
                     )
                     verbose(
-                        "Current settings for '%s' are: %s"
-                        % (common_group_name, current_groups[common_group_name])
+                        "Current settings for '%s' are: %s" % (common_group_name, current_groups[common_group_name])
                     )
                 else:
                     verbose("Setting group '%s' as a member", common_group_name)
@@ -76,9 +64,7 @@ class MembersProcessor(AbstractProcessor):
                     # we will remove group access first and then re-add them,
                     # to ensure that the groups have the expected access level
                     self.gitlab.unshare_with_group(project_and_group, common_group_name)
-                    self.gitlab.share_with_group(
-                        project_and_group, common_group_name, access, expiry
-                    )
+                    self.gitlab.share_with_group(project_and_group, common_group_name, access, expiry)
 
         if enforce_members:
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
@@ -88,9 +74,7 @@ class MembersProcessor(AbstractProcessor):
             groups_not_in_config = set(groups_in_gitlab) - set(groups_in_config)
 
             for group_not_in_config in groups_not_in_config:
-                verbose(
-                    f"Removing group '{group_not_in_config}' that is not configured to be a member."
-                )
+                verbose(f"Removing group '{group_not_in_config}' that is not configured to be a member.")
                 self.gitlab.unshare_with_group(project_and_group, group_not_in_config)
         else:
             verbose("Not enforcing group members.")
@@ -118,24 +102,12 @@ class MembersProcessor(AbstractProcessor):
                     warning(f"Could not find user '{user}' in Gitlab, skipping...")
                     continue
 
-                expires_at = (
-                    users[user]["expires_at"].strftime("%Y-%m-%d")
-                    if "expires_at" in users[user]
-                    else None
-                )
-                access_level = (
-                    users[user]["access_level"]
-                    if "access_level" in users[user]
-                    else None
-                )
-                member_role_id_or_name = (
-                    users[user]["member_role"] if "member_role" in users[user] else None
-                )
+                expires_at = users[user]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[user] else None
+                access_level = users[user]["access_level"] if "access_level" in users[user] else None
+                member_role_id_or_name = users[user]["member_role"] if "member_role" in users[user] else None
                 if member_role_id_or_name:
                     group_name_and_path = project.namespace["full_path"]
-                    member_role_id = self.gl.get_member_role_id_cached(
-                        member_role_id_or_name, group_name_and_path
-                    )
+                    member_role_id = self.gl.get_member_role_id_cached(member_role_id_or_name, group_name_and_path)
                 else:
                     member_role_id = None
 
@@ -161,8 +133,7 @@ class MembersProcessor(AbstractProcessor):
                             common_username,
                         )
                         verbose(
-                            "Current settings for '%s' are: %s"
-                            % (common_username, current_members[common_username])
+                            "Current settings for '%s' are: %s" % (common_username, current_members[common_username])
                         )
                     else:
                         verbose(
@@ -205,12 +176,8 @@ class MembersProcessor(AbstractProcessor):
             users_in_gitlab = current_members.keys()
             users_not_in_config = set(users_in_gitlab) - set(users_in_config)
             for user_not_in_config in users_not_in_config:
-                verbose(
-                    f"Removing user '{user_not_in_config}' that is not configured to be a member."
-                )
-                gl_user: User | None = self.gl.get_user_by_username_cached(
-                    user_not_in_config
-                )
+                verbose(f"Removing user '{user_not_in_config}' that is not configured to be a member.")
+                gl_user: User | None = self.gl.get_user_by_username_cached(user_not_in_config)
 
                 if gl_user is None:
                     # User does not exist an instance level but is for whatever reason present on a Group/Project
@@ -224,17 +191,13 @@ class MembersProcessor(AbstractProcessor):
                     continue
 
                 if keep_bots and gl_user.bot:
-                    verbose(
-                        f"Will not remove bot user '{user_not_in_config}' as the 'keep_bots' option is true."
-                    )
+                    verbose(f"Will not remove bot user '{user_not_in_config}' as the 'keep_bots' option is true.")
                     continue
 
                 try:
                     project.members.delete(id=gl_user.id)
                 except GitlabDeleteError as delete_error:
-                    error(
-                        f"Member '{user_not_in_config}' could not be deleted: {delete_error}"
-                    )
+                    error(f"Member '{user_not_in_config}' could not be deleted: {delete_error}")
                     raise delete_error
         else:
             verbose("Not enforcing user members.")

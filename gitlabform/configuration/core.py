@@ -101,9 +101,7 @@ class ConfigurationCore(ABC):
         if config_string:
             config = textwrap.dedent(source)
             verbose("Reading config from the provided string.")
-            (yaml_data, doc_loaded) = Parsers.get_yaml_data(
-                yaml, log, config, literal=True
-            )
+            (yaml_data, doc_loaded) = Parsers.get_yaml_data(yaml, log, config, literal=True)
         else:
             config_path = source
             verbose(f"Reading config from file: {config_path}")
@@ -157,23 +155,17 @@ class ConfigurationCore(ABC):
         return to_return
 
     @staticmethod
-    def _validate_break_inheritance_flag(
-        config: dict, section_name: str, parent_key: str = ""
-    ) -> None:
+    def _validate_break_inheritance_flag(config: dict, section_name: str, parent_key: str = "") -> None:
         for key, value in config.items():
             if "inherit" == key:
-                parent_key_description = (
-                    ' under key "' + parent_key + '"' if parent_key else ""
-                )
+                parent_key_description = ' under key "' + parent_key + '"' if parent_key else ""
                 fatal(
                     f'The inheritance-break flag set in "{section_name}"{parent_key_description} is invalid\n'
                     f"because it has no higher level setting to inherit from.\n",
                     exit_code=EXIT_INVALID_INPUT,
                 )
             elif type(value) in [CommentedMap, dict]:
-                ConfigurationCore._validate_break_inheritance_flag(
-                    value, section_name, key
-                )
+                ConfigurationCore._validate_break_inheritance_flag(value, section_name, key)
 
     @staticmethod
     def _merge_configs(more_general_config, more_specific_config) -> dict:
@@ -191,9 +183,7 @@ class ConfigurationCore(ABC):
             for key, value in specific_config.items():
                 if "inherit" == key:
                     if not value:
-                        replace_config_sections(
-                            merged_dict, parent_key, specific_config
-                        )
+                        replace_config_sections(merged_dict, parent_key, specific_config)
                         break
                     elif value:
                         fatal(
