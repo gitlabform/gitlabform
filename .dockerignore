@@ -1,12 +1,34 @@
 /.git
 /.github
-/.idea
-/.overrides
-/dev
-# only gitlabform directory is needed
-/docs
 /.gitlabform.egg-info
+/.idea
+/.mypy_cache
+/.overrides
+/.pytest_cache
+/.venv
+/config
+/dev
+/dist
+/docs
+# only gitlabform directory is needed
 /tests
 /venv
+.DS_Store
+.coveragerc
 .dockerignore
+.git-blame-ignore-revs
 .gitignore
+.lgtm.yml
+.mypy.ini
+.pre-commit-config.yaml
+codecov.yml
+CONTRIBUTING.md
+Dockerfile
+LICENSE
+gitlab_*
+gitlabform.iml
+mkdocs.yml
+output.yml
+# pyproject.toml file is needed
+README.md
+tbump.toml
