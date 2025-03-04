@@ -208,6 +208,19 @@ def users(group):
         user.delete()
 
 
+@pytest.fixture(scope="function")
+def users_for_function(group_for_function):
+    no_of_users = 4
+
+    username_base = get_random_name("user")
+    users = create_users(username_base, no_of_users)
+
+    yield users
+
+    for user in users:
+        user.delete()
+
+
 @pytest.fixture(scope="class")
 def other_users():
     # TODO: deduplicate this - it's a copy and paste from the above fixture

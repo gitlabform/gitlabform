@@ -9,24 +9,33 @@ from tests.acceptance import (
 
 @pytest.fixture(scope="function")
 def one_owner_and_two_developers(group, root_user, users):
-    group.members.create({"user_id": users[0].id, "access_level": AccessLevel.OWNER.value})
-    group.members.create({"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value})
-    group.members.create({"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value})
-    group.members.delete(root_user.id)
+    yield from one_owner_and_two_developers_for_group_non_fixture(group, root_user, users)
 
-    yield group
+
+@pytest.fixture(scope="function")
+def one_owner_and_two_developers_group_for_function(group_for_function, root_user, users_for_function):
+    yield from one_owner_and_two_developers_for_group_non_fixture(group_for_function, root_user, users_for_function)
+
+
+def one_owner_and_two_developers_for_group_non_fixture(group_to_add_members_to, root_user_account, users_to_add):
+    group_to_add_members_to.members.create({"user_id": users_to_add[0].id, "access_level": AccessLevel.OWNER.value})
+    group_to_add_members_to.members.create({"user_id": users_to_add[1].id, "access_level": AccessLevel.DEVELOPER.value})
+    group_to_add_members_to.members.create({"user_id": users_to_add[2].id, "access_level": AccessLevel.DEVELOPER.value})
+
+    group_to_add_members_to.members.delete(root_user_account.id)
+
+    yield group_to_add_members_to
 
     # we are running tests with root's token, so every group is created
     # with a single user - root as owner. we restore the group to
     # this state here.
-
-    group.members.create({"user_id": root_user.id, "access_level": AccessLevel.OWNER.value})
+    group_to_add_members_to.members.create({"user_id": root_user_account.id, "access_level": AccessLevel.OWNER.value})
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
-    for user in users:
+    for user in users_to_add:
         with allowed_codes(404):
-            group.members.delete(user.id)
+            group_to_add_members_to.members.delete(user.id)
 
 
 @pytest.fixture(scope="function")
@@ -186,31 +195,45 @@ class TestGroupMembersUsers:
             if member.username == f"{users[2].username}":
                 assert member.access_level == new_access_level
 
-    def test__change_owner(self, group, users, one_owner_and_two_developers):
-        change_owner = f"""
-            projects_and_groups:
-              {group.full_path}/*:
-                group_members:
-                  users:
-                    {users[0].username}:
-                      access_level: {AccessLevel.DEVELOPER.value} # only developer now
-                    {users[1].username}:
-                      access_level: {AccessLevel.OWNER.value} # new owner
-                    {users[2].username}:
-                      access_level: {AccessLevel.DEVELOPER.value}
-            """
+    def test__change_owner(
+        self, group_for_function, users_for_function, one_owner_and_two_developers_group_for_function
+    ):
+        members = group_for_function.members.list()
 
-        run_gitlabform(change_owner, group)
-
-        members = group.members.list()
         assert len(members) == 3
 
         for member in members:
-            if member.username == f"{users[0].username}":
+            if member.username == f"{users_for_function[0].username}":
+                assert member.access_level == AccessLevel.OWNER.value
+            if member.username == f"{users_for_function[1].username}":
+                assert member.access_level == AccessLevel.DEVELOPER.value
+            if member.username == f"{users_for_function[2].username}":
+                assert member.access_level == AccessLevel.DEVELOPER.value
+
+        change_owner = f"""
+            projects_and_groups:
+              {group_for_function.full_path}/*:
+                group_members:
+                  users:
+                    {users_for_function[0].username}:
+                      access_level: {AccessLevel.DEVELOPER.value} # only developer now
+                    {users_for_function[1].username}:
+                      access_level: {AccessLevel.OWNER.value} # new owner
+                    {users_for_function[2].username}:
+                      access_level: {AccessLevel.DEVELOPER.value}
+            """
+
+        run_gitlabform(change_owner, group_for_function)
+
+        members = group_for_function.members.list()
+        assert len(members) == 3
+
+        for member in members:
+            if member.username == f"{users_for_function[0].username}":
                 assert member.access_level == AccessLevel.DEVELOPER.value  # only developer now
-            if member.username == f"{users[1].username}":
+            if member.username == f"{users_for_function[1].username}":
                 assert member.access_level == AccessLevel.OWNER.value  # new owner
-            if member.username == f"{users[2].username}":
+            if member.username == f"{users_for_function[2].username}":
                 assert member.access_level == AccessLevel.DEVELOPER.value
 
     def test__add_user_with_access_level_name(self, group, users, one_owner_and_two_developers):
