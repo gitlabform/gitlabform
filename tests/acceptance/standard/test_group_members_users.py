@@ -127,45 +127,47 @@ class TestGroupMembersUsers:
 
         assert one_bot_member in members_usernames
 
-    def test__not_remove_users_with_enforce_false(self, group, users, one_owner_and_two_developers):
-        no_of_members_before = len(group.members.list())
+    def test__not_remove_users_with_enforce_false(
+        self, group_for_function, users_for_function, one_owner_and_two_developers_group_for_function
+    ):
+        no_of_members_before = len(group_for_function.members.list())
 
         setups = [
             # flag explicitly set to false
             f"""
                 projects_and_groups:
-                  {group.full_path}/*:
+                  {group_for_function.full_path}/*:
                     group_members:
                       users:
-                        {users[0].username}:
+                        {users_for_function[0].username}:
                           access_level: {AccessLevel.OWNER.value}
-                        {users[1].username}:
+                        {users_for_function[1].username}:
                           access_level: {AccessLevel.DEVELOPER.value}
                       enforce: false
                 """,
             # flag not set at all (but the default is false)
             f"""
                 projects_and_groups:
-                  {group.full_path}/*:
+                  {group_for_function.full_path}/*:
                     group_members:
                       users:
-                        {users[0].username}:
+                        {users_for_function[0].username}:
                           access_level: {AccessLevel.OWNER.value}
-                        {users[1].username}:
+                        {users_for_function[1].username}:
                           access_level: {AccessLevel.DEVELOPER.value}
                 """,
         ]
         for setup in setups:
-            run_gitlabform(setup, group)
+            run_gitlabform(setup, group_for_function)
 
-            members = group.members.list()
+            members = group_for_function.members.list()
             assert len(members) == no_of_members_before
 
             members_usernames = {member.username for member in members}
             assert members_usernames == {
-                f"{users[0].username}",
-                f"{users[1].username}",
-                f"{users[2].username}",
+                f"{users_for_function[0].username}",
+                f"{users_for_function[1].username}",
+                f"{users_for_function[2].username}",
             }
 
     def test__change_some_users_access(self, group, users, one_owner_and_two_developers):
@@ -262,10 +264,10 @@ class TestGroupMembersUsers:
         members_usernames = [member.username for member in members]
         assert members_usernames.count(user_to_add) == 1
 
-    def test__root_as_the_sole_owner(self, group):
+    def test__root_as_the_sole_owner(self, group_for_function):
         config = f"""
             projects_and_groups:
-              {group.full_path}/*:
+              {group_for_function.full_path}/*:
                 group_members:
                   users:
                     root:
@@ -273,9 +275,9 @@ class TestGroupMembersUsers:
                   enforce: true
             """
 
-        run_gitlabform(config, group)
+        run_gitlabform(config, group_for_function)
 
-        members = group.members.list()
+        members = group_for_function.members.list()
         assert len(members) == 1
 
         assert members[0].username == "root"
