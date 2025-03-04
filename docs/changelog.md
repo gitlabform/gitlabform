@@ -1,5 +1,46 @@
 # Changelog
 
+## 4.2.0
+
+### Features
+
+* Add the possibility to add group level webhooks [#919](https://github.com/gitlabform/gitlabform/pull/919), [szEvEz](https://github.com/szEvEz)
+* Add Project Security Settings support [#922](https://github.com/gitlabform/gitlabform/pull/922), [szEvEz](https://github.com/szEvEz)
+
+### Bug Fixes
+
+* Project topics should not be removed if topics are not in the config [#954](https://github.com/gitlabform/gitlabform/pull/954), [amimas](https://github.com/amimas)
+
+### Refactors
+
+* migrate 'merge_requests_approvals' processor to python-gitlab [#955](https://github.com/gitlabform/gitlabform/pull/955), [amimas](https://github.com/amimas)
+
+### Tests
+
+* Stabilize intermittent failure from TestFiles acceptance tests [#956](https://github.com/gitlabform/gitlabform/pull/956), [amimas](https://github.com/amimas)
+* Handle flaky test in test_files [#961](https://github.com/gitlabform/gitlabform/pull/961), [gdubicki](https://github.com/gdubicki)
+* Dix issues with eventual consistency in tests and cover an mr_approval_rules use case [#969](https://github.com/gitlabform/gitlabform/pull/969), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+
+### Documentation
+
+* Improving the Features listings and local dev instructions, [gdubicki](https://github.com/gdubicki)
+
+### Code Style
+
+* Implement `black` formatting [#959](https://github.com/gitlabform/gitlabform/pull/959), [gdubicki](https://github.com/gdubicki)
+
+### Build Process
+
+* Improved pyproject.toml [#945](https://github.com/gitlabform/gitlabform/pull/945), [gdubicki](https://github.com/gdubicki)
+* Ensure that the app keeps running on MacOS and Windows [#958](https://github.com/gitlabform/gitlabform/pull/958), [gdubicki](https://github.com/gdubicki)
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+
+Thanks to all the contributors of this release!
+
 ## 4.1.3
 
 ### Fixes
