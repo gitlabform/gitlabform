@@ -24,6 +24,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [Members (users) {add/remove user, change access level, optional enforce}](reference/members.md#project-members)
     * [Merge Requests project-level configuration and approval rules](reference/merge_requests.md) (**GitLab Premium (paid) only**)
     * [Pipeline schedules](reference/pipeline_schedules.md)
+    * [Project security settings](reference/project_security_settings.md)
     * [Protected branches](reference/protected_branches.md):
       * access levels (roles) allowed to push/merge/unprotect, allow force push flag,
       * users/groups allowed to push/merge/unprotect, code owner approval required flag (**GitLab Premium (paid) only**),
