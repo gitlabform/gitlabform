@@ -493,3 +493,56 @@ class TestMergeRequestApprovers:
         assert default_mr_approval_rule_details.users[0]["username"] == project_user_for_approval_rule.username
         assert len(default_mr_approval_rule_details.groups) == 1
         assert default_mr_approval_rule_details.groups[0]["path"] == group_for_function.full_path
+
+    def test__can_set_approvals_required_to_zero_at_a_Project_level_when_also_defined_at_a_Group_level(
+        self, project_for_function, group, make_user
+    ):
+        """
+        Setting a merge request approval rule at a project level, with enforce: true, should take priority, even if
+        enforce: true is set on merge request approval rules at group level.
+        """
+        user_for_approval_rule = make_user(level=AccessLevel.MAINTAINER, add_to_project=False)
+        config = f"""
+            projects_and_groups:    
+             "{group.full_path}/*":
+                group_members:
+                    users:
+                      {user_for_approval_rule.username}:
+                        access_level: {AccessLevel.MAINTAINER.value}
+                merge_requests_approval_rules:
+                  enforce: true
+                  code_coverage:
+                    applies_to_all_protected_branches: true
+                    approvals_required: 1
+                    name: "Coverage-Check"
+                    users:
+                      - {user_for_approval_rule.username}
+                    report_type: code_coverage
+                    rule_type: report_approver
+             "{project_for_function.path_with_namespace}":
+                merge_requests_approval_rules:
+                  enforce: true
+                  any:
+                    approvals_required: 1
+                    name: "Any member"
+                    rule_type: any_approver
+                  code_coverage:
+                    applies_to_all_protected_branches: true
+                    approvals_required: 0
+                    name: "Coverage-Check"
+                    users:
+                      - {user_for_approval_rule.username}
+                    report_type: code_coverage
+                    rule_type: report_approver
+        """
+
+        run_gitlabform(config, project_for_function)
+
+        mr_approval_rules_under_this_project = project_for_function.approvalrules.list()
+        assert len(mr_approval_rules_under_this_project) == 2
+        any_mr_approval_rule_details = mr_approval_rules_under_this_project[0]
+        assert any_mr_approval_rule_details.name == "Any member"
+
+        coverage_check_approval_rule_details = mr_approval_rules_under_this_project[1]
+        assert coverage_check_approval_rule_details.name == "Coverage-Check"
+        assert coverage_check_approval_rule_details.approvals_required == 0
