@@ -54,7 +54,7 @@ content-type = "text/markdown"
 test = [
     "coverage==7.6.12",
     "cryptography==44.0.2",
-    "deepdiff==8.2.0",
+    "deepdiff==8.3.0",
     "mypy==1.15.0",
     "mypy-extensions==1.0.0",
     "pre-commit==2.21.0",
