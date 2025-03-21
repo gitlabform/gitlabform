@@ -61,7 +61,7 @@ test = [
     "pytest==8.3.5",
     "pytest-cov==6.0.0",
     "pytest-rerunfailures==15.0",
-    "xkcdpass==1.19.9",
+    "xkcdpass==1.20.0",
 ]
 docs = ["mkdocs", "mkdocs-material"]
 
