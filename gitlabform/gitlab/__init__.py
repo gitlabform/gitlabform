@@ -28,6 +28,7 @@ class AccessLevel(enum.IntEnum):
     NO_ACCESS = 0
     MINIMAL = 5  # introduced in GitLab 13.5
     GUEST = 10
+    PLANNER = 15  # introduced in GitLab 17.7
     REPORTER = 20
     DEVELOPER = 30
     MAINTAINER = 40
