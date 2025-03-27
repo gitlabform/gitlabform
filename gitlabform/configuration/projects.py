@@ -22,7 +22,7 @@ class ConfigurationProjects(ConfigurationGroups, ABC):
         projects = []
         projects_and_groups = self.get("projects_and_groups")
         for element in projects_and_groups.keys():
-            if element != "*" and not element.endswith("/*"):
+            if element != "*" and not element.endswith("/*") and not element.endswith("/"):
                 projects.append(element)
         return sorted(projects)
 
