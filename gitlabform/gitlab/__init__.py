@@ -6,13 +6,11 @@ from gitlab import GraphQL
 
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
-from gitlabform.gitlab.group_avatar import GitLabGroupAvatar
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
 from gitlabform.gitlab.group_variables import GitLabGroupVariables
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
 from gitlabform.gitlab.project_badges import GitLabProjectBadges
-from gitlabform.gitlab.project_avatar import GitLabProjectAvatar
 from gitlabform.gitlab.project_deploy_keys import GitLabProjectDeployKeys
 from gitlabform.gitlab.project_protected_environments import (
     GitLabProjectProtectedEnvironments,
@@ -57,10 +55,8 @@ class GitLab(
     GitLabGroupLDAPLinks,
     GitLabGroupBadges,
     GitLabGroupVariables,
-    GitLabGroupAvatar,
     GitLabPipelines,
     GitLabProjectBadges,
-    GitLabProjectAvatar,
     GitLabProjectDeployKeys,
     GitLabProjectProtectedEnvironments,
     GitLabProjectMergeRequestsApprovals,
