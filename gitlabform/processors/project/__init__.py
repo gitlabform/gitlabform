@@ -59,7 +59,7 @@ class ProjectProcessors(AbstractProcessors):
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab, strict),
             ProjectSecuritySettingsProcessor(gitlab),
-            AvatarProcessor(gitlab),
+            AvatarProcessor(gitlab, config),
             MembersProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
             ProjectLabelsProcessor(gitlab),

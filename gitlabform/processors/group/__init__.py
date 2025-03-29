@@ -39,7 +39,7 @@ class GroupProcessors(AbstractProcessors):
         self.processors: List[AbstractProcessor] = [
             GroupVariablesProcessor(gitlab),
             GroupSettingsProcessor(gitlab),
-            GroupAvatarProcessor(gitlab),
+            GroupAvatarProcessor(gitlab, config),
             GroupMembersProcessor(gitlab),
             GroupLDAPLinksProcessor(gitlab),
             GroupBadgesProcessor(gitlab),
