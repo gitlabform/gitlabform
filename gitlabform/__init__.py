@@ -114,15 +114,9 @@ class GitLabForm:
 
         self.gitlab, self.configuration = self._initialize_configuration_and_gitlab()
 
-        self.application_processors = ApplicationProcessors(
-            self.gitlab, self.configuration, self.strict
-        )
-        self.group_processors = GroupProcessors(
-            self.gitlab, self.configuration, self.strict
-        )
-        self.project_processors = ProjectProcessors(
-            self.gitlab, self.configuration, self.strict
-        )
+        self.application_processors = ApplicationProcessors(self.gitlab, self.configuration, self.strict)
+        self.group_processors = GroupProcessors(self.gitlab, self.configuration, self.strict)
+        self.project_processors = ProjectProcessors(self.gitlab, self.configuration, self.strict)
         self.groups_provider = GroupsProvider(
             self.gitlab,
             self.configuration,
@@ -186,15 +180,11 @@ class GitLabForm:
             help="Skips checking if the latest version is used",
         )
 
-        parser.add_argument(
-            "-c", "--config", default="config.yml", help="config file path and filename"
-        )
+        parser.add_argument("-c", "--config", default="config.yml", help="config file path and filename")
 
         verbosity_args = parser.add_mutually_exclusive_group()
 
-        verbosity_args.add_argument(
-            "-v", "--verbose", action="store_true", help="verbose output"
-        )
+        verbosity_args.add_argument("-v", "--verbose", action="store_true", help="verbose output")
 
         verbosity_args.add_argument(
             "-d",
@@ -428,9 +418,7 @@ class GitLabForm:
                 )
                 continue
 
-            group_configuration = self.configuration.get_effective_config_for_group(
-                group
-            )
+            group_configuration = self.configuration.get_effective_config_for_group(group)
 
             effective_configuration.add_placeholder(group)
 
@@ -457,9 +445,7 @@ class GitLabForm:
                 failed_groups[group_number] = group
 
                 trace = traceback.format_exc()
-                message = (
-                    f"Error occurred while processing group {group}, exception:\n\n{e}"
-                )
+                message = f"Error occurred while processing group {group}, exception:\n\n{e}"
 
                 if self.terminate_after_error:
                     effective_configuration.write_to_file()
@@ -470,9 +456,7 @@ class GitLabForm:
                     warning(message)
                     debug(trace)
             finally:
-                debug(
-                    f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}"
-                )
+                debug(f"@ ({group_number}/{len(groups)}) FINISHED Processing group: {group}")
 
         project_number = 0
         successful_projects = 0
@@ -492,9 +476,7 @@ class GitLabForm:
                 )
                 continue
 
-            project_configuration = self.configuration.get_effective_config_for_project(
-                project_and_group
-            )
+            project_configuration = self.configuration.get_effective_config_for_project(project_and_group)
 
             effective_configuration.add_placeholder(project_and_group)
 
@@ -519,9 +501,7 @@ class GitLabForm:
 
             except Exception as e:
                 if "Non GET methods are not allowed for moved projects" in str(e):
-                    info(
-                        "Project has been transferred, no need to process original location"
-                    )
+                    info("Project has been transferred, no need to process original location")
                     continue
 
                 failed_projects[project_number] = project_and_group
@@ -539,8 +519,7 @@ class GitLabForm:
                     debug(trace)
             finally:
                 debug(
-                    f"* ({project_number}/{len(projects)})"
-                    f" FINISHED Processing project: {project_and_group}",
+                    f"* ({project_number}/{len(projects)})" f" FINISHED Processing project: {project_and_group}",
                 )
 
         effective_configuration.write_to_file()
@@ -618,9 +597,7 @@ class GitLabForm:
             info("Running in dry-run mode...")
 
         if target == "ALL":
-            info(
-                ">>> Getting ALL groups and projects that I have permission to modify..."
-            )
+            info(">>> Getting ALL groups and projects that I have permission to modify...")
         elif target == "ALL_DEFINED":
             info(">>> Getting ALL groups and projects DEFINED in the configuration...")
         else:
@@ -633,9 +610,7 @@ class GitLabForm:
             if target == "ALL":
                 error_message = "GitLab has no projects and groups!"
             elif target == "ALL_DEFINED":
-                error_message = (
-                    "Configuration does not have any groups or projects defined!"
-                )
+                error_message = "Configuration does not have any groups or projects defined!"
             else:
                 error_message = f"Project or group {target} cannot be found in GitLab!"
             fatal(
@@ -668,9 +643,7 @@ class GitLabForm:
                 if len(entities.omitted[reason]) > 0:
                     if not first:
                         entities_omitted += ","
-                    entities_omitted += (
-                        f" {reason.value}: {len(entities.omitted[reason])}"
-                    )
+                    entities_omitted += f" {reason.value}: {len(entities.omitted[reason])}"
                     entities_verbose += f"\nomitted {entities.name} - {reason.value}: {entities.get_omitted(reason)}"
                     first = False
             entities_omitted += ")"
@@ -733,21 +706,15 @@ class GitLabForm:
             # fmt: on
 
     @classmethod
-    def _info_group_count(
-        cls, prefix, i: int, n: int, *rest: Token, **kwargs: Any
-    ) -> None:
+    def _info_group_count(cls, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
         cls._info_count(purple, prefix, i, n, *rest, **kwargs)
 
     @classmethod
-    def _info_project_count(
-        cls, prefix, i: int, n: int, *rest: Token, **kwargs: Any
-    ) -> None:
+    def _info_project_count(cls, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
         cls._info_count(green, prefix, i, n, *rest, **kwargs)
 
     @classmethod
-    def _info_count(
-        cls, color, prefix, i: int, n: int, *rest: Token, **kwargs: Any
-    ) -> None:
+    def _info_count(cls, color, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
         num_digits = len(str(n))
         counter_format = f"(%{num_digits}d/%d)"
         counter_str = counter_format % (i, n)

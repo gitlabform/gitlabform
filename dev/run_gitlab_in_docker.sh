@@ -41,22 +41,101 @@ cecho() {
 }
 
 # ============================================================================
+#  Defaults and Argument Parsing
+# ============================================================================
+
+# Default values
+gitlab_version="latest"
+gitlab_flavor="ee"
+cpu_limit=""
+memory_limit=""
+
+# Process command-line arguments
+while [[ $# -gt 0 ]]; do
+  key="$1"
+  case $key in
+    --help)
+      echo "Usage: $0 [options]"
+      echo ""
+      echo "  --help                  Display this help message."
+      echo "  --gitlab-version <version> Specify the GitLab version to deploy (default: latest)."
+      echo "  --gitlab-flavor <flavor> Specify the GitLab flavor to deploy (\"ce\" or \"ee\"). Default is \"ee\"."
+      echo "  --cpus <value>          Limit CPU usage (e.g., 0.5, 2, etc.). Default: no limit."
+      echo "  --memory <value>        Limit memory usage (e.g., 512m, 2g, etc.). Default: no limit."
+      exit 0
+      ;;
+    --gitlab-version)
+      if [[ -n "$2" ]]; then
+        gitlab_version="$2"
+        shift 2
+      else
+        echo "Error: --gitlab-version requires a value"
+        exit 1
+      fi
+      ;;
+    --gitlab-flavor)
+      if [[ -n "$2" ]]; then
+        gitlab_flavor="$2"
+        shift 2
+      else
+        echo "Error: --gitlab-flavor requires an argument (\"ce\" or \"ee\")"
+        exit 1
+      fi
+      ;;
+    --cpus)
+      if [[ -n "$2" ]]; then
+        cpu_limit="$2"
+        shift 2
+      else
+        echo "Error: --cpus requires a value"
+        exit 1
+      fi
+      ;;
+    --memory)
+      if [[ -n "$2" ]]; then
+        memory_limit="$2"
+        shift 2
+      else
+        echo "Error: --memory requires a value"
+        exit 1
+      fi
+      ;;
+    --*)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# ============================================================================
 #  Variables
 # ============================================================================
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 repo_root_dir="$script_dir/.."
 
-if [[ $# == 1 ]] ; then
-  gitlab_version="$1"
-else
-  gitlab_version="latest"
-fi
-
-if [[ $(uname -s) == 'Darwin' ]] && [[ $(uname -m) == 'arm64' ]] ; then
+# Determine the appropriate GitLab image
+if [[ $(uname -s) == 'Darwin' ]] && [[ $(uname -m) == 'arm64' ]]; then
   gitlab_image="gsdukbh/gitlab-ee-arm64"
 else
-  gitlab_image="gitlab/gitlab-ee"
+  if [[ "$gitlab_flavor" == "ce" ]]; then
+    gitlab_image="gitlab/gitlab-ce"
+  else
+    gitlab_image="gitlab/gitlab-ee"
+  fi
+fi
+
+# Prepare extra Docker run options
+extra_options=""
+if [[ -n "$cpu_limit" ]]; then
+  extra_options+=" --cpus $cpu_limit"
+fi
+if [[ -n "$memory_limit" ]]; then
+  extra_options+=" --memory $memory_limit"
 fi
 
 # ============================================================================
@@ -104,6 +183,7 @@ docker run --detach \
   --volume "$repo_root_dir/dev/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
   --volume "$repo_root_dir/dev/gitlab.rb:/etc/gitlab/gitlab.rb" \
   $config_volume \
+  $extra_options \
   --health-cmd '/healthcheck-and-setup.sh' \
   --health-interval 2s \
   --health-timeout 2m \

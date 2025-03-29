@@ -52,9 +52,7 @@ class LabelsProcessor:
         # add new labels
         for label_name in configured_labels.keys():
             if label_name not in existing_label_names:
-                self.create_new_label(
-                    configured_labels, group_or_project, label_name, parent_object_type
-                )
+                self.create_new_label(configured_labels, group_or_project, label_name, parent_object_type)
 
     @staticmethod
     def update_existing_label(

@@ -10,15 +10,9 @@ from tests.acceptance import (
 
 @pytest.fixture(scope="function")
 def one_owner_and_two_developers(group, root_user, users):
-    group.members.create(
-        {"user_id": users[0].id, "access_level": AccessLevel.OWNER.value}
-    )
-    group.members.create(
-        {"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value}
-    )
-    group.members.create(
-        {"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value}
-    )
+    group.members.create({"user_id": users[0].id, "access_level": AccessLevel.OWNER.value})
+    group.members.create({"user_id": users[1].id, "access_level": AccessLevel.DEVELOPER.value})
+    group.members.create({"user_id": users[2].id, "access_level": AccessLevel.DEVELOPER.value})
     group.members.delete(root_user.id)
 
     yield group
@@ -27,9 +21,7 @@ def one_owner_and_two_developers(group, root_user, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    group.members.create(
-        {"user_id": root_user.id, "access_level": AccessLevel.OWNER.value}
-    )
+    group.members.create({"user_id": root_user.id, "access_level": AccessLevel.OWNER.value})
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests
@@ -40,9 +32,7 @@ def one_owner_and_two_developers(group, root_user, users):
 
 @pytest.fixture(scope="function")
 def one_owner(group, groups, subgroup, root_user, users):
-    group.members.create(
-        {"user_id": users[0].id, "access_level": AccessLevel.OWNER.value}
-    )
+    group.members.create({"user_id": users[0].id, "access_level": AccessLevel.OWNER.value})
     group.members.delete(root_user.id)
 
     yield group
@@ -51,9 +41,7 @@ def one_owner(group, groups, subgroup, root_user, users):
     # with a single user - root as owner. we restore the group to
     # this state here.
 
-    group.members.create(
-        {"user_id": root_user.id, "access_level": AccessLevel.OWNER.value}
-    )
+    group.members.create({"user_id": root_user.id, "access_level": AccessLevel.OWNER.value})
 
     # we try to remove all users, not just those added above,
     # on purpose, as more may have been added in the tests

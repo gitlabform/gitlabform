@@ -5,21 +5,6 @@ from gitlabform.gitlab.core import (
 
 
 class GitLabProjectMergeRequestsApprovals(GitLabCore):
-    # configuration
-
-    def get_approvals_settings(self, project_and_group_name):
-        pid = self._get_project_id(project_and_group_name)
-        return self._make_requests_to_api("projects/%s/approvals", pid)
-
-    def post_approvals_settings(self, project_and_group_name, data):
-        # for this endpoint GitLab still actually wants pid, not "group/project"...
-        pid = self._get_project_id(project_and_group_name)
-        data_required = {"id": pid}
-        data = {**data, **data_required}
-        self._make_requests_to_api(
-            "projects/%s/approvals", pid, "POST", data, expected_codes=201
-        )
-
     # approval rules
 
     def get_approval_rules(self, project_and_group_name):
@@ -104,8 +89,6 @@ class GitLabProjectMergeRequestsApprovals(GitLabCore):
         data.pop("protected_branches")
         protected_branch_ids = []
         for branch_name in protected_branches_name:
-            branch_id = self._get_protected_branch_id(
-                project_and_group_name, branch_name
-            )
+            branch_id = self._get_protected_branch_id(project_and_group_name, branch_name)
             protected_branch_ids.append(branch_id)
         data["protected_branch_ids"] = protected_branch_ids

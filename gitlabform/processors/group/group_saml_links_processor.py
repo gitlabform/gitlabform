@@ -19,9 +19,7 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
         enforce_links = configuration.get("saml_group_links|enforce", False)
 
         group: Group = self.gl.get_group_by_path_cached(group_path)
-        existing_links: Union[RESTObjectList, List[RESTObject]] = (
-            self._fetch_saml_links(group)
-        )
+        existing_links: Union[RESTObjectList, List[RESTObject]] = self._fetch_saml_links(group)
         existing_link_names = [existing_link.name for existing_link in existing_links]
 
         # Remove 'enforce' key from the config so that it's not treated as a "link"
@@ -49,9 +47,7 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
     ) -> None:
         """Delete any SAML links that are not in the configuration."""
         known_names = [
-            common_name["saml_group_name"]
-            for common_name in configured.values()
-            if common_name != "enforce"
+            common_name["saml_group_name"] for common_name in configured.values() if common_name != "enforce"
         ]
 
         for link in existing:

@@ -5,9 +5,7 @@ from gitlabform.gitlab.groups import GitLabGroups
 class GitLabGroupLDAPLinks(GitLabGroups):
     def get_ldap_group_links(self, group):
         group_id = self.get_group_id_case_insensitive(group)
-        return self._make_requests_to_api(
-            "groups/%s/ldap_group_links", group_id, expected_codes=[200, 404]
-        )
+        return self._make_requests_to_api("groups/%s/ldap_group_links", group_id, expected_codes=[200, 404])
 
     def add_ldap_group_link(self, group, data):
         group_id = self.get_group_id_case_insensitive(group)
@@ -23,9 +21,7 @@ class GitLabGroupLDAPLinks(GitLabGroups):
             )
         # this is a GitLab API bug - it returns 404 here instead of 400 for bad requests...
         except NotFoundException:
-            raise InvalidParametersException(
-                f"Invalid parameters for a Group LDAP link for group {group}: {data}"
-            )
+            raise InvalidParametersException(f"Invalid parameters for a Group LDAP link for group {group}: {data}")
 
     def delete_ldap_group_link(self, group, data):
         if "group_access" in data:

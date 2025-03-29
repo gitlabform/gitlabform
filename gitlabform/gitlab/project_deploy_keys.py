@@ -7,9 +7,7 @@ class GitLabProjectDeployKeys(GitLabProjects):
         return self._make_requests_to_api("deploy_keys")
 
     def get_deploy_keys(self, project_and_group_name):
-        return self._make_requests_to_api(
-            "projects/%s/deploy_keys", project_and_group_name
-        )
+        return self._make_requests_to_api("projects/%s/deploy_keys", project_and_group_name)
 
     def post_deploy_key(self, project_and_group_name, deploy_key_in_config):
         # deploy_key_in_config has to be like this:
@@ -30,9 +28,7 @@ class GitLabProjectDeployKeys(GitLabProjects):
             )
 
         except UnexpectedResponseException as e:
-            if e.response_status_code == 400 and (
-                "has already been taken" in e.response_text
-            ):
+            if e.response_status_code == 400 and ("has already been taken" in e.response_text):
                 # Sometimes GitLab throws HTTP 400: {"deploy_key.fingerprint_sha256":["has already been taken"]}
                 # when you try to add an existing SSH key to another project, although according to the API docs
                 # it should work
@@ -45,9 +41,7 @@ class GitLabProjectDeployKeys(GitLabProjects):
 
                 existing_key_id = None
                 for existing_key in all_existing_keys:
-                    if self._keys_are_effectively_equal(
-                        existing_key["key"], deploy_key_in_config["key"]
-                    ):
+                    if self._keys_are_effectively_equal(existing_key["key"], deploy_key_in_config["key"]):
                         existing_key_id = existing_key["id"]
                         break
 
@@ -67,9 +61,7 @@ class GitLabProjectDeployKeys(GitLabProjects):
                     )
                     raise e
 
-    def put_deploy_key(
-        self, project_and_group_name, deploy_key_in_gitlab, deploy_key_in_config
-    ):
+    def put_deploy_key(self, project_and_group_name, deploy_key_in_gitlab, deploy_key_in_config):
         # according to docs_new at https://docs.gitlab.com/ee/api/deploy_keys.html#update-deploy-key
         # you only can change key's title and can_push param
 
@@ -94,9 +86,7 @@ class GitLabProjectDeployKeys(GitLabProjects):
         )
 
     def get_deploy_key(self, project_and_group_name, id):
-        return self._make_requests_to_api(
-            "projects/%s/deploy_keys/%s", (project_and_group_name, id), "GET"
-        )
+        return self._make_requests_to_api("projects/%s/deploy_keys/%s", (project_and_group_name, id), "GET")
 
     @staticmethod
     def _keys_are_effectively_equal(key1, key2):

@@ -35,28 +35,20 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
 
         super().__init__(configuration_name, gitlab)
         self.list_method: Callable = (
-            getattr(self.gitlab, list_method_name)
-            if (isinstance(list_method_name, str))
-            else list_method_name
+            getattr(self.gitlab, list_method_name) if (isinstance(list_method_name, str)) else list_method_name
         )
         self.add_method: Callable = (
-            getattr(self.gitlab, add_method_name)
-            if (isinstance(add_method_name, str))
-            else add_method_name
+            getattr(self.gitlab, add_method_name) if (isinstance(add_method_name, str)) else add_method_name
         )
         self.delete_method: Callable = (
-            getattr(self.gitlab, delete_method_name)
-            if (isinstance(delete_method_name, str))
-            else delete_method_name
+            getattr(self.gitlab, delete_method_name) if (isinstance(delete_method_name, str)) else delete_method_name
         )
         self.defining: AbstractKey = defining
         self.required_to_create_or_update: AbstractKey = required_to_create_or_update
 
         if edit_method_name:
             self.edit_method: Union[Callable, None] = (
-                getattr(self.gitlab, edit_method_name)
-                if (isinstance(edit_method_name, str))
-                else edit_method_name
+                getattr(self.gitlab, edit_method_name) if (isinstance(edit_method_name, str)) else edit_method_name
             )
         else:
             self.edit_method = None
@@ -119,44 +111,28 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         for entity_name, entity_config in entities_in_both.items():
             entity_in_gitlab = self._is_in(entity_config, entities_in_gitlab)
             if entity_config.get("delete", False):
-                self._validate_required_to_delete(
-                    project_or_group, entity_name, entity_config
-                )
-                verbose(
-                    f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}"
-                )
+                self._validate_required_to_delete(project_or_group, entity_name, entity_config)
+                verbose(f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}")
                 self.delete_method(project_or_group, entity_in_gitlab)
             elif self._needs_update(entity_in_gitlab, entity_config):
-                self._validate_required_to_create_or_update(
-                    project_or_group, entity_name, entity_config
-                )
+                self._validate_required_to_create_or_update(project_or_group, entity_name, entity_config)
                 if self.edit_method:
-                    verbose(
-                        f"Editing {entity_name} of {self.configuration_name} in {project_or_group}"
-                    )
+                    verbose(f"Editing {entity_name} of {self.configuration_name} in {project_or_group}")
                     self.edit_method(project_or_group, entity_in_gitlab, entity_config)
                     debug(f"{self.configuration_name} AFTER: ^^^")
                 else:
-                    verbose(
-                        f" * Recreating {entity_name} of {self.configuration_name} in {project_or_group}"
-                    )
+                    verbose(f" * Recreating {entity_name} of {self.configuration_name} in {project_or_group}")
                     self.delete_method(project_or_group, entity_in_gitlab)
                     self.add_method(project_or_group, entity_config)
                     debug(f"{self.configuration_name} AFTER: ^^^")
             else:
-                verbose(
-                    f" * {entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update."
-                )
+                verbose(f" * {entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update.")
 
         # add c) (or do nothing if marked as "delete")
 
         for entity_name, entity_config in entities_only_in_configuration.items():
-            self._validate_required_to_create_or_update(
-                project_or_group, entity_name, entity_config
-            )
-            verbose(
-                f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}"
-            )
+            self._validate_required_to_create_or_update(project_or_group, entity_name, entity_config)
+            verbose(f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}")
             self.add_method(project_or_group, entity_config)
             debug(f"{self.configuration_name} AFTER: ^^^")
 
@@ -171,9 +147,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                             exit_code=EXIT_INVALID_INPUT,
                         )
 
-    def _validate_required_to_create_or_update(
-        self, project_or_group: str, entity_name: str, entity_dict: dict
-    ):
+    def _validate_required_to_create_or_update(self, project_or_group: str, entity_name: str, entity_dict: dict):
         if not self.required_to_create_or_update.contains(entity_dict):
             fatal(
                 f"Entity {entity_name} in {self.configuration_name} for {project_or_group}"
@@ -182,9 +156,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                 exit_code=EXIT_INVALID_INPUT,
             )
 
-    def _validate_required_to_delete(
-        self, project_or_group: str, entity_name: str, entity_dict: dict
-    ):
+    def _validate_required_to_delete(self, project_or_group: str, entity_name: str, entity_dict: dict):
         if not self.defining.contains(entity_dict):
             fatal(
                 f"Entity {entity_name} in {self.configuration_name} for {project_or_group}"

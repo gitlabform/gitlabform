@@ -34,9 +34,7 @@ class TestInheritanceBreakProjectsAndGroups:
 
         configuration = Configuration(config_string=config_yaml)
 
-        effective_config = configuration.get_effective_config_for_project(
-            "some_group/my_project"
-        )
+        effective_config = configuration.get_effective_config_for_project("some_group/my_project")
 
         variables = effective_config["variables"]
 
@@ -72,9 +70,7 @@ class TestInheritanceBreakProjectsAndGroups:
 
         configuration = Configuration(config_string=config_yaml)
 
-        effective_config = configuration.get_effective_config_for_project(
-            "some_group/my_project"
-        )
+        effective_config = configuration.get_effective_config_for_project("some_group/my_project")
 
         assert effective_config == {
             "members": {
@@ -146,9 +142,7 @@ class TestInheritanceBreakProjectsAndGroups:
 
         configuration = Configuration(config_string=config_yaml)
 
-        effective_config = configuration.get_effective_config_for_project(
-            "some_group/my_project"
-        )
+        effective_config = configuration.get_effective_config_for_project("some_group/my_project")
 
         variables = effective_config["variables"]
 
@@ -186,9 +180,7 @@ class TestInheritanceBreakProjectsAndGroups:
 
         configuration = Configuration(config_string=config_yaml)
 
-        effective_config = configuration.get_effective_config_for_project(
-            "some_group/my_project"
-        )
+        effective_config = configuration.get_effective_config_for_project("some_group/my_project")
 
         variables = effective_config["variables"]
 

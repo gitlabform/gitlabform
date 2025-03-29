@@ -33,6 +33,10 @@ from gitlabform.processors.group.group_push_rules_processor import (
     GroupPushRulesProcessor,
 )
 
+from gitlabform.processors.group.group_hooks_processor import (
+    GroupHooksProcessor,
+)
+
 
 class GroupProcessors(AbstractProcessors):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
@@ -45,6 +49,7 @@ class GroupProcessors(AbstractProcessors):
             GroupBadgesProcessor(gitlab),
             GroupSAMLLinksProcessor(gitlab),
             GroupLabelsProcessor(gitlab),
+            GroupHooksProcessor(gitlab),
             GroupMergeRequestsApprovalSettings(gitlab),
             GroupMergeRequestsApprovalRules(gitlab),
             GroupPushRulesProcessor(gitlab),

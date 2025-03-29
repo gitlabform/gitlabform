@@ -20,6 +20,4 @@ def configuration_with_yes():
 
 
 def test__default_yaml_11(configuration_with_yes):
-    assert configuration_with_yes.get(
-        "projects_and_groups|some_group/*|project_settings"
-    ) == {"foo": True}
+    assert configuration_with_yes.get("projects_and_groups|some_group/*|project_settings") == {"foo": True}

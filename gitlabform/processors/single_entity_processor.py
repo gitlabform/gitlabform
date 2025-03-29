@@ -42,17 +42,13 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
                 self.edit_method(project_or_group, entity_config)
                 debug(f"{self.configuration_name} AFTER: ^^^")
             else:
-                verbose(
-                    f"{self.configuration_name} in {project_or_group} doesn't need an update."
-                )
+                verbose(f"{self.configuration_name} in {project_or_group} doesn't need an update.")
         else:
             verbose(f"Adding {self.configuration_name} in {project_or_group}")
             self.add_method(project_or_group, entity_config)
             debug(f"{self.configuration_name} AFTER: ^^^")
 
-    def _print_diff(
-        self, project_or_project_and_group: str, entity_config, diff_only_changed: bool
-    ):
+    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
         entity_in_gitlab = self.get_method(project_or_project_and_group)
 
         DifferenceLogger.log_diff(

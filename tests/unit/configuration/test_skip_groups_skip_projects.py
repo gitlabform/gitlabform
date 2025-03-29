@@ -52,14 +52,9 @@ def configuration_for_skip_groups_skip_projects():
     ],
 )
 def test__config_skip_project(project, is_skipped, request):
-    configuration_for_skip_groups_skip_projects = request.getfixturevalue(
-        "configuration_for_skip_groups_skip_projects"
-    )
+    configuration_for_skip_groups_skip_projects = request.getfixturevalue("configuration_for_skip_groups_skip_projects")
 
-    assert (
-        configuration_for_skip_groups_skip_projects.is_project_skipped(project)
-        == is_skipped
-    )
+    assert configuration_for_skip_groups_skip_projects.is_project_skipped(project) == is_skipped
 
 
 @pytest.mark.parametrize(
@@ -77,14 +72,9 @@ def test__config_skip_project(project, is_skipped, request):
     ],
 )
 def test__config_skip_group(group, is_skipped, request):
-    configuration_for_skip_groups_skip_projects = request.getfixturevalue(
-        "configuration_for_skip_groups_skip_projects"
-    )
+    configuration_for_skip_groups_skip_projects = request.getfixturevalue("configuration_for_skip_groups_skip_projects")
 
-    assert (
-        configuration_for_skip_groups_skip_projects.is_group_skipped(group)
-        == is_skipped
-    )
+    assert configuration_for_skip_groups_skip_projects.is_group_skipped(group) == is_skipped
 
 
 def test__config_skip_group_configuration():
@@ -104,17 +94,11 @@ def test__config_skip_group_configuration():
 
     configuration = Configuration(config_string=config_yaml)
 
-    normal_config = configuration.get_effective_config_for_group(
-        "parent-group/normal-group"
-    )
+    normal_config = configuration.get_effective_config_for_group("parent-group/normal-group")
     assert normal_config.get("group_settings", {}).get("specific") == "setting"
 
-    skipped_config = configuration.get_effective_config_for_group(
-        "parent-group/skip-group"
-    )
+    skipped_config = configuration.get_effective_config_for_group("parent-group/skip-group")
     assert skipped_config == {}
 
-    skipped_subgroup_config = configuration.get_effective_config_for_group(
-        "parent-group/skip-group/subgroup"
-    )
+    skipped_subgroup_config = configuration.get_effective_config_for_group("parent-group/skip-group/subgroup")
     assert skipped_subgroup_config == {}

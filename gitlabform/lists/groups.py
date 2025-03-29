@@ -61,9 +61,7 @@ class GroupsProvider:
         else:  # ALL_DEFINED
             groups.add_requested(self.configuration.get_groups())
 
-        groups.add_omitted(
-            OmissionReason.SKIPPED, self._get_skipped_groups(groups.get_effective())
-        )
+        groups.add_omitted(OmissionReason.SKIPPED, self._get_skipped_groups(groups.get_effective()))
 
         if target == "ALL_DEFINED":
             # check if all the groups from the config actually exist

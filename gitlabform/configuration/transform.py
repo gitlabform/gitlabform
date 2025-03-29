@@ -26,9 +26,7 @@ from gitlabform.gitlab import GitLab
 
 class ConfigurationTransformers:
     def __init__(self, gitlab: GitLab):
-        self.merge_request_approvals_transformer = MergeRequestApprovalsTransformer(
-            gitlab
-        )
+        self.merge_request_approvals_transformer = MergeRequestApprovalsTransformer(gitlab)
         self.user_transformer = UserTransformer(gitlab)
         self.group_transformer = GroupTransformer(gitlab)
         self.implicit_name_transformer = ImplicitNameTransformer(gitlab)
@@ -94,9 +92,7 @@ class UserTransformer(ConfigurationTransformer):
             # under the given path
             pass
 
-        verbose(
-            "Getting user ids for users defined in merge_requests_approval_rules config"
-        )
+        verbose("Getting user ids for users defined in merge_requests_approval_rules config")
         try:
             for node_coordinate in processor.get_nodes(
                 "**.merge_requests_approval_rules.*.users",
@@ -184,9 +180,7 @@ class ImplicitNameTransformer(ConfigurationTransformer):
                 if type(node_coordinate.node) not in [CommentedMap, dict]:
                     continue
 
-                node_coordinate.parent[node_coordinate.parentref][
-                    "name"
-                ] = node_coordinate.parentref
+                node_coordinate.parent[node_coordinate.parentref]["name"] = node_coordinate.parentref
         except YAMLPathException:
             # this just means that we haven't found any keys in YAML
             # under the given path
@@ -228,9 +222,7 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                 for node_coordinate in processor.get_nodes(path, mustexist=True):
                     try:
                         access_level_string = str(node_coordinate.node)
-                        node_coordinate.parent[node_coordinate.parentref] = (
-                            AccessLevel.get_value(access_level_string)
-                        )
+                        node_coordinate.parent[node_coordinate.parentref] = AccessLevel.get_value(access_level_string)
                     except KeyError:
                         fatal(
                             f"Configuration string '{access_level_string}' is not one of the valid access levels:"
@@ -258,8 +250,8 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                     if node_coordinate.parentref == "access_level":
                         try:
                             access_level_string = str(node_coordinate.node)
-                            node_coordinate.parent[node_coordinate.parentref] = (
-                                AccessLevel.get_value(access_level_string)
+                            node_coordinate.parent[node_coordinate.parentref] = AccessLevel.get_value(
+                                access_level_string
                             )
                         except KeyError:
                             fatal(
@@ -308,24 +300,16 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                     if "approvals_before_merge" in old_syntax["approvals"]:
                         # this setting is now moved inside the approval rules, so remove it from here
                         # but store it for adding there
-                        approvals_required = old_syntax["approvals"][
-                            "approvals_before_merge"
-                        ]
+                        approvals_required = old_syntax["approvals"]["approvals_before_merge"]
                         approvals_required_guessed = False
                         old_syntax["approvals"].pop("approvals_before_merge")
 
                     if old_syntax["approvals"]:
                         # add the settings, if there are left any after removing 'approvals_before_merge'
-                        where_to_add_new_syntax["merge_requests_approvals"] = (
-                            old_syntax["approvals"]
-                        )
+                        where_to_add_new_syntax["merge_requests_approvals"] = old_syntax["approvals"]
 
                 # approval rules
-                if (
-                    "approvers" in old_syntax
-                    or "approver_groups" in old_syntax
-                    or not approvals_required_guessed
-                ):
+                if "approvers" in old_syntax or "approver_groups" in old_syntax or not approvals_required_guessed:
                     old_syntax_found = True
 
                     where_to_add_new_syntax["merge_requests_approval_rules"] = {
@@ -336,22 +320,17 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                     }
 
                     if "approvers" in old_syntax:
-                        where_to_add_new_syntax["merge_requests_approval_rules"][
-                            "legacy"
-                        ]["users"] = old_syntax["approvers"]
+                        where_to_add_new_syntax["merge_requests_approval_rules"]["legacy"]["users"] = old_syntax[
+                            "approvers"
+                        ]
                     if "approver_groups" in old_syntax:
-                        where_to_add_new_syntax["merge_requests_approval_rules"][
-                            "legacy"
-                        ]["groups"] = old_syntax["approver_groups"]
+                        where_to_add_new_syntax["merge_requests_approval_rules"]["legacy"]["groups"] = old_syntax[
+                            "approver_groups"
+                        ]
 
-                    if (
-                        "remove_other_approval_rules" in old_syntax
-                        and old_syntax["remove_other_approval_rules"]
-                    ):
+                    if "remove_other_approval_rules" in old_syntax and old_syntax["remove_other_approval_rules"]:
                         old_syntax_found = True
-                        where_to_add_new_syntax["merge_requests_approval_rules"][
-                            "enforce"
-                        ] = True
+                        where_to_add_new_syntax["merge_requests_approval_rules"]["enforce"] = True
 
                 if old_syntax_found:
                     where_to_add_new_syntax.pop("merge_requests")

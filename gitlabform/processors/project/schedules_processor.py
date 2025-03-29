@@ -24,13 +24,9 @@ class SchedulesProcessor(AbstractProcessor):
             configured_schedules.pop("enforce")
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
-        existing_schedules: List[RESTObject] | RESTObjectList = (
-            project.pipelineschedules.list(get_all=True)
-        )
+        existing_schedules: List[RESTObject] | RESTObjectList = project.pipelineschedules.list(get_all=True)
 
-        schedule_ids_by_description: Dict = self._group_schedule_ids_by_description(
-            existing_schedules
-        )
+        schedule_ids_by_description: Dict = self._group_schedule_ids_by_description(existing_schedules)
 
         for schedule_description in sorted(configured_schedules):
             schedule_ids = schedule_ids_by_description.get(schedule_description)
@@ -50,9 +46,7 @@ class SchedulesProcessor(AbstractProcessor):
 
                 if schedule_ids and len(schedule_ids) == 1:
                     schedule = project.pipelineschedules.get(schedule_ids[0])
-                    self._update_existing_schedule(
-                        entity_config, project, schedule, schedule_description
-                    )
+                    self._update_existing_schedule(entity_config, project, schedule, schedule_description)
                 elif schedule_ids:
                     debug(
                         "Replacing existing pipeline schedules '%s'",
@@ -61,21 +55,15 @@ class SchedulesProcessor(AbstractProcessor):
                     for schedule_id in schedule_ids:
                         project.pipelineschedules.get(schedule_id).delete()
 
-                    self._create_schedule_with_variables(
-                        entity_config, project, schedule_description
-                    )
+                    self._create_schedule_with_variables(entity_config, project, schedule_description)
                 else:
                     debug("Creating pipeline schedule '%s'", schedule_description)
-                    self._create_schedule_with_variables(
-                        entity_config, project, schedule_description
-                    )
+                    self._create_schedule_with_variables(entity_config, project, schedule_description)
 
         if enforce_schedules:
             debug("Delete unconfigured schedules because enforce is enabled")
 
-            self._delete_schedules_no_longer_in_config(
-                configured_schedules, existing_schedules, project
-            )
+            self._delete_schedules_no_longer_in_config(configured_schedules, existing_schedules, project)
 
     def _update_existing_schedule(
         self,
@@ -84,9 +72,7 @@ class SchedulesProcessor(AbstractProcessor):
         schedule_in_gitlab: ProjectPipelineSchedule,
         schedule_description: str,
     ):
-        entity_config["cron"] = _replace_extended_cron_pattern(
-            project.id, entity_config["cron"]
-        )
+        entity_config["cron"] = _replace_extended_cron_pattern(project.id, entity_config["cron"])
         if self._needs_update(schedule_in_gitlab.asdict(), entity_config):
             debug("Changing existing pipeline schedule '%s'", schedule_description)
             # In order to edit a Schedule created by someone else we need to take ownership:
@@ -112,9 +98,7 @@ class SchedulesProcessor(AbstractProcessor):
         project: Project,
         schedule_description: str,
     ):
-        entity_config["cron"] = _replace_extended_cron_pattern(
-            project.id, entity_config["cron"]
-        )
+        entity_config["cron"] = _replace_extended_cron_pattern(project.id, entity_config["cron"])
         schedule_data = {"description": schedule_description, **entity_config}
         debug("Creating pipeline schedule using data: '%s'", schedule_data)
         created_schedule_id = project.pipelineschedules.create(schedule_data).id
@@ -130,9 +114,7 @@ class SchedulesProcessor(AbstractProcessor):
         created_schedule.save()
 
     @staticmethod
-    def _set_schedule_variables(
-        schedule: ProjectPipelineSchedule, variables: Dict
-    ) -> None:
+    def _set_schedule_variables(schedule: ProjectPipelineSchedule, variables: Dict) -> None:
         attributes = schedule.attributes
         existing_variables = attributes.get("variables")
         if existing_variables:
@@ -152,16 +134,12 @@ class SchedulesProcessor(AbstractProcessor):
         schedule_ids_by_description: Dict[str, List[str]] = {}
 
         for schedule in schedules:
-            schedule_ids_by_description.setdefault(schedule.description, []).append(
-                schedule.id
-            )
+            schedule_ids_by_description.setdefault(schedule.description, []).append(schedule.id)
 
         return schedule_ids_by_description
 
     @staticmethod
-    def _delete_schedules_no_longer_in_config(
-        configured_schedules: Dict, existing_schedules, project: Project
-    ) -> None:
+    def _delete_schedules_no_longer_in_config(configured_schedules: Dict, existing_schedules, project: Project) -> None:
         schedule: ProjectPipelineSchedule
         for schedule in existing_schedules:
             schedule_description = schedule.description
@@ -179,18 +157,14 @@ class SchedulesProcessor(AbstractProcessor):
 class ExtendedCronPattern:
 
     def __init__(self, project_id: int, cron_expression: str):
-        self._h_pattern = re.compile(
-            r"H(?:(\((?P<start>\d+)-(?P<end>\d+)\))|(?P<interval>/\d+))?"
-        )
+        self._h_pattern = re.compile(r"H(?:(\((?P<start>\d+)-(?P<end>\d+)\))|(?P<interval>/\d+))?")
         # We do use random here to achieve a stable pseudo-random value, this is not security relevant
         # Seeding with project_id always returns the same numbers, that is what we want here.
         self._random = random.Random()  # nosec B311
         self._random.seed(project_id, 2)
         self._cron_parts = cron_expression.split()
         if len(self._cron_parts) != 5:
-            raise ValueError(
-                f"Expected 5 parts in the cron expression, got {self._cron_parts}"
-            )
+            raise ValueError(f"Expected 5 parts in the cron expression, got {self._cron_parts}")
 
     def render(self) -> str:
         self._cron_parts[0] = self._detect_and_replace_h(self._cron_parts[0], 60)
@@ -230,7 +204,5 @@ EXTENDED_CRON_PATTERN_ALIASES = {
 
 
 def _replace_extended_cron_pattern(project_id: int, cron_expression: str) -> str:
-    cron_expression = EXTENDED_CRON_PATTERN_ALIASES.get(
-        cron_expression.lower(), cron_expression
-    )
+    cron_expression = EXTENDED_CRON_PATTERN_ALIASES.get(cron_expression.lower(), cron_expression)
     return ExtendedCronPattern(project_id, cron_expression).render()

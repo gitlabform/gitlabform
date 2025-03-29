@@ -40,6 +40,10 @@ from gitlabform.processors.shared.protected_environments_processor import (
     ProtectedEnvironmentsProcessor,
 )
 
+from gitlabform.processors.project.project_security_settings import (
+    ProjectSecuritySettingsProcessor,
+)
+
 
 class ProjectProcessors(AbstractProcessors):
     def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
@@ -53,6 +57,7 @@ class ProjectProcessors(AbstractProcessors):
             # before those processors.
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab, strict),
+            ProjectSecuritySettingsProcessor(gitlab),
             MembersProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
             ProjectLabelsProcessor(gitlab),

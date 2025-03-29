@@ -178,9 +178,7 @@ def group_to_invite_to_project(
     group_name_base = get_random_name("group")
     created_groups: List[Group] = []
 
-    def _group_to_invite_to_project(
-        project: Project, access_level: AccessLevel = AccessLevel.DEVELOPER
-    ) -> Group:
+    def _group_to_invite_to_project(project: Project, access_level: AccessLevel = AccessLevel.DEVELOPER) -> Group:
         group_index = len(created_groups) + 1
         group_name = f"{group_name_base}_{group_index}"
         gitlab_group = create_group(group_name)
@@ -199,6 +197,19 @@ def group_to_invite_to_project(
 
 @pytest.fixture(scope="class")
 def users(group):
+    no_of_users = 4
+
+    username_base = get_random_name("user")
+    users = create_users(username_base, no_of_users)
+
+    yield users
+
+    for user in users:
+        user.delete()
+
+
+@pytest.fixture(scope="function")
+def users_for_function(group_for_function):
     no_of_users = 4
 
     username_base = get_random_name("user")
@@ -246,9 +257,7 @@ def other_branch_for_function(project_for_function):
 
 def create_branch(project_to_create_branch_on, entity_name):
     name = get_random_name(entity_name)
-    branch = project_to_create_branch_on.branches.create(
-        {"branch": name, "ref": "main"}
-    )
+    branch = project_to_create_branch_on.branches.create({"branch": name, "ref": "main"})
     yield name
     branch.delete()
 
@@ -269,15 +278,11 @@ def tag(project):
 
 
 @pytest.fixture(scope="class")
-def make_user(
-    gl, project
-) -> Generator[Callable[[AccessLevel, bool], User], None, None]:
+def make_user(gl, project) -> Generator[Callable[[AccessLevel, bool], User], None, None]:
     username_base = get_random_name("user")
     created_users: List[User] = []
 
-    def _make_user(
-        level: AccessLevel = AccessLevel.DEVELOPER, add_to_project: bool = True
-    ) -> User:
+    def _make_user(level: AccessLevel = AccessLevel.DEVELOPER, add_to_project: bool = True) -> User:
         last_id = len(created_users) + 1
         username = f"{username_base}_{last_id}"
         user = gl.users.create(
@@ -326,9 +331,7 @@ def make_multiple_project_members_for_pagination(gl, project_for_function):
     users = create_users(randomize_case(get_random_name("user")), 25)
 
     for user in users:
-        project_for_function.members.create(
-            {"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value}
-        )
+        project_for_function.members.create({"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value})
 
     yield users
 
@@ -345,18 +348,14 @@ def _create_user_and_add_to_project(gl, project, username):
             "password": get_random_password(),
         }
     )
-    project.members.create(
-        {"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value}
-    )
+    project.members.create({"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value})
     return user
 
 
 @pytest.fixture(scope="class")
 def make_project_access_token(
     project,
-) -> Generator[
-    Callable[[Project, AccessLevel, List[str]], ProjectAccessToken], None, None
-]:
+) -> Generator[Callable[[Project, AccessLevel, List[str]], ProjectAccessToken], None, None]:
     token_name_base = get_random_name("user")
     created_tokens: List[ProjectAccessToken] = []
 
@@ -445,9 +444,7 @@ def outsider_user(gl):
 
 @pytest.fixture(scope="function")
 def public_ssh_key():
-    key = rsa.generate_private_key(
-        backend=crypto_default_backend(), public_exponent=65537, key_size=2048
-    )
+    key = rsa.generate_private_key(backend=crypto_default_backend(), public_exponent=65537, key_size=2048)
 
     public_key = key.public_key().public_bytes(
         crypto_serialization.Encoding.OpenSSH, crypto_serialization.PublicFormat.OpenSSH
@@ -459,9 +456,7 @@ def public_ssh_key():
 @pytest.fixture(scope="function")
 def other_public_ssh_key():
     # TODO: deduplicate this - it's a copy and paste from the above fixture
-    key = rsa.generate_private_key(
-        backend=crypto_default_backend(), public_exponent=65537, key_size=2048
-    )
+    key = rsa.generate_private_key(backend=crypto_default_backend(), public_exponent=65537, key_size=2048)
 
     public_key = key.public_key().public_bytes(
         crypto_serialization.Encoding.OpenSSH, crypto_serialization.PublicFormat.OpenSSH

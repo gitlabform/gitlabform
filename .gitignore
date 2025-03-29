@@ -69,3 +69,6 @@ Vagrantfile
 .pyre_configuration
 .watchmanconfig
 .pyre
+
+# locally build docs
+site/

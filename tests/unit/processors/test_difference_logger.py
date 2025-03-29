@@ -10,9 +10,7 @@ def test_empty_dict_current():
         "foo": 123,
         "bar": "whatever",
     }
-    result = DifferenceLogger.log_diff(
-        "test", current_config, config_to_apply, False, None, True
-    )
+    result = DifferenceLogger.log_diff("test", current_config, config_to_apply, False, None, True)
     # the whitespace after "123" below is required!
     expected = textwrap.dedent(
         """
@@ -30,9 +28,7 @@ def test_none_current():
         "foo": 123,
         "bar": "whatever",
     }
-    result = DifferenceLogger.log_diff(
-        "test", current_config, config_to_apply, False, None, True
-    )
+    result = DifferenceLogger.log_diff("test", current_config, config_to_apply, False, None, True)
     # the whitespace after "123" below is required!
     expected = textwrap.dedent(
         """
@@ -53,9 +49,7 @@ def test_diff_from_current():
         "foo": 123,
         "bar": "whatever",
     }
-    result = DifferenceLogger.log_diff(
-        "test", current_config, config_to_apply, True, None, True
-    )
+    result = DifferenceLogger.log_diff("test", current_config, config_to_apply, True, None, True)
     # the whitespace after "123" below is required!
     expected = textwrap.dedent(
         """
@@ -75,9 +69,7 @@ def test_diff_output_no_changes():
         "foo": 123,
         "bar": "whatever",
     }
-    result = DifferenceLogger.log_diff(
-        "test", current_config, config_to_apply, True, None, True
-    )
+    result = DifferenceLogger.log_diff("test", current_config, config_to_apply, True, None, True)
 
     expected = textwrap.dedent(
         """

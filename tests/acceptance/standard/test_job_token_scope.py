@@ -86,9 +86,7 @@ class TestProjectJobTokenScope:
         # Validate nothing on groups_allowlist
         assert len(scope.groups_allowlist.list()) == 0
 
-        assert message_recorder.find(
-            f"Added Project {other_project.get_id()} to allowlist"
-        )
+        assert message_recorder.find(f"Added Project {other_project.get_id()} to allowlist")
 
     def test__adding_project_already_on_allowlist_via_config(
         self,
@@ -130,12 +128,7 @@ class TestProjectJobTokenScope:
         # Validate nothing on groups_allowlist
         assert len(scope.groups_allowlist.list()) == 0
 
-        assert (
-            message_recorder.find(
-                f"Added Project {other_project.get_id()} to allowlist"
-            )
-            is None
-        )
+        assert message_recorder.find(f"Added Project {other_project.get_id()} to allowlist") is None
 
     def test__add_other_project_to_job_token_scope_by_id(
         self,
@@ -197,9 +190,7 @@ class TestProjectJobTokenScope:
         # Validate other_project no longer on allowlist
         projects_allowlist_after = scope.allowlist.list()
         assert len(projects_allowlist_after) == 1
-        assert not any(
-            allowed.id == other_project.id for allowed in projects_allowlist_after
-        )
+        assert not any(allowed.id == other_project.id for allowed in projects_allowlist_after)
 
         # Validate nothing on groups_allowlist
         assert len(scope.groups_allowlist.list()) == 0
@@ -236,9 +227,7 @@ class TestProjectJobTokenScope:
         # Validate other_project no longer on allowlist
         projects_allowlist_after = updated_scope.allowlist.list()
         assert len(projects_allowlist_after) == 1
-        assert not any(
-            allowed.id == other_project.id for allowed in projects_allowlist_after
-        )
+        assert not any(allowed.id == other_project.id for allowed in projects_allowlist_after)
 
         # Validate nothing on groups_allowlist
         assert len(updated_scope.groups_allowlist.list()) == 0
@@ -271,9 +260,7 @@ class TestProjectJobTokenScope:
         projects_allowlist_after = scope.allowlist.list()
         assert len(projects_allowlist_after) == 2
 
-        assert any(
-            allowed.id == other_project.id for allowed in projects_allowlist_after
-        )
+        assert any(allowed.id == other_project.id for allowed in projects_allowlist_after)
 
         # Validate other_group added to allowlist
         groups_allowlist_after = scope.groups_allowlist.list()
@@ -310,9 +297,7 @@ class TestProjectJobTokenScope:
         projects_allowlist_after = scope.allowlist.list()
         assert len(projects_allowlist_after) == 1
 
-        assert not any(
-            allowed.id == other_project.id for allowed in projects_allowlist_after
-        )
+        assert not any(allowed.id == other_project.id for allowed in projects_allowlist_after)
 
         # Validate other_group added to allowlist
         groups_allowlist_after = scope.groups_allowlist.list()
@@ -359,9 +344,7 @@ class TestProjectJobTokenScope:
         self._restore_default_allowlist_state(project)
 
         job_token_scope = project.job_token_scope.get()
-        job_token_scope.groups_allowlist.create(
-            {"target_group_id": other_group.get_id()}
-        )
+        job_token_scope.groups_allowlist.create({"target_group_id": other_group.get_id()})
         job_token_scope.save()
 
         job_token_scope_config = f"""
@@ -384,10 +367,7 @@ class TestProjectJobTokenScope:
 
         assert any(allowed.id == other_group.id for allowed in groups_allowlist_after)
 
-        assert (
-            message_recorder.find(f"Added Group {other_group.get_id()} to allowlist")
-            is None
-        )
+        assert message_recorder.find(f"Added Group {other_group.get_id()} to allowlist") is None
 
     @staticmethod
     def _setup_limit_access_state(project: Project, state: bool):
