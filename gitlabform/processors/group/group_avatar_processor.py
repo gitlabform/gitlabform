@@ -1,32 +1,54 @@
-from cli_ui import debug
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
+import os
+from pathlib import Path
+from cli_ui import debug, warning
 
 
 class GroupAvatarProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("group", gitlab)
+        super().__init__("group_avatar", gitlab)
 
-    def _process_configuration(self, group, configuration):
-        # Get the group configuration
-        group_config = configuration.get("group")
-        if not group_config or not isinstance(group_config, dict):
-            return  # No group config
+    def _process_configuration(self, group_path, configuration):
+        if "*" in group_path:
+            # Remove the wildcard as we're dealing with the group itself
+            group_path = group_path.rstrip("/*")
 
-        # Check if 'avatar' is explicitly set in the configuration
-        if "avatar" not in group_config:
-            return  # Avatar is not defined in the configuration
+        group = self.gl.groups.get(group_path)
 
-        # Get the avatar value
-        avatar_path = group_config.get("avatar")
+        # Check if configuration is a dict with 'delete' key
+        if isinstance(configuration, dict) and configuration.get("delete"):
+            debug(f"Removing avatar for group {group_path}...")
 
-        if avatar_path:
-            # If there is a path, update the avatar
-            debug(f"Setting avatar for group {group}...")
-            self.gitlab.update_group_avatar(group, avatar_path)
-            debug(f"✅ Avatar updated for group {group}")
+            # Set avatar to None to remove it
+            group.avatar = None
+            group.save()
+
+            debug(f"✅ Avatar removed for group {group_path}")
+            return
+
+        if isinstance(configuration, str):
+            avatar_path = configuration
+            full_path = self._get_effective_path(avatar_path)
+
+            # Check if file exists
+            if not os.path.exists(full_path):
+                warning(f"❌ Avatar file not found: {full_path}")
+                return
+
+            # Update the avatar
+            debug(f"Setting avatar for group {group_path}...")
+
+            # Update the avatar
+            with open(full_path, "rb") as avatar_file:
+                group.avatar = avatar_file
+                group.save()
+
+            debug(f"✅ Avatar updated for group {group_path}")
+
+    def _get_effective_path(self, path_str):
+        path = Path(path_str)
+        if path.is_absolute():
+            return str(path)
         else:
-            # If the value is explicitly an empty string, remove the avatar
-            debug(f"Removing avatar for group {group}...")
-            self.gitlab.delete_group_avatar(group)
-            debug(f"✅ Avatar removed for group {group}")
+            return str(Path(os.path.abspath(path_str)))
