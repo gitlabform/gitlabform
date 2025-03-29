@@ -88,6 +88,10 @@ to `ProjectProcessors` in `project > __init__.py`.
 
 ### gitlabform.gitlab.*
 
+!!! important
+
+    We have decided to move away from our own homegrown GitLab API client to the `python-gitlab` library. (See [issue #73](https://github.com/gitlabform/gitlabform/issues/73) for info.) Therefore, you should **NOT** add any more code to this package!
+
 With the basics for making requests to the GitLab API covered in the `GitLabCore` class in `core.py`, all other code
 is simple (most of the time).
 
