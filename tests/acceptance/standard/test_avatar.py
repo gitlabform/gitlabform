@@ -1,4 +1,5 @@
 import os
+import pytest
 from tests.acceptance import (
     run_gitlabform,
 )
@@ -18,8 +19,7 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            project:
-              avatar: "{self.test_image_path}"
+            project_avatar: "{self.test_image_path}"
         """
         run_gitlabform(config, project)
 
@@ -34,8 +34,7 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            project:
-              avatar: "{self.test_image_path}"
+            project_avatar: "{self.test_image_path}"
         """
         run_gitlabform(config, project)
 
@@ -47,8 +46,8 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            project:
-              avatar: ""
+            project_avatar:
+              delete: true
         """
         run_gitlabform(config, project)
 
@@ -63,8 +62,7 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
-            group:
-              avatar: "{self.test_image_path}"
+            group_avatar: "{self.test_image_path}"
         """
         run_gitlabform(config, group)
 
@@ -79,8 +77,7 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
-            group:
-              avatar: "{self.test_image_path}"
+            group_avatar: "{self.test_image_path}"
         """
         run_gitlabform(config, group)
 
@@ -92,8 +89,8 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
-            group:
-              avatar: ""
+            group_avatar:
+              delete: true
         """
         run_gitlabform(config, group)
 
@@ -103,66 +100,23 @@ class TestAvatar:
         # Verify avatar is removed
         assert group.avatar_url is None or "gravatar" in group.avatar_url
 
-    def test__group_avatar_file_not_found(self, group):
+    def test__avatar_file_not_found(self, project):
         # Test handling of non-existent avatar file path
         nonexistent_path = "/path/to/nonexistent/image.png"
 
         # Store the original avatar URL to verify it doesn't change
-        group_original = group.manager.get(group.id)
-        original_avatar_url = group_original.avatar_url
+        project_original = project.manager.get(project.id)
+        original_avatar_url = project_original.avatar_url
 
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
-            group:
-              avatar: "{nonexistent_path}"
+          {project.path_with_namespace}:
+            project_avatar: "{nonexistent_path}"
         """
 
         # This should run without crashing, even though the file doesn't exist
-        run_gitlabform(config, group)
+        run_gitlabform(config, project)
 
-        # Refresh group data - avatar should remain unchanged since file wasn't found
-        group_updated = group.manager.get(group.id)
-        assert group_updated.avatar_url == original_avatar_url
-
-    def test__group_avatar_no_group_config(self, group):
-        # Test when group config is missing
-        config = f"""
-        projects_and_groups:
-          {group.full_path}/*:
-            # No 'group' section
-            project:
-              something_else: value
-        """
-
-        # Store original state
-        group_original = group.manager.get(group.id)
-        original_avatar_url = group_original.avatar_url
-
-        # Run GitLabForm
-        run_gitlabform(config, group)
-
-        # Verify no changes to avatar (since group section was missing)
-        group_updated = group.manager.get(group.id)
-        assert group_updated.avatar_url == original_avatar_url
-
-    def test__group_avatar_config_without_avatar(self, group):
-        # Test when 'avatar' key is not in group config
-        config = f"""
-        projects_and_groups:
-          {group.full_path}/*:
-            group:
-              # No 'avatar' key
-              description: "Test description for coverage"
-        """
-
-        # Store original state
-        group_original = group.manager.get(group.id)
-        original_avatar_url = group_original.avatar_url
-
-        # Run GitLabForm
-        run_gitlabform(config, group)
-
-        # Verify no changes to avatar (since avatar key was missing)
-        group_updated = group.manager.get(group.id)
-        assert group_updated.avatar_url == original_avatar_url
+        # Refresh project data - avatar should remain unchanged since file wasn't found
+        project_updated = project.manager.get(project.id)
+        assert project_updated.avatar_url == original_avatar_url
