@@ -5,6 +5,7 @@ from gitlabform.gitlab import GitLab
 from gitlabform.processors import AbstractProcessors
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.project.badges_processor import BadgesProcessor
+from gitlabform.processors.project.avatar_processor import AvatarProcessor
 from gitlabform.processors.project.branches_processor import BranchesProcessor
 from gitlabform.processors.project.deploy_keys_processor import DeployKeysProcessor
 from gitlabform.processors.project.files_processor import FilesProcessor
@@ -58,6 +59,7 @@ class ProjectProcessors(AbstractProcessors):
             ProjectProcessor(gitlab),
             ProjectSettingsProcessor(gitlab, strict),
             ProjectSecuritySettingsProcessor(gitlab),
+            AvatarProcessor(gitlab),
             MembersProcessor(gitlab),
             ProjectPushRulesProcessor(gitlab),
             ProjectLabelsProcessor(gitlab),
