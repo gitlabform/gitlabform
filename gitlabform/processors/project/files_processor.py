@@ -222,7 +222,7 @@ class FilesProcessor(AbstractProcessor):
                     if configuration.get("branches|" + branch.name + "|protected"):
                         debug("> Protecting the branch again.")
                         branch_config: dict = configuration["branches"][branch.name]
-                        self.branch_processor.protect_branch(project, branch.name, branch_config)
+                        self.branch_processor.protect_branch(project, branch.name, branch_config, False)
 
             else:
                 raise e
