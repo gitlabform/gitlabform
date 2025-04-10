@@ -18,6 +18,9 @@ class BranchesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("branches", gitlab)
         self.strict = strict
+        self.custom_diff_analyzers["merge_access_levels"] = self.access_level_diff_analyzer
+        self.custom_diff_analyzers["push_access_levels"] = self.access_level_diff_analyzer
+        self.custom_diff_analyzers["unprotect_access_levels"] = self.access_level_diff_analyzer
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
@@ -53,31 +56,44 @@ class BranchesProcessor(AbstractProcessor):
             debug(message)
 
         if branch_config.get("protected"):
-            if protected_branch and self._needs_update(protected_branch.attributes, branch_config):
-                # Need to unprotect the branch and then re-protect again using current config
-                # Another option would be to "update" protected branch. But, GitLab's API for
-                # updating protected branch requires retrieving id of the existing rule/config
-                # such as 'allowed_to_push'. See: https://docs.gitlab.com/ee/api/protected_branches.html#example-update-a-push_access_level-record
-                # This could involve more data processing. The data for updating vs creating a
-                # protected branch is not the same. So, removing existing branch protection and
-                # reconfiguring branch protection seems simpler.
-                self.unprotect_branch(protected_branch)
-                self.protect_branch(project, branch_name, branch_config)
+            # this key is not needed at this point - and it's not present in
+            # protected_branch.attributes, so _needs_update() would always
+            # return True with this key present.
+            branch_config.pop("protected")
+            if protected_branch:
+                branch_config_for_needs_update = self.transform_branch_config_access_levels(
+                    branch_config, protected_branch.attributes
+                )
+                if self._needs_update(protected_branch.attributes, branch_config_for_needs_update):
+                    # For GitLab version < 15.6 - need to unprotect the branch
+                    # and then re-protect again using current config
+                    debug("Updating branch protection for ':%s'", branch_name)
+                    if self.gitlab_version < (15, 6):
+                        self.unprotect_branch(protected_branch)
+                        self.protect_branch(project, branch_name, branch_config, False)
+                    else:
+                        branch_config_prepared_for_update = self.prepare_branch_config_for_update(
+                            branch_config, protected_branch
+                        )
+                        self.protect_branch(project, branch_name, branch_config_prepared_for_update, True)
             elif not protected_branch:
-                self.protect_branch(project, branch_name, branch_config)
+                debug("Creating branch protection for ':%s'", branch_name)
+                self.protect_branch(project, branch_name, branch_config, False)
         elif protected_branch and not branch_config.get("protected"):
+            debug("Removing branch protection for ':%s'", branch_name)
             self.unprotect_branch(protected_branch)
 
-    def protect_branch(self, project: Project, branch_name: str, branch_config: dict):
+    def protect_branch(self, project: Project, branch_name: str, branch_config: dict, update_only: bool):
         """
-        Protect a branch using given config.
+        Create or update branch protection using given config.
         Raise exception if running in strict mode.
         """
 
-        debug("Setting branch '%s' as protected", branch_name)
-
         try:
-            project.protectedbranches.create({"name": branch_name, **branch_config})
+            if update_only:
+                project.protectedbranches.update(branch_name, branch_config)
+            else:
+                project.protectedbranches.create({"name": branch_name, **branch_config})
         except GitlabCreateError as e:
             message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
 
@@ -111,6 +127,126 @@ class BranchesProcessor(AbstractProcessor):
             else:
                 warning(message)
 
+    def prepare_branch_config_for_update(self, our_branch_config: dict, gitlab_branch_config: ProjectProtectedBranch):
+        """Prepare GitLabForm branch config for "update" operation.
+
+        This function also removes branch protection access rules that not defined in GitLabForm config.
+
+        Args:
+            our_branch_config (dict): branch configuration read from .yaml file
+            gitlab_branch_config (ProjectProtectedBranch): branch configuration obtained from GitLab
+
+        Returns:
+            dict: copy of our_branch_config updated with needed metadata for "update" operation to succeed.
+        """
+        verbose("Preparing branch config for update")
+        access_level_keys_map = {
+            "merge_access_level": "allowed_to_merge",
+            "push_access_level": "allowed_to_push",
+            "unprotect_access_level": "allowed_to_unprotect",
+        }
+        allowed_to_keys_map = [v for k, v in access_level_keys_map.items()]
+        new_branch_config = our_branch_config.copy()
+        for key in our_branch_config:
+            if key in access_level_keys_map:
+                access_level = new_branch_config.pop(key)
+                new_branch_config_key = access_level_keys_map[key]
+                new_branch_config[new_branch_config_key] = [{"id": None, "access_level": access_level}]
+                for gl_item in gitlab_branch_config.merge_access_levels:
+                    if gl_item["access_level"]:
+                        new_branch_config[new_branch_config_key][0]["id"] = gl_item["id"]
+                    else:
+                        new_branch_config[new_branch_config_key].append({"id": gl_item["id"], "_destroy": True})
+            elif key in allowed_to_keys_map:
+                # this one is tricky...
+                # if we got to this point - this means that there is /some/
+                # difference between our local config and state in gitlab.
+                # we don't know where the difference is - let's figure it out:
+                # 1- access_levels existing in both our and gitlab branch config
+                #    are no-op (but we need to identify those, as attempt to create
+                #    access_level that's already in GitLab will raise an error on
+                #    GitLab side)
+                # 2- access_levels existing only in our config - need to be created
+                # 3- access_levels existing only in gitlab config - should be removed
+                # The above is valid for user_id and group_id entries too.
+
+                access_levels_on_both_sides = []
+                for idx, our_item in enumerate(our_branch_config[key]):
+                    found_items = [
+                        (idx, gl_item["id"])
+                        for gl_item in gitlab_branch_config.merge_access_levels
+                        if gl_item["access_level"] == our_item["access_level"]
+                        or gl_item["user_id"] == our_item["user_id"]
+                        or gl_item["group_id"] == our_item["group_id"]
+                    ]
+                    if len(found_items) > 0:
+                        access_levels_on_both_sides.append(found_items[0])
+                for item in access_levels_on_both_sides:
+                    access_level_idx = item[0]
+                    access_level_id = item[1]
+                    new_branch_config[key][access_level_idx]["id"] = access_level_id
+
+                # remove access_levels from GitLab that are not listed in our
+                # config already
+                for gl_item in gitlab_branch_config.merge_access_levels:
+                    if gl_item["id"] not in [item[1] for item in access_levels_on_both_sides]:
+                        self.gitlab._make_request_to_api(
+                            "projects/%s/protected_branches/%s",
+                            (gitlab_branch_config.manager._parent.get_id(), gitlab_branch_config.name),
+                            "PATCH",
+                            None,
+                            [200],
+                            {key: [{"_destroy": "true", "id": gl_item["id"]}]},
+                        )
+        return new_branch_config
+
+    def transform_branch_config_access_levels(
+        self, our_branch_config: dict, gitlab_branch_config: dict, prepare_for_update: bool = False
+    ):
+        """Branch protection CRUD API in python-gitlab (and GitLab itself) is
+        inconsistent, the structure needed to create a branch protection rule is
+        different from structure needed to update a rule in place.
+        This method will normalize gitlabform branch_config to accomodate this.
+        """
+        # Also see https://github.com/python-gitlab/python-gitlab/issues/2850
+
+        verbose("Transforming *_access_level and allowed_to_* keys in Branch configuration")
+        local_keys_to_gitlab_keys_map = {
+            "merge_access_level": "merge_access_levels",
+            "push_access_level": "push_access_levels",
+            "unprotect_access_level": "unprotect_access_levels",
+            "allowed_to_merge": "merge_access_levels",
+            "allowed_to_push": "push_access_levels",
+            "allowed_to_unprotect": "unprotect_access_levels",
+        }
+        new_branch_config = our_branch_config.copy()
+        for key in our_branch_config:
+            if key in local_keys_to_gitlab_keys_map.keys():
+                # *_access_level in gitlabform is of type int
+                if isinstance(our_branch_config[key], int):
+                    access_level = new_branch_config.pop(key)
+                    new_branch_config[local_keys_to_gitlab_keys_map[key]] = [
+                        {"id": None, "access_level": access_level, "user_id": None, "group_id": None}
+                    ]
+                # allowed_to_* are lists...
+                elif isinstance(our_branch_config[key], list):
+                    new_branch_config[local_keys_to_gitlab_keys_map[key]] = []
+                    for item in our_branch_config[key]:
+                        if "access_level" in item:
+                            new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
+                                {"id": None, "access_level": item["access_level"], "user_id": None, "group_id": None}
+                            )
+                        elif "group_id" in item:
+                            new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
+                                {"id": None, "access_level": None, "user_id": None, "group_id": item["group_id"]}
+                            )
+                        elif "user_id" in item:
+                            new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
+                                {"id": None, "access_level": None, "user_id": item["user_id"], "group_id": None}
+                            )
+                    new_branch_config.pop(key)
+        return new_branch_config
+
     def transform_branch_config(self, branch_config: dict):
         """
         The branch configuration in gitlabform supports passing users or group using username
@@ -135,6 +271,34 @@ class BranchesProcessor(AbstractProcessor):
                             item["group_id"] = self.gl.get_group_id(item.pop("group"))
 
         return branch_config
+
+    @staticmethod
+    def access_level_diff_analyzer(cfg_key: str, cfg_in_gitlab: list, local_cfg: list):
+        # cfg_key - unused; required by custom_diff_analyzer signature
+
+        if len(cfg_in_gitlab) != len(local_cfg):
+            return True
+
+        needs_update = True
+        for item in local_cfg:
+            if item["access_level"]:
+                # find in GitLab same access level
+                access_level = item["access_level"]
+                for gl_item in cfg_in_gitlab:
+                    if gl_item["access_level"] == access_level:
+                        needs_update = False
+            elif item["user_id"]:
+                user_id = item["user_id"]
+                for gl_item in cfg_in_gitlab:
+                    if gl_item["user_id"] == user_id:
+                        needs_update = False
+            elif item["group_id"]:
+                group_id = item["group_id"]
+                for gl_item in cfg_in_gitlab:
+                    if gl_item["group_id"] == group_id:
+                        needs_update = False
+        debug(f"access_level_diff_analyzer - needs_update: {needs_update}")
+        return needs_update
 
     @staticmethod
     def is_branch_name_wildcard(branch):
