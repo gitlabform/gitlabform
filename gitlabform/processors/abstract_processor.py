@@ -71,10 +71,15 @@ class AbstractProcessor(ABC):
 
     def _get_gitlab_server_version(self) -> tuple[int, int]:
         if self.gitlab.version != "unknown":
-            gitlab_version = tuple(map(int, self.gitlab.version.split(".")[:2]))
+            # We could've used tuple(map(int, ...)) here - but in this case the
+            # return value would be typed as tuple[int, ...] which is ambigous.
+            # Let's be explicit.
+            _maj = int(self.gitlab.version.split(".")[0])
+            _min = int(self.gitlab.version.split(".")[1])
+            _gitlab_version = (_maj, _min)
         else:
-            gitlab_version = (0, 0)
-        return gitlab_version
+            _gitlab_version = (0, 0)
+        return _gitlab_version
 
     def _section_is_in_config(self, configuration: dict):
         return self.configuration_name in configuration
