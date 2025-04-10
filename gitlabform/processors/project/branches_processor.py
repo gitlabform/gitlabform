@@ -152,7 +152,9 @@ class BranchesProcessor(AbstractProcessor):
                 access_level = new_branch_config.pop(key)
                 new_branch_config_key = access_level_keys_map[key]
                 new_branch_config[new_branch_config_key] = [{"id": None, "access_level": access_level}]
-                for gl_item in gitlab_branch_config.merge_access_levels:
+
+                access_level_key_plural = "{}s".format(key)
+                for gl_item in gitlab_branch_config.asdict()[access_level_key_plural]:
                     if gl_item["access_level"]:
                         new_branch_config[new_branch_config_key][0]["id"] = gl_item["id"]
                     else:
@@ -185,14 +187,13 @@ class BranchesProcessor(AbstractProcessor):
                     access_level_idx = item[0]
                     access_level_id = item[1]
                     new_branch_config[key][access_level_idx]["id"] = access_level_id
-
                 # remove access_levels from GitLab that are not listed in our
                 # config already
                 for gl_item in gitlab_branch_config.merge_access_levels:
                     if gl_item["id"] not in [item[1] for item in access_levels_on_both_sides]:
                         self.gitlab._make_request_to_api(
                             "projects/%s/protected_branches/%s",
-                            (gitlab_branch_config.manager._parent.get_id(), gitlab_branch_config.name),
+                            (gitlab_branch_config.id, gitlab_branch_config.name),
                             "PATCH",
                             None,
                             [200],
