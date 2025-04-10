@@ -20,6 +20,7 @@ class AbstractProcessor(ABC):
             Callable[[str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool],
         ] = {}
         self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
+        self.gitlab_version = self._get_gitlab_server_version()
 
     @configuration_to_safe_dict
     def process(
@@ -67,6 +68,13 @@ class AbstractProcessor(ABC):
             )
         else:
             verbose(f"Skipping section '{self.configuration_name}' - not in config.")
+
+    def _get_gitlab_server_version(self) -> tuple[int, int]:
+        if self.gitlab.version != "unknown":
+            gitlab_version = tuple(map(int, self.gitlab.version.split(".")[:2]))
+        else:
+            gitlab_version = (0, 0)
+        return gitlab_version
 
     def _section_is_in_config(self, configuration: dict):
         return self.configuration_name in configuration
