@@ -155,7 +155,7 @@ class BranchesProcessor(AbstractProcessor):
 
                 access_level_key_plural = "{}s".format(key)
                 for gl_item in gitlab_branch_config.asdict()[access_level_key_plural]:
-                    if gl_item["access_level"]:
+                    if gl_item["access_level"] == access_level:
                         new_branch_config[new_branch_config_key][0]["id"] = gl_item["id"]
                     else:
                         new_branch_config[new_branch_config_key].append({"id": gl_item["id"], "_destroy": True})
