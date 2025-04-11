@@ -56,10 +56,6 @@ class BranchesProcessor(AbstractProcessor):
             debug(message)
 
         if branch_config.get("protected"):
-            # this key is not needed at this point - and it's not present in
-            # protected_branch.attributes, so _needs_update() would always
-            # return True with this key present.
-            branch_config.pop("protected")
             if protected_branch:
                 branch_config_for_needs_update = self.transform_branch_config_access_levels(
                     branch_config, protected_branch.attributes
@@ -207,6 +203,7 @@ class BranchesProcessor(AbstractProcessor):
         """Branch protection CRUD API in python-gitlab (and GitLab itself) is
         inconsistent, the structure needed to create a branch protection rule is
         different from structure needed to update a rule in place.
+        Also, "protected" attribute is missing from GitLab side of things.
         This method will normalize gitlabform branch_config to accomodate this.
         """
         # Also see https://github.com/python-gitlab/python-gitlab/issues/2850
@@ -246,6 +243,11 @@ class BranchesProcessor(AbstractProcessor):
                                 {"id": None, "access_level": None, "user_id": item["user_id"], "group_id": None}
                             )
                     new_branch_config.pop(key)
+
+        # this key is not present in
+        # protected_branch.attributes, so _needs_update() would always
+        # return True with this key present.
+        new_branch_config.pop("protected")
         return new_branch_config
 
     def transform_branch_config(self, branch_config: dict):
