@@ -24,7 +24,7 @@ classifiers = [
 requires-python = ">=3.12.0"
 dependencies = [
     "certifi==2025.1.31",
-    "cli-ui==0.18.0",
+    "cli-ui==0.19.0",
     "ez-yaml==1.2.0",
     "Jinja2==3.1.6",
     "luddite==1.0.4",
@@ -35,8 +35,8 @@ dependencies = [
     "python-gitlab[graphql]==5.6.0",
     "requests==2.32.3",
     "ruamel.yaml==0.17.21",
-    "types-requests==2.32.0.20250306",
-    "types-setuptools==76.0.0.20250313",
+    "types-requests==2.32.0.20250328",
+    "types-setuptools==78.1.0.20250329",
     "yamlpath==3.8.2",
 ]
 
@@ -52,14 +52,14 @@ content-type = "text/markdown"
 
 [project.optional-dependencies]
 test = [
-    "coverage==7.7.1",
+    "coverage==7.8.0",
     "cryptography==44.0.2",
     "deepdiff==8.4.2",
     "mypy==1.15.0",
     "mypy-extensions==1.0.0",
     "pre-commit==2.21.0",
     "pytest==8.3.5",
-    "pytest-cov==6.0.0",
+    "pytest-cov==6.1.1",
     "pytest-rerunfailures==15.0",
     "xkcdpass==1.20.0",
 ]
