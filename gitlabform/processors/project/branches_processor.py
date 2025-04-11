@@ -284,7 +284,7 @@ class BranchesProcessor(AbstractProcessor):
         # GitLab UI, API, python-gitlab and GitLabForm itself make it impossible
         # to set "access_level", "user_id" and/or "group_id" at the same time,
         # so we take a naive approach here and kind of expect it will always be
-        # either one of those, but not a combination 
+        # either one of those, but not a combination
         needs_update = False
         changes_found = 0
         for item in local_cfg:
@@ -303,7 +303,8 @@ class BranchesProcessor(AbstractProcessor):
                 for gl_item in cfg_in_gitlab:
                     if gl_item["group_id"] != group_id:
                         changes_found += 1
-        if changes_found > 0: needs_update = True
+        if changes_found > 0:
+            needs_update = True
         debug(f"naive_access_level_diff_analyzer - needs_update: {needs_update}, changes_found: {changes_found}")
         return needs_update
 
