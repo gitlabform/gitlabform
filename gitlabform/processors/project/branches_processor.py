@@ -18,9 +18,9 @@ class BranchesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("branches", gitlab)
         self.strict = strict
-        self.custom_diff_analyzers["merge_access_levels"] = self.access_level_diff_analyzer
-        self.custom_diff_analyzers["push_access_levels"] = self.access_level_diff_analyzer
-        self.custom_diff_analyzers["unprotect_access_levels"] = self.access_level_diff_analyzer
+        self.custom_diff_analyzers["merge_access_levels"] = self.naive_access_level_diff_analyzer
+        self.custom_diff_analyzers["push_access_levels"] = self.naive_access_level_diff_analyzer
+        self.custom_diff_analyzers["unprotect_access_levels"] = self.naive_access_level_diff_analyzer
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
@@ -276,31 +276,35 @@ class BranchesProcessor(AbstractProcessor):
         return branch_config
 
     @staticmethod
-    def access_level_diff_analyzer(cfg_key: str, cfg_in_gitlab: list, local_cfg: list):
-        # cfg_key - unused; required by custom_diff_analyzer signature
+    def naive_access_level_diff_analyzer(_, cfg_in_gitlab: list, local_cfg: list):
 
         if len(cfg_in_gitlab) != len(local_cfg):
             return True
 
-        needs_update = True
+        # GitLab UI, API, python-gitlab and GitLabForm itself make it impossible
+        # to set "access_level", "user_id" and/or "group_id" at the same time,
+        # so we take a naive approach here and kind of expect it will always be
+        # either one of those, but not a combination 
+        needs_update = False
+        changes_found = 0
         for item in local_cfg:
-            if item["access_level"]:
-                # find in GitLab same access level
+            if item["access_level"] >= 0:
                 access_level = item["access_level"]
                 for gl_item in cfg_in_gitlab:
-                    if gl_item["access_level"] == access_level:
-                        needs_update = False
-            elif item["user_id"]:
+                    if gl_item["access_level"] != access_level:
+                        changes_found += 1
+            elif item["user_id"] >= 0:
                 user_id = item["user_id"]
                 for gl_item in cfg_in_gitlab:
-                    if gl_item["user_id"] == user_id:
-                        needs_update = False
-            elif item["group_id"]:
+                    if gl_item["user_id"] != user_id:
+                        changes_found += 1
+            elif item["group_id"] >= 0:
                 group_id = item["group_id"]
                 for gl_item in cfg_in_gitlab:
-                    if gl_item["group_id"] == group_id:
-                        needs_update = False
-        debug(f"access_level_diff_analyzer - needs_update: {needs_update}")
+                    if gl_item["group_id"] != group_id:
+                        changes_found += 1
+        if changes_found > 0: needs_update = True
+        debug(f"naive_access_level_diff_analyzer - needs_update: {needs_update}, changes_found: {changes_found}")
         return needs_update
 
     @staticmethod
