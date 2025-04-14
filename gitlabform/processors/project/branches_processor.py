@@ -289,17 +289,17 @@ class BranchesProcessor(AbstractProcessor):
         needs_update = False
         changes_found = 0
         for item in local_cfg:
-            if item["access_level"] >= 0:
+            if item["access_level"] and item["access_level"] >= 0:
                 access_level = item["access_level"]
                 for gl_item in cfg_in_gitlab:
                     if gl_item["access_level"] != access_level:
                         changes_found += 1
-            elif item["user_id"] >= 0:
+            elif item["user_id"] and item["user_id"] >= 0:
                 user_id = item["user_id"]
                 for gl_item in cfg_in_gitlab:
                     if gl_item["user_id"] != user_id:
                         changes_found += 1
-            elif item["group_id"] >= 0:
+            elif item["group_id"] and item["group_id"] >= 0:
                 group_id = item["group_id"]
                 for gl_item in cfg_in_gitlab:
                     if gl_item["group_id"] != group_id:
