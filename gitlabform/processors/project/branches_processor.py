@@ -126,7 +126,7 @@ class BranchesProcessor(AbstractProcessor):
     def prepare_branch_config_for_update(self, our_branch_config: dict, gitlab_branch_config: ProjectProtectedBranch):
         """Prepare GitLabForm branch config for "update" operation.
 
-        This function also removes branch protection access rules that not defined in GitLabForm config.
+        This function also removes branch protection access rules that not defined in GitLabForm config from GitLab instance.
 
         Args:
             our_branch_config (dict): branch configuration read from .yaml file
@@ -185,7 +185,8 @@ class BranchesProcessor(AbstractProcessor):
                     new_branch_config[key][access_level_idx]["id"] = access_level_id
                 # remove access_levels from GitLab that are not listed in our
                 # config already
-                for gl_item in gitlab_branch_config.merge_access_levels:
+                gl_key = ["{}s".format(k) for k, v in access_level_keys_map.items() if key == v][0]
+                for gl_item in gitlab_branch_config.asdict()[gl_key]:
                     if gl_item["id"] not in [item[1] for item in access_levels_on_both_sides]:
                         self.gitlab._make_request_to_api(
                             "projects/%s/protected_branches/%s",
