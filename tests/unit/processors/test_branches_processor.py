@@ -52,11 +52,21 @@ class TestBranchesProcessor:
         local_cfg = [{"access_level": 40, "user_id": None, "group_id": None}]
         assert BranchesProcessor.naive_access_level_diff_analyzer("test_key", cfg_in_gitlab, local_cfg) is True
 
+        # Test with different user_ids
+        cfg_in_gitlab = [{"access_level": None, "user_id": 30, "group_id": None}]
+        local_cfg = [{"access_level": None, "user_id": 40, "group_id": None}]
+        assert BranchesProcessor.naive_access_level_diff_analyzer("test_key", cfg_in_gitlab, local_cfg) is True
+
+        # Test with different group_ids
+        cfg_in_gitlab = [{"access_level": None, "user_id": None, "group_id": 30}]
+        local_cfg = [{"access_level": None, "user_id": None, "group_id": 40}]
+        assert BranchesProcessor.naive_access_level_diff_analyzer("test_key", cfg_in_gitlab, local_cfg) is True
+
         # Test with different lengths
-        cfg_in_gitlab = [{"access_level": 40, "user_id": None, "group_id": None}]
+        cfg_in_gitlab = [{"access_level": None, "user_id": 40, "group_id": None}]
         local_cfg = [
-            {"access_level": 40, "user_id": None, "group_id": None},
-            {"access_level": 30, "user_id": None, "group_id": None},
+            {"access_level": None, "user_id": 40, "group_id": None},
+            {"access_level": None, "user_id": 30, "group_id": None},
         ]
         assert BranchesProcessor.naive_access_level_diff_analyzer("test_key", cfg_in_gitlab, local_cfg) is True
 
