@@ -19,7 +19,8 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            project_avatar: "{self.test_image_path}"
+            project_settings:
+              avatar: "{self.test_image_path}"
         """
         run_gitlabform(config, project)
 
@@ -34,7 +35,8 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            project_avatar: "{self.test_image_path}"
+            project_settings:
+              avatar: "{self.test_image_path}"
         """
         run_gitlabform(config, project)
 
@@ -46,8 +48,8 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            project_avatar:
-              delete: true
+            project_settings:
+              avatar: ""
         """
         run_gitlabform(config, project)
 
@@ -61,8 +63,9 @@ class TestAvatar:
         # Test setting a group avatar
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
-            group_avatar: "{self.test_image_path}"
+          {group.full_path}:
+            group_settings:
+              avatar: "{self.test_image_path}"
         """
         run_gitlabform(config, group)
 
@@ -76,8 +79,9 @@ class TestAvatar:
         # First set an avatar
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
-            group_avatar: "{self.test_image_path}"
+          {group.full_path}:
+            group_settings:
+              avatar: "{self.test_image_path}"
         """
         run_gitlabform(config, group)
 
@@ -88,9 +92,9 @@ class TestAvatar:
         # Then delete it
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
-            group_avatar:
-              delete: true
+          {group.full_path}:
+            group_settings:
+              avatar: ""
         """
         run_gitlabform(config, group)
 
@@ -111,7 +115,8 @@ class TestAvatar:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            project_avatar: "{nonexistent_path}"
+            project_settings:
+              avatar: "{nonexistent_path}"
         """
 
         # This should run without crashing, even though the file doesn't exist
