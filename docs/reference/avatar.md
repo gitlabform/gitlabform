@@ -10,15 +10,16 @@ Example:
 ```
 projects_and_groups:
   group_1/project_1:
-    project_avatar: "images/project-logo.png"
+    project_settings:
+      avatar: "images/project-logo.png"
 ```
 
 To remove an avatar:
 ```
 projects_and_groups:
   group_1/project_1:
-    project_avatar:
-      delete: true
+    project_settings:
+      avatar: ""
 ```
 
 ## Group Avatars
@@ -29,13 +30,14 @@ Example:
 ```
 groups:
   group_1:
-    group_avatar: "images/group-logo.png"
+    group_settings:
+      avatar: "images/group-logo.png"
 ```
 
 To remove an avatar:
 ```
 groups:
   group_1:
-    group_avatar:
-      delete: true
+    group_settings:
+      avatar: ""
 ```

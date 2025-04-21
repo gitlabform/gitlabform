@@ -4,7 +4,6 @@ from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.processors import AbstractProcessors
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.group.group_avatar_processor import GroupAvatarProcessor
 from gitlabform.processors.group.group_badges_processor import GroupBadgesProcessor
 from gitlabform.processors.group.group_ldap_links_processor import (
     GroupLDAPLinksProcessor,
@@ -39,7 +38,6 @@ class GroupProcessors(AbstractProcessors):
         self.processors: List[AbstractProcessor] = [
             GroupVariablesProcessor(gitlab),
             GroupSettingsProcessor(gitlab),
-            GroupAvatarProcessor(gitlab),
             GroupMembersProcessor(gitlab),
             GroupLDAPLinksProcessor(gitlab),
             GroupBadgesProcessor(gitlab),
