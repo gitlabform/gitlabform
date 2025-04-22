@@ -1,6 +1,7 @@
-from logging import debug, info
+from cli_ui import debug as verbose, info, error
 from typing import Dict, List, Callable
 
+from gitlab import GitlabGetError
 from gitlab.base import RESTObject
 from gitlab.v4.objects import Group, Project, ProjectLabel, GroupLabel
 
@@ -26,11 +27,12 @@ class LabelsProcessor:
 
         if existing_labels:
             for listed_label in existing_labels:
-                full_label = group_or_project.labels.get(listed_label.id)
+                verbose(f"Processing existing label in Gitlab: {listed_label.name}")
+                full_label: GroupLabel | ProjectLabel = group_or_project.labels.get(listed_label.id)
                 label_name = full_label.name
 
                 if label_name not in configured_labels.keys():
-                    debug(f"{label_name} not in configured labels")
+                    verbose(f"{label_name} not in configured labels")
                     # only delete labels when enforce is true, because user's maybe automatically applying labels based
                     # on Repo state, for example: Compliance Framework labels based on language or CI-template status
                     if enforce:
@@ -47,11 +49,12 @@ class LabelsProcessor:
                             parent_object_type,
                         )
                     else:
-                        debug(f"No update required for label: {label_name}")
+                        verbose(f"No update required for label: {label_name}")
 
         # add new labels
         for label_name in configured_labels.keys():
             if label_name not in existing_label_names:
+                info(f"Creating new label: {label_name}, on {parent_object_type}")
                 self.create_new_label(configured_labels, group_or_project, label_name, parent_object_type)
 
     @staticmethod
