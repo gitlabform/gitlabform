@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.2.1
+
+* Improved logging in Labels processor [#1002](https://github.com/gitlabform/gitlabform/pull/1002), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+
+### Fixes
+
+### Documentation
+
+* Document preference for using python-gitlab [#73](https://github.com/gitlabform/gitlabform/issues/73), [#988](https://github.com/gitlabform/gitlabform/pull/988) [gdubicki](https://github.com/gdubicki)
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+
+Thanks to all the contributors of this release!
+
 ## 4.2.0
 
 ### Features
