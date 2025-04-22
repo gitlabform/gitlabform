@@ -1,8 +1,6 @@
-from cli_ui import debug as verbose, info, error
+from cli_ui import debug as verbose, info
 from typing import Dict, List, Callable
 
-from gitlab import GitlabGetError
-from gitlab.base import RESTObject
 from gitlab.v4.objects import Group, Project, ProjectLabel, GroupLabel
 
 
