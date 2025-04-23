@@ -121,3 +121,37 @@ class TestGroupLabels:
 
         # validate same id is being used
         assert created_label.id == new_label.id
+
+    def test__does_not_try_to_remove_existing_label_on_parent_group_when_enforce_is_true(
+        self, gl, group_for_function, subgroup_for_function
+    ):
+        parent_group = gl.groups.get(group_for_function.id)
+        parent_group.labels.create({"name": "do_not_delete_this", "color": "red"})
+        labels = parent_group.labels.list()
+        assert len(labels) == 1
+
+        config_for_labels = f"""
+        projects_and_groups:
+          {subgroup_for_function.full_path}/*:
+            group_labels:
+              enforce: true
+              test_label:
+                color: red
+                description: this is a label
+        """
+
+        run_gitlabform(config_for_labels, group_for_function)
+
+        updated_sub_group = gl.groups.get(subgroup_for_function.id)
+        updated_labels = updated_sub_group.labels.list()
+        assert len(updated_labels) == 2
+
+        parent_label = updated_labels[0]
+        assert parent_label.name == "do_not_delete_this"
+
+        updated_label = updated_labels[1]
+        assert updated_label.name == "test_label"
+        assert updated_label.description == "this is a label"
+
+        # text color gets converted to HexCode by GitLab ie red -> #FF0000
+        assert updated_label.color == "#FF0000"

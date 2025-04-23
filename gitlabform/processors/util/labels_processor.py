@@ -14,8 +14,8 @@ class LabelsProcessor:
         group_or_project: Group | Project,
         needs_update: Callable,  # self._needs_update passed from AbstractProcessor called process_labels
     ):
-        # python-gitlab/python-gitlab#2843
-        existing_labels = group_or_project.labels.list(get_all=True)
+        # Only get Labels created directly on the project/group
+        existing_labels = group_or_project.labels.list(get_all=True, include_ancestor_groups=False)
         existing_label_names: List = []
 
         if isinstance(group_or_project, Group):
@@ -25,9 +25,11 @@ class LabelsProcessor:
 
         if existing_labels:
             for listed_label in existing_labels:
+                # list and get single label return the same data from Gitlab so we can save on API calls
+                # by only GETting again when we need to make an update or delete
+                # https://docs.gitlab.com/api/labels/ && https://docs.gitlab.com/api/group_labels/
                 verbose(f"Processing existing label in Gitlab: {listed_label.name}")
-                full_label: GroupLabel | ProjectLabel = group_or_project.labels.get(listed_label.id)
-                label_name = full_label.name
+                label_name = listed_label.name
 
                 if label_name not in configured_labels.keys():
                     verbose(f"{label_name} not in configured labels")
@@ -35,15 +37,15 @@ class LabelsProcessor:
                     # on Repo state, for example: Compliance Framework labels based on language or CI-template status
                     if enforce:
                         info(f"Removing {label_name} from {parent_object_type}")
-                        full_label.delete()
+                        self.get_label(group_or_project, listed_label).delete()
                 else:
                     configured_label = configured_labels.get(label_name)
                     existing_label_names.append(label_name)
 
-                    if needs_update(full_label.asdict(), configured_label):
+                    if needs_update(listed_label.asdict(), configured_label):
                         self.update_existing_label(
                             configured_label,
-                            full_label,
+                            self.get_label(group_or_project, listed_label),
                             parent_object_type,
                         )
                     else:
@@ -54,6 +56,10 @@ class LabelsProcessor:
             if label_name not in existing_label_names:
                 info(f"Creating new label: {label_name}, on {parent_object_type}")
                 self.create_new_label(configured_labels, group_or_project, label_name, parent_object_type)
+
+    @staticmethod
+    def get_label(group_or_project, listed_label) -> GroupLabel | ProjectLabel:
+        return group_or_project.labels.get(listed_label.id)
 
     @staticmethod
     def update_existing_label(

@@ -115,6 +115,17 @@ def subgroup(gl: Gitlab, group: Group):
         gl.groups.delete(f"{group.full_path}/{subgroup_name}")
 
 
+@pytest.fixture(scope="function")
+def subgroup_for_function(gl: Gitlab, group_for_function: Group):
+    subgroup_name = get_random_name("subgroup")
+    gitlab_subgroup = create_group(subgroup_name, group_for_function.id)
+
+    yield gitlab_subgroup
+
+    with allowed_codes(404):
+        gl.groups.delete(f"{group_for_function.full_path}/{subgroup_name}")
+
+
 @pytest.fixture(scope="class")
 def other_subgroup(gl: Gitlab, group: Group):
     # TODO: deduplicate this - it's a copy and paste from the above fixture
