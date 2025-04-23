@@ -28,6 +28,9 @@ class LabelsProcessor:
         for label_to_update in existing_labels:
             label_name_in_gl = label_to_update.name
             updated_label = False
+            verbose(
+                f"Checking if {label_name_in_gl} is in Configuration to update or delete"
+            )
 
             for key, configured_label in configured_labels.items():
                 configured_label_name = configured_label.get("name")
@@ -36,7 +39,8 @@ class LabelsProcessor:
                     configured_label_name is not None and label_name_in_gl == configured_label_name
                 ) or label_name_in_gl == key:
                     # label exists in GL, so update
-                    verbose(f"Checking if existing label needs update: {label_to_update.name}")
+                    existing_label_keys.append(key)
+                    updated_label = True
 
                     if needs_update(label_to_update.asdict(), configured_label):
                         self.update_existing_label(
@@ -46,9 +50,6 @@ class LabelsProcessor:
                         )
                     else:
                         verbose(f"No update required for label: {label_name_in_gl}")
-
-                    existing_label_keys.append(key)
-                    updated_label = True
                     break
 
             if not updated_label:
