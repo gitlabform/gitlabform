@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.2.3
+
+### Fixes
+
+* Fix labels get deleted and recreated if the key in YAML does not match the name in YAML or Gitlab [#1004](https://github.com/gitlabform/gitlabform/pull/1004), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+
+
 ## 4.2.2
 
 ### Fixes
