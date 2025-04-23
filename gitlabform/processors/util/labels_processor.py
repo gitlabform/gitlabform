@@ -16,46 +16,60 @@ class LabelsProcessor:
     ):
         # Only get Labels created directly on the project/group
         existing_labels = group_or_project.labels.list(get_all=True, include_ancestor_groups=False)
-        existing_label_names: List = []
+        existing_label_keys: List = []
 
         if isinstance(group_or_project, Group):
             parent_object_type = "Group"
         else:
             parent_object_type = "Project"
 
-        if existing_labels:
-            for listed_label in existing_labels:
-                # list and get single label return the same data from Gitlab so we can save on API calls
-                # by only GETting again when we need to make an update or delete
-                # https://docs.gitlab.com/api/labels/ && https://docs.gitlab.com/api/group_labels/
-                verbose(f"Processing existing label in Gitlab: {listed_label.name}")
-                label_name = listed_label.name
+        gitlab_labels_to_delete: List = []
 
-                if label_name not in configured_labels.keys():
-                    verbose(f"{label_name} not in configured labels")
-                    # only delete labels when enforce is true, because user's maybe automatically applying labels based
-                    # on Repo state, for example: Compliance Framework labels based on language or CI-template status
-                    if enforce:
-                        info(f"Removing {label_name} from {parent_object_type}")
-                        self.get_label(group_or_project, listed_label).delete()
-                else:
-                    configured_label = configured_labels.get(label_name)
-                    existing_label_names.append(label_name)
+        for label_to_update in existing_labels:
+            label_name_in_gl = label_to_update.name
+            updated_label = False
 
-                    if needs_update(listed_label.asdict(), configured_label):
+            for key, configured_label in configured_labels.items():
+                configured_label_name = configured_label.get("name")
+                # Key in YAML may not match the "name" value in Gitlab or YAML, so we must match on both
+                if (
+                    configured_label_name is not None and label_name_in_gl == configured_label_name
+                ) or label_name_in_gl == key:
+                    # label exists in GL, so update
+                    verbose(f"Checking if existing label needs update: {label_to_update.name}")
+
+                    if needs_update(label_to_update.asdict(), configured_label):
                         self.update_existing_label(
                             configured_label,
-                            self.get_label(group_or_project, listed_label),
+                            self.get_label(group_or_project, label_to_update),
                             parent_object_type,
                         )
                     else:
-                        verbose(f"No update required for label: {label_name}")
+                        verbose(f"No update required for label: {label_name_in_gl}")
+
+                    existing_label_keys.append(key)
+                    updated_label = True
+                    break
+
+            if not updated_label:
+                gitlab_labels_to_delete.append(label_to_update)
+
+        # Delete labels no longer in config
+        for label_to_delete in gitlab_labels_to_delete:
+            label_name_in_gl = label_to_delete.name
+
+            verbose(f"{label_name_in_gl} not in configured labels")
+            # only delete labels when enforce is true, because user's maybe automatically applying labels based
+            # on Repo state, for example: Compliance Framework labels based on language or CI-template status
+            if enforce:
+                info(f"Removing {label_name_in_gl} from {parent_object_type}")
+                self.get_label(group_or_project, label_to_delete).delete()
 
         # add new labels
-        for label_name in configured_labels.keys():
-            if label_name not in existing_label_names:
-                info(f"Creating new label: {label_name}, on {parent_object_type}")
-                self.create_new_label(configured_labels, group_or_project, label_name, parent_object_type)
+        for label_key in configured_labels.keys():
+            if label_key not in existing_label_keys:
+                info(f"Creating new label with key: {label_key}, on {parent_object_type}")
+                self.create_new_label(configured_labels, group_or_project, label_key, parent_object_type)
 
     @staticmethod
     def get_label(group_or_project, listed_label) -> GroupLabel | ProjectLabel:
