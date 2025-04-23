@@ -122,6 +122,62 @@ class TestGroupLabels:
         # validate same id is being used
         assert created_label.id == new_label.id
 
+    def test__handles_label_name_not_equivalent_to_key_in_yaml(self, gl, group_for_function):
+        group = gl.groups.get(group_for_function.id)
+        labels = group.labels.list()
+        assert len(labels) == 0
+
+        config_for_labels = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_labels:
+              enforce: true
+              test_label:
+                name: "test::label"
+                color: red
+                description: this is a label
+              other_label:
+                name: "other_label"
+                color: green
+                description: this is another label
+        """
+
+        # First run should add the labels to the group
+        run_gitlabform(config_for_labels, group_for_function)
+
+        updated_group = gl.groups.get(group.id)
+        updated_labels = updated_group.labels.list()
+        assert len(updated_labels) == 2
+
+        # GL will return labels in alpabetical order
+        updated_label = updated_labels[1]
+        updated_label_id = updated_label.id
+        assert updated_label.name == "test::label"
+        assert updated_label.description == "this is a label"
+
+        other_updated_label = updated_labels[0]
+        other_updated_label_id = other_updated_label.id
+        assert other_updated_label.name == "other_label"
+        assert other_updated_label.description == "this is another label"
+
+        # Second run should do nothing, as there is nothing to update, add or delete
+        run_gitlabform(config_for_labels, group_for_function)
+
+        updated_again_group = gl.groups.get(group.id)
+        updated_again_labels = updated_again_group.labels.list()
+        assert len(updated_again_labels) == 2
+
+        updated_label = updated_again_labels[1]
+        # Verify Id has not been changed i.e. label wasn't deleted and re-created
+        assert updated_label.id == updated_label_id
+        assert updated_label.name == "test::label"
+        assert updated_label.description == "this is a label"
+
+        other_updated_label = updated_again_labels[0]
+        assert other_updated_label.id == other_updated_label_id
+        assert other_updated_label.name == "other_label"
+        assert other_updated_label.description == "this is another label"
+
     def test__does_not_try_to_remove_existing_label_on_parent_group_when_enforce_is_true(
         self, gl, group_for_function, subgroup_for_function
     ):
