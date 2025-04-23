@@ -14,8 +14,8 @@ class LabelsProcessor:
         group_or_project: Group | Project,
         needs_update: Callable,  # self._needs_update passed from AbstractProcessor called process_labels
     ):
-        # python-gitlab/python-gitlab#2843
-        existing_labels = group_or_project.labels.list(get_all=True)
+        # Only get Labels created directly on the project/group
+        existing_labels = group_or_project.labels.list(get_all=True, include_ancestor_groups=False)
         existing_label_names: List = []
 
         if isinstance(group_or_project, Group):
