@@ -1,10 +1,17 @@
 # Changelog
 
-## 4.2.1
-
-* Improved logging in Labels processor [#1002](https://github.com/gitlabform/gitlabform/pull/1002), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+## 4.2.2
 
 ### Fixes
+
+* Fix a 404 error when labels_processor attempts to delete labels set on parent group(s) [#1003](https://github.com/gitlabform/gitlabform/pull/1003), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+
+
+## 4.2.1
+
+### Fixes
+
+* Improved logging in Labels processor [#1002](https://github.com/gitlabform/gitlabform/pull/1002), [TimKnight-DWP](https://github.com/TimKnight-DWP)
 
 ### Documentation
 
