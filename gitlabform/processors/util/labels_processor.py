@@ -29,16 +29,14 @@ class LabelsProcessor:
             label_name_in_gl = label_to_update.name
             updated_label = False
 
-            for key, value in configured_labels.items():
-                configured_label_name = value.get("name")
+            for key, configured_label in configured_labels.items():
+                configured_label_name = configured_label.get("name")
                 # Key in YAML may not match the "name" value in Gitlab or YAML, so we must match on both
                 if (
                     configured_label_name is not None and label_name_in_gl == configured_label_name
                 ) or label_name_in_gl == key:
                     # label exists in GL, so update
                     verbose(f"Checking if existing label needs update: {label_to_update.name}")
-
-                    configured_label = configured_labels.get(key)
 
                     if needs_update(label_to_update.asdict(), configured_label):
                         self.update_existing_label(
