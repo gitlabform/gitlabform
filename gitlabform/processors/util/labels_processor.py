@@ -28,9 +28,7 @@ class LabelsProcessor:
         for label_to_update in existing_labels:
             label_name_in_gl = label_to_update.name
             updated_label = False
-            verbose(
-                f"Checking if {label_name_in_gl} is in Configuration to update or delete"
-            )
+            verbose(f"Checking if {label_name_in_gl} is in Configuration to update or delete")
 
             for key, configured_label in configured_labels.items():
                 configured_label_name = configured_label.get("name")
