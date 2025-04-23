@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.2.4
+
+### Fixes
+
+* Improves logging within labels processor
+
+
 ## 4.2.3
 
 ### Fixes
