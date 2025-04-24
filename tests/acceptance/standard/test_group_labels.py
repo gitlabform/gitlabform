@@ -287,3 +287,52 @@ class TestGroupLabels:
 
         # text color gets converted to HexCode by GitLab ie red -> #FF0000
         assert updated_label.color == "#FF0000"
+
+    def test__does_not_attempt_to_create_or_update_existing_label_on_parent_group(
+        self, gl, group_for_function, subgroup_for_function
+    ):
+        parent_group = gl.groups.get(group_for_function.id)
+        parent_group.labels.create({"name": "parent_label", "color": "red", "description": "this is a parent label"})
+        labels = parent_group.labels.list()
+        assert len(labels) == 1
+
+        parent_label = labels[0]
+        parent_label_id = parent_label.id
+        assert parent_label.name == "parent_label"
+        # text color gets converted to HexCode by GitLab ie red -> #FF0000
+        assert parent_label.color == "#FF0000"
+        assert parent_label.description == "this is a parent label"
+
+        config_for_labels = f"""
+        projects_and_groups:
+          {subgroup_for_function.full_path}/*:
+            group_labels:
+              enforce: true
+              test_label:
+                color: red
+                description: this is a label
+              parent_label:
+                color: green
+                description: hello world
+        """
+
+        run_gitlabform(config_for_labels, group_for_function)
+
+        updated_sub_group = gl.groups.get(subgroup_for_function.id)
+        updated_labels = updated_sub_group.labels.list()
+        assert len(updated_labels) == 2
+
+        updated_parent_label = updated_labels[0]
+        assert updated_parent_label.name == "parent_label"
+        # Validate a new label has not been created
+        assert updated_parent_label.id == parent_label_id
+        # text color gets converted to HexCode by GitLab ie red -> #FF0000
+        assert updated_parent_label.color == "#FF0000"
+        assert updated_parent_label.description == "this is a parent label"
+
+        updated_label = updated_labels[1]
+        assert updated_label.name == "test_label"
+        assert updated_label.description == "this is a label"
+
+        # text color gets converted to HexCode by GitLab ie red -> #FF0000
+        assert updated_label.color == "#FF0000"
