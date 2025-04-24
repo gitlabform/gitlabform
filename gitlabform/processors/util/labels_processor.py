@@ -1,6 +1,7 @@
-from cli_ui import debug as verbose, info
+from cli_ui import debug as verbose, info, warning
 from typing import Dict, List, Callable
 
+from gitlab.base import RESTObjectList, RESTObject
 from gitlab.v4.objects import Group, Project, ProjectLabel, GroupLabel
 
 
@@ -15,7 +16,8 @@ class LabelsProcessor:
         needs_update: Callable,  # self._needs_update passed from AbstractProcessor called process_labels
     ):
         # Only get Labels created directly on the project/group
-        existing_labels = group_or_project.labels.list(get_all=True, include_ancestor_groups=False)
+        existing_group_labels = group_or_project.labels.list(get_all=True, include_ancestor_groups=False)
+        existing_group_and_parent_labels = group_or_project.labels.list(get_all=True)
         existing_label_keys: List = []
 
         if isinstance(group_or_project, Group):
@@ -25,7 +27,7 @@ class LabelsProcessor:
 
         gitlab_labels_to_delete: List = []
 
-        for label_to_update in existing_labels:
+        for label_to_update in existing_group_labels:
             label_name_in_gl = label_to_update.name
             updated_label = False
             verbose(f"Checking if {label_name_in_gl} is in Configuration to update or delete")
@@ -33,9 +35,7 @@ class LabelsProcessor:
             for key, configured_label in configured_labels.items():
                 configured_label_name = configured_label.get("name")
                 # Key in YAML may not match the "name" value in Gitlab or YAML, so we must match on both
-                if (
-                    configured_label_name is not None and label_name_in_gl == configured_label_name
-                ) or label_name_in_gl == key:
+                if self.configured_label_matches_gitlab_label(configured_label_name, key, label_name_in_gl):
                     # label exists in GL, so update
                     existing_label_keys.append(key)
                     updated_label = True
@@ -65,10 +65,19 @@ class LabelsProcessor:
                 self.get_label(group_or_project, label_to_delete).delete()
 
         # add new labels
+
         for label_key in configured_labels.keys():
             if label_key not in existing_label_keys:
                 info(f"Creating new label with key: {label_key}, on {parent_object_type}")
-                self.create_new_label(configured_labels, group_or_project, label_key, parent_object_type)
+                self.create_new_label(
+                    configured_labels, group_or_project, label_key, parent_object_type, existing_group_and_parent_labels
+                )
+
+    @staticmethod
+    def configured_label_matches_gitlab_label(configured_label_name: str, key: str, label_name_in_gl: str):
+        return (
+            configured_label_name is not None and label_name_in_gl == configured_label_name
+        ) or label_name_in_gl == key
 
     @staticmethod
     def get_label(group_or_project, listed_label) -> GroupLabel | ProjectLabel:
@@ -88,13 +97,25 @@ class LabelsProcessor:
 
         full_label.save()
 
-    @staticmethod
     def create_new_label(
+        self,
         configured_labels,
         group_or_project: Group | Project,
-        label_name: str,
+        label_key: str,
         parent_object_type: str,
+        existing_group_and_parent_labels: RESTObjectList | list[RESTObject],
     ):
-        label = configured_labels.get(label_name)
-        info(f"Adding {label_name} to {parent_object_type}")
-        group_or_project.labels.create({"name": label_name, **label})
+        label = configured_labels.get(label_key)
+        configured_label_name = label.get("name")
+        found_existing_label = False
+        for existing_label in existing_group_and_parent_labels:
+            if self.configured_label_matches_gitlab_label(configured_label_name, label_key, existing_label.name):
+                warning(
+                    f"Label {existing_label.name} already exists either in {group_or_project.name} or on Parent Group, so will not create"
+                )
+                found_existing_label = True
+                break
+
+        if not found_existing_label:
+            info(f"Adding label with key: {label_key} to {parent_object_type}")
+            group_or_project.labels.create({"name": label_key, **label})
