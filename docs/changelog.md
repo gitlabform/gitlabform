@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.2.5
+
+### Fixes
+
+* Do not attempt to create or update labels defined in parent group [#1007](https://github.com/gitlabform/gitlabform/pull/1007), closes [#1006](https://github.com/gitlabform/gitlabform/issues/1006), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+
+
 ## 4.2.4
 
 ### Fixes
