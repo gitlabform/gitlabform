@@ -4,39 +4,51 @@
 
 ### Fixes
 
-* Do not attempt to create or update labels defined in parent group [#1007](https://github.com/gitlabform/gitlabform/pull/1007), closes [#1006](https://github.com/gitlabform/gitlabform/issues/1006), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+* Do not attempt to create or update labels defined in parent group [#1007](https://github.com/gitlabform/gitlabform/pull/1007), closes [#1006](https://github.com/gitlabform/gitlabform/issues/1006), ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+
+Thanks to all the contributors of this release!
 
 
 ## 4.2.4
 
 ### Fixes
 
-* Improves logging within labels processor
+* Improves logging within labels processor [fdda773e](https://github.com/gitlabform/gitlabform/commit/fdda773e920dcb38680be2068cb5c0a7f64d92c8) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+
+Thanks to all the contributors of this release!
 
 
 ## 4.2.3
 
 ### Fixes
 
-* Fix labels get deleted and recreated if the key in YAML does not match the name in YAML or Gitlab [#1004](https://github.com/gitlabform/gitlabform/pull/1004), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+* Fix labels get deleted and recreated if the key in YAML does not match the name in YAML or Gitlab [#1004](https://github.com/gitlabform/gitlabform/pull/1004) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
 
+Thanks to all the contributors of this release!
 
 ## 4.2.2
 
 ### Fixes
 
-* Fix a 404 error when labels_processor attempts to delete labels set on parent group(s) [#1003](https://github.com/gitlabform/gitlabform/pull/1003), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+* Fix a 404 error when labels_processor attempts to delete labels set on parent group(s) [#1003](https://github.com/gitlabform/gitlabform/pull/1003), ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+
+Thanks to all the contributors of this release!
 
 
 ## 4.2.1
 
+### Features
+
+* add support for 'Planner' role [#981](https://github.com/gitlabform/gitlabform/pull/981) ([amimas](https://github.com/amimas))
+
 ### Fixes
 
-* Improved logging in Labels processor [#1002](https://github.com/gitlabform/gitlabform/pull/1002), [TimKnight-DWP](https://github.com/TimKnight-DWP)
+* Improved logging in Labels processor [#1002](https://github.com/gitlabform/gitlabform/pull/1002), ([TimKnight-DWP](https://github.com/TimKnight-DWP))
 
 ### Documentation
 
 * Document preference for using python-gitlab [#73](https://github.com/gitlabform/gitlabform/issues/73), [#988](https://github.com/gitlabform/gitlabform/pull/988) [gdubicki](https://github.com/gdubicki)
+* Fix changelog for v4.2.0 [#982](https://github.com/gitlabform/gitlabform/pull/982) ([amimas](https://github.com/amimas))
 
 ### Dependencies
 
