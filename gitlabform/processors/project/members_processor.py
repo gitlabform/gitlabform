@@ -179,7 +179,7 @@ class MembersProcessor(AbstractProcessor):
                     )
                     if use_native_call:
                         create_data = {
-                            "username": user,
+                            "username": common_username,
                             "access_level": access_level,
                         }
                     else:
