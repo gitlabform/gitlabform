@@ -79,6 +79,23 @@ class MembersProcessor(AbstractProcessor):
         else:
             verbose("Not enforcing group members.")
 
+    def _process_gitlab_version_for_native_members_call(self, version: str) -> bool:
+        # this call is only needed for the newly introduced (17.1) member GET call
+        # instead of needing an additional call to get the member id we can use this now
+        # not completely happy about this function, would prefer a more generic approach
+        # so other internal processes can use this kind of approach as well for other API
+        splitted_version = version.split(".")
+        major_version = int(splitted_version[0])
+        minor_version = int(splitted_version[1])
+
+        if major_version > 17:
+            return True
+
+        if major_version >= 17 and minor_version >= 1:
+            return True
+
+        return False
+
     def _process_users(
         self,
         project_and_group: str,
@@ -91,16 +108,20 @@ class MembersProcessor(AbstractProcessor):
 
         current_members = self._get_members_from_project(project)
 
+        version = self.gl.version()[0]
+        use_native_call = self._process_gitlab_version_for_native_members_call(version)
+
         if users:
             verbose("Processing users as members...")
 
             for user in users:
                 info(f"Processing user '{user}'...")
 
-                user_id = self.gl.get_user_id_cached(user)
-                if user_id is None:
-                    warning(f"Could not find user '{user}' in Gitlab, skipping...")
-                    continue
+                if not use_native_call:
+                    user_id = self.gl.get_user_id_cached(user)
+                    if user_id is None:
+                        warning(f"Could not find user '{user}' in Gitlab, skipping...")
+                        continue
 
                 expires_at = users[user]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[user] else None
                 access_level = users[user]["access_level"] if "access_level" in users[user] else None
@@ -156,10 +177,16 @@ class MembersProcessor(AbstractProcessor):
                         "Adding user '%s' who previously was not a member.",
                         common_username,
                     )
-                    create_data = {
-                        "user_id": user_id,
-                        "access_level": access_level,
-                    }
+                    if use_native_call:
+                        create_data = {
+                            "username": user,
+                            "access_level": access_level,
+                        }
+                    else:
+                        create_data = {
+                            "user_id": user_id,
+                            "access_level": access_level,
+                        }
 
                     if expires_at:
                         create_data["expires_at"] = expires_at
