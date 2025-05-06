@@ -102,7 +102,8 @@ docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:latest gitlabform
 ## Used by
 
 <a href="https://www.egnyte.com" target="_blank"><img src="images/egnyte-logo.svg" width="130px" style="margin: 10px" alt="Egnyte logo"></a>
-<a href="https://www.elasticpath.com" target="_blank"><img src="images/elastic-path-logo.svg" width="130px" style="margin: 10px" alt="Elastic Path" /></a> ...and many more!
+<a href="https://www.elasticpath.com" target="_blank"><img src="images/elastic-path-logo.svg" width="130px" style="margin: 10px" alt="Elastic Path" /></a>
+<a href="https://www.roche.com" target="_blank"><img src="images/roche-logo.png" width="130px" style="margin: 10px" alt="Roche logo" /></a> ...and many more!
 
 ## License
 
