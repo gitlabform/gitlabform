@@ -49,15 +49,10 @@ class MembersProcessor(AbstractProcessor):
                     and expires_at == current_groups[common_group_name]["expires_at"]
                     and access_level == current_groups[common_group_name]["group_access_level"]
                 ):
-                    verbose(
-                        "Ignoring group '%s' as it is already a member",
-                        common_group_name,
-                    )
-                    verbose(
-                        "Current settings for '%s' are: %s" % (common_group_name, current_groups[common_group_name])
-                    )
+                    verbose(f"Ignoring group '{common_group_name}' as it is already a member")
+                    verbose(f"Current settings for '{common_group_name}' are: {current_groups[common_group_name]}")
                 else:
-                    verbose("Setting group '%s' as a member", common_group_name)
+                    verbose(f"Setting group '{common_group_name}' as a member")
                     access = access_level
                     expiry = expires_at
 
@@ -128,17 +123,11 @@ class MembersProcessor(AbstractProcessor):
                         and access_level == current_member.access_level
                         and member_role_id == member_role_id_before
                     ):
-                        verbose(
-                            "Nothing to change for user '%s' - same config now as to set.",
-                            common_username,
-                        )
-                        verbose(
-                            "Current settings for '%s' are: %s" % (common_username, current_members[common_username])
-                        )
+                        verbose(f"Nothing to change for user '{common_username}' - same config now as to set.")
+                        verbose(f"Current settings for '{common_username}' are: {current_members[common_username]}")
                     else:
                         verbose(
-                            "Editing user '%s' membership to change their access level or expires at",
-                            common_username,
+                            f"Editing user '{common_username}' membership to change their access level or expires at",
                         )
                         update_data = {
                             "user_id": common_username,
@@ -153,8 +142,7 @@ class MembersProcessor(AbstractProcessor):
 
                 else:
                     verbose(
-                        "Adding user '%s' who previously was not a member.",
-                        common_username,
+                        f"Adding user '{common_username}' who previously was not a member.",
                     )
                     create_data = {
                         "user_id": user_id,
