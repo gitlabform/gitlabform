@@ -1,6 +1,6 @@
 from cli_ui import debug as verbose, warning, info, error
 from cli_ui import fatal
-from gitlab import GitlabGetError, GitlabDeleteError
+from gitlab import GitlabGetError, GitlabDeleteError, GitlabCreateError
 from gitlab.v4.objects import Project, User
 
 from gitlabform.constants import EXIT_INVALID_INPUT
@@ -193,8 +193,10 @@ class MembersProcessor(AbstractProcessor):
 
                     if member_role_id:
                         create_data["member_role_id"] = member_role_id
-
-                    project.members.create(data=create_data)
+                    try:
+                        project.members.create(data=create_data)
+                    except GitlabCreateError:
+                        warning(f"User {user} not found!")
 
         if enforce_members:
             verbose("Enforcing Project members")
