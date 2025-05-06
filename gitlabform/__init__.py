@@ -75,6 +75,7 @@ class GitLabForm:
             self.just_show_version = False
             self.terminate_after_error = True
             self.only_sections = "all"
+            self.exclude_sections = []
             self.recurse_subgroups = recurse_subgroups
 
             self._configure_output(tests=True)
@@ -97,6 +98,7 @@ class GitLabForm:
                 self.just_show_version,
                 self.terminate_after_error,
                 self.only_sections,
+                self.exclude_sections,
                 self.recurse_subgroups,
             ) = self._parse_args()
 
@@ -276,6 +278,15 @@ class GitLabForm:
         )
 
         parser.add_argument(
+            "-es",
+            "--exclude-sections",
+            dest="exclude_sections",
+            default="none",
+            type=str,
+            help="exclude sections with these names (comma-delimited)",
+        )
+
+        parser.add_argument(
             "-r",
             "--recurse-subgroups",
             dest="recurse_subsgroups",
@@ -287,6 +298,11 @@ class GitLabForm:
 
         if args.only_sections != "all":
             args.only_sections = args.only_sections.split(",")
+
+        if args.exclude_sections != "none":
+            args.exclude_sections = args.exclude_sections.split(",")
+        else:
+            args.exclude_sections = []
 
         return (
             args.target,
@@ -304,6 +320,7 @@ class GitLabForm:
             args.just_show_version,
             args.terminate_after_error,
             args.only_sections,
+            args.exclude_sections,
             args.recurse_subsgroups,
         )
 
@@ -402,6 +419,7 @@ class GitLabForm:
                 diff_only_changed=self.diff_only_changed,
                 effective_configuration=effective_configuration,
                 only_sections=self.only_sections,
+                exclude_sections=self.exclude_sections,
             )
 
         for group in groups:
@@ -437,6 +455,7 @@ class GitLabForm:
                     diff_only_changed=self.diff_only_changed,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
+                    exclude_sections=self.exclude_sections,
                 )
 
                 successful_groups += 1
@@ -495,6 +514,7 @@ class GitLabForm:
                     diff_only_changed=self.diff_only_changed,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
+                    exclude_sections=self.exclude_sections,
                 )
 
                 successful_projects += 1
