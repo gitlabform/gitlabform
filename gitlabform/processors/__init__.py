@@ -26,15 +26,19 @@ class AbstractProcessors(ABC):
         diff_only_changed: bool,
         effective_configuration: EffectiveConfigurationFile,
         only_sections: List[str],
+        excluded_sections: List[str],
     ):
         for processor in self.processors:
-            if only_sections == "all" or processor.configuration_name in only_sections:
-                processor.process(
-                    entity_reference,
-                    configuration,
-                    dry_run,
-                    diff_only_changed,
-                    effective_configuration,
-                )
+            if processor.configuration_name not in excluded_sections:
+                if only_sections == "all" or processor.configuration_name in only_sections:
+                    processor.process(
+                        entity_reference,
+                        configuration,
+                        dry_run,
+                        diff_only_changed,
+                        effective_configuration,
+                    )
+                else:
+                    verbose(f"Skipping section '{processor.configuration_name}' - not in --only-sections list.")
             else:
-                verbose(f"Skipping section '{processor.configuration_name}' - not in --only-sections list.")
+                verbose(f"Excluding section '{processor.configuration_name}'.")
