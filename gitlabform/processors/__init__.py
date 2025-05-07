@@ -26,10 +26,10 @@ class AbstractProcessors(ABC):
         diff_only_changed: bool,
         effective_configuration: EffectiveConfigurationFile,
         only_sections: List[str],
-        excluded_sections: List[str],
+        exclude_sections: List[str],
     ):
         for processor in self.processors:
-            if processor.configuration_name not in excluded_sections:
+            if processor.configuration_name not in exclude_sections:
                 if only_sections == "all" or processor.configuration_name in only_sections:
                     processor.process(
                         entity_reference,
