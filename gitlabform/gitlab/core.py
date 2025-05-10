@@ -243,7 +243,7 @@ class GitLabCore:
         Returns:
             bool: True if server version is < max_version, False otherwise
         """
-        return not self.is_version_at_least(max_version)
+        return not self._is_version_at_least(max_version)
 
     @staticmethod
     def _format_with_url_encoding(format_string, single_arg_or_args_tuple):
