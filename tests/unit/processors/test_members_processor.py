@@ -195,11 +195,15 @@ class TestMembersProcessor:
             bot=False,
         )
         current_members.update({"username": user})
-        with patch.object(
-            processor.gl, "get_user_by_username_cached", return_value=user, create=True
-        ) as mock_get_user_by_username_cached:
+        with (
+            patch.object(
+                processor.gl, "get_user_by_username_cached", return_value=user, create=True
+            ) as mock_get_user_by_username_cached,
+            patch.object(project.members, "delete", create=True) as mock_delete_member,
+        ):
             processor._enforce_members("", True, project, users, current_members)
             mock_get_user_by_username_cached.assert_called_once()
+            mock_delete_member.assert_called_once()
 
     def test_enforce_members_no_user(
         self, processor: MembersProcessor, project, users, current_members, expires_at_date
