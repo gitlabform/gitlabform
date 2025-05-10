@@ -43,16 +43,22 @@ class TestMembersProcessor:
 
     @pytest.fixture
     def users(self, expires_at_date) -> dict:
-        return {"some_user": {"access_level": 30, "expires_at": expires_at_date, "member_role": 1}}
+        return {"some_user": {"username": "some_user", "access_level": 30, "expires_at": expires_at_date, "member_role": 1}}
 
     @pytest.fixture
     def current_members(self, expires_at_date) -> dict[str, MagicMock]:
-        member_mock = MagicMock(spec=ProjectMember)
-        member_mock.access_level = 40
-        member_mock.expires_at = expires_at_date.strftime("%Y-%m-%d")
-        member_mock.id = 123123
-        type(member_mock).member_role = PropertyMock(return_value={"id": 40})
-        current_members = {"some_user": member_mock}
+        some_user_mock = MagicMock(spec=ProjectMember)
+        some_user_mock.configure_mock(
+            id=1,
+            username="some_user",
+            access_level=40,
+            expires_at=expires_at_date.strftime("%Y-%m-%d"),
+            member_role={"id": 1}
+        )
+
+        current_members = {
+            "some_user": some_user_mock,
+        }
         return current_members
 
     def test_process_users_no_users(self, processor: MembersProcessor):
@@ -149,8 +155,6 @@ class TestMembersProcessor:
         ):
             users["some_user"]["access_level"] = 40
             users["some_user"]["member_role"] = None
-            member_mock_instance = current_members["some_user"]
-            type(member_mock_instance).member_role = PropertyMock(return_value={"id": None})
             processor._process_users_as_members(users, False, project, current_members)
             mock_get_user_id.assert_called_once()
 
@@ -161,10 +165,51 @@ class TestMembersProcessor:
             patch.object(processor.gl, "get_user_id_cached", return_value=1, create=True) as mock_get_user_id,
             patch.object(processor.gl, "get_member_role_id_cached", return_value=1, create=True),
         ):
-            member_mock = MagicMock(spec=ProjectMember)
-            member_mock.access_level = 40
-            member_mock.expires_at = current_members["some_user"].expires_at
-            member_mock.id = 123123
-            current_members["some_user"] = member_mock
+            current_members["access_level"] = 40
             processor._process_users_as_members(users, False, project, current_members)
             mock_get_user_id.assert_called_once()
+
+    def test_enforce_members(self, processor: MembersProcessor, project, users, current_members, expires_at_date):
+        user = MagicMock(spec=ProjectMember)
+        user.configure_mock(
+            id=1,
+            username="some_user",
+            access_level=40,
+            expires_at=expires_at_date.strftime("%Y-%m-%d"),
+            member_role={"id": 1},
+            bot = True
+        )
+        current_members.update({"username": user})
+        with patch.object(processor.gl, "get_user_by_username_cached", return_value=user, create=True) as mock_get_user_by_username_cached:
+            processor._enforce_members("", True, project, users, current_members)
+            mock_get_user_by_username_cached.assert_called_once()
+
+    def test_enforce_members_no_bot(self, processor: MembersProcessor, project, users, current_members, expires_at_date):
+        user = MagicMock(spec=ProjectMember)
+        user.configure_mock(
+            id=1,
+            username="some_user",
+            access_level=40,
+            expires_at=expires_at_date.strftime("%Y-%m-%d"),
+            member_role={"id": 1},
+            bot = False
+        )
+        current_members.update({"username": user})
+        with patch.object(processor.gl, "get_user_by_username_cached", return_value=user, create=True) as mock_get_user_by_username_cached:
+            processor._enforce_members("", True, project, users, current_members)
+            mock_get_user_by_username_cached.assert_called_once()
+
+    def test_enforce_members_no_user(self, processor: MembersProcessor, project, users, current_members, expires_at_date):
+        user = MagicMock(spec=ProjectMember)
+        user.configure_mock(
+            id=1,
+            username="some_user",
+            access_level=40,
+            expires_at=expires_at_date.strftime("%Y-%m-%d"),
+            member_role={"id": 1},
+            bot = False
+        )
+        current_members.update({"username": user})
+        with patch.object(processor.gl, "get_user_by_username_cached", return_value=None, create=True) as mock_get_user_by_username_cached:
+            processor._enforce_members("", True, project, users, current_members)
+            mock_get_user_by_username_cached.assert_called_once()
