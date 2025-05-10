@@ -231,7 +231,7 @@ class MembersProcessor(AbstractProcessor):
             verbose("Not enforcing user members.")
 
     @staticmethod
-    def _get_members_from_project(project):
+    def _get_members_from_project(project: Project):
         # Only get direct members from Python Gitlab (matches previous implementation)
         # https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#id14
         project_members = project.members.list(iterator=True)
