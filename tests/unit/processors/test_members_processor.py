@@ -19,15 +19,9 @@ class TestMembersProcessor:
         processor = MembersProcessor(gitlab_mock)
         gitlab = MagicMock(GitLab)
         processor.gl = gitlab
-        processor.gl.version = MagicMock(return_value=["17.1.0"])
+        processor.gitlab.version = MagicMock(return_value=["17.1.0"])
         processor.gl.get_project_by_path_cached = MagicMock()
         return processor
-
-    @pytest.mark.parametrize(
-        "version,expected", [("17.1.0", True), ("18.0.0", True), ("16.11.0", False), ("17.0.0", False)]
-    )
-    def test_process_gitlab_version_for_native_members_call(self, processor: MembersProcessor, version, expected):
-        assert processor._process_gitlab_version_for_native_members_call(version) == expected
 
     @pytest.fixture
     def project(self) -> Project:

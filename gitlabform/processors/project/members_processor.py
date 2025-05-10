@@ -189,23 +189,6 @@ class MembersProcessor(AbstractProcessor):
                 except GitlabCreateError:
                     warning(f"User {user} not found!")
 
-    def _process_gitlab_version_for_native_members_call(self, version: str) -> bool:
-        # this call is only needed for the newly introduced (17.1) member GET call
-        # instead of needing an additional call to get the member id we can use this now
-        # not completely happy about this function, would prefer a more generic approach
-        # so other internal processes can use this kind of approach as well for other API
-        splitted_version = version.split(".")
-        major_version = int(splitted_version[0])
-        minor_version = int(splitted_version[1])
-
-        if major_version > 17:
-            return True
-
-        if major_version >= 17 and minor_version >= 1:
-            return True
-
-        return False
-
     def _process_users(
         self,
         project_and_group: str,
@@ -215,8 +198,7 @@ class MembersProcessor(AbstractProcessor):
     ):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
         current_members = self._get_members_from_project(project)
-        version = self.gl.version()[0]
-        use_native_call = self._process_gitlab_version_for_native_members_call(version)
+        use_native_call = self.gitlab._is_version_at_least("17.1.0")
 
         if users:
             debug("Processing users as members...")
