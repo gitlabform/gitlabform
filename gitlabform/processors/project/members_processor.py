@@ -52,9 +52,7 @@ class MembersProcessor(AbstractProcessor):
                         "Ignoring group '%s' as it is already a member",
                         common_group_name,
                     )
-                    debug(
-                        "Current settings for '%s' are: %s" % (common_group_name, current_groups[common_group_name])
-                    )
+                    debug("Current settings for '%s' are: %s" % (common_group_name, current_groups[common_group_name]))
                 else:
                     debug("Setting group '%s' as a member", common_group_name)
                     access = access_level

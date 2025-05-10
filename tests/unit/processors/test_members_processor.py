@@ -43,7 +43,9 @@ class TestMembersProcessor:
 
     @pytest.fixture
     def users(self, expires_at_date) -> dict:
-        return {"some_user": {"username": "some_user", "access_level": 30, "expires_at": expires_at_date, "member_role": 1}}
+        return {
+            "some_user": {"username": "some_user", "access_level": 30, "expires_at": expires_at_date, "member_role": 1}
+        }
 
     @pytest.fixture
     def current_members(self, expires_at_date) -> dict[str, MagicMock]:
@@ -53,7 +55,7 @@ class TestMembersProcessor:
             username="some_user",
             access_level=40,
             expires_at=expires_at_date.strftime("%Y-%m-%d"),
-            member_role={"id": 1}
+            member_role={"id": 1},
         )
 
         current_members = {
@@ -177,14 +179,18 @@ class TestMembersProcessor:
             access_level=40,
             expires_at=expires_at_date.strftime("%Y-%m-%d"),
             member_role={"id": 1},
-            bot = True
+            bot=True,
         )
         current_members.update({"username": user})
-        with patch.object(processor.gl, "get_user_by_username_cached", return_value=user, create=True) as mock_get_user_by_username_cached:
+        with patch.object(
+            processor.gl, "get_user_by_username_cached", return_value=user, create=True
+        ) as mock_get_user_by_username_cached:
             processor._enforce_members("", True, project, users, current_members)
             mock_get_user_by_username_cached.assert_called_once()
 
-    def test_enforce_members_no_bot(self, processor: MembersProcessor, project, users, current_members, expires_at_date):
+    def test_enforce_members_no_bot(
+        self, processor: MembersProcessor, project, users, current_members, expires_at_date
+    ):
         user = MagicMock(spec=ProjectMember)
         user.configure_mock(
             id=1,
@@ -192,14 +198,18 @@ class TestMembersProcessor:
             access_level=40,
             expires_at=expires_at_date.strftime("%Y-%m-%d"),
             member_role={"id": 1},
-            bot = False
+            bot=False,
         )
         current_members.update({"username": user})
-        with patch.object(processor.gl, "get_user_by_username_cached", return_value=user, create=True) as mock_get_user_by_username_cached:
+        with patch.object(
+            processor.gl, "get_user_by_username_cached", return_value=user, create=True
+        ) as mock_get_user_by_username_cached:
             processor._enforce_members("", True, project, users, current_members)
             mock_get_user_by_username_cached.assert_called_once()
 
-    def test_enforce_members_no_user(self, processor: MembersProcessor, project, users, current_members, expires_at_date):
+    def test_enforce_members_no_user(
+        self, processor: MembersProcessor, project, users, current_members, expires_at_date
+    ):
         user = MagicMock(spec=ProjectMember)
         user.configure_mock(
             id=1,
@@ -207,9 +217,11 @@ class TestMembersProcessor:
             access_level=40,
             expires_at=expires_at_date.strftime("%Y-%m-%d"),
             member_role={"id": 1},
-            bot = False
+            bot=False,
         )
         current_members.update({"username": user})
-        with patch.object(processor.gl, "get_user_by_username_cached", return_value=None, create=True) as mock_get_user_by_username_cached:
+        with patch.object(
+            processor.gl, "get_user_by_username_cached", return_value=None, create=True
+        ) as mock_get_user_by_username_cached:
             processor._enforce_members("", True, project, users, current_members)
             mock_get_user_by_username_cached.assert_called_once()
