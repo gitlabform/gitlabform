@@ -79,7 +79,9 @@ class MembersProcessor(AbstractProcessor):
         else:
             verbose("Not enforcing group members.")
 
-    def _enforce_members(self, project_and_group: str, keep_bots: bool, project: Project, users: dict, current_members: dict):
+    def _enforce_members(
+        self, project_and_group: str, keep_bots: bool, project: Project, users: dict, current_members: dict
+    ):
         # Enforce that all usernames are lowercase for comparisons.
         users_in_config = [username.lower() for username in users.keys()]
         users_in_gitlab = current_members.keys()
@@ -148,9 +150,7 @@ class MembersProcessor(AbstractProcessor):
                         "Nothing to change for user '%s' - same config now as to set.",
                         common_username,
                     )
-                    verbose(
-                        "Current settings for '%s' are: %s" % (common_username, current_members[common_username])
-                    )
+                    verbose("Current settings for '%s' are: %s" % (common_username, current_members[common_username]))
                 else:
                     verbose(
                         "Editing user '%s' membership to change their access level or expires at",
