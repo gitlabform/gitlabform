@@ -221,10 +221,10 @@ class GitLabCore:
     def _is_version_at_least(self, min_version: Union[str, version.Version]) -> bool:
         """
         Check if GitLab server version is at least the specified version
-        
+
         Args:
             min_version: Version string like "15.4.0" or "16.0", or a Version object
-            
+
         Returns:
             bool: True if server version is >= min_version, False otherwise
         """
@@ -236,10 +236,10 @@ class GitLabCore:
     def _is_version_less_than(self, max_version: Union[str, version.Version]) -> bool:
         """
         Check if GitLab server version is less than the specified version
-        
+
         Args:
             max_version: Version string like "15.4.0" or "16.0", or a Version object
-            
+
         Returns:
             bool: True if server version is < max_version, False otherwise
         """
