@@ -1,5 +1,4 @@
-from cli_ui import debug, warning, info, error
-from cli_ui import fatal
+from cli_ui import debug, warning, info, error, fatal
 from gitlab import GitlabDeleteError, GitlabCreateError
 from gitlab.v4.objects import Project, User
 
