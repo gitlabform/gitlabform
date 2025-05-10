@@ -229,6 +229,11 @@ class GitLabCore:
             bool: True if server version is >= min_version, False otherwise
         """
         current = "0.0.0" if self.version == "unknown" else self.version
+
+        # remove gitlab version identifier for generic comparison
+        if "-ee" in current or "-ce" in current:
+            current = current.split("-")[0]
+
         if isinstance(min_version, str):
             min_version = version.parse(min_version)
         return version.parse(current) >= min_version
