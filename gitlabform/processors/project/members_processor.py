@@ -109,6 +109,7 @@ class MembersProcessor(AbstractProcessor):
                 error(f"Member '{user_not_in_config}' could not be deleted: {delete_error}")
                 raise delete_error
 
+    # edits or adds users to the members of the desired project
     def _process_users_as_members(self, users: dict, use_native_call: bool, project: Project, current_members: dict):
         for user in users:
             info(f"Processing user '{user}'...")
@@ -166,6 +167,7 @@ class MembersProcessor(AbstractProcessor):
 
                     project.members.update(new_data=update_data)
             else:
+                # TODO
                 verbose(
                     "Adding user '%s' who previously was not a member.",
                     common_username,
@@ -241,6 +243,7 @@ class MembersProcessor(AbstractProcessor):
             # To make sure that the user hasn't been added in a different
             # case, we enforce that the username is always in lowercase for
             # checks.
+            # TODO
             existing_user_names_lower[member.username.lower()] = member
 
         verbose(f"Existing project members {existing_user_names_lower}")
