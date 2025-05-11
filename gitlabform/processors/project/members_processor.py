@@ -124,54 +124,57 @@ class MembersProcessor(AbstractProcessor):
             else:
                 member_role_id = None
 
-                # we only add the user if it doesn't have the correct settings.
-                # To make sure that the user hasn't been added in a different
-                # case, we enforce that the username is always in lowercase for
-                # checks.
-                common_username = user.lower()
+            # we only add the user if it doesn't have the correct settings.
+            # To make sure that the user hasn't been added in a different
+            # case, we enforce that the username is always in lowercase for
+            # checks.
+            common_username = user.lower()
 
-                if common_username in current_members:
-                    current_member = current_members[common_username]
-                    if hasattr(current_member, "member_role"):
-                        member_role_id_before = current_member.member_role["id"]
-                    else:
-                        member_role_id_before = None
-                    if (
-                        expires_at == current_member.expires_at
-                        and access_level == current_member.access_level
-                        and member_role_id == member_role_id_before
-                    ):
-                        debug(f"Nothing to change for user '{common_username}' - same config now as to set.")
-                        debug(f"Current settings for '{common_username}' are: {current_members[common_username]}")
-                    else:
-                        debug(
-                            f"Editing user '{common_username}' membership to change their access level or expires at",
-                        )
-                        update_data = {
-                            "user_id": common_username,
-                            "access_level": access_level,
-                            "member_role_id": member_role_id_before,
-                        }
+            if common_username in current_members:
+                current_member = current_members[common_username]
+
+                if hasattr(current_member, "member_role"):
+                    member_role_id_before = current_member.member_role["id"]
+                else:
+                    member_role_id_before = None
+
+                if (
+                    expires_at == current_member.expires_at
+                    and access_level == current_member.access_level
+                    and member_role_id == member_role_id_before
+                ):
+                    debug(f"Nothing to change for user '{common_username}' - same config now as to set.")
+                    debug(f"Current settings for '{common_username}' are: {current_members[common_username]}")
+                else:
+                    debug(
+                        f"Editing user '{common_username}' membership to change their access level or expires at",
+                    )
+                    update_data = {
+                        "user_id": common_username,
+                        "access_level": access_level,
+                        "member_role_id": member_role_id_before,
+                    }
 
                     if expires_at:
                         update_data["expires_at"] = expires_at
+                    
+                    project.members.update(new_data=update_data)
 
-                        project.members.update(new_data=update_data)
-
-                else:
-                    debug(
-                        f"Adding user '{common_username}' who previously was not a member.",
-                    )
-                    create_data = {
-                        "user_id": user_id,
-                        "access_level": access_level,
-                    }
+            else:
+                debug(
+                    f"Adding user '{common_username}' who previously was not a member.",
+                )
+                create_data = {
+                    "user_id": user_id,
+                    "access_level": access_level,
+                }
 
                 if expires_at:
                     create_data["expires_at"] = expires_at
 
                 if member_role_id:
                     create_data["member_role_id"] = member_role_id
+
                 try:
                     project.members.create(data=create_data)
                 except GitlabCreateError:
