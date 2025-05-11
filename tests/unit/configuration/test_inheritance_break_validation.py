@@ -4,7 +4,6 @@ from gitlabform.configuration import Configuration
 from gitlabform import EXIT_INVALID_INPUT
 
 
-
 class TestInheritanceBreakValidation:
     def test__validate_break_inheritance_flag__invalid_flag_set_at_common_level(self):
         config_yaml = """
