@@ -1,8 +1,4 @@
-import logging
-
 from gitlabform.configuration import Configuration
-
-logger = logging.getLogger(__name__)
 
 
 class TestInheritanceBreakProjectsAndGroups:
