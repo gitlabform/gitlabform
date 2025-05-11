@@ -1,5 +1,4 @@
-from logging import debug
-from cli_ui import debug as verbose
+from cli_ui import debug
 from cli_ui import fatal
 
 import abc
@@ -100,7 +99,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         if enforce:
             for entity_name, entity_config in entities_only_in_gitlab.items():
                 # no need to validate if we have what's needed to delete as we got the entities from gitlab
-                verbose(
+                debug(
                     f"Deleting entity no {entity_name} of {self.configuration_name} in {project_or_group} "
                     f"as it's not in config and enforce is set to true."
                 )
@@ -112,27 +111,27 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             entity_in_gitlab = self._is_in(entity_config, entities_in_gitlab)
             if entity_config.get("delete", False):
                 self._validate_required_to_delete(project_or_group, entity_name, entity_config)
-                verbose(f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}")
+                debug(f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}")
                 self.delete_method(project_or_group, entity_in_gitlab)
             elif self._needs_update(entity_in_gitlab, entity_config):
                 self._validate_required_to_create_or_update(project_or_group, entity_name, entity_config)
                 if self.edit_method:
-                    verbose(f"Editing {entity_name} of {self.configuration_name} in {project_or_group}")
+                    debug(f"Editing {entity_name} of {self.configuration_name} in {project_or_group}")
                     self.edit_method(project_or_group, entity_in_gitlab, entity_config)
                     debug(f"{self.configuration_name} AFTER: ^^^")
                 else:
-                    verbose(f" * Recreating {entity_name} of {self.configuration_name} in {project_or_group}")
+                    debug(f" * Recreating {entity_name} of {self.configuration_name} in {project_or_group}")
                     self.delete_method(project_or_group, entity_in_gitlab)
                     self.add_method(project_or_group, entity_config)
                     debug(f"{self.configuration_name} AFTER: ^^^")
             else:
-                verbose(f" * {entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update.")
+                debug(f" * {entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update.")
 
         # add c) (or do nothing if marked as "delete")
 
         for entity_name, entity_config in entities_only_in_configuration.items():
             self._validate_required_to_create_or_update(project_or_group, entity_name, entity_config)
-            verbose(f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}")
+            debug(f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}")
             self.add_method(project_or_group, entity_config)
             debug(f"{self.configuration_name} AFTER: ^^^")
 

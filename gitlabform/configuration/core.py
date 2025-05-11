@@ -1,17 +1,15 @@
 from typing import Any
 
 import os
-import logging
 import textwrap
+import cli_ui
 from abc import ABC
 from copy import deepcopy
-from logging import debug
 from pathlib import Path
 from ruamel.yaml.scalarstring import ScalarString
 from types import SimpleNamespace
 
-from cli_ui import debug as verbose
-from cli_ui import fatal
+from cli_ui import debug, fatal
 from mergedeep import merge
 from yamlpath.common import Parsers
 from yamlpath.wrappers import ConsolePrinter
@@ -100,11 +98,11 @@ class ConfigurationCore(ABC):
 
         if config_string:
             config = textwrap.dedent(source)
-            verbose("Reading config from the provided string.")
+            debug("Reading config from the provided string.")
             (yaml_data, doc_loaded) = Parsers.get_yaml_data(yaml, log, config, literal=True)
         else:
             config_path = source
-            verbose(f"Reading config from file: {config_path}")
+            debug(f"Reading config from file: {config_path}")
             (yaml_data, doc_loaded) = Parsers.get_yaml_data(yaml, log, config_path)
 
         if doc_loaded:
@@ -307,7 +305,7 @@ class KeyNotFoundException(Exception):
     __slots__ = "key"
 
     def __init__(self, key: str):
-        if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
+        if cli_ui.ConfigValue == cli_ui.CONFIG["verbose"]:
             self.key = key
         else:
             fatal(

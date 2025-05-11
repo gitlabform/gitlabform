@@ -1,8 +1,6 @@
-from logging import debug, warning
 from typing import Dict, Tuple
 
-import gitlab
-from cli_ui import fatal, error, debug as verbose
+from cli_ui import fatal, error, debug
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
@@ -246,7 +244,7 @@ class GroupMembersProcessor(AbstractProcessor):
                 [username.lower() for username in users_to_set_by_username.keys()]
             )
             for user in users_not_configured:
-                verbose(f"Removing user {user} who is not configured to be a member.")
+                debug(f"Removing user {user} who is not configured to be a member.")
 
                 gl_user: User | None = self.gl.get_user_by_username_cached(user)
 

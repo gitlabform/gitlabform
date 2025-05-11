@@ -1,5 +1,4 @@
-from cli_ui import debug as verbose
-from cli_ui import warning
+from cli_ui import debug, warning
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -41,7 +40,7 @@ class ResourceGroupsProcessor(AbstractProcessor):
                     continue
 
             if self._needs_update(resource_group_in_gitlab.asdict(), resource_group_in_config):
-                verbose(f"Updating resource group '{config_resource_group_name}'")
+                debug(f"Updating resource group '{config_resource_group_name}'")
 
                 try:
                     project.resource_groups.update(resource_group_in_gitlab.key, **resource_group_in_config)

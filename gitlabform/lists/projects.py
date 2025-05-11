@@ -1,6 +1,5 @@
 from typing import Optional, Tuple
-from logging import debug
-from cli_ui import fatal
+from cli_ui import fatal, debug
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects

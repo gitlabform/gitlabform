@@ -1,5 +1,4 @@
-from logging import debug
-from cli_ui import debug as verbose
+from cli_ui import debug
 
 import abc
 from typing import Callable, Optional
@@ -38,13 +37,13 @@ class SingleEntityProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
 
         if entity_in_gitlab:
             if self._needs_update(entity_in_gitlab, entity_config):
-                verbose(f"Editing {self.configuration_name} in {project_or_group}")
+                debug(f"Editing {self.configuration_name} in {project_or_group}")
                 self.edit_method(project_or_group, entity_config)
                 debug(f"{self.configuration_name} AFTER: ^^^")
             else:
-                verbose(f"{self.configuration_name} in {project_or_group} doesn't need an update.")
+                debug(f"{self.configuration_name} in {project_or_group} doesn't need an update.")
         else:
-            verbose(f"Adding {self.configuration_name} in {project_or_group}")
+            debug(f"Adding {self.configuration_name} in {project_or_group}")
             self.add_method(project_or_group, entity_config)
             debug(f"{self.configuration_name} AFTER: ^^^")
 

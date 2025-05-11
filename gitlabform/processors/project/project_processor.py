@@ -1,8 +1,7 @@
-from cli_ui import debug as verbose
-from logging import fatal
+from cli_ui import debug
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlab import GitlabGetError, GitlabTransferProjectError
+from gitlab import GitlabGetError
 from gitlab.v4.objects import Project
 
 
@@ -19,7 +18,7 @@ class ProjectProcessor(AbstractProcessor):
             # Check if the project was already transfered (i.e. in previous run) or a project with same path already exists
             try:
                 project_in_config: Project = self.gl.get_project_by_path_cached(project_path_with_namespace)
-                verbose(
+                debug(
                     f"Project already exists: '{project_in_config.path_with_namespace}'. Ignoring 'transfer_from' config..."
                 )
             except GitlabGetError:
@@ -30,7 +29,7 @@ class ProjectProcessor(AbstractProcessor):
                 destination_project_path = project_and_group.split("/")[-1]
                 # Check if the project path needs to be updated; In Gitlab, path maybe different than name
                 if destination_project_path != project_to_be_transferred.path:
-                    verbose(
+                    debug(
                         f"Updating the source project path from '{project_to_be_transferred.path}' to '{destination_project_path}'"
                     )
                     self.gl.projects.update(project_to_be_transferred.id, {"path": destination_project_path})
@@ -39,7 +38,7 @@ class ProjectProcessor(AbstractProcessor):
                 #  See the next comment for details.
                 # try:
                 project_transfer_destination_group, _ = project_and_group.rsplit("/", 1)
-                verbose(f"Transferring project to '{project_transfer_destination_group}' group...")
+                debug(f"Transferring project to '{project_transfer_destination_group}' group...")
                 project_to_be_transferred.transfer(project_transfer_destination_group)
                 # TODO: Catch GitlabTransferProjectError exception.
                 #  The above code can run into exception for various reasons.
@@ -55,8 +54,8 @@ class ProjectProcessor(AbstractProcessor):
             project: Project = self.gl.get_project_by_path_cached(project_path_with_namespace)
 
             if configuration["project"].get("archive") is True:
-                verbose("Archiving project...")
+                debug("Archiving project...")
                 project.archive()
             elif configuration["project"].get("archive") is False:
-                verbose("Unarchiving project...")
+                debug("Unarchiving project...")
                 project.unarchive()

@@ -1,7 +1,7 @@
 from abc import ABC
 
 import functools
-from logging import debug
+from cli_ui import debug
 
 from gitlabform.configuration import ConfigurationGroups
 from gitlabform.util import to_str

@@ -6,7 +6,7 @@ from gitlab import Gitlab, GitlabGetError, GraphQL
 from gitlab.base import RESTObject
 from gitlab.v4.objects import Group, Project, User
 
-from cli_ui import debug as verbose
+from cli_ui import debug
 
 
 # Extends the python-gitlab class to add convenience wrappers for common functionality used within gitlabform
@@ -138,7 +138,7 @@ class PythonGitlab(Gitlab):
         }
         """
         )
-        verbose(f"Executing graphQl query to get Member Roles for Group '{group_full_path}'")
+        debug(f"Executing graphQl query to get Member Roles for Group '{group_full_path}'")
         result = self.graphql.execute(query)
 
         # Validate Group / MemberRoles exist
