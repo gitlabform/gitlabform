@@ -1,9 +1,8 @@
 import pytest
 from unittest.mock import MagicMock, patch, PropertyMock
-from datetime import datetime, timedelta
+from datetime import datetime
 from gitlabform.processors.project.members_processor import MembersProcessor
-from gitlab.v4.objects import ProjectMember, Project, User, ProjectMemberManager
-from gitlabform.gitlab.python_gitlab import PythonGitlab
+from gitlab.v4.objects import ProjectMember, Project
 from gitlabform.gitlab import GitLab
 
 
