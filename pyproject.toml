@@ -53,7 +53,7 @@ content-type = "text/markdown"
 [project.optional-dependencies]
 test = [
     "coverage==7.8.0",
-    "cryptography==44.0.2",
+    "cryptography==44.0.3",
     "deepdiff==8.4.2",
     "mypy==1.15.0",
     "mypy-extensions==1.1.0",

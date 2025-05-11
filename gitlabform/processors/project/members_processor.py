@@ -48,13 +48,10 @@ class MembersProcessor(AbstractProcessor):
                     and expires_at == current_groups[common_group_name]["expires_at"]
                     and access_level == current_groups[common_group_name]["group_access_level"]
                 ):
-                    debug(
-                        "Ignoring group '%s' as it is already a member",
-                        common_group_name,
-                    )
-                    debug("Current settings for '%s' are: %s" % (common_group_name, current_groups[common_group_name]))
+                    debug(f"Ignoring group '{common_group_name}' as it is already a member")
+                    debug(f"Current settings for '{common_group_name}' are: {current_groups[common_group_name]}")
                 else:
-                    debug("Setting group '%s' as a member", common_group_name)
+                    debug(f"Setting group '{common_group_name}' as a member")
                     access = access_level
                     expiry = expires_at
 
@@ -127,53 +124,44 @@ class MembersProcessor(AbstractProcessor):
             else:
                 member_role_id = None
 
-            # we only add the user if it doesn't have the correct settings.
-            # To make sure that the user hasn't been added in a different
-            # case, we enforce that the username is always in lowercase for
-            # checks.
-            common_username = user.lower()
-            if common_username in current_members:
-                current_member = current_members[common_username]
-                if hasattr(current_member, "member_role"):
-                    member_role_id_before = current_member.member_role["id"]
-                else:
-                    member_role_id_before = None
-                if (
-                    expires_at == current_member.expires_at
-                    and access_level == current_member.access_level
-                    and member_role_id == member_role_id_before
-                ):
-                    debug(
-                        "Nothing to change for user '%s' - same config now as to set.",
-                        common_username,
-                    )
-                    debug("Current settings for '%s' are: %s" % (common_username, current_members[common_username]))
-                else:
-                    debug(
-                        "Editing user '%s' membership to change their access level or expires at",
-                        common_username,
-                    )
-                    update_data = {
-                        "user_id": common_username,
-                        "access_level": access_level,
-                        "member_role_id": member_role_id_before,
-                    }
+                # we only add the user if it doesn't have the correct settings.
+                # To make sure that the user hasn't been added in a different
+                # case, we enforce that the username is always in lowercase for
+                # checks.
+                common_username = user.lower()
+
+                if common_username in current_members:
+                    current_member = current_members[common_username]
+                    if hasattr(current_member, "member_role"):
+                        member_role_id_before = current_member.member_role["id"]
+                    else:
+                        member_role_id_before = None
+                    if (
+                        expires_at == current_member.expires_at
+                        and access_level == current_member.access_level
+                        and member_role_id == member_role_id_before
+                    ):
+                        debug(f"Nothing to change for user '{common_username}' - same config now as to set.")
+                        debug(f"Current settings for '{common_username}' are: {current_members[common_username]}")
+                    else:
+                        debug(
+                            f"Editing user '{common_username}' membership to change their access level or expires at",
+                        )
+                        update_data = {
+                            "user_id": common_username,
+                            "access_level": access_level,
+                            "member_role_id": member_role_id_before,
+                        }
 
                     if expires_at:
                         update_data["expires_at"] = expires_at
 
-                    project.members.update(new_data=update_data)
-            else:
-                debug(
-                    "Adding user '%s' who previously was not a member.",
-                    common_username,
-                )
-                if use_native_call:
-                    create_data = {
-                        "username": common_username,
-                        "access_level": access_level,
-                    }
+                        project.members.update(new_data=update_data)
+
                 else:
+                    debug(
+                        f"Adding user '{common_username}' who previously was not a member.",
+                    )
                     create_data = {
                         "user_id": user_id,
                         "access_level": access_level,
