@@ -129,15 +129,12 @@ class MembersProcessor(AbstractProcessor):
             # case, we enforce that the username is always in lowercase for
             # checks.
             common_username = user.lower()
-
             if common_username in current_members:
                 current_member = current_members[common_username]
-
                 if hasattr(current_member, "member_role"):
                     member_role_id_before = current_member.member_role["id"]
                 else:
                     member_role_id_before = None
-
                 if (
                     expires_at == current_member.expires_at
                     and access_level == current_member.access_level
@@ -157,24 +154,28 @@ class MembersProcessor(AbstractProcessor):
 
                     if expires_at:
                         update_data["expires_at"] = expires_at
-                    
-                    project.members.update(new_data=update_data)
 
+                    project.members.update(new_data=update_data)
             else:
                 debug(
                     f"Adding user '{common_username}' who previously was not a member.",
                 )
-                create_data = {
-                    "user_id": user_id,
-                    "access_level": access_level,
-                }
+                if use_native_call:
+                    create_data = {
+                        "username": common_username,
+                        "access_level": access_level,
+                    }
+                else:
+                    create_data = {
+                        "user_id": user_id,
+                        "access_level": access_level,
+                    }
 
                 if expires_at:
                     create_data["expires_at"] = expires_at
 
                 if member_role_id:
                     create_data["member_role_id"] = member_role_id
-
                 try:
                     project.members.create(data=create_data)
                 except GitlabCreateError:
