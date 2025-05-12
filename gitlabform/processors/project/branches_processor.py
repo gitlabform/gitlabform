@@ -102,7 +102,7 @@ class BranchesProcessor(AbstractProcessor):
             # It only unprotects the branch.
             protected_branch.delete()
         except GitlabDeleteError as e:
-            message = f"Branch '{protected_branch.name}' could not be unprotected! Error '{e.error_message}"
+            message = f"Branch '{protected_branch.name}' could not be unprotected! Error '{e.error_message}'"
             if self.strict:
                 fatal(
                     message,
