@@ -141,6 +141,20 @@ class TestMembersProcessor:
             mock_get_user_id.assert_called_once()
             project.members.update.assert_called_once()
 
+    def test_process_users_as_members_no_native_call_with_new_user(
+        self, processor: MembersProcessor, project, users, current_members, expires_at_date
+    ):
+        with (
+            patch.object(processor.gl, "get_user_id_cached", return_value=1, create=True) as mock_get_user_id,
+            patch.object(processor.gl, "get_member_role_id_cached", return_value=1, create=True),
+        ):
+            users.update(
+                {"test": {"username": "test", "access_level": 30, "expires_at": expires_at_date, "member_role": 1}}
+            )
+            processor._process_users_as_members(users, False, project, current_members)
+            mock_get_user_id.assert_called()
+            project.members.create.assert_called_once()
+
     def test_process_users_as_members_no_native_call_nothing_to_change(
         self, processor: MembersProcessor, project, users, current_members
     ):
