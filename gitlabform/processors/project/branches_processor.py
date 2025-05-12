@@ -79,7 +79,7 @@ class BranchesProcessor(AbstractProcessor):
         try:
             project.protectedbranches.create({"name": branch_name, **branch_config})
         except GitlabCreateError as e:
-            message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
+            message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}'"
 
             if self.strict:
                 fatal(
