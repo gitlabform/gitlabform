@@ -60,7 +60,7 @@ test = [
     "pre-commit==2.21.0",
     "pytest==8.3.5",
     "pytest-cov==6.1.1",
-    "pytest-rerunfailures==15.0",
+    "pytest-rerunfailures==15.1",
     "xkcdpass==1.20.0",
 ]
 docs = ["mkdocs", "mkdocs-material"]
