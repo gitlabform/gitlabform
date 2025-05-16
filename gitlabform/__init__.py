@@ -1,9 +1,7 @@
 import sys
-from logging import debug
 
 import argparse
 import cli_ui
-import logging
 import luddite
 from importlib.metadata import version as package_version
 import textwrap
@@ -17,7 +15,7 @@ from cli_ui import (
     info,
     fatal,
     info_1,
-    debug as verbose,
+    debug,
     red,
     green,
     yellow,
@@ -317,29 +315,14 @@ class GitLabForm:
 
         :param tests: True if we are running in tests mode
         """
-
-        logging.basicConfig()
-
         if self.debug or tests:
-            # debug / tests
             cli_ui_verbose = True
-            level = logging.DEBUG
         elif self.verbose:
-            # verbose
             cli_ui_verbose = True
-            # de facto disabled as we don't use logging different from debug in this project
-            level = logging.FATAL
         else:
             # normal
             cli_ui_verbose = False
-            # de facto disabled as we don't use logging different from debug in this project
-            level = logging.FATAL
-
         cli_ui.setup(verbose=cli_ui_verbose)
-        logging.getLogger().setLevel(level)
-
-        fmt = logging.Formatter("%(message)s")
-        logging.getLogger().handlers[0].setFormatter(fmt)
 
     def _initialize_configuration_and_gitlab(self) -> Tuple[GitLab, Configuration]:
         """
@@ -651,7 +634,7 @@ class GitLabForm:
         if entities_omitted:
             info_1(entities_omitted)
 
-        verbose(entities_verbose)
+        debug(entities_verbose)
 
     @classmethod
     def _show_summary(

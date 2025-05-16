@@ -1,4 +1,4 @@
-from cli_ui import debug as verbose
+from cli_ui import debug
 
 from gitlab.v4.objects import Project, ProjectIntegration
 from gitlabform.gitlab import GitLab
@@ -17,8 +17,8 @@ class IntegrationsProcessor(AbstractProcessor):
             gl_integration: ProjectIntegration = project.integrations.get(integration, lazy=True)
 
             if configured_integrations[integration].get("delete"):
-                verbose(f"Deleting integration: {integration}")
+                debug(f"Deleting integration: {integration}")
                 gl_integration.delete()
             else:
-                verbose(f"Setting integration: {integration}")
+                debug(f"Setting integration: {integration}")
                 project.integrations.update(integration, configured_integrations[integration])
