@@ -36,7 +36,7 @@ dependencies = [
     "requests==2.32.3",
     "ruamel.yaml==0.17.21",
     "types-requests==2.32.0.20250328",
-    "types-setuptools==80.3.0.20250505",
+    "types-setuptools==80.4.0.20250511",
     "yamlpath==3.8.2",
 ]
 
@@ -54,13 +54,13 @@ content-type = "text/markdown"
 test = [
     "coverage==7.8.0",
     "cryptography==44.0.3",
-    "deepdiff==8.4.2",
+    "deepdiff==8.5.0",
     "mypy==1.15.0",
     "mypy-extensions==1.1.0",
     "pre-commit==2.21.0",
     "pytest==8.3.5",
     "pytest-cov==6.1.1",
-    "pytest-rerunfailures==15.0",
+    "pytest-rerunfailures==15.1",
     "xkcdpass==1.20.0",
 ]
 docs = ["mkdocs", "mkdocs-material"]
