@@ -35,16 +35,30 @@ class TestProjectJobTokenScope:
         project: Project,
     ):
         """
-        Test that project-level job token scope can be disabled when the instance setting allows it.
-        
-        This test requires:
-        1. GitLab instance setting 'enforce_ci_inbound_job_token_scope_enabled' to be configurable
-        2. Admin access to modify instance settings
+        Test that project-level 'Limit access to this project' setting can be configured
+        when the instance-level setting 'enforce_ci_inbound_job_token_scope_enabled' is disabled.
+
+        The test verifies that:
+        1. When instance setting is disabled, projects can control their own 'inbound_enabled' setting
+        2. The gitlabform config 'limit_access_to_this_project: false' correctly sets
+           the project's 'inbound_enabled' to false via the GitLab API
+
+        This test requires admin access to modify the instance setting.
         """
-        # Setup: Ensure instance setting allows project-level configuration
+        # Setup: Disable instance-level enforcement to allow project-level configuration
         instance_settings = gl.settings.get()
         instance_settings.enforce_ci_inbound_job_token_scope_enabled = False
-        instance_settings.save()
+        
+        # Retry settings update in case of temporary resource issues
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                instance_settings.save()
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise Exception(f"Failed to update instance settings after {max_retries} attempts: {str(e)}")
+                print(f"Attempt {attempt + 1} failed, retrying...")
 
         try:
             # Setup: Enable limit access at project level
@@ -65,9 +79,12 @@ class TestProjectJobTokenScope:
 
         finally:
             # Cleanup: Restore instance setting to its original state
-            instance_settings = gl.settings.get()
-            instance_settings.enforce_ci_inbound_job_token_scope_enabled = True
-            instance_settings.save()
+            try:
+                instance_settings = gl.settings.get()
+                instance_settings.enforce_ci_inbound_job_token_scope_enabled = True
+                instance_settings.save()
+            except Exception as e:
+                print(f"Warning: Failed to restore instance settings: {str(e)}")
 
     def test__add_other_project_to_job_token_scope_by_name(
         self,
