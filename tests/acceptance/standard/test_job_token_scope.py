@@ -48,17 +48,7 @@ class TestProjectJobTokenScope:
         # Setup: Disable instance-level enforcement to allow project-level configuration
         instance_settings = gl.settings.get()
         instance_settings.enforce_ci_inbound_job_token_scope_enabled = False
-
-        # Retry settings update in case of temporary resource issues
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                instance_settings.save()
-                break
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    raise Exception(f"Failed to update instance settings after {max_retries} attempts: {str(e)}")
-                print(f"Attempt {attempt + 1} failed, retrying...")
+        instance_settings.save()
 
         try:
             # Setup: Enable limit access at project level
