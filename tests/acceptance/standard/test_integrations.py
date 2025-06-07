@@ -68,6 +68,39 @@ class TestIntegrations:
             integration = project.integrations.get(integration_name)
             assert integration.active is False
 
+    def test__if_delete_without_create_works(self, other_project):
+        for integration_name in ["jira", "slack"]:
+            try:
+                other_project.integrations.get(integration_name)
+            except GitlabGetError as e:
+                assert (
+                    e.response_code == 404
+                ), f"Integration {integration_name} should not exist, but got a different error: {e}"
+            else:
+                assert False, f"Integration {integration_name} should not exist."
+
+        config_integrations_delete = f"""
+        projects_and_groups:
+          {other_project.path_with_namespace}:
+            integrations:
+              jira:
+                delete: true
+              slack:
+                delete: true
+        """
+
+        run_gitlabform(config_integrations_delete, other_project)
+
+        for integration_name in ["jira", "slack"]:
+            try:
+                other_project.integrations.get(integration_name)
+            except GitlabGetError as e:
+                assert (
+                    e.response_code == 404
+                ), f"Integration {integration_name} should not exist, but got a different error: {e}"
+            else:
+                assert False, f"Integration {integration_name} should not exist."
+
     def test__if_push_events_true_works(self, project):
         config_integration_push_events_true = f"""
         projects_and_groups:
