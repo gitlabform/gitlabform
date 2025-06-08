@@ -1,4 +1,8 @@
 from logging import warning, fatal
+<<<<<<< HEAD
+=======
+from time import sleep
+>>>>>>> parent of b83a2868 (test: add more check for debugging CI failure)
 from typing import Any, Dict, List, Union
 from io import StringIO
 
