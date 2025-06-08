@@ -31,33 +31,29 @@ class TestGroupVariables:
 
         # Cleanup: Delete all variables in the group
         # This is to ensure that the group is clean before each test
-        retries = 5
-        for _ in range(retries):
+        try:
+            variables = self.group.variables.list(get_all=True)
+        except GitlabListError:
+            warning(f"Failed to list variables for group {self.group.full_path}")
+
+        for var in variables:
+            print(f"Deleting variable {var}")
             try:
-                variables = self.group.variables.list(get_all=True)
-                print(f"Found {len(variables)} variables in group {self.group.full_path}")
-                print(variables)
-            except GitlabListError:
-                print(f"Failed to list variables for group {self.group.full_path}")
-                break
+                self.group.variables.delete(var.key, filter={"environment_scope": var.environment_scope})
+            except GitlabDeleteError as error:
+                fatal(f"Unexpected error occurred while deleting existing variables: {error}")
+            print(f"Deleted variable {var}")
 
-            all_deleted = True
-            for var in variables:
-                print(f"Deleting variable {var}")
-                try:
-                    self.group.variables.delete(var.key, filter={"environment_scope": var.environment_scope})
-                    print(f"Deleted variable {var}")
-                except GitlabDeleteError as error:
-                    print(f"Unexpected error occurred while deleting existing variables: {error}")
-                    all_deleted = False
 
-            if all_deleted:
-                break
-            sleep(2)
-        else:
-            fatal("Failed to delete all variables after retries")
+        for var in variables:
+            print(f"Checking previously deleted variable {var}")
+            try:
+                v = self.group.variables.get(var.key, filter={"environment_scope": var.environment_scope})
+                print(f"Variable still exists: {v}")
+            except:
+                debug(f"The variable {var} was deleted successfully")
 
-        sleep(5)  # Increase sleep to allow GitLab to finish processing variable deletions
+        sleep(2)  # Sleep to allow GitLab to finish processing variable deletions
 
 
     @pytest.mark.parametrize(
