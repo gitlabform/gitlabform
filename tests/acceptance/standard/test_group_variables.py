@@ -29,9 +29,6 @@ class TestGroupVariables:
         # Access the 'group' fixture
         self.group = request.getfixturevalue("group")
 
-        # Print test case name for debugging
-        print(f"\nRunning test: {request.node.name}")
-
         # Cleanup: Delete all variables in the group
         # This is to ensure that the group is clean before each test
         try:
@@ -45,7 +42,6 @@ class TestGroupVariables:
                 self.group.variables.delete(var.key, filter={"environment_scope": var.environment_scope})
             except GitlabDeleteError as error:
                 fatal(f"Unexpected error occurred while deleting existing variables: {error}")
-
 
     @pytest.mark.parametrize(
         "initial_vars, config_vars, expected",
