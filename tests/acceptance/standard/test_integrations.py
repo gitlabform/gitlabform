@@ -81,15 +81,8 @@ class TestIntegrations:
 
         run_gitlabform(config_integrations_delete, project_for_function)
 
-        for integration_name in ["jira", "slack"]:
-            try:
-                project_for_function.integrations.get(integration_name)
-            except GitlabGetError as e:
-                assert (
-                    e.response_code == 404
-                ), f"Integration {integration_name} should not exist, but got a different error: {e}"
-            else:
-                assert False, f"Integration {integration_name} should not exist."
+        project_integrations = project_for_function.integrations.list(get_all=True)
+        assert len(project_integrations) == 0
 
     def test__if_push_events_true_works(self, project):
         config_integration_push_events_true = f"""
