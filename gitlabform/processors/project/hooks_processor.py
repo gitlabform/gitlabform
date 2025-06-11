@@ -3,6 +3,7 @@ from typing import Dict, Any, List
 
 from gitlab.base import RESTObject, RESTObjectList
 from gitlab.v4.objects import Project
+from gitlab.v4.objects import ProjectHook
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -15,7 +16,7 @@ class HooksProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing hooks...")
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
-        project_hooks: RESTObjectList | List[RESTObject] = project.hooks.list(get_all=True)
+        project_hooks: list[ProjectHook] = project.hooks.list(get_all=True)
 
         hooks_in_config: tuple[str, ...] = tuple(x for x in sorted(configuration["hooks"]) if x != "enforce")
 

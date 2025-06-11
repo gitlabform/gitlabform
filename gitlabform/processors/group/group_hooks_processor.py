@@ -3,6 +3,7 @@ from typing import Dict, Any, List
 
 from gitlab.base import RESTObject, RESTObjectList
 from gitlab.v4.objects import Group
+from gitlab.v4.objects import GroupHook
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -15,7 +16,7 @@ class GroupHooksProcessor(AbstractProcessor):
     def _process_configuration(self, group_path_and_name: str, configuration: dict):
         debug("Processing group hooks...")
         group: Group = self.gl.get_group_by_path_cached(group_path_and_name)
-        group_hooks: RESTObjectList | List[RESTObject] = group.hooks.list(get_all=True)
+        group_hooks: list[GroupHook] = group.hooks.list(get_all=True)
 
         hooks_in_config: tuple[str, ...] = tuple(x for x in sorted(configuration["group_hooks"]) if x != "enforce")
 
