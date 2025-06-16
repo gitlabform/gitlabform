@@ -31,25 +31,50 @@ class TestProjectJobTokenScope:
 
     def test__disable_limit_access_to_this_project(
         self,
+        gl,
         project: Project,
     ):
-        self._setup_limit_access_state(project, True)
-
-        job_token_scope = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            job_token_scope:
-              limit_access_to_this_project: false
         """
+        Test that project-level 'Limit access to this project' setting can be configured
+        when the instance-level setting 'enforce_ci_inbound_job_token_scope_enabled' is disabled.
 
-        run_gitlabform(job_token_scope, project)
+        The test verifies that:
+        1. When instance setting is disabled, projects can control their own 'inbound_enabled' setting
+        2. The gitlabform config 'limit_access_to_this_project: false' correctly sets
+           the project's 'inbound_enabled' to false via the GitLab API
 
-        scope = project.job_token_scope.get()
+        This test requires admin access to modify the instance setting.
+        """
+        # Setup: Disable instance-level enforcement to allow project-level configuration
+        instance_settings = gl.settings.get()
+        instance_settings.enforce_ci_inbound_job_token_scope_enabled = False
+        instance_settings.save()
 
-        # inbound_enabled is what GL returns from GET
-        # https://docs.gitlab.com/ee/api/project_job_token_scopes.html#get-a-projects-cicd-job-token-access-settings
-        # to denote whether "Limit Access to this Project" is enabled or not
-        assert not scope.inbound_enabled
+        try:
+            # Setup: Enable limit access at project level
+            self._setup_limit_access_state(project, True)
+
+            # Test: Disable limit access through gitlabform
+            config = f"""
+            projects_and_groups:
+              {project.path_with_namespace}:
+                job_token_scope:
+                  limit_access_to_this_project: false
+            """
+            run_gitlabform(config, project)
+
+            # Verify: Check that limit access is disabled
+            scope = project.job_token_scope.get()
+            assert not scope.inbound_enabled, "Project should have limit access disabled"
+
+        finally:
+            # Cleanup: Restore instance setting to its original state
+            try:
+                instance_settings = gl.settings.get()
+                instance_settings.enforce_ci_inbound_job_token_scope_enabled = True
+                instance_settings.save()
+            except Exception as e:
+                print(f"Warning: Failed to restore instance settings: {str(e)}")
 
     def test__add_other_project_to_job_token_scope_by_name(
         self,
