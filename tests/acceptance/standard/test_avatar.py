@@ -63,7 +63,7 @@ class TestAvatar:
         # Test setting a group avatar
         config = f"""
         projects_and_groups:
-          {group.full_path}:
+          {group.full_path}/*:
             group_settings:
               avatar: "{self.test_image_path}"
         """
@@ -79,7 +79,7 @@ class TestAvatar:
         # First set an avatar
         config = f"""
         projects_and_groups:
-          {group.full_path}:
+          {group.full_path}/*:
             group_settings:
               avatar: "{self.test_image_path}"
         """
@@ -92,7 +92,7 @@ class TestAvatar:
         # Then delete it
         config = f"""
         projects_and_groups:
-          {group.full_path}:
+          {group.full_path}/*:
             group_settings:
               avatar: ""
         """
