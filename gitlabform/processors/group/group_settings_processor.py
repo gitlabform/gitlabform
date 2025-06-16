@@ -40,7 +40,7 @@ class GroupSettingsProcessor(AbstractProcessor):
     def _process_group_avatar(self, gitlab_group: Group, group_settings_config: dict) -> None:
         """Process group avatar settings from configuration."""
         avatar_path = group_settings_config.get("avatar")
-        if not avatar_path:
+        if avatar_path is None:
             return
 
         debug(f"Processing group avatar configuration: {avatar_path}")

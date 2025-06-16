@@ -107,7 +107,7 @@ class ProjectSettingsProcessor(AbstractProcessor):
     def _process_project_avatar(self, project: Project, project_settings_in_config: dict) -> None:
         """Process project avatar settings from configuration."""
         avatar_path = project_settings_in_config.get("avatar")
-        if not avatar_path:
+        if avatar_path is None:
             return
 
         debug(f"Processing project avatar configuration: {avatar_path}")
