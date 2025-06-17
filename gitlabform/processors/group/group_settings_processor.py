@@ -20,7 +20,6 @@ class GroupSettingsProcessor(AbstractProcessor):
 
         # Remove avatar from config to prevent it from being processed in the standard way
         if "avatar" in configured_group_settings:
-            configured_group_settings = configured_group_settings.copy()
             del configured_group_settings["avatar"]
 
         if self._needs_update(gitlab_group.asdict(), configured_group_settings):
@@ -39,19 +38,30 @@ class GroupSettingsProcessor(AbstractProcessor):
 
     def _process_group_avatar(self, gitlab_group: Group, group_settings_config: dict) -> None:
         """Process group avatar settings from configuration."""
+        debug("Processing group avatar configuration")
+
         avatar_path = group_settings_config.get("avatar")
         if avatar_path is None:
+            debug("No avatar configuration provided, skipping avatar processing")
             return
 
-        debug(f"Processing group avatar configuration: {avatar_path}")
+        debug(f"Avatar configuration found: {avatar_path}")
+
+        # Check current avatar status
+        current_avatar = getattr(gitlab_group, "avatar_url", None)
 
         if avatar_path == "":
+            # Want to remove avatar
+            if not current_avatar:
+                debug("Avatar already empty, no update needed")
+                return
             debug("Deleting group avatar")
             gitlab_group.avatar = ""
             gitlab_group.save()
             debug("Avatar deleted successfully")
             return
 
+        # Want to set avatar from file
         debug(f"Setting group avatar from file: {avatar_path}")
         try:
             with open(avatar_path, "rb") as avatar_file:

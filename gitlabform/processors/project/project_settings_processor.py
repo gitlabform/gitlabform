@@ -29,7 +29,6 @@ class ProjectSettingsProcessor(AbstractProcessor):
 
         # Remove avatar from config to prevent it from being processed in the standard way
         if "avatar" in project_settings_in_config:
-            project_settings_in_config = project_settings_in_config.copy()
             del project_settings_in_config["avatar"]
 
         if self._needs_update(project_settings_in_gitlab, project_settings_in_config):
@@ -106,19 +105,30 @@ class ProjectSettingsProcessor(AbstractProcessor):
 
     def _process_project_avatar(self, project: Project, project_settings_in_config: dict) -> None:
         """Process project avatar settings from configuration."""
+        debug("Processing project avatar configuration")
+
         avatar_path = project_settings_in_config.get("avatar")
         if avatar_path is None:
+            debug("No avatar configuration provided, skipping avatar processing")
             return
 
-        debug(f"Processing project avatar configuration: {avatar_path}")
+        debug(f"Avatar configuration found: {avatar_path}")
+
+        # Check current avatar status
+        current_avatar = getattr(project, "avatar_url", None)
 
         if avatar_path == "":
+            # Want to remove avatar
+            if not current_avatar:
+                debug("Avatar already empty, no update needed")
+                return
             debug("Deleting project avatar")
             project.avatar = ""
             project.save()
             debug("Project avatar deleted successfully")
             return
 
+        # Want to set avatar from file
         debug(f"Setting project avatar from file: {avatar_path}")
         try:
             with open(avatar_path, "rb") as avatar_file:

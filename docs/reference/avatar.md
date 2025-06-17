@@ -1,6 +1,6 @@
 # Avatars
 
-## Project Avatars
+## Project Avatar
 
 This section purpose is to manage the project avatar - the image that is displayed next to your project name in GitLab.
 
@@ -22,7 +22,7 @@ projects_and_groups:
       avatar: ""
 ```
 
-## Group Avatars
+## Group Avatar
 This section purpose is to manage the group avatar - the image that is displayed next to your group name in GitLab.
 The value is a path to an image file. You can use both absolute paths and relative paths.
 

@@ -14,8 +14,8 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
 
 * Project:
     * [Archive/unarchive](reference/archive_unarchive.md)
-    * [Badges](reference/badges.md#project-badges)
     * [Avatar](reference/avatar.md#project-avatar)
+    * [Badges](reference/badges.md#project-badges)
     * [CI/CD Job Token Scope](reference/job_token_scope.md)
     * [CI/CD Job Token Scope](reference/job_token_scope.md)
     * [CI/CD variables](reference/ci_cd_variables.md#project-cicd-variables)
