@@ -5,7 +5,7 @@ from tests.acceptance import (
 )
 
 
-class TestAvatar:
+class TestProjectAvatar:
     def setup_method(self):
         # Use gitlabform logo
         self.project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
@@ -31,20 +31,13 @@ class TestAvatar:
         assert project.avatar_url is not None
 
     def test__project_avatar_delete(self, project):
-        # First set an avatar
-        config = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              avatar: "{self.test_image_path}"
-        """
-        run_gitlabform(config, project)
-
-        # Refresh project data
+        # Refresh project data to get current state
         project = project.manager.get(project.id)
-        assert project.avatar_url is not None
 
-        # Then delete it
+        # Verify that avatar exists (should be set by previous test)
+        assert project.avatar_url is not None, "Avatar should exist from previous test"
+
+        # Delete the avatar
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -58,51 +51,6 @@ class TestAvatar:
 
         # Verify avatar is removed
         assert project.avatar_url is None or "gravatar" in project.avatar_url
-
-    def test__group_avatar_set(self, group):
-        # Test setting a group avatar
-        config = f"""
-        projects_and_groups:
-          {group.full_path}/*:
-            group_settings:
-              avatar: "{self.test_image_path}"
-        """
-        run_gitlabform(config, group)
-
-        # Refresh group data
-        group = group.manager.get(group.id)
-
-        # Verify avatar is set
-        assert group.avatar_url is not None
-
-    def test__group_avatar_delete(self, group):
-        # First set an avatar
-        config = f"""
-        projects_and_groups:
-          {group.full_path}/*:
-            group_settings:
-              avatar: "{self.test_image_path}"
-        """
-        run_gitlabform(config, group)
-
-        # Refresh group data
-        group = group.manager.get(group.id)
-        assert group.avatar_url is not None
-
-        # Then delete it
-        config = f"""
-        projects_and_groups:
-          {group.full_path}/*:
-            group_settings:
-              avatar: ""
-        """
-        run_gitlabform(config, group)
-
-        # Refresh group data
-        group = group.manager.get(group.id)
-
-        # Verify avatar is removed
-        assert group.avatar_url is None or "gravatar" in group.avatar_url
 
     def test__avatar_file_not_found(self, project):
         # Test handling of non-existent avatar file path
