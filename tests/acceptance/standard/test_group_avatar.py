@@ -227,3 +227,66 @@ class TestGroupAvatar:
         # Both avatar and description should be set
         assert updated_group.avatar_url is not None
         assert getattr(updated_group, "description", "") == test_description
+
+    def test__group_avatar_delete_when_already_empty(self, group):
+        """Test deleting avatar when it's already empty - should be no-op"""
+        # First ensure the group has no avatar
+        group = group.manager.get(group.id)
+
+        # If there's an avatar, remove it first
+        if group.avatar_url and "gravatar" not in group.avatar_url:
+            config_remove = f"""
+            projects_and_groups:
+              {group.full_path}/*:
+                group_settings:
+                  avatar: ""
+            """
+            run_gitlabform(config_remove, group)
+            group = group.manager.get(group.id)
+
+        # Store the current avatar state (should be None or gravatar)
+        original_avatar_url = group.avatar_url
+
+        # Try to delete avatar when it's already empty
+        config_delete_empty = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_settings:
+              avatar: ""
+        """
+        run_gitlabform(config_delete_empty, group)
+
+        # Refresh and verify nothing changed
+        group = group.manager.get(group.id)
+        assert group.avatar_url == original_avatar_url
+
+    def test__group_avatar_generic_exception_handling(self, group):
+        """Test generic exception handling during avatar upload"""
+
+        original_cwd = os.getcwd()
+        temp_dir = tempfile.mkdtemp()
+
+        try:
+            os.chdir(temp_dir)
+
+            # Create a directory with the name of an image file
+            # This should cause an exception when trying to open it as a file
+            fake_image_dir = "fake_image.png"
+            os.makedirs(fake_image_dir)
+
+            config = f"""
+            projects_and_groups:
+              {group.full_path}/*:
+                group_settings:
+                  avatar: "{fake_image_dir}"
+            """
+
+            # Should fail with SystemExit due to the exception
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config, group)
+
+            assert exc_info.value.code == 2
+
+        finally:
+            os.chdir(original_cwd)
+            shutil.rmtree(temp_dir)
