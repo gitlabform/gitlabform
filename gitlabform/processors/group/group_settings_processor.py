@@ -1,3 +1,4 @@
+import os
 from logging import info, debug
 from typing import Dict
 
@@ -61,6 +62,12 @@ class GroupSettingsProcessor(AbstractProcessor):
             debug("Avatar deleted successfully")
             return
 
+        # Resolve relative paths to absolute paths
+        if not os.path.isabs(avatar_path):
+            # Convert relative path to absolute path relative to current working directory
+            avatar_path = os.path.abspath(avatar_path)
+            debug(f"Resolved relative path to absolute path: {avatar_path}")
+
         # Want to set avatar from file
         debug(f"Setting group avatar from file: {avatar_path}")
         try:
@@ -69,6 +76,10 @@ class GroupSettingsProcessor(AbstractProcessor):
                 gitlab_group.save()
             debug("Group avatar uploaded successfully")
         except FileNotFoundError:
-            debug(f"Group avatar file not found: {avatar_path}")
+            error_msg = f"Group avatar file not found: {avatar_path}"
+            debug(error_msg)
+            raise FileNotFoundError(error_msg)
         except Exception as e:
-            debug(f"Error uploading group avatar: {str(e)}")
+            error_msg = f"Error uploading group avatar: {str(e)}"
+            debug(error_msg)
+            raise Exception(error_msg) from e

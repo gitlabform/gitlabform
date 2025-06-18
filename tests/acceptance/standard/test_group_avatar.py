@@ -1,5 +1,7 @@
 import os
 import pytest
+import tempfile
+import shutil
 from tests.acceptance import (
     run_gitlabform,
 )
@@ -14,8 +16,8 @@ class TestGroupAvatar:
         # Check if the file exists
         assert os.path.exists(self.test_image_path), f"Test image not found at {self.test_image_path}"
 
-    def test__group_avatar_set(self, group):
-        # Test setting a group avatar
+    def test__group_avatar_set_absolute_path(self, group):
+        # Test setting a group avatar with absolute path
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -30,21 +32,96 @@ class TestGroupAvatar:
         # Verify avatar is set
         assert group.avatar_url is not None
 
+    def test__group_avatar_paths_comprehensive(self, group):
+        """Test both absolute and relative paths comprehensively"""
+
+        # Test 1: Absolute path (already tested above, but included for completeness)
+        config_absolute = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_settings:
+              avatar: "{self.test_image_path}"
+        """
+        run_gitlabform(config_absolute, group)
+
+        group = group.manager.get(group.id)
+        assert group.avatar_url is not None
+
+        # Test 2: Simple relative path
+        original_cwd = os.getcwd()
+        temp_dir = tempfile.mkdtemp()
+
+        try:
+            os.chdir(temp_dir)
+
+            # Copy image to temp directory
+            temp_image_name = "relative_test_avatar.png"
+            shutil.copy2(self.test_image_path, temp_image_name)
+
+            config_relative = f"""
+            projects_and_groups:
+              {group.full_path}/*:
+                group_settings:
+                  avatar: "{temp_image_name}"
+            """
+            run_gitlabform(config_relative, group)
+
+            group = group.manager.get(group.id)
+            assert group.avatar_url is not None
+
+        finally:
+            os.chdir(original_cwd)
+            shutil.rmtree(temp_dir)
+
+        # Test 3: Relative path with subdirectory
+        temp_dir2 = tempfile.mkdtemp()
+        try:
+            os.chdir(temp_dir2)
+
+            subdir = "test_images"
+            os.makedirs(subdir)
+            relative_subdir_path = os.path.join(subdir, "subdir_avatar.png")
+            shutil.copy2(self.test_image_path, relative_subdir_path)
+
+            config_relative_subdir = f"""
+            projects_and_groups:
+              {group.full_path}/*:
+                group_settings:
+                  avatar: "{relative_subdir_path}"
+            """
+            run_gitlabform(config_relative_subdir, group)
+
+            group = group.manager.get(group.id)
+            assert group.avatar_url is not None
+
+        finally:
+            os.chdir(original_cwd)
+            shutil.rmtree(temp_dir2)
+
     def test__group_avatar_delete(self, group):
+        # First ensure there's an avatar to delete by setting one
+        config_set = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_settings:
+              avatar: "{self.test_image_path}"
+        """
+        run_gitlabform(config_set, group)
+
         # Refresh group data to get current state
         group = group.manager.get(group.id)
 
-        # Verify that avatar exists (should be set by previous test)
-        assert group.avatar_url is not None, "Avatar should exist from previous test"
+        # Verify that avatar exists
+        assert group.avatar_url is not None, "Avatar should exist after setting it"
 
         # Delete the avatar
-        config = f"""
+        config_delete = f"""
         projects_and_groups:
           {group.full_path}/*:
             group_settings:
               avatar: ""
         """
-        run_gitlabform(config, group)
+        run_gitlabform(config_delete, group)
 
         # Refresh group data
         group = group.manager.get(group.id)
@@ -52,13 +129,9 @@ class TestGroupAvatar:
         # Verify avatar is removed
         assert group.avatar_url is None or "gravatar" in group.avatar_url
 
-    def test__group_avatar_file_not_found(self, group):
-        # Test handling of non-existent avatar file path
+    def test__group_avatar_file_not_found_should_fail(self, group):
+        # Test handling of non-existent avatar file path - should fail
         nonexistent_path = "/path/to/nonexistent/image.png"
-
-        # Store the original avatar URL to verify it doesn't change
-        group_original = group.manager.get(group.id)
-        original_avatar_url = group_original.avatar_url
 
         config = f"""
         projects_and_groups:
@@ -67,9 +140,90 @@ class TestGroupAvatar:
               avatar: "{nonexistent_path}"
         """
 
-        # This should run without crashing, even though the file doesn't exist
+        # GitLabForm catches exceptions
+        with pytest.raises(SystemExit) as exc_info:
+            run_gitlabform(config, group)
+
+        # Verify it's the expected exit code for processing errors
+        assert exc_info.value.code == 2
+
+    def test__group_avatar_relative_file_not_found_should_fail(self, group):
+        # Test handling of non-existent relative avatar file path - should fail
+        original_cwd = os.getcwd()
+        temp_dir = tempfile.mkdtemp()
+
+        try:
+            os.chdir(temp_dir)
+
+            # Use non-existent relative path
+            nonexistent_relative_path = "images/nonexistent_avatar.png"
+
+            config = f"""
+            projects_and_groups:
+              {group.full_path}/*:
+                group_settings:
+                  avatar: "{nonexistent_relative_path}"
+            """
+
+            # Should fail with SystemExit since file won't be found
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config, group)
+
+            # Verify it's the expected exit code for processing errors
+            assert exc_info.value.code == 2
+
+        finally:
+            os.chdir(original_cwd)
+            shutil.rmtree(temp_dir)
+
+    def test__group_avatar_failure_with_other_settings(self, group):
+        nonexistent_path = "/path/to/nonexistent/image.png"
+        test_description = "Test description that should not be set due to avatar failure"
+
+        # Store original description to verify it doesn't change
+        original_group = group.manager.get(group.id)
+        original_description = getattr(original_group, "description", "")
+
+        config = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_settings:
+              description: "{test_description}"
+              avatar: "{nonexistent_path}"
+        """
+
+        # Should fail due to avatar file not found
+        with pytest.raises(SystemExit) as exc_info:
+            run_gitlabform(config, group)
+
+        # Verify it's the expected exit code for processing errors
+        assert exc_info.value.code == 2
+
+        # Refresh group data and verify description wasn't changed
+        updated_group = group.manager.get(group.id)
+        current_description = getattr(updated_group, "description", "")
+
+        # Description should remain unchanged since the process failed
+        assert current_description == original_description
+        assert current_description != test_description
+
+    def test__group_avatar_other_settings_process_when_no_avatar_error(self, group):
+        # Test that other settings are processed when there's no avatar error
+        test_description = "Test description that should be set successfully"
+
+        config = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_settings:
+              description: "{test_description}"
+              avatar: "{self.test_image_path}"
+        """
+
         run_gitlabform(config, group)
 
-        # Refresh group data - avatar should remain unchanged since file wasn't found
-        group_updated = group.manager.get(group.id)
-        assert group_updated.avatar_url == original_avatar_url
+        # Refresh group data
+        updated_group = group.manager.get(group.id)
+
+        # Both avatar and description should be set
+        assert updated_group.avatar_url is not None
+        assert getattr(updated_group, "description", "") == test_description

@@ -1,4 +1,5 @@
-from logging import debug
+import os
+from logging import debug, error
 from typing import Callable, Dict, List
 
 from gitlab.v4.objects import Project
@@ -128,6 +129,12 @@ class ProjectSettingsProcessor(AbstractProcessor):
             debug("Project avatar deleted successfully")
             return
 
+        # Resolve relative paths to absolute paths
+        if not os.path.isabs(avatar_path):
+            # Convert relative path to absolute path relative to current working directory
+            avatar_path = os.path.abspath(avatar_path)
+            debug(f"Resolved relative path to absolute path: {avatar_path}")
+
         # Want to set avatar from file
         debug(f"Setting project avatar from file: {avatar_path}")
         try:
@@ -136,6 +143,10 @@ class ProjectSettingsProcessor(AbstractProcessor):
                 project.save()
             debug("Project avatar uploaded successfully")
         except FileNotFoundError:
-            debug(f"Project avatar file not found: {avatar_path}")
+            error_msg = f"Project avatar file not found: {avatar_path}"
+            error(error_msg)
+            raise FileNotFoundError(error_msg)
         except Exception as e:
-            debug(f"Error uploading project avatar: {str(e)}")
+            error_msg = f"Error uploading project avatar: {str(e)}"
+            error(error_msg)
+            raise Exception(error_msg) from e
