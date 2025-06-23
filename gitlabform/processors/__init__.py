@@ -25,7 +25,7 @@ class AbstractProcessors(ABC):
         dry_run: bool,
         diff_only_changed: bool,
         effective_configuration: EffectiveConfigurationFile,
-        only_sections: List[str],
+        only_sections: List[str] | str,
         exclude_sections: List[str],
     ):
         for processor in self.processors:
