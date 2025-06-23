@@ -1,3 +1,4 @@
+import sys
 import pytest
 from tests.acceptance import (
     run_gitlabform,
@@ -97,3 +98,22 @@ class TestRunning:
 
         with pytest.raises(SystemExit):
             run_gitlabform(config, "ALL_DEFINED")
+
+    # noinspection PyPep8Naming
+    def test_exclude_sections(self, gl, project, other_project):
+        config = f"""
+        projects_and_groups:
+          '*':
+            project_settings:
+              request_access_enabled: true
+        """
+
+        sys.argv.append("--exclude-sections project_settings")
+
+        run_gitlabform(config=config, target="ALL")
+
+        project = gl.projects.get(project.id)
+        assert project.request_access_enabled is False
+
+        other_project = gl.projects.get(other_project.id)
+        assert other_project.request_access_enabled is False
