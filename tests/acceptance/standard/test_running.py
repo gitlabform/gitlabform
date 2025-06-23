@@ -5,6 +5,7 @@ from tests.acceptance import (
 )
 from pathlib import Path
 from ruamel.yaml import YAML
+from gitlab.v4.objects import Project
 
 
 class TestRunning:
@@ -100,7 +101,9 @@ class TestRunning:
             run_gitlabform(config, "ALL_DEFINED")
 
     # noinspection PyPep8Naming
-    def test_exclude_sections(self, gl, project, other_project):
+    def test_exclude_sections(self, gl, project_for_function: Project):
+        project_for_function.request_access_enabled = False
+        project_for_function.save()
         config = f"""
         projects_and_groups:
           '*':
@@ -112,8 +115,5 @@ class TestRunning:
 
         run_gitlabform(config=config, target="ALL")
 
-        project = gl.projects.get(project.id)
+        project = gl.projects.get(project_for_function.id)
         assert project.request_access_enabled is False
-
-        other_project = gl.projects.get(other_project.id)
-        assert other_project.request_access_enabled is False
