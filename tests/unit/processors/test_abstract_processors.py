@@ -1,12 +1,14 @@
 from unittest.mock import MagicMock
+from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
+from gitlabform.output import EffectiveConfigurationFile
 from gitlabform.processors import AbstractProcessors
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
 def test_can_exclude_sections() -> None:
     mock_gitlab = MagicMock(GitLab)
-    test_config = []
+    test_config: Configuration = MagicMock(Configuration)
 
     abstract_proccessors = AbstractProcessors(gitlab=mock_gitlab, config=test_config, strict=False)
 
@@ -24,10 +26,10 @@ def test_can_exclude_sections() -> None:
 
     abstract_proccessors.process_entity(
         entity_reference="test-group/project",
-        configuration=[],
+        configuration=MagicMock(dict),
         dry_run=False,
         diff_only_changed=False,
-        effective_configuration=None,
+        effective_configuration=MagicMock(EffectiveConfigurationFile),
         only_sections=only_sections,
         exclude_sections=exclude_sections,
     )
@@ -38,7 +40,7 @@ def test_can_exclude_sections() -> None:
 
 def test_can_process_only_sections() -> None:
     mock_gitlab = MagicMock(GitLab)
-    test_config = []
+    test_config: Configuration = MagicMock(Configuration)
 
     abstract_proccessors = AbstractProcessors(gitlab=mock_gitlab, config=test_config, strict=False)
 
@@ -51,14 +53,14 @@ def test_can_process_only_sections() -> None:
     abstract_proccessors.processors = [group_members_processor, project_members_processor]
 
     only_sections = ["group_members"]
-    exclude_sections = []
+    exclude_sections: list[str] = []
 
     abstract_proccessors.process_entity(
         entity_reference="test-group/project",
-        configuration=[],
+        configuration=MagicMock(dict),
         dry_run=False,
         diff_only_changed=False,
-        effective_configuration=None,
+        effective_configuration=MagicMock(EffectiveConfigurationFile),
         only_sections=only_sections,
         exclude_sections=exclude_sections,
     )
