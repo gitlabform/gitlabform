@@ -24,7 +24,7 @@ class SchedulesProcessor(AbstractProcessor):
             configured_schedules.pop("enforce")
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
-        existing_schedules: List[RESTObject] | RESTObjectList = project.pipelineschedules.list(get_all=True)
+        existing_schedules: list[ProjectPipelineSchedule] = project.pipelineschedules.list(get_all=True)
 
         schedule_ids_by_description: Dict = self._group_schedule_ids_by_description(existing_schedules)
 
