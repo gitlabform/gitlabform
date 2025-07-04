@@ -1,8 +1,9 @@
 import functools
 import os
 from logging import debug
+from typing import Union
 from urllib import parse
-
+from packaging import version
 from importlib.metadata import version as package_version
 import requests
 
@@ -216,6 +217,38 @@ class GitLabCore:
         else:
             debug(f"<--- json = (empty))")
         return response
+
+    def _is_version_at_least(self, min_version: Union[str, version.Version]) -> bool:
+        """
+        Check if GitLab server version is at least the specified version
+
+        Args:
+            min_version: Version string like "15.4.0" or "16.0", or a Version object
+
+        Returns:
+            bool: True if server version is >= min_version, False otherwise
+        """
+        current = "0.0.0" if self.version == "unknown" else self.version
+
+        # remove gitlab version identifier for generic comparison
+        if "-ee" in current or "-ce" in current:
+            current = current.split("-")[0]
+
+        if isinstance(min_version, str):
+            min_version = version.parse(min_version)
+        return version.parse(current) >= min_version
+
+    def _is_version_less_than(self, max_version: Union[str, version.Version]) -> bool:
+        """
+        Check if GitLab server version is less than the specified version
+
+        Args:
+            max_version: Version string like "15.4.0" or "16.0", or a Version object
+
+        Returns:
+            bool: True if server version is < max_version, False otherwise
+        """
+        return not self._is_version_at_least(max_version)
 
     @staticmethod
     def _format_with_url_encoding(format_string, single_arg_or_args_tuple):

@@ -1,6 +1,5 @@
-from cli_ui import debug as verbose, warning, info, error
-from cli_ui import fatal
-from gitlab import GitlabGetError, GitlabDeleteError
+from cli_ui import debug, warning, info, error, fatal
+from gitlab import GitlabDeleteError, GitlabCreateError
 from gitlab.v4.objects import Project, User
 
 from gitlabform.constants import EXIT_INVALID_INPUT
@@ -34,7 +33,7 @@ class MembersProcessor(AbstractProcessor):
 
     def _process_groups(self, project_and_group: str, groups: dict, enforce_members: bool):
         if groups:
-            verbose("Processing groups as members...")
+            debug("Processing groups as members...")
 
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
             for group in groups:
@@ -49,10 +48,10 @@ class MembersProcessor(AbstractProcessor):
                     and expires_at == current_groups[common_group_name]["expires_at"]
                     and access_level == current_groups[common_group_name]["group_access_level"]
                 ):
-                    verbose(f"Ignoring group '{common_group_name}' as it is already a member")
-                    verbose(f"Current settings for '{common_group_name}' are: {current_groups[common_group_name]}")
+                    debug(f"Ignoring group '{common_group_name}' as it is already a member")
+                    debug(f"Current settings for '{common_group_name}' are: {current_groups[common_group_name]}")
                 else:
-                    verbose(f"Setting group '{common_group_name}' as a member")
+                    debug(f"Setting group '{common_group_name}' as a member")
                     access = access_level
                     expiry = expires_at
 
@@ -69,10 +68,118 @@ class MembersProcessor(AbstractProcessor):
             groups_not_in_config = set(groups_in_gitlab) - set(groups_in_config)
 
             for group_not_in_config in groups_not_in_config:
-                verbose(f"Removing group '{group_not_in_config}' that is not configured to be a member.")
+                debug(f"Removing group '{group_not_in_config}' that is not configured to be a member.")
                 self.gitlab.unshare_with_group(project_and_group, group_not_in_config)
         else:
-            verbose("Not enforcing group members.")
+            debug("Not enforcing group members.")
+
+    def _enforce_members(
+        self, project_and_group: str, keep_bots: bool, project: Project, users: dict, current_members: dict
+    ):
+        # Enforce that all usernames are lowercase for comparisons.
+        users_in_config = [username.lower() for username in users.keys()]
+        users_in_gitlab = current_members.keys()
+        users_not_in_config = set(users_in_gitlab) - set(users_in_config)
+        for user_not_in_config in users_not_in_config:
+            debug(f"Removing user '{user_not_in_config}' that is not configured to be a member.")
+            gl_user: User | None = self.gl.get_user_by_username_cached(user_not_in_config)
+
+            if gl_user is None:
+                # User does not exist an instance level but is for whatever reason present on a Group/Project
+                # We should raise error into Logs but not prevent the rest of GitLabForm from executing
+                # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
+                # be completely deleted from gitlab.com
+                error(
+                    f"Could not find User '{user_not_in_config}' on the Instance so can not remove User from "
+                    f"Project '{project_and_group}'"
+                )
+                continue
+
+            if keep_bots and gl_user.bot:
+                debug(f"Will not remove bot user '{user_not_in_config}' as the 'keep_bots' option is true.")
+                continue
+
+            try:
+                project.members.delete(id=gl_user.id)
+            except GitlabDeleteError as delete_error:
+                error(f"Member '{user_not_in_config}' could not be deleted: {delete_error}")
+                raise delete_error
+
+    # edits or adds users to the members of the desired project
+    def _process_users_as_members(self, users: dict, use_native_call: bool, project: Project, current_members: dict):
+        for user in users:
+            info(f"Processing user '{user}'...")
+            if not use_native_call:
+                user_id = self.gl.get_user_id_cached(user)
+                if user_id is None:
+                    warning(f"Could not find user '{user}' in Gitlab, skipping...")
+                    continue
+
+            expires_at = users[user]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[user] else None
+            access_level = users[user]["access_level"] if "access_level" in users[user] else None
+            member_role_id_or_name = users[user]["member_role"] if "member_role" in users[user] else None
+            if member_role_id_or_name:
+                group_name_and_path = project.namespace["full_path"]
+                member_role_id = self.gl.get_member_role_id_cached(member_role_id_or_name, group_name_and_path)
+            else:
+                member_role_id = None
+
+            # we only add the user if it doesn't have the correct settings.
+            # To make sure that the user hasn't been added in a different
+            # case, we enforce that the username is always in lowercase for
+            # checks.
+            common_username = user.lower()
+            if common_username in current_members:
+                current_member = current_members[common_username]
+                if hasattr(current_member, "member_role"):
+                    member_role_id_before = current_member.member_role["id"]
+                else:
+                    member_role_id_before = None
+                if (
+                    expires_at == current_member.expires_at
+                    and access_level == current_member.access_level
+                    and member_role_id == member_role_id_before
+                ):
+                    debug(f"Nothing to change for user '{common_username}' - same config now as to set.")
+                    debug(f"Current settings for '{common_username}' are: {current_members[common_username]}")
+                else:
+                    debug(
+                        f"Editing user '{common_username}' membership to change their access level or expires at",
+                    )
+                    update_data = {
+                        "user_id": common_username,
+                        "access_level": access_level,
+                        "member_role_id": member_role_id_before,
+                    }
+
+                    if expires_at:
+                        update_data["expires_at"] = expires_at
+
+                    project.members.update(new_data=update_data)
+            else:
+                debug(
+                    f"Adding user '{common_username}' who previously was not a member.",
+                )
+                if use_native_call:
+                    create_data = {
+                        "username": common_username,
+                        "access_level": access_level,
+                    }
+                else:
+                    create_data = {
+                        "user_id": user_id,
+                        "access_level": access_level,
+                    }
+
+                if expires_at:
+                    create_data["expires_at"] = expires_at
+
+                if member_role_id:
+                    create_data["member_role_id"] = member_role_id
+                try:
+                    project.members.create(data=create_data)
+                except GitlabCreateError:
+                    warning(f"User {user} not found!")
 
     def _process_users(
         self,
@@ -81,117 +188,22 @@ class MembersProcessor(AbstractProcessor):
         enforce_members: bool,
         keep_bots: bool,
     ):
-
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
-
         current_members = self._get_members_from_project(project)
+        use_native_call = self.gitlab._is_version_at_least("17.1.0")
 
         if users:
-            verbose("Processing users as members...")
-
-            for user in users:
-                info(f"Processing user '{user}'...")
-
-                user_id = self.gl.get_user_id_cached(user)
-                if user_id is None:
-                    warning(f"Could not find user '{user}' in Gitlab, skipping...")
-                    continue
-
-                expires_at = users[user]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[user] else None
-                access_level = users[user]["access_level"] if "access_level" in users[user] else None
-                member_role_id_or_name = users[user]["member_role"] if "member_role" in users[user] else None
-                if member_role_id_or_name:
-                    group_name_and_path = project.namespace["full_path"]
-                    member_role_id = self.gl.get_member_role_id_cached(member_role_id_or_name, group_name_and_path)
-                else:
-                    member_role_id = None
-
-                # we only add the user if it doesn't have the correct settings.
-                # To make sure that the user hasn't been added in a different
-                # case, we enforce that the username is always in lowercase for
-                # checks.
-                common_username = user.lower()
-
-                if common_username in current_members:
-                    current_member = current_members[common_username]
-                    if hasattr(current_member, "member_role"):
-                        member_role_id_before = current_member.member_role["id"]
-                    else:
-                        member_role_id_before = None
-                    if (
-                        expires_at == current_member.expires_at
-                        and access_level == current_member.access_level
-                        and member_role_id == member_role_id_before
-                    ):
-                        verbose(f"Nothing to change for user '{common_username}' - same config now as to set.")
-                        verbose(f"Current settings for '{common_username}' are: {current_members[common_username]}")
-                    else:
-                        verbose(
-                            f"Editing user '{common_username}' membership to change their access level or expires at",
-                        )
-                        update_data = {
-                            "user_id": common_username,
-                            "access_level": access_level,
-                            "member_role_id": member_role_id_before,
-                        }
-
-                        if expires_at:
-                            update_data["expires_at"] = expires_at
-
-                        project.members.update(new_data=update_data)
-
-                else:
-                    verbose(
-                        f"Adding user '{common_username}' who previously was not a member.",
-                    )
-                    create_data = {
-                        "user_id": user_id,
-                        "access_level": access_level,
-                    }
-
-                    if expires_at:
-                        create_data["expires_at"] = expires_at
-
-                    if member_role_id:
-                        create_data["member_role_id"] = member_role_id
-
-                    project.members.create(data=create_data)
+            debug("Processing users as members...")
+            self._process_users_as_members(users, use_native_call, project, current_members)
 
         if enforce_members:
-            verbose("Enforcing Project members")
-            # Enforce that all usernames are lowercase for comparisons.
-            users_in_config = [username.lower() for username in users.keys()]
-            users_in_gitlab = current_members.keys()
-            users_not_in_config = set(users_in_gitlab) - set(users_in_config)
-            for user_not_in_config in users_not_in_config:
-                verbose(f"Removing user '{user_not_in_config}' that is not configured to be a member.")
-                gl_user: User | None = self.gl.get_user_by_username_cached(user_not_in_config)
-
-                if gl_user is None:
-                    # User does not exist an instance level but is for whatever reason present on a Group/Project
-                    # We should raise error into Logs but not prevent the rest of GitLabForm from executing
-                    # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
-                    # be completely deleted from gitlab.com
-                    error(
-                        f"Could not find User '{user_not_in_config}' on the Instance so can not remove User from "
-                        f"Project '{project_and_group}'"
-                    )
-                    continue
-
-                if keep_bots and gl_user.bot:
-                    verbose(f"Will not remove bot user '{user_not_in_config}' as the 'keep_bots' option is true.")
-                    continue
-
-                try:
-                    project.members.delete(id=gl_user.id)
-                except GitlabDeleteError as delete_error:
-                    error(f"Member '{user_not_in_config}' could not be deleted: {delete_error}")
-                    raise delete_error
+            debug("Enforcing Project members")
+            self._enforce_members(project_and_group, keep_bots, project, users, current_members)
         else:
-            verbose("Not enforcing user members.")
+            debug("Not enforcing user members.")
 
     @staticmethod
-    def _get_members_from_project(project):
+    def _get_members_from_project(project: Project):
         # Only get direct members from Python Gitlab (matches previous implementation)
         # https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#id14
         project_members = project.members.list(iterator=True)
@@ -203,5 +215,5 @@ class MembersProcessor(AbstractProcessor):
             # checks.
             existing_user_names_lower[member.username.lower()] = member
 
-        verbose(f"Existing project members {existing_user_names_lower}")
+        debug(f"Existing project members {existing_user_names_lower}")
         return existing_user_names_lower
