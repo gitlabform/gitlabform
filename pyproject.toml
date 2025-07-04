@@ -55,7 +55,7 @@ test = [
     "coverage==7.9.1",
     "cryptography==45.0.3",
     "deepdiff==8.5.0",
-    "mypy==1.16.0",
+    "mypy==1.16.1",
     "mypy-extensions==1.1.0",
     "pre-commit==2.21.0",
     "pytest==8.4.1",
