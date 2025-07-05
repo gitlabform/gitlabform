@@ -29,7 +29,7 @@ The value is a path to an image file. You can use both absolute paths and relati
 Example:
 ```
 groups:
-  group_1:
+  group_1/*:
     group_settings:
       avatar: "images/group-logo.png"
 ```
@@ -37,7 +37,7 @@ groups:
 To remove an avatar:
 ```
 groups:
-  group_1:
+  group_1/*:
     group_settings:
       avatar: ""
 ```
