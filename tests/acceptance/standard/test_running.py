@@ -1,11 +1,9 @@
-import sys
 import pytest
 from tests.acceptance import (
     run_gitlabform,
 )
 from pathlib import Path
 from ruamel.yaml import YAML
-from gitlab.v4.objects import Project
 
 
 class TestRunning:
