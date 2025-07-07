@@ -1,14 +1,13 @@
-from logging import debug, warning
+from logging import debug, error
 from typing import Dict, Tuple
 
-import gitlab
 from cli_ui import fatal, error, debug as verbose
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlab.v4.objects import Group, GroupMember, User
-from gitlab import GitlabDeleteError, GitlabGetError
+from gitlab import GitlabDeleteError, GitlabError, GitlabGetError
 
 
 class GroupMembersProcessor(AbstractProcessor):
@@ -102,7 +101,11 @@ class GroupMembersProcessor(AbstractProcessor):
                     # to ensure that the group has the expected access level
                     self._unshare(group_being_processed, share_with_group_id)
 
-                    group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                    try:
+                        group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                    except GitlabError as e:
+                        error(f"Error processing {share_with_group_path}, {e.error_message}")
+                        raise e
 
             else:
                 debug(
@@ -111,7 +114,11 @@ class GroupMembersProcessor(AbstractProcessor):
                 )
 
                 share_with_group_id = self.gl.get_group_id(share_with_group_path)
-                group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                try:
+                    group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                except GitlabError as e:
+                    error(f"Error processing {share_with_group_path}, {e.error_message}")
+                    raise e
 
         if enforce_group_members:
             # remove groups not configured explicitly
