@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -1322,12 +1322,22 @@
 
 <h1 id="cicd-job-token-scope">CI/CD job token scope<a class="headerlink" href="#cicd-job-token-scope" title="Permanent link">&para;</a></h1>
 <h2 id="project-cicd-job-token-scope">Project CI/CD job token scope<a class="headerlink" href="#project-cicd-job-token-scope" title="Permanent link">&para;</a></h2>
-<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/jobs/ci_job_token.html#control-job-token-access-to-your-project">project CI/CD job token scope</a></p>
-<p>The values are like documented at <a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html">Job Token Scope API docs</a>, <strong>except the Enabled</strong>.</p>
-<p>We use <code>limit_access_to_this_project</code> as the variable name for restricting access to the Project from other projects, rather than <code>inbound_enabled</code> in the GET and <code>enabled</code> in the PATCH requests defined in the api, in line with GitLab's UI and <a href="https://docs.gitlab.com/ee/update/deprecations.html#default-cicd-job-token-ci_job_token-scope-changed-1">intended language</a>.</p>
-<p>You can:</p>
+<p>This section's purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/jobs/ci_job_token.html#control-job-token-access-to-your-project">project CI/CD job token scope</a>.</p>
+<p>The GitLab UI refers to this setting under "Authorized groups and projects". This controls which projects can use CI/CD job tokens to authenticate with the current project.</p>
+<p>There are two main options in the UI:
+*   <strong>All groups and projects</strong>: This option disables any restrictions, allowing any project to use a job token to access this project. This corresponds to the API field <code>inbound_enabled</code> being <code>false</code>.
+*   <strong>Only this project and any groups and projects in the allowlist</strong>: This option restricts access to only the current project and those explicitly added to the allowlist. This corresponds to the API field <code>inbound_enabled</code> being <code>true</code>.</p>
+<p>It's important to note that this project-level setting can only be controlled if the instance-level setting <code>enforce_ci_inbound_job_token_scope_enabled</code> is disabled. This instance setting requires admin privileges to change.</p>
+<p>In <code>gitlabform</code>, we use the <code>limit_access_to_this_project</code> setting to control the "Authorized groups and projects" option. Setting <code>limit_access_to_this_project: true</code> enables the restriction ("Only this project and any groups and projects in the allowlist"), while <code>limit_access_to_this_project: false</code> disables it ("All groups and projects").</p>
+<p>The <a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html">Job Token Scope API docs</a> use <code>inbound_enabled</code> in GET requests and <code>enabled</code> in PATCH requests, which can be confusing. The <code>gitlabform</code> <code>limit_access_to_this_project</code> setting maps to the API's <code>enabled</code> field in PATCH requests.</p>
+<p>In addition to the main setting, you can manage the project's CI/CD job token allowlist. This allowlist determines which other projects and groups are authorized to use their job tokens to access this project when the "Only this project and any groups and projects in the allowlist" option is enabled.</p>
+<p>Within the <code>allowlist</code> section of the configuration, you can use the <code>enforce</code> setting:</p>
 <ul>
-<li><a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html#patch-a-projects-cicd-job-token-access-settings">Limit access to a project</a></li>
+<li>When <code>enforce: true</code> is set, <code>gitlabform</code> will ensure that the allowlist in GitLab exactly matches the <code>projects</code> and <code>groups</code> specified in your configuration. Any projects or groups found in the GitLab allowlist that are <em>not</em> listed in your <code>gitlabform</code> configuration will be removed.</li>
+<li>If <code>enforce</code> is not set or set to <code>false</code>, <code>gitlabform</code> will only add the projects and groups specified in the configuration to the allowlist, leaving any existing entries in GitLab untouched.</li>
+</ul>
+<p>You can add projects and groups to the allowlist using their ID or path/name:</p>
+<ul>
 <li><a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html#add-a-project-to-a-cicd-job-token-inbound-allowlist">Add other projects to the job token allowlist</a></li>
 <li><a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html#add-a-group-to-a-cicd-job-token-allowlist">Add groups to the job token allowlist</a></li>
 </ul>
@@ -1394,10 +1404,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
     
   </body>
