@@ -129,17 +129,13 @@ class MembersProcessor(AbstractProcessor):
                         verbose(
                             f"Editing user '{common_username}' membership to change their access level or expires at",
                         )
-                        # Update data using the username currently in Gitlab not the case-insensitive version we may in gitlabform config
-                        update_data = {
-                            "user_id": user_id,
-                            "access_level": access_level,
-                            "member_role_id": member_role_id_before,
-                        }
 
+                        project_member = project.members.get(id=user_id)
+                        project_member.access_level = access_level
+                        project_member.member_role_id = member_role_id_before
                         if expires_at:
-                            update_data["expires_at"] = expires_at
-
-                        project.members.update(new_data=update_data)
+                            project_member.expires_at = expires_at
+                        project_member.save()
 
                 else:
                     verbose(
