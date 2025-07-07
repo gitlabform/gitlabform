@@ -316,6 +316,34 @@ def make_user(gl, project) -> Generator[Callable[[AccessLevel, bool], User], Non
 
 
 @pytest.fixture(scope="function")
+def make_user_with_name_for_function(
+    gl, project_for_function, username_base
+) -> Generator[Callable[[AccessLevel, bool], User], None, None]:
+    created_users: List[User] = []
+
+    def _make_user(level: AccessLevel = AccessLevel.DEVELOPER, add_to_project: bool = True) -> User:
+        last_id = len(created_users) + 1
+        username = f"{username_base}_{last_id}"
+        user = gl.users.create(
+            {
+                "username": username,
+                "email": username + "@example.com",
+                "name": username + " Example",
+                "password": get_random_password(),
+            }
+        )
+        if add_to_project:
+            project_for_function.members.create({"user_id": user.id, "access_level": level.value})
+        created_users.append(user)
+        return user
+
+    yield _make_user
+    for user in created_users:
+        with allowed_codes(404):
+            gl.users.delete(user.id)
+
+
+@pytest.fixture(scope="function")
 def make_project_member_developer(gl, project_for_function):
     username = get_random_name("user")
 
