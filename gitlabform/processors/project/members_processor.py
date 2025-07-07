@@ -81,7 +81,6 @@ class MembersProcessor(AbstractProcessor):
         enforce_members: bool,
         keep_bots: bool,
     ):
-
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
         current_members = self._get_members_from_project(project)
@@ -92,10 +91,11 @@ class MembersProcessor(AbstractProcessor):
             for user in users:
                 info(f"Processing user '{user}'...")
 
-                user_id = self.gl.get_user_id_cached(user)
-                if user_id is None:
+                gitlab_user = self.gl.get_user_by_username_cached(user)
+                if gitlab_user is None:
                     warning(f"Could not find user '{user}' in Gitlab, skipping...")
                     continue
+                user_id = gitlab_user.id
 
                 expires_at = users[user]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[user] else None
                 access_level = users[user]["access_level"] if "access_level" in users[user] else None
@@ -129,8 +129,9 @@ class MembersProcessor(AbstractProcessor):
                         verbose(
                             f"Editing user '{common_username}' membership to change their access level or expires at",
                         )
+                        # Update data using the username currently in Gitlab not the case-insensitive version we may in gitlabform config
                         update_data = {
-                            "user_id": common_username,
+                            "user_id": user_id,
                             "access_level": access_level,
                             "member_role_id": member_role_id_before,
                         }
