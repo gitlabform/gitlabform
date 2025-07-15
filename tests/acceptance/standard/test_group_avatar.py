@@ -105,8 +105,8 @@ class TestGroupAvatar:
         group_for_function = group_for_function.manager.get(group_for_function.id)
         assert group_for_function.avatar_url is None or "gravatar" in group_for_function.avatar_url
 
-    def test__group_avatar_file_not_found_should_fail(self, group):
-        """Test handling of non-existent avatar file path - should fail"""
+    def test__group_avatar_file_not_found_continues_with_warning(self, group):
+        """Test that non-existent avatar file shows warning but continues processing"""
         nonexistent_path = "/path/to/nonexistent/image.png"
 
         config = f"""
@@ -116,7 +116,42 @@ class TestGroupAvatar:
               avatar: "{nonexistent_path}"
         """
 
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config, group)
+        # Should not fail - avatar failure is now handled with warning
+        run_gitlabform(config, group)
 
-        assert exc_info.value.code == 2
+        # Avatar should remain unchanged (not set due to failure)
+        group = group.manager.get(group.id)
+        assert group.avatar_url is None or "gravatar" in group.avatar_url
+
+    def test__group_avatar_no_avatar_config(self, group):
+        """Test that no avatar config is handled gracefully"""
+        config = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_settings:
+              description: "Test without avatar config"
+        """
+
+        # Should work fine without avatar config
+        run_gitlabform(config, group)
+
+        # Verify other settings are applied
+        group = group.manager.get(group.id)
+        assert getattr(group, "description", "") == "Test without avatar config"
+
+    def test__group_avatar_generic_upload_error(self, group):
+        """Test generic exception handling during avatar upload"""
+        # Use a directory path as avatar - this will cause IsADirectoryError
+        config = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_settings:
+              avatar: "/tmp"
+        """
+
+        # Should not fail - avatar failure is now handled with warning
+        run_gitlabform(config, group)
+
+        # Avatar should remain unchanged (not set due to failure)
+        group = group.manager.get(group.id)
+        assert group.avatar_url is None or "gravatar" in group.avatar_url

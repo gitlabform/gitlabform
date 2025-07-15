@@ -1,5 +1,5 @@
 import os
-from logging import info, debug
+from logging import info, debug, warning
 from typing import Dict
 
 from gitlabform.gitlab import GitLab
@@ -16,18 +16,23 @@ class GroupSettingsProcessor(AbstractProcessor):
 
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
 
-        # Process avatar separately before other settings
-        self._process_group_avatar(gitlab_group, configured_group_settings)
+        # Remove avatar from config to process it last
+        avatar_config = configured_group_settings.pop("avatar", None)
 
-        # Remove avatar from config to prevent it from being processed in the standard way
-        if "avatar" in configured_group_settings:
-            del configured_group_settings["avatar"]
-
+        # Process other settings first
         if self._needs_update(gitlab_group.asdict(), configured_group_settings):
             info(f"Updating group settings for group {gitlab_group.name}")
             self.update_group_settings(gitlab_group, configured_group_settings)
         else:
             debug("No update needed for Group Settings")
+
+        # Process avatar last - with error handling that doesn't stop execution
+        if avatar_config is not None:
+            try:
+                self._process_group_avatar(gitlab_group, {"avatar": avatar_config})
+            except Exception as e:
+                warning(f"Failed to process group avatar: {e}")
+                # Continue execution instead of raising
 
     @staticmethod
     def update_group_settings(gitlab_group: Group, group_settings_config: dict):

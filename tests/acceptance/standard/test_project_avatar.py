@@ -105,8 +105,8 @@ class TestProjectAvatar:
         project_for_function = project_for_function.manager.get(project_for_function.id)
         assert project_for_function.avatar_url is None or "gravatar" in project_for_function.avatar_url
 
-    def test__project_avatar_file_not_found_should_fail(self, project):
-        """Test handling of non-existent avatar file path - should fail"""
+    def test__project_avatar_file_not_found_continues_with_warning(self, project):
+        """Test that non-existent avatar file shows warning but continues processing"""
         nonexistent_path = "/path/to/nonexistent/image.png"
 
         config = f"""
@@ -116,7 +116,42 @@ class TestProjectAvatar:
               avatar: "{nonexistent_path}"
         """
 
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config, project)
+        # Should not fail - avatar failure is now handled with warning
+        run_gitlabform(config, project)
 
-        assert exc_info.value.code == 2
+        # Avatar should remain unchanged (not set due to failure)
+        project = project.manager.get(project.id)
+        assert project.avatar_url is None or "gravatar" in project.avatar_url
+
+    def test__project_avatar_no_avatar_config(self, project):
+        """Test that no avatar config is handled gracefully"""
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_settings:
+              description: "Test without avatar config"
+        """
+
+        # Should work fine without avatar config
+        run_gitlabform(config, project)
+
+        # Verify other settings are applied
+        project = project.manager.get(project.id)
+        assert getattr(project, "description", "") == "Test without avatar config"
+
+    def test__project_avatar_generic_upload_error(self, project):
+        """Test generic exception handling during avatar upload"""
+        # Use a directory path as avatar - this will cause IsADirectoryError
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_settings:
+              avatar: "/tmp"
+        """
+
+        # Should not fail - avatar failure is now handled with warning
+        run_gitlabform(config, project)
+
+        # Avatar should remain unchanged (not set due to failure)
+        project = project.manager.get(project.id)
+        assert project.avatar_url is None or "gravatar" in project.avatar_url

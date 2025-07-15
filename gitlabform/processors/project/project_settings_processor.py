@@ -1,5 +1,5 @@
 import os
-from logging import debug, error
+from logging import debug, error, warning
 from typing import Callable, Dict, List
 
 from gitlab.v4.objects import Project
@@ -25,13 +25,10 @@ class ProjectSettingsProcessor(AbstractProcessor):
 
         self._process_project_topics(project_settings_in_config, project_settings_in_gitlab)
 
-        # Process avatar separately before other settings
-        self._process_project_avatar(project, project_settings_in_config)
+        # Remove avatar from config to process it last
+        avatar_config = project_settings_in_config.pop("avatar", None)
 
-        # Remove avatar from config to prevent it from being processed in the standard way
-        if "avatar" in project_settings_in_config:
-            del project_settings_in_config["avatar"]
-
+        # Process other settings first
         if self._needs_update(project_settings_in_gitlab, project_settings_in_config):
             debug("Updating project settings")
             for key, value in project_settings_in_config.items():
@@ -44,6 +41,14 @@ class ProjectSettingsProcessor(AbstractProcessor):
 
         else:
             debug("No update needed for project settings")
+
+        # Process avatar last - with error handling that doesn't stop execution
+        if avatar_config is not None:
+            try:
+                self._process_project_avatar(project, {"avatar": avatar_config})
+            except Exception as e:
+                warning(f"Failed to process project avatar: {e}")
+                # Continue execution instead of raising
 
     def get_project_settings(self, project_path: str):
         """Get project settings from GitLab."""
