@@ -37,7 +37,7 @@ groups:
 To remove an avatar:
 ```
 groups:
-  group_1:
+  group_1/*:
     group_settings:
       avatar: ""
 ```
