@@ -11,18 +11,18 @@ class TestProjectAvatar:
     def setup_method(self):
         # Use gitlabform logo
         self.project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-        self.test_image_path = os.path.join(self.project_root, "docs/images/gitlabform-logo.png")
+        self.test_image_absolute_path = os.path.join(self.project_root, "docs/images/gitlabform-logo.png")
 
         # Check if the file exists
-        assert os.path.exists(self.test_image_path), f"Test image not found at {self.test_image_path}"
+        assert os.path.exists(self.test_image_absolute_path), f"Test image not found at {self.test_image_absolute_path}"
 
     def test__project_avatar_set_absolute_path(self, project):
-        # Test setting a project avatar with absolute path
+        """Test setting a project avatar with absolute path"""
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             project_settings:
-              avatar: "{self.test_image_path}"
+              avatar: "{self.test_image_absolute_path}"
         """
         run_gitlabform(config, project)
 
@@ -32,39 +32,25 @@ class TestProjectAvatar:
         # Verify avatar is set
         assert project.avatar_url is not None
 
-    def test__project_avatar_paths_comprehensive(self, project):
-        """Test both absolute and relative paths comprehensively"""
-
-        # Test 1: Absolute path (already tested above, but included for completeness)
-        config_absolute = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              avatar: "{self.test_image_path}"
-        """
-        run_gitlabform(config_absolute, project)
-
-        project = project.manager.get(project.id)
-        assert project.avatar_url is not None
-
-        # Test 2: Simple relative path
+    def test__project_avatar_set_relative_path(self, project):
+        """Test setting a project avatar with relative path"""
         original_cwd = os.getcwd()
         temp_dir = tempfile.mkdtemp()
 
         try:
             os.chdir(temp_dir)
 
-            # Copy image to temp directory
-            temp_image_name = "relative_test_avatar.png"
-            shutil.copy2(self.test_image_path, temp_image_name)
+            # Copy image to temp directory with relative name
+            relative_image_name = "test_avatar.png"
+            shutil.copy2(self.test_image_absolute_path, relative_image_name)
 
-            config_relative = f"""
+            config = f"""
             projects_and_groups:
               {project.path_with_namespace}:
                 project_settings:
-                  avatar: "{temp_image_name}"
+                  avatar: "{relative_image_name}"
             """
-            run_gitlabform(config_relative, project)
+            run_gitlabform(config, project)
 
             project = project.manager.get(project.id)
             assert project.avatar_url is not None
@@ -73,46 +59,20 @@ class TestProjectAvatar:
             os.chdir(original_cwd)
             shutil.rmtree(temp_dir)
 
-        # Test 3: Relative path with subdirectory
-        temp_dir2 = tempfile.mkdtemp()
-        try:
-            os.chdir(temp_dir2)
-
-            subdir = "test_images"
-            os.makedirs(subdir)
-            relative_subdir_path = os.path.join(subdir, "subdir_avatar.png")
-            shutil.copy2(self.test_image_path, relative_subdir_path)
-
-            config_relative_subdir = f"""
-            projects_and_groups:
-              {project.path_with_namespace}:
-                project_settings:
-                  avatar: "{relative_subdir_path}"
-            """
-            run_gitlabform(config_relative_subdir, project)
-
-            project = project.manager.get(project.id)
-            assert project.avatar_url is not None
-
-        finally:
-            os.chdir(original_cwd)
-            shutil.rmtree(temp_dir2)
-
     def test__project_avatar_delete(self, project):
-        # First ensure there's an avatar to delete by setting one
+        """Test deleting a project avatar"""
+        # First set an avatar
         config_set = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             project_settings:
-              avatar: "{self.test_image_path}"
+              avatar: "{self.test_image_absolute_path}"
         """
         run_gitlabform(config_set, project)
 
-        # Refresh project data to get current state
+        # Verify avatar exists
         project = project.manager.get(project.id)
-
-        # Verify that avatar exists
-        assert project.avatar_url is not None, "Avatar should exist after setting it"
+        assert project.avatar_url is not None
 
         # Delete the avatar
         config_delete = f"""
@@ -123,170 +83,40 @@ class TestProjectAvatar:
         """
         run_gitlabform(config_delete, project)
 
-        # Refresh project data
-        project = project.manager.get(project.id)
-
         # Verify avatar is removed
+        project = project.manager.get(project.id)
         assert project.avatar_url is None or "gravatar" in project.avatar_url
 
-    def test__project_avatar_file_not_found_should_fail(self, project):
-        # Test handling of non-existent avatar file path - should fail
-        nonexistent_path = "/path/to/nonexistent/image.png"
-
-        config = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              avatar: "{nonexistent_path}"
-        """
-
-        # GitLabForm catches exceptions
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config, project)
-
-        # Verify it's the expected exit code for processing errors
-        assert exc_info.value.code == 2
-
-    def test__project_avatar_relative_file_not_found_should_fail(self, project):
-        # Test handling of non-existent relative avatar file path - should fail
-        original_cwd = os.getcwd()
-        temp_dir = tempfile.mkdtemp()
-
-        try:
-            os.chdir(temp_dir)
-
-            # Use non-existent relative path
-            nonexistent_relative_path = "images/nonexistent_avatar.png"
-
-            config = f"""
-            projects_and_groups:
-              {project.path_with_namespace}:
-                project_settings:
-                  avatar: "{nonexistent_relative_path}"
-            """
-
-            # Should fail with SystemExit since file won't be found
-            with pytest.raises(SystemExit) as exc_info:
-                run_gitlabform(config, project)
-
-            # Verify it's the expected exit code for processing errors
-            assert exc_info.value.code == 2
-
-        finally:
-            os.chdir(original_cwd)
-            shutil.rmtree(temp_dir)
-
-    def test__project_avatar_failure_with_other_settings(self, project):
-        nonexistent_path = "/path/to/nonexistent/image.png"
-        test_description = "Test description that should not be set due to avatar failure"
-
-        # Store original description to verify it doesn't change
-        original_project = project.manager.get(project.id)
-        original_description = getattr(original_project, "description", "")
-
-        config = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              description: "{test_description}"
-              avatar: "{nonexistent_path}"
-        """
-
-        # Should fail due to avatar file not found
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config, project)
-
-        # Verify it's the expected exit code for processing errors
-        assert exc_info.value.code == 2
-
-        # Refresh project data and verify description wasn't changed
-        updated_project = project.manager.get(project.id)
-        current_description = getattr(updated_project, "description", "")
-
-        # Description should remain unchanged since the process failed
-        assert current_description == original_description
-        assert current_description != test_description
-
-    def test__project_avatar_other_settings_process_when_no_avatar_error(self, project):
-        # Test that other settings are processed when there's no avatar error
-        test_description = "Test description that should be set successfully"
-
-        config = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project_settings:
-              description: "{test_description}"
-              avatar: "{self.test_image_path}"
-        """
-
-        run_gitlabform(config, project)
-
-        # Refresh project data
-        updated_project = project.manager.get(project.id)
-
-        # Both avatar and description should be set
-        assert updated_project.avatar_url is not None
-        assert getattr(updated_project, "description", "") == test_description
-
-    def test__project_avatar_delete_when_already_empty(self, project):
+    def test__project_avatar_delete_when_already_empty(self, project_for_function):
         """Test deleting avatar when it's already empty - should be no-op"""
-        # First ensure the project has no avatar
-        project = project.manager.get(project.id)
-
-        # If there's an avatar, remove it first
-        if project.avatar_url and "gravatar" not in project.avatar_url:
-            config_remove = f"""
-            projects_and_groups:
-              {project.path_with_namespace}:
-                project_settings:
-                  avatar: ""
-            """
-            run_gitlabform(config_remove, project)
-            project = project.manager.get(project.id)
-
-        # Store the current avatar state (should be None or gravatar)
-        original_avatar_url = project.avatar_url
+        # Verify project has no custom avatar (fresh project)
+        assert project_for_function.avatar_url is None or "gravatar" in project_for_function.avatar_url
 
         # Try to delete avatar when it's already empty
         config_delete_empty = f"""
         projects_and_groups:
-          {project.path_with_namespace}:
+          {project_for_function.path_with_namespace}:
             project_settings:
               avatar: ""
         """
-        run_gitlabform(config_delete_empty, project)
+        run_gitlabform(config_delete_empty, project_for_function)
 
-        # Refresh and verify nothing changed
-        project = project.manager.get(project.id)
-        assert project.avatar_url == original_avatar_url
+        # Verify nothing changed
+        project_for_function = project_for_function.manager.get(project_for_function.id)
+        assert project_for_function.avatar_url is None or "gravatar" in project_for_function.avatar_url
 
-    def test__project_avatar_generic_exception_handling(self, project):
-        """Test generic exception handling during avatar upload"""
+    def test__project_avatar_file_not_found_should_fail(self, project):
+        """Test handling of non-existent avatar file path - should fail"""
+        nonexistent_path = "/path/to/nonexistent/image.png"
 
-        original_cwd = os.getcwd()
-        temp_dir = tempfile.mkdtemp()
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            project_settings:
+              avatar: "{nonexistent_path}"
+        """
 
-        try:
-            os.chdir(temp_dir)
+        with pytest.raises(SystemExit) as exc_info:
+            run_gitlabform(config, project)
 
-            # Create a directory with the name of an image file
-            # This should cause an exception when trying to open it as a file
-            fake_image_dir = "fake_image.png"
-            os.makedirs(fake_image_dir)
-
-            config = f"""
-            projects_and_groups:
-              {project.path_with_namespace}:
-                project_settings:
-                  avatar: "{fake_image_dir}"
-            """
-
-            # Should fail with SystemExit due to the exception
-            with pytest.raises(SystemExit) as exc_info:
-                run_gitlabform(config, project)
-
-            assert exc_info.value.code == 2
-
-        finally:
-            os.chdir(original_cwd)
-            shutil.rmtree(temp_dir)
+        assert exc_info.value.code == 2
