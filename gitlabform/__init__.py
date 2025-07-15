@@ -268,7 +268,9 @@ class GitLabForm:
             '(as numbered by "x/y Processing group/project" messages)',
         )
 
-        parser.add_argument(
+        sections_group = parser.add_mutually_exclusive_group()
+
+        sections_group.add_argument(
             "-os",
             "--only-sections",
             dest="only_sections",
@@ -277,7 +279,7 @@ class GitLabForm:
             help="process only section with these names (comma-delimited)",
         )
 
-        parser.add_argument(
+        sections_group.add_argument(
             "-es",
             "--exclude-sections",
             dest="exclude_sections",
