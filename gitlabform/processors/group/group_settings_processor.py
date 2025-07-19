@@ -32,7 +32,7 @@ class GroupSettingsProcessor(AbstractProcessor):
                 self._process_group_avatar(gitlab_group, {"avatar": avatar_config})
             except Exception as e:
                 warning(f"Failed to process group avatar: {e}")
-                # Continue execution instead of raising
+                raise e
 
     @staticmethod
     def update_group_settings(gitlab_group: Group, group_settings_config: dict):

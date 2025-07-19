@@ -155,3 +155,138 @@ class TestGroupAvatar:
         # Avatar should remain unchanged (not set due to failure)
         group = group.manager.get(group.id)
         assert group.avatar_url is None or "gravatar" in group.avatar_url
+
+    def test__group_avatar_error_continues_with_next_processor(self, group_for_function, other_group):
+        """
+        Test that when terminate_after_error=False, GitLabForm continues processing
+        other groups even when one group's avatar fails.
+
+        This demonstrates the current architecture's support for group-level
+        granularity in error handling.
+        """
+        from gitlabform import GitLabForm
+
+        nonexistent_path = "/path/to/nonexistent/image.png"
+        test_description = "Test description that should be set successfully"
+
+        # Reset other_group description to known value because it's class scoped and may have been set by other tests
+        other_group.description = None
+        other_group.save()
+
+        # Store original descriptions to verify changes
+        original_group = group_for_function.manager.get(group_for_function.id)
+        original_other_group = other_group.manager.get(other_group.id)
+
+        # Determine which group comes first alphabetically
+        groups = [group_for_function, other_group]
+        groups_sorted = sorted(groups, key=lambda g: g.full_path)
+
+        first_group = groups_sorted[0]
+        second_group = groups_sorted[1]
+
+        # Now build the config so that first_group is the one that should fail and stop processing
+        config = f"""
+        projects_and_groups:
+          {first_group.full_path}/*:
+            group_settings:
+              description: "{test_description}"
+              avatar: "{nonexistent_path}"
+          {second_group.full_path}/*:
+            group_settings:
+              description: "{test_description}"
+        """
+
+        # Create GitLabForm instance directly (this will use test mode)
+        gf = GitLabForm(target="ALL_DEFINED", config_string=config)  # Process all groups defined in config
+
+        # Override the terminate_after_error setting to test non-terminate behavior
+        gf.terminate_after_error = False
+
+        # This should now run without terminating immediately
+        # The first group should fail due to avatar, but the second group should be processed
+        # Note: It will still exit with SystemExit at the end due to _show_summary
+        with pytest.raises(SystemExit) as exc_info:
+            gf.run()
+
+        # Verify it's the expected exit code for processing errors
+        assert exc_info.value.code == 2
+
+        # Refresh group data and verify the behavior:
+        # 1. First group: description should be changed because it's non-avatar config, which is processed first
+        # 2. avatar setting failed
+        # 3. gitlabform continues processing other groups due to terminate_after_error=False or `--terminate` CLI option is not set
+        updated_group = first_group.manager.get(first_group.id)
+        current_description = getattr(updated_group, "description", "")
+        assert current_description == test_description
+
+        # 2. Second group: description SHOULD be changed because gitlabform continues processing other groups due to terminate_after_error=False or `--terminate` CLI option is not set
+        updated_other_group = second_group.manager.get(second_group.id)
+        current_other_description = getattr(updated_other_group, "description", "")
+        assert current_other_description == test_description
+
+    def test__group_avatar_error_stops_all_processing(self, group_for_function, other_group):
+        """
+        Test that when terminate_after_error=True (default), GitLabForm stops processing
+        immediately when the first group's avatar fails.
+
+        This demonstrates the default terminate behavior at group-level.
+        """
+        from gitlabform import GitLabForm
+
+        nonexistent_path = "/path/to/nonexistent/image.png"
+        test_description = "Test description that should NOT be set due to early termination"
+
+        # Reset other_group description to known value because it's class scoped and may have been set by other tests
+        other_group.description = None
+        other_group.save()
+
+        # Store original descriptions to verify they don't change
+        original_group = group_for_function.manager.get(group_for_function.id)
+        original_other_group = other_group.manager.get(other_group.id)
+        original_other_description = getattr(original_other_group, "description", "")
+
+        # Determine which group comes first alphabetically
+        groups = [group_for_function, other_group]
+        groups_sorted = sorted(groups, key=lambda g: g.full_path)
+
+        first_group = groups_sorted[0]
+        second_group = groups_sorted[1]
+
+        # Now build the config so that first_group is the one that should fail and stop processing
+        config = f"""
+        projects_and_groups:
+          {first_group.full_path}/*:
+            group_settings:
+              description: "{test_description}"
+              avatar: "{nonexistent_path}"
+          {second_group.full_path}/*:
+            group_settings:
+              description: "{test_description}"
+        """
+
+        # Create GitLabForm instance directly (this will use test mode)
+        gf = GitLabForm(target="ALL_DEFINED", config_string=config)  # Process all groups defined in config
+
+        # Use the default terminate_after_error=True behavior
+        # This should terminate immediately when the first group fails
+
+        # Should fail with SystemExit due to immediate termination
+        with pytest.raises(SystemExit) as exc_info:
+            gf.run()
+
+        # Verify it's the expected exit code for processing errors
+        assert exc_info.value.code == 2
+
+        # Refresh group data and verify the behavior:
+        # 1. First group: description should be changed because it's non-avatar config, which is processed first
+        # 2. avatar setting failed
+        # 3. gitlabform stops processing other groups due to terminate_after_error=True or `--terminate` CLI option is set
+        updated_group = first_group.manager.get(first_group.id)
+        current_description = getattr(updated_group, "description", "")
+        assert current_description == test_description
+
+        # 2. Second group: description should NOT be changed because gitlabform stops processing other groups due to terminate_after_error=True or `--terminate` CLI option is set
+        updated_other_group = second_group.manager.get(second_group.id)
+        current_other_description = getattr(updated_other_group, "description", "")
+        assert current_other_description == original_other_description
+        assert current_other_description != test_description

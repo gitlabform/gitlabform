@@ -155,3 +155,141 @@ class TestProjectAvatar:
         # Avatar should remain unchanged (not set due to failure)
         project = project.manager.get(project.id)
         assert project.avatar_url is None or "gravatar" in project.avatar_url
+
+    def test__project_avatar_error_continues_with_next_processor(self, project_for_function, other_project):
+        """
+        Test that when terminate_after_error=False, GitLabForm continues processing
+        other projects even when one project's avatar fails.
+
+        This demonstrates the current architecture's support for project-level
+        granularity in error handling.
+        """
+        from gitlabform import GitLabForm
+
+        nonexistent_path = "/path/to/nonexistent/image.png"
+        test_description = "Test description that should be set successfully"
+        # Reset other_project description to known value because it's class scoped and may have been set by other tests
+        other_project.description = None
+        other_project.save()
+        original_other_description = None
+
+        # Store original descriptions to verify changes
+        original_project = project_for_function.manager.get(project_for_function.id)
+        original_other_project = other_project.manager.get(other_project.id)
+        original_other_description = getattr(original_other_project, "description", "")
+
+        # Determine which project comes first alphabetically
+        projects = [project_for_function, other_project]
+        projects_sorted = sorted(projects, key=lambda p: p.path_with_namespace)
+
+        first_project = projects_sorted[0]
+        second_project = projects_sorted[1]
+
+        # Now build the config so that first_project is the one that should fail and stop processing
+        config = f"""
+        projects_and_groups:
+          {first_project.path_with_namespace}:
+            project_settings:
+              description: "{test_description}"
+              avatar: "{nonexistent_path}"
+          {second_project.path_with_namespace}:
+            project_settings:
+              description: "{test_description}"
+        """
+
+        # Create GitLabForm instance directly (this will use test mode)
+        gf = GitLabForm(target="ALL_DEFINED", config_string=config)  # Process all projects defined in config
+
+        # Override the terminate_after_error setting to test non-terminate behavior
+        gf.terminate_after_error = False
+
+        # This should now run without terminating immediately
+        # The first project should fail due to avatar, but the second project should be processed
+        # Note: It will still exit with SystemExit at the end due to _show_summary
+        with pytest.raises(SystemExit) as exc_info:
+            gf.run()
+
+        # Verify it's the expected exit code for processing errors
+        assert exc_info.value.code == 2
+
+        # Refresh project data and verify the behavior:
+        # 1. First project: description should be changed because it's non-avatar config, which is processed first
+        # 2. avatar setting failed
+        # 3. gitlabform continues processing other projects due to terminate_after_error=False or `--terminate` CLI option is not set
+        updated_project = first_project.manager.get(first_project.id)
+        current_description = getattr(updated_project, "description", "")
+        # assert current_description == original_description
+        assert current_description == test_description
+
+        # 2. Second project: description SHOULD be changed because gitlabform continues processing other projects due to terminate_after_error=False or `--terminate` CLI option is not set
+        updated_other_project = second_project.manager.get(second_project.id)
+        current_other_description = getattr(updated_other_project, "description", "")
+        assert current_other_description == test_description
+        assert current_other_description != original_other_description
+
+    def test__project_avatar_error_stops_all_processing(self, project_for_function, other_project):
+        """
+        Test that when terminate_after_error=True (default), GitLabForm stops processing
+        immediately when the first project's avatar fails.
+
+        This demonstrates the default terminate behavior at project-level.
+        """
+        from gitlabform import GitLabForm
+
+        nonexistent_path = "/path/to/nonexistent/image.png"
+        test_description = "Test description that should NOT be set due to early termination"
+
+        # Reset other_project description to known value because it's class scoped and may have been set by other tests
+        other_project.description = None
+        other_project.save()
+
+        # Store original descriptions to verify they don't change
+        original_project = project_for_function.manager.get(project_for_function.id)
+        original_other_project = other_project.manager.get(other_project.id)
+        original_other_description = getattr(original_other_project, "description", "")
+
+        # Determine which project comes first alphabetically
+        projects = [project_for_function, other_project]
+        projects_sorted = sorted(projects, key=lambda p: p.path_with_namespace)
+
+        first_project = projects_sorted[0]
+        second_project = projects_sorted[1]
+
+        # Now build the config so that first_project is the one that should fail and stop processing
+        config = f"""
+        projects_and_groups:
+          {first_project.path_with_namespace}:
+            project_settings:
+              description: "{test_description}"
+              avatar: "{nonexistent_path}"
+          {second_project.path_with_namespace}:
+            project_settings:
+              description: "{test_description}"
+        """
+
+        # Create GitLabForm instance directly (this will use test mode)
+        gf = GitLabForm(target="ALL_DEFINED", config_string=config)  # Process all projects defined in config
+
+        # Use the default terminate_after_error=True behavior
+        # This should terminate immediately when the first project fails
+
+        # Should fail with SystemExit due to immediate termination
+        with pytest.raises(SystemExit) as exc_info:
+            gf.run()
+
+        # Verify it's the expected exit code for processing errors
+        assert exc_info.value.code == 2
+
+        # Refresh project data and verify the behavior:
+        # 1. First project: description should be changed because it's non-avatar config, which is processed first
+        # 2. avatar setting failed
+        # 3. gitlabform stops processing other projects due to terminate_after_error=True or `--terminate` CLI option is set
+        updated_project = first_project.manager.get(first_project.id)
+        current_description = getattr(updated_project, "description", "")
+        assert current_description == test_description
+
+        # 2. Second project: description should NOT be changed because gitlabform stops processing other projects due to terminate_after_error=True or `--terminate` CLI option is set
+        updated_other_project = second_project.manager.get(second_project.id)
+        current_other_description = getattr(updated_other_project, "description", "")
+        assert current_other_description == original_other_description
+        assert current_other_description != test_description

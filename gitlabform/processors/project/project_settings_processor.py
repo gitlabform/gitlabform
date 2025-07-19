@@ -48,7 +48,7 @@ class ProjectSettingsProcessor(AbstractProcessor):
                 self._process_project_avatar(project, {"avatar": avatar_config})
             except Exception as e:
                 warning(f"Failed to process project avatar: {e}")
-                # Continue execution instead of raising
+                raise e
 
     def get_project_settings(self, project_path: str):
         """Get project settings from GitLab."""
