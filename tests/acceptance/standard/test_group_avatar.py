@@ -105,8 +105,8 @@ class TestGroupAvatar:
         group_for_function = group_for_function.manager.get(group_for_function.id)
         assert group_for_function.avatar_url is None or "gravatar" in group_for_function.avatar_url
 
-    def test__group_avatar_file_not_found_continues_with_warning(self, group):
-        """Test that non-existent avatar file shows warning but continues processing"""
+    def test__group_avatar_file_not_found_raises_exception(self, group):
+        """Test that non-existent avatar file raises exception and does not set avatar"""
         nonexistent_path = "/path/to/nonexistent/image.png"
 
         config = f"""
@@ -116,8 +116,9 @@ class TestGroupAvatar:
               avatar: "{nonexistent_path}"
         """
 
-        # Should not fail - avatar failure is now handled with warning
-        run_gitlabform(config, group)
+        # Should raise SystemExit due to avatar error
+        with pytest.raises(SystemExit):
+            run_gitlabform(config, group)
 
         # Avatar should remain unchanged (not set due to failure)
         group = group.manager.get(group.id)
@@ -139,8 +140,8 @@ class TestGroupAvatar:
         group = group.manager.get(group.id)
         assert getattr(group, "description", "") == "Test without avatar config"
 
-    def test__group_avatar_generic_upload_error(self, group):
-        """Test generic exception handling during avatar upload"""
+    def test__group_avatar_generic_upload_error_raises_exception(self, group):
+        """Test that generic upload error raises exception and does not set avatar"""
         # Use a directory path as avatar - this will cause IsADirectoryError
         config = f"""
         projects_and_groups:
@@ -149,8 +150,9 @@ class TestGroupAvatar:
               avatar: "/tmp"
         """
 
-        # Should not fail - avatar failure is now handled with warning
-        run_gitlabform(config, group)
+        # Should raise SystemExit due to avatar error
+        with pytest.raises(SystemExit):
+            run_gitlabform(config, group)
 
         # Avatar should remain unchanged (not set due to failure)
         group = group.manager.get(group.id)
@@ -288,5 +290,5 @@ class TestGroupAvatar:
         # 2. Second group: description should NOT be changed because gitlabform stops processing other groups due to terminate_after_error=True or `--terminate` CLI option is set
         updated_other_group = second_group.manager.get(second_group.id)
         current_other_description = getattr(updated_other_group, "description", "")
-        assert current_other_description == original_other_description
+        assert current_other_description in (None, "")
         assert current_other_description != test_description

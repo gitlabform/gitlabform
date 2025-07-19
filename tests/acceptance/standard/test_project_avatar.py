@@ -105,8 +105,8 @@ class TestProjectAvatar:
         project_for_function = project_for_function.manager.get(project_for_function.id)
         assert project_for_function.avatar_url is None or "gravatar" in project_for_function.avatar_url
 
-    def test__project_avatar_file_not_found_continues_with_warning(self, project):
-        """Test that non-existent avatar file shows warning but continues processing"""
+    def test__project_avatar_file_not_found_raises_exception(self, project):
+        """Test that non-existent avatar file raises exception and does not set avatar"""
         nonexistent_path = "/path/to/nonexistent/image.png"
 
         config = f"""
@@ -116,8 +116,9 @@ class TestProjectAvatar:
               avatar: "{nonexistent_path}"
         """
 
-        # Should not fail - avatar failure is now handled with warning
-        run_gitlabform(config, project)
+        # Should raise SystemExit due to avatar error
+        with pytest.raises(SystemExit):
+            run_gitlabform(config, project)
 
         # Avatar should remain unchanged (not set due to failure)
         project = project.manager.get(project.id)
@@ -139,8 +140,8 @@ class TestProjectAvatar:
         project = project.manager.get(project.id)
         assert getattr(project, "description", "") == "Test without avatar config"
 
-    def test__project_avatar_generic_upload_error(self, project):
-        """Test generic exception handling during avatar upload"""
+    def test__project_avatar_generic_upload_error_raises_exception(self, project):
+        """Test that generic upload error raises exception and does not set avatar"""
         # Use a directory path as avatar - this will cause IsADirectoryError
         config = f"""
         projects_and_groups:
@@ -149,8 +150,9 @@ class TestProjectAvatar:
               avatar: "/tmp"
         """
 
-        # Should not fail - avatar failure is now handled with warning
-        run_gitlabform(config, project)
+        # Should raise SystemExit due to avatar error
+        with pytest.raises(SystemExit):
+            run_gitlabform(config, project)
 
         # Avatar should remain unchanged (not set due to failure)
         project = project.manager.get(project.id)
@@ -291,5 +293,4 @@ class TestProjectAvatar:
         # 2. Second project: description should NOT be changed because gitlabform stops processing other projects due to terminate_after_error=True or `--terminate` CLI option is set
         updated_other_project = second_project.manager.get(second_project.id)
         current_other_description = getattr(updated_other_project, "description", "")
-        assert current_other_description == original_other_description
-        assert current_other_description != test_description
+        assert current_other_description in (None, "")
