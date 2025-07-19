@@ -4,6 +4,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
 
 * Group:
     * [Badges](reference/badges.md#group-badges)
+    * [Avatar](reference/avatar.md#group-avatar)
     * [CI/CD variables](reference/ci_cd_variables.md#group-cicd-variables)
     * [Members (groups) {share/unshare with group, change access level, optional enforce}](reference/members.md#group-members)
     * [Members (users) {add/remove user, change access level, optional enforce}](reference/members.md#group-members)
@@ -13,6 +14,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
 
 * Project:
     * [Archive/unarchive](reference/archive_unarchive.md)
+    * [Avatar](reference/avatar.md#project-avatar)
     * [Badges](reference/badges.md#project-badges)
     * [CI/CD Job Token Scope](reference/job_token_scope.md)
     * [CI/CD Job Token Scope](reference/job_token_scope.md)
