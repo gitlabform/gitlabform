@@ -1,10 +1,11 @@
 import pytest
-from gitlab.v4.objects import User, Project
+from gitlab.v4.objects import User, Project, ProjectMember
 
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
     run_gitlabform,
     randomize_case,
+    get_random_password,
 )
 
 
@@ -39,6 +40,46 @@ class TestProjectMembersCaseInsensitive:
 
         members_usernames = [member.username for member in members]
         assert outsider_user.username in members_usernames
+
+    def test__user_capitalised_in_gitlab_but_not_gitlabform(
+        self,
+        project_for_function: Project,
+        gl,
+    ):
+        # Regression test for: https://github.com/gitlabform/gitlabform/issues/1055
+        # Username in gitlab has mixed capitalisation, but defined in gitlabform in lowercase
+        username = "Ayannah.Reuben"
+        lower_case_username = username.lower()
+        gitlab_user_capitalised = gl.users.create(
+            {
+                "username": username,
+                "email": username + "@example.com",
+                "name": username + " Example",
+                "password": get_random_password(),
+            }
+        )
+        project_for_function.members.create(
+            {"user_id": gitlab_user_capitalised.id, "access_level": AccessLevel.DEVELOPER.value}
+        )
+
+        user_in_project: ProjectMember = project_for_function.members.get(gitlab_user_capitalised.id)
+        assert user_in_project.access_level == AccessLevel.DEVELOPER.value
+
+        change_user_level = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            members:
+              users:
+                {lower_case_username}: # refer to a user in lower case
+                  access_level: {AccessLevel.MAINTAINER.value}
+        """
+
+        run_gitlabform(change_user_level, project_for_function)
+
+        members = project_for_function.members.list()
+        assert len(members) == 1
+        updated_user_in_project: ProjectMember = project_for_function.members.get(gitlab_user_capitalised.id)
+        assert updated_user_in_project.access_level == AccessLevel.MAINTAINER.value
 
     def test__existing_users_are_not_added_again(
         self,

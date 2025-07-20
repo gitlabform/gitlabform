@@ -1,5 +1,24 @@
 # Changelog
 
+## 4.2.6
+
+### Bug Fixes
+
+* Handle the case where an integration doesn't exist when trying to delete it. (fixes #1036) [#1040](https://github.com/gitlabform/gitlabform/pull/1040) ([Andrew Wilkinson](https://github.com/andrewjw))
+* Ensure gitlabform can handle mixed case username in gitlab [#1056](https://github.com/gitlabform/gitlabform/pull/1056) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+* Verbose output for members_processor [#1018](https://github.com/gitlabform/gitlabform/pull/1018) ([BenediktBertsch](https://github.com/BenediktBertsch))
+* Centred logos in `used by` documentation and added Roche [#1019](https://github.com/gitlabform/gitlabform/pull/1019) ([BenediktBertsch](https://github.com/BenediktBertsch))
+
+### Tests
+
+* fix test case for job token scope [#1035](https://github.com/gitlabform/gitlabform/pull/1035) ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.2.5
 
 ### Fixes
