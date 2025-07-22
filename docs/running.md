@@ -56,4 +56,6 @@ To exclude certain sections of the configuration from a given gitlabform run, yo
 gitlabform --exclude_sections group_settings,project_settings
 ```
 
-**Warning**, the maintainers of gitlabform cannot guarantee consistent functionality when excluding and including different sections in executions of the tool, as Gitlab itself may require a specific set of operations. For example, provisioning of User and Group Permissions often needs to occur prior to other operations, we maintain a list within the `ProjectProcessors` and `GroupProcessors` classes in valid order of operations.
+!!! warning
+
+    gitlabform cannot guarantee consistent functionality when excluding and including different sections in executions of the tool, as Gitlab itself may require a specific set of operations. For example, provisioning of User and Group Permissions often needs to occur prior to other operations, we maintain a list within the `ProjectProcessors` and `GroupProcessors` classes in valid order of operations.
