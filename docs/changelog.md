@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.3.0
+
+### Chores
+
+- Improve logging within group_members_processor [#1064](https://github.com/gitlabform/gitlabform/pull/1064) ([TimKnight-Opencast](https://github.com/TimKnight-Opencast))
+
+### Features
+
+- add support for group and project avatar [#987](https://github.com/gitlabform/gitlabform/pull/987) ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.2.6
 
 ### Bug Fixes
