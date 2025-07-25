@@ -1,7 +1,6 @@
-from logging import debug, error
 from typing import Dict, Tuple
 
-from cli_ui import fatal, error, debug as verbose
+from cli_ui import info, fatal, error, debug as verbose
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
@@ -67,7 +66,7 @@ class GroupMembersProcessor(AbstractProcessor):
         enforce_group_members: bool,
     ):
         shared_with_groups_before = group_being_processed.shared_with_groups
-        debug("Group shared with BEFORE: %s", shared_with_groups_before)
+        verbose("Group shared with BEFORE: %s", shared_with_groups_before)
 
         groups_before_by_group_path = dict()
         for shared_with_group in shared_with_groups_before:
@@ -87,15 +86,12 @@ class GroupMembersProcessor(AbstractProcessor):
                 expires_at_before = groups_before_by_group_path[share_with_group_path]["expires_at"]
 
                 if group_access_before == group_access_to_set and expires_at_before == expires_at_to_set:
-                    debug(
+                    verbose(
                         "Nothing to change for group '%s' - same config now as to set.",
                         share_with_group_path,
                     )
                 else:
-                    debug(
-                        "Re-adding group '%s' to change their access level or expires at.",
-                        share_with_group_path,
-                    )
+                    info(f"Re-adding group {share_with_group_path} to change their access level or expires at.")
                     share_with_group_id = groups_before_by_group_path[share_with_group_path]["group_id"]
                     # we will remove the group first and then re-add them,
                     # to ensure that the group has the expected access level
@@ -108,9 +104,8 @@ class GroupMembersProcessor(AbstractProcessor):
                         raise e
 
             else:
-                debug(
-                    "Adding group '%s' who previously was not a member.",
-                    share_with_group_path,
+                verbose(
+                    f"Adding group {share_with_group_path} who previously was not a member.",
                 )
 
                 share_with_group_id = self.gl.get_group_id(share_with_group_path)
@@ -124,16 +119,16 @@ class GroupMembersProcessor(AbstractProcessor):
             # remove groups not configured explicitly
             groups_not_configured = set(groups_before_by_group_path) - set(groups_to_share_with_by_path)
             for group_path in groups_not_configured:
-                debug(
+                verbose(
                     "Removing group '%s' who is not configured to be a member.",
                     group_path,
                 )
                 share_with_group_id = self.gl.get_group_id(group_path)
                 self._unshare(group_being_processed, share_with_group_id)
         else:
-            debug("Not enforcing group members.")
+            verbose("Not enforcing group members.")
 
-        debug(
+        verbose(
             "Group shared with AFTER: %s",
             group_being_processed.members.list(get_all=True),
         )
@@ -143,7 +138,7 @@ class GroupMembersProcessor(AbstractProcessor):
         try:
             group_being_processed.unshare(share_with_group_id)
         except GitlabDeleteError:
-            debug("Group could not be unshared, likely was never shared to begin with")
+            info(f"Group with id {share_with_group_id} could not be unshared, likely was never shared to begin with")
             pass
 
     def _process_users(
@@ -157,7 +152,7 @@ class GroupMembersProcessor(AbstractProcessor):
         # (note: we DON'T get inherited users as we don't manage them at this level anyway)
         users_before = self.get_group_members(group)
 
-        debug("Group members BEFORE: %s", users_before.keys())
+        verbose("Group members BEFORE: %s", users_before.keys())
 
         if users_to_set_by_username:
             # group users to set by access level
@@ -217,26 +212,28 @@ class GroupMembersProcessor(AbstractProcessor):
                             and expires_at_before == expires_at_to_set
                             and member_role_id_before == member_role_id_to_set
                         ):
-                            debug(
+                            verbose(
                                 "Nothing to change for user '%s' - same config now as to set.",
                                 common_username,
                             )
                         else:
-                            debug(
-                                "Editing user '%s' membership to change their access level or expires at.",
-                                common_username,
+                            verbose(
+                                f"Editing user {common_username} to change their access level to {access_level_to_set},"
+                                f" expires at to {expires_at_to_set},"
+                                f" and member_role_id to {member_role_id_to_set}."
                             )
 
                             group_member.access_level = access_level_to_set
                             group_member.expires_at = expires_at_to_set
                             group_member.member_role_id = member_role_id_to_set
-                            group_member.save()
+                            try:
+                                group_member.save()
+                            except GitlabError as e:
+                                error(f"Could not save user {common_username}, error: {e.error_message}")
+                                raise e
 
                     else:
-                        debug(
-                            "Adding user '%s' who previously was not a member.",
-                            common_username,
-                        )
+                        verbose(f"Adding user {common_username} who previously was not a member.")
                         group.members.create(
                             {
                                 "user_id": user_id,
@@ -266,7 +263,7 @@ class GroupMembersProcessor(AbstractProcessor):
                     continue
 
                 if keep_bots and gl_user.bot:
-                    debug(f"Will not remove bot user '{user}' as the 'keep_bots' option is true.")
+                    verbose(f"Will not remove bot user '{user}' as the 'keep_bots' option is true.")
                     continue
 
                 try:
@@ -276,9 +273,9 @@ class GroupMembersProcessor(AbstractProcessor):
                     raise delete_error
 
         else:
-            debug("Not enforcing group members.")
+            verbose("Not enforcing group members.")
 
-        debug(f"Group members AFTER: {group.members.list(get_all=True)}")
+        verbose(f"Group members AFTER: {group.members.list(get_all=True)}")
 
     @staticmethod
     def get_group_members(group) -> dict:

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitlabform"
-version = "4.2.6"
+version = "4.3.0"
 authors = [{ name = "Greg Dubicki and Contributors" }]
 description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
 keywords = ["cli", "yaml", "gitlab", "configuration-as-code"]
@@ -55,7 +55,7 @@ test = [
     "coverage==7.9.2",
     "cryptography==45.0.5",
     "deepdiff==8.5.0",
-    "mypy==1.16.1",
+    "mypy==1.17.0",
     "mypy-extensions==1.1.0",
     "pre-commit==2.21.0",
     "pytest==8.4.1",

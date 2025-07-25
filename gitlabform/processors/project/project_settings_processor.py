@@ -1,4 +1,5 @@
-from logging import debug
+import os
+from logging import debug, error, warning
 from typing import Callable, Dict, List
 
 from gitlab.v4.objects import Project
@@ -24,6 +25,10 @@ class ProjectSettingsProcessor(AbstractProcessor):
 
         self._process_project_topics(project_settings_in_config, project_settings_in_gitlab)
 
+        # Remove avatar from config to process it last
+        avatar_config = project_settings_in_config.pop("avatar", None)
+
+        # Process other settings first
         if self._needs_update(project_settings_in_gitlab, project_settings_in_config):
             debug("Updating project settings")
             for key, value in project_settings_in_config.items():
@@ -37,7 +42,16 @@ class ProjectSettingsProcessor(AbstractProcessor):
         else:
             debug("No update needed for project settings")
 
+        # Process avatar last - with error handling that doesn't stop execution
+        if avatar_config is not None:
+            try:
+                self._process_project_avatar(project, {"avatar": avatar_config})
+            except Exception as e:
+                warning(f"Failed to process project avatar: {e}")
+                raise e
+
     def get_project_settings(self, project_path: str):
+        """Get project settings from GitLab."""
         return self.gl.get_project_by_path_cached(project_path).asdict()
 
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
@@ -94,3 +108,50 @@ class ProjectSettingsProcessor(AbstractProcessor):
         debug(f"topics after adjustment: {adjusted_project_topics_to_set}")
 
         project_settings_in_config["topics"] = adjusted_project_topics_to_set
+
+    def _process_project_avatar(self, project: Project, project_settings_in_config: dict) -> None:
+        """Process project avatar settings from configuration."""
+        debug("Processing project avatar configuration")
+
+        avatar_path = project_settings_in_config.get("avatar")
+        if avatar_path is None:
+            debug("No avatar configuration provided, skipping avatar processing")
+            return
+
+        debug(f"Avatar configuration found: {avatar_path}")
+
+        # Check current avatar status
+        current_avatar = getattr(project, "avatar_url", None)
+
+        if avatar_path == "":
+            # Want to remove avatar
+            if not current_avatar:
+                debug("Avatar already empty, no update needed")
+                return
+            debug("Deleting project avatar")
+            project.avatar = ""
+            project.save()
+            debug("Project avatar deleted successfully")
+            return
+
+        # Resolve relative paths to absolute paths
+        if not os.path.isabs(avatar_path):
+            # Convert relative path to absolute path relative to current working directory
+            avatar_path = os.path.abspath(avatar_path)
+            debug(f"Resolved relative path to absolute path: {avatar_path}")
+
+        # Want to set avatar from file
+        debug(f"Setting project avatar from file: {avatar_path}")
+        try:
+            with open(avatar_path, "rb") as avatar_file:
+                project.avatar = avatar_file
+                project.save()
+            debug("Project avatar uploaded successfully")
+        except FileNotFoundError:
+            error_msg = f"Project avatar file not found: {avatar_path}"
+            error(error_msg)
+            raise FileNotFoundError(error_msg)
+        except Exception as e:
+            error_msg = f"Error uploading project avatar: {str(e)}"
+            error(error_msg)
+            raise Exception(error_msg) from e
