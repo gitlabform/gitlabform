@@ -9,7 +9,7 @@
   ![GitLabForm logo](images/gitlabform-logo.png)
 </figure>
 
-is a specialized configuration as a code tool for GitLab:
+GitLabForm is a specialized configuration-as-code tool for GitLab:
 
 * application settings,
 * groups,
