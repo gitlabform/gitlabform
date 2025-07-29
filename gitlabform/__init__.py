@@ -285,7 +285,7 @@ class GitLabForm:
             dest="exclude_sections",
             default="none",
             type=str,
-            help="exclude sections with these names (comma-delimited). Warning: may result in odd functionality when enforcing different oders of operation.",
+            help="exclude sections with these names (comma-delimited). Warning: may result in failure or odd functionality when excluding sections that are dependent on by other sections.",
         )
 
         parser.add_argument(
