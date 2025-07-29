@@ -59,7 +59,7 @@ class VariablesProcessor:
                 (var.key, getattr(var, "environment_scope", "*")): var for var in existing_variables
             }
 
-            verbose(f"Found {len(existing_variables)} existing variables in {type(group_or_project)}")
+            verbose(f"Found {len(existing_variables)} existing variables in {group_or_project.name}")
 
             # Process all configured variables (both new and existing)
             processed_existing_vars = set()
@@ -79,12 +79,13 @@ class VariablesProcessor:
                 if vars_to_delete > 0:
                     verbose(
                         f"Enforce mode will delete {vars_to_delete} existing variables "
-                        f"that were not in configuration from {type(group_or_project)}"
+                        f"that were not in configuration from {group_or_project.name}"
                     )
                 self._delete_unconfigured_variables(existing_variables, processed_existing_vars)
 
-        except Exception as e:
-            warning(f"Failed to process variables for {type(group_or_project)}: {str(e)}")
+        except Exception as err:
+            warning(f"Failed to process variables for {group_or_project.name}: {str(err)}")
+            raise
 
     def _process_configured_variables(
         self,
@@ -182,11 +183,17 @@ class VariablesProcessor:
                         variable_attributes,
                         filter={"environment_scope": env_scope},
                     )
-        elif not should_delete:
-            verbose(f"Creating new variable {key} with scope {env_scope}")
-            variable_attributes = var_config.copy()
-            variable_attributes.pop("delete", None)
-            group_or_project.variables.create(variable_attributes)
+        else:
+            if should_delete:
+                verbose(f"Cannot delete variable {key} with scope {env_scope}, as it does not exist")
+                raise Exception(
+                    "To delete a variable with scope, make sure to specify 'environment_scope' in the config"
+                )
+            else:
+                verbose(f"Creating new variable {key} with scope {env_scope}")
+                variable_attributes = var_config.copy()
+                variable_attributes.pop("delete", None)
+                group_or_project.variables.create(variable_attributes)
 
     def _delete_unconfigured_variables(
         self,
@@ -195,6 +202,7 @@ class VariablesProcessor:
     ) -> None:
         """Delete variables that are not in the configuration when enforce mode is enabled."""
         for var in current_variables:
-            var_key = (var.key, getattr(var, "environment_scope", "*"))
-            if var_key not in processed_vars:
-                var.delete()
+            variable_key_and_env_scope = (var.key, getattr(var, "environment_scope", "*"))
+            if variable_key_and_env_scope not in processed_vars:
+                verbose(f"Deleting variable {var.key} with scope {var.environment_scope}")
+                var.delete(filter={"environment_scope": var.environment_scope})
