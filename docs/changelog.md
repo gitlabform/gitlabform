@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.4.0
+
+### Features
+
+- implement "exclude-sections" CLI parameter [#1016](https://github.com/gitlabform/gitlabform/pull/1016). ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+
+### Documentation
+
+- update intro using common term [#1065](https://github.com/gitlabform/gitlabform/pull/1065). ([mfriedenhagen](https://github.com/mfriedenhagen))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.3.0
 
 ### Chores
