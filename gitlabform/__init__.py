@@ -75,6 +75,7 @@ class GitLabForm:
             self.just_show_version = False
             self.terminate_after_error = True
             self.only_sections = "all"
+            self.exclude_sections = []
             self.recurse_subgroups = recurse_subgroups
 
             self._configure_output(tests=True)
@@ -97,6 +98,7 @@ class GitLabForm:
                 self.just_show_version,
                 self.terminate_after_error,
                 self.only_sections,
+                self.exclude_sections,
                 self.recurse_subgroups,
             ) = self._parse_args()
 
@@ -266,13 +268,24 @@ class GitLabForm:
             '(as numbered by "x/y Processing group/project" messages)',
         )
 
-        parser.add_argument(
+        sections_group = parser.add_mutually_exclusive_group()
+
+        sections_group.add_argument(
             "-os",
             "--only-sections",
             dest="only_sections",
             default="all",
             type=str,
             help="process only section with these names (comma-delimited)",
+        )
+
+        sections_group.add_argument(
+            "-es",
+            "--exclude-sections",
+            dest="exclude_sections",
+            default="none",
+            type=str,
+            help="exclude sections with these names (comma-delimited). Warning: may result in failure or odd functionality when excluding sections that are dependent on by other sections.",
         )
 
         parser.add_argument(
@@ -287,6 +300,11 @@ class GitLabForm:
 
         if args.only_sections != "all":
             args.only_sections = args.only_sections.split(",")
+
+        if args.exclude_sections != "none":
+            args.exclude_sections = args.exclude_sections.split(",")
+        else:
+            args.exclude_sections = []
 
         return (
             args.target,
@@ -304,6 +322,7 @@ class GitLabForm:
             args.just_show_version,
             args.terminate_after_error,
             args.only_sections,
+            args.exclude_sections,
             args.recurse_subsgroups,
         )
 
@@ -402,6 +421,7 @@ class GitLabForm:
                 diff_only_changed=self.diff_only_changed,
                 effective_configuration=effective_configuration,
                 only_sections=self.only_sections,
+                exclude_sections=self.exclude_sections,
             )
 
         for group in groups:
@@ -437,6 +457,7 @@ class GitLabForm:
                     diff_only_changed=self.diff_only_changed,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
+                    exclude_sections=self.exclude_sections,
                 )
 
                 successful_groups += 1
@@ -495,6 +516,7 @@ class GitLabForm:
                     diff_only_changed=self.diff_only_changed,
                     effective_configuration=effective_configuration,
                     only_sections=self.only_sections,
+                    exclude_sections=self.exclude_sections,
                 )
 
                 successful_projects += 1
