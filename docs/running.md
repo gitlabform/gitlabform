@@ -50,10 +50,10 @@ To view the full set of Command Line Options you can run `gitlabform --help`
 
 ### Exclude Sections
 
-To exclude certain sections of the configuration from a given gitlabform run, you can pass a list of comma-delimited names via the `--exclude_sections` parameter.
+To exclude certain sections of the configuration from a given gitlabform run, you can pass a list of comma-delimited names via the `--exclude-sections` parameter.
 
 ```shell
-gitlabform --exclude_sections group_settings,project_settings
+gitlabform --exclude-sections group-settings,project-settings
 ```
 
 !!! warning
