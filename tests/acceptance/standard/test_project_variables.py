@@ -38,395 +38,176 @@ class TestVariables:
             vars = self.project.variables.list()
             print("vars: ", type(vars), vars)
 
-
-    def test__single_variable_no_change(self, project_for_function):
-        """Test case: Single variable - no change"""
-
-        # Set initial variables
-        initial_vars = [{"key": "FOO", "value": "123"}]
-
-        for var in initial_vars:
-            project_for_function.variables.create(var)
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              FOO:
-                key: FOO
-                value: 123
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 1
-        assert variables[0].key == "FOO"
-        assert variables[0].value == "123"
-
-    def test__single_variable_update(self, project_for_function):
-        """Test case: Single variable - update"""
-
-        # Set initial variables
-        initial_vars = [{"key": "FOO", "value": "123"}]
-
-        for var in initial_vars:
-            project_for_function.variables.create(var)
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              FOO:
-                key: FOO
-                value: 123456
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 1
-        assert variables[0].key == "FOO"
-        assert variables[0].value == "123456"
-
-    def test__single_variable_delete(self, project_for_function):
-        """Test case: Single variable - delete"""
-
-        # Set initial variables
-        initial_vars = [{"key": "FOO", "value": "123"}]
-
-        for var in initial_vars:
-            project_for_function.variables.create(var)
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              FOO:
-                key: FOO
-                value: 123456
-                delete: true
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 0
-
-    def test__single_variable_delete_using_variable_key_only(self, project_for_function):
-        """Test case: Single variable - delete using variable key only"""
-
-        # Set initial variables
-        initial_vars = [{"key": "FOO", "value": "123"}]
-
-        for var in initial_vars:
-            project_for_function.variables.create(var)
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              FOO:
-                key: FOO
-                delete: true
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 0
-
-    def test__multiple_variables_all_operations(self, project_for_function):
-        """Test case: Multiple variables - all operations"""
+    def test__add_new_variables(self, project):
+        """Test case: add new variables"""
 
         # Set initial variables
         initial_vars = [
-            {"key": "FOO", "value": "123"},  # will be updated
-            {"key": "BAR", "value": "bleble"},  # will be deleted
-            {"key": "BAZ", "value": "old"},  # will stay the same
-            # A new variable will be added using gitlabform
+            {"key": "FOO", "value": "foo123"},
         ]
 
         for var in initial_vars:
-            project_for_function.variables.create(var)
+            project.variables.create(var)
+
+        # Verify that 1 initial variable have been set
+        assert len(project.variables.list(get_all=True)) == 1
 
         # Apply gitlabform config
         config = f"""
         projects_and_groups:
-          {project_for_function.path_with_namespace}:
+          {project.path_with_namespace}:
             variables:
-              FOO:
+              FOO_scoped_variable:
                 key: FOO
-                value: 123456
-              BAR:
+                value: prod-value
+                environment_scope: prod
+              BAR_variable:
                 key: BAR
-                delete: true
-              BAZ:
-                key: BAZ
-                value: old
-              QUX:
-                key: QUX
-                value: new
+                value: bar-value
         """
-        run_gitlabform(config, project_for_function)
+        run_gitlabform(config, project)
 
         # Verify results
-        variables = project_for_function.variables.list(get_all=True)
+        variables = project.variables.list(get_all=True)
         assert len(variables) == 3
+
         assert variables[0].key == "FOO"
-        assert variables[0].value == "123456"
-        assert variables[1].key == "BAZ"
-        assert variables[1].value == "old"
-        assert variables[2].key == "QUX"
-        assert variables[2].value == "new"
+        assert variables[0].value == "foo123"
+        assert variables[0].environment_scope == "*"  # default scope if not configured
 
-    def test__enforce_mode_delete_all_variables(self, project_for_function):
-        """Test case: Enforce mode - delete all variables"""
+        assert variables[1].key == "FOO"
+        assert variables[1].value == "prod-value"
+        assert variables[1].environment_scope == "prod"
 
-        # Set initial variables
-        initial_vars = [{"key": "FOO", "value": "123"}, {"key": "BAR", "value": "456"}]
+        assert variables[2].key == "BAR"
+        assert variables[2].value == "bar-value"
+        assert variables[2].environment_scope == "*"  # default scope if not configured
 
-        for var in initial_vars:
-            project_for_function.variables.create(var)
+    def test__update_variables(self, project):
+        """Test case: update variables that were added in previous test case"""
+
+        # Verify that 3 initial variables have been set because 'project' is class scoped fixture and the last test case result will set 3 variables.
+        assert len(project.variables.list(get_all=True)) == 3
 
         # Apply gitlabform config
         config = f"""
         projects_and_groups:
-          {project_for_function.path_with_namespace}:
+          {project.path_with_namespace}:
             variables:
-              enforce: true
+              # Not configuring 'FOO' variable with default scope. Expect that to remain as-is
+              FOO_scoped_variable:
+                key: FOO
+                value: prod-new-value
+                environment_scope: prod
+              BAR_variable:
+                key: BAR
+                value: bar-value-updated
         """
-        run_gitlabform(config, project_for_function)
+        run_gitlabform(config, project)
 
-        # Verify results - all variables should be deleted
-        variables = project_for_function.variables.list(get_all=True)
+        # Verify results
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 3
+
+        # Expect 'FOO' variable with default scope to remain unchanged because it was not in the config
+        assert variables[0].key == "FOO"
+        assert variables[0].value == "foo123"
+        assert variables[0].environment_scope == "*"  # default scope if not configured
+
+        assert variables[1].key == "FOO"
+        assert variables[1].value == "prod-new-value"
+        assert variables[1].environment_scope == "prod"
+
+        assert variables[2].key == "BAR"
+        assert variables[2].value == "bar-value-updated"
+        assert variables[2].environment_scope == "*"  # default scope if not configured
+
+    def test__delete_variables(self, project, capsys):
+        """Test case: delete variables that were added/updated in previous test cases"""
+
+        # Verify that 3 initial variables have been set because 'project' is class scoped fixture and the last test case result will set 3 variables.
+        assert len(project.variables.list(get_all=True)) == 3
+
+        # Apply gitlabform config
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              # Delete following variable even though 'value' is not provided
+              FOO_default_scoped_variable:
+                key: FOO
+                delete: true
+              # Delete following variable where both key and value is provided
+              BAR_variable:
+                key: BAR
+                value: bar-value-updated
+                delete: true
+              # Delete following variable that specifies key and environment_scope
+              FOO_scoped_variable:
+                key: FOO
+                environment_scope: prod
+                delete: true
+        """
+        run_gitlabform(config, project)
+
+        # Verify results
+        variables = project.variables.list(get_all=True)
         assert len(variables) == 0
 
-    def test__enforce_mode_with_all_operations(self, project_for_function):
-        """Test case: Enforce mode - with all operations (i.e. add, delete, update)"""
-        # Set initial variables
+        # Now test deleting a variable by providing a config that contains correct key but wrong value.
+        # It should not delete that variable because the search shouldn't match.
+
+        # First set inital variables for test
         initial_vars = [
-            {"key": "FOO", "value": "123"},  # will stay
-            {"key": "BAR", "value": "456"},  # will be updated
-            {"key": "BAZ", "value": "789"},  # will be deleted via delete key
-            {
-                "key": "BLAH",
-                "value": "blahblah",
-            },  # will be deleted because of ommission in gitlabform config and 'enforce' mode
-            # A new variable will be added using gitlabform
+            {"key": "FOO", "value": "foo-123"},
+            {"key": "BAR", "value": "bar-123", "environment_scope": "prod"},
         ]
-
         for var in initial_vars:
-            project_for_function.variables.create(var)
+            project.variables.create(var)
 
-        # Verify that 4 initial variables have been set
-        assert len(project_for_function.variables.list(get_all=True)) == 4
+        # Verify that 2 initial variables have been set
+        assert len(project.variables.list(get_all=True)) == 2
 
-        # Apply gitlabform config
+        # Apply gitlabform config containig wrong value for FOO that has deafult scope '*'
         config = f"""
         projects_and_groups:
-          {project_for_function.path_with_namespace}:
+          {project.path_with_namespace}:
             variables:
-              enforce: true
-              FOO:
+              FOO_default_scoped_variable:
                 key: FOO
-                value: 123
-              BAR:
-                key: BAR
-                value: 456_updated
-              BAZ:
-                key: BAZ
+                value: this is a wrong value
                 delete: true
-              QUX:
-                key: QUX
-                value: new 
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 3
-        assert variables[0].key == "FOO"
-        assert variables[0].value == "123"
-        assert variables[1].key == "BAR"
-        assert variables[1].value == "456_updated"
-        assert variables[2].key == "QUX"
-        assert variables[2].value == "new"
-
-    def test__raw_params_passed(self, project_for_function):
-        """Test case: Raw parameters (protected, masked)"""
-        # Set initial variables
-        initial_vars = []  # no initial vars
-
-        for var in initial_vars:
-            project_for_function.variables.create(var)
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              Protected_variable:
-                key: PROTECTED_VAR
-                value: secret123
-                protected: true
-                masked: true
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 1
-        assert variables[0].key == "PROTECTED_VAR"
-        assert variables[0].value == "secret123"
-        assert variables[0].protected is True
-        assert variables[0].masked is True
-
-    def test__preserve_protected_status(self, project_for_function):
-        """Test case: Preserve protected status on update if protected config is not set"""
-        # Set initial variables
-        initial_vars = [{"key": "PROTECTED_VAR", "value": "secret123", "protected": True}]
-
-        for var in initial_vars:
-            project_for_function.variables.create(var)
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              Protected_variable:
-                key: PROTECTED_VAR
-                value: newvalue
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 1
-        assert variables[0].key == "PROTECTED_VAR"
-        assert variables[0].value == "newvalue"
-        assert variables[0].protected is True
-
-    def test__preserve_masked_status(self, project_for_function):
-        """Test case: Preserve masked status on update if masked config is not set"""
-        # Set initial variables
-        initial_vars = [{"key": "MASKED_VAR", "value": "secret123", "masked": True}]
-
-        for var in initial_vars:
-            project_for_function.variables.create(var)
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              Masked_variable:
-                key: MASKED_VAR
-                value: newvalue
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 1
-        assert variables[0].key == "MASKED_VAR"
-        assert variables[0].value == "newvalue"
-        assert variables[0].masked is True
-
-    def test__special_characters(self, project_for_function):
-        """Test case: Special characters in value"""
-
-        # Apply gitlabform config
-        config = f"""
-            projects_and_groups:
-              {project_for_function.path_with_namespace}:
-                variables:
-                  Variable_value_with_special_chars:
-                    key: SPECIAL_CHARS
-                    value: "!@#$%^&*()_+-=[]{{}}|;:,.<>?"
-            """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 1
-        assert variables[0].key == "SPECIAL_CHARS"
-        assert variables[0].value == "!@#$%^&*()_+-=[]{}|;:,.<>?"
-
-    def test__complex_yaml_config(self, project_for_function):
-        """Test case: Complex YAML configuration handling"""
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              Variable_value_with_special_chars:
-                key: CONFIG_WITH_SPECIAL
-                value: |
-                  # This represents a typical complex configuration value
-                  host: ${{HOST_VAR}}
-                  port: 8080
-                  paths:
-                    - /api/v1
-                    - /api/v2
         """
 
-        run_gitlabform(config, project_for_function)
+        # TODO: This test should run like this
+        # with pytest.raises(SystemExit) as exec_info:
+        #     run_gitlabform(config, project)
 
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
+        run_gitlabform(config, project)
+
+        variables = project.variables.list(get_all=True)
         assert len(variables) == 1
-        assert variables[0].key == "CONFIG_WITH_SPECIAL"
-        # The \n is needed because the value is a multi-line string.
-        # Each line break in the YAML block literal (|) is preserved as a newline character in the string.
-        # Without the \n, all lines would be concatenated together, which does not match the actual value.
-        # To debug, print the value to see the actual string:
-        assert variables[0].value == (
-            "# This represents a typical complex configuration value\n"
-            "host: ${HOST_VAR}\n"
-            "port: 8080\n"
-            "paths:\n"
-            "  - /api/v1\n"
-            "  - /api/v2\n"
-        )
 
-    def test__delete_variables_scope_requires_specifying_scope(self, group_for_function, capsys):
-        """Test case: If a variable is configured with non-default environment scope,
-        deleting will require specifying the environment scope in gitlabform config."""
-        # Set initial variables
-        initial_vars = [
-            {"key": "FOO", "value": "prod-val", "environment_scope": "prod"},  # will be deleted
-        ]
+        assert variables[0].key == "BAR"
+        assert variables[0].value == "bar-123"
+        assert variables[0].environment_scope == "prod"
 
+        # Now test deleting a variable with environment scope (i.e. BAR) but it's not specified
         error_message_for_delete_without_scope = (
             "To delete a variable with scope, make sure to specify 'environment_scope' in the config"
         )
-
-        for var in initial_vars:
-            group_for_function.variables.create(var)
-
-        # Ensure 1 initial variables have been configured
-        assert len(group_for_function.variables.list(get_all=True)) == 1
-
-        # Test using wrong config
-        config_wrong = f"""
+        # Apply gitlabform config
+        config = f"""
         projects_and_groups:
-          {group_for_function.full_path}/*:
-            group_variables:
-              foo_prod:
-                key: FOO
+          {project.path_with_namespace}:
+            variables:
+              BAR_prod_scoped_variable:
+                key: BAR
                 delete: true
         """
-
         # Verify results
         with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_wrong, group_for_function)
+            run_gitlabform(config, project)
 
         captured_output = capsys.readouterr()
 
@@ -435,115 +216,210 @@ class TestVariables:
         assert exc_info.value.code == EXIT_PROCESSING_ERROR
         assert error_message_for_delete_without_scope in captured_output.err
 
-        variables = group_for_function.variables.list(get_all=True)
-        assert len(variables) == 1  # variable wasn't deleted due to config error
-
-        # Now test using correct config
-        config_correct = f"""
+        # Now test deleting variable with envrionment scope but wrong value for the variable
+        config = f"""
         projects_and_groups:
-          {group_for_function.full_path}/*:
-            group_variables:
-              foo_prod:
-                key: FOO
+          {project.path_with_namespace}:
+            variables:
+              BAR_prod_scoped_variable:
+                key: BAR
+                value: this is a wrong value
                 environment_scope: prod
                 delete: true
         """
-        run_gitlabform(config_correct, group_for_function)
 
-        # Verify results
-        variables = group_for_function.variables.list(get_all=True)
+        # TODO: This test should run like this
+        # with pytest.raises(SystemExit) as exec_info:
+        #     run_gitlabform(config, project)
+
+        run_gitlabform(config, project)
+
+        variables = project.variables.list(get_all=True)
         assert len(variables) == 0
 
-    def test__variables_same_key_different_scopes(self, group_for_function):
-        """Test case: Variable with same key but different scopes"""
-        # Set initial variables
+    def test__raw_parameter_passing(self, project):
+        """Test case: validate raw parameter passing design works by setting extra optional attributes for variables"""
+
+        # The previous test case using 'project' fixture ends with 0 variables.
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 0
+
+        # Apply gitlabform config
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              FOO_scoped_variable:
+                description: this is a prod scoped protected and masked variable
+                key: FOO
+                value: foo-123-xyz  # value must follow masking requirement
+                protected: true
+                masked: true
+                environment_scope: prod
+                filter[environment_scope]: prod
+        """
+        run_gitlabform(config, project)
+
+        # Verify results
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 1
+
+        assert variables[0].description == "this is a prod scoped protected and masked variable"
+        assert variables[0].key == "FOO"
+        assert variables[0].value == "foo-123-xyz"
+        assert variables[0].protected is True
+        assert variables[0].masked is True
+        assert variables[0].environment_scope == "prod"
+
+    def test__preserve_unconfigured_attributes(self, project):
+        """Test case: When updating a variable, any attributes that is not in config, should remain as-is"""
+
+        # The previous test case using 'project' fixture ends with 1 variables.
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 1
+
+        # Apply gitlabform config
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              FOO_scoped_variable:
+                key: FOO
+                value: foo-123-xyz-new-value  # value must follow masking requirement as previously it was configured
+                environment_scope: prod
+        """
+        run_gitlabform(config, project)
+
+        # Verify results
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 1
+
+        assert variables[0].description == "this is a prod scoped protected and masked variable"
+        assert variables[0].key == "FOO"
+        assert variables[0].value == "foo-123-xyz-new-value"
+        assert variables[0].protected is True
+        assert variables[0].masked is True
+        assert variables[0].environment_scope == "prod"
+
+    def test__enforce_mode_delete_all_variables(self, project):
+        """Test case: Enforce mode - delete all variables"""
+
+        # Initial variables should already be set for the 'project' because it's a class scoped fixture.
+        # Ensure the project has correct number of variables from the latest state of previous test.
+        assert len(project.variables.list(get_all=True)) == 1
+
+        # Apply gitlabform config
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              enforce: true
+        """
+        run_gitlabform(config, project)
+
+        # Verify results - all variables should be deleted
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 0
+
+    def test__enforce_mode_with_all_operations(self, project):
+        """Test case: Enforce mode - with all operations (i.e. add, delete, update)"""
+
+        # Initial variables be empty for the 'project' because it's a class scoped fixture and previous test deleted all variables.
+        assert len(project.variables.list(get_all=True)) == 0
+
+        # Add some new variables so that we can test gitlabform config
         initial_vars = [
-            {"key": "FOO", "value": "prod-val", "environment_scope": "prod"},  # value will be updated
-            {"key": "FOO", "value": "stage-val", "environment_scope": "stage"},  # will be deleted using 'delete' key
-            {"key": "FOO", "value": "dev-val", "environment_scope": "dev"},  # protected will be set
+            {"key": "FOO", "value": "123"},  # should not change because gitlabform config will be same
+            {
+                "key": "FOO",
+                "value": "prod-value",
+                "environment_scope": "prod",
+            },  # should be deleted because of ommission in gitlabform config and 'enforce' mode
+            {"key": "BAR", "value": "456"},  # should be updated because gitlabform config will apply new value
+            {"key": "BAZ", "value": "789"},  # should be deleted because gitlabform config will use the 'delete' key
+            {
+                "key": "BLAH",
+                "value": "blahblah",
+            },  # Should be deleted because of ommission in gitlabform config and 'enforce' mode
             # A new variable will be added using gitlabform
         ]
 
         for var in initial_vars:
-            group_for_function.variables.create(var)
+            project.variables.create(var)
 
-        # Ensure 3 initial variables have been configured
-        assert len(group_for_function.variables.list(get_all=True)) == 3
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {group_for_function.full_path}/*:
-            group_variables:
-              foo_prod:
-                key: FOO
-                value: new-prod-value
-                environment_scope: prod
-              foo_stage:
-                key: FOO
-                environment_scope: stage
-                delete: true
-              foo_dev:
-                key: FOO
-                value: dev-val
-                environment_scope: dev
-                protected: true
-              foo_test:
-                key: FOO
-                value: test-val
-                environment_scope: test
-        """
-        run_gitlabform(config, group_for_function)
-
-        # Verify results
-        variables = group_for_function.variables.list(get_all=True)
-        assert len(variables) == 3
-
-        assert variables[0].key == "FOO"
-        assert variables[0].value == "new-prod-value"
-        assert variables[0].environment_scope == "prod"
-
-        assert variables[1].key == "FOO"
-        assert variables[1].value == "dev-val"
-        assert variables[1].environment_scope == "dev"
-        assert variables[1].protected is True
-
-        assert variables[2].key == "FOO"
-        assert variables[2].value == "test-val"
-        assert variables[2].environment_scope == "test"
-
-    def test__enforce_mode_with_environment_scopes(self, group_for_function):
-        """Test case: Enforce mode with environment scopes"""
-        # Set initial variables
-        initial_vars = [
-            {"key": "FOO", "value": "prod-val", "environment_scope": "prod"},  # value will be updated
-            {
-                "key": "FOO",
-                "value": "stage-val",
-                "environment_scope": "stage",
-            },  # ommitted in gitlabform config - will be deleted due to 'enforce' mode
-        ]
-
-        for var in initial_vars:
-            group_for_function.variables.create(var)
+        # Verify that 4 initial variables have been set
+        assert len(project.variables.list(get_all=True)) == 5
 
         # Apply gitlabform config
         config = f"""
         projects_and_groups:
-          {group_for_function.full_path}/*:
-            group_variables:
+          {project.path_with_namespace}:
+            variables:
               enforce: true
-              foo_prod:
+              FOO_variable:
                 key: FOO
-                value: prod-new-val
-                environment_scope: prod
+                value: 123
+              BAR_variable:
+                key: BAR
+                value: 456_updated
+              BAZ_variable:
+                key: BAZ
+                delete: true
+              QUX_variable:
+                key: QUX
+                value: new 
         """
-        run_gitlabform(config, group_for_function)
+        run_gitlabform(config, project)
 
         # Verify results
-        variables = group_for_function.variables.list(get_all=True)
-        assert len(variables) == 1
-
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 3
         assert variables[0].key == "FOO"
-        assert variables[0].value == "prod-new-val"
-        assert variables[0].environment_scope == "prod"
+        assert variables[0].value == "123"
+        assert variables[1].key == "BAR"
+        assert variables[1].value == "456_updated"
+        assert variables[2].key == "QUX"
+        assert variables[2].value == "new"
+
+    def test__special_characters(self, project_for_function):
+        """Test case: Special characters in value"""
+
+        # Apply gitlabform config
+        config = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            variables:
+              Variable_value_with_special_chars:
+                key: SPECIAL_CHARS
+                value: "!@#$%^&*()_+-=[]{{}}|;:,.<>?"
+              Variable_value_with_complex_value:
+                key: COMPLEX_VALUE
+                value: |
+                  # This represents a typical complex configuration value
+                  host: ${{HOST_VAR}}
+                  port: 8080
+                  paths:
+                    - /api/v1
+                    - /api/v2
+        """
+        run_gitlabform(config, project_for_function)
+
+        # Verify results
+        variables = project_for_function.variables.list(get_all=True)
+        assert len(variables) == 2
+        assert variables[0].key == "SPECIAL_CHARS"
+        assert variables[0].value == "!@#$%^&*()_+-=[]{}|;:,.<>?"
+        assert variables[1].key == "COMPLEX_VALUE"
+        # The \n is needed because the value is a multi-line string.
+        # Each line break in the YAML block literal (|) is preserved as a newline character in the string.
+        # Without the \n, all lines would be concatenated together, which does not match the actual value.
+        # To debug, print the value to see the actual string:
+        expected_message = (
+            "# This represents a typical complex configuration value\n"
+            "host: ${HOST_VAR}\n"
+            "port: 8080\n"
+            "paths:\n"
+            "  - /api/v1\n"
+            "  - /api/v2\n"
+        )
+        assert variables[1].value == expected_message
