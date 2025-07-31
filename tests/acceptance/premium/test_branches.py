@@ -308,5 +308,88 @@ class TestBranches:
         )
         assert merge_access_group_ids == sorted([group_for_function.id])
 
+    def test__modify_protection(self, project_for_function, group_for_function, branch_for_function, make_user):
+        project_user_allowed_to_push = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
+        project_for_function.members.create(
+            {"user_id": project_user_allowed_to_push.id, "access_level": AccessLevel.DEVELOPER.value}
+        )
 
-# TODO: test removing allowed_to_push
+        project_user_allowed_to_merge = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
+        project_for_function.members.create(
+            {"user_id": project_user_allowed_to_merge.id, "access_level": AccessLevel.DEVELOPER.value}
+        )
+
+        # Wait a little for newly created users to be available.
+        time.sleep(2)
+
+        config_protect_branch = f"""
+         projects_and_groups:
+           {project_for_function.path_with_namespace}:
+             branches:
+               {branch_for_function}:
+                 protected: true
+                 push_access_level: {AccessLevel.NO_ACCESS.value}
+                 merge_access_level: {AccessLevel.MAINTAINER.value}
+                 unprotect_access_level: {AccessLevel.MAINTAINER.value}
+         """
+
+        run_gitlabform(config_protect_branch, project_for_function.path_with_namespace)
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            unprotect_access_level,
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
+        assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+        config_update_branch = f"""
+         projects_and_groups:
+           {project_for_function.path_with_namespace}:
+             branches:
+               {branch_for_function}:
+                 protected: true
+                 allowed_to_push:
+                  - access_level: {AccessLevel.NO_ACCESS.value}
+                  - user_id: {project_user_allowed_to_push.id}
+                 allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+                  - user: {project_user_allowed_to_merge.username}
+         """
+
+        run_gitlabform(config_update_branch, project_for_function.path_with_namespace)
+
+        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
+        assert protected_branch.allow_force_push is False
+        assert protected_branch.code_owner_approval_required is False
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            _,
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert push_access_user_ids == sorted(
+            [
+                project_user_allowed_to_push.id,
+            ]
+        )
+
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_user_ids == sorted(
+            [
+                project_user_allowed_to_merge.id,
+            ]
+        )
