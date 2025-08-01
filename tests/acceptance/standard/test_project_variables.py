@@ -179,18 +179,19 @@ class TestVariables:
                 delete: true
         """
 
-        # TODO: This test should run like this
-        # with pytest.raises(SystemExit) as exec_info:
-        #     run_gitlabform(config, project)
-
-        run_gitlabform(config, project)
+        with pytest.raises(SystemExit) as exec_info:
+            run_gitlabform(config, project)
 
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 1
+        assert len(variables) == 2
 
-        assert variables[0].key == "BAR"
-        assert variables[0].value == "bar-123"
-        assert variables[0].environment_scope == "prod"
+        assert variables[0].key == "FOO"
+        assert variables[0].value == "foo-123"
+        assert variables[0].environment_scope == "*"
+
+        assert variables[1].key == "BAR"
+        assert variables[1].value == "bar-123"
+        assert variables[1].environment_scope == "prod"
 
         # Now test deleting a variable with environment scope (i.e. BAR) but it's not specified
         error_message_for_delete_without_scope = (
@@ -228,21 +229,18 @@ class TestVariables:
                 delete: true
         """
 
-        # TODO: This test should run like this
-        # with pytest.raises(SystemExit) as exec_info:
-        #     run_gitlabform(config, project)
-
-        run_gitlabform(config, project)
+        with pytest.raises(SystemExit) as exec_info:
+            run_gitlabform(config, project)
 
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 0
+        assert len(variables) == 2
 
     def test__raw_parameter_passing(self, project):
         """Test case: validate raw parameter passing design works by setting extra optional attributes for variables"""
 
-        # The previous test case using 'project' fixture ends with 0 variables.
+        # The previous test case using 'project' fixture ends with 2 variables.
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 0
+        assert len(variables) == 2
 
         # Apply gitlabform config
         config = f"""
@@ -262,21 +260,21 @@ class TestVariables:
 
         # Verify results
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 1
+        assert len(variables) == 3
 
-        assert variables[0].description == "this is a prod scoped protected and masked variable"
-        assert variables[0].key == "FOO"
-        assert variables[0].value == "foo-123-xyz"
-        assert variables[0].protected is True
-        assert variables[0].masked is True
-        assert variables[0].environment_scope == "prod"
+        assert variables[2].description == "this is a prod scoped protected and masked variable"
+        assert variables[2].key == "FOO"
+        assert variables[2].value == "foo-123-xyz"
+        assert variables[2].protected is True
+        assert variables[2].masked is True
+        assert variables[2].environment_scope == "prod"
 
     def test__preserve_unconfigured_attributes(self, project):
         """Test case: When updating a variable, any attributes that is not in config, should remain as-is"""
 
-        # The previous test case using 'project' fixture ends with 1 variables.
+        # The previous test case using 'project' fixture ends with 3 variables.
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 1
+        assert len(variables) == 3
 
         # Apply gitlabform config
         config = f"""
@@ -292,21 +290,21 @@ class TestVariables:
 
         # Verify results
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 1
+        assert len(variables) == 3
 
-        assert variables[0].description == "this is a prod scoped protected and masked variable"
-        assert variables[0].key == "FOO"
-        assert variables[0].value == "foo-123-xyz-new-value"
-        assert variables[0].protected is True
-        assert variables[0].masked is True
-        assert variables[0].environment_scope == "prod"
+        assert variables[2].description == "this is a prod scoped protected and masked variable"
+        assert variables[2].key == "FOO"
+        assert variables[2].value == "foo-123-xyz-new-value"
+        assert variables[2].protected is True
+        assert variables[2].masked is True
+        assert variables[2].environment_scope == "prod"
 
     def test__enforce_mode_delete_all_variables(self, project):
         """Test case: Enforce mode - delete all variables"""
 
         # Initial variables should already be set for the 'project' because it's a class scoped fixture.
         # Ensure the project has correct number of variables from the latest state of previous test.
-        assert len(project.variables.list(get_all=True)) == 1
+        assert len(project.variables.list(get_all=True)) == 3
 
         # Apply gitlabform config
         config = f"""

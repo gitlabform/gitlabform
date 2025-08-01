@@ -31,6 +31,43 @@ class VariablesProcessor:
         else:
             return [cast(GroupVariable, var) for var in variables]  # Return type is List[GroupVariable]
 
+    def _create_lookup_key(self, attributes: Dict[str, Any], is_config: bool = False) -> Tuple[str, str]:
+        """Create a lookup key from variable attributes.
+        
+        Args:
+            attributes: Dictionary of variable attributes
+            is_config: Boolean indicating if these are attributes from config (True) 
+                      or from existing GitLab variable (False)
+        
+        Returns:
+            Tuple of (key, environment_scope) for consistent lookup
+        """
+        return (
+            attributes['key'],
+            attributes.get('environment_scope', '*')
+        )
+
+    def _variables_match(self, existing_var: Dict[str, Any], config_var: Dict[str, Any]) -> bool:
+        """Compare if existing variable matches the configured attributes.
+        
+        Args:
+            existing_var: Dictionary of existing variable attributes
+            config_var: Dictionary of configured variable attributes
+        
+        Returns:
+            True if all configured attributes match the existing variable
+        """
+        # Ignore these keys when comparing
+        ignore_keys = {'id', '_links', 'delete'}
+        
+        # Check if all configured attributes match existing variable
+        for key, value in config_var.items():
+            if key in ignore_keys:
+                continue
+            if key not in existing_var or existing_var[key] != value:
+                return False
+        return True
+
     def process_variables(
         self,
         group_or_project: Group | Project,
@@ -54,9 +91,10 @@ class VariablesProcessor:
         try:
             existing_variables = self.get_variables_from_gitlab(group_or_project)
 
-            # Create lookup of existing variables for faster access
+            # Create lookup of existing variables considering all attributes
             existing_vars_lookup = {
-                (var.key, getattr(var, "environment_scope", "*")): var for var in existing_variables
+                self._create_lookup_key(var.asdict()): var
+                for var in existing_variables
             }
 
             verbose(f"Found {len(existing_variables)} existing variables in {group_or_project.name}")
@@ -130,10 +168,9 @@ class VariablesProcessor:
         processed_vars: Set[Tuple[str, str]] = set()
 
         for var_name, var_config in configured_variables.items():
-            key: str = var_config["key"]
-            env_scope: str = var_config.get("environment_scope", "*")
-
-            processed_vars.add((key, env_scope))
+            # Create lookup key using key and scope
+            lookup_key = self._create_lookup_key(var_config, is_config=True)
+            processed_vars.add(lookup_key)
 
             # Handle the variable with all its configured attributes
             self._handle_variable(group_or_project, var_config, current_vars_lookup)
@@ -146,43 +183,38 @@ class VariablesProcessor:
         var_config: Dict[str, Any],
         current_vars_lookup: Dict[Tuple[str, str], GroupVariable | ProjectVariable],
     ) -> None:
-        """Handle a single variable: create, update, or delete.
-
-        Args:
-            group_or_project: GitLab group or project object
-            var_config: Complete variable configuration including all attributes
-            current_vars_lookup: Dictionary mapping (key, scope) to existing GroupVariable or ProjectVariable objects
-
-        Note:
-            - Uses filter parameter with environment_scope for unique identification
-            - Supports all GitLab API variable attributes
-            - Uses needs_update to determine if update is needed
-        """
+        """Handle a single variable: create, update, or delete."""
         key: str = var_config["key"]
         env_scope: str = var_config.get("environment_scope", "*")
         should_delete: bool = var_config.get("delete", False)
 
-        # Look up existing variable using the lookup dictionary
-        existing_var = current_vars_lookup.get((key, env_scope))
+        # Look up existing variable using key and scope
+        lookup_key = self._create_lookup_key(var_config)
+        existing_var = current_vars_lookup.get(lookup_key)
 
         if existing_var:
+            existing_attrs = existing_var.asdict()
+            
+            # For delete operations, verify all provided attributes match
             if should_delete:
+                if not self._variables_match(existing_attrs, var_config):
+                    error_msg = (f"Cannot delete variable {key} with scope {env_scope} - "
+                               "provided attributes don't match existing variable")
+                    # fatal(error_msg)
+                    raise Exception(error_msg)
+
                 verbose(f"Deleting variable {key} with scope {env_scope}")
                 group_or_project.variables.delete(key, filter={"environment_scope": env_scope})
-            else:
-                # Create variable configuration without special keys
+            elif not self._variables_match(existing_attrs, var_config):
+                # Update if attributes don't match
+                verbose(f"Updating variable {key} with scope {env_scope}")
                 variable_attributes = var_config.copy()
                 variable_attributes.pop("delete", None)
-                variable_attributes.pop("key", None)
-                env_scope = variable_attributes.pop("environment_scope", "*")
-
-                if self.needs_update(existing_var.asdict(), variable_attributes):
-                    verbose(f"Updating variable {key} with scope {env_scope}")
-                    group_or_project.variables.update(
-                        key,
-                        variable_attributes,
-                        filter={"environment_scope": env_scope},
-                    )
+                group_or_project.variables.update(
+                    key,
+                    variable_attributes,
+                    filter={"environment_scope": env_scope},
+                )
         else:
             if should_delete:
                 verbose(f"Cannot delete variable {key} with scope {env_scope}, as it does not exist")
@@ -198,11 +230,11 @@ class VariablesProcessor:
     def _delete_unconfigured_variables(
         self,
         current_variables: List[GroupVariable] | List[ProjectVariable],
-        processed_vars: Set[Tuple[str, str]],
+        processed_vars: Set[Tuple[Tuple[str, Any], ...]],
     ) -> None:
         """Delete variables that are not in the configuration when enforce mode is enabled."""
         for var in current_variables:
-            variable_key_and_env_scope = (var.key, getattr(var, "environment_scope", "*"))
-            if variable_key_and_env_scope not in processed_vars:
-                verbose(f"Deleting variable {var.key} with scope {var.environment_scope}")
-                var.delete(filter={"environment_scope": var.environment_scope})
+            lookup_key = self._create_lookup_key(var.asdict())
+            if lookup_key not in processed_vars:
+                verbose(f"Deleting variable {var.key} with scope {getattr(var, 'environment_scope', '*')}")
+                var.delete(filter={"environment_scope": getattr(var, "environment_scope", "*")})
