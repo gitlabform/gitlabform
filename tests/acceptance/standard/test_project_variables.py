@@ -123,117 +123,162 @@ class TestVariables:
         assert variables[2].environment_scope == "*"  # default scope if not configured
 
     def test__delete_variables(self, project, capsys):
-        """Test case: delete variables that were added/updated in previous test cases"""
+        """Test case: Variable deletion scenarios"""
+        
+        # Clear any existing variables from previous tests since 'project' is class-scoped
+        existing = project.variables.list(get_all=True)
+        for var in existing:
+            project.variables.delete(var.key, filter={"environment_scope": var.environment_scope})
 
-        # Verify that 3 initial variables have been set because 'project' is class scoped fixture and the last test case result will set 3 variables.
-        assert len(project.variables.list(get_all=True)) == 3
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            variables:
-              # Delete following variable even though 'value' is not provided
-              FOO_default_scoped_variable:
-                key: FOO
-                delete: true
-              # Delete following variable where both key and value is provided
-              BAR_variable:
-                key: BAR
-                value: bar-value-updated
-                delete: true
-              # Delete following variable that specifies key and environment_scope
-              FOO_scoped_variable:
-                key: FOO
-                environment_scope: prod
-                delete: true
-        """
-        run_gitlabform(config, project)
-
-        # Verify results
-        variables = project.variables.list(get_all=True)
-        assert len(variables) == 0
-
-        # Now test deleting a variable by providing a config that contains correct key but wrong value.
-        # It should not delete that variable because the search shouldn't match.
-
-        # First set inital variables for test
+        # Set initial variables for all test scenarios
         initial_vars = [
-            {"key": "FOO", "value": "foo-123"},
-            {"key": "BAR", "value": "bar-123", "environment_scope": "prod"},
+            {"key": "KEY_ONLY", "value": "value123"},                      # for key-only delete
+            {"key": "KEY_VALUE", "value": "match-this"},                   # for key-value match delete
+            {"key": "KEY_SCOPE", "value": "any", "environment_scope": "prod"},  # for key-scope match delete
+            {"key": "WRONG_VALUE", "value": "actual-value"},               # for wrong value test
+            {"key": "WRONG_SCOPE", "value": "value", "environment_scope": "prod"},  # for wrong scope test
+            {   # for attribute match tests
+                "key": "MULTI_ATTR",
+                "value": "test-xyz-123",
+                "protected": True,
+                "masked": True,
+                "variable_type": "env_var",
+                "environment_scope": "prod"
+            }
         ]
         for var in initial_vars:
             project.variables.create(var)
 
-        # Verify that 2 initial variables have been set
-        assert len(project.variables.list(get_all=True)) == 2
+        # Verify initial state
+        assert len(project.variables.list(get_all=True)) == 6
 
-        # Apply gitlabform config containig wrong value for FOO that has deafult scope '*'
-        config = f"""
+        # Test 1: Delete with key only (default scope)
+        config_key_only = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             variables:
-              FOO_default_scoped_variable:
-                key: FOO
-                value: this is a wrong value
+              key_only_var:
+                key: KEY_ONLY
                 delete: true
         """
-
-        with pytest.raises(SystemExit) as exec_info:
-            run_gitlabform(config, project)
-
+        run_gitlabform(config_key_only, project)
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 2
+        assert len(variables) == 5
+        assert not any(v.key == "KEY_ONLY" for v in variables)
 
-        assert variables[0].key == "FOO"
-        assert variables[0].value == "foo-123"
-        assert variables[0].environment_scope == "*"
-
-        assert variables[1].key == "BAR"
-        assert variables[1].value == "bar-123"
-        assert variables[1].environment_scope == "prod"
-
-        # Now test deleting a variable with environment scope (i.e. BAR) but it's not specified
-        error_message_for_delete_without_scope = (
-            "To delete a variable with scope, make sure to specify 'environment_scope' in the config"
-        )
-        # Apply gitlabform config
-        config = f"""
+        # Test 2: Delete with key and value match
+        config_key_value = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             variables:
-              BAR_prod_scoped_variable:
-                key: BAR
+              key_value_var:
+                key: KEY_VALUE
+                value: match-this
                 delete: true
         """
-        # Verify results
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config, project)
+        run_gitlabform(config_key_value, project)
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 4
+        assert not any(v.key == "KEY_VALUE" for v in variables)
 
-        captured_output = capsys.readouterr()
-
-        assert exc_info.value.code == 2
-        assert exc_info.type == SystemExit
-        assert exc_info.value.code == EXIT_PROCESSING_ERROR
-        assert error_message_for_delete_without_scope in captured_output.err
-
-        # Now test deleting variable with envrionment scope but wrong value for the variable
-        config = f"""
+        # Test 3: Delete with key and scope match
+        config_key_scope = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             variables:
-              BAR_prod_scoped_variable:
-                key: BAR
-                value: this is a wrong value
+              key_scope_var:
+                key: KEY_SCOPE
                 environment_scope: prod
                 delete: true
         """
-
-        with pytest.raises(SystemExit) as exec_info:
-            run_gitlabform(config, project)
-
+        run_gitlabform(config_key_scope, project)
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 2
+        assert len(variables) == 3
+        assert not any(v.key == "KEY_SCOPE" for v in variables)
+
+        # Test 4: Delete should fail with wrong value
+        config_wrong_value = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              wrong_value_var:
+                key: WRONG_VALUE
+                value: wrong-value
+                delete: true
+        """
+        with pytest.raises(SystemExit) as exc_info:
+            run_gitlabform(config_wrong_value, project)
+        captured = capsys.readouterr()
+        assert "Cannot delete WRONG_VALUE - attributes don't match" in captured.err
+
+        # Test 5: Delete should fail with wrong scope
+        config_wrong_scope = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              wrong_scope_var:
+                key: WRONG_SCOPE
+                environment_scope: dev  # wrong scope, actual is 'prod'
+                delete: true
+        """
+        with pytest.raises(SystemExit) as exc_info:
+            run_gitlabform(config_wrong_scope, project)
+        captured = capsys.readouterr()
+        assert "Cannot delete variable 'WRONG_SCOPE' with scope 'dev' - variable does not exist" in captured.err
+
+        # Test 6: Delete should fail for non-existent variable
+        config_non_existent = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              non_existent_var:
+                key: NON_EXISTENT
+                delete: true
+        """
+        with pytest.raises(SystemExit) as exc_info:
+            run_gitlabform(config_non_existent, project)
+        captured = capsys.readouterr()
+        assert "Cannot delete variable 'NON_EXISTENT' with scope '*' - variable does not exist" in captured.err
+
+        # Test 7: Delete should fail when specified attributes don't match
+        config_mismatch = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              multi_attr_var:
+                key: MULTI_ATTR
+                value: test-xyz-123     # match
+                protected: False        # doesn't match
+                environment_scope: prod # match
+                delete: true
+        """
+        with pytest.raises(SystemExit) as exc_info:
+            run_gitlabform(config_mismatch, project)
+        captured = capsys.readouterr()
+        assert "Cannot delete MULTI_ATTR - attributes don't match" in captured.err
+
+        # Test 8: Delete should succeed when providing subset of attributes
+        config_partial = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              multi_attr_var:
+                key: MULTI_ATTR
+                value: test-xyz-123     # match
+                protected: True         # match
+                # masked is not specified (should not affect matching)
+                # variable_type is not specified (should not affect matching)
+                environment_scope: prod # match
+                delete: true
+        """
+        run_gitlabform(config_partial, project)
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 2  # Only WRONG_VALUE and WRONG_SCOPE should remain
+        assert not any(v.key == "MULTI_ATTR" for v in variables)
+
+        # Verify final state
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 2  # Only WRONG_VALUE and WRONG_SCOPE should remain
 
     def test__raw_parameter_passing(self, project):
         """Test case: validate raw parameter passing design works by setting extra optional attributes for variables"""
