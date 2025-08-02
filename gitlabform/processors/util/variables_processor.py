@@ -20,22 +20,19 @@ class VariablesProcessor:
     ) -> List[GroupVariable] | List[ProjectVariable]:
         """Get variables as a properly typed list."""
         variables = group_or_project.variables.list(get_all=True)
-        return [
-            cast(ProjectVariable if isinstance(group_or_project, Project) else GroupVariable, var)
-            for var in variables
-        ]
+
+        if isinstance(group_or_project, Project):
+            return [cast(ProjectVariable, var) for var in variables]  # Return type is List[ProjectVariable]
+        else:
+            return [cast(GroupVariable, var) for var in variables]  # Return type is List[GroupVariable]
 
     def _variables_match(self, existing_var: Dict[str, Any], config_var: Dict[str, Any]) -> bool:
         """Compare if existing variable matches the configured attributes."""
         # Ignore internal GitLab attributes and delete flag
-        ignore_keys = {'id', '_links', 'delete'}
-        
+        ignore_keys = {"id", "_links", "delete"}
+
         # Check if all configured attributes match existing variable
-        return all(
-            existing_var.get(key) == value 
-            for key, value in config_var.items() 
-            if key not in ignore_keys
-        )
+        return all(existing_var.get(key) == value for key, value in config_var.items() if key not in ignore_keys)
 
     def process_variables(
         self,
@@ -55,7 +52,7 @@ class VariablesProcessor:
                 verbose(f"Processing {len(configured_variables)} variables from configuration")
                 for var_config in configured_variables.values():
                     self._handle_variable(group_or_project, var_config, existing_variables)
-                    processed_vars.add((var_config['key'], var_config.get('environment_scope', '*')))
+                    processed_vars.add((var_config["key"], var_config.get("environment_scope", "*")))
 
             # Handle enforce mode
             if enforce and existing_variables:
@@ -72,33 +69,41 @@ class VariablesProcessor:
         existing_variables: List[GroupVariable] | List[ProjectVariable],
     ) -> None:
         """Handle a single variable operation."""
-        key = var_config['key']
-        scope = var_config.get('environment_scope', '*')
-        should_delete = var_config.get('delete', False)
+        key = var_config["key"]
+        scope = var_config.get("environment_scope", "*")
+        should_delete = var_config.get("delete", False)
 
         # Find matching existing variable
         existing_var = next(
-            (var for var in existing_variables 
-             if var.key == key and getattr(var, 'environment_scope', '*') == scope),
-            None
+            (
+                existing_var
+                for existing_var in existing_variables
+                if existing_var.key == key and getattr(existing_var, "environment_scope", "*") == scope
+            ),
+            None,
         )
 
+        # Handle non-existent variable
         if not existing_var:
+            # In case config refers to deleting non-existent variable, raise error
             if should_delete:
-                raise Exception(
-                    f"Cannot delete variable '{key}' with scope '{scope}' - variable does not exist"
-                )
+                raise Exception(f"Cannot delete variable '{key}' with scope '{scope}' - variable does not exist")
             self._create_variable(group_or_project, var_config)
             return
-
-        if should_delete:
-            if not self._variables_match(existing_var.asdict(), var_config):
-                raise Exception(f"Cannot delete {key} - attributes don't match")
-            self._delete_variable(group_or_project, key, scope)
-            return
-
-        if not self._variables_match(existing_var.asdict(), var_config):
-            self._update_variable(group_or_project, var_config)
+        else:
+            # If the variable exists, check if it should be deleted or updated
+            if should_delete:
+                # If delete is requested, check if the variable matches the config
+                # and delete it if it does
+                if not self._variables_match(existing_var.asdict(), var_config):
+                    raise Exception(f"Cannot delete {key} - attributes don't match")
+                self._delete_variable(group_or_project, key, scope)
+                return
+            else:
+                # If delete is not requested, update the variable if it's for the same variable
+                if not self._variables_match(existing_var.asdict(), var_config):
+                    self._update_variable(group_or_project, var_config)
+                    return
 
     def _handle_enforce_mode(
         self,
@@ -108,35 +113,30 @@ class VariablesProcessor:
     ) -> None:
         """Delete variables not in configuration when enforce mode is enabled."""
         vars_to_delete = [
-            var for var in existing_variables
-            if (var.key, getattr(var, 'environment_scope', '*')) not in processed_vars
+            existing_var
+            for existing_var in existing_variables
+            if (existing_var.key, getattr(existing_var, "environment_scope", "*")) not in processed_vars
         ]
-        
+
         if vars_to_delete:
             verbose(f"Enforce mode will delete {len(vars_to_delete)} variables")
             for var in vars_to_delete:
-                self._delete_variable(group_or_project, var.key, getattr(var, 'environment_scope', '*'))
+                self._delete_variable(group_or_project, var.key, getattr(var, "environment_scope", "*"))
 
     def _create_variable(self, group_or_project: Group | Project, var_config: Dict[str, Any]) -> None:
         """Create a new variable."""
         attrs = var_config.copy()
-        attrs.pop('delete', None)
         verbose(f"Creating variable {attrs['key']}")
         group_or_project.variables.create(attrs)
 
     def _update_variable(self, group_or_project: Group | Project, var_config: Dict[str, Any]) -> None:
         """Update an existing variable."""
         attrs = var_config.copy()
-        attrs.pop('delete', None)
-        scope = attrs.get('environment_scope', '*')
+        scope = attrs.get("environment_scope", "*")
         verbose(f"Updating variable {attrs['key']}")
-        group_or_project.variables.update(
-            attrs['key'],
-            attrs,
-            filter={'environment_scope': scope}
-        )
+        group_or_project.variables.update(attrs["key"], attrs, filter={"environment_scope": scope})
 
     def _delete_variable(self, group_or_project: Group | Project, key: str, scope: str) -> None:
         """Delete a variable."""
         verbose(f"Deleting variable {key}")
-        group_or_project.variables.delete(key, filter={'environment_scope': scope})
+        group_or_project.variables.delete(key, filter={"environment_scope": scope})

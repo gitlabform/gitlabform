@@ -174,10 +174,9 @@ class TestVariables:
         assert variables[4].value == expected_message
         assert variables[4].environment_scope == "*"  # default scope if not configured
 
-
     def test__delete_variables(self, project, capsys):
         """Test case: Variable deletion scenarios"""
-        
+
         # Clear any existing variables from previous tests since 'project' is class-scoped
         existing = project.variables.list(get_all=True)
         for var in existing:
@@ -185,19 +184,19 @@ class TestVariables:
 
         # Set initial variables for all test scenarios
         initial_vars = [
-            {"key": "KEY_ONLY", "value": "value123"},                      # for key-only delete
-            {"key": "KEY_VALUE", "value": "match-this"},                   # for key-value match delete
+            {"key": "KEY_ONLY", "value": "value123"},  # for key-only delete
+            {"key": "KEY_VALUE", "value": "match-this"},  # for key-value match delete
             {"key": "KEY_SCOPE", "value": "any", "environment_scope": "prod"},  # for key-scope match delete
-            {"key": "WRONG_VALUE", "value": "actual-value"},               # for wrong value test
+            {"key": "WRONG_VALUE", "value": "actual-value"},  # for wrong value test
             {"key": "WRONG_SCOPE", "value": "value", "environment_scope": "prod"},  # for wrong scope test
-            {   # for attribute match tests
+            {  # for attribute match tests
                 "key": "MULTI_ATTR",
                 "value": "test-xyz-123",
                 "protected": True,
                 "masked": True,
                 "variable_type": "env_var",
-                "environment_scope": "prod"
-            }
+                "environment_scope": "prod",
+            },
         ]
         for var in initial_vars:
             project.variables.create(var)

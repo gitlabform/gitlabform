@@ -95,14 +95,14 @@ class TestGroupVariablesPremium:
         initial_vars = [
             {"key": "KEY_SCOPE", "value": "any", "environment_scope": "prod"},  # for key-scope match delete
             {"key": "WRONG_SCOPE", "value": "value", "environment_scope": "prod"},  # for wrong scope test
-            {   # for attribute match tests
+            {  # for attribute match tests
                 "key": "MULTI_ATTR",
                 "value": "test-xyz-123",
                 "protected": True,
                 "masked": True,
                 "variable_type": "env_var",
-                "environment_scope": "prod"
-            }
+                "environment_scope": "prod",
+            },
         ]
         for var in initial_vars:
             group.variables.create(var)
@@ -176,7 +176,6 @@ class TestGroupVariablesPremium:
         assert len(variables) == 1  # Only WRONG_SCOPE should remain
         assert not any(v.key == "MULTI_ATTR" for v in variables)
 
-
     def test__raw_parameter_passing(self, group):
         """Test case: validate raw parameter passing design works by setting extra optional attributes for variables"""
 
@@ -210,7 +209,6 @@ class TestGroupVariablesPremium:
         assert variables[1].protected is True
         assert variables[1].masked is True
         assert variables[1].environment_scope == "prod"
-
 
     def test__preserve_unconfigured_attributes(self, group):
         """Test case: When updating a variable, any attributes that is not in config, should remain as-is"""
@@ -279,10 +277,26 @@ class TestGroupVariablesPremium:
         # Add some new variables so that we can test gitlabform config
         initial_vars = [
             # A new variable will be added using gitlabform
-            {"key": "FOO", "value": "123", "environment_scope": "dev"},  # should not change because gitlabform config will be same
-            {"key": "FOO", "value": "prod-value", "environment_scope": "prod"},  # should be deleted because of ommission in gitlabform config and 'enforce' mode
-            {"key": "BAR", "value": "456", "environment_scope": "dev"},  # should be updated because gitlabform config will apply new value
-            {"key": "BAZ", "value": "789", "environment_scope": "dev"},  # should be deleted because gitlabform config will use the 'delete' key
+            {
+                "key": "FOO",
+                "value": "123",
+                "environment_scope": "dev",
+            },  # should not change because gitlabform config will be same
+            {
+                "key": "FOO",
+                "value": "prod-value",
+                "environment_scope": "prod",
+            },  # should be deleted because of ommission in gitlabform config and 'enforce' mode
+            {
+                "key": "BAR",
+                "value": "456",
+                "environment_scope": "dev",
+            },  # should be updated because gitlabform config will apply new value
+            {
+                "key": "BAZ",
+                "value": "789",
+                "environment_scope": "dev",
+            },  # should be deleted because gitlabform config will use the 'delete' key
         ]
 
         for var in initial_vars:

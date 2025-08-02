@@ -73,7 +73,6 @@ class TestGroupVariables:
         )
         assert variables[3].value == expected_message
 
-
     def test__update_variables(self, group):
         """Test case: update variables that were added in previous test case"""
 
@@ -131,16 +130,16 @@ class TestGroupVariables:
 
         # Set initial variables for all test scenarios
         initial_vars = [
-            {"key": "KEY_ONLY", "value": "value123"},                      # for key-only delete
-            {"key": "KEY_VALUE", "value": "match-this"},                   # for key-value match delete
-            {"key": "WRONG_VALUE", "value": "actual-value"},               # for wrong value test
-            {   # for attribute match tests
+            {"key": "KEY_ONLY", "value": "value123"},  # for key-only delete
+            {"key": "KEY_VALUE", "value": "match-this"},  # for key-value match delete
+            {"key": "WRONG_VALUE", "value": "actual-value"},  # for wrong value test
+            {  # for attribute match tests
                 "key": "MULTI_ATTR",
                 "value": "test-xyz-123",
                 "protected": True,
                 "masked": True,
                 "variable_type": "env_var",
-            }
+            },
         ]
         for var in initial_vars:
             group.variables.create(var)
@@ -304,7 +303,6 @@ class TestGroupVariables:
         assert variables[1].protected is True
         assert variables[1].masked is True
 
-
     def test__enforce_mode_delete_all_variables(self, group):
         """Test case: Enforce mode - delete all variables"""
 
@@ -336,7 +334,10 @@ class TestGroupVariables:
             # A new variable will be added using gitlabform
             {"key": "FOO1", "value": "123"},  # should not change because gitlabform config will be same
             {"key": "BAR", "value": "456"},  # should be updated because gitlabform config will apply new value
-            {"key": "FOO2", "value": "value"},  # should be deleted because of ommission in gitlabform config and 'enforce' mode
+            {
+                "key": "FOO2",
+                "value": "value",
+            },  # should be deleted because of ommission in gitlabform config and 'enforce' mode
             {"key": "BAZ", "value": "789"},  # should be deleted because gitlabform config will use the 'delete' key
         ]
 
