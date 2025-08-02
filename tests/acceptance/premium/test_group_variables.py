@@ -1,5 +1,6 @@
+from unittest.mock import patch
 import pytest
-
+from cli_ui import debug as verbose  # for wraps
 from tests.acceptance import run_gitlabform
 from gitlabform.constants import EXIT_PROCESSING_ERROR
 
@@ -51,12 +52,50 @@ class TestGroupVariablesPremium:
         assert variables[1].value == "prod-value"
         assert variables[1].environment_scope == "prod"
 
-    def test__update_variables_with_env_scope(self, group):
+    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=verbose)
+    def test__update_variables_with_env_scope(self, mock_verbose, group):
         """Test case: update variables that were added in previous test case"""
 
-        # Verify that 3 initial variables have been set because 'group' is class scoped fixture and the last test case result will set 3 variables.
+        # Verify that 2 initial variables have been set because 'group' is class scoped fixture and the last test case result will set 3 variables.
         assert len(group.variables.list(get_all=True)) == 2
 
+        # Test1: Variable update should not be attempted if there are no changes
+        config_no_change = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_variables:
+              FOO_variable:
+                key: FOO
+                value: prod-value
+                environment_scope: prod
+        """
+        # Import after verbose patch is applied by the function decorator.
+        # This will be usd for capturing verbose logs by the module to verify
+        # that variable update is not attempted
+        from gitlabform.processors.util.variables_processor import VariablesProcessor
+
+        run_gitlabform(config_no_change, group)
+
+        # Verify results
+        variables = group.variables.list(get_all=True)
+        assert len(variables) == 2
+
+        # Check verbose log output
+        actual_messages = [call.args[0] for call in mock_verbose.call_args_list]
+
+        expected_messages = [
+            "Variable FOO with scope prod already matches configuration, no update needed",
+        ]
+
+        for expected in expected_messages:
+            assert any(expected in msg for msg in actual_messages), f"Missing verbose: {expected}"
+
+        # Expect 'FOO' variables to remain unchanged because it was not in the config
+        assert variables[0].key == "FOO"
+        assert variables[0].value == "foo123"
+        assert variables[0].environment_scope == "*"  # default scope if not configured
+
+        # Test2: Variable update should happen
         # Apply gitlabform config
         config = f"""
         projects_and_groups:

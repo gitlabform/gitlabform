@@ -83,7 +83,6 @@ class VariablesProcessor:
             None,
         )
 
-        # Handle non-existent variable
         if not existing_var:
             # In case config refers to deleting non-existent variable, raise error
             if should_delete:
@@ -100,9 +99,12 @@ class VariablesProcessor:
                 self._delete_variable(group_or_project, key, scope)
                 return
             else:
-                # If delete is not requested, update the variable if it's for the same variable
-                if not self._variables_match(existing_var.asdict(), var_config):
+                # If delete is not requested, update the variable if config is different from gitlab
+                if self.needs_update(existing_var.asdict(), var_config):
                     self._update_variable(group_or_project, var_config)
+                    return
+                else:
+                    verbose(f"Variable {key} with scope {scope} already matches configuration, no update needed")
                     return
 
     def _handle_enforce_mode(

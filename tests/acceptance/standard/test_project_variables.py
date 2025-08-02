@@ -1,6 +1,7 @@
 import pytest
+from cli_ui import debug as verbose  # for wraps
+from unittest.mock import patch
 from gitlab.exceptions import GitlabListError
-from gitlabform.constants import EXIT_PROCESSING_ERROR
 
 from tests.acceptance import run_gitlabform
 
@@ -115,12 +116,57 @@ class TestVariables:
         assert variables[4].value == expected_message
         assert variables[4].environment_scope == "*"  # default scope if not configured
 
-    def test__update_variables(self, project):
+    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=verbose)
+    def test__update_variables(self, mock_verbose, project):
         """Test case: update variables that were added in previous test case"""
 
-        # Verify that 3 initial variables have been set because 'project' is class scoped fixture and the last test case result will set 3 variables.
+        # Verify that 5 initial variables have been set because 'project' is class scoped fixture and the last test case result will set 3 variables.
         assert len(project.variables.list(get_all=True)) == 5
 
+        # Test1: Variable update should not be attempted if there are no changes
+        config_no_change = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            variables:
+              FOO_variable:
+                key: FOO
+                value: foo123
+              FOO_scoped_variable:
+                key: FOO
+                value: prod-value
+                environment_scope: prod
+        """
+        # Import after verbose patch is applied by the function decorator.
+        # This will be usd for capturing verbose logs by the module to verify
+        # that variable update is not attempted
+        from gitlabform.processors.util.variables_processor import VariablesProcessor
+
+        run_gitlabform(config_no_change, project)
+
+        # Verify results
+        variables = project.variables.list(get_all=True)
+        assert len(variables) == 5
+
+        # Check verbose log output
+        actual_messages = [call.args[0] for call in mock_verbose.call_args_list]
+
+        expected_messages = [
+            "Variable FOO with scope * already matches configuration, no update needed",
+            "Variable FOO with scope prod already matches configuration, no update needed",
+        ]
+
+        for expected in expected_messages:
+            assert any(expected in msg for msg in actual_messages), f"Missing verbose: {expected}"
+
+        # Expect 'FOO' variables to remain unchanged because it was not in the config
+        assert variables[0].key == "FOO"
+        assert variables[0].value == "foo123"
+        assert variables[0].environment_scope == "*"  # default scope if not configured
+        assert variables[1].key == "FOO"
+        assert variables[1].value == "prod-value"
+        assert variables[1].environment_scope == "prod"
+
+        # Test2: Variable update should happen
         # Apply gitlabform config
         config = f"""
         projects_and_groups:
