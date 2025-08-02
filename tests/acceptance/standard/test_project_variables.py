@@ -39,7 +39,7 @@ class TestVariables:
             print("vars: ", type(vars), vars)
 
     def test__add_new_variables(self, project):
-        """Test case: add new variables"""
+        """Test case: add new variables, including special characters and complex values"""
 
         # Set initial variables
         initial_vars = [
@@ -64,12 +64,24 @@ class TestVariables:
               BAR_variable:
                 key: BAR
                 value: bar-value
+              Special_chars_variable:
+                key: SPECIAL_CHARS
+                value: "!@#$%^&*()_+-=[]{{}}|;:,.<>?"
+              Complex_value_variable:
+                key: COMPLEX_VALUE
+                value: |
+                  # This represents a typical complex configuration value
+                  host: ${{HOST_VAR}}
+                  port: 8080
+                  paths:
+                    - /api/v1
+                    - /api/v2
         """
         run_gitlabform(config, project)
 
         # Verify results
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 3
+        assert len(variables) == 5
 
         assert variables[0].key == "FOO"
         assert variables[0].value == "foo123"
@@ -83,11 +95,31 @@ class TestVariables:
         assert variables[2].value == "bar-value"
         assert variables[2].environment_scope == "*"  # default scope if not configured
 
+        assert variables[3].key == "SPECIAL_CHARS"
+        assert variables[3].value == "!@#$%^&*()_+-=[]{}|;:,.<>?"
+        assert variables[3].environment_scope == "*"  # default scope if not configured
+
+        assert variables[4].key == "COMPLEX_VALUE"
+        # The \n is needed because the value is a multi-line string.
+        # Each line break in the YAML block literal (|) is preserved as a newline character in the string.
+        # Without the \n, all lines would be concatenated together, which does not match the actual value.
+        # To debug, print the value to see the actual string:
+        expected_message = (
+            "# This represents a typical complex configuration value\n"
+            "host: ${HOST_VAR}\n"
+            "port: 8080\n"
+            "paths:\n"
+            "  - /api/v1\n"
+            "  - /api/v2\n"
+        )
+        assert variables[4].value == expected_message
+        assert variables[4].environment_scope == "*"  # default scope if not configured
+
     def test__update_variables(self, project):
         """Test case: update variables that were added in previous test case"""
 
         # Verify that 3 initial variables have been set because 'project' is class scoped fixture and the last test case result will set 3 variables.
-        assert len(project.variables.list(get_all=True)) == 3
+        assert len(project.variables.list(get_all=True)) == 5
 
         # Apply gitlabform config
         config = f"""
@@ -107,7 +139,7 @@ class TestVariables:
 
         # Verify results
         variables = project.variables.list(get_all=True)
-        assert len(variables) == 3
+        assert len(variables) == 5
 
         # Expect 'FOO' variable with default scope to remain unchanged because it was not in the config
         assert variables[0].key == "FOO"
@@ -121,6 +153,27 @@ class TestVariables:
         assert variables[2].key == "BAR"
         assert variables[2].value == "bar-value-updated"
         assert variables[2].environment_scope == "*"  # default scope if not configured
+
+        assert variables[3].key == "SPECIAL_CHARS"
+        assert variables[3].value == "!@#$%^&*()_+-=[]{}|;:,.<>?"
+        assert variables[3].environment_scope == "*"  # default scope if not configured
+
+        assert variables[4].key == "COMPLEX_VALUE"
+        # The \n is needed because the value is a multi-line string.
+        # Each line break in the YAML block literal (|) is preserved as a newline character in the string.
+        # Without the \n, all lines would be concatenated together, which does not match the actual value.
+        # To debug, print the value to see the actual string:
+        expected_message = (
+            "# This represents a typical complex configuration value\n"
+            "host: ${HOST_VAR}\n"
+            "port: 8080\n"
+            "paths:\n"
+            "  - /api/v1\n"
+            "  - /api/v2\n"
+        )
+        assert variables[4].value == expected_message
+        assert variables[4].environment_scope == "*"  # default scope if not configured
+
 
     def test__delete_variables(self, project, capsys):
         """Test case: Variable deletion scenarios"""
@@ -423,46 +476,3 @@ class TestVariables:
         assert variables[1].value == "456_updated"
         assert variables[2].key == "QUX"
         assert variables[2].value == "new"
-
-    def test__special_characters(self, project_for_function):
-        """Test case: Special characters in value"""
-
-        # Apply gitlabform config
-        config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            variables:
-              Variable_value_with_special_chars:
-                key: SPECIAL_CHARS
-                value: "!@#$%^&*()_+-=[]{{}}|;:,.<>?"
-              Variable_value_with_complex_value:
-                key: COMPLEX_VALUE
-                value: |
-                  # This represents a typical complex configuration value
-                  host: ${{HOST_VAR}}
-                  port: 8080
-                  paths:
-                    - /api/v1
-                    - /api/v2
-        """
-        run_gitlabform(config, project_for_function)
-
-        # Verify results
-        variables = project_for_function.variables.list(get_all=True)
-        assert len(variables) == 2
-        assert variables[0].key == "SPECIAL_CHARS"
-        assert variables[0].value == "!@#$%^&*()_+-=[]{}|;:,.<>?"
-        assert variables[1].key == "COMPLEX_VALUE"
-        # The \n is needed because the value is a multi-line string.
-        # Each line break in the YAML block literal (|) is preserved as a newline character in the string.
-        # Without the \n, all lines would be concatenated together, which does not match the actual value.
-        # To debug, print the value to see the actual string:
-        expected_message = (
-            "# This represents a typical complex configuration value\n"
-            "host: ${HOST_VAR}\n"
-            "port: 8080\n"
-            "paths:\n"
-            "  - /api/v1\n"
-            "  - /api/v2\n"
-        )
-        assert variables[1].value == expected_message
