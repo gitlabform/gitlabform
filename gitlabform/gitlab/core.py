@@ -1,5 +1,6 @@
 import functools
 import os
+import re
 from logging import debug
 from typing import Union
 from urllib import parse
@@ -88,12 +89,19 @@ class GitLabCore:
         Returns:
             bool: True if server version is >= min_version, False otherwise
         """
-        current = "0.0.0" if self.version == "unknown" else self.version
+        current_version = "0.0.0"
+
+        if self.version != "unknown":
+            sem_ver_regex = "^\d*\.\d*\.\d*"
+            # Get the pure semantic version from self.version, for example Gitlab will return 18.2.1-ee
+            match = re.search(sem_ver_regex, self.version)
+            if match:
+                current_version = match.group()
 
         if isinstance(min_version, str):
             min_version = version.parse(min_version)
 
-        return version.parse(current) >= min_version
+        return version.parse(current_version) >= min_version
 
     def _is_version_less_than(self, max_version: Union[str, version.Version]) -> bool:
         """
