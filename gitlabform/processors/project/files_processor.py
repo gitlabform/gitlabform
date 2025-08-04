@@ -219,11 +219,13 @@ class FilesProcessor(AbstractProcessor):
 
                 finally:
                     # ...and protect the branch again after the operation
-                    if configuration.get("branches|" + branch.name + "|protected"):
-                        debug("> Protecting the branch again.")
-                        branch_config: dict = configuration["branches"][branch.name]
-                        self.branch_processor.protect_branch(project, branch.name, branch_config, False)
-
+                    branch_name = branch.name
+                    if configuration.get("branches|" + branch_name + "|protected"):
+                        debug(f"> Protecting the branch {branch_name} again.")
+                        branch_config: dict = configuration["branches"][branch_name]
+                        self.branch_processor.protect_branch(
+                            project=project, branch_name=branch_name, branch_config=branch_config, update_only=False
+                        )
             else:
                 raise e
 
