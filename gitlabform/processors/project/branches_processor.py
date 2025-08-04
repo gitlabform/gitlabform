@@ -1,5 +1,5 @@
 from typing import Optional
-from cli_ui import warning, fatal, verbose as verbose
+from cli_ui import warning, fatal, debug as verbose
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
@@ -17,6 +17,10 @@ class BranchesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("branches", gitlab)
         self.strict = strict
+        # Protected Branch API: https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
+        # Behind the scenes gitlab will map "allowed_to_merge" and "merge_access_level" to "merge_access_levels"
+        # and the same for unprotect and push access, so we need some custom diff analyzers to validate if the config
+        # has actually changed
         self.custom_diff_analyzers["merge_access_levels"] = self.naive_access_level_diff_analyzer
         self.custom_diff_analyzers["push_access_levels"] = self.naive_access_level_diff_analyzer
         self.custom_diff_analyzers["unprotect_access_levels"] = self.naive_access_level_diff_analyzer
@@ -56,6 +60,10 @@ class BranchesProcessor(AbstractProcessor):
 
         if branch_config.get("protected"):
             if protected_branch:
+                # Branch matching this name exists, so check for updates
+
+                # Transform the config from "allowed_to_push" or "push_access_level" into "push_access_levels" array to
+                # match how the data is stored in the Gitlab backend
                 branch_config_for_needs_update = self.transform_branch_config_access_levels(
                     branch_config, protected_branch.attributes
                 )
