@@ -1,6 +1,4 @@
 from gitlabform.processors import AbstractProcessor
-from gitlabform.gitlab import GitLab
-from unittest.mock import MagicMock
 
 
 class TestRecursiveDiffAnalyzer:

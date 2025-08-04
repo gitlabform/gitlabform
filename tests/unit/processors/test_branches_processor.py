@@ -70,6 +70,7 @@ class TestBranchesProcessor:
         ]
         assert BranchesProcessor.naive_access_level_diff_analyzer("test_key", cfg_in_gitlab, local_cfg) is True
 
+    # TODO: Refactor to remove magic mock
     def test_prepare_branch_config_for_update(self):
 
         self.processor.gitlab._make_request_to_api = MagicMock()
