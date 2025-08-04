@@ -1,7 +1,10 @@
 import functools
 import os
 from logging import debug
+from typing import Union
 from urllib import parse
+
+from packaging import version
 
 from importlib.metadata import version as package_version
 import requests
@@ -74,6 +77,35 @@ class GitLabCore:
 
     def get_project(self, project_and_group_or_id):
         return self._make_requests_to_api("projects/%s", project_and_group_or_id)
+
+    def is_version_at_least(self, min_version: Union[str, version.Version]) -> bool:
+        """
+        Check if GitLab server version is at least the specified version
+
+        Args:
+             min_version: Version string like "15.4.0" or "16.0", or a Version object
+
+        Returns:
+            bool: True if server version is >= min_version, False otherwise
+        """
+        current = "0.0.0" if self.version == "unknown" else self.version
+
+        if isinstance(min_version, str):
+            min_version = version.parse(min_version)
+
+        return version.parse(current) >= min_version
+
+    def _is_version_less_than(self, max_version: Union[str, version.Version]) -> bool:
+        """
+        Check if GitLab server version is less than the specified version
+        Args:
+             max_version: Version string like "15.4.0" or "16.0", or a Version object
+
+        Returns:
+            bool: True if server version is < max_version, False otherwise
+        """
+
+        return not self.is_version_at_least(max_version)
 
     @functools.lru_cache()
     def _get_user_id(self, username: str) -> int:
