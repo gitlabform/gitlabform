@@ -1,6 +1,5 @@
-from logging import debug
 from typing import Optional
-from cli_ui import warning, fatal, debug as verbose
+from cli_ui import warning, fatal, verbose as verbose
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
@@ -53,7 +52,7 @@ class BranchesProcessor(AbstractProcessor):
             protected_branch = project.protectedbranches.get(branch_name)
         except GitlabGetError:
             message = f"The branch '{branch_name}' is not protected!"
-            debug(message)
+            verbose(message)
 
         if branch_config.get("protected"):
             if protected_branch:
@@ -63,8 +62,8 @@ class BranchesProcessor(AbstractProcessor):
                 if self._needs_update(protected_branch.attributes, branch_config_for_needs_update):
                     # For GitLab version < 15.6 - need to unprotect the branch
                     # and then re-protect again using current config
-                    debug("Updating branch protection for ':%s'", branch_name)
-                    if self.gitlab_version < (15, 6):
+                    verbose("Updating branch protection for ':%s'", branch_name)
+                    if self.gitlab.is_version_at_least("15.6.0"):
                         self.unprotect_branch(protected_branch)
                         self.protect_branch(project, branch_name, branch_config, False)
                     else:
@@ -73,10 +72,10 @@ class BranchesProcessor(AbstractProcessor):
                         )
                         self.protect_branch(project, branch_name, branch_config_prepared_for_update, True)
             elif not protected_branch:
-                debug("Creating branch protection for ':%s'", branch_name)
+                verbose("Creating branch protection for ':%s'", branch_name)
                 self.protect_branch(project, branch_name, branch_config, False)
         elif protected_branch and not branch_config.get("protected"):
-            debug("Removing branch protection for ':%s'", branch_name)
+            verbose("Removing branch protection for ':%s'", branch_name)
             self.unprotect_branch(protected_branch)
 
     def protect_branch(self, project: Project, branch_name: str, branch_config: dict, update_only: bool):
@@ -84,7 +83,7 @@ class BranchesProcessor(AbstractProcessor):
         Create or update branch protection using given config.
         Raise exception if running in strict mode.
         """
-
+        verbose("Setting branch '%s' as protected", branch_name)
         try:
             if update_only:
                 project.protectedbranches.update(branch_name, branch_config)
@@ -107,7 +106,7 @@ class BranchesProcessor(AbstractProcessor):
         Raise exception if running in strict mode.
         """
 
-        debug("Setting branch '%s' as unprotected", protected_branch.name)
+        verbose("Setting branch '%s' as unprotected", protected_branch.name)
 
         try:
             # The delete method doesn't delete the actual branch.
@@ -306,7 +305,7 @@ class BranchesProcessor(AbstractProcessor):
                         changes_found += 1
         if changes_found > 0:
             needs_update = True
-        debug(f"naive_access_level_diff_analyzer - needs_update: {needs_update}, changes_found: {changes_found}")
+        verbose(f"naive_access_level_diff_analyzer - needs_update: {needs_update}, changes_found: {changes_found}")
         return needs_update
 
     @staticmethod

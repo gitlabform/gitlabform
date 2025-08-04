@@ -35,29 +35,3 @@ class TestRecursiveDiffAnalyzer:
         modified_cfg[1]["group_inheritance_type"] = 1
 
         assert AbstractProcessor.recursive_diff_analyzer("deploy_access_levels", self._cfg_a, modified_cfg)
-
-
-class TestGetGitlabVersion:
-
-    version_to_expected_map = {
-        "15.6.4-ee": (15, 6),
-        "unknown": (0, 0),
-    }
-
-    class TestAbstractProcessor(AbstractProcessor):
-        __test__ = False
-
-        def __init__(self, gitlab: GitLab):
-            self.gitlab = gitlab
-
-        def _process_configuration(self, project_or_project_and_group: str, configuration: dict):
-            pass
-
-    def test__get_gitlab_server_version(self) -> None:
-        gitlab = MagicMock(GitLab)
-        processor = self.TestAbstractProcessor(gitlab)
-        processor.gitlab = gitlab
-
-        for version, expected in self.version_to_expected_map.items():
-            gitlab.version = version
-            assert processor._get_gitlab_server_version() == expected
