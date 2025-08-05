@@ -2,6 +2,7 @@ import pytest
 import time
 
 import gitlab
+from gitlab.v4.objects import ProjectProtectedBranch
 
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import get_only_branch_access_levels, run_gitlabform
@@ -355,6 +356,28 @@ class TestBranches:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
+        # Add manual approval rule on the protected branch
+        protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
+        project_for_function.approvalrules.create(
+            {
+                "name": "any",
+                "approvals_required": 2,
+                "rule_type": "regular",
+                "protected_branch_ids": [
+                    protected_branch.id,
+                ],
+            }
+        )
+
+        approval_rules = project_for_function.approvalrules.list(get_all=True)
+        assert len(approval_rules) == 1
+        approval_rule = approval_rules[0]
+        assert approval_rule.name == "any"
+        assert approval_rule.approvals_required == 2
+        assert len(approval_rule.protected_branches) == 1
+        pb_ar = approval_rule.protected_branches[0]
+        assert pb_ar.get("id") == protected_branch.id
+
         # Apply "Premium" allowed_to_push protection
         config_premium_protect_branch = f"""
          projects_and_groups:
@@ -400,6 +423,18 @@ class TestBranches:
             ]
         )
 
+        # If the branch was unprotected and then re-protected it should have a difference protected branch id after
+        # the GLF run, and therefore will not match the protected_branch_ids array on the approval rule
+        protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
+
+        approval_rules = project_for_function.approvalrules.list(get_all=True)
+        assert len(approval_rules) == 1
+        approval_rule = approval_rules[0]
+        assert approval_rule.name == "any"
+        assert approval_rule.approvals_required == 2
+        pb_ar = approval_rule.protected_branches[0]
+        assert pb_ar.get("id") == protected_branch.id
+
         # Reset to standard rules
         run_gitlabform(config_standard_protect_branch, project_for_function.path_with_namespace)
 
@@ -417,3 +452,15 @@ class TestBranches:
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+        # If the branch was unprotected and then re-protected it should have a difference protected branch id after
+        # the GLF run, and therefore will not match the protected_branch_ids array on the approval rule
+        protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
+
+        approval_rules = project_for_function.approvalrules.list(get_all=True)
+        assert len(approval_rules) == 1
+        approval_rule = approval_rules[0]
+        assert approval_rule.name == "any"
+        assert approval_rule.approvals_required == 2
+        pb_ar = approval_rule.protected_branches[0]
+        assert pb_ar.get("id") == protected_branch.id
