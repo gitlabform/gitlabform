@@ -70,74 +70,6 @@ class TestBranchesProcessor:
         ]
         assert BranchesProcessor.naive_access_level_diff_analyzer("test_key", cfg_in_gitlab, local_cfg) is True
 
-    def test_prepare_branch_config_for_update(self):
-
-        self.processor.gitlab._make_request_to_api = MagicMock()
-        self.processor.gitlab._make_request_to_api.return_value = None
-        self.processor.gitlab_version = (15, 6)
-
-        our_branch_config_access_level = {
-            "merge_access_level": 40,
-            "push_access_level": 30,
-            "unprotect_access_level": 20,
-        }
-        our_branch_config_allowed_to = {
-            "allowed_to_merge": [{"access_level": 50}, {"user_id": 123}],
-            "allowed_to_push": [{"group_id": 456}],
-            "allowed_to_unprotect": [{"access_level": 60}, {"user_id": 789}],
-        }
-
-        gitlab_branch_config = MagicMock()
-        gitlab_branch_config.asdict = MagicMock()
-        gitlab_branch_config.asdict.return_value = {
-            "merge_access_levels": [
-                {"access_level": 40, "id": 1},
-            ],
-            "push_access_levels": [{"access_level": 30, "id": 3}],
-            "unprotect_access_levels": [
-                {"access_level": 20, "id": 4},
-            ],
-        }
-        gitlab_branch_config.id = 1
-        gitlab_branch_config.name = "test-branch"
-
-        result_access_level = self.processor.prepare_branch_config_for_update(
-            our_branch_config_access_level, gitlab_branch_config
-        )
-
-        expected_result_access_level = {
-            "allowed_to_merge": [{"id": 1, "access_level": 40}],
-            "allowed_to_push": [{"id": 3, "access_level": 30}],
-            "allowed_to_unprotect": [{"id": 4, "access_level": 20}],
-        }
-        assert result_access_level == expected_result_access_level
-        self.processor.gitlab._make_request_to_api.assert_not_called()
-
-        result_allowed_to = self.processor.prepare_branch_config_for_update(
-            our_branch_config_allowed_to, gitlab_branch_config
-        )
-        print(result_allowed_to)
-        expected_result_allowed_to = {
-            "allowed_to_merge": [{"access_level": 50}, {"user_id": 123}],
-            "allowed_to_push": [{"group_id": 456}],
-            "allowed_to_unprotect": [{"access_level": 60}, {"user_id": 789}],
-        }
-
-        assert result_allowed_to == expected_result_allowed_to
-
-        self.processor.gitlab._make_request_to_api.assert_has_calls(
-            [
-                call(
-                    "projects/%s/protected_branches/%s",
-                    (1, "test-branch"),
-                    "PATCH",
-                    None,
-                    [200],
-                    {"allowed_to_unprotect": [{"_destroy": "true", "id": 4}]},
-                ),
-            ]
-        )
-
     def test_transform_branch_config_access_levels(self):
         our_branch_config_access_level = {
             "merge_access_level": 40,
@@ -151,8 +83,8 @@ class TestBranchesProcessor:
             "allowed_to_unprotect": [{"access_level": 60}, {"user_id": 789}],
             "protected": True,
         }
-        result_access_level = self.processor.transform_branch_config_access_levels(our_branch_config_access_level, {})
-        result_allowed_to = self.processor.transform_branch_config_access_levels(our_branch_config_allowed_to, {})
+        result_access_level = self.processor.transform_branch_config_access_levels(our_branch_config_access_level)
+        result_allowed_to = self.processor.transform_branch_config_access_levels(our_branch_config_allowed_to)
 
         expected_result_access_level = {
             "merge_access_levels": [{"id": None, "access_level": 40, "user_id": None, "group_id": None}],
