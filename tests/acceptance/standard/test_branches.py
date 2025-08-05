@@ -1,3 +1,5 @@
+import time
+
 from gitlab.v4.objects import ProjectProtectedBranch
 
 from gitlabform.gitlab import AccessLevel
@@ -69,7 +71,7 @@ class TestBranches:
              branches:
                {branch_for_function}:
                  protected: true
-                 push_access_level: {AccessLevel.NO_ACCESS.value}
+                 push_access_level: {AccessLevel.NO_ACCESS}
                  merge_access_level: {AccessLevel.MAINTAINER.value}
                  unprotect_access_level: {AccessLevel.MAINTAINER.value}
          """
@@ -98,10 +100,13 @@ class TestBranches:
                {branch_for_function}:
                  protected: true
                  push_access_level: {AccessLevel.MAINTAINER.value}
-                 unprotect_access_level: {AccessLevel.MAINTAINER.value}
+                 unprotect_access_level: {AccessLevel.MAINTAINER}
          """
 
         run_gitlabform(config_modify_protection_on_branch, project_for_function.path_with_namespace)
+
+        # Wait a little for Gitlab update PATCH api processing
+        time.sleep(2)
 
         (
             push_access_levels,
@@ -131,6 +136,9 @@ class TestBranches:
          """
 
         run_gitlabform(config_remodify_protection_on_branch, project_for_function.path_with_namespace)
+
+        # Wait a little for Gitlab update PATCH api processing
+        time.sleep(2)
 
         (
             push_access_levels,

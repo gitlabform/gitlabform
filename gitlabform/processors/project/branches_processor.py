@@ -1,5 +1,5 @@
 from typing import Optional
-from cli_ui import warning, fatal, debug as verbose
+from cli_ui import info, warning, fatal, debug as verbose
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
@@ -7,216 +7,9 @@ from gitlab import (
 )
 from gitlab.v4.objects import Project, ProjectProtectedBranch
 
-from gitlabform import gitlab
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
-
-
-#### File level methods which do not require class variables, allowing for easier unit testing ####
-
-
-def _map_allowed_to_config_to_access_levels(config: list[dict]):
-    """
-    Converts config defined in Gitlabform for "allowed_to_merge", "allowed_to_push", "allowed_to_unprotect" into
-    items which can be passed to the PATCH api for Create/Update operations
-
-    For updating/creating user_id and group_id entries we must also pass access_level, which Gitlab defaults
-    to Maintainer
-
-    - https://docs.gitlab.com/api/protected_branches/#example-update-a-push_access_level-record
-    - https://docs.gitlab.com/api/protected_branches/#example-create-a-push_access_level-record
-    """
-    output = []
-    for item in config:
-        if item.get("access_level") is not None:
-            value = item.get("access_level")
-            access_level_value = get_access_level_value(value)
-            mapped_item = {
-                "access_level": access_level_value,
-            }
-        elif item.get("user_id") is not None:
-            value = item.get("user_id")
-            mapped_item = {
-                "user_id": value,
-            }
-        elif item.get("group_id") is not None:
-            value = item.get("group_id")
-            mapped_item = {
-                "group_id": value,
-            }
-        else:
-            continue
-        output.append(mapped_item)
-
-    return output
-
-
-def get_access_level_value(value: int | str):
-    """
-    Given an AccessLevel defined either as an integer or as a string, return the value as an integer.
-
-    For example, an input of "Maintainer" returns 40
-
-    Args:
-        value (int|str): the AccessLevel
-    """
-    if isinstance(value, str):
-        access_level_value = AccessLevel.get_value(value)
-    else:
-        access_level_value = value
-    return access_level_value
-
-
-def append_records_for_deletion(access_items: list, records_to_delete: list | tuple):
-    """
-    Appends information to the access_items list in order to mark records for deletion.
-    Creates data in the pattern defined in the gitlab api: https://docs.gitlab.com/api/protected_branches/#example-delete-a-push_access_level-record
-
-    Args:
-        access_items (list): List of items to be passed to the Gitlab protected_branches PATCH api in order to modify the access_levels of the branch
-        records_to_delete (list): List of records from Gitlab from the protected_branch access_levels attributes (e.g. protected_branch.push_access_levels), which will be marked for destruction
-    """
-    for record in records_to_delete:
-        record_id = record.get("id")
-        access_items.append({"id": record_id, "_destroy": True})
-
-
-def find_config_matching_existing_record(configured_items_to_create: list[dict], record: dict, key: str):
-    """
-    Given an existing record from Gitlab, finds a matching item defined in the config.
-    Match is performed on the key passed in, e.g. matches on user_id or group_id
-
-    Args:
-        configured_items_to_create (list[dict]): list items defined in configuration
-        record (dict): a given record from Gitlab from the protected_branch access_levels attributes (e.g. protected_branch.push_access_levels)
-        key (str): key to match on, e.g. group_id, user_id, access_level
-    """
-    matching_config = next(
-        (item for item in configured_items_to_create if item.get(key) is not None and item.get(key) == record.get(key)),
-        None,
-    )
-    return matching_config
-
-
-def build_patch_request_data(
-    allowed_to_config: list[dict] | None, level_config: str | None, existing_records: tuple[dict]
-) -> list[dict]:
-    """
-    Given the "allowed_to_x" and "x_access_level" configuration defined in Gitlabform, and the existing_records for that
-    access level in Gitlab. Build a dictionary of data to pass to the update() endpoint in Gitlab
-
-    Gitlab supports merge_access_level for users with a Standard license and allowed_to_merge etc for users with Premium
-    or Ultimate licenses.
-    We need to support both options, and potentially blended configuration for users with Premium+ licenses.
-
-    args:
-        allowed_to_config (list[dict|None]): allowed_to_merge or allowed_to_push or allowed_to_unprotect config defined in Gitlabform
-        level_config (str): merge_access_level or push_access_level or unprotect_access_level config defined in Gitlabform
-        existing_records (tuple[dict]): immutable list of existing records
-
-    returns:
-        list[dict]: Data in the format required by the protected_branches PATCH api. https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
-    """
-    access_items_to_patch = []
-    if level_config is None:
-        # e.g.: User has not defined "merge_access_level" in config
-        if allowed_to_config is None:
-            # e.g.: User has also not defined "allowed_to_merge" rules in config
-            access_level_value = AccessLevel.MAINTAINER.value
-
-            if len(existing_records) == 1:
-                # User has previously defined only "x_access_level" in config there will only be one record in Gitlab
-                record = existing_records[0]
-                # Record already has access level defined, so no updates to make
-                if record.get("access_level") == access_level_value:
-                    return []
-
-            # Create a new record for the new Access Level required and mark the existing records for deletion
-            access_items_to_patch.append(
-                {
-                    "access_level": access_level_value,
-                }
-            )
-
-            append_records_for_deletion(access_items=access_items_to_patch, records_to_delete=existing_records)
-        else:
-            # e.g.: User has defined allowed_to_merge rules
-            configured_items_to_create = _map_allowed_to_config_to_access_levels(allowed_to_config)
-
-            for record in existing_records:
-                if record.get("user_id") is not None:
-                    # Record is a User allowed to merge record, do we have one for this user already?
-                    matching_config = find_config_matching_existing_record(
-                        configured_items_to_create, record, "user_id"
-                    )
-                    if matching_config is not None:
-                        # Do not delete existing Record and no need to create one either
-                        configured_items_to_create.remove(matching_config)
-                        continue
-                elif record.get("group_id") is not None:
-                    # Record is a Group allowed to merge record, do we have one for this group already?
-                    matching_config = find_config_matching_existing_record(
-                        configured_items_to_create, record, "group_id"
-                    )
-                    if matching_config is not None:
-                        # Do not delete existing Record and no need to create one either
-                        configured_items_to_create.remove(matching_config)
-                        continue
-                elif record.get("access_level") is not None:
-                    # Record is a pure Access Level record, do we have one in config with the same Access Level
-                    matching_config = find_config_matching_existing_record(
-                        configured_items_to_create, record, "access_level"
-                    )
-                    if matching_config is not None:
-                        # Do not delete existing Record, no need to create a new one, but we do need to pass
-                        # the existing one back to the PATCH api
-                        configured_items_to_create.remove(matching_config)
-                        access_items_to_patch.append(
-                            {
-                                "id": record.get("id"),
-                                "access_level": record.get("access_level"),
-                                "_update": True,
-                            }
-                        )
-                        continue
-
-                # No matching item found in config, so add record for deletion
-                access_items_to_patch.append({"id": record.get("id"), "_destroy": True})
-
-            for item in configured_items_to_create:
-                # When creating user_id or group_id entry we must also provide access_level, defaulted to Maintainer
-                # as per https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
-                if item.get("access_level") is None:
-                    access_items_to_patch.append(
-                        {
-                            **item,
-                            "access_level": AccessLevel.MAINTAINER.value,
-                        }
-                    )
-                else:
-                    access_items_to_patch.append(item)
-    else:
-        # e.g.: User has defined "merge_access_level" in config
-
-        access_level_value = get_access_level_value(level_config)
-        if len(existing_records) == 1:
-            # User has previously defined only "x_access_level" in config there will only be one record in Gitlab
-            record = existing_records[0]
-            # Record already has access level defined, so no updates to make
-            if record.get("access_level") == access_level_value:
-                return []
-
-        # Create a new record for the new Access Level required and mark the existing records for deletion
-        access_items_to_patch.append(
-            {
-                "access_level": access_level_value,
-            }
-        )
-
-        append_records_for_deletion(access_items=access_items_to_patch, records_to_delete=existing_records)
-
-    return access_items_to_patch
 
 
 class BranchesProcessor(AbstractProcessor):
@@ -247,7 +40,7 @@ class BranchesProcessor(AbstractProcessor):
 
         if not self.is_branch_name_wildcard(branch_name):
             try:
-                branch = project.branches.get(branch_name)
+                project.branches.get(branch_name)
             except GitlabGetError:
                 message = f"Branch '{branch_name}' not found when processing it to be protected/unprotected!"
                 if self.strict:
@@ -286,21 +79,21 @@ class BranchesProcessor(AbstractProcessor):
                             # "code_owner_approval_required"
                             protected_branch.save()
 
-                        merge_access_items = build_patch_request_data(
-                            allowed_to_config=branch_config.get("allowed_to_merge"),
-                            level_config=branch_config.get("merge_access_level"),
+                        verbose("Processing merged_access_levels")
+                        merge_access_items = self.build_patch_request_data(
+                            transformed_access_levels=branch_config_for_needs_update.get("merge_access_levels"),
                             existing_records=tuple(protected_branch.merge_access_levels),
                         )
 
-                        push_access_items = build_patch_request_data(
-                            allowed_to_config=branch_config.get("allowed_to_push"),
-                            level_config=branch_config.get("push_access_level"),
+                        verbose("Processing push_access_levels")
+                        push_access_items = self.build_patch_request_data(
+                            transformed_access_levels=branch_config_for_needs_update.get("push_access_levels"),
                             existing_records=tuple(protected_branch.push_access_levels),
                         )
 
-                        unprotect_access_items = build_patch_request_data(
-                            allowed_to_config=branch_config.get("allowed_to_unprotect"),
-                            level_config=branch_config.get("unprotect_access_level"),
+                        verbose("Processing unprotect_access_levels")
+                        unprotect_access_items = self.build_patch_request_data(
+                            transformed_access_levels=branch_config_for_needs_update.get("unprotect_access_levels"),
                             existing_records=tuple(protected_branch.unprotect_access_levels),
                         )
 
@@ -317,6 +110,7 @@ class BranchesProcessor(AbstractProcessor):
 
                         if branch_config_prepared_for_update != {}:
                             # We have some updates to Access Levels to make
+                            info(f"Updating protected branch {branch_name} with {branch_config_prepared_for_update}")
                             self.protect_branch(project, branch_name, branch_config_prepared_for_update, True)
             elif not protected_branch:
                 verbose("Creating branch protection for ':%s'", branch_name)
@@ -468,7 +262,8 @@ class BranchesProcessor(AbstractProcessor):
         new_branch_config = our_branch_config.copy()
         for key in our_branch_config:
             if key in local_keys_to_gitlab_keys_map.keys():
-                # *_access_level in gitlabform is of type int
+                # *_access_level in gitlabform will have been transformed to it's int representation already if defined
+                # by the user as "merge_access_level: Maintainer"
                 if isinstance(our_branch_config[key], int):
                     access_level = new_branch_config.pop(key)
                     new_branch_config[local_keys_to_gitlab_keys_map[key]] = [
@@ -497,6 +292,126 @@ class BranchesProcessor(AbstractProcessor):
         # return True with this key present.
         new_branch_config.pop("protected")
         return new_branch_config
+
+    @staticmethod
+    def build_patch_request_data(
+        transformed_access_levels: list[dict] | None, existing_records: tuple[dict]
+    ) -> list[dict]:
+        """
+        Gitlab supports merge_access_level for users with a Standard license and allowed_to_merge etc for users with Premium
+        or Ultimate licenses.
+        We need to support both options, and potentially blended configuration for users with Premium+ licenses.
+
+        The Gitlab PATCH api is very inconsistent when it comes to updating existing records, however it supports Create and
+        Delete in the same Update request, so for consistency if we have an update to make we create new records with the
+        new configuration and mark the old records for deltion.
+
+        args:
+            transformed_access_levels (list[dict|None]): transformed merge_access_levels or push_access_levels or unprotect_access_levels configration generated by transform_branch_config_access_levels
+            existing_records (tuple[dict]): immutable list of existing records for the protected branch in Gitlab
+
+        returns:
+            list[dict]: Data in the format required by the protected_branches PATCH api. https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
+        """
+        # {'push_access_levels': [{'access_level': 40, 'group_id': None, 'id': None, 'user_id': None}], 'unprotect_access_levels': [{'access_level': 40, 'group_id': None, 'id': None, 'user_id': None}]}
+
+        def create_delete_data(records_to_delete: tuple) -> list:
+            """
+            Creates data in the pattern defined in the gitlab api: https://docs.gitlab.com/api/protected_branches/#example-delete-a-push_access_level-record
+
+            args:
+                records_to_delete (tuple): immutable list of records from Gitlab from the protected_branch access_levels attributes (e.g. protected_branch.push_access_levels), which will be marked for destruction
+
+            returns:
+                list[dict]: Data in the format required to delete items from the access_levels in Gitlab
+            """
+            items = []
+            for record_to_delete in records_to_delete:
+                record_id = record_to_delete.get("id")
+                items.append({"id": record_id, "_destroy": True})
+
+            return items
+
+        access_items_to_patch = []
+
+        if transformed_access_levels is not None:
+            # User has defined in configuration some access level for this resource on the protected branch
+            configured_access_level_count = len(transformed_access_levels)
+            for configuration in transformed_access_levels:
+                configured_access_level = configuration.get("access_level")
+                configured_user_id = configuration.get("user_id")
+                configured_group_id = configuration.get("group_id")
+
+                if configured_access_level is not None:
+                    # Entry to configure an access level e.g.
+                    # push_access_level: Maintainer
+                    #
+                    # or:
+                    # allowed_to_push:
+                    #   - access_level: Maintainer
+
+                    # If there is only one access_level entry defined in config now, if the User has previously defined
+                    # only one access_level entry then there will only be on record in Gitlab
+                    if configured_access_level_count == 1 and len(existing_records) == 1:
+                        # Check if the record already has the same access level defined
+                        # If so, don't send any updates or deletions to the API
+                        record = existing_records[0]
+                        if record.get("access_level") == configured_access_level:
+                            return []
+
+                    # Create a new record for the new Access Level required
+                    access_items_to_patch.append(
+                        {
+                            "access_level": configured_access_level,
+                        }
+                    )
+                elif configured_user_id is not None:
+                    # Entry to configure a user to have access, only available for users with "Premium" or "Ultimate" e.g.
+                    # allowed_to_push:
+                    #   - user: tim-knight
+                    access_items_to_patch.append(
+                        {
+                            "user_id": configured_user_id,
+                        }
+                    )
+                else:
+                    # Entry to configure a group to have access, only available for users with "Premium" or "Ultimate" e.g.
+                    # allowed_to_push:
+                    #   - group_id: 15
+                    access_items_to_patch.append(
+                        {
+                            "group_id": configured_group_id,
+                        }
+                    )
+
+            # Mark existing records for deletion
+            access_items_to_patch.extend(create_delete_data(existing_records))
+
+            return access_items_to_patch
+        else:
+            verbose("No configuration defined for this access level, defaulting to Maintainer")
+            # User has not defined either x_access_level OR allowed_to_x in their configuration
+            # We should follow Gitlab convention and ensure the protected branch is set to Maintainer access level
+            access_level_value = AccessLevel.MAINTAINER.value
+
+            if len(existing_records) == 1:
+                # User has previously defined only "x_access_level" in config there will only be one record in Gitlab
+                record = existing_records[0]
+                # Record already has access level defined, so no updates to make
+                if record.get("access_level") == access_level_value:
+                    return []
+
+            # Create a new record for the new Access Level required and mark the existing records for deletion
+            access_items_to_patch.append(
+                {
+                    "access_level": access_level_value,
+                }
+            )
+
+            # Mark existing records for deletion
+            access_items_to_patch.extend(create_delete_data(existing_records))
+
+            return access_items_to_patch
 
     @staticmethod
     def naive_access_level_diff_analyzer(_, cfg_in_gitlab: list, local_cfg: list):
