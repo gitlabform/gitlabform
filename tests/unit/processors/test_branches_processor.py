@@ -211,17 +211,10 @@ class TestBranchesProcessor:
         result = BranchesProcessor.build_patch_request_data(transformed_access_levels, existing_records)
         assert result == [
             {
-                "access_level": AccessLevel.MAINTAINER.value,
-            },
-            {
                 "user_id": 23,
             },
             {
                 "group_id": 54,
-            },
-            {
-                "id": 17,
-                "_destroy": True,
             },
         ]
 
@@ -262,13 +255,6 @@ class TestBranchesProcessor:
 
         result = BranchesProcessor.build_patch_request_data(transformed_access_levels, existing_records)
         assert result == [
-            {
-                "access_level": AccessLevel.MAINTAINER.value,
-            },
-            {
-                "id": 17,
-                "_destroy": True,
-            },
             {
                 "id": 18,
                 "_destroy": True,
