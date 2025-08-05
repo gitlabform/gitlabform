@@ -1,5 +1,5 @@
 from typing import Optional
-from cli_ui import info, warning, fatal, debug as verbose
+from cli_ui import info, warning, error, fatal, debug as verbose
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
@@ -145,7 +145,7 @@ class BranchesProcessor(AbstractProcessor):
                     exit_code=EXIT_PROCESSING_ERROR,
                 )
             else:
-                warning(message)
+                error(message)
 
     def unprotect_branch(self, protected_branch: ProjectProtectedBranch):
         """
