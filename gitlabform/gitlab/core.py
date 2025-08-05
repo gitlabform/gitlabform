@@ -103,7 +103,7 @@ class GitLabCore:
 
         return version.parse(current_version) >= min_version
 
-    def _is_version_less_than(self, max_version: Union[str, version.Version]) -> bool:
+    def is_version_less_than(self, max_version: Union[str, version.Version]) -> bool:
         """
         Check if GitLab server version is less than the specified version
         Args:

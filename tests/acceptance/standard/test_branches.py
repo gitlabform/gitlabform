@@ -81,7 +81,7 @@ class TestBranches:
         assert protected_branch.allow_force_push is False
         assert protected_branch.code_owner_approval_required is True
 
-        config_unprotect_branch = f"""
+        config_modify_settings_for_branch = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             branches:
@@ -91,13 +91,13 @@ class TestBranches:
                 code_owner_approval_required: false
         """
 
-        run_gitlabform(config_unprotect_branch, project.path_with_namespace)
+        run_gitlabform(config_modify_settings_for_branch, project.path_with_namespace)
 
         protected_branch = project.protectedbranches.get(branch)
         assert protected_branch.allow_force_push is True
         assert protected_branch.code_owner_approval_required is False
 
-        config_unprotect_branch = f"""
+        config_remove_settings_for_branch = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             branches:
@@ -105,7 +105,7 @@ class TestBranches:
                 protected: true
         """
 
-        run_gitlabform(config_unprotect_branch, project.path_with_namespace)
+        run_gitlabform(config_remove_settings_for_branch, project.path_with_namespace)
 
         protected_branch = project.protectedbranches.get(branch)
         assert protected_branch.allow_force_push is False

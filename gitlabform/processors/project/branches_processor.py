@@ -69,7 +69,7 @@ class BranchesProcessor(AbstractProcessor):
                 # Check if it needs update using the specialised naive updaters (due to Gitlab storing the data differently
                 # in the backend to how it takes Create requests and therefore how we represent the data in YAML)
                 verbose("Updating branch protection for ':%s'", branch_name)
-                if not self.gitlab.is_version_at_least("15.6.0") and self._needs_update(
+                if self.gitlab.is_version_less_than("15.6.0") and self._needs_update(
                     protected_branch.attributes, branch_config_for_needs_update
                 ):
                     self.unprotect_branch(protected_branch)
@@ -77,9 +77,10 @@ class BranchesProcessor(AbstractProcessor):
                 else:
                     # We can use the Protected_Branch update APIs and the code is architected to only make changes where
                     # required, so we don't need to perform the _needs_update check first
-                    if self.set_code_owner_approval_required(
-                        branch_config, protected_branch
-                    ) or self.set_allow_force_push(branch_config, protected_branch):
+                    owner_approval_updated = self.set_code_owner_approval_required(branch_config, protected_branch)
+
+                    allow_force_push_updated = self.set_allow_force_push(branch_config, protected_branch)
+                    if owner_approval_updated or allow_force_push_updated:
                         # No need to call the API if we haven't had to change either of "allow_force_push" or
                         # "code_owner_approval_required"
                         protected_branch.save()
@@ -206,10 +207,11 @@ class BranchesProcessor(AbstractProcessor):
         configured_state = branch_config.get("code_owner_approval_required")
         branch_state = protected_branch.code_owner_approval_required
 
-        if configured_state is None and branch_state:
-            protected_branch.code_owner_approval_required = False
-            return True
-        elif configured_state is not None and branch_state != configured_state:
+        if configured_state is None:
+            if branch_state:
+                protected_branch.code_owner_approval_required = False
+                return True
+        elif branch_state != configured_state:
             protected_branch.code_owner_approval_required = configured_state
             return True
 
