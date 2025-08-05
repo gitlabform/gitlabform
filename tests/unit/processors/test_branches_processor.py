@@ -106,3 +106,59 @@ class TestBranchesProcessor:
 
         assert result_access_level == expected_result_access_level
         assert result_allowed_to == expected_result_allowed_to
+
+    def test_set_allow_force_push_returns_false_when_config_matches_gitlab(self):
+        branch_config = {
+            "allow_force_push": True,
+        }
+        protected_branch = MagicMock()
+        protected_branch.allow_force_push = True
+        result = BranchesProcessor.set_allow_force_push(branch_config, protected_branch)
+        assert result is False
+        assert protected_branch.allow_force_push is True
+
+    def test_set_allow_force_push_returns_true_when_config_differs_from_gitlab(self):
+        branch_config = {
+            "allow_force_push": False,
+        }
+        protected_branch = MagicMock()
+        protected_branch.allow_force_push = True
+        result = BranchesProcessor.set_allow_force_push(branch_config, protected_branch)
+        assert result is True
+        assert protected_branch.allow_force_push is False
+
+    def test_set_allow_force_push_returns_true_when_config_is_not_defined_and_gitlab_is_set_to_true(self):
+        branch_config = {}
+        protected_branch = MagicMock()
+        protected_branch.allow_force_push = True
+        result = BranchesProcessor.set_allow_force_push(branch_config, protected_branch)
+        assert result is True
+        assert protected_branch.allow_force_push is False
+
+    def test_set_code_owner_approval_required_returns_false_when_config_matches_gitlab(self):
+        branch_config = {
+            "code_owner_approval_required": True,
+        }
+        protected_branch = MagicMock()
+        protected_branch.code_owner_approval_required = True
+        result = BranchesProcessor.set_code_owner_approval_required(branch_config, protected_branch)
+        assert result is False
+        assert protected_branch.code_owner_approval_required is True
+
+    def test_set_code_owner_approval_required_returns_true_when_config_differs_from_gitlab(self):
+        branch_config = {
+            "code_owner_approval_required": False,
+        }
+        protected_branch = MagicMock()
+        protected_branch.code_owner_approval_required = True
+        result = BranchesProcessor.set_code_owner_approval_required(branch_config, protected_branch)
+        assert result is True
+        assert protected_branch.code_owner_approval_required is False
+
+    def test_set_code_owner_approval_required_returns_true_when_config_is_not_defined_and_gitlab_is_set_to_true(self):
+        branch_config = {}
+        protected_branch = MagicMock()
+        protected_branch.code_owner_approval_required = True
+        result = BranchesProcessor.set_code_owner_approval_required(branch_config, protected_branch)
+        assert result is True
+        assert protected_branch.code_owner_approval_required is False
