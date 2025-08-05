@@ -223,6 +223,7 @@ class FilesProcessor(AbstractProcessor):
                         debug("> Protecting the branch again.")
                         branch_config: dict = configuration["branches"][branch.name]
                         self.branch_processor.protect_branch(project, branch.name, branch_config)
+
             else:
                 raise e
 
