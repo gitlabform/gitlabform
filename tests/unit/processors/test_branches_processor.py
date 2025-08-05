@@ -23,7 +23,7 @@ class TestBranchesProcessor:
         assert BranchesProcessor.is_branch_name_wildcard("main") is False
         assert BranchesProcessor.is_branch_name_wildcard("feature-123") is False
 
-    def test_transform_branch_config(self):
+    def test_convert_user_and_group_names_to_ids(self):
         # Setup
         self.processor.gl = MagicMock()
         self.processor.gl.get_user_id_cached.return_value = 123
@@ -31,13 +31,13 @@ class TestBranchesProcessor:
 
         # Test with user
         config_with_user = {"allowed_to_push": [{"user": "johndoe"}], "protected": True}
-        result = self.processor.transform_branch_config(config_with_user)
+        result = self.processor.convert_user_and_group_names_to_ids(config_with_user)
         assert result["allowed_to_push"][0]["user_id"] == 123
         assert "user" not in result["allowed_to_push"][0]
 
         # Test with group
         config_with_group = {"allowed_to_merge": [{"group": "developers"}], "protected": True}
-        result = self.processor.transform_branch_config(config_with_group)
+        result = self.processor.convert_user_and_group_names_to_ids(config_with_group)
         assert result["allowed_to_merge"][0]["group_id"] == 456
         assert "group" not in result["allowed_to_merge"][0]
 
@@ -70,7 +70,6 @@ class TestBranchesProcessor:
         ]
         assert BranchesProcessor.naive_access_level_diff_analyzer("test_key", cfg_in_gitlab, local_cfg) is True
 
-    # TODO: Refactor to remove magic mock
     def test_prepare_branch_config_for_update(self):
 
         self.processor.gitlab._make_request_to_api = MagicMock()
