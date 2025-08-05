@@ -125,10 +125,17 @@ class BranchesProcessor(AbstractProcessor):
             verbose("Removing branch protection for ':%s'", branch_name)
             self.unprotect_branch(protected_branch)
 
-    def protect_branch(self, project: Project, branch_name: str, branch_config: dict, update_only: bool):
+    def protect_branch(self, project: Project, branch_name: str, branch_config: dict, update_only: bool = False):
         """
         Create or update branch protection using given config.
         Raise exception if running in strict mode.
+
+        args:
+            project (Project): Gitlab project
+            branch_name (str): Name of branch on the project to protect or update protection on
+            branch_config (dict): Branch protection configuration to apply
+            update_only (bool): If True, update branch protection of branch with branch_name,
+             If False create a new protected branch with branch_name
         """
         verbose("Setting branch '%s' as protected", branch_name)
         try:
