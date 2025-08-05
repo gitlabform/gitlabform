@@ -318,25 +318,6 @@ class BranchesProcessor(AbstractProcessor):
         returns:
             list[dict]: Data in the format required by the protected_branches PATCH api. https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
         """
-        # {'push_access_levels': [{'access_level': 40, 'group_id': None, 'id': None, 'user_id': None}], 'unprotect_access_levels': [{'access_level': 40, 'group_id': None, 'id': None, 'user_id': None}]}
-
-        def create_delete_data(records_to_delete: tuple) -> list:
-            """
-            Creates data in the pattern defined in the gitlab api: https://docs.gitlab.com/api/protected_branches/#example-delete-a-push_access_level-record
-
-            args:
-                records_to_delete (tuple): immutable list of records from Gitlab from the protected_branch access_levels attributes (e.g. protected_branch.push_access_levels), which will be marked for destruction
-
-            returns:
-                list[dict]: Data in the format required to delete items from the access_levels in Gitlab
-            """
-            items = []
-            for record_to_delete in records_to_delete:
-                record_id = record_to_delete.get("id")
-                items.append({"id": record_id, "_destroy": True})
-
-            return items
-
         access_items_to_patch = []
 
         if transformed_access_levels is not None:
@@ -354,15 +335,6 @@ class BranchesProcessor(AbstractProcessor):
                     # or:
                     # allowed_to_push:
                     #   - access_level: Maintainer
-
-                    # If there is only one access_level entry defined in config now, if the User has previously defined
-                    # only one access_level entry then there will only be on record in Gitlab
-                    if configured_access_level_count == 1 and len(existing_records) == 1:
-                        # Check if the record already has the same access level defined
-                        # If so, don't send any updates or deletions to the API
-                        record = existing_records[0]
-                        if record.get("access_level") == configured_access_level:
-                            return []
 
                     # Create a new record for the new Access Level required
                     access_items_to_patch.append(
@@ -389,8 +361,8 @@ class BranchesProcessor(AbstractProcessor):
                         }
                     )
 
-            # Mark existing records for deletion
-            access_items_to_patch.extend(create_delete_data(existing_records))
+            # Mark records for deletion
+            access_items_to_patch.extend(BranchesProcessor.create_delete_data(existing_records, access_items_to_patch))
 
             return access_items_to_patch
         else:
@@ -399,13 +371,6 @@ class BranchesProcessor(AbstractProcessor):
             # We should follow Gitlab convention and ensure the protected branch is set to Maintainer access level
             access_level_value = AccessLevel.MAINTAINER.value
 
-            if len(existing_records) == 1:
-                # User has previously defined only "x_access_level" in config there will only be one record in Gitlab
-                record = existing_records[0]
-                # Record already has access level defined, so no updates to make
-                if record.get("access_level") == access_level_value:
-                    return []
-
             # Create a new record for the new Access Level required and mark the existing records for deletion
             access_items_to_patch.append(
                 {
@@ -413,10 +378,51 @@ class BranchesProcessor(AbstractProcessor):
                 }
             )
 
-            # Mark existing records for deletion
-            access_items_to_patch.extend(create_delete_data(existing_records))
+            # Mark records for deletion
+            access_items_to_patch.extend(BranchesProcessor.create_delete_data(existing_records, access_items_to_patch))
 
             return access_items_to_patch
+
+    @staticmethod
+    def create_delete_data(existing_records: tuple, items_to_be_created: list) -> list:
+        """
+        Creates data in the pattern defined in the gitlab api: https://docs.gitlab.com/api/protected_branches/#example-delete-a-push_access_level-record
+
+        If gitlab contains an "access_level" entry for one we are trying to configure, don't mark for deletion
+            and re-creation, as we will likely get a "Merge Access Level access level already exists" error
+            as well as it being relatively pointless data change
+
+        args:
+            existing_records (tuple|list): list of records from Gitlab from the protected_branch access_levels attributes (e.g. protected_branch.push_access_levels)
+            items_to_be_created (list): list of items which will be created -> will be mutated if we find an existing record matching an item to be created
+
+        returns:
+            list[dict]: Data in the format required to delete items from the access_levels in Gitlab
+        """
+        items_to_delete = []
+        for item_to_delete in existing_records:
+            access_level = item_to_delete.get("access_level")
+            matching_item = None
+
+            if access_level is not None:
+                # Gitlab entry is an "access_level" entry, find if we have configured one with the same level
+                for item in items_to_be_created:
+                    if item.get("access_level") == access_level:
+                        matching_item = item
+
+            # If we found an existing "access_level" item matching one that has been configured, remove the item to be
+            # created and don't mark the existing record for deletion
+            if matching_item is not None:
+                items_to_be_created.remove(matching_item)
+            else:
+                items_to_delete.append(item_to_delete)
+
+        items = []
+        for record_to_delete in items_to_delete:
+            record_id = record_to_delete.get("id")
+            items.append({"id": record_id, "_destroy": True})
+
+        return items
 
     @staticmethod
     def naive_access_level_diff_analyzer(_, cfg_in_gitlab: list, local_cfg: list):
