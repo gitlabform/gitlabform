@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch, call
 
+from gitlabform.gitlab import AccessLevel
 from gitlabform.processors.project.branches_processor import BranchesProcessor
 
 
@@ -162,3 +163,114 @@ class TestBranchesProcessor:
         result = BranchesProcessor.set_code_owner_approval_required(branch_config, protected_branch)
         assert result is True
         assert protected_branch.code_owner_approval_required is False
+
+    def test_build_patch_request_data_returns_nothing_if_no_config_defined_and_gitlab_has_maintainer_access_already(
+        self,
+    ):
+        transformed_access_levels = None
+        existing_records = tuple(
+            [
+                {
+                    "access_level": AccessLevel.MAINTAINER.value,
+                }
+            ]
+        )
+
+        result = BranchesProcessor.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == []
+
+    def test_build_patch_request_data_returns_nothing_when_config_access_level_matches_gitlab_access_level(self):
+        transformed_access_levels = [
+            {
+                "access_level": AccessLevel.MAINTAINER.value,
+            }
+        ]
+        existing_records = tuple(
+            [
+                {
+                    "access_level": AccessLevel.MAINTAINER.value,
+                }
+            ]
+        )
+
+        result = BranchesProcessor.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == []
+
+    def test_build_patch_request_data_when_config_has_additional_data_to_gitlab(self):
+        transformed_access_levels = [
+            {
+                "access_level": AccessLevel.MAINTAINER.value,
+            },
+            {"user_id": 23},
+            {
+                "group_id": 54,
+            },
+        ]
+        existing_records = tuple([{"access_level": AccessLevel.MAINTAINER.value, "id": 17}])
+
+        result = BranchesProcessor.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [
+            {
+                "access_level": AccessLevel.MAINTAINER.value,
+            },
+            {
+                "user_id": 23,
+            },
+            {
+                "group_id": 54,
+            },
+            {
+                "id": 17,
+                "_destroy": True,
+            },
+        ]
+
+    def test_build_patch_request_data_when_config_has_different_access_level_to_gitlab(self):
+        transformed_access_levels = [
+            {
+                "access_level": AccessLevel.NO_ACCESS.value,
+            }
+        ]
+        existing_records = tuple([{"access_level": AccessLevel.MAINTAINER.value, "id": 17}])
+
+        result = BranchesProcessor.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [
+            {
+                "access_level": AccessLevel.NO_ACCESS.value,
+            },
+            {
+                "id": 17,
+                "_destroy": True,
+            },
+        ]
+
+    def test_build_patch_request_data_when_config_is_remove_user_access_to_gitlab(self):
+        transformed_access_levels = [
+            {
+                "access_level": AccessLevel.MAINTAINER.value,
+            }
+        ]
+        existing_records = tuple(
+            [
+                {"access_level": AccessLevel.MAINTAINER.value, "id": 17},
+                {
+                    "used_id": 23,
+                    "id": 18,
+                },
+            ]
+        )
+
+        result = BranchesProcessor.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [
+            {
+                "access_level": AccessLevel.MAINTAINER.value,
+            },
+            {
+                "id": 17,
+                "_destroy": True,
+            },
+            {
+                "id": 18,
+                "_destroy": True,
+            },
+        ]
