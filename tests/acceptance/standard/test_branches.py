@@ -152,9 +152,6 @@ class TestBranches:
 
         run_gitlabform(config_modify_protection_on_branch, project_for_function.path_with_namespace)
 
-        # Wait a little for Gitlab update PATCH api processing
-        time.sleep(2)
-
         (
             push_access_levels,
             merge_access_levels,
@@ -183,9 +180,6 @@ class TestBranches:
          """
 
         run_gitlabform(config_remodify_protection_on_branch, project_for_function.path_with_namespace)
-
-        # Wait a little for Gitlab update PATCH api processing
-        time.sleep(2)
 
         (
             push_access_levels,
