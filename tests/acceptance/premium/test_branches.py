@@ -11,9 +11,9 @@ pytestmark = pytest.mark.requires_license
 
 
 class TestBranches:
-    def test__code_owners_approval(self, project, branch):
+    def test__code_owners_approval(self, project_for_function, branch_for_function):
         try:
-            protected_branch = project.protectedbranches.get(branch)
+            protected_branch = project_for_function.protectedbranches.get(branch_for_function)
             assert protected_branch.code_owner_approval_required is False
         except gitlab.GitlabGetError:
             # this is fine, the branch may not be protected at all yet
@@ -21,9 +21,9 @@ class TestBranches:
 
         protect_branch_with_code_owner_approval_required = f"""
         projects_and_groups:
-          {project.path_with_namespace}:
+          {project_for_function.path_with_namespace}:
             branches:
-              {branch}:
+              {branch_for_function}:
                 protected: true
                 push_access_level: maintainer
                 merge_access_level: developer
@@ -31,12 +31,12 @@ class TestBranches:
                 code_owner_approval_required: true
         """
 
-        run_gitlabform(protect_branch_with_code_owner_approval_required, project)
+        run_gitlabform(protect_branch_with_code_owner_approval_required, project_for_function)
 
-        protected_branch = project.protectedbranches.get(branch)
+        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
         assert protected_branch.code_owner_approval_required is True
 
-    def test__allow_user_ids(self, project, branch, make_user):
+    def test__allow_user_ids(self, project_for_function, branch_for_function, make_user):
         user_allowed_to_push = make_user(AccessLevel.DEVELOPER)
         user_allowed_to_merge = make_user(AccessLevel.DEVELOPER)
         user_allowed_to_push_and_merge = make_user(AccessLevel.DEVELOPER)
@@ -46,9 +46,9 @@ class TestBranches:
 
         config_with_user_ids = f"""
         projects_and_groups:
-          {project.path_with_namespace}:
+          {project_for_function.path_with_namespace}:
             branches:
-              {branch}:
+              {branch_for_function}:
                 protected: true
                 allowed_to_push:
                   - user_id: {user_allowed_to_push.id}
@@ -60,7 +60,7 @@ class TestBranches:
                   - user: {user_allowed_to_push_and_merge.username}
         """
 
-        run_gitlabform(config_with_user_ids, project)
+        run_gitlabform(config_with_user_ids, project_for_function)
 
         (
             push_access_levels,
@@ -70,7 +70,7 @@ class TestBranches:
             _,
             _,
             _,
-        ) = get_only_branch_access_levels(project, branch)
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
 
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.DEVELOPER.value]
@@ -87,16 +87,16 @@ class TestBranches:
             ]
         )
 
-    def test__allow_more_than_one_user_by_ids(self, project, branch, make_user):
+    def test__allow_more_than_one_user_by_ids(self, project_for_function, branch_for_function, make_user):
         first_user = make_user(AccessLevel.DEVELOPER)
         second_user = make_user(AccessLevel.DEVELOPER)
         third_user = make_user(AccessLevel.DEVELOPER)
 
         config_with_more_user_ids = f"""
         projects_and_groups:
-          {project.path_with_namespace}:
+          {project_for_function.path_with_namespace}:
             branches:
-              {branch}:
+              {branch_for_function}:
                 protected: true
                 allowed_to_push:
                   - access_level: {AccessLevel.MAINTAINER.value} 
@@ -107,7 +107,7 @@ class TestBranches:
                   - access_level: {AccessLevel.MAINTAINER.value}
         """
 
-        run_gitlabform(config_with_more_user_ids, project)
+        run_gitlabform(config_with_more_user_ids, project_for_function)
 
         (
             push_access_levels,
@@ -117,7 +117,7 @@ class TestBranches:
             _,
             _,
             _,
-        ) = get_only_branch_access_levels(project, branch)
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
 
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
