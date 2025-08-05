@@ -14,13 +14,37 @@ class TestGroupSamlLinks:
         projects_and_groups:
           {group.full_path}/*:              
              saml_group_links: 
-               devops_are_maintainers:                                 
-                 saml_group_name: devops_maintainer
+               devops_users:                                 
+                 saml_group_name: devops_users
                  access_level: maintainer
         """
         run_gitlabform(add_group_saml_settings, group)
+
+        # Verify that the SAML link was created
         refreshed_group = gl.groups.get(group.id)
-        assert len(refreshed_group.saml_group_links.list()) == 1
+        saml_links = refreshed_group.saml_group_links.list(get_all = True)
+        assert len(saml_links) == 1
+        assert saml_links[0].name == "devops_users"
+        assert saml_links[0].access_level == AccessLevel.get_value("maintainer")
+
+    def test__update_saml_links(self, gl, group):
+
+        assert len(group.saml_group_links.list()) == 1, "saml_group_links is not empty from previous test"
+        add_group_saml_settings = f"""
+        projects_and_groups:
+          {group.full_path}/*:              
+             saml_group_links: 
+               devops_users:                                 
+                 saml_group_name: devops_users
+                 access_level: developer
+        """
+        run_gitlabform(add_group_saml_settings, group)
+        # Verify that the SAML link was updated
+        refreshed_group = gl.groups.get(group.id)
+        saml_links = refreshed_group.saml_group_links.list(get_all = True)
+        assert len(saml_links) == 1
+        assert saml_links[0].name == "devops_users"
+        assert saml_links[0].access_level == AccessLevel.get_value("developer")
 
     def test__enforce_saml_links(self, gl, group_for_function):
 
