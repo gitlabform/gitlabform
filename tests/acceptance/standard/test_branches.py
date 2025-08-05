@@ -64,6 +64,53 @@ class TestBranches:
         assert merge_access_user_ids is None
         assert unprotect_access_level is None
 
+    def test_modify_force_push_and_code_owner_approvals(self, project, branch):
+        config_protect_branch = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                allow_force_push: false
+                code_owner_approval_required: true
+        """
+
+        run_gitlabform(config_protect_branch, project.path_with_namespace)
+
+        protected_branch = project.protectedbranches.get(branch)
+        assert protected_branch.allow_force_push is False
+        assert protected_branch.code_owner_approval_required is True
+
+        config_unprotect_branch = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                allow_force_push: true
+                code_owner_approval_required: false
+        """
+
+        run_gitlabform(config_unprotect_branch, project.path_with_namespace)
+
+        protected_branch = project.protectedbranches.get(branch)
+        assert protected_branch.allow_force_push is True
+        assert protected_branch.code_owner_approval_required is False
+
+        config_unprotect_branch = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+        """
+
+        run_gitlabform(config_unprotect_branch, project.path_with_namespace)
+
+        protected_branch = project.protectedbranches.get(branch)
+        assert protected_branch.allow_force_push is False
+        assert protected_branch.code_owner_approval_required is False
+
     def test__modify_protection(self, project_for_function, branch_for_function):
         config_protect_branch = f"""
          projects_and_groups:
