@@ -22,7 +22,7 @@ class TestGroupSamlLinks:
 
         # Verify that the SAML link was created
         refreshed_group = gl.groups.get(group.id)
-        saml_links = refreshed_group.saml_group_links.list(get_all = True)
+        saml_links = refreshed_group.saml_group_links.list(get_all=True)
         assert len(saml_links) == 1
         assert saml_links[0].name == "devops_users"
         assert saml_links[0].access_level == AccessLevel.get_value("maintainer")
@@ -41,7 +41,7 @@ class TestGroupSamlLinks:
         run_gitlabform(add_group_saml_settings, group)
         # Verify that the SAML link was updated
         refreshed_group = gl.groups.get(group.id)
-        saml_links = refreshed_group.saml_group_links.list(get_all = True)
+        saml_links = refreshed_group.saml_group_links.list(get_all=True)
         assert len(saml_links) == 1
         assert saml_links[0].name == "devops_users"
         assert saml_links[0].access_level == AccessLevel.get_value("developer")
