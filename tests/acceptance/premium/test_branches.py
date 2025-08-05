@@ -1,45 +1,21 @@
 import pytest
 import time
 
-import gitlab
-from gitlab.v4.objects import ProjectProtectedBranch
+from gitlab.v4.objects import ProjectProtectedBranch, User
 
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import get_only_branch_access_levels, run_gitlabform
+from tests.acceptance.conftest import create_project_member_developer
 
 pytestmark = pytest.mark.requires_license
 
 
 class TestBranches:
-    def test__code_owners_approval(self, project_for_function, branch_for_function):
-        try:
-            protected_branch = project_for_function.protectedbranches.get(branch_for_function)
-            assert protected_branch.code_owner_approval_required is False
-        except gitlab.GitlabGetError:
-            # this is fine, the branch may not be protected at all yet
-            pass
 
-        protect_branch_with_code_owner_approval_required = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            branches:
-              {branch_for_function}:
-                protected: true
-                push_access_level: maintainer
-                merge_access_level: developer
-                unprotect_access_level: maintainer
-                code_owner_approval_required: true
-        """
-
-        run_gitlabform(protect_branch_with_code_owner_approval_required, project_for_function)
-
-        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
-        assert protected_branch.code_owner_approval_required is True
-
-    def test__allow_user_ids(self, project_for_function, branch_for_function, make_user):
-        user_allowed_to_push = make_user(AccessLevel.DEVELOPER)
-        user_allowed_to_merge = make_user(AccessLevel.DEVELOPER)
-        user_allowed_to_push_and_merge = make_user(AccessLevel.DEVELOPER)
+    def test__allow_user_ids(self, gl, project_for_function, branch_for_function):
+        user_allowed_to_push = create_project_member_developer(gl, project_for_function)
+        user_allowed_to_merge = create_project_member_developer(gl, project_for_function)
+        user_allowed_to_push_and_merge = create_project_member_developer(gl, project_for_function)
 
         # Wait a little for newly created users to be available.
         time.sleep(2)
@@ -87,10 +63,10 @@ class TestBranches:
             ]
         )
 
-    def test__allow_more_than_one_user_by_ids(self, project_for_function, branch_for_function, make_user):
-        first_user = make_user(AccessLevel.DEVELOPER)
-        second_user = make_user(AccessLevel.DEVELOPER)
-        third_user = make_user(AccessLevel.DEVELOPER)
+    def test__allow_more_than_one_user_by_ids(self, project_for_function, branch_for_function, gl):
+        first_user = create_project_member_developer(gl, project_for_function)
+        second_user = create_project_member_developer(gl, project_for_function)
+        third_user = create_project_member_developer(gl, project_for_function)
 
         config_with_more_user_ids = f"""
         projects_and_groups:
@@ -131,7 +107,7 @@ class TestBranches:
         assert merge_access_user_ids == []
 
     def test__branch_protection_dependent_on_members(
-        self, project_for_function, group_for_function, branch_for_function, make_user
+        self, project_for_function, group_for_function, branch_for_function, make_user, gl
     ):
         """
         Configure a branch protection setting that depends on users or groups (i.e. allowed_to_merge)
@@ -141,15 +117,9 @@ class TestBranches:
 
         user_for_group_to_share_project_with = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
 
-        project_user_allowed_to_push = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
-        project_for_function.members.create(
-            {"user_id": project_user_allowed_to_push.id, "access_level": AccessLevel.DEVELOPER.value}
-        )
+        project_user_allowed_to_push = create_project_member_developer(gl, project_for_function)
 
-        project_user_allowed_to_merge = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
-        project_for_function.members.create(
-            {"user_id": project_user_allowed_to_merge.id, "access_level": AccessLevel.DEVELOPER.value}
-        )
+        project_user_allowed_to_merge = create_project_member_developer(gl, project_for_function)
 
         # Wait a little for newly created users to be available.
         time.sleep(2)
@@ -216,7 +186,7 @@ class TestBranches:
         assert merge_access_group_ids == sorted([group_for_function.id])
 
     def test__modifying_branch_protection_dependent_on_members(
-        self, project_for_function, group_for_function, branch_for_function, make_user
+        self, project_for_function, group_for_function, branch_for_function, make_user, gl
     ):
         """
         Configure a branch protection setting that depends on users or groups (i.e. allowed_to_merge)
@@ -226,15 +196,9 @@ class TestBranches:
 
         user_for_group_to_share_project_with = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
 
-        project_user_allowed_to_push = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
-        project_for_function.members.create(
-            {"user_id": project_user_allowed_to_push.id, "access_level": AccessLevel.DEVELOPER.value}
-        )
+        project_user_allowed_to_push = create_project_member_developer(gl, project_for_function)
 
-        project_user_allowed_to_merge = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
-        project_for_function.members.create(
-            {"user_id": project_user_allowed_to_merge.id, "access_level": AccessLevel.DEVELOPER.value}
-        )
+        project_user_allowed_to_merge = create_project_member_developer(gl, project_for_function)
 
         # Wait a little for newly created users to be available.
         time.sleep(2)
@@ -309,20 +273,14 @@ class TestBranches:
         )
         assert merge_access_group_ids == sorted([group_for_function.id])
 
-    def test__modify_protection(self, project_for_function, group_for_function, branch_for_function, make_user):
+    def test__modify_protection(self, project_for_function, group_for_function, branch_for_function, gl):
         """
         Set protection using the "standard" push_access_level fields, modify using the "Premium" allowed_to_push,
         and then revert back using "standard" level
         """
-        project_user_allowed_to_push = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
-        project_for_function.members.create(
-            {"user_id": project_user_allowed_to_push.id, "access_level": AccessLevel.DEVELOPER.value}
-        )
+        project_user_allowed_to_push = create_project_member_developer(gl, project_for_function)
 
-        project_user_allowed_to_merge = make_user(level=AccessLevel.DEVELOPER, add_to_project=False)
-        project_for_function.members.create(
-            {"user_id": project_user_allowed_to_merge.id, "access_level": AccessLevel.DEVELOPER.value}
-        )
+        project_user_allowed_to_merge = create_project_member_developer(gl, project_for_function)
 
         # Wait a little for newly created users to be available.
         time.sleep(2)

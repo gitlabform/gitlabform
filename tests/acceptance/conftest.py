@@ -317,13 +317,17 @@ def make_user(gl, project) -> Generator[Callable[[AccessLevel, bool], User], Non
 
 @pytest.fixture(scope="function")
 def make_project_member_developer(gl, project_for_function):
-    username = get_random_name("user")
-
-    user = _create_user_and_add_to_project(gl, project_for_function, username)
+    user = create_project_member_developer(gl, project_for_function)
 
     yield user
 
     gl.users.delete(user.id)
+
+
+def create_project_member_developer(gl, project_to_add_user_to):
+    username = get_random_name("user")
+    user = _create_user_and_add_to_project(gl, project_to_add_user_to, username)
+    return user
 
 
 @pytest.fixture(scope="function")
