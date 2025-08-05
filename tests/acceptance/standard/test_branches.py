@@ -1,5 +1,3 @@
-import time
-
 from gitlab.v4.objects import ProjectProtectedBranch
 
 from gitlabform.gitlab import AccessLevel

@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock
 
 from gitlabform.gitlab import AccessLevel
 from gitlabform.processors.project.branches_processor import BranchesProcessor
