@@ -12,7 +12,7 @@ pytestmark = pytest.mark.requires_license
 
 class TestBranches:
 
-    def test_can_add_users_by_username_or_id_to_branch_protection_rules(self, project, branch, gl):
+    def test__can_add_users_by_username_or_id_to_branch_protection_rules(self, project, branch, gl):
         first_user = create_project_member(gl, project)
         second_user = create_project_member(gl, project)
         third_user = create_project_member(gl, project)
@@ -55,7 +55,7 @@ class TestBranches:
         )
         assert merge_access_user_ids == []
 
-    def test_can_add_users_and_group_to_branch_protection_rules(
+    def test__can_add_users_and_group_to_branch_protection_rules(
         self, project, group_for_function, branch, make_user, gl
     ):
         """

@@ -75,8 +75,8 @@ class BranchesProcessor(AbstractProcessor):
                     self.unprotect_branch(protected_branch)
                     self.protect_branch(project, branch_name, branch_config, False)
                 else:
-                    # We can use the Protected_Branch update APIs and the code is architected to only make changes where
-                    # required, so we don't need to perform the _needs_update check first
+                    # Update the Branch Protection Rules
+
                     owner_approval_updated = self.set_code_owner_approval_required(branch_config, protected_branch)
 
                     allow_force_push_updated = self.set_allow_force_push(branch_config, protected_branch)
@@ -205,8 +205,14 @@ class BranchesProcessor(AbstractProcessor):
     def set_code_owner_approval_required(branch_config: dict, protected_branch: ProjectProtectedBranch):
         """
         Sets the state of code_owner_approval_required on the protected branch.
-        If code_owner_approval_required is not set in the gitlabform config we assume it should not be required
-        e.g. set to False
+        If code_owner_approval_required is no longer set in the gitlabform config we follow the defaults Gitlab uses
+        when first protecting the branch and set the state to False
+
+        API spec: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
+
+        We retain that decision-making rather than leaving the values at their previous state, otherwise
+        if a User manually unprotected a branch, and restored protection by re-running Gitlabform, the flags would
+        silently change
 
         Returns:
               bool: whether a change was made to the protected_branch attribute
@@ -228,8 +234,14 @@ class BranchesProcessor(AbstractProcessor):
     def set_allow_force_push(branch_config: dict, protected_branch: ProjectProtectedBranch):
         """
         Sets the state of allow_force_push on the protected branch.
-        If allow_force_push is not set in the gitlabform config we assume it should not be required
-        e.g. set to False
+        If allow_force_push is no longer set in the gitlabform config we follow the defaults Gitlab uses
+        when first protecting the branch and set the state to False
+
+        API spec: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
+
+        We retain that decision-making rather than leaving the values at their previous state, otherwise
+        if a User manually unprotected a branch, and restored protection by re-running Gitlabform, the flags would
+        silently change
 
         Returns:
               bool: whether a change was made to the protected_branch attribute
