@@ -1,3 +1,4 @@
+from gitlab import GitlabGetError
 from gitlab.v4.objects import ProjectProtectedBranch
 
 from gitlabform.gitlab import AccessLevel
@@ -44,8 +45,10 @@ class TestBranches:
 
         run_gitlabform(config_unprotect_branch, project.path_with_namespace)
 
+        # Verify branch is no longer one of the project's protected branches
         protected_branches = project.protectedbranches.list()
-        assert len(protected_branches) == 0
+        for pb in protected_branches:
+            assert pb.name != branch
 
     def test__modify_force_push_and_code_owner_approvals(self, project, branch):
         config_protect_branch = f"""
@@ -99,7 +102,23 @@ class TestBranches:
         assert protected_branch.allow_force_push is False
         assert protected_branch.code_owner_approval_required is False
 
-    def test__modify_protection_rules(self, project_for_function, branch_for_function):
+    def test__repeatedly_modify_protection_rules(self, project_for_function, branch_for_function):
+        """
+        This test modifies the branch protection rules multiple times using gitlabform to stress the "Update" functionality.
+
+        If we were to run the config only once or twice we would test "Create" once and "Update" once, to have confidence
+        that the "Update" functionality can swap between different states without breaking we need to "Update" repeatedly
+
+        Usually we prefer **not** to run multiple iterations of gitlabform in an integration test
+        """
+
+        try:
+            protected_branch = project_for_function.protectedbranches.get(branch_for_function)
+        except GitlabGetError:
+            # Set Branch to be Protected before running gitlabform
+            project_for_function.protectedbranches.create({"name": branch_for_function})
+
+        # Initially update branch with NO ACCESS to push, MAINTAINER to unprotect and DEVELOPER to merge
         config_protect_branch = f"""
          projects_and_groups:
            {project_for_function.path_with_namespace}:
@@ -128,17 +147,18 @@ class TestBranches:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-        config_modify_protection_on_branch = f"""
+        # Re run the configuration with NO ACCESS to push, MAINTAINER to unprotect, but MAINTAINER not supplied
+        config_without_merge_access_level_defined = f"""
          projects_and_groups:
            {project_for_function.path_with_namespace}:
              branches:
                {branch_for_function}:
                  protected: true
-                 push_access_level: {AccessLevel.MAINTAINER.value}
+                 push_access_level: {AccessLevel.NO_ACCESS.value}
                  unprotect_access_level: {AccessLevel.MAINTAINER.value}
          """
 
-        run_gitlabform(config_modify_protection_on_branch, project_for_function.path_with_namespace)
+        run_gitlabform(config_without_merge_access_level_defined, project_for_function.path_with_namespace)
 
         (
             push_access_levels,
@@ -149,7 +169,7 @@ class TestBranches:
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
-        assert push_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
 
         # When first protecting a branch, if merge_access_level is not supplied, Gitlab will default to "Maintainer"
         # https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
@@ -161,6 +181,7 @@ class TestBranches:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
+        # Re run the configuration with MAINTAINER to push, MAINTAINER to unprotect and MAINTAINER to merge
         config_remodify_protection_on_branch = f"""
          projects_and_groups:
            {project_for_function.path_with_namespace}:
@@ -168,7 +189,7 @@ class TestBranches:
                {branch_for_function}:
                  protected: true
                  push_access_level: {AccessLevel.MAINTAINER.value}
-                 merge_access_level: {AccessLevel.DEVELOPER.value}
+                 merge_access_level: {AccessLevel.MAINTAINER.value}
                  unprotect_access_level: {AccessLevel.MAINTAINER.value}
          """
 
@@ -184,7 +205,7 @@ class TestBranches:
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
-        assert merge_access_levels == [AccessLevel.DEVELOPER.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
