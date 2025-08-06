@@ -317,14 +317,14 @@ def make_user(gl, project) -> Generator[Callable[[AccessLevel, bool], User], Non
 
 @pytest.fixture(scope="function")
 def make_project_member_developer(gl, project_for_function):
-    user = create_project_member_developer(gl, project_for_function)
+    user = create_project_member(gl, project_for_function)
 
     yield user
 
     gl.users.delete(user.id)
 
 
-def create_project_member_developer(gl, project_to_add_user_to):
+def create_project_member(gl, project_to_add_user_to, access_level_value: int = AccessLevel.DEVELOPER.value):
     username = get_random_name("user")
     user = _create_user_and_add_to_project(gl, project_to_add_user_to, username)
     return user
@@ -354,7 +354,7 @@ def make_multiple_project_members_for_pagination(gl, project_for_function):
         user.delete()
 
 
-def _create_user_and_add_to_project(gl, project, username):
+def _create_user_and_add_to_project(gl, project, username, access_level_value=AccessLevel.DEVELOPER.value):
     user = gl.users.create(
         {
             "username": username,
@@ -363,7 +363,7 @@ def _create_user_and_add_to_project(gl, project, username):
             "password": get_random_password(),
         }
     )
-    project.members.create({"user_id": user.id, "access_level": AccessLevel.DEVELOPER.value})
+    project.members.create({"user_id": user.id, "access_level": access_level_value})
     return user
 
 
