@@ -1,3 +1,5 @@
+import logging
+
 from gitlab import GitlabGetError
 from gitlab.v4.objects import ProjectProtectedBranch
 
@@ -51,6 +53,13 @@ class TestBranches:
             assert pb.name != branch
 
     def test__modify_force_push_and_code_owner_approvals(self, project, branch):
+        try:
+            protected_branch = project.protectedbranches.get(branch)
+            protected_branch.delete()
+        except GitlabGetError:
+            # Branch currently not protected so do nothing
+            logging.debug("Nothing to reset")
+
         config_protect_branch = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -210,7 +219,9 @@ class TestBranches:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-    def test__if_protected_branch_config_does_not_change_then_branch_approval_rules_are_retained(self, project, branch):
+    def test__if_protected_branch_config_does_not_change_then_branch_approval_rules_are_retained(
+        self, project_for_function, branch_for_function
+    ):
         # Previously we have unprotected and re-protected branches in order to apply config changes
         # and even if config did not change, branches_processor would thing it still needed a change.
         # This resulted in loss of manual approval rules: https://github.com/gitlabform/gitlabform/issues/1061
@@ -218,16 +229,16 @@ class TestBranches:
         # when run in debug mode with breakpoints from an IDE, and validates the branch approval rules being retained
         config_protect_branch = f"""
          projects_and_groups:
-           {project.path_with_namespace}:
+           {project_for_function.path_with_namespace}:
              branches:
-               {branch}:
+               {branch_for_function}:
                  protected: true
                  push_access_level: {AccessLevel.NO_ACCESS.value}
                  merge_access_level: {AccessLevel.MAINTAINER.value}
                  unprotect_access_level: {AccessLevel.MAINTAINER.value}
          """
 
-        run_gitlabform(config_protect_branch, project.path_with_namespace)
+        run_gitlabform(config_protect_branch, project_for_function.path_with_namespace)
 
         (
             push_access_levels,
@@ -237,7 +248,7 @@ class TestBranches:
             _,
             _,
             unprotect_access_level,
-        ) = get_only_branch_access_levels(project, branch)
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
@@ -245,10 +256,10 @@ class TestBranches:
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         # Add manual approval rule on the protected branch
-        protected_branch: ProjectProtectedBranch = project.protectedbranches.get(branch)
-        project.approvalrules.create(
+        protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
+        project_for_function.approvalrules.create(
             {
-                "name": "any",
+                "name": "Branch Protection validation",
                 "approvals_required": 2,
                 "rule_type": "regular",
                 "protected_branch_ids": [
@@ -257,7 +268,7 @@ class TestBranches:
             }
         )
 
-        approval_rules = project.approvalrules.list(get_all=True)
+        approval_rules = project_for_function.approvalrules.list(get_all=True)
         assert len(approval_rules) == 1
         approval_rule = approval_rules[0]
         assert approval_rule.name == "any"
@@ -267,7 +278,7 @@ class TestBranches:
         assert pb_ar.get("id") == protected_branch.id
 
         # re-run the exact same config
-        run_gitlabform(config_protect_branch, project.path_with_namespace)
+        run_gitlabform(config_protect_branch, project_for_function.path_with_namespace)
 
         (
             push_access_levels,
@@ -277,7 +288,7 @@ class TestBranches:
             _,
             _,
             unprotect_access_level,
-        ) = get_only_branch_access_levels(project, branch)
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
 
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
@@ -287,9 +298,9 @@ class TestBranches:
 
         # If the branch was unprotected and then re-protected the branch id of the protected branch would likely differ
         # from that stored in the branch approval rule
-        protected_branch: ProjectProtectedBranch = project.protectedbranches.get(branch)
+        protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
 
-        approval_rules = project.approvalrules.list(get_all=True)
+        approval_rules = project_for_function.approvalrules.list(get_all=True)
         assert len(approval_rules) == 1
         approval_rule = approval_rules[0]
         assert approval_rule.name == "any"
