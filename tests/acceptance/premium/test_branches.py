@@ -1,6 +1,7 @@
 import pytest
 import time
 
+from gitlab import GitlabGetError
 from gitlab.v4.objects import ProjectProtectedBranch, User
 
 from gitlabform.gitlab import AccessLevel
@@ -72,7 +73,9 @@ class TestBranches:
         # Wait a little for newly created users to be available.
         time.sleep(2)
 
-        if project.protectedbranches.get(branch) is None:
+        try:
+            protected_branch = project.protectedbranches.get(branch)
+        except GitlabGetError:
             # Set Branch to be Protected before running gitlabform
             project.protectedbranches.create({"name": branch})
 
