@@ -13,16 +13,18 @@ pytestmark = pytest.mark.requires_license
 
 class TestBranches:
 
-    def test__can_add_users_by_username_or_id_to_branch_protection_rules(self, project, branch, gl):
-        first_user = create_project_member(gl, project)
-        second_user = create_project_member(gl, project)
-        third_user = create_project_member(gl, project)
+    def test__can_add_users_by_username_or_id_to_branch_protection_rules(
+        self, project_for_function, branch_for_function, gl
+    ):
+        first_user = create_project_member(gl, project_for_function)
+        second_user = create_project_member(gl, project_for_function)
+        third_user = create_project_member(gl, project_for_function)
 
         config_with_more_user_ids = f"""
         projects_and_groups:
-          {project.path_with_namespace}:
+          {project_for_function.path_with_namespace}:
             branches:
-              {branch}:
+              {branch_for_function}:
                 protected: true
                 allowed_to_push:
                   - user_id: {first_user.id}
@@ -33,7 +35,7 @@ class TestBranches:
                   - access_level: {AccessLevel.MAINTAINER.value}
         """
 
-        run_gitlabform(config_with_more_user_ids, project)
+        run_gitlabform(config_with_more_user_ids, project_for_function)
 
         (
             push_access_levels,
@@ -43,7 +45,7 @@ class TestBranches:
             _,
             _,
             _,
-        ) = get_only_branch_access_levels(project, branch)
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
 
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
