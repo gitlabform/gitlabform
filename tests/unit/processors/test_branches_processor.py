@@ -12,17 +12,19 @@ class TestBranchesProcessor:
 
     def test_is_branch_name_wildcard(self):
         # Test cases with wildcards
-        assert BranchesProcessor.is_branch_name_wildcard("branch*") is True
-        assert BranchesProcessor.is_branch_name_wildcard("*branch") is True
-        assert BranchesProcessor.is_branch_name_wildcard("br*nch") is True
-        assert BranchesProcessor.is_branch_name_wildcard("branch?") is True
-        assert BranchesProcessor.is_branch_name_wildcard("?branch") is True
-        assert BranchesProcessor.is_branch_name_wildcard("br?nch") is True
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("branch*") is True
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("*branch") is True
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("br*nch") is True
+
+        # Test cases with unsupported wildcards
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("branch?") is False
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("?branch") is False
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("br?nch") is False
 
         # Test cases without wildcards
-        assert BranchesProcessor.is_branch_name_wildcard("branch") is False
-        assert BranchesProcessor.is_branch_name_wildcard("main") is False
-        assert BranchesProcessor.is_branch_name_wildcard("feature-123") is False
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("branch") is False
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("main") is False
+        assert BranchesProcessor.is_branch_name_supported_protected_branch_wildcard("feature-123") is False
 
     def test_convert_user_and_group_names_to_ids(self):
         # Setup
