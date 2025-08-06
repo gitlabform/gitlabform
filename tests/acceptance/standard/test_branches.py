@@ -5,7 +5,7 @@ from tests.acceptance import get_only_branch_access_levels, run_gitlabform
 
 
 class TestBranches:
-    def test__protect_and_unprotect(self, project, branch):
+    def test__can_protect_and_unprotect_a_branch(self, project, branch):
         config_protect_branch = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -40,29 +40,14 @@ class TestBranches:
             branches:
               {branch}:
                 protected: false
-                push_access_level: {AccessLevel.NO_ACCESS.value}
-                merge_access_level: {AccessLevel.MAINTAINER.value}
-                unprotect_access_level: {AccessLevel.MAINTAINER.value}
         """
 
         run_gitlabform(config_unprotect_branch, project.path_with_namespace)
 
-        (
-            push_access_levels,
-            merge_access_levels,
-            push_access_user_ids,
-            merge_access_user_ids,
-            _,
-            _,
-            unprotect_access_level,
-        ) = get_only_branch_access_levels(project, branch)
-        assert push_access_levels is None
-        assert merge_access_levels is None
-        assert push_access_user_ids is None
-        assert merge_access_user_ids is None
-        assert unprotect_access_level is None
+        protected_branches = project.protectedbranches.list()
+        assert len(protected_branches) == 0
 
-    def test_modify_force_push_and_code_owner_approvals(self, project, branch):
+    def test__modify_force_push_and_code_owner_approvals(self, project, branch):
         config_protect_branch = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -105,19 +90,24 @@ class TestBranches:
 
         run_gitlabform(config_remove_settings_for_branch, project.path_with_namespace)
 
+        # If we were protecting a branch for the first time and not passing these values, Gitlab would default both
+        # to "False" as per: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
+        # We retain that decision-making rather than leaving the values at their previous state, otherwise
+        # if a User manually unprotected a branch, and restored protection by re-running Gitlabform, the flags would
+        # have silently changed
         protected_branch = project.protectedbranches.get(branch)
         assert protected_branch.allow_force_push is False
         assert protected_branch.code_owner_approval_required is False
 
-    def test__modify_protection(self, project_for_function, branch_for_function):
+    def test__modify_protection_rules(self, project_for_function, branch_for_function):
         config_protect_branch = f"""
          projects_and_groups:
            {project_for_function.path_with_namespace}:
              branches:
                {branch_for_function}:
                  protected: true
-                 push_access_level: {AccessLevel.NO_ACCESS}
-                 merge_access_level: {AccessLevel.MAINTAINER.value}
+                 push_access_level: {AccessLevel.NO_ACCESS.value}
+                 merge_access_level: {AccessLevel.DEVELOPER.value}
                  unprotect_access_level: {AccessLevel.MAINTAINER.value}
          """
 
@@ -133,7 +123,7 @@ class TestBranches:
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
-        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_levels == [AccessLevel.DEVELOPER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
@@ -145,7 +135,7 @@ class TestBranches:
                {branch_for_function}:
                  protected: true
                  push_access_level: {AccessLevel.MAINTAINER.value}
-                 unprotect_access_level: {AccessLevel.MAINTAINER}
+                 unprotect_access_level: {AccessLevel.MAINTAINER.value}
          """
 
         run_gitlabform(config_modify_protection_on_branch, project_for_function.path_with_namespace)
@@ -160,7 +150,12 @@ class TestBranches:
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
-        # If it is not defined in create or update, Gitlab defaults to "Maintainer" level
+
+        # When first protecting a branch, if merge_access_level is not supplied, Gitlab will default to "Maintainer"
+        # https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
+        # We retain that functionality, if a user no longer defines a given access_level we default back to "Maintainer"
+        # otherwise if a User manually unprotected a branch, and restored protection by re-running Gitlabform, the
+        # access_level would silently change
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
@@ -269,8 +264,8 @@ class TestBranches:
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-        # If the branch was unprotected and then re-protected it should have a difference protected branch id after
-        # the GLF run, and therefore will not match the protected_branch_ids array on the approval rule
+        # If the branch was unprotected and then re-protected the branch id of the protected branch would likely differ
+        # from that stored in the branch approval rule
         protected_branch: ProjectProtectedBranch = project.protectedbranches.get(branch)
 
         approval_rules = project.approvalrules.list(get_all=True)
