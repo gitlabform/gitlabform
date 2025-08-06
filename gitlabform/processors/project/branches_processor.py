@@ -224,9 +224,12 @@ class BranchesProcessor(AbstractProcessor):
 
         if configured_state is None:
             if branch_state:
+                info("code_owner_approval_required not defined in config, setting to False...")
                 protected_branch.code_owner_approval_required = False
                 return True
-        elif branch_state != configured_state:
+
+        if branch_state != configured_state:
+            info(f"code_owner_approval_required being updated to {configured_state}")
             protected_branch.code_owner_approval_required = configured_state
             return True
 
@@ -251,10 +254,14 @@ class BranchesProcessor(AbstractProcessor):
         configured_state = branch_config.get("allow_force_push")
         branch_state = protected_branch.allow_force_push
 
-        if configured_state is None and branch_state:
-            protected_branch.allow_force_push = False
-            return True
-        elif configured_state is not None and branch_state != configured_state:
+        if configured_state is None:
+            if branch_state:
+                info("allow_force_push not defined in config, setting to False...")
+                protected_branch.allow_force_push = False
+                return True
+
+        if branch_state != configured_state:
+            info(f"allow_force_push being updated to {configured_state}")
             protected_branch.allow_force_push = configured_state
             return True
 

@@ -1,6 +1,6 @@
 import logging
 
-from gitlab import GitlabGetError
+from gitlab import GitlabGetError, GitlabCreateError
 from gitlab.v4.objects import ProjectProtectedBranch
 
 from gitlabform.gitlab import AccessLevel
@@ -122,7 +122,7 @@ class TestBranches:
         """
 
         try:
-            protected_branch = project_for_function.protectedbranches.get(branch_for_function)
+            project_for_function.protectedbranches.get(branch_for_function)
         except GitlabGetError:
             # Set Branch to be Protected before running gitlabform
             project_for_function.protectedbranches.create({"name": branch_for_function})
@@ -257,16 +257,20 @@ class TestBranches:
 
         # Add manual approval rule on the protected branch
         protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
-        project_for_function.approvalrules.create(
-            {
-                "name": "Branch Protection validation",
-                "approvals_required": 2,
-                "rule_type": "regular",
-                "protected_branch_ids": [
-                    protected_branch.id,
-                ],
-            }
-        )
+        try:
+            project_for_function.approvalrules.create(
+                {
+                    "name": "Branch Protection validation",
+                    "approvals_required": 2,
+                    "rule_type": "regular",
+                    "protected_branch_ids": [
+                        protected_branch.id,
+                    ],
+                }
+            )
+        except GitlabCreateError as e:
+            logging.error(f"Error creating approval rules {e.error_message}")
+            raise e
 
         approval_rules = project_for_function.approvalrules.list(get_all=True)
         assert len(approval_rules) == 1
