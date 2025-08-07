@@ -70,14 +70,17 @@ class BranchesProcessor(AbstractProcessor):
                 # For GitLab version < 15.6 - need to unprotect the branch and then re-protect using the new config
                 # Check if it needs update using the specialised naive updaters (due to Gitlab storing the data differently
                 # in the backend to how it takes Create requests and therefore how we represent the data in YAML)
-                verbose("Updating branch protection for ':%s'", branch_name)
                 if self.gitlab.is_version_less_than("15.6.0") and self._needs_update(
                     protected_branch.attributes, branch_config_for_needs_update
                 ):
-                    self.unprotect_branch(protected_branch)
+                    verbose(
+                        f"Gitlab version is less than 15.6.0, so un-protecting and reprotecting branch {branch_name} to apply new config..."
+                    )
+                    self._unprotect_branch(protected_branch)
                     self.protect_branch(project, branch_name, branch_config, False)
                 else:
                     # Update the Branch Protection Rules
+                    verbose(f"Updating branch protection for {branch_name}")
 
                     code_owner_approval_required_data = self.get_code_owner_approval_required_data(
                         branch_config, protected_branch
@@ -85,19 +88,19 @@ class BranchesProcessor(AbstractProcessor):
 
                     allow_force_push_data = self.get_allow_force_push_data(branch_config, protected_branch)
 
-                    verbose("Processing merged_access_levels")
+                    verbose("Creating data to update merge_access_levels as necessary")
                     merge_access_items = self.build_patch_request_data(
                         transformed_access_levels=branch_config_for_needs_update.get("merge_access_levels"),
                         existing_records=tuple(protected_branch.merge_access_levels),
                     )
 
-                    verbose("Processing push_access_levels")
+                    verbose("Creating data to update push_access_levels as necessary")
                     push_access_items = self.build_patch_request_data(
                         transformed_access_levels=branch_config_for_needs_update.get("push_access_levels"),
                         existing_records=tuple(protected_branch.push_access_levels),
                     )
 
-                    verbose("Processing unprotect_access_levels")
+                    verbose("Creating data to update unprotect_access_levels as necessary")
                     unprotect_access_items = self.build_patch_request_data(
                         transformed_access_levels=branch_config_for_needs_update.get("unprotect_access_levels"),
                         existing_records=tuple(protected_branch.unprotect_access_levels),
@@ -127,11 +130,11 @@ class BranchesProcessor(AbstractProcessor):
                         info(f"Updating protected branch {branch_name} with {branch_config_prepared_for_update}")
                         self.protect_branch(project, branch_name, branch_config_prepared_for_update, True)
             elif not protected_branch:
-                verbose("Creating branch protection for ':%s'", branch_name)
+                info(f"Creating branch protection for {branch_name}")
                 self.protect_branch(project, branch_name, branch_config, False)
         elif protected_branch and not branch_config.get("protected"):
-            verbose("Removing branch protection for ':%s'", branch_name)
-            self.unprotect_branch(protected_branch)
+            info(f"Removing branch protection for {branch_name}")
+            self._unprotect_branch(protected_branch)
 
     def protect_branch(self, project: Project, branch_name: str, branch_config: dict, update_only: bool = False):
         """
@@ -145,7 +148,6 @@ class BranchesProcessor(AbstractProcessor):
             update_only (bool): If True, update branch protection of branch with branch_name,
              If False create a new protected branch with branch_name
         """
-        verbose("Setting branch '%s' as protected", branch_name)
         try:
             if update_only:
                 project.protectedbranches.update(branch_name, branch_config)
@@ -162,20 +164,17 @@ class BranchesProcessor(AbstractProcessor):
             else:
                 error(message)
 
-    def unprotect_branch(self, protected_branch: ProjectProtectedBranch):
+    def _unprotect_branch(self, protected_branch: ProjectProtectedBranch):
         """
         Unprotect a branch.
         Raise exception if running in strict mode.
         """
-
-        verbose("Setting branch '%s' as unprotected", protected_branch.name)
-
         try:
             # The delete method doesn't delete the actual branch.
             # It only unprotects the branch.
             protected_branch.delete()
         except GitlabDeleteError as e:
-            message = f"Branch '{protected_branch.name}' could not be unprotected! Error '{e.error_message}"
+            message = f"Branch '{protected_branch.name}' could not be unprotected! Error '{e.error_message}'"
             if self.strict:
                 fatal(
                     message,
@@ -227,6 +226,7 @@ class BranchesProcessor(AbstractProcessor):
         Returns:
               bool|None: Return True|False if we need to update the setting to that, or None if no change needs to be made
         """
+        verbose("Creating data to update code_owner_approval_required as necessary")
         return BranchesProcessor.build_boolean_patch_data_from_config_and_gitlab_states(
             protected_branch.code_owner_approval_required, branch_config.get("code_owner_approval_required")
         )
@@ -247,6 +247,7 @@ class BranchesProcessor(AbstractProcessor):
         Returns:
               bool|None: Return True|False if we need to update the setting to that, or None if no change needs to be made
         """
+        verbose("Creating data to update allow_force_push as necessary")
         return BranchesProcessor.build_boolean_patch_data_from_config_and_gitlab_states(
             protected_branch.allow_force_push, branch_config.get("allow_force_push")
         )
