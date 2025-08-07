@@ -79,13 +79,11 @@ class BranchesProcessor(AbstractProcessor):
                 else:
                     # Update the Branch Protection Rules
 
-                    owner_approval_updated = self.set_code_owner_approval_required(branch_config, protected_branch)
+                    code_owner_approval_required_data = self.get_code_owner_approval_required_data(
+                        branch_config, protected_branch
+                    )
 
-                    allow_force_push_updated = self.set_allow_force_push(branch_config, protected_branch)
-                    if owner_approval_updated or allow_force_push_updated:
-                        # No need to call the API if we haven't had to change either of "allow_force_push" or
-                        # "code_owner_approval_required"
-                        protected_branch.save()
+                    allow_force_push_data = self.get_allow_force_push_data(branch_config, protected_branch)
 
                     verbose("Processing merged_access_levels")
                     merge_access_items = self.build_patch_request_data(
@@ -105,7 +103,7 @@ class BranchesProcessor(AbstractProcessor):
                         existing_records=tuple(protected_branch.unprotect_access_levels),
                     )
 
-                    branch_config_prepared_for_update = {}
+                    branch_config_prepared_for_update: dict = {}
 
                     if len(merge_access_items) > 0:
                         branch_config_prepared_for_update["allowed_to_merge"] = merge_access_items
@@ -115,6 +113,14 @@ class BranchesProcessor(AbstractProcessor):
 
                     if len(unprotect_access_items) > 0:
                         branch_config_prepared_for_update["allowed_to_unprotect"] = unprotect_access_items
+
+                    if code_owner_approval_required_data is not None:
+                        branch_config_prepared_for_update["code_owner_approval_required"] = (
+                            code_owner_approval_required_data
+                        )
+
+                    if allow_force_push_data is not None:
+                        branch_config_prepared_for_update["allow_force_push"] = allow_force_push_data
 
                     if branch_config_prepared_for_update != {}:
                         # We have some updates to Access Levels to make
@@ -204,7 +210,9 @@ class BranchesProcessor(AbstractProcessor):
         return branch_config
 
     @staticmethod
-    def set_code_owner_approval_required(branch_config: dict, protected_branch: ProjectProtectedBranch):
+    def get_code_owner_approval_required_data(
+        branch_config: dict, protected_branch: ProjectProtectedBranch
+    ) -> bool | None:
         """
         Sets the state of code_owner_approval_required on the protected branch.
         If code_owner_approval_required is no longer set in the gitlabform config we follow the defaults Gitlab uses
@@ -217,24 +225,14 @@ class BranchesProcessor(AbstractProcessor):
         silently change
 
         Returns:
-              bool: whether a change was made to the protected_branch attribute
+              bool|None: Return True|False if we need to update the setting to that, or None if no change needs to be made
         """
-        configured_state = branch_config.get("code_owner_approval_required")
-        branch_state = protected_branch.code_owner_approval_required
-
-        if configured_state is None:
-            if branch_state:
-                protected_branch.code_owner_approval_required = False
-                return True
-
-        if branch_state != configured_state:
-            protected_branch.code_owner_approval_required = configured_state
-            return True
-
-        return False
+        return BranchesProcessor.build_boolean_patch_data_from_config_and_gitlab_states(
+            protected_branch.code_owner_approval_required, branch_config.get("code_owner_approval_required")
+        )
 
     @staticmethod
-    def set_allow_force_push(branch_config: dict, protected_branch: ProjectProtectedBranch):
+    def get_allow_force_push_data(branch_config: dict, protected_branch: ProjectProtectedBranch) -> bool | None:
         """
         Sets the state of allow_force_push on the protected branch.
         If allow_force_push is no longer set in the gitlabform config we follow the defaults Gitlab uses
@@ -247,21 +245,25 @@ class BranchesProcessor(AbstractProcessor):
         silently change
 
         Returns:
-              bool: whether a change was made to the protected_branch attribute
+              bool|None: Return True|False if we need to update the setting to that, or None if no change needs to be made
         """
-        configured_state = branch_config.get("allow_force_push")
-        branch_state = protected_branch.allow_force_push
+        return BranchesProcessor.build_boolean_patch_data_from_config_and_gitlab_states(
+            protected_branch.allow_force_push, branch_config.get("allow_force_push")
+        )
+
+    @staticmethod
+    def build_boolean_patch_data_from_config_and_gitlab_states(
+        branch_state: bool, configured_state: bool | None
+    ) -> bool | None:
+        update_data = None
 
         if configured_state is None:
             if branch_state:
-                protected_branch.allow_force_push = False
-                return True
+                update_data = False
+        elif branch_state != configured_state:
+            update_data = configured_state
 
-        if branch_state != configured_state:
-            protected_branch.allow_force_push = configured_state
-            return True
-
-        return False
+        return update_data
 
     @staticmethod
     def transform_branch_config_access_levels(our_branch_config: dict):
