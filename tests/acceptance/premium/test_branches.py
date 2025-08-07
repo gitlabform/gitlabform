@@ -356,7 +356,7 @@ class TestBranches:
         approval_rules = project_for_function.approvalrules.list(get_all=True)
         assert len(approval_rules) == 1
         approval_rule = approval_rules[0]
-        assert approval_rule.name == "any"
+        assert approval_rule.name == "Branch Protection validation"
         assert approval_rule.approvals_required == 2
         assert len(approval_rule.protected_branches) == 1
         pb_ar = approval_rule.protected_branches[0]
@@ -388,7 +388,7 @@ class TestBranches:
         approval_rules = project_for_function.approvalrules.list(get_all=True)
         assert len(approval_rules) == 1
         approval_rule = approval_rules[0]
-        assert approval_rule.name == "any"
+        assert approval_rule.name == "Branch Protection validation"
         assert approval_rule.approvals_required == 2
         pb_ar = approval_rule.protected_branches[0]
         assert pb_ar.get("id") == protected_branch.id
