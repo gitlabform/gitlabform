@@ -40,7 +40,7 @@ class BranchesProcessor(AbstractProcessor):
         protected_branch: Optional[ProjectProtectedBranch] = None
 
         # If protected branch name contains a supported wildcard do not try looking it up
-        if not self.is_branch_name_supported_protected_branch_wildcard(branch_name):
+        if not self.branch_name_contains_supported_wildcard(branch_name):
             # Check branch we are trying to protect actually exists first
             try:
                 project.branches.get(branch_name)
@@ -485,7 +485,7 @@ class BranchesProcessor(AbstractProcessor):
         return needs_update
 
     @staticmethod
-    def is_branch_name_supported_protected_branch_wildcard(branch):
+    def branch_name_contains_supported_wildcard(branch):
         """
         Gitlab supports "*" wildcards when protecting branches:
         https://docs.gitlab.com/user/project/repository/branches/protected/#use-wildcard-rules
