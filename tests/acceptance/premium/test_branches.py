@@ -94,6 +94,8 @@ class TestBranches:
                   - user: {third_user.username}
                 allowed_to_merge:
                   - access_level: {AccessLevel.MAINTAINER.value}
+                  - user_id: {third_user.id}
+                  - user: {second_user.username}
         """
 
         run_gitlabform(config_with_more_user_ids, project_for_function.path_with_namespace)
@@ -117,7 +119,12 @@ class TestBranches:
                 third_user.id,
             ]
         )
-        assert merge_access_user_ids == []
+        assert merge_access_user_ids == sorted(
+            [
+                second_user.id,
+                third_user.id,
+            ]
+        )
 
     def test__can_add_users_and_group_to_branch_protection_rules(
         self, project, group_for_function, branch, make_user, gl
