@@ -326,7 +326,7 @@ def make_project_member_developer(gl, project_for_function):
 
 def create_project_member(gl, project_to_add_user_to, access_level_value: int = AccessLevel.DEVELOPER.value):
     username = get_random_name("user")
-    user = _create_user_and_add_to_project(gl, project_to_add_user_to, username)
+    user = _create_user_and_add_to_project(gl, project_to_add_user_to, username, access_level_value)
     return user
 
 
