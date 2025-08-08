@@ -96,7 +96,7 @@ class TestBranches:
                   - access_level: {AccessLevel.MAINTAINER.value}
         """
 
-        run_gitlabform(config_with_more_user_ids, project_for_function)
+        run_gitlabform(config_with_more_user_ids, project_for_function.path_with_namespace)
 
         (
             push_access_levels,
@@ -172,7 +172,7 @@ class TestBranches:
                   - group_id: {group_for_function.id}
         """
 
-        run_gitlabform(config_branch_protection, project)
+        run_gitlabform(config_branch_protection, project.path_with_namespace)
 
         (
             push_access_levels,
