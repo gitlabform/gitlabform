@@ -3,6 +3,21 @@ registry['enable']=false
 prometheus_monitoring['enable']=false
 gitlab_rails['initial_license_file']='/etc/gitlab/Gitlab.gitlab-license'
 gitlab_kas['enable']=false
+gitlab_rails['ldap_enabled'] = true
+gitlab_rails['ldap_servers'] = {
+  'ldap_main' => {
+    'label' => 'LDAP Main',
+    'host' => 'localhost',
+    'port' => 389,
+    'uid' => 'uid',
+    'bind_dn' => 'cn=admin,dc=example,dc=org',
+    'password' => 'admin',
+    'encryption' => 'plain',
+    'base' => 'dc=example,dc=org',
+    'group_base' => 'ou=groups,dc=example,dc=org',
+    'timeout' => 1
+  }
+}
 gitlab_rails['omniauth_enabled'] = true
 gitlab_rails['omniauth_allow_single_sign_on'] = ['saml']
 gitlab_rails['omniauth_block_auto_created_users'] = false
