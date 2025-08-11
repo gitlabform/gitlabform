@@ -18,6 +18,10 @@ gitlab_rails['ldap_servers'] = {
     'timeout' => 1
   }
 }
+# Important: disable login UI for AD-style login
+# Regular username/password based login will be used
+# for local development of gitlabform
+gitlab_rails['prevent_ldap_sign_in'] = true
 gitlab_rails['omniauth_enabled'] = true
 gitlab_rails['omniauth_allow_single_sign_on'] = ['saml']
 gitlab_rails['omniauth_block_auto_created_users'] = false
