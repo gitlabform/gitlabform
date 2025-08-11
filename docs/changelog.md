@@ -1,5 +1,24 @@
 # Changelog
 
+## 4.4.1
+
+### Bug Fixes
+
+* Group SAML Link config changes should be applied. Resolves [#994](https://github.com/gitlabform/gitlabform/issues/994), PR [#1076](https://github.com/gitlabform/gitlabform/pull/1076). ([amimas](https://github.com/amimas))
+
+### Tests
+
+* Improve branch protection tests [#1066](https://github.com/gitlabform/gitlabform/pull/1066). ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+* Add smoke tests for python 3.13
+* Add acceptance test for group ldap links [#1079](https://github.com/gitlabform/gitlabform/pull/1079). ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+* Update Dockerfile to use latest version of Alpine
+
+Thanks to all the contributors of this release!
+
 ## 4.4.0
 
 ### Features
