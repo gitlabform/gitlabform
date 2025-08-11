@@ -65,13 +65,9 @@ class TestBranches:
 
         run_gitlabform(config_remove_settings_for_branch, project.path_with_namespace)
 
-        # If we were protecting a branch for the first time and not passing these values, Gitlab would default both
-        # to "False" as per: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
-        # We retain that decision-making rather than leaving the values at their previous state, otherwise
-        # if a User manually unprotected a branch, and restored protection by re-running Gitlabform, the flags would
-        # have silently changed
+        # If config is no longer defined, GitlabForm should not make any changes
         protected_branch = project.protectedbranches.get(branch)
-        assert protected_branch.allow_force_push is False
+        assert protected_branch.allow_force_push is True
         assert protected_branch.code_owner_approval_required is False
 
     def test__can_add_users_by_username_or_id_to_branch_protection_rules(

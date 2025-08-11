@@ -214,14 +214,8 @@ class BranchesProcessor(AbstractProcessor):
     ) -> bool | None:
         """
         Sets the state of code_owner_approval_required on the protected branch.
-        If code_owner_approval_required is no longer set in the gitlabform config we follow the defaults Gitlab uses
-        when first protecting the branch and set the state to False
-
-        API spec: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
-
-        We retain that decision-making rather than leaving the values at their previous state, otherwise
-        if a User manually unprotected a branch, and restored protection by re-running Gitlabform, the flags would
-        silently change
+        If code_owner_approval_required is no longer set in the gitlabform config we will not modify the state of Gitlab
+        See discussion: https://github.com/gitlabform/gitlabform/pull/1070#discussion_r2261837750
 
         Returns:
               bool|None: Return True|False if we need to update the setting to that, or None if no change needs to be made
@@ -235,14 +229,8 @@ class BranchesProcessor(AbstractProcessor):
     def get_allow_force_push_data(branch_config: dict, protected_branch: ProjectProtectedBranch) -> bool | None:
         """
         Sets the state of allow_force_push on the protected branch.
-        If allow_force_push is no longer set in the gitlabform config we follow the defaults Gitlab uses
-        when first protecting the branch and set the state to False
-
-        API spec: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
-
-        We retain that decision-making rather than leaving the values at their previous state, otherwise
-        if a User manually unprotected a branch, and restored protection by re-running Gitlabform, the flags would
-        silently change
+        If allow_force_push is no longer set in the gitlabform config we will not modify the state of Gitlab
+        See discussion: https://github.com/gitlabform/gitlabform/pull/1070#discussion_r2261837750
 
         Returns:
               bool|None: Return True|False if we need to update the setting to that, or None if no change needs to be made
@@ -258,10 +246,7 @@ class BranchesProcessor(AbstractProcessor):
     ) -> bool | None:
         update_data = None
 
-        if configured_state is None:
-            if branch_state:
-                update_data = False
-        elif branch_state != configured_state:
+        if configured_state is not None and branch_state != configured_state:
             update_data = configured_state
 
         return update_data
