@@ -130,14 +130,14 @@ class TestBranchesProcessor:
         assert result is False
         assert protected_branch.allow_force_push is True
 
-    def test_get_allow_force_push_data_returns_false_without_modifying_branch_when_config_is_not_defined_and_gitlab_is_set_to_true(
+    def test_get_allow_force_push_data_returns_none_without_modifying_branch_when_config_is_not_defined_and_gitlab_is_set_to_true(
         self,
     ):
         branch_config = {}
         protected_branch = MagicMock()
         protected_branch.allow_force_push = True
         result = BranchesProcessor.get_allow_force_push_data(branch_config, protected_branch)
-        assert result is False
+        assert result is None
         assert protected_branch.allow_force_push is True
 
     def test_get_code_owner_approval_required_data_returns_none_when_config_matches_gitlab(self):
@@ -162,14 +162,14 @@ class TestBranchesProcessor:
         assert result is True
         assert protected_branch.code_owner_approval_required is False
 
-    def test_get_code_owner_approval_required_data_returns_false_without_modifying_branch_when_config_is_not_defined_and_gitlab_is_set_to_true(
+    def test_get_code_owner_approval_required_data_returns_none_without_modifying_branch_when_config_is_not_defined_and_gitlab_is_set_to_true(
         self,
     ):
         branch_config = {}
         protected_branch = MagicMock()
         protected_branch.code_owner_approval_required = True
         result = BranchesProcessor.get_code_owner_approval_required_data(branch_config, protected_branch)
-        assert result is False
+        assert result is None
         assert protected_branch.code_owner_approval_required is True
 
     def test_build_patch_request_data_returns_nothing_if_no_config_defined_and_gitlab_has_maintainer_access_already(

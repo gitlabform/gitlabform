@@ -2,6 +2,32 @@
 
 Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.
 
+## From 3.\* to 4.\*
+
+### Branch Protection Changes
+
+When preventing GitlabForm from un-protecting and then re-protecting the Branch in order to apply configuration changes to the protection rules [#1070](https://github.com/gitlabform/gitlabform/pull/1070), we discovered some functionality that was previously hidden from the user.
+
+Previously if you stopped defining `code_owner_approval_required` or `allow_force_push` in the YAML config, the settings would revert to the default Gitlab settings applied when first protecting the branch, see: [Branch Protection API](https://docs.gitlab.com/api/protected_branches/#protect-repository-branches)
+
+With the changes to perform dynamic updates as required, we follow the GitlabForm convention of **leaving the Gitlab settings as is if the data is no longer defined in configuration**.
+
+Therefore, if you wish to ensure the Protected Branch settings are applied as you intend when running GitlabForm you should define some defaults explicitly:
+
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       protected: true
+       allow_force_push: false
+       code_owner_approval_required: true
+```
+
+## From 3.\* to 4.*\
+
+Relatively minor breaking-change, we dropped support for Python < 3.12, so if you are running locally using Python rather than Docker, ensure you are using Python > 3.12
+
 ## From 2.\* to 3.\*
 
 Steps outline:
