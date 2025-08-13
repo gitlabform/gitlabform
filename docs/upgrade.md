@@ -2,7 +2,7 @@
 
 Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.
 
-## From 3.\* to 4.\*
+## From 4.\* to 5.\*
 
 ### Branch Protection Changes
 
