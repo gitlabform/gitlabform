@@ -25,7 +25,20 @@ class BranchesProcessor(AbstractProcessor):
         self.custom_diff_analyzers["push_access_levels"] = self.naive_access_level_diff_analyzer
         self.custom_diff_analyzers["unprotect_access_levels"] = self.naive_access_level_diff_analyzer
 
+    def _can_proceed(self, project_or_group: str, configuration: dict):
+        for branch in sorted(configuration["branches"]):
+            branch_config = configuration["branches"][branch]
+            if branch_config.get("protected") is None:
+                fatal(f"The Protected key is mandatory in branches configuration, fix {branch} YAML config")
+
+        return True
+
     def _process_configuration(self, project_and_group: str, configuration: dict):
+        """
+        Called from process defined in abstract_processor.py after checking self._can_proceed
+        Processes the branches configuration
+        """
+
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
         for branch in sorted(configuration["branches"]):
