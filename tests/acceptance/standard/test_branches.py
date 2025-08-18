@@ -1,3 +1,4 @@
+import pytest
 from gitlab import GitlabGetError
 
 from gitlabform.gitlab import AccessLevel
@@ -5,6 +6,22 @@ from tests.acceptance import get_only_branch_access_levels, run_gitlabform
 
 
 class TestBranches:
+    def test__not_supplying_protected_keyword(self, project, branch):
+        config_protect_branch = f"""
+           projects_and_groups:
+             {project.path_with_namespace}:
+               branches:
+                 {branch}:
+                   push_access_level: {AccessLevel.NO_ACCESS.value}
+                   merge_access_level: {AccessLevel.MAINTAINER.value}
+                   unprotect_access_level: {AccessLevel.MAINTAINER.value}
+           """
+
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            run_gitlabform(config_protect_branch, project.path_with_namespace)
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == 1
+
     def test__can_protect_and_unprotect_a_branch(self, project, branch):
         config_protect_branch = f"""
         projects_and_groups:
