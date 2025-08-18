@@ -89,23 +89,6 @@ class BranchesProcessor(AbstractProcessor):
             # For later Gitlab versions we dynamically generate the data to send to the update endpoint based on the
             # configured state and the current Gitlab state so do not need to check _needs_update first.
 
-            # Update the Branch Protection Rules
-            verbose(f"Updating branch protection for {branch_name}")
-
-            code_owner_approval_required_data = None
-            if branch_config.get(
-                "code_owner_approval_required"
-            ) is not None and protected_branch.code_owner_approval_required != branch_config.get(
-                "code_owner_approval_required"
-            ):
-                code_owner_approval_required_data = branch_config.get("code_owner_approval_required")
-
-            allow_force_push_data = None
-            if branch_config.get(
-                "allow_force_push"
-            ) is not None and protected_branch.allow_force_push != branch_config.get("allow_force_push"):
-                allow_force_push_data = branch_config.get("allow_force_push")
-
             # Gitlab returns the allowed_to_merge etc. data in a different format from GET endpoint than it takes in
             # the POST (create) or PATCH (update) endpoints
             # GET: https://docs.gitlab.com/api/protected_branches/#get-a-single-protected-branch-or-wildcard-protected-branch
@@ -113,23 +96,38 @@ class BranchesProcessor(AbstractProcessor):
             # PATCH: https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
             # Therefore we first transform the configured YAML into a state matching the gitlab GET endpoint so we can
             # compare states easier to determine what PATCH request we need to send (if any)
-            branch_config_for_needs_update = self.transform_branch_config_access_levels(branch_config)
+            transformed_branch_config = self.map_config_to_protected_branch_get_data(branch_config)
+
+            verbose("Creating data to update code_owner_approval_required as necessary")
+            code_owner_approval_required_patch_data = None
+            code_owner_approval_required_config = transformed_branch_config.get("code_owner_approval_required")
+            if (
+                code_owner_approval_required_config is not None
+                and protected_branch.code_owner_approval_required != code_owner_approval_required_config
+            ):
+                code_owner_approval_required_patch_data = transformed_branch_config.get("code_owner_approval_required")
+
+            verbose("Creating data to update allow_force_push as necessary")
+            allow_force_push_patch_data = None
+            allow_force_push_config = transformed_branch_config.get("allow_force_push")
+            if allow_force_push_config is not None and protected_branch.allow_force_push != allow_force_push_config:
+                allow_force_push_patch_data = allow_force_push_config
 
             verbose("Creating data to update merge_access_levels as necessary")
-            merge_access_items = self.build_patch_request_data(
-                transformed_access_levels=branch_config_for_needs_update.get("merge_access_levels"),
+            merge_access_items_patch_data = self.build_patch_request_data(
+                transformed_access_levels=transformed_branch_config.get("merge_access_levels"),
                 existing_records=tuple(protected_branch.merge_access_levels),
             )
 
             verbose("Creating data to update push_access_levels as necessary")
-            push_access_items = self.build_patch_request_data(
-                transformed_access_levels=branch_config_for_needs_update.get("push_access_levels"),
+            push_access_items_patch_data = self.build_patch_request_data(
+                transformed_access_levels=transformed_branch_config.get("push_access_levels"),
                 existing_records=tuple(protected_branch.push_access_levels),
             )
 
             verbose("Creating data to update unprotect_access_levels as necessary")
-            unprotect_access_items = self.build_patch_request_data(
-                transformed_access_levels=branch_config_for_needs_update.get("unprotect_access_levels"),
+            unprotect_access_items_patch_data = self.build_patch_request_data(
+                transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
                 existing_records=tuple(protected_branch.unprotect_access_levels),
             )
 
@@ -138,20 +136,22 @@ class BranchesProcessor(AbstractProcessor):
             # If we send everything the PATCH endpoint will return a 200 but not apply any updates.
             protected_branch_api_patch_data: dict = {}
 
-            if len(merge_access_items) > 0:
-                protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items
+            if len(merge_access_items_patch_data) > 0:
+                protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items_patch_data
 
-            if len(push_access_items) > 0:
-                protected_branch_api_patch_data["allowed_to_push"] = push_access_items
+            if len(push_access_items_patch_data) > 0:
+                protected_branch_api_patch_data["allowed_to_push"] = push_access_items_patch_data
 
-            if len(unprotect_access_items) > 0:
-                protected_branch_api_patch_data["allowed_to_unprotect"] = unprotect_access_items
+            if len(unprotect_access_items_patch_data) > 0:
+                protected_branch_api_patch_data["allowed_to_unprotect"] = unprotect_access_items_patch_data
 
-            if code_owner_approval_required_data is not None:
-                protected_branch_api_patch_data["code_owner_approval_required"] = code_owner_approval_required_data
+            if code_owner_approval_required_patch_data is not None:
+                protected_branch_api_patch_data["code_owner_approval_required"] = (
+                    code_owner_approval_required_patch_data
+                )
 
-            if allow_force_push_data is not None:
-                protected_branch_api_patch_data["allow_force_push"] = allow_force_push_data
+            if allow_force_push_patch_data is not None:
+                protected_branch_api_patch_data["allow_force_push"] = allow_force_push_patch_data
 
             if protected_branch_api_patch_data != {}:
                 # We have some updates to make
@@ -175,7 +175,7 @@ class BranchesProcessor(AbstractProcessor):
         # POST: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
         # Therefore we first transform the configured YAML into a state matching the gitlab GET endpoint,
         # before checking if it needs_update
-        if self._needs_update(protected_branch.attributes, self.transform_branch_config_access_levels(branch_config)):
+        if self._needs_update(protected_branch.attributes, self.map_config_to_protected_branch_get_data(branch_config)):
             verbose(
                 f"Gitlab version is less than 15.6.0, so un-protecting and reprotecting branch {branch_name} to apply new config..."
             )
@@ -193,8 +193,9 @@ class BranchesProcessor(AbstractProcessor):
             project (Project): Gitlab project
             branch_name (str): Name of branch on the project to protect or update protection on
             branch_config (dict): Branch protection configuration to apply
-            update_only (bool): If True, update branch protection of branch with branch_name,
-             If False create a new protected branch with branch_name
+            update_only (bool):
+                If True, update branch protection of branch with branch_name,
+                If False create a new protected branch with branch_name
         """
         try:
             if update_only:
@@ -257,7 +258,7 @@ class BranchesProcessor(AbstractProcessor):
         return branch_config
 
     @staticmethod
-    def transform_branch_config_access_levels(our_branch_config: dict):
+    def map_config_to_protected_branch_get_data(our_branch_config: dict):
         """
         Branch protection CRUD API in python-gitlab (and GitLab itself) is
         inconsistent, the structure needed to create a branch protection rule is
@@ -320,13 +321,13 @@ class BranchesProcessor(AbstractProcessor):
     @staticmethod
     def build_patch_request_data(transformed_access_levels: list[dict] | None, existing_records: tuple) -> list[dict]:
         """
+        Compares the access_levels configuration (transformed to match the Gitlab GET response) to the existing access_level record in Gitlab.
+        If there are no changes for a given access_level record an empty list is returned.
+        Otherwise, data is returned to add/update access_level records and remove any outdated records.
+
         Gitlab supports merge_access_level for users with a Standard license and allowed_to_merge etc for users with Premium
         or Ultimate licenses.
         We need to support both options, and potentially blended configuration for users with Premium+ licenses.
-
-        The Gitlab PATCH api is very inconsistent when it comes to updating existing records, however it supports Create and
-        Delete in the same Update request, so for consistency if we have an update to make we create new records with the
-        new configuration and mark the old records for deltion.
 
         args:
             transformed_access_levels (list[dict|None]): transformed merge_access_levels or push_access_levels or unprotect_access_levels configration generated by transform_branch_config_access_levels
@@ -335,11 +336,10 @@ class BranchesProcessor(AbstractProcessor):
         returns:
             list[dict]: Data in the format required by the protected_branches PATCH api. https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
         """
-        access_items_to_patch = []
+        patch_data = []
 
         if transformed_access_levels is not None:
             # User has defined in configuration some access level for this resource on the protected branch
-            configured_access_level_count = len(transformed_access_levels)
             for configuration in transformed_access_levels:
                 configured_access_level = configuration.get("access_level")
                 configured_user_id = configuration.get("user_id")
@@ -354,7 +354,7 @@ class BranchesProcessor(AbstractProcessor):
                     #   - access_level: Maintainer
 
                     # Create a new record for the new Access Level required
-                    access_items_to_patch.append(
+                    patch_data.append(
                         {
                             "access_level": configured_access_level,
                         }
@@ -363,7 +363,7 @@ class BranchesProcessor(AbstractProcessor):
                     # Entry to configure a user to have access, only available for users with "Premium" or "Ultimate" e.g.
                     # allowed_to_push:
                     #   - user: tim-knight
-                    access_items_to_patch.append(
+                    patch_data.append(
                         {
                             "user_id": configured_user_id,
                         }
@@ -372,16 +372,16 @@ class BranchesProcessor(AbstractProcessor):
                     # Entry to configure a group to have access, only available for users with "Premium" or "Ultimate" e.g.
                     # allowed_to_push:
                     #   - group_id: 15
-                    access_items_to_patch.append(
+                    patch_data.append(
                         {
                             "group_id": configured_group_id,
                         }
                     )
 
             # Mark records for deletion
-            access_items_to_patch.extend(BranchesProcessor.create_delete_data(existing_records, access_items_to_patch))
+            BranchesProcessor.add_patch_data_to_remove_existing_records(existing_records, patch_data)
 
-            return access_items_to_patch
+            return patch_data
         else:
             verbose("No configuration defined for this access level, defaulting to Maintainer")
             # User has not defined either x_access_level OR allowed_to_x in their configuration
@@ -389,21 +389,22 @@ class BranchesProcessor(AbstractProcessor):
             access_level_value = AccessLevel.MAINTAINER.value
 
             # Create a new record for the new Access Level required and mark the existing records for deletion
-            access_items_to_patch.append(
+            patch_data.append(
                 {
                     "access_level": access_level_value,
                 }
             )
 
             # Mark records for deletion
-            access_items_to_patch.extend(BranchesProcessor.create_delete_data(existing_records, access_items_to_patch))
+            BranchesProcessor.add_patch_data_to_remove_existing_records(existing_records, patch_data)
 
-            return access_items_to_patch
+            return patch_data
 
     @staticmethod
-    def create_delete_data(existing_records: tuple, items_to_be_created: list) -> list:
+    def add_patch_data_to_remove_existing_records(existing_records: tuple, patch_data: list) -> None:
         """
-        Creates data in the pattern defined in the gitlab api: https://docs.gitlab.com/api/protected_branches/#example-delete-a-push_access_level-record
+        Adds data in the pattern defined in the gitlab api: https://docs.gitlab.com/api/protected_branches/#example-delete-a-push_access_level-record
+        to the patch_data list
 
         If gitlab contains an "access_level" entry for one we are trying to configure, don't mark for deletion
             and re-creation, as we will likely get a "Merge Access Level access level already exists" error
@@ -411,35 +412,26 @@ class BranchesProcessor(AbstractProcessor):
 
         args:
             existing_records (tuple|list): list of records from Gitlab from the protected_branch access_levels attributes (e.g. protected_branch.push_access_levels)
-            items_to_be_created (list): list of items which will be created -> will be mutated if we find an existing record matching an item to be created
+            patch_data (list): list of patch_data built from the configured YAML
 
-        returns:
-            list[dict]: Data in the format required to delete items from the access_levels in Gitlab
         """
-        items_to_delete = []
-        for item_to_delete in existing_records:
-            access_level = item_to_delete.get("access_level")
-            matching_item = None
+        for record_to_delete in existing_records:
+            access_level = record_to_delete.get("access_level")
+            matching_item_to_be_created = None
 
             if access_level is not None:
                 # Gitlab entry is an "access_level" entry, find if we have configured one with the same level
-                for item in items_to_be_created:
+                for item in patch_data:
                     if item.get("access_level") == access_level:
-                        matching_item = item
+                        matching_item_to_be_created = item
 
-            # If we found an existing "access_level" item matching one that has been configured, remove the item to be
-            # created and don't mark the existing record for deletion
-            if matching_item is not None:
-                items_to_be_created.remove(matching_item)
+            if matching_item_to_be_created is not None:
+                # If we found an existing "access_level" item matching one that has been configured, remove the item
+                # to be created and don't mark the existing record for deletion
+                patch_data.remove(matching_item_to_be_created)
             else:
-                items_to_delete.append(item_to_delete)
-
-        items = []
-        for record_to_delete in items_to_delete:
-            record_id = record_to_delete.get("id")
-            items.append({"id": record_id, "_destroy": True})
-
-        return items
+                record_id = record_to_delete.get("id")
+                patch_data.append({"id": record_id, "_destroy": True})
 
     @staticmethod
     def naive_access_level_diff_analyzer(_, cfg_in_gitlab: list, local_cfg: list):
