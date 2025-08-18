@@ -86,8 +86,8 @@ class TestBranchesProcessor:
             "allowed_to_unprotect": [{"access_level": 60}, {"user_id": 789}],
             "protected": True,
         }
-        result_access_level = self.processor.transform_branch_config_access_levels(our_branch_config_access_level)
-        result_allowed_to = self.processor.transform_branch_config_access_levels(our_branch_config_allowed_to)
+        result_access_level = self.processor.map_config_to_protected_branch_get_data(our_branch_config_access_level)
+        result_allowed_to = self.processor.map_config_to_protected_branch_get_data(our_branch_config_allowed_to)
 
         expected_result_access_level = {
             "merge_access_levels": [{"id": None, "access_level": 40, "user_id": None, "group_id": None}],
