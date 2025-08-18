@@ -25,6 +25,21 @@ projects_and_groups:
        code_owner_approval_required: true
 ```
 
+### Protected key is Mandatory
+The documentation has always mandated that the `protected` key must be present in GitlabForm configuration, set to either `true` or `false`.
+
+From v5 GitlabForm will exit Fatally if there is a branch under `branches` configuration _without_ the protected key, for example the following will now error fatally:
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       allow_force_push: false
+       code_owner_approval_required: true
+     master:
+       protected: true
+```
+
 ## From 3.\* to 4.*\
 
 Relatively minor breaking-change, we dropped support for Python < 3.12, so if you are running locally using Python rather than Docker, ensure you are using Python > 3.12
