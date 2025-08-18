@@ -74,88 +74,115 @@ class BranchesProcessor(AbstractProcessor):
             verbose(message)
 
         if branch_config.get("protected"):
-            if protected_branch:
-                # Branch matching this name exists, so check for updates
-
-                # Transform the config from "allowed_to_push" or "push_access_level" into "push_access_levels" array to
-                # match how the data is stored in the Gitlab backend
-                branch_config_for_needs_update = self.transform_branch_config_access_levels(branch_config)
-                # For GitLab version < 15.6 - need to unprotect the branch and then re-protect using the new config
-                # Check if it needs update using the specialised naive updaters (due to Gitlab storing the data differently
-                # in the backend to how it takes Create requests and therefore how we represent the data in YAML)
-                if self.gitlab.is_version_less_than("15.6.0") and self._needs_update(
-                    protected_branch.attributes, branch_config_for_needs_update
-                ):
-                    verbose(
-                        f"Gitlab version is less than 15.6.0, so un-protecting and reprotecting branch {branch_name} to apply new config..."
-                    )
-                    self._unprotect_branch(protected_branch)
-                    self.protect_branch(project, branch_name, branch_config, False)
-                else:
-                    # Update the Branch Protection Rules
-                    verbose(f"Updating branch protection for {branch_name}")
-
-                    code_owner_approval_required_data = None
-                    if branch_config.get(
-                        "code_owner_approval_required"
-                    ) is not None and protected_branch.code_owner_approval_required != branch_config.get(
-                        "code_owner_approval_required"
-                    ):
-                        code_owner_approval_required_data = branch_config.get("code_owner_approval_required")
-
-                    allow_force_push_data = None
-                    if branch_config.get(
-                        "allow_force_push"
-                    ) is not None and protected_branch.allow_force_push != branch_config.get("allow_force_push"):
-                        allow_force_push_data = branch_config.get("allow_force_push")
-
-                    verbose("Creating data to update merge_access_levels as necessary")
-                    merge_access_items = self.build_patch_request_data(
-                        transformed_access_levels=branch_config_for_needs_update.get("merge_access_levels"),
-                        existing_records=tuple(protected_branch.merge_access_levels),
-                    )
-
-                    verbose("Creating data to update push_access_levels as necessary")
-                    push_access_items = self.build_patch_request_data(
-                        transformed_access_levels=branch_config_for_needs_update.get("push_access_levels"),
-                        existing_records=tuple(protected_branch.push_access_levels),
-                    )
-
-                    verbose("Creating data to update unprotect_access_levels as necessary")
-                    unprotect_access_items = self.build_patch_request_data(
-                        transformed_access_levels=branch_config_for_needs_update.get("unprotect_access_levels"),
-                        existing_records=tuple(protected_branch.unprotect_access_levels),
-                    )
-
-                    branch_config_prepared_for_update: dict = {}
-
-                    if len(merge_access_items) > 0:
-                        branch_config_prepared_for_update["allowed_to_merge"] = merge_access_items
-
-                    if len(push_access_items) > 0:
-                        branch_config_prepared_for_update["allowed_to_push"] = push_access_items
-
-                    if len(unprotect_access_items) > 0:
-                        branch_config_prepared_for_update["allowed_to_unprotect"] = unprotect_access_items
-
-                    if code_owner_approval_required_data is not None:
-                        branch_config_prepared_for_update["code_owner_approval_required"] = (
-                            code_owner_approval_required_data
-                        )
-
-                    if allow_force_push_data is not None:
-                        branch_config_prepared_for_update["allow_force_push"] = allow_force_push_data
-
-                    if branch_config_prepared_for_update != {}:
-                        # We have some updates to Access Levels to make
-                        info(f"Updating protected branch {branch_name} with {branch_config_prepared_for_update}")
-                        self.protect_branch(project, branch_name, branch_config_prepared_for_update, True)
-            elif not protected_branch:
+            if not protected_branch:
                 info(f"Creating branch protection for {branch_name}")
                 self.protect_branch(project, branch_name, branch_config, False)
+                return
+
+            # https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch was only introduced after 15.6
+            # for user's on older versions of Gitlab we need to unprotect and then reprotect the branch to apply the
+            # defined configuration
+            if self.gitlab.is_version_less_than("15.6.0"):
+                self.process_branch_config_gitlab_15_6_0_or_older(branch_config, branch_name, project, protected_branch)
+                return
+
+            # For later Gitlab versions we dynamically generate the data to send to the update endpoint based on the
+            # configured state and the current Gitlab state so do not need to check _needs_update first.
+
+            # Update the Branch Protection Rules
+            verbose(f"Updating branch protection for {branch_name}")
+
+            code_owner_approval_required_data = None
+            if branch_config.get(
+                "code_owner_approval_required"
+            ) is not None and protected_branch.code_owner_approval_required != branch_config.get(
+                "code_owner_approval_required"
+            ):
+                code_owner_approval_required_data = branch_config.get("code_owner_approval_required")
+
+            allow_force_push_data = None
+            if branch_config.get(
+                "allow_force_push"
+            ) is not None and protected_branch.allow_force_push != branch_config.get("allow_force_push"):
+                allow_force_push_data = branch_config.get("allow_force_push")
+
+            # Gitlab returns the allowed_to_merge etc. data in a different format from GET endpoint than it takes in
+            # the POST (create) or PATCH (update) endpoints
+            # GET: https://docs.gitlab.com/api/protected_branches/#get-a-single-protected-branch-or-wildcard-protected-branch
+            # POST: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
+            # PATCH: https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
+            # Therefore we first transform the configured YAML into a state matching the gitlab GET endpoint so we can
+            # compare states easier to determine what PATCH request we need to send (if any)
+            branch_config_for_needs_update = self.transform_branch_config_access_levels(branch_config)
+
+            verbose("Creating data to update merge_access_levels as necessary")
+            merge_access_items = self.build_patch_request_data(
+                transformed_access_levels=branch_config_for_needs_update.get("merge_access_levels"),
+                existing_records=tuple(protected_branch.merge_access_levels),
+            )
+
+            verbose("Creating data to update push_access_levels as necessary")
+            push_access_items = self.build_patch_request_data(
+                transformed_access_levels=branch_config_for_needs_update.get("push_access_levels"),
+                existing_records=tuple(protected_branch.push_access_levels),
+            )
+
+            verbose("Creating data to update unprotect_access_levels as necessary")
+            unprotect_access_items = self.build_patch_request_data(
+                transformed_access_levels=branch_config_for_needs_update.get("unprotect_access_levels"),
+                existing_records=tuple(protected_branch.unprotect_access_levels),
+            )
+
+            # We only build PATCH data for items requiring updates, e.g. if a merge_access_level has been changed or removed,
+            # or if the code_owner_approval_required state has changed.
+            # If we send everything the PATCH endpoint will return a 200 but not apply any updates.
+            protected_branch_api_patch_data: dict = {}
+
+            if len(merge_access_items) > 0:
+                protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items
+
+            if len(push_access_items) > 0:
+                protected_branch_api_patch_data["allowed_to_push"] = push_access_items
+
+            if len(unprotect_access_items) > 0:
+                protected_branch_api_patch_data["allowed_to_unprotect"] = unprotect_access_items
+
+            if code_owner_approval_required_data is not None:
+                protected_branch_api_patch_data["code_owner_approval_required"] = code_owner_approval_required_data
+
+            if allow_force_push_data is not None:
+                protected_branch_api_patch_data["allow_force_push"] = allow_force_push_data
+
+            if protected_branch_api_patch_data != {}:
+                # We have some updates to make
+                info(f"Updating protected branch {branch_name} with {protected_branch_api_patch_data}")
+                self.protect_branch(project, branch_name, protected_branch_api_patch_data, True)
+
         elif protected_branch and not branch_config.get("protected"):
             info(f"Removing branch protection for {branch_name}")
-            self._unprotect_branch(protected_branch)
+            self.unprotect_branch(protected_branch)
+
+    def process_branch_config_gitlab_15_6_0_or_older(self, branch_config, branch_name, project, protected_branch):
+        """
+        Processes the branches configuration for gitlab version 15.6.0 or older,
+        first checking if the branch needs to be updated, if it does, then the branch will be unprotected prior to being
+        reprotected with the YAML configuration.
+        """
+
+        # Gitlab returns the allowed_to_merge etc data in a different format from GET endpoint than it takes in
+        # the POST (create) endpoint
+        # GET: https://docs.gitlab.com/api/protected_branches/#get-a-single-protected-branch-or-wildcard-protected-branch
+        # POST: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
+        # Therefore we first transform the configured YAML into a state matching the gitlab GET endpoint,
+        # before checking if it needs_update
+        if self._needs_update(protected_branch.attributes, self.transform_branch_config_access_levels(branch_config)):
+            verbose(
+                f"Gitlab version is less than 15.6.0, so un-protecting and reprotecting branch {branch_name} to apply new config..."
+            )
+            self.unprotect_branch(protected_branch)
+
+            # Send the untransformed config to the POST endpoint, as GitlabForm YAML structure conforms to the POST inputs
+            self.protect_branch(project, branch_name, branch_config, False)
 
     def protect_branch(self, project: Project, branch_name: str, branch_config: dict, update_only: bool = False):
         """
@@ -185,7 +212,7 @@ class BranchesProcessor(AbstractProcessor):
             else:
                 error(message)
 
-    def _unprotect_branch(self, protected_branch: ProjectProtectedBranch):
+    def unprotect_branch(self, protected_branch: ProjectProtectedBranch):
         """
         Unprotect a branch.
         Raise exception if running in strict mode.
