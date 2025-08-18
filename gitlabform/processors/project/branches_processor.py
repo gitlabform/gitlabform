@@ -82,11 +82,19 @@ class BranchesProcessor(AbstractProcessor):
                     # Update the Branch Protection Rules
                     verbose(f"Updating branch protection for {branch_name}")
 
-                    code_owner_approval_required_data = self.get_code_owner_approval_required_data(
-                        branch_config, protected_branch
-                    )
+                    code_owner_approval_required_data = None
+                    if branch_config.get(
+                        "code_owner_approval_required"
+                    ) is not None and protected_branch.code_owner_approval_required != branch_config.get(
+                        "code_owner_approval_required"
+                    ):
+                        code_owner_approval_required_data = branch_config.get("code_owner_approval_required")
 
-                    allow_force_push_data = self.get_allow_force_push_data(branch_config, protected_branch)
+                    allow_force_push_data = None
+                    if branch_config.get(
+                        "allow_force_push"
+                    ) is not None and protected_branch.allow_force_push != branch_config.get("allow_force_push"):
+                        allow_force_push_data = branch_config.get("allow_force_push")
 
                     verbose("Creating data to update merge_access_levels as necessary")
                     merge_access_items = self.build_patch_request_data(
@@ -207,49 +215,6 @@ class BranchesProcessor(AbstractProcessor):
                             item["group_id"] = self.gl.get_group_id(item.pop("group"))
 
         return branch_config
-
-    @staticmethod
-    def get_code_owner_approval_required_data(
-        branch_config: dict, protected_branch: ProjectProtectedBranch
-    ) -> bool | None:
-        """
-        Sets the state of code_owner_approval_required on the protected branch.
-        If code_owner_approval_required is no longer set in the gitlabform config we will not modify the state of Gitlab
-        See discussion: https://github.com/gitlabform/gitlabform/pull/1070#discussion_r2261837750
-
-        Returns:
-              bool|None: Return True|False if we need to update the setting to that, or None if no change needs to be made
-        """
-        verbose("Creating data to update code_owner_approval_required as necessary")
-        return BranchesProcessor.build_boolean_patch_data_from_config_and_gitlab_states(
-            protected_branch.code_owner_approval_required, branch_config.get("code_owner_approval_required")
-        )
-
-    @staticmethod
-    def get_allow_force_push_data(branch_config: dict, protected_branch: ProjectProtectedBranch) -> bool | None:
-        """
-        Sets the state of allow_force_push on the protected branch.
-        If allow_force_push is no longer set in the gitlabform config we will not modify the state of Gitlab
-        See discussion: https://github.com/gitlabform/gitlabform/pull/1070#discussion_r2261837750
-
-        Returns:
-              bool|None: Return True|False if we need to update the setting to that, or None if no change needs to be made
-        """
-        verbose("Creating data to update allow_force_push as necessary")
-        return BranchesProcessor.build_boolean_patch_data_from_config_and_gitlab_states(
-            protected_branch.allow_force_push, branch_config.get("allow_force_push")
-        )
-
-    @staticmethod
-    def build_boolean_patch_data_from_config_and_gitlab_states(
-        branch_state: bool, configured_state: bool | None
-    ) -> bool | None:
-        update_data = None
-
-        if configured_state is not None and branch_state != configured_state:
-            update_data = configured_state
-
-        return update_data
 
     @staticmethod
     def transform_branch_config_access_levels(our_branch_config: dict):
