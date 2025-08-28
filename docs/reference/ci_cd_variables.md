@@ -45,6 +45,15 @@ projects_and_groups:
         value: "foobar-123-123-123"
         masked: true
 
+      # --- Adding/resetting non-expanded variable
+      # Gitlab's UI uses the term "expanded" while
+      # the API uses "raw".  Variables are not expanded
+      # when "raw" is true.
+      my_raw_variable:
+        key: RAW_VAR
+        value: "foobar-123-123-123"
+        raw: true
+
       # --- Adding/resetting variables per environment
       aws_access_key_id_for_deploying_in_production:
         key: APP_HOST_AWS_ACCESS_KEY_ID
