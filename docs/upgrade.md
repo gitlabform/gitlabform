@@ -34,9 +34,11 @@ projects_and_groups:
  my-group/*:
    branches:
      main:
+       # This configuration is now invalid due to lacking the `protected` flag and will cause GitlabForm to fail
        allow_force_push: false
        code_owner_approval_required: true
-     master:
+     my_other_protected_branch:
+       # Valid configuration
        protected: true
 ```
 
