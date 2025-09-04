@@ -364,25 +364,10 @@ class BranchesProcessor(AbstractProcessor):
 
             # Mark records for deletion
             BranchesProcessor.add_patch_data_to_remove_existing_records(existing_records, patch_data)
-
-            return patch_data
         else:
-            verbose("No configuration defined for this access level, defaulting to Maintainer")
-            # User has not defined either x_access_level OR allowed_to_x in their configuration
-            # We should follow Gitlab convention and ensure the protected branch is set to Maintainer access level
-            access_level_value = AccessLevel.MAINTAINER.value
+            verbose("No configuration defined for this access level. No changes will be made.")
 
-            # Create a new record for the new Access Level required and mark the existing records for deletion
-            patch_data.append(
-                {
-                    "access_level": access_level_value,
-                }
-            )
-
-            # Mark records for deletion
-            BranchesProcessor.add_patch_data_to_remove_existing_records(existing_records, patch_data)
-
-            return patch_data
+        return patch_data
 
     @staticmethod
     def add_patch_data_to_remove_existing_records(existing_records: tuple, patch_data: list) -> None:
