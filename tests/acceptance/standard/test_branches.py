@@ -135,12 +135,8 @@ class TestBranches:
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
 
-        # When first protecting a branch, if merge_access_level is not supplied, Gitlab will default to "Maintainer"
-        # https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
-        # We retain that functionality, if a user no longer defines a given access_level we default back to "Maintainer"
-        # otherwise if a User manually unprotected a branch, and restored protection by re-running Gitlabform, the
-        # access_level would silently change
-        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert merge_access_levels == [AccessLevel.DEVELOPER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
