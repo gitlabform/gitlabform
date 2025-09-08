@@ -1091,6 +1091,39 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#from-4-to-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      From 4.* to 5.*
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From 4.* to 5.*">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#branch-protection-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branch Protection Changes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protected-key-is-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Protected key is Mandatory
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#from-2-to-3" class="md-nav__link">
     <span class="md-ellipsis">
       From 2.* to 3.*
@@ -1325,6 +1358,39 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#from-4-to-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      From 4.* to 5.*
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From 4.* to 5.*">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#branch-protection-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branch Protection Changes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protected-key-is-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Protected key is Mandatory
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#from-2-to-3" class="md-nav__link">
     <span class="md-ellipsis">
       From 2.* to 3.*
@@ -1363,6 +1429,39 @@
 
 <h1 id="upgrading-to-new-major-versions">Upgrading to new major versions<a class="headerlink" href="#upgrading-to-new-major-versions" title="Permanent link">&para;</a></h1>
 <p>Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.</p>
+<h2 id="from-4-to-5">From 4.* to 5.*<a class="headerlink" href="#from-4-to-5" title="Permanent link">&para;</a></h2>
+<h3 id="branch-protection-changes">Branch Protection Changes<a class="headerlink" href="#branch-protection-changes" title="Permanent link">&para;</a></h3>
+<p>In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach reset all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of <a href="../reference/#raw-parameters-passing">raw parameter passing</a> — where only explicitly configured values are sent, and unspecified ones are left untouched.</p>
+<p>This unintended consequence meant:</p>
+<ul>
+<li>A user configuring only some protection attributes (e.g. <code>push_access_level</code>) would find others reset to default (e.g. <code>code_owner_approval_required</code>) on re-run.</li>
+<li>GitLabForm was no longer idempotent unless all settings were always provided.</li>
+</ul>
+<p>This issue is being fixed by following original intended behaviour of GitLabForm. Therefore, if you wish to ensure the Protected Branch settings are applied as you intend when running GitlabForm you should define some defaults explicitly:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">my-group/*</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">main</span><span class="p">:</span>
+<span class="w">       </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">       </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">       </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h3 id="protected-key-is-mandatory">Protected key is Mandatory<a class="headerlink" href="#protected-key-is-mandatory" title="Permanent link">&para;</a></h3>
+<p>The documentation has always mandated that the <code>protected</code> key must be present in GitlabForm configuration, set to either <code>true</code> or <code>false</code>.</p>
+<p>From v5 GitlabForm will exit Fatally if there is a branch under <code>branches</code> configuration <em>without</em> the protected key, for example the following will now error fatally:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">my-group/*</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">main</span><span class="p">:</span>
+<span class="w">       </span><span class="c1"># This configuration is now invalid due to lacking the `protected` flag and will cause GitlabForm to fail</span>
+<span class="w">       </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">       </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">     </span><span class="nt">my_other_protected_branch</span><span class="p">:</span>
+<span class="w">       </span><span class="c1"># Valid configuration</span>
+<span class="w">       </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div></p>
+<p>## From 3.* to 4.*\</p>
+<p>Relatively minor breaking-change, we dropped support for Python &lt; 3.12, so if you are running locally using Python rather than Docker, ensure you are using Python &gt; 3.12</p>
 <h2 id="from-2-to-3">From 2.* to 3.*<a class="headerlink" href="#from-2-to-3" title="Permanent link">&para;</a></h2>
 <p>Steps outline:</p>
 <ol>
