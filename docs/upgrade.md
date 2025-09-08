@@ -2,6 +2,50 @@
 
 Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.
 
+## From 4.\* to 5.\*
+
+### Branch Protection Changes
+
+In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach reset all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of [raw parameter passing](reference/index.md#raw-parameters-passing) — where only explicitly configured values are sent, and unspecified ones are left untouched.
+
+This unintended consequence meant:
+
+- A user configuring only some protection attributes (e.g. `push_access_level`) would find others reset to default (e.g. `code_owner_approval_required`) on re-run.
+- GitLabForm was no longer idempotent unless all settings were always provided.
+
+This issue is being fixed by following original intended behaviour of GitLabForm. Therefore, if you wish to ensure the Protected Branch settings are applied as you intend when running GitlabForm you should define some defaults explicitly:
+
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       protected: true
+       allow_force_push: false
+       code_owner_approval_required: true
+```
+
+### Protected key is Mandatory
+The documentation has always mandated that the `protected` key must be present in GitlabForm configuration, set to either `true` or `false`.
+
+From v5 GitlabForm will exit Fatally if there is a branch under `branches` configuration _without_ the protected key, for example the following will now error fatally:
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       # This configuration is now invalid due to lacking the `protected` flag and will cause GitlabForm to fail
+       allow_force_push: false
+       code_owner_approval_required: true
+     my_other_protected_branch:
+       # Valid configuration
+       protected: true
+```
+
+## From 3.\* to 4.*\
+
+Relatively minor breaking-change, we dropped support for Python < 3.12, so if you are running locally using Python rather than Docker, ensure you are using Python > 3.12
+
 ## From 2.\* to 3.\*
 
 Steps outline:
