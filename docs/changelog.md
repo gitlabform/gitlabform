@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.5.0
+
+### Features
+
+* Add liquidlight logo [#1085](https://github.com/gitlabform/gitlabform/pull/1085). ([mikestreety](https://github.com/mikestreety))
+
+### Documentation
+
+* Update `ci_cd_variables.md` to include raw variable example [#1091](https://github.com/gitlabform/gitlabform/pull/1091). ([uob-hillmu](https://github.com/uob-hillmu))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.4.1
 
 ### Bug Fixes
