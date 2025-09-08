@@ -55,6 +55,38 @@ Thanks to all the contributors of this release!
 
 Thanks to all the contributors of this release!
 
+## 5.0.0-beta.1
+
+### Breaking Changes
+
+#### Branch Protection Updates [#1070](https://github.com/gitlabform/gitlabform/pull/1070) ([TimKnight-DWP](https://github.com/TimKnight-DWP) & [br0ziliy](https://github.com/br0ziliy))
+When preventing GitlabForm from un-protecting and then re-protecting the Branch in order to apply configuration changes to the protection rules [#1070](https://github.com/gitlabform/gitlabform/pull/1070), we discovered some functionality that was previously hidden from the user.
+
+Previously if you stopped defining `code_owner_approval_required` or `allow_force_push` in the YAML config, the settings would revert to the default Gitlab settings applied when first protecting the branch, see: [Branch Protection API](https://docs.gitlab.com/api/protected_branches/#protect-repository-branches)
+
+With the changes to perform dynamic updates as required, we follow the GitlabForm convention of **leaving the Gitlab settings as is if the data is no longer defined in configuration**.
+
+Therefore, if you wish to ensure the Protected Branch settings are applied as you intend when running GitlabForm you should define some defaults explicitly:
+
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       protected: true
+       allow_force_push: false
+       code_owner_approval_required: true
+```
+
+Full details: [docs/reference/protected_branches.md](reference/protected_branches.md)
+
+- Extension of: https://github.com/gitlabform/gitlabform/pull/996
+
+Resolves:
+- https://github.com/gitlabform/gitlabform/issues/445
+- https://github.com/gitlabform/gitlabform/issues/1061
+- https://github.com/gitlabform/gitlabform/issues/1034
+
 
 ## 4.6.1
 
