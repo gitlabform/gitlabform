@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitlabform"
-version = "4.5.0"
+version = "5.0.0-beta.1"
 authors = [{ name = "Greg Dubicki and Contributors" }]
 description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
 keywords = ["cli", "yaml", "gitlab", "configuration-as-code"]
