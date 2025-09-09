@@ -15,25 +15,6 @@ jobs:
       - name: Approve
         run: echo For security reasons, all pull requests need to be approved first before running the Premium Acceptance Tests.
 
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Run Snyk to check for vulnerabilities
-        continue-on-error: true # To make sure that SARIF upload gets called
-        uses: snyk/actions/python-3.12@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --sarif-file-output=snyk.sarif
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: snyk.sarif
-
   codeql:
     runs-on: ubuntu-latest
 
