@@ -1,17 +1,21 @@
 from unittest.mock import patch
 import pytest
-from tests.acceptance import run_gitlabform
 from cli_ui import debug as verbose  # for wraps
+from tests.acceptance import run_gitlabform
+from gitlabform.constants import EXIT_PROCESSING_ERROR
+
+pytestmark = pytest.mark.requires_license
 
 
-class TestGroupVariables:
-    """Test suite for GitLab group variable operations.
+class TestGroupVariablesPremium:
+    """Test suite for GitLab group variable operations with Premium features.
 
-    Tests variable creation, updates, deletion using gitlabform configuration.
+    Tests variable creation, updates, deletion using gitlabform configuration that.
+    requires GitLab Premium license.
     """
 
-    def test__add_new_variables(self, group):
-        """Test case: add new variables, including special characters and complex values"""
+    def test__add_new_variables_with_env_scope(self, group):
+        """Test case: add new variables with environment scope."""
 
         # Set initial variables
         initial_vars = [
@@ -29,58 +33,31 @@ class TestGroupVariables:
         projects_and_groups:
           {group.full_path}/*:
             group_variables:
-              BAR_variable:
-                key: BAR
-                value: bar-value
-              Special_chars_variable:
-                key: SPECIAL_CHARS
-                value: "!@#$%^&*()_+-=[]{{}}|;:,.<>?"
-              Complex_value_variable:
-                key: COMPLEX_VALUE
-                value: |
-                  # This represents a typical complex configuration value
-                  host: ${{HOST_VAR}}
-                  port: 8080
-                  paths:
-                    - /api/v1
-                    - /api/v2
+              FOO_scoped_variable:
+                key: FOO
+                value: prod-value
+                environment_scope: prod
         """
         run_gitlabform(config, group)
 
         # Verify results
         variables = group.variables.list(get_all=True)
-        assert len(variables) == 4
+        assert len(variables) == 2
 
         assert variables[0].key == "FOO"
         assert variables[0].value == "foo123"
+        assert variables[0].environment_scope == "*"  # default scope if not configured
 
-        assert variables[1].key == "BAR"
-        assert variables[1].value == "bar-value"
-
-        assert variables[2].key == "SPECIAL_CHARS"
-        assert variables[2].value == "!@#$%^&*()_+-=[]{}|;:,.<>?"
-
-        assert variables[3].key == "COMPLEX_VALUE"
-        # The \n is needed because the value is a multi-line string.
-        # Each line break in the YAML block literal (|) is preserved as a newline character in the string.
-        # Without the \n, all lines would be concatenated together, which does not match the actual value.
-        # To debug, print the value to see the actual string:
-        expected_message = (
-            "# This represents a typical complex configuration value\n"
-            "host: ${HOST_VAR}\n"
-            "port: 8080\n"
-            "paths:\n"
-            "  - /api/v1\n"
-            "  - /api/v2\n"
-        )
-        assert variables[3].value == expected_message
+        assert variables[1].key == "FOO"
+        assert variables[1].value == "prod-value"
+        assert variables[1].environment_scope == "prod"
 
     @patch("gitlabform.processors.util.variables_processor.verbose", wraps=verbose)
-    def test__update_variables(self, mock_verbose, group):
+    def test__update_variables_with_env_scope(self, mock_verbose, group):
         """Test case: update variables that were added in previous test case"""
 
-        # Verify that 4 initial variables have been set because 'group' is class scoped fixture and the last test case result will set 3 variables.
-        assert len(group.variables.list(get_all=True)) == 4
+        # Verify that 2 initial variables have been set because 'group' is class scoped fixture and the last test case result will set 3 variables.
+        assert len(group.variables.list(get_all=True)) == 2
 
         # Test1: Variable update should not be attempted if there are no changes
         config_no_change = f"""
@@ -89,7 +66,8 @@ class TestGroupVariables:
             group_variables:
               FOO_variable:
                 key: FOO
-                value: foo123
+                value: prod-value
+                environment_scope: prod
         """
         # Import after verbose patch is applied by the function decorator.
         # This will be usd for capturing verbose logs by the module to verify
@@ -100,13 +78,13 @@ class TestGroupVariables:
 
         # Verify results
         variables = group.variables.list(get_all=True)
-        assert len(variables) == 4
+        assert len(variables) == 2
 
         # Check verbose log output
         actual_messages = [call.args[0] for call in mock_verbose.call_args_list]
 
         expected_messages = [
-            "Variable FOO with scope * already matches configuration, no update needed",
+            "Variable FOO with scope prod already matches configuration, no update needed",
         ]
 
         for expected in expected_messages:
@@ -124,42 +102,27 @@ class TestGroupVariables:
           {group.full_path}/*:
             group_variables:
               # Not configuring 'FOO' variable with default scope. Expect that to remain as-is
-              BAR_variable:
-                key: BAR
-                value: bar-value-updated
+              FOO_scoped_variable:
+                key: FOO
+                value: prod-new-value
+                environment_scope: prod
         """
         run_gitlabform(config, group)
 
         # Verify results
         variables = group.variables.list(get_all=True)
-        assert len(variables) == 4
+        assert len(variables) == 2
 
         # Expect 'FOO' variable with default scope to remain unchanged because it was not in the config
         assert variables[0].key == "FOO"
         assert variables[0].value == "foo123"
+        assert variables[0].environment_scope == "*"  # default scope if not configured
 
-        assert variables[1].key == "BAR"
-        assert variables[1].value == "bar-value-updated"
+        assert variables[1].key == "FOO"
+        assert variables[1].value == "prod-new-value"
+        assert variables[1].environment_scope == "prod"
 
-        assert variables[2].key == "SPECIAL_CHARS"
-        assert variables[2].value == "!@#$%^&*()_+-=[]{}|;:,.<>?"
-
-        assert variables[3].key == "COMPLEX_VALUE"
-        # The \n is needed because the value is a multi-line string.
-        # Each line break in the YAML block literal (|) is preserved as a newline character in the string.
-        # Without the \n, all lines would be concatenated together, which does not match the actual value.
-        # To debug, print the value to see the actual string:
-        expected_message = (
-            "# This represents a typical complex configuration value\n"
-            "host: ${HOST_VAR}\n"
-            "port: 8080\n"
-            "paths:\n"
-            "  - /api/v1\n"
-            "  - /api/v2\n"
-        )
-        assert variables[3].value == expected_message
-
-    def test__delete_variables(self, group, capsys):
+    def test__delete_variables_with_env_scope(self, group, capsys):
         """Test case: Variable deletion scenarios"""
 
         # Clear any existing variables from previous tests since 'group' is class-scoped
@@ -169,82 +132,54 @@ class TestGroupVariables:
 
         # Set initial variables for all test scenarios
         initial_vars = [
-            {"key": "KEY_ONLY", "value": "value123"},  # for key-only delete
-            {"key": "KEY_VALUE", "value": "match-this"},  # for key-value match delete
-            {"key": "WRONG_VALUE", "value": "actual-value"},  # for wrong value test
+            {"key": "KEY_SCOPE", "value": "any", "environment_scope": "prod"},  # for key-scope match delete
+            {"key": "WRONG_SCOPE", "value": "value", "environment_scope": "prod"},  # for wrong scope test
             {  # for attribute match tests
                 "key": "MULTI_ATTR",
                 "value": "test-xyz-123",
                 "protected": True,
                 "masked": True,
                 "variable_type": "env_var",
+                "environment_scope": "prod",
             },
         ]
         for var in initial_vars:
             group.variables.create(var)
 
         # Verify initial state
-        assert len(group.variables.list(get_all=True)) == 4
+        assert len(group.variables.list(get_all=True)) == 3
 
-        # Test 1: Delete with key only
-        config_key_only = f"""
+        # Test 1: Delete with key and scope match
+        config_key_scope = f"""
         projects_and_groups:
           {group.full_path}/*:
             group_variables:
-              key_only_var:
-                key: KEY_ONLY
+              key_scope_var:
+                key: KEY_SCOPE
+                environment_scope: prod
                 delete: true
         """
-        run_gitlabform(config_key_only, group)
+        run_gitlabform(config_key_scope, group)
         variables = group.variables.list(get_all=True)
-        assert len(variables) == 3
-        assert not any(v.key == "KEY_ONLY" for v in variables)
+        assert len(variables) == 2  # Only WRONG_SCOPE and MULTI_ATTR should remain
+        assert not any(v.key == "KEY_SCOPE" for v in variables)
 
-        # Test 2: Delete with key and value match
-        config_key_value = f"""
+        # Test 2: Delete should fail with wrong scope
+        config_wrong_scope = f"""
         projects_and_groups:
           {group.full_path}/*:
             group_variables:
-              key_value_var:
-                key: KEY_VALUE
-                value: match-this
-                delete: true
-        """
-        run_gitlabform(config_key_value, group)
-        variables = group.variables.list(get_all=True)
-        assert len(variables) == 2
-        assert not any(v.key == "KEY_VALUE" for v in variables)
-
-        # Test 3: Delete should fail with wrong value
-        config_wrong_value = f"""
-        projects_and_groups:
-          {group.full_path}/*:
-            group_variables:
-              wrong_value_var:
-                key: WRONG_VALUE
-                value: wrong-value
+              wrong_scope_var:
+                key: WRONG_SCOPE
+                environment_scope: dev  # wrong scope, actual is 'prod'
                 delete: true
         """
         with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_wrong_value, group)
+            run_gitlabform(config_wrong_scope, group)
         captured = capsys.readouterr()
-        assert "Cannot delete WRONG_VALUE - attributes don't match" in captured.err
+        assert "Cannot delete variable 'WRONG_SCOPE' with scope 'dev' - variable does not exist" in captured.err
 
-        # Test 4: Delete should fail for non-existent variable
-        config_non_existent = f"""
-        projects_and_groups:
-          {group.full_path}/*:
-            group_variables:
-              non_existent_var:
-                key: NON_EXISTENT
-                delete: true
-        """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_non_existent, group)
-        captured = capsys.readouterr()
-        assert "Cannot delete variable 'NON_EXISTENT' with scope '*' - variable does not exist" in captured.err
-
-        # Test 5: Delete should fail when specified attributes don't match
+        # Test 3: Delete should fail when specified attributes don't match
         config_mismatch = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -253,6 +188,7 @@ class TestGroupVariables:
                 key: MULTI_ATTR
                 value: test-xyz-123     # match
                 protected: False        # doesn't match
+                environment_scope: prod # match
                 delete: true
         """
         with pytest.raises(SystemExit) as exc_info:
@@ -260,7 +196,7 @@ class TestGroupVariables:
         captured = capsys.readouterr()
         assert "Cannot delete MULTI_ATTR - attributes don't match" in captured.err
 
-        # Test 6: Delete should succeed when providing subset of attributes
+        # Test 4: Delete should succeed when providing subset of attributes
         config_partial = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -271,31 +207,34 @@ class TestGroupVariables:
                 protected: True         # match
                 # masked is not specified (should not affect matching)
                 # variable_type is not specified (should not affect matching)
+                environment_scope: prod # match
                 delete: true
         """
         run_gitlabform(config_partial, group)
         variables = group.variables.list(get_all=True)
-        assert len(variables) == 1  # Only WRONG_VALUE variable should remain
+        assert len(variables) == 1  # Only WRONG_SCOPE should remain
         assert not any(v.key == "MULTI_ATTR" for v in variables)
 
     def test__raw_parameter_passing(self, group):
         """Test case: validate raw parameter passing design works by setting extra optional attributes for variables"""
 
-        # The previous test case using 'group' fixture ends with 2 variables.
+        # The previous test case using 'group' fixture ends with 1 variables.
         variables = group.variables.list(get_all=True)
-        assert len(variables) == 1  # Only WRONG_VALUE variable should remain
+        assert len(variables) == 1
 
         # Apply gitlabform config
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
             group_variables:
-              FOO_variable:
+              FOO_scoped_variable:
                 description: this is a prod scoped protected and masked variable
                 key: FOO
                 value: foo-123-xyz  # value must follow masking requirement
                 protected: true
                 masked: true
+                environment_scope: prod
+                filter[environment_scope]: prod
         """
         run_gitlabform(config, group)
 
@@ -308,6 +247,7 @@ class TestGroupVariables:
         assert variables[1].value == "foo-123-xyz"
         assert variables[1].protected is True
         assert variables[1].masked is True
+        assert variables[1].environment_scope == "prod"
 
     def test__preserve_unconfigured_attributes(self, group):
         """Test case: When updating a variable, any attributes that is not in config, should remain as-is"""
@@ -321,9 +261,10 @@ class TestGroupVariables:
         projects_and_groups:
           {group.full_path}/*:
             group_variables:
-              FOO_variable:
+              FOO_scoped_variable:
                 key: FOO
                 value: foo-123-xyz-new-value  # value must follow masking requirement as previously it was configured
+                environment_scope: prod
         """
         run_gitlabform(config, group)
 
@@ -331,16 +272,20 @@ class TestGroupVariables:
         variables = group.variables.list(get_all=True)
         assert len(variables) == 2
 
-        # Expect the variable to be updated, but other attributes like description, protected, masked should remain unchanged
-        # because they were not specified in the config.
-        # This tests the design of preserving unconfigured attributes.
-        # The description, protected, and masked attributes should remain as they were set in the previous
-        # test case. The value should be updated to the new value specified in the config.
+        # Expect 'FOO' variable with default scope to remain unchanged because it was not in the config
+        assert variables[0].key == "WRONG_SCOPE"
+        assert variables[0].value == "value"
+        assert variables[0].environment_scope == "prod"
+        # Expect 'FOO' variable with prod scope to be updated
+        # and other attributes to remain as-is
+        # because they were not specified in the config
+        # and were set in the previous test case
         assert variables[1].description == "this is a prod scoped protected and masked variable"
         assert variables[1].key == "FOO"
         assert variables[1].value == "foo-123-xyz-new-value"
         assert variables[1].protected is True
         assert variables[1].masked is True
+        assert variables[1].environment_scope == "prod"
 
     def test__enforce_mode_delete_all_variables(self, group):
         """Test case: Enforce mode - delete all variables"""
@@ -371,13 +316,26 @@ class TestGroupVariables:
         # Add some new variables so that we can test gitlabform config
         initial_vars = [
             # A new variable will be added using gitlabform
-            {"key": "FOO1", "value": "123"},  # should not change because gitlabform config will be same
-            {"key": "BAR", "value": "456"},  # should be updated because gitlabform config will apply new value
             {
-                "key": "FOO2",
-                "value": "value",
+                "key": "FOO",
+                "value": "123",
+                "environment_scope": "dev",
+            },  # should not change because gitlabform config will be same
+            {
+                "key": "FOO",
+                "value": "prod-value",
+                "environment_scope": "prod",
             },  # should be deleted because of ommission in gitlabform config and 'enforce' mode
-            {"key": "BAZ", "value": "789"},  # should be deleted because gitlabform config will use the 'delete' key
+            {
+                "key": "BAR",
+                "value": "456",
+                "environment_scope": "dev",
+            },  # should be updated because gitlabform config will apply new value
+            {
+                "key": "BAZ",
+                "value": "789",
+                "environment_scope": "dev",
+            },  # should be deleted because gitlabform config will use the 'delete' key
         ]
 
         for var in initial_vars:
@@ -395,25 +353,31 @@ class TestGroupVariables:
               NEW_variable:
                 key: NEW
                 value: new-var-value
-              FOO1_variable:
-                key: FOO1
+                environment_scope: dev
+              FOO_variable:
+                key: FOO
                 value: 123
+                environment_scope: dev
               BAR_variable:
                 key: BAR
                 value: 456_updated
+                environment_scope: dev
               BAZ_variable:
                 key: BAZ
+                environment_scope: dev
                 delete: true
-
         """
         run_gitlabform(config, group)
 
         # Verify results
         variables = group.variables.list(get_all=True)
         assert len(variables) == 3
-        assert variables[0].key == "FOO1"
+        assert variables[0].key == "FOO"
         assert variables[0].value == "123"
+        assert variables[0].environment_scope == "dev"
         assert variables[1].key == "BAR"
         assert variables[1].value == "456_updated"
+        assert variables[1].environment_scope == "dev"
         assert variables[2].key == "NEW"
         assert variables[2].value == "new-var-value"
+        assert variables[2].environment_scope == "dev"
