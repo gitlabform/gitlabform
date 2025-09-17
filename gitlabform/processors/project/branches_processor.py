@@ -328,8 +328,8 @@ class BranchesProcessor(AbstractProcessor):
             # just updating
             for configuration in transformed_access_levels:
                 configured_access_level = configuration.get("access_level")
-                existing_records_user_id = configuration.get("user_id")
-                existing_records_group_id = configuration.get("group_id")
+                configured_user_id = configuration.get("user_id")
+                configured_group_id = configuration.get("group_id")
 
                 if configured_access_level is not None:
                     # Entry to configure an access level e.g.
@@ -343,13 +343,13 @@ class BranchesProcessor(AbstractProcessor):
                             "access_level": configured_access_level,
                         }
                     )
-                elif existing_records_user_id is not None:
+                elif configured_user_id is not None:
                     # Entry to configure a user to have access, only available for users with "Premium" or "Ultimate" e.g.
                     # allowed_to_push:
                     #   - user: tim-knight
                     patch_data.append(
                         {
-                            "user_id": existing_records_user_id,
+                            "user_id": configured_user_id,
                         }
                     )
                 else:
@@ -358,7 +358,7 @@ class BranchesProcessor(AbstractProcessor):
                     #   - group_id: 15
                     patch_data.append(
                         {
-                            "group_id": existing_records_group_id,
+                            "group_id": configured_group_id,
                         }
                     )
 
