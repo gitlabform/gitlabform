@@ -19,6 +19,8 @@ from gitlabform.gitlab.project_merge_requests_approvals import (
     GitLabProjectMergeRequestsApprovals,
 )
 from gitlabform.gitlab.python_gitlab import PythonGitlab
+from gitlabform.gitlab.variables import GitLabVariables
+from gitlabform.gitlab.project_security_settings import GitlabProjectSecuritySettings
 
 
 @enum.unique
@@ -57,6 +59,8 @@ class GitLab(
     GitLabProjectDeployKeys,
     GitLabProjectProtectedEnvironments,
     GitLabProjectMergeRequestsApprovals,
+    GitLabVariables,
+    GitlabProjectSecuritySettings,
 ):
     pass
 
