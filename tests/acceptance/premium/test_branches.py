@@ -122,6 +122,87 @@ class TestBranches:
             ]
         )
 
+    def test__does_not_attempt_to_modify_unchanged_branch_protection_when_users_are_present(
+        self, project_for_function, branch_for_function, gl
+    ):
+        # https://github.com/gitlabform/gitlabform/issues/1101
+        first_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
+        second_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
+        third_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
+
+        project_for_function.protectedbranches.create(
+            {
+                "name": branch_for_function,
+                "allowed_to_merge": [{"access_level": AccessLevel.MAINTAINER.value}],
+                "allowed_to_push": [
+                    {"user_id": first_user.id},
+                    {"user_id": second_user.id},
+                    {"user_id": third_user.id},
+                ],
+                "allowed_to_unprotect": [{"access_level": AccessLevel.MAINTAINER.value}],
+            }
+        )
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            unprotect_access_level,
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+
+        assert unprotect_access_level == AccessLevel.MAINTAINER.value
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == sorted(
+            [
+                first_user.id,
+                second_user.id,
+                third_user.id,
+            ]
+        )
+        assert len(merge_access_user_ids) == 0
+
+        config_with_more_user_ids = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            branches:
+              {branch_for_function}:
+                protected: true
+                allowed_to_merge:
+                  - access_level: maintainer
+                allowed_to_unprotect:
+                  - access_level: maintainer
+                allowed_to_push:
+                  - user: {first_user.username}
+                  - user: {second_user.username}
+                  - user: {third_user.username}
+        """
+
+        run_gitlabform(config_with_more_user_ids, project_for_function.path_with_namespace)
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            unprotect_access_level,
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+
+        assert unprotect_access_level == AccessLevel.MAINTAINER.value
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == sorted(
+            [
+                first_user.id,
+                second_user.id,
+                third_user.id,
+            ]
+        )
+        assert len(merge_access_user_ids) == 0
+
     def test__can_add_users_and_group_to_branch_protection_rules(
         self, project, group_for_function, branch, make_user, gl
     ):
