@@ -324,10 +324,12 @@ class BranchesProcessor(AbstractProcessor):
 
         if transformed_access_levels is not None:
             # User has defined in configuration some access level for this resource on the protected branch
+            # Create Patch Data for the defined configuration and then determine what existing records need deleting or
+            # just updating
             for configuration in transformed_access_levels:
                 configured_access_level = configuration.get("access_level")
-                configured_user_id = configuration.get("user_id")
-                configured_group_id = configuration.get("group_id")
+                existing_records_user_id = configuration.get("user_id")
+                existing_records_group_id = configuration.get("group_id")
 
                 if configured_access_level is not None:
                     # Entry to configure an access level e.g.
@@ -336,20 +338,18 @@ class BranchesProcessor(AbstractProcessor):
                     # or:
                     # allowed_to_push:
                     #   - access_level: Maintainer
-
-                    # Create a new record for the new Access Level required
                     patch_data.append(
                         {
                             "access_level": configured_access_level,
                         }
                     )
-                elif configured_user_id is not None:
+                elif existing_records_user_id is not None:
                     # Entry to configure a user to have access, only available for users with "Premium" or "Ultimate" e.g.
                     # allowed_to_push:
                     #   - user: tim-knight
                     patch_data.append(
                         {
-                            "user_id": configured_user_id,
+                            "user_id": existing_records_user_id,
                         }
                     )
                 else:
@@ -358,49 +358,43 @@ class BranchesProcessor(AbstractProcessor):
                     #   - group_id: 15
                     patch_data.append(
                         {
-                            "group_id": configured_group_id,
+                            "group_id": existing_records_group_id,
                         }
                     )
 
-            # Mark records for deletion
-            BranchesProcessor.add_patch_data_to_remove_existing_records(existing_records, patch_data)
+            # Check if we need to make the update (e.g. an existing record for that user_id or access_level exists)
+            # and mark existing records for deletion if the access_level does not match
+            # (e.g. config has changed from DEVELOPER to MAINTAINER; delete the DEVELOPER entry and add a MAINTAINER
+            # entry)
+            for existing_record in existing_records:
+                existing_records_access_level = existing_record.get("access_level")
+                existing_records_user_id = existing_record.get("user_id")
+                existing_records_group_id = existing_record.get("group_id")
+
+                matching_item_to_be_created = None
+
+                for item in patch_data:
+                    if (
+                        existing_records_access_level is not None
+                        and item.get("access_level") == existing_records_access_level
+                    ):
+                        matching_item_to_be_created = item
+                    elif existing_records_user_id is not None and item.get("user_id") == existing_records_user_id:
+                        matching_item_to_be_created = item
+                    elif existing_records_group_id is not None and item.get("group_id") == existing_records_group_id:
+                        matching_item_to_be_created = item
+
+                if matching_item_to_be_created is not None:
+                    # If we found an existing item matching one that has been configured, remove the item
+                    # to be created and don't mark the existing record for deletion
+                    patch_data.remove(matching_item_to_be_created)
+                else:
+                    record_id = existing_record.get("id")
+                    patch_data.append({"id": record_id, "_destroy": True})
         else:
             verbose("No configuration defined for this access level. No changes will be made.")
 
         return patch_data
-
-    @staticmethod
-    def add_patch_data_to_remove_existing_records(existing_records: tuple, patch_data: list) -> None:
-        """
-        Adds data in the pattern defined in the gitlab api: https://docs.gitlab.com/api/protected_branches/#example-delete-a-push_access_level-record
-        to the patch_data list
-
-        If gitlab contains an "access_level" entry for one we are trying to configure, don't mark for deletion
-            and re-creation, as we will likely get a "Merge Access Level access level already exists" error
-            as well as it being relatively pointless data change
-
-        args:
-            existing_records (tuple|list): list of records from Gitlab from the protected_branch access_levels attributes (e.g. protected_branch.push_access_levels)
-            patch_data (list): list of patch_data built from the configured YAML
-
-        """
-        for record_to_delete in existing_records:
-            access_level = record_to_delete.get("access_level")
-            matching_item_to_be_created = None
-
-            if access_level is not None:
-                # Gitlab entry is an "access_level" entry, find if we have configured one with the same level
-                for item in patch_data:
-                    if item.get("access_level") == access_level:
-                        matching_item_to_be_created = item
-
-            if matching_item_to_be_created is not None:
-                # If we found an existing "access_level" item matching one that has been configured, remove the item
-                # to be created and don't mark the existing record for deletion
-                patch_data.remove(matching_item_to_be_created)
-            else:
-                record_id = record_to_delete.get("id")
-                patch_data.append({"id": record_id, "_destroy": True})
 
     @staticmethod
     def naive_access_level_diff_analyzer(_, cfg_in_gitlab: list, local_cfg: list):
