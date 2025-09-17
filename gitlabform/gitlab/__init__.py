@@ -8,7 +8,6 @@ from gitlab import Gitlab as GitlabClient, GraphQL
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
-from gitlabform.gitlab.group_variables import GitLabGroupVariables
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
 from gitlabform.gitlab.project_badges import GitLabProjectBadges
@@ -20,7 +19,6 @@ from gitlabform.gitlab.project_merge_requests_approvals import (
     GitLabProjectMergeRequestsApprovals,
 )
 from gitlabform.gitlab.python_gitlab import PythonGitlab
-from gitlabform.gitlab.variables import GitLabVariables
 
 
 @enum.unique
@@ -54,13 +52,11 @@ class GitLab(
     GitLabMergeRequests,
     GitLabGroupLDAPLinks,
     GitLabGroupBadges,
-    GitLabGroupVariables,
     GitLabPipelines,
     GitLabProjectBadges,
     GitLabProjectDeployKeys,
     GitLabProjectProtectedEnvironments,
     GitLabProjectMergeRequestsApprovals,
-    GitLabVariables,
 ):
     pass
 
