@@ -1,6 +1,6 @@
 from typing import Dict, Tuple
 
-from cli_ui import fatal, error, debug
+from cli_ui import fatal, error, debug, info
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
