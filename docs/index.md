@@ -9,7 +9,7 @@
   ![GitLabForm logo](images/gitlabform-logo.png)
 </figure>
 
-is a specialized configuration as a code tool for GitLab:
+GitLabForm is a specialized configuration-as-code tool for GitLab:
 
 * application settings,
 * groups,
@@ -104,6 +104,7 @@ docker run -it -v $(pwd):/config ghcr.io/gitlabform/gitlabform:latest gitlabform
 <div style="text-align: center;">
   <a href="https://www.egnyte.com" target="_blank"><img src="images/egnyte-logo.svg" width="130px" style="margin: 10px; vertical-align: middle;" alt="Egnyte logo"></a>
   <a href="https://www.elasticpath.com" target="_blank"><img src="images/elastic-path-logo.svg" width="130px" style="margin: 10px; vertical-align: middle;" alt="Elastic Path" /></a>
+  <a href="https://www.liquidlight.co.uk/" target="_blank"><img src="images/liquidlight-logo.svg" width="130px" style="margin: 10px; vertical-align: middle;" alt="Liquid Light" /></a>
   <a href="https://www.roche.com" target="_blank"><img src="images/roche-logo.png" width="130px" style="margin: 10px; vertical-align: middle;" alt="Roche logo" /></a>
 </div>
 ...and many more!

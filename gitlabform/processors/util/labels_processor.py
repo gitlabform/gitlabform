@@ -1,5 +1,5 @@
 from cli_ui import debug, info, warning
-from typing import Dict, List, Callable
+from typing import Dict, List, Callable, Union
 
 from gitlab.base import RESTObjectList, RESTObject
 from gitlab.v4.objects import Group, Project, ProjectLabel, GroupLabel
@@ -103,7 +103,7 @@ class LabelsProcessor:
         group_or_project: Group | Project,
         label_key: str,
         parent_object_type: str,
-        existing_group_and_parent_labels: RESTObjectList | list[RESTObject],
+        existing_group_and_parent_labels: Union[List[GroupLabel], List[ProjectLabel]],
     ):
         label = configured_labels.get(label_key)
         configured_label_name = label.get("name")

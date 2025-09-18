@@ -68,6 +68,22 @@ class TestIntegrations:
             integration = project.integrations.get(integration_name)
             assert integration.active is False
 
+    def test__if_delete_without_create_works(self, project_for_function):
+        config_integrations_delete = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            integrations:
+              jira:
+                delete: true
+              slack:
+                delete: true
+        """
+
+        run_gitlabform(config_integrations_delete, project_for_function)
+
+        project_integrations = project_for_function.integrations.list(get_all=True)
+        assert len(project_integrations) == 0
+
     def test__if_push_events_true_works(self, project):
         config_integration_push_events_true = f"""
         projects_and_groups:

@@ -96,6 +96,7 @@ class PythonGitlab(Gitlab):
         # Gitlab API will only ever return 0 or 1 entry when GETting using `username` attribute
         # https://docs.gitlab.com/ee/api/users.html#for-non-administrator-users
         # so will always be list[RESTObject] and never RESTObjectList from python-gitlab's api
+        # username list is case-insensitive on the gitlab api
         users: list[RESTObject] = self.users.list(username=username)  # type: ignore
 
         if len(users) == 0:

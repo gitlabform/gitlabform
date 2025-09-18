@@ -6,7 +6,7 @@ from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlab.v4.objects import Group, GroupMember, User
-from gitlab import GitlabDeleteError, GitlabGetError
+from gitlab import GitlabDeleteError, GitlabError, GitlabGetError
 
 
 class GroupMembersProcessor(AbstractProcessor):
@@ -91,25 +91,29 @@ class GroupMembersProcessor(AbstractProcessor):
                         share_with_group_path,
                     )
                 else:
-                    debug(
-                        "Re-adding group '%s' to change their access level or expires at.",
-                        share_with_group_path,
-                    )
+                    info(f"Re-adding group {share_with_group_path} to change their access level or expires at.")
                     share_with_group_id = groups_before_by_group_path[share_with_group_path]["group_id"]
                     # we will remove the group first and then re-add them,
                     # to ensure that the group has the expected access level
                     self._unshare(group_being_processed, share_with_group_id)
 
-                    group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                    try:
+                        group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                    except GitlabError as e:
+                        error(f"Error processing {share_with_group_path}, {e.error_message}")
+                        raise e
 
             else:
                 debug(
-                    "Adding group '%s' who previously was not a member.",
-                    share_with_group_path,
+                    f"Adding group {share_with_group_path} who previously was not a member.",
                 )
 
                 share_with_group_id = self.gl.get_group_id(share_with_group_path)
-                group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                try:
+                    group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                except GitlabError as e:
+                    error(f"Error processing {share_with_group_path}, {e.error_message}")
+                    raise e
 
         if enforce_group_members:
             # remove groups not configured explicitly
@@ -134,7 +138,7 @@ class GroupMembersProcessor(AbstractProcessor):
         try:
             group_being_processed.unshare(share_with_group_id)
         except GitlabDeleteError:
-            debug("Group could not be unshared, likely was never shared to begin with")
+            info(f"Group with id {share_with_group_id} could not be unshared, likely was never shared to begin with")
             pass
 
     def _process_users(
@@ -214,20 +218,22 @@ class GroupMembersProcessor(AbstractProcessor):
                             )
                         else:
                             debug(
-                                "Editing user '%s' membership to change their access level or expires at.",
-                                common_username,
+                                f"Editing user {common_username} to change their access level to {access_level_to_set},"
+                                f" expires at to {expires_at_to_set},"
+                                f" and member_role_id to {member_role_id_to_set}."
                             )
 
                             group_member.access_level = access_level_to_set
                             group_member.expires_at = expires_at_to_set
                             group_member.member_role_id = member_role_id_to_set
-                            group_member.save()
+                            try:
+                                group_member.save()
+                            except GitlabError as e:
+                                error(f"Could not save user {common_username}, error: {e.error_message}")
+                                raise e
 
                     else:
-                        debug(
-                            "Adding user '%s' who previously was not a member.",
-                            common_username,
-                        )
+                        debug(f"Adding user {common_username} who previously was not a member.")
                         group.members.create(
                             {
                                 "user_id": user_id,
