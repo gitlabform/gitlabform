@@ -119,14 +119,10 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 repo_root_dir="$script_dir/.."
 
 # Determine the appropriate GitLab image
-if [[ $(uname -s) == 'Darwin' ]] && [[ $(uname -m) == 'arm64' ]]; then
-  gitlab_image="gsdukbh/gitlab-ee-arm64"
+if [[ "$gitlab_flavor" == "ce" ]]; then
+  gitlab_image="gitlab/gitlab-ce"
 else
-  if [[ "$gitlab_flavor" == "ce" ]]; then
-    gitlab_image="gitlab/gitlab-ce"
-  else
-    gitlab_image="gitlab/gitlab-ee"
-  fi
+  gitlab_image="gitlab/gitlab-ee"
 fi
 
 # Prepare extra Docker run options
