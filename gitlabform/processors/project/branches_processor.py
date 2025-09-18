@@ -1,6 +1,5 @@
-from logging import debug
 from typing import Optional
-from cli_ui import warning, fatal, debug as verbose
+from cli_ui import warning, fatal, debug
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
@@ -117,7 +116,7 @@ class BranchesProcessor(AbstractProcessor):
         or group name but GitLab only supports their id. This method will transform the
         config by replacing them with ids.
         """
-        verbose("Transforming User and Group names in Branch configuration to Ids")
+        debug("Transforming User and Group names in Branch configuration to Ids")
 
         for key in branch_config:
             if isinstance(branch_config[key], list):
