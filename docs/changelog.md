@@ -55,6 +55,18 @@ Thanks to all the contributors of this release!
 
 Thanks to all the contributors of this release!
 
+
+## 5.0.0-beta.2
+
+### Bug Fixes
+
+- Fix for Branch Protection changes, GitlabForm attempted to updated users when config has not changed from Gitlab, resulting in API errors and a failed run of GitlabForm. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+
+#### Variables with same name but different scope should be deletable [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
+As per the referenced issue [#533](https://github.com/gitlabform/gitlabform/issues/533), if there are multiple CI CD variables with same key/name but scoped to different "environment", gitlabform does not make the API call correctly. As a result, the variable cannot be deleted and an error is returned.
+
+Bug fix includes a large refactor to use python-gitlab code and tidy up redundant paths, hence being included as part of v5 Release Candidate testing.
+
 ## 5.0.0-beta.1
 
 ### Breaking Changes
