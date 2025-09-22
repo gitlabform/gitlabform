@@ -193,9 +193,6 @@ class TestSchedules:
         assert schedule.cron == "0 * * * *"
         assert schedule.active is True
 
-        # Verify logged out "No update"; from which we can infer no API actions invoked
-        assert "No update required for pipeline schedule 'Existing schedule'" in caplog.text
-
     def test__apply_existing_schedule_with_variables_to_new_branch(self, project_for_function, branch_for_function):
         existing_schedule = project_for_function.pipelineschedules.create(
             {

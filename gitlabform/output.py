@@ -1,7 +1,5 @@
-from logging import debug
-
 import ez_yaml
-from cli_ui import debug as verbose
+from cli_ui import debug
 from cli_ui import fatal
 
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
@@ -35,7 +33,7 @@ class EffectiveConfigurationFile:
 
     def add_configuration(self, project_or_group: str, configuration_name: str, configuration: dict):
         if self.output_file:
-            verbose(f"Adding effective configuration for {configuration_name}.")
+            debug(f"Adding effective configuration for {configuration_name}.")
             self.config[project_or_group][configuration_name] = configuration
 
     def write_to_file(self):

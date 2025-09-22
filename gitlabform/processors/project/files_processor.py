@@ -2,14 +2,13 @@ import os
 import re
 from pathlib import Path
 
-from logging import debug
-from cli_ui import debug as verbose
+from cli_ui import debug
 from cli_ui import warning, fatal
 from typing import List
 
 from jinja2 import Environment, FileSystemLoader
 from gitlab import GitlabGetError, GitlabUpdateError
-from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
+from gitlab.v4.objects import Project, ProjectFile
 from gitlab.base import RESTObject
 
 from gitlabform.constants import EXIT_INVALID_INPUT
@@ -67,7 +66,7 @@ class FilesProcessor(AbstractProcessor):
             )
 
             for branch in branches_to_update:
-                verbose(f"Processing file '{file}' in branch '{branch.name}'")
+                debug(f"Processing file '{file}' in branch '{branch.name}'")
 
                 if configuration.get("files|" + file + "|content") and configuration.get("files|" + file + "|file"):
                     fatal(
@@ -163,7 +162,7 @@ class FilesProcessor(AbstractProcessor):
                         )
 
                 if configuration.get("files|" + file + "|only_first_branch"):
-                    verbose("Skipping other branches for this file, as configured.")
+                    debug("Skipping other branches for this file, as configured.")
                     break
 
     def modify_file_dealing_with_branch_protection(
