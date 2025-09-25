@@ -1,8 +1,10 @@
 import os
-from logging import debug, error, warning
+from logging import debug, error, warning, info
 from typing import Callable, Dict, List
 
+from gitlab import GitlabGetError, GitlabUpdateError
 from gitlab.v4.objects import Project
+from gql.transport.exceptions import TransportQueryError
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -28,6 +30,10 @@ class ProjectSettingsProcessor(AbstractProcessor):
         # Remove avatar from config to process it last
         avatar_config = project_settings_in_config.pop("avatar", None)
 
+        # Remove duo_features_enabled from config as it can't be processed via the REST Api and if it's the only
+        # config defined for a Project, Gitlab will reject with error the REST update() request
+        duo_features_enabled_in_config = project_settings_in_config.pop("duo_features_enabled", None)
+
         # Process other settings first
         if self._needs_update(project_settings_in_gitlab, project_settings_in_config):
             debug("Updating project settings")
@@ -38,9 +44,11 @@ class ProjectSettingsProcessor(AbstractProcessor):
 
             debug(project.asdict())
             debug("project_settings AFTER: ^^^")
-
         else:
             debug("No update needed for project settings")
+
+        # Process duo_features_enabled
+        self._process_duo_features_enabled(project, duo_features_enabled_in_config)
 
         # Process avatar last - with error handling that doesn't stop execution
         if avatar_config is not None:
@@ -155,3 +163,73 @@ class ProjectSettingsProcessor(AbstractProcessor):
             error_msg = f"Error uploading project avatar: {str(e)}"
             error(error_msg)
             raise Exception(error_msg) from e
+
+    def _process_duo_features_enabled(self, project: Project, duo_features_enabled_in_config: None | bool):
+        if duo_features_enabled_in_config is None:
+            info(
+                f"duo_features_enabled is not defined in Config for project {project.path_with_namespace}, will not make any changes."
+            )
+            return
+
+        duo_features_enabled_in_gl = self._get_project_duo_features_enabled_from_gitlab(project)
+        if duo_features_enabled_in_gl == duo_features_enabled_in_config:
+            debug("No changes detected for duo_features_enabled")
+            return
+
+        self._set_project_duo_features_enabled(project, duo_features_enabled_in_config)
+
+    def _get_project_duo_features_enabled_from_gitlab(self, project: Project) -> List[Dict[str, str]]:
+        """Query GraphQL using Python Gitlab
+        https://python-gitlab.readthedocs.io/en/stable/api-usage-graphql.html
+
+        GETting and updating of duo_features_enabled is currently only supported through the GraphQL API:
+        https://gitlab.com/gitlab-org/gitlab/-/merge_requests/143972
+        """
+
+        query = (
+            """
+            query ProjectDuoFeatures {
+               project(fullPath: \""""
+            + project.path_with_namespace
+            + """\") 
+              {
+                   duoFeaturesEnabled
+              }
+           }
+        """
+        )
+        result = self.gl.graphql.execute(query)
+
+        if result["project"] is not None and result["project"]["duoFeaturesEnabled"] is not None:
+            return result["project"]["duoFeaturesEnabled"]
+        else:
+            raise GitlabGetError(f"Failed to get duo_features_enabled for Project: {project.path_with_namespace}")
+
+    def _set_project_duo_features_enabled(self, project: Project, duo_features_enabled: bool) -> None:
+        """Mutate Project Settings using GraphQL with Python Gitlab"""
+        duo_features_enabled_str = str(duo_features_enabled).lower()
+        mutation = (
+            """
+           mutation Projects {
+             projectSettingsUpdate(input: { fullPath: \""""
+            + project.path_with_namespace
+            + """\", duoFeaturesEnabled: """
+            + duo_features_enabled_str
+            + """ }) 
+             {
+                errors
+             }
+           }
+        """
+        )
+        try:
+            result = self.gl.graphql.execute(mutation)
+
+            if result["errors"] is not None:
+                raise GitlabUpdateError(
+                    f"Failed to update duo_features_enabled for Project: {project.path_with_namespace}, to: {duo_features_enabled}: {result['errors']}"
+                )
+        except TransportQueryError as e:
+            raise GitlabUpdateError(
+                f"Failed to update duo_features_enabled for Project: {project.path_with_namespace}, to: {duo_features_enabled}: {e.errors[0]["message"]}"
+            )
