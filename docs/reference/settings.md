@@ -45,6 +45,7 @@ projects_and_groups:
       visibility: internal
       only_allow_merge_if_pipeline_succeeds: true
       only_allow_merge_if_all_discussions_are_resolved: true
+      duo_features_enabled: false
       container_expiration_policy_attributes:
         cadence: "1month"
         enabled: true
@@ -55,6 +56,11 @@ projects_and_groups:
         name_regex_keep: ".*-main"
       # (...)
 ```
+
+### Project Settings - GitLab Duo
+We have extended the functionality of GitLabForm to support setting `duo_features_enabled` at the Project Level, which are currently supported in the [Group Setting API](https://docs.gitlab.com/api/groups/#update-group-attributes), but only via GraphQL for Projects.
+
+You can specify `duo_features_enabled: true` or `false` under the `project_settings` configuration and GitLabForm will make the appropriate [GraphQL Mutation](https://gitlab.com/gitlab-org/gitlab/-/issues/571776) to update the Project Settings.
 
 ### Project Settings - Topics
 
