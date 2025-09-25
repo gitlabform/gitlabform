@@ -230,6 +230,10 @@ class ProjectSettingsProcessor(AbstractProcessor):
                     f"Failed to update duo_features_enabled for Project: {project.path_with_namespace}, to: {duo_features_enabled}: {result['errors']}"
                 )
         except TransportQueryError as e:
+            if e.errors is not None:
+                error_message = e.errors[0].message
+            else:
+                error_message = "Unknown GraphQL error"
             raise GitlabUpdateError(
-                f"Failed to update duo_features_enabled for Project: {project.path_with_namespace}, to: {duo_features_enabled}: {e.errors[0]["message"]}"
+                f"Failed to update duo_features_enabled for Project: {project.path_with_namespace}, to: {duo_features_enabled}: {error_message}"
             )
