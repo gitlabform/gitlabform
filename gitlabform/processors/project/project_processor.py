@@ -1,5 +1,4 @@
-from cli_ui import debug as verbose
-from logging import fatal
+from cli_ui import debug as verbose, error
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlab import GitlabGetError, GitlabTransferProjectError
@@ -44,6 +43,7 @@ class ProjectProcessor(AbstractProcessor):
                 # TODO: Catch GitlabTransferProjectError exception.
                 #  The above code can run into exception for various reasons.
                 #  We should catch this exception and log a custom error message with hints.
+                #  In some scenarios we want to break and in some we want to proceed and attempt a transfer regardless
                 #  For more details, see: https://github.com/gitlabform/gitlabform/issues/611
                 # except GitlabTransferProjectError as e:
                 #     fatal(

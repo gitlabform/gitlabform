@@ -170,9 +170,9 @@ class TestTransferProject:
         project_after_transfer = gl.projects.get(project_for_function.id)
         assert project_after_transfer.archived is True
 
-    # It seems Gitlab allows moving/transferring a project that is already archived.
-    # This test case validates that. The project will still be in archived state but
-    # it is allowed to be transferred.
+    @pytest.mark.skip(
+        reason="As of 18.4 transferring of archived projects is blocked: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/203476, we could manually add support by unarchiving, transferring and rearchiving if there is demand"
+    )
     def test__transfer_project_already_archived(self, gl, project_for_function, group, other_group):
         project_name = project_for_function.name
         project_source_path = project_for_function.path_with_namespace
@@ -197,6 +197,9 @@ class TestTransferProject:
         project_after_transfer = gl.projects.get(project_for_function.id)
         assert project_after_transfer.archived is True
 
+    @pytest.mark.skip(
+        reason="As of 18.4 transferring of archived projects is blocked: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/203476, we could manually add support by unarchiving, transferring and rearchiving if there is demand"
+    )
     def test__transfer_and_unarchive(self, gl, project_for_function, group, other_group):
         project_name = project_for_function.name
         project_source_path = project_for_function.path_with_namespace
