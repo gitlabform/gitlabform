@@ -23,7 +23,7 @@ classifiers = [
 ]
 requires-python = ">=3.12.0"
 dependencies = [
-    "certifi==2025.8.3",
+    "certifi==2025.10.5",
     "cli-ui==0.19.0",
     "ez-yaml==1.2.0",
     "Jinja2==3.1.6",
