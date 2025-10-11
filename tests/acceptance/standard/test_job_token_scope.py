@@ -1,4 +1,3 @@
-import logging
 from gitlab.v4.objects import Project, Group
 
 from tests.acceptance import (

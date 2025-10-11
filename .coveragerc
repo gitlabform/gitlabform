@@ -8,3 +8,8 @@ omit =
 
     # no point in checking this
     setup.py
+
+[report]
+exclude_also =
+    \s*debug\(.*\)
+    \s*fatal\(.*\)

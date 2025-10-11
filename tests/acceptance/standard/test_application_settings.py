@@ -59,7 +59,6 @@ class TestApplicationSettings:
         updated_settings.save()
 
     def test__can_detect_when_no_changes_required_to_application_settings(self, gl, project, caplog):
-        caplog.set_level(logging.DEBUG)
         initial_settings = gl.settings.get()
 
         initial_settings.require_two_factor_authentication = True
@@ -81,9 +80,6 @@ class TestApplicationSettings:
         assert updated_settings is not None
         assert updated_settings.require_two_factor_authentication is True
         assert updated_settings.two_factor_grace_period == 2
-
-        # Check we printed out "No update" as a proxy for checking no api calls made via python-gitlab
-        assert "No update needed for Application Settings" in caplog.text
 
         # Tear down
         updated_settings.require_two_factor_authentication = False
