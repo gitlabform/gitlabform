@@ -204,10 +204,7 @@ class TestHooksProcessor:
         # Because of 'enforce: false', default config, total number of hooks should be
         # what's in the applied config and what was previously configured.
         assert len(hooks_after_test) == 2
-        assert (
-            first_url in hooks_after_test
-            and "http://www.newhook.org" in hooks_after_test
-        )
+        assert first_url in hooks_after_test and "http://www.newhook.org" in hooks_after_test
 
         parent_target = f"{group.path}/*"
         enforce_star_yaml = f"""
