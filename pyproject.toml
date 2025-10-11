@@ -81,8 +81,8 @@ markers = [
 
 [tool.coverage.report]
 exclude_also = [
-    "debug\\(.*\\)",
-    "fatal\\(.*\\)",
+    "\\s*debug\\(.*\\)",
+    "\\s*fatal\\(.*\\)",
 ]
 
 #uncomment below for debug logging ALWAYS, even if the tests are passing
