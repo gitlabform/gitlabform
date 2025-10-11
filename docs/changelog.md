@@ -1,5 +1,25 @@
 # Changelog
 
+## 4.6.0
+
+### Features
+
+* Add support for `duo_features_enabled` at `project_settings` level [#1113](https://github.com/gitlabform/gitlabform/pull/1113). ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+
+### Tests
+
+* Fix project transfer tests for Gitlab 18.4 [#1116](https://github.com/gitlabform/gitlabform/pull/1116). ([Tim Knight](https://github.com/shoddyknight))
+
+### Documentation
+
+* Update `ci_cd_variables.md` to include raw variable example [#1091](https://github.com/gitlabform/gitlabform/pull/1091). ([uob-hillmu](https://github.com/uob-hillmu))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.5.0
 
 ### Features

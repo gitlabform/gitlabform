@@ -43,6 +43,7 @@ class ProjectProcessor(AbstractProcessor):
                 # TODO: Catch GitlabTransferProjectError exception.
                 #  The above code can run into exception for various reasons.
                 #  We should catch this exception and log a custom error message with hints.
+                #  In some scenarios we want to break and in some we want to proceed and attempt a transfer regardless
                 #  For more details, see: https://github.com/gitlabform/gitlabform/issues/611
                 # except GitlabTransferProjectError as e:
                 #     fatal(
