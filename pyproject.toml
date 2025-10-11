@@ -79,12 +79,6 @@ markers = [
     "requires_license: marks tests which require GitLab paid (Premium/Ultimate) license '-m \"not requires_license\"')",
 ]
 
-[tool.coverage.report]
-exclude_also = [
-    "\\s*debug\\(.*\\)",
-    "\\s*fatal\\(.*\\)",
-]
-
 #uncomment below for debug logging ALWAYS, even if the tests are passing
 #log_cli = true
 #log_cli_level = "DEBUG"
