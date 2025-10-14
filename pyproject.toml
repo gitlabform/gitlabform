@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitlabform"
-version = "5.0.0-beta.1"
+version = "5.0.0-beta.2"
 authors = [{ name = "Greg Dubicki and Contributors" }]
 description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
 keywords = ["cli", "yaml", "gitlab", "configuration-as-code"]
@@ -35,7 +35,7 @@ dependencies = [
     "python-gitlab[graphql]==6.3.0",
     "requests==2.32.5",
     "ruamel.yaml==0.17.21",
-    "types-requests==2.32.4.20250809",
+    "types-requests==2.32.4.20250913",
     "types-setuptools==80.9.0.20250822",
     "yamlpath==3.8.2",
 ]
@@ -54,12 +54,12 @@ content-type = "text/markdown"
 test = [
     "coverage==7.10.6",
     "cryptography==45.0.7",
-    "deepdiff==8.6.0",
-    "mypy==1.17.1",
+    "deepdiff==8.6.1",
+    "mypy==1.18.1",
     "mypy-extensions==1.1.0",
     "pre-commit==2.21.0",
     "pytest==8.4.2",
-    "pytest-cov==6.2.1",
+    "pytest-cov==7.0.0",
     "pytest-rerunfailures==16.0.1",
     "xkcdpass==1.20.0",
 ]
