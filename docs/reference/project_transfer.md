@@ -81,6 +81,9 @@ projects_and_groups:
 
 In the above example, the project will be transferred first and then it will be archived at the new location.
 
+#### Transferring archived projects
+As of [GitLab **18.4**](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/203476), they no longer support transferring of projects in an archived state. For now we do not unarchive, transfer and re-archive projects, however we would accept Feature Requests to add that functionality if there is demand. 
+
 Also, Gitlab allows transferring a project or updating its path that is already archived. In the following example, if `group_2/project_1` is already archived, gitlabform will transfer the project to `group_1/foo-bar` and then unarchive it. Note that the project's path is changed from `project_1` to `foo-bar`.
 
 ```yaml

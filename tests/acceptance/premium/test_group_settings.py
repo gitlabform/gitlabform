@@ -1,13 +1,12 @@
 import pytest
 
 from tests.acceptance import run_gitlabform
-from gitlabform.gitlab import AccessLevel
 
 pytestmark = pytest.mark.requires_license
 
 
 class TestGroupSettings:
-    def test__edit_new_setting_premium(self, gl, project, group):
+    def test__can_set_file_template_project_id(self, gl, project, group):
         assert "file_template_project_id" not in group.attributes
 
         edit_group_settings = f"""
