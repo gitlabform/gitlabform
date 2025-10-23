@@ -17,7 +17,7 @@ jobs:
         python-version: [3.12]
       fail-fast : false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
@@ -54,7 +54,7 @@ jobs:
         python-version: [3.12, 3.13]
       fail-fast : false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
@@ -83,7 +83,7 @@ jobs:
   security-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
@@ -108,7 +108,7 @@ jobs:
       fail-fast: true
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
