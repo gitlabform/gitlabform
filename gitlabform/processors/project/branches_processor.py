@@ -79,7 +79,7 @@ class BranchesProcessor(AbstractProcessor):
         try:
             project.protectedbranches.create({"name": branch_name, **branch_config})
         except GitlabCreateError as e:
-            message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
+            message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}'"
 
             if self.strict:
                 fatal(
@@ -102,7 +102,7 @@ class BranchesProcessor(AbstractProcessor):
             # It only unprotects the branch.
             protected_branch.delete()
         except GitlabDeleteError as e:
-            message = f"Branch '{protected_branch.name}' could not be unprotected! Error '{e.error_message}"
+            message = f"Branch '{protected_branch.name}' could not be unprotected! Error '{e.error_message}'"
             if self.strict:
                 fatal(
                     message,
