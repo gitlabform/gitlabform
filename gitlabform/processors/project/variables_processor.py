@@ -1,4 +1,4 @@
-from cli_ui import debug as verbose
+from cli_ui import debug
 from cli_ui import warning
 
 import copy
@@ -38,18 +38,18 @@ class VariablesProcessor(MultipleEntitiesProcessor):
             for variable in current_variables:
                 variable["value"] = hide(variable["value"])
 
-            verbose(f"Variables for {project_and_group} in GitLab:")
+            debug(f"Variables for {project_and_group} in GitLab:")
 
-            verbose(
+            debug(
                 textwrap.indent(
                     ez_yaml.to_string(current_variables),
                     "  ",
                 )
             )
         except:
-            verbose(f"Variables for {project_and_group} in GitLab cannot be checked.")
+            debug(f"Variables for {project_and_group} in GitLab cannot be checked.")
 
-        verbose(f"Variables in {project_and_group} in configuration:")
+        debug(f"Variables in {project_and_group} in configuration:")
 
         configured_variables = copy.deepcopy(configuration)
 
@@ -62,7 +62,7 @@ class VariablesProcessor(MultipleEntitiesProcessor):
         for key in configured_variables.keys():
             configured_variables[key]["value"] = hide(configured_variables[key]["value"])
 
-        verbose(
+        debug(
             textwrap.indent(
                 ez_yaml.to_string(configured_variables),
                 "  ",
