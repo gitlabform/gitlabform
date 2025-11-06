@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.0.0-beta.3
+
+### Chore
+
+- Rebased onto v4.6.1
+
 ## 5.0.0-beta.2
 
 ### Bug Fixes
