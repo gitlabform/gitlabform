@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.6.1
+
+### Bug Fixes
+
+* Correct protecting branches error message [#1122](https://github.com/gitlabform/gitlabform/pull/1122). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+
 ## 4.6.0
 
 ### Features
