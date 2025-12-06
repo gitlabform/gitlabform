@@ -3,7 +3,7 @@ from cli_ui import info, warning, error, fatal, debug as verbose
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
-    GitlabOperationError,
+    GitlabCreateError,
 )
 from gitlab.v4.objects import Project, ProjectProtectedBranch
 
@@ -186,7 +186,7 @@ class BranchesProcessor(AbstractProcessor):
                 project.protectedbranches.update(branch_name, branch_config)
             else:
                 project.protectedbranches.create({"name": branch_name, **branch_config})
-        except GitlabOperationError as e:
+        except GitlabCreateError as e:
             message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
 
             if self.strict:

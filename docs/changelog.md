@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.0.0-beta.3
+
+### Chore
+
+- Rebased onto v4.6.1
+
 ## 5.0.0-beta.2
 
 ### Bug Fixes
@@ -42,6 +48,21 @@ Resolves:
 - https://github.com/gitlabform/gitlabform/issues/445
 - https://github.com/gitlabform/gitlabform/issues/1061
 - https://github.com/gitlabform/gitlabform/issues/1034
+
+
+## 4.6.1
+
+### Bug Fixes
+
+* Correct protecting branches error message [#1122](https://github.com/gitlabform/gitlabform/pull/1122). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+
 ## 4.6.0
 
 ### Features
