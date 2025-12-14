@@ -4,6 +4,49 @@ Some of these changes between major application versions may affect the effectiv
 
 ## From 4.\* to 5.\*
 
+### Update `config_version` and remove deprecated MR approval config
+
+GitLabForm v5 removed configuration syntax for merge request approval settings that were deprecated in v3. To use GitLabForm v5, `config_version` must be set to `4`.
+
+In addition, following config will not be processed anymore.
+
+```yaml
+config_version: 4
+
+projects_and_groups:
+  group_1/project_1:
+    merge_requests:
+      approvals:
+        approvals_before_merge: 2
+        reset_approvals_on_push: true
+        disable_overriding_approvers_per_merge_request: true
+      approvers:
+        - user1
+        - user2
+      approver_groups:
+        - my-group
+        - my-group1/subgroup
+        - my-group2/subgroup/subsubgroup
+      remove_other_approval_rules: false
+```
+
+New config syntax supported as of GitLabForm v3.4.0:
+
+```yaml
+config_version: 4
+
+projects_and_groups:
+  group_1/project_1:
+    merge_requests_approvals:
+      disable_overriding_approvers_per_merge_request: true
+    merge_requests_approval_rules:
+      any: # this is just a label
+        approvals_required: 0
+        name: "Any member"
+        rule_type: any_approver
+      enforce: true
+```
+
 ### Branch Protection Changes
 
 In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach reset all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of [raw parameter passing](reference/index.md#raw-parameters-passing) — where only explicitly configured values are sent, and unspecified ones are left untouched.
