@@ -14,6 +14,9 @@ from gitlabform.configuration.yaml_tags import (
     GitLabFormTagList,
     register_custom_tags,
 )
+# Control keys to skip when parsing badges
+CONTROL_KEYS = ['enforce', 'inherit', 'keep_existing']
+
 from gitlabform.configuration.config_v5_objects import (
     EntityConfig,
     BadgesConfig,
@@ -253,7 +256,7 @@ class ConfigV5TypedParser:
         data_dict = self._to_dict(data)
         
         for badge_name, badge_data in data_dict.items():
-            if badge_name in ['enforce', 'inherit', 'keep_existing']:
+            if badge_name in CONTROL_KEYS:
                 # Skip old-style control keys
                 continue
             
@@ -286,8 +289,14 @@ class ConfigV5TypedParser:
             
             for username, user_data in users_dict.items():
                 user_dict = self._to_dict(user_data)
+                access_level = user_dict.get('access_level', AccessLevel.DEVELOPER)
+                if isinstance(access_level, str):
+                    try:
+                        access_level = AccessLevel(access_level)
+                    except ValueError:
+                        pass  # Keep as string if not a valid enum value
                 member = MemberConfig(
-                    access_level=user_dict.get('access_level', AccessLevel.DEVELOPER),
+                    access_level=access_level,
                     expires_at=user_dict.get('expires_at')
                 )
                 member._delete = self._get_tag(user_data, 'delete', False)
@@ -401,10 +410,33 @@ class ConfigV5TypedParser:
         
         for branch_name, branch_data in data_dict.items():
             branch_dict = self._to_dict(branch_data)
+            
+            # Convert string access levels to enum
+            push_level = branch_dict.get('push_access_level', AccessLevel.MAINTAINER)
+            if isinstance(push_level, str):
+                try:
+                    push_level = AccessLevel(push_level)
+                except ValueError:
+                    pass
+            
+            merge_level = branch_dict.get('merge_access_level', AccessLevel.MAINTAINER)
+            if isinstance(merge_level, str):
+                try:
+                    merge_level = AccessLevel(merge_level)
+                except ValueError:
+                    pass
+            
+            unprotect_level = branch_dict.get('unprotect_access_level')
+            if isinstance(unprotect_level, str):
+                try:
+                    unprotect_level = AccessLevel(unprotect_level)
+                except ValueError:
+                    pass
+            
             branch = ProtectedBranchConfig(
-                push_access_level=branch_dict.get('push_access_level', AccessLevel.MAINTAINER),
-                merge_access_level=branch_dict.get('merge_access_level', AccessLevel.MAINTAINER),
-                unprotect_access_level=branch_dict.get('unprotect_access_level')
+                push_access_level=push_level,
+                merge_access_level=merge_level,
+                unprotect_access_level=unprotect_level
             )
             branch._delete = self._get_tag(branch_data, 'delete', False)
             config.branches[branch_name] = branch

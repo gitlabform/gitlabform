@@ -360,6 +360,14 @@ class EntityConfig:
     _enforce: bool = False
     _inherit: Optional[str] = None
     
+    # Config attribute names for efficient lookup
+    _CONFIG_ATTRS = [
+        'project_settings', 'badges', 'project_push_rules',
+        'group_settings', 'group_badges', 'group_push_rules',
+        'members', 'group_members', 'deploy_keys', 'variables',
+        'labels', 'webhooks', 'protected_branches'
+    ]
+    
     def get_configs(self) -> List[Any]:
         """
         Get all non-None configuration objects.
@@ -368,11 +376,9 @@ class EntityConfig:
             List of configuration objects that are set
         """
         configs = []
-        for attr_name in dir(self):
-            if attr_name.startswith('_') or attr_name in ['path', 'get_configs', 'is_project', 'is_group']:
-                continue
-            attr = getattr(self, attr_name)
-            if attr is not None and not callable(attr):
+        for attr_name in self._CONFIG_ATTRS:
+            attr = getattr(self, attr_name, None)
+            if attr is not None:
                 configs.append(attr)
         return configs
     
