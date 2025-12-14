@@ -252,17 +252,13 @@ class ConfigV5Parser:
             Dictionary of control directives
         """
         directives = {}
+        directive_names = ['inherit', 'enforce', 'delete', 'keep_existing']
         
         # Check for YAML tag directives
         if hasattr(value, 'get_tag'):
-            if value.has_tag('inherit'):
-                directives['inherit'] = value.get_tag('inherit')
-            if value.has_tag('enforce'):
-                directives['enforce'] = value.get_tag('enforce')
-            if value.has_tag('delete'):
-                directives['delete'] = value.get_tag('delete')
-            if value.has_tag('keep_existing'):
-                directives['keep_existing'] = value.get_tag('keep_existing')
+            for name in directive_names:
+                if value.has_tag(name):
+                    directives[name] = value.get_tag(name)
         
         # Check for special key directives
         if isinstance(value, dict):
@@ -270,14 +266,9 @@ class ConfigV5Parser:
             directives.update(control_keys)
         
         # Check for control keys on object
-        if has_control_key(value, 'inherit'):
-            directives['inherit'] = get_control_key(value, 'inherit')
-        if has_control_key(value, 'enforce'):
-            directives['enforce'] = get_control_key(value, 'enforce')
-        if has_control_key(value, 'delete'):
-            directives['delete'] = get_control_key(value, 'delete')
-        if has_control_key(value, 'keep_existing'):
-            directives['keep_existing'] = get_control_key(value, 'keep_existing')
+        for name in directive_names:
+            if has_control_key(value, name):
+                directives[name] = get_control_key(value, name)
         
         return directives
     
