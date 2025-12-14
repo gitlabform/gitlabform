@@ -163,6 +163,9 @@ class ConfigV5TypedParser:
         
         data_dict = self._to_dict(data)
         
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
+        
         # Parse known fields
         if 'default_branch' in data_dict:
             config.default_branch = data_dict['default_branch']
@@ -205,7 +208,7 @@ class ConfigV5TypedParser:
             'builds_access_level', 'only_allow_merge_if_pipeline_succeeds',
             'only_allow_merge_if_all_discussions_are_resolved',
             'remove_source_branch_after_merge', 'duo_features_enabled',
-            'container_expiration_policy_attributes'
+            'container_expiration_policy_attributes', 'raw'
         }
         config.additional_settings = {
             k: v for k, v in data_dict.items() if k not in known_fields
@@ -223,6 +226,9 @@ class ConfigV5TypedParser:
         
         data_dict = self._to_dict(data)
         
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
+        
         if 'name' in data_dict:
             config.name = data_dict['name']
         
@@ -237,7 +243,7 @@ class ConfigV5TypedParser:
             config.visibility = Visibility(vis) if isinstance(vis, str) else vis
         
         # Store additional settings
-        known_fields = {'name', 'path', 'description', 'visibility'}
+        known_fields = {'name', 'path', 'description', 'visibility', 'raw'}
         config.additional_settings = {
             k: v for k, v in data_dict.items() if k not in known_fields
         }
@@ -255,6 +261,9 @@ class ConfigV5TypedParser:
         
         data_dict = self._to_dict(data)
         
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
+        
         for badge_name, badge_data in data_dict.items():
             if badge_name in CONTROL_KEYS:
                 # Skip old-style control keys
@@ -268,6 +277,7 @@ class ConfigV5TypedParser:
                 delete=badge_dict.get('delete', False)
             )
             badge._delete = self._get_tag(badge_data, 'delete', badge.delete)
+            badge.raw = badge_dict.get('raw', {})
             
             config.badges[badge_name] = badge
         
@@ -282,6 +292,9 @@ class ConfigV5TypedParser:
         config._inherit = self._get_tag(data, 'inherit', None)
         
         data_dict = self._to_dict(data)
+        
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
         
         if 'users' in data_dict:
             users_data = data_dict['users']
@@ -300,6 +313,7 @@ class ConfigV5TypedParser:
                     expires_at=user_dict.get('expires_at')
                 )
                 member._delete = self._get_tag(user_data, 'delete', False)
+                member.raw = user_dict.get('raw', {})
                 config.users[username] = member
         
         if 'groups' in data_dict:
@@ -317,6 +331,9 @@ class ConfigV5TypedParser:
         
         data_dict = self._to_dict(data)
         
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
+        
         for key_name, key_data in data_dict.items():
             key_dict = self._to_dict(key_data)
             key = DeployKeyConfig(
@@ -325,6 +342,7 @@ class ConfigV5TypedParser:
                 can_push=key_dict.get('can_push', False)
             )
             key._delete = self._get_tag(key_data, 'delete', False)
+            key.raw = key_dict.get('raw', {})
             config.keys[key_name] = key
         
         return config
@@ -339,6 +357,9 @@ class ConfigV5TypedParser:
         
         data_dict = self._to_dict(data)
         
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
+        
         for var_name, var_data in data_dict.items():
             var_dict = self._to_dict(var_data)
             variable = VariableConfig(
@@ -348,6 +369,7 @@ class ConfigV5TypedParser:
                 variable_type=var_dict.get('variable_type', 'env_var')
             )
             variable._delete = self._get_tag(var_data, 'delete', False)
+            variable.raw = var_dict.get('raw', {})
             config.variables[var_name] = variable
         
         return config
@@ -362,6 +384,9 @@ class ConfigV5TypedParser:
         
         data_dict = self._to_dict(data)
         
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
+        
         for label_name, label_data in data_dict.items():
             label_dict = self._to_dict(label_data)
             label = LabelConfig(
@@ -370,6 +395,7 @@ class ConfigV5TypedParser:
                 priority=label_dict.get('priority')
             )
             label._delete = self._get_tag(label_data, 'delete', False)
+            label.raw = label_dict.get('raw', {})
             config.labels[label_name] = label
         
         return config
@@ -384,6 +410,9 @@ class ConfigV5TypedParser:
         
         data_dict = self._to_dict(data)
         
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
+        
         for hook_name, hook_data in data_dict.items():
             hook_dict = self._to_dict(hook_data)
             webhook = WebhookConfig(
@@ -394,6 +423,7 @@ class ConfigV5TypedParser:
                 enable_ssl_verification=hook_dict.get('enable_ssl_verification', True)
             )
             webhook._delete = self._get_tag(hook_data, 'delete', False)
+            webhook.raw = hook_dict.get('raw', {})
             config.webhooks[hook_name] = webhook
         
         return config
@@ -407,6 +437,9 @@ class ConfigV5TypedParser:
         config._inherit = self._get_tag(data, 'inherit', None)
         
         data_dict = self._to_dict(data)
+        
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
         
         for branch_name, branch_data in data_dict.items():
             branch_dict = self._to_dict(branch_data)
@@ -439,6 +472,7 @@ class ConfigV5TypedParser:
                 unprotect_access_level=unprotect_level
             )
             branch._delete = self._get_tag(branch_data, 'delete', False)
+            branch.raw = branch_dict.get('raw', {})
             config.branches[branch_name] = branch
         
         return config
@@ -452,6 +486,9 @@ class ConfigV5TypedParser:
         config._inherit = self._get_tag(data, 'inherit', None)
         
         data_dict = self._to_dict(data)
+        
+        # Extract raw parameters
+        config.raw = self._extract_raw_parameters(data_dict)
         
         # Parse known fields
         if 'commit_message_regex' in data_dict:
@@ -493,7 +530,7 @@ class ConfigV5TypedParser:
             'branch_name_regex', 'author_email_regex', 'file_name_regex',
             'deny_delete_tag', 'member_check', 'prevent_secrets',
             'commit_committer_check', 'commit_committer_name_check',
-            'max_file_size'
+            'max_file_size', 'raw'
         }
         config.additional_settings = {
             k: v for k, v in data_dict.items() if k not in known_fields
@@ -518,6 +555,21 @@ class ConfigV5TypedParser:
         if isinstance(value, (GitLabFormTagOrderedDict, dict)):
             return dict(value)
         return {}
+    
+    def _extract_raw_parameters(self, data_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract raw parameters from configuration.
+        
+        Raw parameters are stored under the 'raw' key and will be passed
+        directly to the GitLab API without validation.
+        
+        Args:
+            data_dict: Configuration dictionary
+            
+        Returns:
+            Dictionary of raw parameters (empty if none found)
+        """
+        return data_dict.get('raw', {})
 
 
 def parse_typed_config_v5(config_string: str) -> Dict[str, EntityConfig]:
