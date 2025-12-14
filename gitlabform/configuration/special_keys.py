@@ -19,11 +19,11 @@ Example:
         - topicB
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 from ruamel.yaml.comments import CommentedMap
 
 
-def extract_special_keys(config: Dict[str, Any]) -> tuple[Dict[str, Any], Dict[str, Any]]:
+def extract_special_keys(config: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """
     Extract special control keys from configuration.
     

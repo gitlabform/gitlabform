@@ -1,5 +1,25 @@
 # Configuration v5: Custom YAML Tags
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Important: YAML Tag Syntax Limitations](#important-yaml-tag-syntax-limitations)
+- [Tag Reference](#tag-reference)
+  - [!inherit](#inherit)
+  - [!enforce](#enforce)
+  - [!delete](#delete)
+  - [!keep_existing](#keep_existing)
+  - [!include](#include)
+- [Complete Example](#complete-example)
+- [Tag Combinations](#tag-combinations)
+- [YAML Tag Syntax Rules](#yaml-tag-syntax-rules)
+- [Migration from v3/v4](#migration-from-v3v4)
+- [Benefits](#benefits)
+- [Alternative Approach: Special Key Prefixes](#alternative-approach-special-key-prefixes)
+- [Testing](#testing)
+- [Example Script](#example-script)
+- [Future Enhancements](#future-enhancements)
+
 GitLabForm configuration v5 introduces custom YAML tags that allow fine-grained control over configuration behavior without cluttering the JSON Schema with special keys everywhere.
 
 ## Overview

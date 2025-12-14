@@ -1,5 +1,12 @@
 """
 Unit tests for custom YAML tags support in GitLabForm configuration v5.
+
+Tests cover:
+- Individual tag functionality (!inherit, !enforce, !delete, !keep_existing, !include)
+- Tag combinations and interactions
+- Error handling for invalid tag values
+- Data structure functionality (GitLabFormTagOrderedDict, GitLabFormTagScalar, GitLabFormTagList)
+- InheritEnum validation
 """
 
 import logging

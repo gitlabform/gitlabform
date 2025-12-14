@@ -164,9 +164,6 @@ def inherit_constructor(
             return result
         else:
             raise ValueError(f"Invalid inherit value: {main_value}")
-
-
-
     else:  # ScalarNode
         value: str = loader.construct_scalar(node)
         if value in {e.value for e in InheritEnum}:
