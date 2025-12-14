@@ -401,6 +401,96 @@ inherit = entity.project_settings.get_inheritance()
 4. **Easier Testing**: Can test specific config types
 5. **Simpler Application Logic**: Type-based dispatch
 
+## Raw Parameters
+
+Raw parameters allow passing new GitLab API parameters without updating the schema. All configuration classes support raw parameters via the `RawParametersMixin`.
+
+### Using Raw Parameters
+
+Raw parameters are specified under the `raw` key and can contain **any JSON-compatible type**:
+
+```yaml
+projects_and_groups:
+  mygroup/myproject:
+    project_settings:
+      visibility: internal
+      raw:
+        # Simple string
+        new_string_param: "value"
+        
+        # Numbers
+        numeric_setting: 42
+        float_setting: 3.14
+        
+        # Booleans
+        enable_feature: true
+        
+        # Lists
+        allowed_ips: [192.168.1.1, 192.168.1.2]
+        
+        # Nested dictionaries
+        complex_config:
+          level1:
+            level2: "deep value"
+            settings: [a, b, c]
+          another_key: 100
+        
+        # Mixed types in list
+        mixed_list:
+          - "string item"
+          - nested: {key: value}
+          - 42
+```
+
+### Accessing Raw Parameters
+
+```python
+# Get configuration
+entity = entities['mygroup/myproject']
+settings = entity.project_settings
+
+# Check if raw parameters exist
+if settings.has_raw_parameters():
+    raw = settings.get_raw_parameters()
+    
+    # Access any type
+    string_val = raw['new_string_param']      # "value"
+    num_val = raw['numeric_setting']          # 42
+    bool_val = raw['enable_feature']          # True
+    list_val = raw['allowed_ips']             # [...]
+    dict_val = raw['complex_config']['level1'] # {...}
+
+# Pass to GitLab API
+api_params = {
+    'visibility': settings.visibility.value,
+    **settings.get_raw_parameters()  # Merge raw params
+}
+gitlab_api.update_project(project_id, **api_params)
+```
+
+### Raw Parameters with Control Directives
+
+Raw parameters can also use control directives:
+
+```yaml
+badges:
+  !enforce
+  coverage:
+    name: "Coverage"
+    link_url: "http://example.com"
+    raw:
+      # New GitLab badge API features
+      custom_positioning: {x: 10, y: 20}
+      animations: [fade, slide]
+```
+
+### Use Cases
+
+1. **Future GitLab Features**: Use new API parameters before they're officially supported
+2. **Custom Installations**: Support custom GitLab modifications
+3. **Experimentation**: Test beta features safely
+4. **Migration**: Gradually transition from old to new parameter names
+
 ## Files
 
 - `gitlabform/configuration/config_v5_objects.py` - Configuration class definitions (10,500 lines)

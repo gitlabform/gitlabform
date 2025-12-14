@@ -62,6 +62,24 @@ class RawParametersMixin:
     Raw parameters allow passing arbitrary key-value pairs directly
     to the GitLab API without validation or transformation.
     This is useful for new GitLab features not yet explicitly supported.
+    
+    Values can be any JSON-compatible type:
+    - Strings: "value"
+    - Numbers: 42, 3.14
+    - Booleans: true, false
+    - Lists: [1, 2, 3]
+    - Dicts: {nested: {key: value}}
+    - None/null
+    
+    Example:
+        raw:
+          simple_string: "value"
+          number: 42
+          flag: true
+          nested_config:
+            key1: value1
+            key2: [item1, item2]
+          list_param: [1, 2, 3]
     """
     raw: Dict[str, Any] = field(default_factory=dict)
     

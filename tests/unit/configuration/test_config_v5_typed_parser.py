@@ -393,3 +393,57 @@ class TestConfigV5TypedParser:
         group_entity = entities['group1/*']
         configs = group_entity.get_configs()
         assert len(configs) == 3  # project_settings, badges, members
+
+    def test_raw_parameters_with_complex_types(self):
+        """Test that raw parameters can contain strings, dicts, lists, numbers, bools."""
+        parser = ConfigV5TypedParser()
+        config = """
+        projects_and_groups:
+          group1/project1:
+            project_settings:
+              visibility: internal
+              raw:
+                simple_string: "text value"
+                number_int: 42
+                number_float: 3.14
+                boolean_true: true
+                boolean_false: false
+                list_param: [1, 2, 3, "four"]
+                nested_dict:
+                  level1:
+                    level2: "deep value"
+                    level2_list: [a, b, c]
+                  another_key: 100
+                mixed_list:
+                  - item1
+                  - nested: {key: value}
+                  - 42
+        """
+        entities = parser.parse(config)
+        
+        assert 'group1/project1' in entities
+        entity = entities['group1/project1']
+        
+        # Verify raw parameters
+        assert entity.project_settings is not None
+        raw = entity.project_settings.get_raw_parameters()
+        
+        # Check different types
+        assert raw['simple_string'] == "text value"
+        assert raw['number_int'] == 42
+        assert raw['number_float'] == 3.14
+        assert raw['boolean_true'] is True
+        assert raw['boolean_false'] is False
+        assert raw['list_param'] == [1, 2, 3, "four"]
+        
+        # Check nested dict
+        assert 'nested_dict' in raw
+        assert raw['nested_dict']['level1']['level2'] == "deep value"
+        assert raw['nested_dict']['level1']['level2_list'] == ['a', 'b', 'c']
+        assert raw['nested_dict']['another_key'] == 100
+        
+        # Check mixed list
+        assert len(raw['mixed_list']) == 3
+        assert raw['mixed_list'][0] == 'item1'
+        assert raw['mixed_list'][1] == {'nested': {'key': 'value'}}
+        assert raw['mixed_list'][2] == 42
