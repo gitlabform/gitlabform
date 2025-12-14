@@ -34,11 +34,12 @@ class InheritEnum(str, Enum):
 
 
 # Custom Ordered Dict to store tags
-@dataclass
 class GitLabFormTagOrderedDict(OrderedDict):
     """A custom ordered dictionary that tracks parsed YAML tags."""
 
-    _tags: Dict[str, Any] = field(default_factory=dict, init=False)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._tags: Dict[str, Any] = {}
 
     def set_tag(self, key: str, tag: Any) -> None:
         """Associate a custom tag with a key."""
@@ -164,20 +165,7 @@ def inherit_constructor(
         else:
             raise ValueError(f"Invalid inherit value: {main_value}")
 
-    elif isinstance(node, MappingNode):
-        # Handle mapping node
-        value: str = loader.construct_scalar(node.value[0][0]) if node.value else ""
-        if value in {e.value for e in InheritEnum}:
-            result = GitLabFormTagOrderedDict()
-            result.set_tag("inherit", value)
-            # Construct the rest of the mapping
-            for key_node, value_node in node.value:
-                key: str = key_node.value
-                val: Any = loader.construct_object(value_node)
-                result[key] = val
-            return result
-        else:
-            raise ValueError(f"Invalid inherit value: {value}")
+
 
     else:  # ScalarNode
         value: str = loader.construct_scalar(node)
@@ -220,11 +208,11 @@ def include_constructor(loader: Constructor, node: ScalarNode) -> Any:
     file_path_str = loader.construct_scalar(node)
     file_path = pathlib.Path(file_path_str)
 
+    # If the path is not absolute, treat it as relative to the current working directory.
+    # In a future enhancement, this could be made relative to the including config file's directory
+    # by passing the config directory context through the loader.
     if not file_path.is_absolute():
-        # Make path relative to the current config directory
-        # This requires access to the config directory from the loader context
-        # For now, treat as relative to current working directory
-        pass
+        file_path = pathlib.Path.cwd() / file_path
 
     if not file_path.exists():
         raise IOError(f"Included external YAML file '{file_path}' does not exist.")

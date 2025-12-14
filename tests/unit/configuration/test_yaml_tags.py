@@ -4,7 +4,6 @@ Unit tests for custom YAML tags support in GitLabForm configuration v5.
 
 import logging
 import pathlib
-import tempfile
 import pytest
 
 import ruamel.yaml
@@ -206,23 +205,19 @@ class TestKeepExistingTag:
 class TestIncludeTag:
     """Tests for the !include tag."""
 
-    def test_include_external_file(self, yaml_parser):
+    def test_include_external_file(self, yaml_parser, tmp_path):
         """Test !include with external file."""
         # Create a temporary YAML file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-            f.write("key1: value1\nkey2: value2\n")
-            temp_file = f.name
+        temp_file = tmp_path / "include_test.yml"
+        temp_file.write_text("key1: value1\nkey2: value2\n")
 
-        try:
-            data = f"""
-            settings: !include {temp_file}
-            """
-            parsed_data = yaml_parser.load(data)
-            assert "settings" in parsed_data
-            assert parsed_data["settings"]["key1"] == "value1"
-            assert parsed_data["settings"]["key2"] == "value2"
-        finally:
-            pathlib.Path(temp_file).unlink()
+        data = f"""
+        settings: !include {temp_file}
+        """
+        parsed_data = yaml_parser.load(data)
+        assert "settings" in parsed_data
+        assert parsed_data["settings"]["key1"] == "value1"
+        assert parsed_data["settings"]["key2"] == "value2"
 
     def test_include_nonexistent_file(self, yaml_parser):
         """Test !include with nonexistent file raises error."""
@@ -232,28 +227,26 @@ class TestIncludeTag:
         with pytest.raises(IOError, match="does not exist"):
             yaml_parser.load(data)
 
-    def test_include_file_with_custom_tags(self, yaml_parser):
+    def test_include_file_with_custom_tags(self, yaml_parser, tmp_path):
         """Test !include with file containing custom tags."""
         # Create a temporary YAML file with custom tags
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-            f.write("project_settings: !inherit force\n")
-            f.write("topics:\n")
-            f.write("  - !delete topicA\n")
-            f.write("  - topicB\n")
-            temp_file = f.name
+        temp_file = tmp_path / "include_tags_test.yml"
+        temp_file.write_text(
+            "project_settings: !inherit force\n"
+            "topics:\n"
+            "  - !delete topicA\n"
+            "  - topicB\n"
+        )
 
-        try:
-            data = f"""
-            config: !include {temp_file}
-            """
-            parsed_data = yaml_parser.load(data)
-            assert "config" in parsed_data
-            assert isinstance(parsed_data["config"]["project_settings"], GitLabFormTagOrderedDict)
-            assert parsed_data["config"]["project_settings"].get_tag("inherit") == "force"
-            assert isinstance(parsed_data["config"]["topics"][0], GitLabFormTagScalar)
-            assert parsed_data["config"]["topics"][0].get_tag("delete") is True
-        finally:
-            pathlib.Path(temp_file).unlink()
+        data = f"""
+        config: !include {temp_file}
+        """
+        parsed_data = yaml_parser.load(data)
+        assert "config" in parsed_data
+        assert isinstance(parsed_data["config"]["project_settings"], GitLabFormTagOrderedDict)
+        assert parsed_data["config"]["project_settings"].get_tag("inherit") == "force"
+        assert isinstance(parsed_data["config"]["topics"][0], GitLabFormTagScalar)
+        assert parsed_data["config"]["topics"][0].get_tag("delete") is True
 
 
 class TestCombinedTags:
