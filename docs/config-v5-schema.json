@@ -64,27 +64,8 @@
   "definitions": {
     "entityConfig": {
       "type": "object",
-      "description": "Configuration for a group or project. Can use YAML tags or special keys for control: !inherit/!_inherit, !enforce/_enforce, !delete/_delete, !keep_existing/_keep_existing",
+      "description": "Configuration for a group or project. Use YAML tags for control: !inherit, !enforce, !delete, !keep_existing",
       "properties": {
-        "_inherit": {
-          "description": "Special key: Control inheritance (values: true, false, never, always, force). Note: Can also use YAML tag !inherit",
-          "oneOf": [
-            {"type": "boolean"},
-            {"type": "string", "enum": ["true", "false", "never", "always", "force"]}
-          ]
-        },
-        "_enforce": {
-          "type": "boolean",
-          "description": "Special key: Enforce configuration. Note: Can also use YAML tag !enforce"
-        },
-        "_delete": {
-          "type": "boolean",
-          "description": "Special key: Mark for deletion. Note: Can also use YAML tag !delete"
-        },
-        "_keep_existing": {
-          "type": "boolean",
-          "description": "Special key: Keep existing values when merging. Note: Can also use YAML tag !keep_existing"
-        },
         "project_settings": {
           "$ref": "#/definitions/projectSettings"
         },
@@ -147,14 +128,14 @@
     },
     "projectSettings": {
       "type": "object",
-      "description": "Project-level settings. Can use !inherit tag or _inherit special key.",
+      "description": "Project-level settings. Can use !inherit tag.",
       "properties": {
         "visibility": {
           "type": "string",
           "enum": ["private", "internal", "public"]
         },
         "topics": {
-          "description": "Project topics. Can use !keep_existing tag or _keep_existing special key. List items can use !delete tag.",
+          "description": "Project topics. Can use !keep_existing tag. List items can use !delete tag.",
           "oneOf": [
             {"type": "array", "items": {"type": "string"}},
             {"type": "null"}
@@ -165,16 +146,16 @@
     },
     "groupSettings": {
       "type": "object",
-      "description": "Group-level settings. Can use !inherit tag or _inherit special key.",
-      "additionalProperties": true
+      "description": "Group-level settings. Can use !inherit tag.",
+      "additionalProperties": false
     },
     "members": {
       "type": "object",
-      "description": "Members configuration. Can use !enforce tag or _enforce special key.",
+      "description": "Members configuration. Can use !enforce tag.",
       "properties": {
         "enforce": {
           "type": "boolean",
-          "description": "Deprecated: Use !enforce tag or _enforce special key instead"
+          "description": "Deprecated: Use !enforce tag instead"
         },
         "users": {
           "type": "object",
