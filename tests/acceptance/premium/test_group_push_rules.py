@@ -40,5 +40,5 @@ class TestGroupPushRules:
         push_rules = group.pushrules.get()
         assert push_rules.commit_message_regex == ""
         assert push_rules.member_check is True
-        assert push_rules.commit_committer_check is None
+        assert push_rules.commit_committer_check is False
         assert push_rules.commit_committer_name_check is False

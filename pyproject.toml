@@ -23,7 +23,7 @@ classifiers = [
 ]
 requires-python = ">=3.12.0"
 dependencies = [
-    "certifi==2025.10.5",
+    "certifi==2025.11.12",
     "cli-ui==0.19.0",
     "ez-yaml==1.2.0",
     "Jinja2==3.1.6",
@@ -52,13 +52,13 @@ content-type = "text/markdown"
 
 [project.optional-dependencies]
 test = [
-    "coverage==7.11.0",
+    "coverage==7.13.0",
     "cryptography==46.0.3",
     "deepdiff==8.6.1",
-    "mypy==1.18.2",
+    "mypy==1.19.0",
     "mypy-extensions==1.1.0",
     "pre-commit==2.21.0",
-    "pytest==8.4.2",
+    "pytest==9.0.2",
     "pytest-cov==7.0.0",
     "pytest-rerunfailures==16.1",
     "xkcdpass==1.20.0",
