@@ -4,7 +4,11 @@ GitLabForm configuration v5 introduces custom YAML tags that allow fine-grained 
 
 ## Overview
 
-The following custom YAML tags are supported:
+There are **two approaches** available for controlling configuration behavior:
+
+### Approach 1: YAML Tags (Recommended)
+
+Custom YAML tags that modify parsing behavior:
 
 - `!inherit` - Control configuration inheritance
 - `!enforce` - Enforce configuration settings
@@ -12,7 +16,39 @@ The following custom YAML tags are supported:
 - `!keep_existing` - Keep existing values when merging
 - `!include` - Include external YAML files
 
-These tags can be used anywhere in the configuration to modify how settings are processed and applied to GitLab groups and projects.
+### Approach 2: Special Key Prefixes (Alternative)
+
+Standard YAML keys with underscore prefixes (for compatibility):
+
+- `_inherit` - Control configuration inheritance
+- `_enforce` - Enforce configuration settings
+- `_delete` - Mark items for deletion
+- `_keep_existing` - Keep existing values when merging
+
+**Note:** Both approaches achieve the same functionality. Tags are cleaner but require understanding YAML tag syntax. Special keys work with any YAML parser.
+
+## Important: YAML Tag Syntax Limitations
+
+⚠️ **YAML tags must be on the same line as the key they modify**. The following syntax does NOT work:
+
+```yaml
+# ❌ INCORRECT - This will cause a syntax error
+project_settings: 
+  !inherit force
+  topics:
+    - topicA
+```
+
+```yaml
+# ✅ CORRECT - Tag on same line as key
+project_settings: !inherit force
+
+# ✅ CORRECT - Tag with list content
+topics: !keep_existing
+  - topicA
+```
+
+This is a limitation of YAML syntax itself, not GitLabForm. See "YAML Tag Syntax Rules" section below for details.
 
 ## Tag Reference
 
@@ -217,6 +253,70 @@ If you're migrating from configuration v3 or v4, here's how the new tags map to 
 | Complex merging logic | `!keep_existing` (simple tag) |
 | Multiple config files | `!include file.yml` (built-in) |
 
+## YAML Tag Syntax Rules
+
+Understanding YAML tag syntax is important for using this feature correctly:
+
+### What Works ✅
+
+```yaml
+# Tag on same line as key with scalar value
+project_settings: !inherit force
+
+# Tag on same line as key with list
+topics: !keep_existing
+  - topicA
+  - topicB
+
+# Tag on block mapping
+members:
+  !enforce
+  users:
+    admin:
+      access_level: maintainer
+
+# Tag on list items
+topics:
+  - !delete oldTopic
+  - newTopic
+```
+
+### What Doesn't Work ❌
+
+```yaml
+# ❌ Tag on indented line after key (YAML syntax error)
+project_settings:
+  !inherit force
+  topics: [...]
+
+# ❌ Tag separated from content by newline (YAML syntax error)  
+topics:
+  !keep_existing
+  - topicA
+```
+
+### Why These Limitations Exist
+
+YAML tags are directives that modify how the **immediately following node** is parsed. They must appear:
+1. On the same line as the key, OR
+2. At the start of a block (for block mappings with `!enforce`)
+
+This is defined in the YAML specification and applies to all YAML parsers, not just GitLabForm.
+
+### Workaround: Use Special Key Prefixes
+
+If the tag syntax is too restrictive for your use case, use the special key prefix approach instead:
+
+```yaml
+# Works with standard YAML - no tags needed
+project_settings:
+  _inherit: force
+  topics:
+    _keep_existing: true
+    - topicA
+    - topicB
+```
+
 ## Benefits
 
 The custom YAML tags approach provides several benefits:
@@ -255,6 +355,76 @@ A demonstration script is available at `dev/yaml_tags_example.py` that shows all
 python dev/yaml_tags_example.py
 ```
 
+## Alternative Approach: Special Key Prefixes
+
+If YAML tags are too restrictive or you prefer standard YAML, you can use special key prefixes instead.
+
+### Syntax
+
+All control keys start with an underscore (`_`) and are placed alongside regular configuration keys:
+
+```yaml
+project_settings:
+  _inherit: force          # Control key
+  visibility: internal     # Regular config key
+  topics:                  # Regular config key
+    _keep_existing: true   # Control key
+    - topicA
+    - topicB
+```
+
+### Special Keys Reference
+
+| Special Key | Equivalent Tag | Description |
+|-------------|----------------|-------------|
+| `_inherit` | `!inherit` | Control inheritance (values: true, false, never, always, force) |
+| `_enforce` | `!enforce` | Enforce configuration (value: true) |
+| `_delete` | `!delete` | Mark for deletion (value: true, or item name) |
+| `_keep_existing` | `!keep_existing` | Keep existing values (value: true) |
+
+### Example with Special Keys
+
+```yaml
+config_version: 5
+
+projects_and_groups:
+  "*":
+    project_settings:
+      visibility: internal
+  
+  mygroup/*:
+    project_settings:
+      _inherit: force
+    
+    topics:
+      _keep_existing: true
+      - security
+      - compliance
+    
+    members:
+      _enforce: true
+      users:
+        admin-user:
+          access_level: maintainer
+```
+
+### Pros and Cons
+
+**Pros:**
+- Works with any YAML parser
+- No special syntax to learn
+- No YAML tag limitations
+- Easy to read and understand
+
+**Cons:**
+- Control keys appear in the configuration namespace
+- Slightly more verbose
+- Need to filter out control keys during processing
+
+### Processing Special Keys
+
+The special keys are automatically extracted and processed by GitLabForm. They don't appear in the final configuration sent to GitLab.
+
 ## Future Enhancements
 
 Potential future enhancements to the tag system:
@@ -264,3 +434,4 @@ Potential future enhancements to the tag system:
 - Custom user-defined tags via plugins
 - Tag validation against JSON Schema
 - IDE support for tag completion and validation
+- Auto-conversion between tag and special key syntax
