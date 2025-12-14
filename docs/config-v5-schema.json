@@ -1,0 +1,378 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gitlabform.github.io/gitlabform/config-v5-schema.json",
+  "title": "GitLabForm Configuration v5",
+  "description": "JSON Schema for GitLabForm configuration files version 5. Note: YAML tags (!inherit, !enforce, etc.) and special keys (_inherit, _enforce, etc.) are not validated by this schema but are documented in the description fields.",
+  "type": "object",
+  "required": ["config_version", "gitlab", "projects_and_groups"],
+  "properties": {
+    "config_version": {
+      "type": "integer",
+      "const": 5,
+      "description": "Configuration format version. Must be 5 for this schema."
+    },
+    "gitlab": {
+      "type": "object",
+      "description": "GitLab API connection settings",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "GitLab instance URL (or use GITLAB_URL environment variable)"
+        },
+        "token": {
+          "type": "string",
+          "description": "GitLab API token (or use GITLAB_TOKEN environment variable)"
+        },
+        "ssl_verify": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to verify SSL certificates"
+        },
+        "timeout": {
+          "type": "integer",
+          "default": 10,
+          "description": "API request timeout in seconds"
+        }
+      }
+    },
+    "projects_and_groups": {
+      "type": "object",
+      "description": "Configuration for GitLab groups and projects. Keys can be: '*' (common), 'group/*' (group), or 'group/project' (project)",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/entityConfig"
+        }
+      }
+    },
+    "skip_groups": {
+      "type": "array",
+      "description": "List of groups to skip during processing",
+      "items": {
+        "type": "string"
+      }
+    },
+    "skip_projects": {
+      "type": "array",
+      "description": "List of projects to skip during processing",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "definitions": {
+    "entityConfig": {
+      "type": "object",
+      "description": "Configuration for a group or project. Can use YAML tags or special keys for control: !inherit/!_inherit, !enforce/_enforce, !delete/_delete, !keep_existing/_keep_existing",
+      "properties": {
+        "_inherit": {
+          "description": "Special key: Control inheritance (values: true, false, never, always, force). Note: Can also use YAML tag !inherit",
+          "oneOf": [
+            {"type": "boolean"},
+            {"type": "string", "enum": ["true", "false", "never", "always", "force"]}
+          ]
+        },
+        "_enforce": {
+          "type": "boolean",
+          "description": "Special key: Enforce configuration. Note: Can also use YAML tag !enforce"
+        },
+        "_delete": {
+          "type": "boolean",
+          "description": "Special key: Mark for deletion. Note: Can also use YAML tag !delete"
+        },
+        "_keep_existing": {
+          "type": "boolean",
+          "description": "Special key: Keep existing values when merging. Note: Can also use YAML tag !keep_existing"
+        },
+        "project_settings": {
+          "$ref": "#/definitions/projectSettings"
+        },
+        "group_settings": {
+          "$ref": "#/definitions/groupSettings"
+        },
+        "members": {
+          "$ref": "#/definitions/members"
+        },
+        "group_members": {
+          "$ref": "#/definitions/members"
+        },
+        "deploy_keys": {
+          "$ref": "#/definitions/deployKeys"
+        },
+        "variables": {
+          "$ref": "#/definitions/variables"
+        },
+        "labels": {
+          "$ref": "#/definitions/labels"
+        },
+        "webhooks": {
+          "$ref": "#/definitions/webhooks"
+        },
+        "protected_branches": {
+          "$ref": "#/definitions/protectedBranches"
+        },
+        "protected_environments": {
+          "$ref": "#/definitions/protectedEnvironments"
+        },
+        "badges": {
+          "$ref": "#/definitions/badges"
+        },
+        "files": {
+          "$ref": "#/definitions/files"
+        },
+        "merge_requests": {
+          "$ref": "#/definitions/mergeRequests"
+        },
+        "pipeline_schedules": {
+          "$ref": "#/definitions/pipelineSchedules"
+        },
+        "push_rules": {
+          "$ref": "#/definitions/pushRules"
+        },
+        "tags_protection": {
+          "$ref": "#/definitions/tagsProtection"
+        },
+        "integrations": {
+          "$ref": "#/definitions/integrations"
+        },
+        "group_ldap_links": {
+          "$ref": "#/definitions/groupLdapLinks"
+        },
+        "group_saml_links": {
+          "$ref": "#/definitions/groupSamlLinks"
+        }
+      },
+      "additionalProperties": false
+    },
+    "projectSettings": {
+      "type": "object",
+      "description": "Project-level settings. Can use !inherit tag or _inherit special key.",
+      "properties": {
+        "visibility": {
+          "type": "string",
+          "enum": ["private", "internal", "public"]
+        },
+        "topics": {
+          "description": "Project topics. Can use !keep_existing tag or _keep_existing special key. List items can use !delete tag.",
+          "oneOf": [
+            {"type": "array", "items": {"type": "string"}},
+            {"type": "null"}
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "groupSettings": {
+      "type": "object",
+      "description": "Group-level settings. Can use !inherit tag or _inherit special key.",
+      "additionalProperties": true
+    },
+    "members": {
+      "type": "object",
+      "description": "Members configuration. Can use !enforce tag or _enforce special key.",
+      "properties": {
+        "enforce": {
+          "type": "boolean",
+          "description": "Deprecated: Use !enforce tag or _enforce special key instead"
+        },
+        "users": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "access_level": {
+                  "oneOf": [
+                    {"type": "integer"},
+                    {"type": "string", "enum": ["guest", "reporter", "developer", "maintainer", "owner"]}
+                  ]
+                },
+                "expires_at": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          }
+        },
+        "groups": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "group_access_level": {
+                  "oneOf": [
+                    {"type": "integer"},
+                    {"type": "string", "enum": ["guest", "reporter", "developer", "maintainer", "owner"]}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "deployKeys": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "can_push": {
+              "type": "boolean"
+            }
+          },
+          "required": ["key", "title"]
+        }
+      }
+    },
+    "variables": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "masked": {
+              "type": "boolean"
+            },
+            "protected": {
+              "type": "boolean"
+            },
+            "variable_type": {
+              "type": "string",
+              "enum": ["env_var", "file"]
+            }
+          },
+          "required": ["value"]
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "description": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "integer"
+            }
+          },
+          "required": ["color"]
+        }
+      }
+    },
+    "webhooks": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "token": {
+              "type": "string"
+            },
+            "push_events": {
+              "type": "boolean"
+            },
+            "merge_requests_events": {
+              "type": "boolean"
+            },
+            "enable_ssl_verification": {
+              "type": "boolean"
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    },
+    "protectedBranches": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "push_access_level": {
+              "oneOf": [
+                {"type": "integer"},
+                {"type": "string", "enum": ["no_access", "developer", "maintainer", "admin"]}
+              ]
+            },
+            "merge_access_level": {
+              "oneOf": [
+                {"type": "integer"},
+                {"type": "string", "enum": ["no_access", "developer", "maintainer", "admin"]}
+              ]
+            },
+            "unprotect_access_level": {
+              "oneOf": [
+                {"type": "integer"},
+                {"type": "string", "enum": ["no_access", "developer", "maintainer", "admin"]}
+              ]
+            }
+          }
+        }
+      }
+    },
+    "protectedEnvironments": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "badges": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "mergeRequests": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "pipelineSchedules": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "pushRules": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "tagsProtection": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "integrations": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "groupLdapLinks": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "groupSamlLinks": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
