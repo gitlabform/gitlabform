@@ -12,7 +12,6 @@ from gitlabform.configuration.transform import (
     AccessLevelsTransformer,
     UserTransformer,
     ImplicitNameTransformer,
-    MergeRequestApprovalsTransformer,
 )
 from gitlabform.gitlab import GitLab
 
