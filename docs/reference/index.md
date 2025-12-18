@@ -49,7 +49,7 @@ gitlab:
   # For following migration to python-gitlab, see: https://github.com/gitlabform/gitlabform/issues/73
   #
   # For example:
-  # retry_transient_errors: false # retry requests that fail due to transient errors
+  # retry_transient_errors: false # (defaults to `true`) retry requests that fail due to transient errors
   # obey_rate_limit: true  # automatically wait if rate limit is hit
   # max_retries: 5      # number of times to retry failed requests
 
