@@ -46,7 +46,7 @@ gitlab:
   # See https://python-gitlab.readthedocs.io/en/stable/api-usage.html#gitlab-client for available options.
   #
   # GitlabForm hasn't yet 100% migrated to use python-gitlab. Some processors are not using it and wont use these parameters.
-  # For following works on the migration, see: https://github.com/gitlabform/gitlabform/issues/73
+  # For following migration to python-gitlab, see: https://github.com/gitlabform/gitlabform/issues/73
   #
   # For example:
   # retry_transient_errors: false # retry requests that fail due to transient errors
