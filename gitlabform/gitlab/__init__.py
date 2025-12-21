@@ -68,23 +68,27 @@ class GitLab(
 
 class GitlabWrapper:
     def __init__(self, gitlabform: GitLab):
-        url = gitlabform.url
-        token = gitlabform.token
-        ssl_verify = gitlabform.ssl_verify
-        timeout = gitlabform.timeout
         session = gitlabform.session
 
-        graphql = GraphQL(url=url, token=token)
+        graphql = GraphQL(url=gitlabform.gitlab_config["url"], token=gitlabform.gitlab_config["token"])
+
+        default_kwargs = {
+            "retry_transient_errors": True,
+        }
+        renamed_kwargs = {
+            "token": "private_token",
+        }
+        extra_kwargs = {
+            **default_kwargs,
+            **{k: v for k, v in gitlabform.gitlab_config.items() if k not in renamed_kwargs},
+            **{renamed_kwargs[k]: v for k, v in gitlabform.gitlab_config.items() if k in renamed_kwargs},
+        }
 
         self._gitlab: PythonGitlab = PythonGitlab(
-            url=url,
-            private_token=token,
-            ssl_verify=ssl_verify,
-            timeout=timeout,
             api_version="4",
-            retry_transient_errors=True,
             graphql=graphql,
             session=session,
+            **extra_kwargs,
         )
 
     def get_gitlab(self):

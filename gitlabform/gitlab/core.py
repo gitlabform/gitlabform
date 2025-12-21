@@ -22,10 +22,14 @@ class GitLabCore:
     def __init__(self, config_path=None, config_string=None):
         self.configuration = Configuration(config_path, config_string)
 
-        self.url = self.configuration.get("gitlab|url", os.getenv("GITLAB_URL"))
-        self.token = self.configuration.get("gitlab|token", os.getenv("GITLAB_TOKEN"))
-        self.ssl_verify = self.configuration.get("gitlab|ssl_verify", True)
-        self.timeout = self.configuration.get("gitlab|timeout", 10)
+        default_gitlab_config = {
+            "url": os.getenv("GITLAB_URL"),
+            "token": os.getenv("GITLAB_TOKEN"),
+            "ssl_verify": True,
+            "timeout": 10,
+        }
+        gitlab_config_from_file = self.configuration.get("gitlab", {})
+        self.gitlab_config = {**default_gitlab_config, **gitlab_config_from_file}
 
         self.session = requests.Session()
 
@@ -38,16 +42,16 @@ class GitLabCore:
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
-        self.session.verify = self.ssl_verify
-        if not self.ssl_verify:
+        self.session.verify = self.gitlab_config["ssl_verify"]
+        if not self.gitlab_config["ssl_verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         self.gitlabform_version = package_version("gitlabform")
         self.requests_version = package_version("requests")
         self.session.headers.update(
             {
-                "private-token": self.token,
-                "authorization": f"Bearer {self.token}",
+                "private-token": self.gitlab_config["token"],
+                "authorization": f"Bearer {self.gitlab_config['token']}",
                 "user-agent": f"GitLabForm/{self.gitlabform_version} (python-requests/{self.requests_version})",
             }
         )
@@ -178,15 +182,15 @@ class GitLabCore:
         if dict_data and json_data:
             raise Exception("You need to pass the data either as dict (dict_data) or JSON (json_data), not both!")
 
-        url = f"{self.url}/api/v4/{self._format_with_url_encoding(path_as_format_string, args)}"
+        url = f"{self.gitlab_config['url']}/api/v4/{self._format_with_url_encoding(path_as_format_string, args)}"
         if dict_data:
-            response = self.session.request(method, url, data=dict_data, timeout=self.timeout)
+            response = self.session.request(method, url, data=dict_data, timeout=self.gitlab_config["timeout"])
             debug(f"===> data = {to_str(dict_data)}")
         elif json_data:
-            response = self.session.request(method, url, json=json_data, timeout=self.timeout)
+            response = self.session.request(method, url, json=json_data, timeout=self.gitlab_config["timeout"])
             debug(f"===> json = {to_str(json_data)}")
         else:
-            response = self.session.request(method, url, timeout=self.timeout)
+            response = self.session.request(method, url, timeout=self.gitlab_config["timeout"])
 
         if response.status_code in expected_codes:
             # if we accept error responses then they will likely not contain a JSON body
