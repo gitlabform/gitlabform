@@ -84,20 +84,26 @@ class RemoteMirrorsProcessor(AbstractProcessor):
 
             if mirror_in_gitlab:
                 # Update existing mirror if needed
-                if self._needs_update(mirror_in_gitlab.asdict(), mirror_config):
-                    verbose(f"The remote mirror '{mirror_url}' config is different from what's in gitlab")
-                    verbose(f"Updating remote mirror '{mirror_url}' with config: {mirror_config}")
+                # Before we compare mirror configuration, we need to normalize the URL.
+                # GitLabForm config contains credentials but GitLab's response scrubs the credentials.
+                # So for true comparison, we need to remove the credentials from both.
+
+                mirror_config_temp = mirror_config.copy()
+                mirror_config_temp["url"] = self._normalize_url_for_comparison(mirror_config_temp["url"])
+
+                mirror_in_gitlab_temp = mirror_in_gitlab.asdict().copy()
+                mirror_in_gitlab_temp["url"] = self._normalize_url_for_comparison(mirror_in_gitlab_temp["url"])
+
+                if self._needs_update(mirror_in_gitlab_temp, mirror_config_temp):
+                    verbose(f"The remote mirror '{mirror_config_temp['url']}' config is different from what's in gitlab")
+                    verbose(f"Updating remote mirror '{mirror_config_temp['url']}' with latest config")
                     try:
-                        mirror_in_gitlab.update(**mirror_config)
-                        try:
-                            verbose(f"Updated remote mirror: id={mirror_in_gitlab.id} url={mirror_in_gitlab.url} config={mirror_in_gitlab.asdict()}")
-                        except Exception:
-                            verbose(f"Updated remote mirror: {mirror_in_gitlab}")
+                        updated_mirror = project.remote_mirrors.update(id = mirror_in_gitlab.id, new_data = mirror_config)
+                        verbose(f"Updated remote mirror: id={mirror_in_gitlab.id} config={updated_mirror}")
                     except GitlabUpdateError:
-                        logging.exception("Failed to update remote mirror %s (id=%s)", mirror_url, getattr(mirror_in_gitlab, "id", None))
-                        verbose(f"Failed to update remote mirror '{mirror_url}'")
+                        verbose(f"Failed to update remote mirror '{updated_mirror}'")
                 else:
-                    verbose(f"Remote mirror '{mirror_url}' remains unchanged")
+                    verbose(f"Remote mirror '{mirror_config_temp['url']}' remains unchanged")
             else:
                 # Create new mirror
                 verbose(f"Creating remote mirror '{mirror_url}' with config: {mirror_config}")

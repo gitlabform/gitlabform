@@ -26,28 +26,50 @@ def mirror_target_projects(other_group):
 def mirror_urls(gl, mirror_target_projects, root_username, root_access_token):
     """Generate mirror URLs pointing to projects in the same GitLab instance.
     
-    HTTP based URLs include embedded credentials as required by GitLab API:
+    HTTP based URL for password based credential as required by GitLab API:
     http://username:password@host/path.git
 
-    SSH based URLs include username embedded as required by GitLab API:
+    SSH based URL for password based credential as required by GitLab API:
+    ssh://username:password@host/path.git
+
+    SSH based URL for public-key based credential as required by GitLab API:
     ssh://username@host/path.git
     """
 
     # For local testing, we use http://localhost as the host since we don't have SSL setup.
-    gitlab_url_http = os.getenv("GITLAB_URL", "http://localhost").rstrip("/")
-    gitlab_url_ssh = f"ssh://{root_username}@localhost.com"
+    gitlab_url = os.getenv("GITLAB_URL", "http://localhost").rstrip("/")
+    # http_mirror_password_auth_url = gitlab_url
+    # ssh_mirror_password_auth_url = gitlab_url.replace("http://", f"ssh://")
 
     first_project, second_project, third_project = mirror_target_projects
     
     # Construct mirror URLs with embedded credentials - each pointing to a different target project
-    if gitlab_url_http.startswith("http://"):
-        base_url_http = gitlab_url_http.replace("http://", f"http://{root_username}:{root_access_token}@")
-    
-    first_url_http = f"{base_url_http}/{first_project.path_with_namespace}.git"
-    second_url_http = f"{base_url_http}/{second_project.path_with_namespace}.git"
-    third_url_ssh = f"{gitlab_url_ssh}/{third_project.path_with_namespace}.git"
-    
-    return first_url_http, second_url_http, third_url_ssh
+    mirror_url_base_http_password_auth = gitlab_url.replace("http://", f"http://{root_username}:{root_access_token}@")
+    first_project_mirror_url_http_password_auth = f"{mirror_url_base_http_password_auth}/{first_project.path_with_namespace}.git"
+
+    mirror_url_base_ssh_password_auth = gitlab_url.replace("http://", f"ssh://{root_username}:{root_access_token}@")
+    second_project_mirror_url_ssh_password_auth = f"{mirror_url_base_ssh_password_auth}/{second_project.path_with_namespace}.git"
+
+    mirror_url_base_ssh_public_key_auth = gitlab_url.replace("http://", f"ssh://{root_username}@")
+    third_project_mirror_url_ssh_public_key_auth = f"{mirror_url_base_ssh_public_key_auth}/{third_project.path_with_namespace}.git"
+
+    return first_project_mirror_url_http_password_auth, second_project_mirror_url_ssh_password_auth, third_project_mirror_url_ssh_public_key_auth
+
+
+    # if gitlab_url_http:
+    #     base_url_http = gitlab_url_http.replace("http://", f"http://{root_username}:{root_access_token}@")
+    #     first_project_url_http = f"{base_url_http}/{first_project.path_with_namespace}.git"
+
+    # if gitlab_url_ssh:
+    #     base_url_ssh = gitlab_url_ssh.replace("ssh://", f"ssh://@{root_username}:{root_access_token}@")
+        
+    #     second_project_url_ssh_password_based = f"{base_url_ssh}/{second_project.path_with_namespace}.git"
+    #     third_project_url_ssh_public_key_based = f"{gitlab_url_ssh}/{third_project.path_with_namespace}.git"
+
+    # # For SSH based URL, GitLab allows authenticating using SSH public key or username/password (i.e. token)
+    # # https://docs.gitlab.com/user/project/repository/mirror/#ssh-authentication
+
+    # return first_project_url_http, second_project_url_ssh_password_based, third_project_url_ssh_public_key_based
 
 
 @pytest.fixture(scope="class")
@@ -124,38 +146,77 @@ class TestRemoteMirrorsProcessor:
         
         return None
 
-    def test_remote_mirrors_create(self, gl, project, mirror_urls, mirror_target_projects):
-        """Test creating multiple remote mirrors with different configurations and validate mirror functionality.
-        
-        This test verifies that gitlabform can create multiple remote mirrors
-        with different settings (enabled/disabled, only_protected_branches).
-        Uses password-based authentication for mirroring within the same GitLab instance.
-        
-        The test validates that mirrors are not just created, but actually functional by:
-        1. Creating a test file in the source project
-        2. Using force_push to trigger a sync
-        3. Verifying the file appears in the target/mirrored project
-        
-        Configuration follows GitLabForm's pattern where config keys match GitLab API parameters.
-        URLs must have credentials embedded: https://username:password@host/path.git
+    def test_remote_mirrors_create(self, gl, project, mirror_urls):
         """
-        import time
+        Test creating multiple remote mirrors with different URL/auth types.
+        """
+
+        first_mirror_url_http_password_auth, second_mirror_url_ssh_password_auth, third_mirror_url_ssh_public_key_auth = mirror_urls
+
+        gitlabform_config = f"""
+            projects_and_groups:
+              {project.path_with_namespace}:
+                remote_mirrors:
+                  {first_mirror_url_http_password_auth}:
+                    enabled: true
+                    auth_method: password
+                  {second_mirror_url_ssh_password_auth}:
+                    enabled: true
+                    auth_method: password
+                  {third_mirror_url_ssh_public_key_auth}:
+                    enabled: false
+                    auth_method: ssh_public_key
+            """
+
+        run_gitlabform(gitlabform_config, project.path_with_namespace)
+
+        first_mirror = self._get_mirror_from_url(project, first_mirror_url_http_password_auth)
+        second_mirror = self._get_mirror_from_url(project, second_mirror_url_ssh_password_auth)
+        third_mirror = self._get_mirror_from_url(project, third_mirror_url_ssh_public_key_auth)
+
+        if TYPE_CHECKING:
+            assert isinstance(first_mirror, ProjectRemoteMirror)
+            assert isinstance(second_mirror, ProjectRemoteMirror)
+            assert isinstance(third_mirror, ProjectRemoteMirror)
         
-        target = project.path_with_namespace
-        first_url_http, second_url_http, third_url_ssh = mirror_urls
-        first_target_project, _, _ = mirror_target_projects
+        mirrors = project.remote_mirrors.list(get_all=True)
+        assert len(mirrors) == 3
+        
+        assert first_mirror is not None
+        assert first_mirror.enabled is True
+        assert TestRemoteMirrorsProcessor._normalize_url_for_comparison(first_mirror.url) == TestRemoteMirrorsProcessor._normalize_url_for_comparison(first_mirror_url_http_password_auth)
+        
+        assert second_mirror is not None
+        assert second_mirror.enabled is True
+        assert TestRemoteMirrorsProcessor._normalize_url_for_comparison(second_mirror.url) == TestRemoteMirrorsProcessor._normalize_url_for_comparison(second_mirror_url_ssh_password_auth)
+        
+        assert third_mirror is not None
+        assert third_mirror.enabled is False
+        assert TestRemoteMirrorsProcessor._normalize_url_for_comparison(third_mirror.url) == TestRemoteMirrorsProcessor._normalize_url_for_comparison(third_mirror_url_ssh_public_key_auth)
 
-        # In GitLab, default setting for a branch protection is to deny force push.
+
+    def test_remote_mirror_http_password_auth_sync(self, gl, project, mirror_urls, mirror_target_projects):
+        """
+        Test remote mirror functionality for http and password based authentication.
+        This also tests configuration of `force_push` config key.
+
+        This is validated by creating a new branch and a test file in the source project.
+        Then run gitlabform with `force_push` enabled for the target mirror.
+        Then check the target mirror repo if the new branch and the test file exists.
+        """
+
+        first_mirror_url_http_password_auth, _, _ = mirror_urls
+        first_mirror_repo, _, _ = mirror_target_projects
+
+
+        # In GitLab, default setting for branch protection is to deny force push.
         # For first mirror, we need to allow force push to the main branch, so that
-        # we can validate the mirror functionality. That's why we need to allow force
-        # push to the main branch.
-        first_target_project_main_branch = first_target_project.protectedbranches.get("main")
-        first_target_project_main_branch.allow_force_push = True
-        first_target_project_main_branch.save()
+        # we can validate the mirror functionality.
+        first_mirror_repo_main_branch = first_mirror_repo.protectedbranches.get("main")
+        first_mirror_repo_main_branch.allow_force_push = True
+        first_mirror_repo_main_branch.save()
 
-        # Create a test file in the source project to validate mirror functionality
-        # Create the test file in a new branch because the main branch is protected.
-        # Default config for target project does not allow force push to the main branch.
+        # Create a test file in a new branch in the source project to validate mirror functionality
         new_branch = project.branches.create({"branch": "test_branch", "ref": "main"})
         test_file_content = "This is a test file for remote mirror validation"
         test_file_path = "mirror_test.txt"
@@ -173,72 +234,157 @@ class TestRemoteMirrorsProcessor:
         assert source_file is not None
         assert source_file.decode().decode("utf-8") == test_file_content
 
-        test_yaml = f"""
+
+        gitlabform_config = f"""
             projects_and_groups:
-              {target}:
+              {project.path_with_namespace}:
                 remote_mirrors:
-                  {first_url_http}:
+                  {first_mirror_url_http_password_auth}:
                     enabled: true
-                    only_protected_branches: false
                     auth_method: password
                     force_push: true
-                  {second_url_http}:
-                    enabled: true
-                    only_protected_branches: true
-                    auth_method: password
-                #   {third_url_ssh}:
-                #     enabled: false
-                #     only_protected_branches: false
-                #     auth_method: password
             """
 
-        run_gitlabform(test_yaml, target)
+        run_gitlabform(gitlabform_config, project.path_with_namespace)
 
-        first_mirror = self._get_mirror_from_url(project, first_url_http)
-        second_mirror = self._get_mirror_from_url(project, second_url_http)
-        # third_mirror = self._get_mirror_from_url(project, third_url)
-
-        if TYPE_CHECKING:
-            assert isinstance(first_mirror, ProjectRemoteMirror)
-            assert isinstance(second_mirror, ProjectRemoteMirror)
-            # assert isinstance(third_mirror, ProjectRemoteMirror)
-        
-        mirrors = project.remote_mirrors.list(get_all=True)
-        assert len(mirrors) == 2
-        
-        assert first_mirror is not None
-        assert first_mirror.enabled is True
-        assert first_mirror.only_protected_branches is False
-        
-        assert second_mirror is not None
-        assert second_mirror.enabled is True
-        assert second_mirror.only_protected_branches is True
-        
-        # assert third_mirror is not None
-        # assert third_mirror.enabled is False
-        # assert third_mirror.only_protected_branches is False
-        
         # Validate mirror functionality: wait for sync and verify test file appears in target
         # The first mirror has force_push: true, so it should sync immediately
         # Wait a bit for the sync to complete
-        time.sleep(30)
+        # time.sleep(30)
         
         # Refresh the target project to get latest state
-        first_target_project = gl.projects.get(id = first_target_project.id)
-        first_mirror = self._get_mirror_from_url(project, first_url_http)
+        first_mirror_repo = gl.projects.get(id = first_mirror_repo.id)
+        first_mirror = self._get_mirror_from_url(project, first_mirror_url_http_password_auth)
         print("*****************************************************")
         print(f"First mirror: {first_mirror.asdict()}")
         print("*****************************************************")
         # Verify the test file exists in the target project (proving mirror works)
         try:
-            target_file = first_target_project.files.get(ref=new_branch.name, file_path=test_file_path)
+            target_file = first_mirror_repo.files.get(ref=new_branch.name, file_path=test_file_path)
         except Exception as e:
             # If file doesn't exist, the mirror didn't work - fail the test
+            print(f"Mirror sync failed. Error: {e}")
             raise AssertionError(
-                f"Mirror validation failed: test file '{test_file_path}' not found in first mirror project. "
-                f"This indicates the mirror is not functioning correctly. Error: {e}"
+                f"Test file '{test_file_path}' not found in mirror project. "
+                
             )
         assert target_file.decode().decode("utf-8") == test_file_content
+
+
+    # def test_remote_mirrors_force_sync(self, gl, project, mirror_urls, mirror_target_projects):
+    #     """Test creating multiple remote mirrors with different configurations and validate mirror functionality.
+        
+    #     This test verifies that gitlabform can create multiple remote mirrors
+    #     with different types of URLs.
+        
+    #     The test validates that mirrors are not just created, but actually functional by:
+    #     1. Creating a test file in the source project
+    #     2. Using force_push to trigger a sync
+    #     3. Verifying the file appears in the target/mirrored project
+        
+    #     Configuration follows GitLabForm's pattern where config keys match GitLab API parameters.
+    #     URLs must have credentials embedded: https://username:password@host/path.git
+    #     """
+    #     import time
+        
+    #     target = project.path_with_namespace
+    #     first_url_http, second_url_http, third_url_ssh = mirror_urls
+    #     first_target_project, _, _ = mirror_target_projects
+
+    #     # In GitLab, default setting for a branch protection is to deny force push.
+    #     # For first mirror, we need to allow force push to the main branch, so that
+    #     # we can validate the mirror functionality. That's why we need to allow force
+    #     # push to the main branch.
+    #     first_target_project_main_branch = first_target_project.protectedbranches.get("main")
+    #     first_target_project_main_branch.allow_force_push = True
+    #     first_target_project_main_branch.save()
+
+    #     # Create a test file in the source project to validate mirror functionality
+    #     # Create the test file in a new branch because the main branch is protected.
+    #     # Default config for target project does not allow force push to the main branch.
+    #     new_branch = project.branches.create({"branch": "test_branch", "ref": "main"})
+    #     test_file_content = "This is a test file for remote mirror validation"
+    #     test_file_path = "mirror_test.txt"
+    #     project.files.create(
+    #         {
+    #             "branch": new_branch.name,
+    #             "file_path": test_file_path,
+    #             "content": test_file_content,
+    #             "commit_message": "Add test file for mirror validation",
+    #         }
+    #     )
+
+    #     # Validate that the test file exists in the source project
+    #     source_file = project.files.get(ref=new_branch.name, file_path=test_file_path)
+    #     assert source_file is not None
+    #     assert source_file.decode().decode("utf-8") == test_file_content
+
+    #     test_yaml = f"""
+    #         projects_and_groups:
+    #           {target}:
+    #             remote_mirrors:
+    #               {first_url_http}:
+    #                 enabled: true
+    #                 only_protected_branches: false
+    #                 auth_method: password
+    #                 force_push: true
+    #               {second_url_http}:
+    #                 enabled: true
+    #                 only_protected_branches: true
+    #                 auth_method: password
+    #             #   {third_url_ssh}:
+    #             #     enabled: false
+    #             #     only_protected_branches: false
+    #             #     auth_method: password
+    #         """
+
+    #     run_gitlabform(test_yaml, target)
+
+    #     first_mirror = self._get_mirror_from_url(project, first_url_http)
+    #     second_mirror = self._get_mirror_from_url(project, second_url_http)
+    #     # third_mirror = self._get_mirror_from_url(project, third_url)
+
+    #     if TYPE_CHECKING:
+    #         assert isinstance(first_mirror, ProjectRemoteMirror)
+    #         assert isinstance(second_mirror, ProjectRemoteMirror)
+    #         # assert isinstance(third_mirror, ProjectRemoteMirror)
+        
+    #     mirrors = project.remote_mirrors.list(get_all=True)
+    #     assert len(mirrors) == 2
+        
+    #     assert first_mirror is not None
+    #     assert first_mirror.enabled is True
+    #     assert first_mirror.only_protected_branches is False
+        
+    #     assert second_mirror is not None
+    #     assert second_mirror.enabled is True
+    #     assert second_mirror.only_protected_branches is True
+        
+    #     # assert third_mirror is not None
+    #     # assert third_mirror.enabled is False
+    #     # assert third_mirror.only_protected_branches is False
+        
+    #     # Validate mirror functionality: wait for sync and verify test file appears in target
+    #     # The first mirror has force_push: true, so it should sync immediately
+    #     # Wait a bit for the sync to complete
+    #     time.sleep(30)
+        
+    #     # Refresh the target project to get latest state
+    #     first_target_project = gl.projects.get(id = first_target_project.id)
+    #     first_mirror = self._get_mirror_from_url(project, first_url_http)
+    #     print("*****************************************************")
+    #     print(f"First mirror: {first_mirror.asdict()}")
+    #     print("*****************************************************")
+    #     # Verify the test file exists in the target project (proving mirror works)
+    #     try:
+    #         target_file = first_target_project.files.get(ref=new_branch.name, file_path=test_file_path)
+    #     except Exception as e:
+    #         # If file doesn't exist, the mirror didn't work - fail the test
+    #         raise AssertionError(
+    #             f"Mirror validation failed: test file '{test_file_path}' not found in first mirror project. "
+    #             f"This indicates the mirror is not functioning correctly. Error: {e}"
+    #         )
+    #     assert target_file.decode().decode("utf-8") == test_file_content
 
     # def test_remote_mirrors_update(self, caplog, gl, project, mirror_urls):
     #     """Test updating existing remote mirrors and verifying unchanged mirrors remain unchanged.
