@@ -99,9 +99,9 @@ class RemoteMirrorsProcessor(AbstractProcessor):
                     verbose(f"Updating remote mirror '{mirror_config_temp['url']}' with latest config")
                     try:
                         updated_mirror = project.remote_mirrors.update(id = mirror_in_gitlab.id, new_data = mirror_config)
-                        verbose(f"Updated remote mirror: id={mirror_in_gitlab.id} config={updated_mirror}")
+                        verbose(f"Updated remote mirror '{mirror_config_temp['url']}': config={updated_mirror}")
                     except GitlabUpdateError:
-                        verbose(f"Failed to update remote mirror '{updated_mirror}'")
+                        verbose(f"Failed to update remote mirror: '{updated_mirror}'")
                 else:
                     verbose(f"Remote mirror '{mirror_config_temp['url']}' remains unchanged")
             else:

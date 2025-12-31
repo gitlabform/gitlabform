@@ -1,10 +1,10 @@
-import logging
 import os
 import pytest
 from typing import TYPE_CHECKING
 from gitlab.v4.objects import ProjectRemoteMirror
 
 from tests.acceptance import run_gitlabform, get_random_name, create_project
+from tests.acceptance.conftest import GitLabFormLogs
 
 
 @pytest.fixture(scope="class")
@@ -163,6 +163,7 @@ class TestRemoteMirrorsProcessor:
                   {second_mirror_url_ssh_password_auth}:
                     enabled: true
                     auth_method: password
+                    keep_divergent_refs: true
                   {third_mirror_url_ssh_public_key_auth}:
                     enabled: false
                     auth_method: ssh_public_key
@@ -184,17 +185,77 @@ class TestRemoteMirrorsProcessor:
         
         assert first_mirror is not None
         assert first_mirror.enabled is True
+        assert first_mirror.auth_method == "password"
         assert TestRemoteMirrorsProcessor._normalize_url_for_comparison(first_mirror.url) == TestRemoteMirrorsProcessor._normalize_url_for_comparison(first_mirror_url_http_password_auth)
         
         assert second_mirror is not None
         assert second_mirror.enabled is True
+        assert second_mirror.auth_method == "password"
+        assert second_mirror.keep_divergent_refs is True
         assert TestRemoteMirrorsProcessor._normalize_url_for_comparison(second_mirror.url) == TestRemoteMirrorsProcessor._normalize_url_for_comparison(second_mirror_url_ssh_password_auth)
         
         assert third_mirror is not None
         assert third_mirror.enabled is False
+        assert third_mirror.auth_method == "ssh_public_key"
         assert TestRemoteMirrorsProcessor._normalize_url_for_comparison(third_mirror.url) == TestRemoteMirrorsProcessor._normalize_url_for_comparison(third_mirror_url_ssh_public_key_auth)
 
 
+    def test_remote_mirrors_update_configuration(self, project, mirror_urls, gitlabform_logs: GitLabFormLogs):
+        """
+        This test validates configuration update of remote mirror by spying on 
+        gitlabform's verbose logs.
+        """
+
+        # 1. Setup the mirror URLs from the fixture
+        first_url, second_url, _ = mirror_urls
+
+        gitlabform_config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            remote_mirrors:
+              {first_url}:
+                enabled: true
+                auth_method: password
+              {second_url}:
+                enabled: true
+                auth_method: password
+                keep_divergent_refs: false
+        """
+
+        # 2. Run GitLabForm
+        run_gitlabform(gitlabform_config, project.path_with_namespace)
+
+        # 3. Get normalized URLs for the assertions
+        first_mirror = self._get_mirror_from_url(project, first_url)
+        first_norm = TestRemoteMirrorsProcessor._normalize_url_for_comparison(first_mirror.url)
+
+        second_mirror = self._get_mirror_from_url(project, second_url)
+        second_norm = TestRemoteMirrorsProcessor._normalize_url_for_comparison(second_mirror.url)
+
+        # 4. Assertions
+        assert first_mirror.enabled is True
+        assert first_mirror.auth_method == "password"
+        # Use substring matching (in) because cli_ui often adds prefixes like '* ' or ':: '
+        expected_unchanged = f"Remote mirror '{first_norm}' remains unchanged"
+        assert any(expected_unchanged in msg for msg in gitlabform_logs.debug), \
+            f"Expected unchanged message not found. Captured: {gitlabform_logs.debug}"
+
+        assert second_mirror.enabled is True
+        assert second_mirror.auth_method == "password"
+        assert second_mirror.keep_divergent_refs is False
+        expected_updated = f"Updated remote mirror '{second_norm}'"
+        assert any(expected_updated in msg for msg in gitlabform_logs.debug), \
+            f"Expected update message not found. Captured: {gitlabform_logs.debug}"
+
+
+    @pytest.mark.skip
+    def test_remote_mirrors_update_credentials(self, gl, project, mirror_urls):
+        """
+        This test validates credetial update of remote mirror.
+        """
+        pass
+
+    @pytest.mark.skip
     def test_remote_mirror_http_password_auth_sync(self, gl, project, mirror_urls, mirror_target_projects):
         """
         Test remote mirror functionality for http and password based authentication.
