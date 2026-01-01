@@ -48,13 +48,13 @@ class RemoteMirrorsProcessor(AbstractProcessor):
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
-        mirrors_in_config: dict = configuration.get("remote_mirrors", {})
         mirrors_in_gitlab: list[ProjectRemoteMirror] = project.remote_mirrors.list(get_all=True)
-        enforce_mirrors: bool = configuration.get("remote_mirrors|enforce", False)
-
-        # Remove 'enforce' key from the config so that it's not treated as a "remote_mirror"
-        if enforce_mirrors:
-            mirrors_in_config.pop("enforce")
+        
+        # Use a copy to avoid modifying the raw configuration object unexpectedly
+        mirrors_in_config: dict = configuration.get("remote_mirrors", {}).copy()
+        
+        # Extract the enforce flag and remove it from the dictionary of mirrors
+        enforce_mirrors = mirrors_in_config.pop("enforce", False)
 
         # Mirrors that are in the configuration and also in GitLab should be updated if config changed.
         # Mirrors that are in the configuration but not in GitLab should be created.
@@ -79,7 +79,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
                 if mirror_in_gitlab:
                     self._delete_remote_mirror(mirror_in_gitlab)
                 else:
-                    verbose(f"Skip deleting remote mirror '{mirror_url}', because it doesn't exist")
+                    verbose(f"Skip deleting remote mirror '{self._normalize_url_for_comparison(mirror_url)}', because it doesn't exist")
                 continue
 
             if mirror_in_gitlab:
@@ -132,7 +132,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
                 normalized_gitlab_url = self._normalize_url_for_comparison(gm.url)
                 if normalized_gitlab_url not in normalized_config_urls:
                     verbose(
-                        f"Deleting remote mirror '{gm.url}' currently setup in the project but it is not in the configuration and enforce is enabled"
+                        f"Deleting remote mirror '{gm.url}' currently setup in the project as it is not in the configuration and enforce is enabled"
                     )
                     self._delete_remote_mirror(gm)
 

@@ -255,6 +255,7 @@ class TestRemoteMirrorsProcessor:
         """
         pass
 
+
     @pytest.mark.skip
     def test_remote_mirror_http_password_auth_sync(self, gl, project, mirror_urls, mirror_target_projects):
         """
@@ -502,149 +503,244 @@ class TestRemoteMirrorsProcessor:
     #         assert updated_third_mirror.enabled is True
     #         assert updated_third_mirror.only_protected_branches is False
 
-    # def test_remote_mirrors_delete(self, gl, project, mirror_urls, caplog):
-    #     """Test deleting remote mirrors using the delete flag.
-    #     
-    #     This test verifies that:
-    #     - Mirrors can be deleted using the 'delete: true' configuration
-    #     - Non-existent mirrors configured for deletion are handled gracefully
-    #     - Other mirrors not marked for deletion remain intact
-    #     """
-    #     target = project.path_with_namespace
-    #     first_url, second_url, third_url = mirror_urls
-    #     second_mirror_before_test = self._get_mirror_from_url(project, second_url)
-    #     third_mirror_before_test = self._get_mirror_from_url(project, third_url)
-    #     non_existent_mirror_url = f"{os.getenv('GITLAB_URL', 'http://localhost').rstrip('/')}/non/existent_project.git"
-    #
-    #     delete_yaml = f"""
-    #     projects_and_groups:
-    #       {target}:
-    #         remote_mirrors:
-    #           {first_url}:
-    #             delete: true
-    #           {second_url}:
-    #             enabled: true
-    #             only_protected_branches: false
-    #           {third_url}:
-    #             enabled: true
-    #             only_protected_branches: false
-    #           {non_existent_mirror_url}:
-    #             delete: true
-    #     """
-    #
-    #     run_gitlabform(delete_yaml, target)
-    #     mirrors_after_test = project.remote_mirrors.list(get_all=True)
-    #     second_mirror_after_test = self._get_mirror_from_url(project, second_url)
-    #     third_mirror_after_test = self._get_mirror_from_url(project, third_url)
-    #
-    #     assert len(mirrors_after_test) == 2
-    #     # The first mirror should not exist as indicated by 'delete: true' config
-    #     assert first_url not in (m.url for m in mirrors_after_test)
-    #     # The second mirror should exist but updated as the config is different
-    #     assert second_mirror_after_test is not None
-    #     assert second_mirror_after_test in mirrors_after_test
-    #     # The third mirror should exist and same as it was setup
-    #     assert third_mirror_after_test is not None
-    #     assert third_mirror_after_test in mirrors_after_test
-    #     # The last mirror configured for deletion but it was never setup in gitlab.
-    #     # Ensure expected error message is reported.
-    #     with caplog.at_level(logging.DEBUG):
-    #         assert f"Skip deleting remote mirror '{non_existent_mirror_url}', because it doesn't exist" in caplog.text
+    def test_remote_mirrors_delete(self, gl, project, mirror_urls, gitlabform_logs):
+        """Test deleting remote mirrors using the delete flag.
+        
+        This test verifies that:
+        - Mirrors can be deleted using the 'delete: true' configuration
+        - Non-existent mirrors configured for deletion are handled gracefully
+        - Other mirrors not marked for deletion remain intact
+        """
+        first_url, second_url, third_url = mirror_urls
+        second_mirror_before_test = self._get_mirror_from_url(project, second_url)
+        third_mirror_before_test = self._get_mirror_from_url(project, third_url)
+        non_existent_mirror_url = f"http://username:password@localhost/non/existent_project.git"
+    
+        delete_yaml = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            remote_mirrors:
+              {first_url}:
+                delete: true
+              {non_existent_mirror_url}:
+                delete: true
+        """
+    
+        run_gitlabform(delete_yaml, project.path_with_namespace)
+        mirrors_after_test = project.remote_mirrors.list(get_all=True)
+        second_mirror_after_test = self._get_mirror_from_url(project, second_url)
+        third_mirror_after_test = self._get_mirror_from_url(project, third_url)
+    
+        # In last test, there were 3 mirrors.
+        # This test should delete the first mirror successfully
+        # So, there should be 2 mirrors remaining.
+        # non-existent mirror deletion should be handled gracefully without quiting.
 
-    # def test_remote_mirrors_enforce(self, gl, group, project, mirror_urls):
-    #     """Test the enforce functionality for remote mirrors.
-    #     
-    #     This test verifies that:
-    #     - When 'enforce: true' is set, only mirrors in the configuration exist
-    #     - When 'enforce: false' is set, mirrors can accumulate (additive behavior)
-    #     - Parent group enforce settings apply to child projects
-    #     - Enforce works correctly with delete operations
-    #     """
-    #     target = project.path_with_namespace
-    #     first_url, second_url, third_url = mirror_urls
-    #     mirrors_before_test = [m.url for m in project.remote_mirrors.list(get_all=True)]
-    #
-    #     # Total number of mirrors before the test should match the remaining
-    #     # mirrors at the end of previous test case.
-    #     assert len(mirrors_before_test) == 2
-    #
-    #     enforce_yaml = f"""
-    #             projects_and_groups:
-    #               {target}:
-    #                 remote_mirrors:
-    #                   enforce: true
-    #                   {first_url}:
-    #                     enabled: true
-    #                     only_protected_branches: false
-    #             """
-    #
-    #     run_gitlabform(enforce_yaml, target)
-    #     mirrors_after_test = [m.url for m in project.remote_mirrors.list(get_all=True)]
-    #     # Because of 'enforce: true' config, total number of mirrors should be
-    #     # what's in the applied config.
-    #     assert len(mirrors_after_test) == 1
-    #     assert first_url in mirrors_after_test
-    #     assert second_url not in mirrors_after_test
-    #     assert third_url not in mirrors_after_test
-    #
-    #     not_enforce_yaml = f"""
-    #             projects_and_groups:
-    #               {target}:
-    #                 remote_mirrors:
-    #                   enforce: false
-    #                   {first_url}:
-    #                     enabled: true
-    #                     only_protected_branches: false
-    #                   {second_url}:
-    #                     enabled: true
-    #                     only_protected_branches: true
-    #             """
-    #
-    #     run_gitlabform(not_enforce_yaml, target)
-    #     mirrors_after_test = [m.url for m in project.remote_mirrors.list(get_all=True)]
-    #     # Because of 'enforce: false', default config, total number of mirrors should be
-    #     # what's in the applied config and what was previously configured.
-    #     assert len(mirrors_after_test) == 2
-    #     assert first_url in mirrors_after_test and second_url in mirrors_after_test
-    #
-    #     parent_target = f"{group.path}/*"
-    #     enforce_star_yaml = f"""
-    #             projects_and_groups:
-    #               {parent_target}:
-    #                 remote_mirrors:
-    #                   enforce: true
-    #                   {first_url}:
-    #                     enabled: true
-    #                     only_protected_branches: false
-    #               {target}:
-    #                 remote_mirrors:
-    #                   {second_url}:
-    #                     enabled: true
-    #                     only_protected_branches: true
-    #               """
-    #
-    #     run_gitlabform(enforce_star_yaml, target)
-    #     mirrors_after_test = [m.url for m in project.remote_mirrors.list(get_all=True)]
-    #
-    #     # Because 'enforce: true' config is in parent group, it will apply to all projects within the group.
-    #     # So, the project being tested will contain only the mirrors that are applied by the project and also
-    #     # by the parent group config.
-    #     assert len(mirrors_after_test) == 2
-    #     assert first_url in mirrors_after_test and second_url in mirrors_after_test
-    #
-    #     enforce_delete_yaml = f"""
-    #             projects_and_groups:
-    #               {target}:
-    #                 remote_mirrors:
-    #                   enforce: true
-    #                   {first_url}:
-    #                     delete: true
-    #             """
-    #
-    #     run_gitlabform(enforce_delete_yaml, target)
-    #     mirrors_after_test = [m.url for m in project.remote_mirrors.list(get_all=True)]
-    #
-    #     # The 'enforce: true' config is set, which means only the mirrors that are in the config
-    #     # applied to the project, should exist. But, the only mirror in the config is set to be
-    #     # deleted. So, there should be no mirrors remaining.
-    #     assert len(mirrors_after_test) == 0
+        assert len(mirrors_after_test) == 2
+
+        # The first mirror should not exist as indicated by 'delete: true' config
+        assert first_url not in (m.url for m in mirrors_after_test)
+
+        # The second & third mirror should exist
+        assert second_mirror_after_test is not None
+        assert second_mirror_after_test in mirrors_after_test
+        assert third_mirror_after_test is not None
+        assert third_mirror_after_test in mirrors_after_test
+
+        # The last mirror configured for deletion but it was never setup in gitlab.
+        # Ensure expected error message is reported.
+        # with caplog.at_level(logging.DEBUG):
+        #     assert f"Skip deleting remote mirror '{non_existent_mirror_url}', because it doesn't exist" in caplog.text
+        expected = f"Skip deleting remote mirror '{TestRemoteMirrorsProcessor._normalize_url_for_comparison(non_existent_mirror_url)}', because it doesn't exist"
+        assert any(expected in msg for msg in gitlabform_logs.debug), \
+            f"Expected message not found. Captured: {gitlabform_logs.debug}"
+
+
+    def test_remote_mirrors_enforce_false(self, gl, project, mirror_urls):
+        """Test the additive behavior when enforce: false is set.
+        
+        This test verifies that:
+        - When 'enforce: false' is set, mirrors not mentioned in the 
+          configuration are NOT deleted (additive behavior).
+        - Existing mirrors mentioned in the configuration are updated correctly.
+
+        """
+        target = project.path_with_namespace
+        first_url, second_url, third_url = mirror_urls
+        
+        # 1. Normalize our target URLs from the fixture
+        second_norm = self._normalize_url_for_comparison(second_url)
+        third_norm = self._normalize_url_for_comparison(third_url)
+    
+        # 2. Verify starting state: 2nd and 3rd mirrors should exist 
+        # (assuming they were left over from previous test setup)
+        mirrors_before = [
+            self._normalize_url_for_comparison(m.url) 
+            for m in project.remote_mirrors.list(get_all=True)
+        ]
+        
+        assert second_norm in mirrors_before
+        assert third_norm in mirrors_before
+    
+        # 3. Apply config that only contains the second mirror
+        not_enforce_yaml = f"""
+        projects_and_groups:
+          {target}:
+            remote_mirrors:
+              enforce: false
+              {second_url}:
+                enabled: true
+                auth_method: password
+                only_protected_branches: true
+        """
+    
+        run_gitlabform(not_enforce_yaml, target)
+        
+        # 4. Get the state after the run and normalize for comparison
+        mirrors_after = [
+            self._normalize_url_for_comparison(m.url) 
+            for m in project.remote_mirrors.list(get_all=True)
+        ]
+        
+        # 5. Assertions
+        # Total number of mirrors should still be 2 because enforce: false 
+        # prevents the deletion of third_url
+        assert len(mirrors_after) == 2
+        
+        # The mirror in the config (second) must still exist
+        assert second_norm in mirrors_after
+        
+        # The mirror NOT in the config (third) must ALSO still exist (Additive check)
+        assert third_norm in mirrors_after, (
+            f"Mirror {third_norm} was deleted but it should have been kept "
+            f"because enforce is set to false."
+        )
+
+    def test_remote_mirrors_enforce_true(self, gl, group, project, mirror_urls):
+        """Test the destructive behavior when enforce: true is set.
+        
+        This test verifies that:
+        - When 'enforce: true' is set, any mirror found in GitLab that is 
+          NOT defined in the configuration is automatically deleted.
+        """
+        target = project.path_with_namespace
+        first_url, second_url, third_url = mirror_urls
+        
+        # Normalize our target URLs
+        second_norm = self._normalize_url_for_comparison(second_url)
+        third_norm = self._normalize_url_for_comparison(third_url)
+        
+        # Ensure we are starting with both mirrors
+        mirrors_before = [
+            self._normalize_url_for_comparison(m.url) 
+            for m in project.remote_mirrors.list(get_all=True)
+        ]
+        assert second_norm in mirrors_before
+        assert third_norm in mirrors_before
+
+        # 1. Apply config with enforce: true, only containing the second mirror
+        enforce_true_yaml = f"""
+        projects_and_groups:
+          {target}:
+            remote_mirrors:
+              enforce: true
+              {second_url}:
+                enabled: true
+                auth_method: password
+        """
+
+        run_gitlabform(enforce_true_yaml, target)
+
+        # 2. Get state after run
+        mirrors_after = [
+            self._normalize_url_for_comparison(m.url) 
+            for m in project.remote_mirrors.list(get_all=True)
+        ]
+
+        # 3. Assertions
+        # third_url should now be GONE because it wasn't in the YAML
+        assert len(mirrors_after) == 1
+        assert second_norm in mirrors_after
+        assert third_norm not in mirrors_after, (
+            f"Mirror {third_norm} should have been deleted by enforce: true logic."
+        )
+
+    def test_remote_mirrors_enforce_with_explicit_delete(self, project, mirror_urls):
+        """Test the interaction between 'enforce: true' and explicit 'delete: true'.
+        
+        This test verifies that:
+        - Mirrors marked with 'delete: true' are removed correctly.
+        - Mirrors NOT in the config are removed by the 'enforce: true' logic.
+        - Handles multiple auth types (password vs ssh_public_key) during setup.
+        - The processor handles both types of removals in a single run.
+        """
+        target = project.path_with_namespace
+        first_url, second_url, third_url = mirror_urls
+        
+        # 1. Define EXPECTED normalized URLs BEFORE setup
+        expected_norms = {
+            self._normalize_url_for_comparison(first_url),
+            self._normalize_url_for_comparison(second_url),
+            self._normalize_url_for_comparison(third_url)
+        }
+    
+        # --- DIRECT SETUP PHASE (using python-gitlab) ---
+        # Clear existing mirrors first to ensure a clean state
+        for m in project.remote_mirrors.list(get_all=True):
+            m.delete()
+
+        # Create 3 mirrors directly using the raw URLs from the fixture
+        for url in [first_url, second_url, third_url]:
+             payload = {
+                 'url': url,
+                 'enabled': True,
+             }
+             
+             # Detect auth method based on fixture URL format
+             if "://" in url and ":" not in url.split("://")[1].split("@")[0]:
+                 payload['auth_method'] = 'ssh_public_key'
+             else:
+                 payload['auth_method'] = 'password'
+             
+             project.remote_mirrors.create(payload)
+        
+        # --- VALIDATE SETUP ---
+        # 2. Fetch ACTUAL mirrors from GitLab AFTER creation
+        actual_mirrors_from_api = project.remote_mirrors.list(get_all=True)
+        actual_norms = {
+            self._normalize_url_for_comparison(m.url) 
+            for m in actual_mirrors_from_api
+        }
+
+        # VALIDATION: Ensure every expected URL from our fixture exists in GitLab
+        assert expected_norms == actual_norms, (
+            f"Setup Mismatch! \nExpected: {expected_norms}\nActual: {actual_norms}"
+        )
+    
+        # --- TEST PHASE ---
+        # We delete 'first', keep 'second', and omit 'third' (letting enforce delete it)
+        test_yaml = f"""
+        projects_and_groups:
+          {target}:
+            remote_mirrors:
+              enforce: true
+              {first_url}:
+                delete: true
+              {second_url}:
+                enabled: true
+                auth_method: password
+                only_protected_branches: true
+        """
+    
+        run_gitlabform(test_yaml, target)
+        
+        # --- VERIFICATION PHASE ---
+        final_mirrors = project.remote_mirrors.list(get_all=True)
+        final_norms = {
+            self._normalize_url_for_comparison(m.url) 
+            for m in final_mirrors
+        }
+        
+        # Only the second mirror's normalized URL should remain.
+        second_norm = self._normalize_url_for_comparison(second_url)
+        assert final_norms == {second_norm}, f"Expected only {second_norm} to remain. Found: {final_norms}"
