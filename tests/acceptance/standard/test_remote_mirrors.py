@@ -248,13 +248,62 @@ class TestRemoteMirrorsProcessor:
             f"Expected update message not found. Captured: {gitlabform_logs.debug}"
 
 
-    @pytest.mark.skip
-    def test_remote_mirrors_update_credentials(self, gl, project, mirror_urls):
+    def test_remote_mirrors_update_credentials(self, project_for_function, root_username, root_access_token, gitlabform_logs: GitLabFormLogs):
         """
-        This test validates credetial update of remote mirror.
+        Validates credential updates for 3 mirror types (HTTP, SSH+Pass, SSH+Key).
+        Uses project_for_function to ensure an isolated state for this test.
         """
-        pass
+        target_path = project_for_function.path_with_namespace
+        
+        # Define 3 distinct dummy URL types
+        # These URLs don't need to exist; we are testing GitLabForm's logic branch and API communication
+        urls = [
+            f"http://{root_username}:{root_access_token}@localhost/dummy/http_target.git",
+            f"ssh://{root_username}:{root_access_token}@localhost/dummy/ssh_pass_target.git",
+            f"ssh://{root_username}@localhost/dummy/ssh_key_target.git"
+        ]
 
+        # 1. Setup initial mirrors directly via API
+        # We manually create these so GitLabForm sees them as "already existing"
+        for url in urls:
+            project_for_function.remote_mirrors.create({
+                "url": url,
+                "enabled": True,
+                # Simple logic to assign auth_method for setup
+                "auth_method": "password" if "ssh://" not in url or ":" in url.split("@")[0] else "ssh_public_key"
+            })
+
+        # 2. Run GitLabForm with force_update: true
+        config = f"""
+        projects_and_groups:
+          {target_path}:
+            remote_mirrors:
+              {urls[0]}:
+                enabled: true
+                force_update: true
+              {urls[1]}:
+                enabled: true
+                force_update: true
+              {urls[2]}:
+                enabled: true
+                force_update: true
+        """
+
+        run_gitlabform(config, target_path)
+
+        # 3. Assertions
+        for url in urls:
+            norm = self._normalize_url_for_comparison(url)
+            
+            # Check Debug Log: Confirms the Processor triggered the update despite masked credentials
+            expected_debug = f"Updating remote mirror '{norm}' with latest config"
+            assert any(expected_debug in msg for msg in gitlabform_logs.debug), \
+                f"Expected update log not found for {norm}."
+            
+            # Check Info Log: Confirms the reminder was printed at the standard output level
+            expected_info = f"!!! REMINDER: 'force_update' was used for mirror '{norm}'"
+            assert any(expected_info in msg for msg in gitlabform_logs.info), \
+                f"Expected info reminder not found for {norm}."
 
     @pytest.mark.skip
     def test_remote_mirror_http_password_auth_sync(self, gl, project, mirror_urls, mirror_target_projects):

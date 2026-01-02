@@ -1,7 +1,7 @@
 import logging
 from urllib.parse import urlparse, urlunparse
 
-from cli_ui import debug as verbose
+from cli_ui import debug as verbose, info_1 as info
 
 from gitlab.exceptions import GitlabCreateError, GitlabUpdateError, GitlabDeleteError
 from gitlab.v4.objects import Project, ProjectRemoteMirror
@@ -31,73 +31,50 @@ class RemoteMirrorsProcessor(AbstractProcessor):
             parsed.fragment
         ))
         return normalized
-    
-    def _get_mirror_by_url(self, project: Project, mirror_url: str) -> ProjectRemoteMirror | None:
-        """
-        Given a mirror URL, this method returns the corresponding ProjectRemoteMirror object if found, otherwise None.
-        GitLab API returns URLs with credentials scrubbed (*****), so we normalize both for comparison.
-        """
-        normalized_config_url = self._normalize_url_for_comparison(mirror_url)
-        mirrors_in_gitlab: list[ProjectRemoteMirror] = project.remote_mirrors.list(get_all=True)
-        for mirror in mirrors_in_gitlab:
-            normalized_gitlab_url = self._normalize_url_for_comparison(mirror.url)
-            if normalized_gitlab_url == normalized_config_url:
-                return mirror
-        return None
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
         
         # 1. PREPARATION & OPTIMIZATION
-        # Fetch current mirrors once at the start to avoid redundant API calls in the loop
         mirrors_in_gitlab: list[ProjectRemoteMirror] = project.remote_mirrors.list(get_all=True)
-        
-        # Map normalized URL -> GitLab Mirror Object for O(1) lookups
         gitlab_mirrors_map = {
             self._normalize_url_for_comparison(m.url): m 
             for m in mirrors_in_gitlab
         }
 
-        # Use a copy to avoid modifying the raw configuration object unexpectedly
         mirrors_in_config: dict = configuration.get("remote_mirrors", {}).copy()
-        
-        # Extract the enforce flag and remove it from the dictionary of mirrors
         enforce_mirrors = mirrors_in_config.pop("enforce", False)
-
-        # This set tracks mirrors defined in config that we actually want to KEEP.
-        # It serves as a "Safe List" for the enforcement phase to prevent logical shadowing.
         urls_to_keep = set()
 
-        # 2. PROCESS CONFIGURATION (Explicit Create / Update / Delete)
+        # 2. PROCESS CONFIGURATION
         for mirror_url in sorted(mirrors_in_config.keys()):
             mirror_settings = mirrors_in_config[mirror_url]
             norm_url = self._normalize_url_for_comparison(mirror_url)
-            
-            # Lookup mirror from our pre-fetched map
             mirror_in_gitlab = gitlab_mirrors_map.get(norm_url)
 
             # --- CASE: EXPLICIT DELETE ---
             if mirror_settings.get("delete"):
                 if mirror_in_gitlab:
                     self._delete_remote_mirror(mirror_in_gitlab)
-                    # Remove from map so enforcement doesn't try to delete it again
                     gitlab_mirrors_map.pop(norm_url, None)
                 else:
                     verbose(f"Skip deleting remote mirror '{norm_url}', because it doesn't exist")
                 continue
 
             # --- CASE: CREATE OR UPDATE ---
-            # Mark as authorized to exist; this URL should not be deleted by enforcement
             urls_to_keep.add(norm_url)
             
-            # Prepare payload: Extract local-only options so they are not passed to the API
+            # Prepare payload: Start with URL and update with config settings
             mirror_payload: dict = {"url": mirror_url, **mirror_settings}
+            
+            # Extract local-only options
             force_push = mirror_payload.pop("force_push", False)
+            force_update = mirror_payload.pop("force_update", False)
             mirror_payload.pop("delete", None)
 
             if mirror_in_gitlab:
                 # Update existing mirror if needed
-                self._update_existing_mirror(project, mirror_in_gitlab, mirror_payload, norm_url)
+                self._update_existing_mirror(project, mirror_in_gitlab, mirror_payload, norm_url, force_update)
             else:
                 # Create new mirror
                 mirror_in_gitlab = self._create_new_mirror(project, mirror_payload, mirror_url)
@@ -114,26 +91,34 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         """
         Overrides the base comparison to handle GitLab's URL credential masking.
         Normalization is applied so that 'user:pass@host' matches '*****:*****@host'.
+        Note: force_update is handled in _update_existing_mirror to allow for specific logging.
         """
-        # Prepare normalized config for comparison
         comparison_payload = config_payload.copy()
         if "url" in comparison_payload:
             comparison_payload["url"] = self._normalize_url_for_comparison(comparison_payload["url"])
             
-        # Prepare normalized current state for comparison
         existing_mirror_dict = existing_mirror.asdict().copy()
         existing_mirror_dict["url"] = self._normalize_url_for_comparison(existing_mirror_dict["url"])
         
-        # Call base class logic with the normalized data to verify other fields
         return super()._needs_update(existing_mirror_dict, comparison_payload)
 
-    def _update_existing_mirror(self, project: Project, mirror_obj: ProjectRemoteMirror, payload: dict, norm_url: str):
-        """Compares and updates an existing mirror if the configuration has changed."""
-        if self._needs_update(mirror_obj, payload):
+    def _update_existing_mirror(self, project: Project, mirror_obj: ProjectRemoteMirror, payload: dict, norm_url: str, force_update: bool):
+        """Compares and updates an existing mirror if changed or if force_update is set."""
+        
+        should_update = force_update or self._needs_update(mirror_obj, payload)
+
+        if should_update:
+            if force_update:
+                verbose(f"Mirror '{norm_url}' update is being forced via 'force_update' flag.")
+            
             verbose(f"Updating remote mirror '{norm_url}' with latest config")
             try:
                 project.remote_mirrors.update(id=mirror_obj.id, new_data=payload)
                 verbose(f"Updated remote mirror '{norm_url}'")
+                
+                if force_update:
+                    info(f"!!! REMINDER: 'force_update' was used for mirror '{norm_url}'. "
+                         "Please remove this flag from your configuration to avoid unnecessary API calls in future runs.")
             except GitlabUpdateError:
                 logging.exception("Failed to update remote mirror %s", payload.get("url"))
         else:
@@ -143,8 +128,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         """Creates a new remote mirror and handles API errors."""
         verbose(f"Creating remote mirror '{raw_url}'")
         try:
-            mirror = project.remote_mirrors.create(payload)
-            return mirror
+            return project.remote_mirrors.create(payload)
         except GitlabCreateError:
             logging.exception("Failed to create remote mirror %s", raw_url)
             return None
@@ -153,10 +137,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         """Deletes mirrors present in GitLab that are not in the 'keep' configuration."""
         for norm_url, gm in gitlab_mirrors_map.items():
             if norm_url not in urls_to_keep:
-                verbose(
-                    f"Enforce: Deleting remote mirror '{gm.url}' currently setup in the project "
-                    f"as it is not in the 'keep' configuration"
-                )
+                verbose(f"Enforce: Deleting remote mirror '{gm.url}' as it is not in the 'keep' configuration")
                 self._delete_remote_mirror(gm)
 
     def _delete_remote_mirror(self, mirror: ProjectRemoteMirror):
