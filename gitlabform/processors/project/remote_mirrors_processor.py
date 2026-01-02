@@ -46,7 +46,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         enforce_mirrors = mirrors_in_config.pop("enforce", False)
         urls_to_keep = set()
 
-        # 2. PROCESS CONFIGURATION
+        # 2. PROCESS CONFIGURATION (Explicit Create / Update / Delete)
         for mirror_url in sorted(mirrors_in_config.keys()):
             mirror_settings = mirrors_in_config[mirror_url]
             norm_url = self._normalize_url_for_comparison(mirror_url)
@@ -64,28 +64,60 @@ class RemoteMirrorsProcessor(AbstractProcessor):
             # --- CASE: CREATE OR UPDATE ---
             urls_to_keep.add(norm_url)
             
-            # Prepare payload: Start with URL and update with config settings
+            # Prepare payload: Extract local-only options
             mirror_payload: dict = {"url": mirror_url, **mirror_settings}
-            
-            # Extract local-only options
+
             force_push = mirror_payload.pop("force_push", False)
             force_update = mirror_payload.pop("force_update", False)
+            print_public_key = mirror_payload.pop("print_public_key", False)            
             mirror_payload.pop("delete", None)
 
             if mirror_in_gitlab:
-                # Update existing mirror if needed
                 self._update_existing_mirror(project, mirror_in_gitlab, mirror_payload, norm_url, force_update)
             else:
-                # Create new mirror
                 mirror_in_gitlab = self._create_new_mirror(project, mirror_payload, mirror_url)
 
-            # Optionally force a sync (force-push) if requested in config
+            if print_public_key and mirror_in_gitlab:
+                self._handle_public_key_display(project, mirror_in_gitlab, norm_url)
+
             if force_push and mirror_in_gitlab:
                 self._sync_remote_mirror(project, mirror_in_gitlab)
 
-        # 3. ENFORCEMENT PHASE (Implicit Cleanup)
+        # 3. ENFORCEMENT PHASE
         if enforce_mirrors:
             self._enforce_mirrors(gitlab_mirrors_map, urls_to_keep)
+
+    def _handle_public_key_display(self, project: Project, mirror_obj: ProjectRemoteMirror, norm_url: str):
+        """
+        Retrieves and prints the SSH public key for a mirror.
+        GitLab only provides this for mirrors configured with 'ssh_public_key' auth.
+        """
+        # Only attempt retrieval if the auth method supports it
+        if getattr(mirror_obj, 'auth_method', None) != 'ssh_public_key':
+            verbose(f"Skipping public key display for '{norm_url}': auth_method is not 'ssh_public_key'")
+            return
+
+        public_key = None
+        try:
+            # TODO: python-gitlab does not yet support retrieving the public key via 
+            # ProjectRemoteMirror object (e.g., mirror_obj.get_public_key()).
+            # Switch to native method once supported in the library.
+            # API Ref: https://docs.gitlab.com/api/remote_mirrors/#get-a-single-projects-remote-mirror-public-key
+            response = project.manager.gitlab.http_get(
+                f"/projects/{project.id}/remote_mirrors/{mirror_obj.id}/public_key"
+            )
+            public_key = response.get("public_key")
+        except Exception:
+            logging.exception("Failed to retrieve SSH public key for mirror %s", norm_url)
+
+        if public_key:
+            info(f"🔑 SSH Public Key for mirror '{norm_url}':")
+            info(public_key)
+            info("👆 This public key must be added to the target repository to authorize the mirror.")
+            info("Please consult the GitLab documentation on 'Repository Mirroring' for specific setup instructions for your target platform.")
+        elif not public_key:
+            verbose(f"No public key available to display for mirror '{norm_url}'")
+
 
     def _needs_update(self, existing_mirror: ProjectRemoteMirror, config_payload: dict) -> bool:
         """

@@ -385,6 +385,58 @@ class TestRemoteMirrorsProcessor:
             f"'{first_mirror_repo.path_with_namespace}' after {max_retries * retry_interval} seconds."
         )
 
+
+    def test_remote_mirrors_ssh_public_key_retrieval(self, project_for_function, gitlabform_logs: GitLabFormLogs):
+        """
+        Validates that when print_public_key is true, the SSH public key is 
+        retrieved and printed to the console.
+        """
+        target_path = project_for_function.path_with_namespace
+        ssh_url = "ssh://git@github.com/dummy/target_repo.git"
+        
+        # 1. Run GitLabForm with print_public_key: true
+        # We use auth_method: ssh_public_key to trigger the logic
+        config = f"""
+        projects_and_groups:
+          {target_path}:
+            remote_mirrors:
+              {ssh_url}:
+                enabled: true
+                auth_method: ssh_public_key
+                print_public_key: true
+        """
+
+        run_gitlabform(config, target_path)
+
+        # 2. Assertions
+        # Normalize the URL as the processor does for logs
+        norm = self._normalize_url_for_comparison(ssh_url)
+        
+        # Check that the mirror was created/updated
+        assert any(f"Creating remote mirror '{ssh_url}'" in msg or f"Updated remote mirror '{norm}'" in msg 
+                   for msg in gitlabform_logs.debug)
+
+        # 3. Check for the Public Key Output
+        # We look for the generic instructions and the presence of an SSH key pattern
+        instruction_text = "This public key must be added to the target repository"
+        key_header = f"🔑 SSH Public Key for mirror '{norm}':"
+        
+        # Verify the instructional text is in the info stream
+        assert any(instruction_text in msg for msg in gitlabform_logs.info), \
+            f"Instructional text not found in info logs. Captured: {gitlabform_logs.info}"
+            
+        assert any(key_header in msg for msg in gitlabform_logs.info), \
+            f"Key header not found in info logs. Captured: {gitlabform_logs.info}"
+
+        # Check if any message in the info stream looks like a public key (starts with ssh-rsa, ecdsa, etc.)
+        ssh_key_patterns = ["ssh-rsa", "ssh-ed25519", "ecdsa-sha2-nistp256"]
+        found_key = any(
+            any(pattern in msg for pattern in ssh_key_patterns) 
+            for msg in gitlabform_logs.info
+        )
+        
+        assert found_key, f"No SSH public key pattern found in info logs. Captured: {gitlabform_logs.info}"
+
     # def test_remote_mirrors_force_sync(self, gl, project, mirror_urls, mirror_target_projects):
     #     """Test creating multiple remote mirrors with different configurations and validate mirror functionality.
         
