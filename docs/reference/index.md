@@ -44,7 +44,7 @@ gitlab:
 
   # ** advanced parameters **
   # Any additional parameters specified here will be passed to the python-gitlab library if they are supported. 
-  # See https://python-gitlab.readthedocs.io/en/stable/api-usage.html for available options.
+  # See https://python-gitlab.readthedocs.io/en/stable/api-usage.html#gitlab-client for available options.
   #
   # GitlabForm hasn't yet 100% migrated to use python-gitlab. Some processors are not using it and won't use these parameters.
   # For following migration to python-gitlab, see: https://github.com/gitlabform/gitlabform/issues/73
