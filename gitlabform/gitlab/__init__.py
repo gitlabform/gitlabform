@@ -67,10 +67,50 @@ class GitLab(
 
 
 class GitlabWrapper:
+    # Parameters accepted by python-gitlab's Gitlab.__init__
+    # Other config keys (like max_retries) are used elsewhere in gitlabform
+    # or passed to specific components like GraphQL
+    GITLAB_CLIENT_PARAMS = {
+        "url",
+        "private_token",
+        "oauth_token",
+        "job_token",
+        "ssl_verify",
+        "http_username",
+        "http_password",
+        "timeout",
+        "api_version",
+        "per_page",
+        "pagination",
+        "order_by",
+        "user_agent",
+        "retry_transient_errors",
+        "keep_base_url",
+    }
+
+    # Parameters accepted by python-gitlab's GraphQL.__init__
+    GRAPHQL_PARAMS = {
+        "ssl_verify",
+        "client",
+        "timeout",
+        "user_agent",
+        "fetch_schema_from_transport",
+        "max_retries",
+        "obey_rate_limit",
+        "retry_transient_errors",
+    }
+
     def __init__(self, gitlabform: GitLab):
         session = gitlabform.session
 
-        graphql = GraphQL(url=gitlabform.gitlab_config["url"], token=gitlabform.gitlab_config["token"])
+        graphql_kwargs = {
+            k: v for k, v in gitlabform.gitlab_config.items() if k in self.GRAPHQL_PARAMS
+        }
+        graphql = GraphQL(
+            url=gitlabform.gitlab_config["url"],
+            token=gitlabform.gitlab_config["token"],
+            **graphql_kwargs,
+        )
 
         default_kwargs = {
             "retry_transient_errors": True,
@@ -80,7 +120,7 @@ class GitlabWrapper:
         }
         extra_kwargs = {
             **default_kwargs,
-            **{k: v for k, v in gitlabform.gitlab_config.items() if k not in renamed_kwargs},
+            **{k: v for k, v in gitlabform.gitlab_config.items() if k not in renamed_kwargs and k in self.GITLAB_CLIENT_PARAMS},
             **{renamed_kwargs[k]: v for k, v in gitlabform.gitlab_config.items() if k in renamed_kwargs},
         }
 
