@@ -305,8 +305,7 @@ class TestRemoteMirrorsProcessor:
             assert any(expected_info in msg for msg in gitlabform_logs.info), \
                 f"Expected info reminder not found for {norm}."
 
-    @pytest.mark.skip
-    def test_remote_mirror_http_password_auth_sync(self, gl, project, mirror_urls, mirror_target_projects):
+    def test_remote_mirror_http_password_auth_sync(self, project, mirror_urls, mirror_target_projects):
         """
         Test remote mirror functionality for http and password based authentication.
         This also tests configuration of `force_push` config key.
@@ -315,10 +314,10 @@ class TestRemoteMirrorsProcessor:
         Then run gitlabform with `force_push` enabled for the target mirror.
         Then check the target mirror repo if the new branch and the test file exists.
         """
+        import time
 
         first_mirror_url_http_password_auth, _, _ = mirror_urls
         first_mirror_repo, _, _ = mirror_target_projects
-
 
         # In GitLab, default setting for branch protection is to deny force push.
         # For first mirror, we need to allow force push to the main branch, so that
@@ -328,9 +327,13 @@ class TestRemoteMirrorsProcessor:
         first_mirror_repo_main_branch.save()
 
         # Create a test file in a new branch in the source project to validate mirror functionality
-        new_branch = project.branches.create({"branch": "test_branch", "ref": "main"})
+        # We use a unique branch name to ensure we are testing a fresh sync
+        sync_branch_name = get_random_name("sync_test_branch")
+        new_branch = project.branches.create({"branch": sync_branch_name, "ref": "main"})
+        
         test_file_content = "This is a test file for remote mirror validation"
-        test_file_path = "mirror_test.txt"
+        test_file_path = f"mirror_test_{sync_branch_name}.txt"
+        
         project.files.create(
             {
                 "branch": new_branch.name,
@@ -345,7 +348,8 @@ class TestRemoteMirrorsProcessor:
         assert source_file is not None
         assert source_file.decode().decode("utf-8") == test_file_content
 
-
+        # Run GitLabForm with force_push enabled. 
+        # This should trigger the self._sync_remote_mirror(project, mirror_in_gitlab) logic.
         gitlabform_config = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -358,29 +362,28 @@ class TestRemoteMirrorsProcessor:
 
         run_gitlabform(gitlabform_config, project.path_with_namespace)
 
-        # Validate mirror functionality: wait for sync and verify test file appears in target
-        # The first mirror has force_push: true, so it should sync immediately
-        # Wait a bit for the sync to complete
-        # time.sleep(30)
-        
-        # Refresh the target project to get latest state
-        first_mirror_repo = gl.projects.get(id = first_mirror_repo.id)
-        first_mirror = self._get_mirror_from_url(project, first_mirror_url_http_password_auth)
-        print("*****************************************************")
-        print(f"First mirror: {first_mirror.asdict()}")
-        print("*****************************************************")
-        # Verify the test file exists in the target project (proving mirror works)
-        try:
-            target_file = first_mirror_repo.files.get(ref=new_branch.name, file_path=test_file_path)
-        except Exception as e:
-            # If file doesn't exist, the mirror didn't work - fail the test
-            print(f"Mirror sync failed. Error: {e}")
-            raise AssertionError(
-                f"Test file '{test_file_path}' not found in mirror project. "
-                
-            )
-        assert target_file.decode().decode("utf-8") == test_file_content
+        # Validate mirror functionality: wait for sync and verify test file appears in target.
+        # Even with force_push: true, GitLab's Sidekiq worker may take a few seconds to 
+        # complete the physical git push to the remote.
+        found = False
+        max_retries = 10
+        retry_interval = 5
 
+        for i in range(max_retries):
+            try:
+                # Attempt to retrieve the file from the target repository
+                target_file = first_mirror_repo.files.get(ref=sync_branch_name, file_path=test_file_path)
+                if target_file.decode().decode("utf-8") == test_file_content:
+                    found = True
+                    break
+            except Exception:
+                # If 404/Exception, wait and try again
+                time.sleep(retry_interval)
+        
+        assert found, (
+            f"Mirror sync failed: File '{test_file_path}' not found in target project "
+            f"'{first_mirror_repo.path_with_namespace}' after {max_retries * retry_interval} seconds."
+        )
 
     # def test_remote_mirrors_force_sync(self, gl, project, mirror_urls, mirror_target_projects):
     #     """Test creating multiple remote mirrors with different configurations and validate mirror functionality.
