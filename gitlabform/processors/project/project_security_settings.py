@@ -1,4 +1,5 @@
 from logging import debug
+from typing import Any, cast
 from gitlab.v4.objects import Project
 
 from gitlabform.gitlab import GitLab
@@ -34,8 +35,7 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
         result = self.gl.http_get(path)
         # http_get can return Response for streamed requests, but we're not streaming
         # so it will always be a dict
-        assert isinstance(result, dict)
-        return result
+        return cast(dict[str, Any], result)
 
     def _update_project_security_settings(self, project: Project, settings: dict) -> None:
         """Update project security settings using python-gitlab."""
