@@ -79,11 +79,7 @@ class GitlabWrapper:
     def __init__(self, gitlabform: GitLab):
         session = gitlabform.session
 
-        graphql_kwargs = {
-            k: v
-            for k, v in gitlabform.gitlab_config.items()
-            if k in self.GRAPHQL_PARAMS
-        }
+        graphql_kwargs = {k: v for k, v in gitlabform.gitlab_config.items() if k in self.GRAPHQL_PARAMS}
         graphql = GraphQL(**graphql_kwargs)
 
         default_gitlab_kwargs = {
@@ -99,10 +95,7 @@ class GitlabWrapper:
                 for k, v in gitlabform.gitlab_config.items()
                 if k not in renamed_gitlab_kwargs and k in self.GITLAB_CLIENT_PARAMS
             },
-            **{
-                renamed_gitlab_kwargs[k]: v
-                for k, v in gitlabform.gitlab_config.items()
-                if k in renamed_gitlab_kwargs},
+            **{renamed_gitlab_kwargs[k]: v for k, v in gitlabform.gitlab_config.items() if k in renamed_gitlab_kwargs},
         }
 
         self._gitlab: PythonGitlab = PythonGitlab(
