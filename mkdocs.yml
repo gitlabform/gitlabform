@@ -27,6 +27,7 @@ nav:
       - Pipeline schedules: reference/pipeline_schedules.md
       - Project security settings: reference/project_security_settings.md
       - Protected environments: reference/protected_environments.md
+      - Push mirrors: reference/push_mirrors.md
       - Push rules: reference/push_rules.md
       - Resource groups: reference/resource_groups.md
       - Settings: reference/settings.md
@@ -53,6 +54,7 @@ markdown_extensions:
   - markdown.extensions.admonition #for !!! notice
   - markdown.extensions.def_list
   - pymdownx.superfences
+  - pymdownx.critic
 
   - toc:
       permalink: True
