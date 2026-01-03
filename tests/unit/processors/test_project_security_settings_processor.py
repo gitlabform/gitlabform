@@ -39,26 +39,20 @@ class TestProjectSecuritySettingsProcessor:
     @pytest.fixture
     def processor(self, mock_gitlab, mock_gl):
         """Create processor with mocked dependencies"""
-        with patch(
-            "gitlabform.processors.abstract_processor.GitlabWrapper"
-        ) as mock_wrapper:
+        with patch("gitlabform.processors.abstract_processor.GitlabWrapper") as mock_wrapper:
             mock_wrapper.return_value.get_gitlab.return_value = mock_gl
             processor = ProjectSecuritySettingsProcessor(mock_gitlab)
             return processor
 
     def test_init(self, mock_gitlab, mock_gl):
         """Test processor initialization"""
-        with patch(
-            "gitlabform.processors.abstract_processor.GitlabWrapper"
-        ) as mock_wrapper:
+        with patch("gitlabform.processors.abstract_processor.GitlabWrapper") as mock_wrapper:
             mock_wrapper.return_value.get_gitlab.return_value = mock_gl
             processor = ProjectSecuritySettingsProcessor(mock_gitlab)
             assert processor.configuration_name == "project_security_settings"
             assert processor.gitlab == mock_gitlab
 
-    def test_get_project_security_settings_returns_dict(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_get_project_security_settings_returns_dict(self, processor, mock_gl, mock_project):
         """Test get_project_security_settings returns security settings"""
         # Setup
         mock_gl.get_project_by_path_cached.return_value = mock_project
@@ -76,9 +70,7 @@ class TestProjectSecuritySettingsProcessor:
         mock_gl.get_project_by_path_cached.assert_called_once_with("test/project")
         mock_gl.http_get.assert_called_once_with("/projects/123/security_settings")
 
-    def test_get_project_security_settings_with_encoded_project_id(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_get_project_security_settings_with_encoded_project_id(self, processor, mock_gl, mock_project):
         """Test that encoded_id is used correctly in the API path"""
         # Setup
         mock_project.encoded_id = "test%2Fproject"
@@ -89,13 +81,9 @@ class TestProjectSecuritySettingsProcessor:
         processor.get_project_security_settings("test/project")
 
         # Assert
-        mock_gl.http_get.assert_called_once_with(
-            "/projects/test%2Fproject/security_settings"
-        )
+        mock_gl.http_get.assert_called_once_with("/projects/test%2Fproject/security_settings")
 
-    def test_update_project_security_settings(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_update_project_security_settings(self, processor, mock_gl, mock_project):
         """Test updating project security settings"""
         # Setup
         settings = {
@@ -107,13 +95,9 @@ class TestProjectSecuritySettingsProcessor:
         processor._update_project_security_settings(mock_project, settings)
 
         # Assert
-        mock_gl.http_put.assert_called_once_with(
-            "/projects/123/security_settings", post_data=settings
-        )
+        mock_gl.http_put.assert_called_once_with("/projects/123/security_settings", post_data=settings)
 
-    def test_process_configuration_when_update_needed(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_process_configuration_when_update_needed(self, processor, mock_gl, mock_project):
         """Test _process_configuration when settings need update"""
         # Setup
         configuration = {
@@ -136,9 +120,7 @@ class TestProjectSecuritySettingsProcessor:
             post_data={"pre_receive_secret_detection_enabled": True},
         )
 
-    def test_process_configuration_when_no_update_needed(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_process_configuration_when_no_update_needed(self, processor, mock_gl, mock_project):
         """Test _process_configuration when settings don't need update"""
         # Setup
         configuration = {
@@ -159,9 +141,7 @@ class TestProjectSecuritySettingsProcessor:
         # Assert - http_put should not be called when no update is needed
         mock_gl.http_put.assert_not_called()
 
-    def test_process_configuration_with_multiple_settings(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_process_configuration_with_multiple_settings(self, processor, mock_gl, mock_project):
         """Test processing configuration with multiple security settings"""
         # Setup
         configuration = {
@@ -204,9 +184,7 @@ class TestProjectSecuritySettingsProcessor:
         mock_gl.get_project_by_path_cached.return_value = mock_project
         mock_gl.http_get.return_value = current_settings
 
-        with patch(
-            "gitlabform.processors.project.project_security_settings.DifferenceLogger"
-        ) as mock_diff_logger:
+        with patch("gitlabform.processors.project.project_security_settings.DifferenceLogger") as mock_diff_logger:
             # Execute
             processor._print_diff("test/project", config_settings, diff_only_changed=True)
 
@@ -218,9 +196,7 @@ class TestProjectSecuritySettingsProcessor:
                 only_changed=True,
             )
 
-    def test_print_diff_with_diff_only_changed_false(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_print_diff_with_diff_only_changed_false(self, processor, mock_gl, mock_project):
         """Test _print_diff with diff_only_changed=False"""
         # Setup
         current_settings = {"setting1": True}
@@ -228,9 +204,7 @@ class TestProjectSecuritySettingsProcessor:
         mock_gl.get_project_by_path_cached.return_value = mock_project
         mock_gl.http_get.return_value = current_settings
 
-        with patch(
-            "gitlabform.processors.project.project_security_settings.DifferenceLogger"
-        ) as mock_diff_logger:
+        with patch("gitlabform.processors.project.project_security_settings.DifferenceLogger") as mock_diff_logger:
             # Execute
             processor._print_diff("test/project", config_settings, diff_only_changed=False)
 
@@ -242,9 +216,7 @@ class TestProjectSecuritySettingsProcessor:
                 only_changed=False,
             )
 
-    def test_process_configuration_uses_correct_project_path(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_process_configuration_uses_correct_project_path(self, processor, mock_gl, mock_project):
         """Test that correct project path is used throughout processing"""
         # Setup
         project_path = "my-group/my-subgroup/my-project"
@@ -262,13 +234,9 @@ class TestProjectSecuritySettingsProcessor:
 
         # Assert - project path should be used for getting project
         assert mock_gl.get_project_by_path_cached.call_count == 2
-        mock_gl.get_project_by_path_cached.assert_has_calls(
-            [call(project_path), call(project_path)]
-        )
+        mock_gl.get_project_by_path_cached.assert_has_calls([call(project_path), call(project_path)])
 
-    def test_get_project_security_settings_http_get_returns_dict(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_get_project_security_settings_http_get_returns_dict(self, processor, mock_gl, mock_project):
         """Test that assertion passes when http_get returns dict"""
         # Setup
         mock_gl.get_project_by_path_cached.return_value = mock_project
@@ -281,9 +249,7 @@ class TestProjectSecuritySettingsProcessor:
         # Assert
         assert result == {"setting": "value"}
 
-    def test_process_configuration_with_empty_settings(
-        self, processor, mock_gl, mock_project
-    ):
+    def test_process_configuration_with_empty_settings(self, processor, mock_gl, mock_project):
         """Test processing with empty security settings configuration"""
         # Setup
         configuration = {"project_security_settings": {}}
