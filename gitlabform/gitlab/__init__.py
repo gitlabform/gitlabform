@@ -1,8 +1,9 @@
 import enum
+import inspect
 
 from typing import List
 
-from gitlab import GraphQL
+from gitlab import Gitlab as GitlabClient, GraphQL
 
 from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_badges import GitLabGroupBadges
@@ -67,28 +68,41 @@ class GitLab(
 
 
 class GitlabWrapper:
+    # Parameters accepted by python-gitlab's Gitlab.__init__
+    # Other config keys (like max_retries) are used elsewhere in gitlabform
+    # or passed to specific components like GraphQL
+    GITLAB_CLIENT_PARAMS = set(inspect.signature(GitlabClient.__init__).parameters.keys()) - {"self"}
+
+    # Parameters accepted by python-gitlab's GraphQL.__init__
+    GRAPHQL_PARAMS = set(inspect.signature(GraphQL.__init__).parameters.keys()) - {"self"}
+
     def __init__(self, gitlabform: GitLab):
         session = gitlabform.session
 
-        graphql = GraphQL(url=gitlabform.gitlab_config["url"], token=gitlabform.gitlab_config["token"])
+        graphql_kwargs = {k: v for k, v in gitlabform.gitlab_config.items() if k in self.GRAPHQL_PARAMS}
+        graphql = GraphQL(**graphql_kwargs)
 
-        default_kwargs = {
+        default_gitlab_kwargs = {
             "retry_transient_errors": True,
         }
-        renamed_kwargs = {
+        renamed_gitlab_kwargs = {
             "token": "private_token",
         }
-        extra_kwargs = {
-            **default_kwargs,
-            **{k: v for k, v in gitlabform.gitlab_config.items() if k not in renamed_kwargs},
-            **{renamed_kwargs[k]: v for k, v in gitlabform.gitlab_config.items() if k in renamed_kwargs},
+        extra_gitlab_kwargs = {
+            **default_gitlab_kwargs,
+            **{
+                k: v
+                for k, v in gitlabform.gitlab_config.items()
+                if k not in renamed_gitlab_kwargs and k in self.GITLAB_CLIENT_PARAMS
+            },
+            **{renamed_gitlab_kwargs[k]: v for k, v in gitlabform.gitlab_config.items() if k in renamed_gitlab_kwargs},
         }
 
         self._gitlab: PythonGitlab = PythonGitlab(
             api_version="4",
             graphql=graphql,
             session=session,
-            **extra_kwargs,
+            **extra_gitlab_kwargs,
         )
 
     def get_gitlab(self):

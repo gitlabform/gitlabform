@@ -41,17 +41,20 @@ gitlab:
   ssl_verify: true
   # timeout for the whole requests to the GitLab API, in seconds
   timeout: 10
+
   # ** advanced parameters **
-  # Any additional parameters specified here will be passed directly to the python-gitlab library.
+  # Any additional parameters specified here will be passed to the python-gitlab library if they are supported. 
   # See https://python-gitlab.readthedocs.io/en/stable/api-usage.html#gitlab-client for available options.
   #
-  # GitlabForm hasn't yet 100% migrated to use python-gitlab. Some processors are not using it and wont use these parameters.
+  # GitlabForm hasn't yet 100% migrated to use python-gitlab. Some processors are not using it and won't use these parameters.
   # For following migration to python-gitlab, see: https://github.com/gitlabform/gitlabform/issues/73
   #
-  # For example:
-  # retry_transient_errors: false # (defaults to `true`) retry requests that fail due to transient errors
-  # obey_rate_limit: true  # automatically wait if rate limit is hit
-  # max_retries: 5      # number of times to retry failed requests
+  # REST API parameters (passed to python-gitlab's Gitlab client):
+  # retry_transient_errors: false  # (defaults to `true`) retry requests that fail due to transient errors (5xx)
+  #
+  # GraphQL API parameters (passed to python-gitlab's GraphQL client):
+  # max_retries: 10       # number of times to retry failed GraphQL requests
+  # obey_rate_limit: true # automatically wait and retry if rate limit is hit
 
 # Configuration to apply to GitLab projects, groups and subgroups
 projects_and_groups:
