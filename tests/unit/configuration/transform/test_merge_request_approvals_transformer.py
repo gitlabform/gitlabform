@@ -290,3 +290,117 @@ def test__config__with_merge_request_approvals__inheritance_2():
     config_after = ez_yaml.to_string(obj=config_after.config, options={})
 
     assert config_before == config_after
+
+
+def test__config__with_only_approvals_section():
+    """Test MergeRequestApprovalsTransformer with only approvals section (no approvers)."""
+    config_before = """
+    projects_and_groups:
+      "foo/bar":
+        merge_requests:
+          approvals:
+            reset_approvals_on_push: true
+            disable_overriding_approvers_per_merge_request: false
+    """
+    config_before = Configuration(config_string=config_before)
+
+    transformer = MergeRequestApprovalsTransformer(MagicMock(GitLab))
+    transformer.transform(config_before)
+    config_before_str = ez_yaml.to_string(obj=config_before.config, options={})
+
+    # Should have converted to new syntax
+    config_after = f"""
+    projects_and_groups:
+      "foo/bar":
+        merge_requests_approvals:
+          reset_approvals_on_push: true
+          disable_overriding_approvers_per_merge_request: false
+    """
+    config_after = Configuration(config_string=config_after)
+    config_after_str = ez_yaml.to_string(obj=config_after.config, options={})
+
+    assert config_before_str == config_after_str
+
+
+def test__config__with_only_approvers():
+    """Test MergeRequestApprovalsTransformer with only approvers (no approvals section)."""
+    config_before = """
+    projects_and_groups:
+      "foo/bar":
+        merge_requests:
+          approvers:
+            - user1
+            - user2
+    """
+    config_before = Configuration(config_string=config_before)
+
+    transformer = MergeRequestApprovalsTransformer(MagicMock(GitLab))
+    transformer.transform(config_before)
+    config_before_str = ez_yaml.to_string(obj=config_before.config, options={})
+
+    # Should have converted to new syntax with guessed approvals_required
+    config_after = f"""
+    projects_and_groups:
+      "foo/bar":
+        merge_requests_approval_rules:
+          legacy:
+            approvals_required: 2
+            name: {APPROVAL_RULE_NAME}
+            users:
+              - user1
+              - user2
+    """
+    config_after = Configuration(config_string=config_after)
+    config_after_str = ez_yaml.to_string(obj=config_after.config, options={})
+
+    assert config_before_str == config_after_str
+
+
+def test__config__without_old_syntax():
+    """Test MergeRequestApprovalsTransformer does nothing when no old syntax present."""
+    config_before = """
+    projects_and_groups:
+      "foo/bar":
+        merge_requests:
+          squash_option: default_off
+    """
+    config_before = Configuration(config_string=config_before)
+
+    transformer = MergeRequestApprovalsTransformer(MagicMock(GitLab))
+    transformer.transform(config_before)
+
+    # Should remain unchanged since no old syntax was detected
+    config = config_before.config["projects_and_groups"]["foo/bar"]
+    assert "merge_requests" in config
+    assert config["merge_requests"]["squash_option"] == "default_off"
+
+
+def test__config__with_only_approver_groups():
+    """Test MergeRequestApprovalsTransformer with only approver_groups."""
+    config_before = """
+    projects_and_groups:
+      "foo/bar":
+        merge_requests:
+          approver_groups:
+            - group1
+    """
+    config_before = Configuration(config_string=config_before)
+
+    transformer = MergeRequestApprovalsTransformer(MagicMock(GitLab))
+    transformer.transform(config_before)
+    config_before_str = ez_yaml.to_string(obj=config_before.config, options={})
+
+    config_after = f"""
+    projects_and_groups:
+      "foo/bar":
+        merge_requests_approval_rules:
+          legacy:
+            approvals_required: 2
+            name: {APPROVAL_RULE_NAME}
+            groups:
+              - group1
+    """
+    config_after = Configuration(config_string=config_after)
+    config_after_str = ez_yaml.to_string(obj=config_after.config, options={})
+
+    assert config_before_str == config_after_str

@@ -108,3 +108,87 @@ def test__transform_for_merge_request_approvals() -> None:
     transformer.convert_to_simple_types(expected_transformed_config)
 
     assert not DeepDiff(configuration.config, expected_transformed_config.config)
+
+
+def test__transform_user_not_found_protected_environments() -> None:
+    """Test that UserTransformer raises NotFoundException when user not found in protected environments."""
+    config_yaml = """
+    projects_and_groups:
+      "foo/bar":
+        protected_environments:
+          production:
+            deploy_access_levels:
+              - user: nonexistent_user
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    gitlab_mock = MagicMock(GitLab)
+
+    with patch("gitlabform.configuration.transform.GitlabWrapper") as wrapper_mock:
+        gl_mock = MagicMock()
+        # Return None to simulate user not found
+        gl_mock.get_user_id_cached = MagicMock(return_value=None)
+        wrapper_mock.return_value.get_gitlab.return_value = gl_mock
+
+        transformer = UserTransformer(gitlab_mock)
+
+        with pytest.raises(Exception) as exc_info:
+            transformer.transform(configuration)
+
+        assert "No users found when searching for username 'nonexistent_user'" in str(exc_info.value)
+
+
+def test__transform_user_not_found_approval_rules() -> None:
+    """Test that UserTransformer raises NotFoundException when user not found in approval rules."""
+    config_yaml = """
+    projects_and_groups:
+      "foo/bar":
+        merge_requests_approval_rules:
+          dev-review:
+            approvals_required: 1
+            users:
+              - valid_user
+              - nonexistent_user
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    gitlab_mock = MagicMock(GitLab)
+
+    with patch("gitlabform.configuration.transform.GitlabWrapper") as wrapper_mock:
+        gl_mock = MagicMock()
+        # First user exists, second doesn't
+        gl_mock.get_user_id_cached = MagicMock(side_effect=[123, None])
+        wrapper_mock.return_value.get_gitlab.return_value = gl_mock
+
+        transformer = UserTransformer(gitlab_mock)
+
+        with pytest.raises(Exception) as exc_info:
+            transformer.transform(configuration)
+
+        assert "No users found when searching for username 'nonexistent_user'" in str(exc_info.value)
+
+
+def test__transform_with_no_users() -> None:
+    """Test that UserTransformer handles configuration with no user fields."""
+    config_yaml = """
+    projects_and_groups:
+      "foo/bar":
+        protected_environments:
+          production:
+            deploy_access_levels:
+              - access_level: maintainer
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    gitlab_mock = MagicMock(GitLab)
+
+    with patch("gitlabform.configuration.transform.GitlabWrapper") as wrapper_mock:
+        gl_mock = MagicMock()
+        gl_mock.get_user_id_cached = MagicMock()
+        wrapper_mock.return_value.get_gitlab.return_value = gl_mock
+
+        transformer = UserTransformer(gitlab_mock)
+        transformer.transform(configuration)
+
+        # Should not call get_user_id_cached since no users to transform
+        assert gl_mock.get_user_id_cached.call_count == 0
