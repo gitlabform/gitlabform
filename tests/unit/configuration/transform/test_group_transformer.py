@@ -1,5 +1,5 @@
 from deepdiff import DeepDiff
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.transform import (
@@ -22,12 +22,17 @@ def test__transform_for_merge_request_approvals() -> None:
     configuration = Configuration(config_string=config_yaml)
 
     gitlab_mock = MagicMock(GitLab)
-    gitlab_mock._get_group_id = MagicMock(side_effect=[123])
+    
+    # Mock the python-gitlab wrapper
+    with patch('gitlabform.configuration.transform.GitlabWrapper') as wrapper_mock:
+        gl_mock = MagicMock()
+        gl_mock.get_group_id = MagicMock(side_effect=[123])
+        wrapper_mock.return_value.get_gitlab.return_value = gl_mock
+        
+        transformer = GroupTransformer(gitlab_mock)
+        transformer.transform(configuration, last=True)
 
-    transformer = GroupTransformer(gitlab_mock)
-    transformer.transform(configuration, last=True)
-
-    assert gitlab_mock._get_group_id.call_count == 1
+        assert gl_mock.get_group_id.call_count == 1
 
     # effective_config_yaml_str = ez_yaml.to_string(obj=configuration.config, options={})
     # print("!!!")

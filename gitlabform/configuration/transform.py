@@ -119,7 +119,7 @@ class UserTransformer(ConfigurationTransformer):
 
 class GroupTransformer(ConfigurationTransformer):
     def __init__(self, gitlab: GitLab):
-        self.gitlab = gitlab
+        self.gl: PythonGitlab = GitlabWrapper(gitlab).get_gitlab()
 
     def _do_transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
@@ -131,7 +131,7 @@ class GroupTransformer(ConfigurationTransformer):
                 mustexist=True,
             ):
                 group = node_coordinate.parent.pop("group")
-                node_coordinate.parent["group_id"] = self.gitlab._get_group_id(group)
+                node_coordinate.parent["group_id"] = self.gl.get_group_id(group)
 
         except YAMLPathException as e:
             # this just means that we haven't found any keys in YAML
@@ -146,7 +146,7 @@ class GroupTransformer(ConfigurationTransformer):
                 group_ids = []
                 groups = node_coordinate.parent.pop("groups")
                 for group in groups:
-                    group_id = self.gitlab._get_group_id(group)
+                    group_id = self.gl.get_group_id(group)
                     group_ids.append(group_id)
                 node_coordinate.parent["group_ids"] = group_ids
         except YAMLPathException:

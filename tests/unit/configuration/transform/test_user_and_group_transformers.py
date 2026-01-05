@@ -33,7 +33,6 @@ def test__transform_for_merge_request_approvals() -> None:
     configuration = Configuration(config_string=config_yaml)
 
     gitlab_mock = MagicMock(GitLab)
-    gitlab_mock._get_group_id = MagicMock(side_effect=[1])
     
     # Mock the python-gitlab wrapper for user transformer
     with patch('gitlabform.configuration.transform.GitlabWrapper') as wrapper_mock:
@@ -44,8 +43,14 @@ def test__transform_for_merge_request_approvals() -> None:
         ut = UserTransformer(gitlab_mock)
         ut.transform(configuration)
 
-    gt = GroupTransformer(gitlab_mock)
-    gt.transform(configuration, last=True)
+    # Mock the python-gitlab wrapper for group transformer
+    with patch('gitlabform.configuration.transform.GitlabWrapper') as wrapper_mock:
+        gl_mock = MagicMock()
+        gl_mock.get_group_id = MagicMock(side_effect=[1])
+        wrapper_mock.return_value.get_gitlab.return_value = gl_mock
+        
+        gt = GroupTransformer(gitlab_mock)
+        gt.transform(configuration, last=True)
 
     # ut = UserTransformer(gitlab_mock)
     # ut.transform(configuration)
