@@ -72,8 +72,7 @@ class ConfigurationTransformer(ABC):
 
 class UserTransformer(ConfigurationTransformer):
     def __init__(self, gitlab: GitLab):
-        self.gitlab = gitlab
-        self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
+        self.gl: PythonGitlab = GitlabWrapper(gitlab).get_gitlab()
 
     def _do_transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
