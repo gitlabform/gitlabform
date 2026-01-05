@@ -33,10 +33,14 @@ class GitLabCore:
 
         self.session = requests.Session()
 
+        retries_status_forcelist = []
+        if self.gitlab_config.get("retry_transient_errors", True):
+            retries_status_forcelist = [408, 425, 429, 500, 502, 503, 504] + list(range(520, 531))
+
         retries = Retry(
-            total=self.gitlab_config.get("max_retries", 10),
-            backoff_factor=self.gitlab_config.get("backoff_factor", 0.25),
-            status_forcelist=[429, 500, 502, 503, 504] + list(range(520, 531)),
+            total=self.gitlab_config.get("max_retries", 3),
+            backoff_factor=gitlab_config_from_file.get("backoff_factor", 0.25),
+            status_forcelist=retries_status_forcelist,
         )
 
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
