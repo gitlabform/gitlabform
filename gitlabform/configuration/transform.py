@@ -89,6 +89,7 @@ class UserTransformer(ConfigurationTransformer):
                 user_id = self.gl.get_user_id_cached(user)
                 if user_id is None:
                     from gitlabform.gitlab.core import NotFoundException
+
                     raise NotFoundException("No users found when searching for username '%s'" % user)
                 node_coordinate.parent["user_id"] = user_id
         except YAMLPathException as _:
@@ -108,6 +109,7 @@ class UserTransformer(ConfigurationTransformer):
                     user_id = self.gl.get_user_id_cached(user)
                     if user_id is None:
                         from gitlabform.gitlab.core import NotFoundException
+
                         raise NotFoundException("No users found when searching for username '%s'" % user)
                     user_ids.append(user_id)
                 node_coordinate.parent["user_ids"] = user_ids
