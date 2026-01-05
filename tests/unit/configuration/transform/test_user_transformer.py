@@ -3,7 +3,7 @@ from unittest import TestCase
 import ez_yaml
 import pytest
 from deepdiff import DeepDiff
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from gitlabform.constants import APPROVAL_RULE_NAME
 from gitlabform import EXIT_INVALID_INPUT
@@ -35,12 +35,17 @@ def test__transform_for_protected_environments() -> None:
     configuration = Configuration(config_string=config_yaml)
 
     gitlab_mock = MagicMock(GitLab)
-    gitlab_mock._get_user_id = MagicMock(side_effect=[78, 89])
+    
+    # Mock the python-gitlab wrapper
+    with patch('gitlabform.configuration.transform.GitlabWrapper') as wrapper_mock:
+        gl_mock = MagicMock()
+        gl_mock.get_user_id_cached = MagicMock(side_effect=[78, 89])
+        wrapper_mock.return_value.get_gitlab.return_value = gl_mock
+        
+        transformer = UserTransformer(gitlab_mock)
+        transformer.transform(configuration)
 
-    transformer = UserTransformer(gitlab_mock)
-    transformer.transform(configuration)
-
-    assert gitlab_mock._get_user_id.call_count == 2
+        assert gl_mock.get_user_id_cached.call_count == 2
 
     expected_transformed_config_yaml = f"""
     projects_and_groups:
@@ -76,12 +81,17 @@ def test__transform_for_merge_request_approvals() -> None:
     configuration = Configuration(config_string=config_yaml)
 
     gitlab_mock = MagicMock(GitLab)
-    gitlab_mock._get_user_id = MagicMock(side_effect=[123])
+    
+    # Mock the python-gitlab wrapper
+    with patch('gitlabform.configuration.transform.GitlabWrapper') as wrapper_mock:
+        gl_mock = MagicMock()
+        gl_mock.get_user_id_cached = MagicMock(side_effect=[123])
+        wrapper_mock.return_value.get_gitlab.return_value = gl_mock
+        
+        transformer = UserTransformer(gitlab_mock)
+        transformer.transform(configuration, last=True)
 
-    transformer = UserTransformer(gitlab_mock)
-    transformer.transform(configuration, last=True)
-
-    assert gitlab_mock._get_user_id.call_count == 1
+        assert gl_mock.get_user_id_cached.call_count == 1
 
     expected_transformed_config_yaml = f"""
     projects_and_groups:

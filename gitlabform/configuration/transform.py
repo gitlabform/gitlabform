@@ -13,7 +13,7 @@ from yamlpath.wrappers import ConsolePrinter
 from gitlabform.constants import EXIT_INVALID_INPUT, APPROVAL_RULE_NAME
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
-from gitlabform.gitlab import GitLab
+from gitlabform.gitlab import GitLab, GitlabWrapper, PythonGitlab
 
 
 # Configuration transformers are classes which take the input configuration as YAML and change it
@@ -73,6 +73,7 @@ class ConfigurationTransformer(ABC):
 class UserTransformer(ConfigurationTransformer):
     def __init__(self, gitlab: GitLab):
         self.gitlab = gitlab
+        self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
 
     def _do_transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
@@ -86,7 +87,11 @@ class UserTransformer(ConfigurationTransformer):
             ):
                 user = node_coordinate.parent.pop("user")
 
-                node_coordinate.parent["user_id"] = self.gitlab._get_user_id(user)
+                user_id = self.gl.get_user_id_cached(user)
+                if user_id is None:
+                    from gitlabform.gitlab.core import NotFoundException
+                    raise NotFoundException("No users found when searching for username '%s'" % user)
+                node_coordinate.parent["user_id"] = user_id
         except YAMLPathException as e:
             # this just means that we haven't found any keys in YAML
             # under the given path
@@ -101,7 +106,10 @@ class UserTransformer(ConfigurationTransformer):
                 user_ids = []
                 users = node_coordinate.parent.pop("users")
                 for user in users:
-                    user_id = self.gitlab._get_user_id(user)
+                    user_id = self.gl.get_user_id_cached(user)
+                    if user_id is None:
+                        from gitlabform.gitlab.core import NotFoundException
+                        raise NotFoundException("No users found when searching for username '%s'" % user)
                     user_ids.append(user_id)
                 node_coordinate.parent["user_ids"] = user_ids
         except YAMLPathException as e:

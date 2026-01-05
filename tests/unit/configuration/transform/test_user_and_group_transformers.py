@@ -1,7 +1,7 @@
 import ez_yaml
 from deepdiff import DeepDiff
 from pprint import pprint
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.transform import (
@@ -34,11 +34,15 @@ def test__transform_for_merge_request_approvals() -> None:
 
     gitlab_mock = MagicMock(GitLab)
     gitlab_mock._get_group_id = MagicMock(side_effect=[1])
-    gitlab_mock._get_user_id = MagicMock(side_effect=[2])
-    # gitlab_mock._get_branch_id = MagicMock(side_effect=[3])
-
-    ut = UserTransformer(gitlab_mock)
-    ut.transform(configuration)
+    
+    # Mock the python-gitlab wrapper for user transformer
+    with patch('gitlabform.configuration.transform.GitlabWrapper') as wrapper_mock:
+        gl_mock = MagicMock()
+        gl_mock.get_user_id_cached = MagicMock(side_effect=[2])
+        wrapper_mock.return_value.get_gitlab.return_value = gl_mock
+        
+        ut = UserTransformer(gitlab_mock)
+        ut.transform(configuration)
 
     gt = GroupTransformer(gitlab_mock)
     gt.transform(configuration, last=True)
