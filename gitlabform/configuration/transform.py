@@ -91,7 +91,7 @@ class UserTransformer(ConfigurationTransformer):
                     from gitlabform.gitlab.core import NotFoundException
                     raise NotFoundException("No users found when searching for username '%s'" % user)
                 node_coordinate.parent["user_id"] = user_id
-        except YAMLPathException as e:
+        except YAMLPathException as _:
             # this just means that we haven't found any keys in YAML
             # under the given path
             pass
@@ -111,7 +111,7 @@ class UserTransformer(ConfigurationTransformer):
                         raise NotFoundException("No users found when searching for username '%s'" % user)
                     user_ids.append(user_id)
                 node_coordinate.parent["user_ids"] = user_ids
-        except YAMLPathException as e:
+        except YAMLPathException as _:
             # this just means that we haven't found any keys in YAML
             # under the given path
             pass
@@ -133,7 +133,7 @@ class GroupTransformer(ConfigurationTransformer):
                 group = node_coordinate.parent.pop("group")
                 node_coordinate.parent["group_id"] = self.gl.get_group_id(group)
 
-        except YAMLPathException as e:
+        except YAMLPathException as _:
             # this just means that we haven't found any keys in YAML
             # under the given path
             pass
