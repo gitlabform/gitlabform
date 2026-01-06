@@ -22,50 +22,75 @@ projects_and_groups:
 ## Mandatory top-level keys
 
 The configuration has to contain the following top-level keys:
-```yaml
-# This key is required in configs for GitLabForm version 3.x.x
-# This ensures that if the application behavior changes in a backward-incompatible way
-# you won't apply unwanted configuration to your GitLab instance.
-config_version: 3
 
-# GitLab API access config
+```yaml
+config_version: 3
 gitlab:
   # alternatively use the GITLAB_URL environment variable for this
   url: https://gitlab.yourcompany.com
   # alternatively use the GITLAB_TOKEN environment variable for this
-  token: "<private token OR an OAuth2 access token of an admin user>"
-  
-  # ** optional parameters - below values are defaults **
-  # whether the SSL certificate of your GitLab instance should be verified,
-  # set this to `false` if you are using a self-signed certificate (not recommended)
-  ssl_verify: true
-  # timeout for the whole requests to the GitLab API, in seconds
-  timeout: 10
-
-  # ** advanced parameters **
-  # Any additional parameters specified here will be passed to the python-gitlab library if they are supported. 
-  # See https://python-gitlab.readthedocs.io/en/stable/api-usage.html#gitlab-client for available options.
-  #
-  # GitlabForm hasn't yet 100% migrated to use python-gitlab. Some processors are not using it and won't use these parameters.
-  # For following migration to python-gitlab, see: https://github.com/gitlabform/gitlabform/issues/73
-  #
-  # REST API parameters (passed to python-gitlab's Gitlab client):
-  # retry_transient_errors: false  # (defaults to `true`) retry requests that fail due to transient errors (5xx)
-  #
-  # GraphQL API parameters (passed to python-gitlab's GraphQL client):
-  # max_retries: 10       # number of times to retry failed GraphQL requests
-  # obey_rate_limit: true # automatically wait and retry if rate limit is hit
-  #
-  # Some parameters are also passed to our custom GitLab core API client (for requests not yet migrated to python-gitlab):
-  # max_retries: 3        # number of times to retry failed REST API requests
-  # retry_transient_errors: false # (defaults to `true`) retry requests that fail due to transient errors (429, 5xx)
-  # backoff_factor: 0.25 # factor for exponential backoff between retries
-
-# Configuration to apply to GitLab projects, groups and subgroups
-projects_and_groups:
-  # (...)
-  # See below.
+  token: "<private token OR an OAuth2 access token>"
 ```
+
+### `config_version`
+
+This key is required in configs for GitLabForm version 3.x.x. It ensures that if the application behavior changes in a backward-incompatible way, you won't apply unwanted configuration to your GitLab instance.
+
+```yaml
+config_version: 3
+```
+
+### `gitlab`
+
+GitLab API access configuration.
+
+```yaml
+gitlab:
+  url: https://gitlab.yourcompany.com
+  token: "<private token OR an OAuth2 access token>"
+```
+
+#### Required parameters
+
+| Parameter | Type | Environment Variable | Description |
+|-----------|------|---------------------|-------------|
+| `url` | string | `GITLAB_URL` | URL of your GitLab instance |
+| `token` | string | `GITLAB_TOKEN` | Private token or OAuth2 access token of an admin user |
+
+#### Optional parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `ssl_verify` | bool | `true` | Whether to verify SSL certificate. Set to `false` for self-signed certificates (not recommended) |
+| `timeout` | int | `10` | Timeout for requests to the GitLab API, in seconds |
+
+#### Advanced parameters
+
+Any additional parameters specified under `gitlab:` will be passed to the [python-gitlab](https://python-gitlab.readthedocs.io/en/stable/api-usage.html#gitlab-client) library if supported.
+
+!!! note "Migration in progress"
+    GitLabForm hasn't yet fully migrated to python-gitlab. Some processors still use a legacy REST client.
+    See [issue #73](https://github.com/gitlabform/gitlabform/issues/73) for migration progress.
+
+See the parameters supported by python-gitlab REST API and GraphQL client in <https://github.com/python-gitlab/python-gitlab/blob/main/docs/api-usage-advanced.rst>.
+
+**Legacy REST client parameters** (for requests not yet migrated to python-gitlab):
+
+Some of the parameters are passed to the legacy REST client used by GitLabForm for requests not yet migrated to python-gitlab. (See the migration status above.)
+
+- `max_retries`: Number of times to retry failed API requests (default: `3`)
+- `backoff_factor`: Factor for exponential backoff between retries (default: `0.25`)
+- `retry_transient_errors`: Retry requests that fail due to transient errors (429, 5xx) (default: `true`)
+
+**Default parameters for python-gitlab clients used by GitLabForm:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `ssl_verify` | bool | `true` | Whether to verify SSL certificate. Set to `false` for self-signed certificates (not recommended) |
+| `timeout` | int | `10` | Timeout for requests to the GitLab API, in seconds |
+| `max_retries` | int | `3` | Number of times to retry failed API requests |
+| `backoff_factor` | float | `0.25` | Factor for exponential backoff between retries |
+| `retry_transient_errors` | bool | `true` | Retry requests that fail due to transient errors (429, 5xx) |
 
 ## Projects and groups configuration
 
