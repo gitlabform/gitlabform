@@ -29,6 +29,7 @@ class GitLabCore:
             "timeout": 10,
             "max_retries": 3,
             "backoff_factor": 0.25,
+            "retry_transient_errors": True,
         }
         gitlab_config_from_file = self.configuration.get("gitlab", {})
         self.gitlab_config = {**default_gitlab_config, **gitlab_config_from_file}
@@ -36,7 +37,7 @@ class GitLabCore:
         self.session = requests.Session()
 
         retries_status_forcelist = []
-        if self.gitlab_config.get("retry_transient_errors", True):
+        if self.gitlab_config["retry_transient_errors"]:
             # 429 Too Many Requests is included to handle rate limiting
             #     Ideally we would like to handle Rate Limiting retrys based on 'Retry-After' header
             #     As done in python-gitlab: https://github.com/python-gitlab/python-gitlab/blob/main/docs/api-usage-advanced.rst#rate-limits
