@@ -27,6 +27,8 @@ class GitLabCore:
             "token": os.getenv("GITLAB_TOKEN"),
             "ssl_verify": True,
             "timeout": 10,
+            "max_retries": 3,
+            "backoff_factor": 0.25,
         }
         gitlab_config_from_file = self.configuration.get("gitlab", {})
         self.gitlab_config = {**default_gitlab_config, **gitlab_config_from_file}
@@ -38,8 +40,8 @@ class GitLabCore:
             retries_status_forcelist = [408, 425, 429, 500, 502, 503, 504] + list(range(520, 531))
 
         retries = Retry(
-            total=self.gitlab_config.get("max_retries", 3),
-            backoff_factor=gitlab_config_from_file.get("backoff_factor", 0.25),
+            total=self.gitlab_config["max_retries"],
+            backoff_factor=self.gitlab_config["backoff_factor"],
             status_forcelist=retries_status_forcelist,
         )
 
