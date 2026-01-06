@@ -37,7 +37,11 @@ class GitLabCore:
 
         retries_status_forcelist = []
         if self.gitlab_config.get("retry_transient_errors", True):
-            retries_status_forcelist = [408, 425, 429, 500, 502, 503, 504] + list(range(520, 531))
+            # 429 Too Many Requests is included to handle rate limiting
+            #     Ideally we would like to handle Rate Limiting retrys based on 'Retry-After' header
+            #     As done in python-gitlab: https://github.com/python-gitlab/python-gitlab/blob/main/docs/api-usage-advanced.rst#rate-limits
+            # 5xx status codes are included to retry after transient server errors
+            retries_status_forcelist = [429, 500, 502, 503, 504] + list(range(520, 531))
 
         retries = Retry(
             total=self.gitlab_config["max_retries"],
