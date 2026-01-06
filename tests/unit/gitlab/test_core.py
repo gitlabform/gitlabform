@@ -101,9 +101,7 @@ class TestGitLabCoreRetryConfiguration:
     @patch("gitlabform.gitlab.core.Retry")
     @patch("gitlabform.gitlab.core.requests.Session")
     @patch("gitlabform.gitlab.core.Configuration")
-    def test_config_passed_to_retry(
-        self, mock_configuration, mock_session, mock_retry, mock_http_adapter
-    ):
+    def test_config_passed_to_retry(self, mock_configuration, mock_session, mock_retry, mock_http_adapter):
         """Test that max_retries value is correctly passed to Retry"""
         mock_configuration.return_value.get.return_value = {
             "url": "https://gitlab.example.com",
