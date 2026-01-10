@@ -58,7 +58,7 @@ gitlab:
   #
   # Some parameters are also passed to our custom GitLab core API client (for requests not yet migrated to python-gitlab):
   # max_retries: 3        # number of times to retry failed REST API requests
-  # retry_transient_errors: false # (defaults to `true`) retry requests that fail due to transient errors (408, 425, 429, 5xx)
+  # retry_transient_errors: false # (defaults to `true`) retry requests that fail due to transient errors (429, 5xx)
   # backoff_factor: 0.25 # factor for exponential backoff between retries
 
 # Configuration to apply to GitLab projects, groups and subgroups
