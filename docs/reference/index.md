@@ -55,6 +55,11 @@ gitlab:
   # GraphQL API parameters (passed to python-gitlab's GraphQL client):
   # max_retries: 10       # number of times to retry failed GraphQL requests
   # obey_rate_limit: true # automatically wait and retry if rate limit is hit
+  #
+  # Some parameters are also passed to our custom GitLab core API client (for requests not yet migrated to python-gitlab):
+  # max_retries: 3        # number of times to retry failed REST API requests
+  # retry_transient_errors: false # (defaults to `true`) retry requests that fail due to transient errors (429, 5xx)
+  # backoff_factor: 0.25 # factor for exponential backoff between retries
 
 # Configuration to apply to GitLab projects, groups and subgroups
 projects_and_groups:
