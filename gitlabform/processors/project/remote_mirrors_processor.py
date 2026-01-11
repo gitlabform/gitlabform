@@ -48,17 +48,19 @@ class RemoteMirrorsProcessor(AbstractProcessor):
 
         # 1. PREPARATION & OPTIMIZATION
         mirrors_in_gitlab: List[ProjectRemoteMirror] = project.remote_mirrors.list(get_all=True)
-        # Type the map for better downstream checking
         gitlab_mirrors_map: Dict[str, ProjectRemoteMirror] = {
             self._normalize_url_for_comparison(m.url): cast(ProjectRemoteMirror, m) for m in mirrors_in_gitlab
         }
 
-        # Type the configuration subset
         mirrors_in_config: Dict[str, Any] = configuration.get("remote_mirrors", {}).copy()
+
+        # --- GLOBAL OPTIONS ---
         enforce_mirrors: bool = mirrors_in_config.pop("enforce", False)
+        print_details: bool = mirrors_in_config.pop("print_details", False)
+
         urls_to_keep: Set[str] = set()
 
-        # 2. PROCESS CONFIGURATION (Explicit Create / Update / Delete)
+        # 2. PROCESS CONFIGURATION (Create / Update / Delete)
         for mirror_url in sorted(mirrors_in_config.keys()):
             mirror_settings: Dict[str, Any] = mirrors_in_config[mirror_url]
             norm_url: str = self._normalize_url_for_comparison(mirror_url)
@@ -78,7 +80,6 @@ class RemoteMirrorsProcessor(AbstractProcessor):
 
             # Prepare payload: Extract local-only options
             mirror_payload: Dict[str, Any] = {"url": mirror_url, **mirror_settings}
-
             force_push: bool = mirror_payload.pop("force_push", False)
             force_update: bool = mirror_payload.pop("force_update", False)
             print_public_key: bool = mirror_payload.pop("print_public_key", False)
@@ -98,6 +99,19 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         # 3. ENFORCEMENT PHASE
         if enforce_mirrors:
             self._enforce_mirrors(gitlab_mirrors_map, urls_to_keep)
+
+        # 4. REPORTING PHASE (Final State)
+        if print_details:
+            # We fetch a fresh list to show the final state after all updates/syncs
+            final_mirrors: List[ProjectRemoteMirror] = project.remote_mirrors.list(get_all=True)
+            if not final_mirrors:
+                info("🔍 No remote mirrors found for this project.")
+            else:
+                info(f"📋 Final Remote Mirror Report for '{project_and_group}':")
+                for mirror in final_mirrors:
+                    info("  " + "─" * 30)  # Visual separator using a light line
+                    self._report_mirror_details(mirror)
+                info("  " + "─" * 30)
 
     def _handle_public_key_display(self, project: Project, mirror_obj: ProjectRemoteMirror, norm_url: str) -> None:
         """
@@ -227,3 +241,26 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         except Exception:
             logging.exception("Failed to trigger sync for remote mirror id=%s url=%s", mirror_id, mirror_url)
             verbose(f"Failed to trigger sync for remote mirror '{mirror_url}'")
+
+    def _report_mirror_details(self, mirror: ProjectRemoteMirror) -> None:
+        """Prints every attribute of the mirror object, one per line."""
+
+        mirror_data = mirror.asdict()
+
+        # Mapping statuses to helpful visual cues
+        status_icons = {
+            "finished": "✅",
+            "started": "⏳",
+            "scheduled": "📅",
+            "failed": "❌",
+            "none": "⚪",
+        }
+
+        for key, value in sorted(mirror_data.items()):
+            if key == "update_status":
+                icon = status_icons.get(value, "❓")
+                info(f"    - {key}: {icon} {value}")
+            elif key == "last_error" and value:
+                info(f"    - {key}: ⚠️ {value}")
+            else:
+                info(f"    - {key}: {value}")

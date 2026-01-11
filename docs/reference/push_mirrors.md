@@ -71,6 +71,44 @@ projects_and_groups:
         only_protected_branches: true
 ```
 
+### `print_details`
+
+Because repository mirror settings are often restricted to users with Maintainer or Owner permissions, regular developers often cannot verify if a mirror is functioning correctly through the GitLab Web UI.
+
+Set this attribute to true and GitLabForm will retrieve the full state of all remote mirrors in the project and print their attributes to the terminal. This includes the synchronization status, last successful update time, and any error messages returned by GitLab. This is particularly useful in CI/CD logs to monitor the health of your mirrors.
+
+```yaml
+projects_and_groups:
+  my-group/my-project:
+    remote_mirrors:
+      print_details: true # Global option to report on all mirrors in this project
+      "https://username:password@example.com/path-to/my-repo.git":
+        enabled: true
+        auth_method: "password"
+```
+
+Example Output in Terminal:
+
+```
+📋 Final Remote Mirror Report for 'my-group/my-project':
+  ────────────────────────────────────────
+  - enabled: True
+  - auth_method: password
+  - enabled: True
+  - host_keys: []
+  - id: 479
+  - keep_divergent_refs: None
+  - last_error: None
+  - last_successful_update_at: 2026-01-11T10:00:00.000Z
+  - last_update_at: None
+  - last_update_started_at: None
+  - mirror_branch_regex: None
+  - only_protected_branches: False
+  - update_status: ✅ finished
+  - url: https://*****:*****@example.com/path-to/my-repo.git
+  ────────────────────────────────────────
+```
+
 ### `delete`
 
 This is a boolean type key that can be used within indiviudal mirror. Set this to `true` for the corresponding mirror to be deleted.

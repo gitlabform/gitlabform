@@ -673,3 +673,96 @@ class TestRemoteMirrorsProcessor:
         # Only the second mirror's normalized URL should remain.
         second_norm = self._normalize_url_for_comparison(second_url)
         assert final_norms == {second_norm}, f"Expected only {second_norm} to remain. Found: {final_norms}"
+
+    def test_remote_mirrors_print_details(
+        self,
+        project: Project,
+        mirror_urls: Tuple[str, str, str],
+        gitlabform_logs: GitLabFormLogs,
+        root_username,
+        root_access_token,
+    ) -> None:
+        """
+        Validates that when print_details is true, the full mirror object
+        details are retrieved and printed to the info logs.
+        """
+        target_path = project.path_with_namespace
+        first_url, second_url, _ = mirror_urls
+
+        # Normalize URLs as they will appear in the masked logs
+        # first_norm = self._normalize_url_for_comparison(first_url)
+        # second_norm = self._normalize_url_for_comparison(second_url)
+
+        # 1. Setup: Ensure at least one mirror exists manually that is NOT in the config
+        # This tests that the report shows the "Final State" of GitLab, not just the config.
+        project.remote_mirrors.create({"url": second_url, "enabled": True, "auth_method": "password"})
+
+        # 2. Run GitLabForm with global print_details: true
+        # Config only contains the first mirror
+        config = f"""
+        projects_and_groups:
+          {target_path}:
+            remote_mirrors:
+              print_details: true
+              enforce: false
+              {first_url}:
+                enabled: true
+                auth_method: password
+                only_protected_branches: true
+        """
+
+        run_gitlabform(config, target_path)
+
+        # 3. Assertions: Check for the Report Header
+        report_header = f"📋 Final Remote Mirror Report for '{target_path}':"
+        assert any(
+            report_header in msg for msg in gitlabform_logs.info
+        ), f"Report header not found in info logs. Captured: {gitlabform_logs.info}"
+
+        # 4. Assertions: Check for Mirror 1 (from config)
+        # We expect GitLab to have masked the username and the token/password
+        # resulting in "https://*****:*****@..."
+        expected_api_url = first_url.replace(root_username, "*****").replace(root_access_token, "*****")
+        assert any(f"- url: {expected_api_url}" in msg for msg in gitlabform_logs.info)
+        assert any("- only_protected_branches: True" in msg for msg in gitlabform_logs.info)
+
+        # 5. Assertions: Check for Mirror 2 (unconfigured but existing in GitLab)
+        # We expect GitLab to have masked the username and the token/password
+        # resulting in "https://*****:*****@..."
+        # This confirms the report shows all mirrors if enforce is false
+        expected_api_url = second_url.replace(root_username, "*****").replace(root_access_token, "*****")
+        assert any(f"- url: {expected_api_url}" in msg for msg in gitlabform_logs.info)
+
+        # 6. Check for status with icon (Default status for new/idle mirrors is 'none')
+        # We check for 'none' or 'finished' depending on how fast GitLab processed the sync
+        status_pattern = ["update_status: ⚪ none", "update_status: ✅ finished"]
+        found_status = any(any(pattern in msg for pattern in status_pattern) for msg in gitlabform_logs.info)
+        assert found_status, f"Mirror status icon not found in report. Logs: {gitlabform_logs.info}"
+
+        # 7. Verify visual separators
+        separator = "─" * 30
+        assert any(separator in msg for msg in gitlabform_logs.info), "Visual separator line not found in report logs."
+
+    def test_remote_mirrors_print_details_disabled_by_default(
+        self, project_for_function: Project, mirror_urls: Tuple[str, str, str], gitlabform_logs: GitLabFormLogs
+    ) -> None:
+        """
+        Ensures that no detailed report is printed when print_details is not set.
+        """
+        target_path = project_for_function.path_with_namespace
+        url, _, _ = mirror_urls
+
+        config = f"""
+        projects_and_groups:
+          {target_path}:
+            remote_mirrors:
+              {url}:
+                enabled: true
+        """
+
+        run_gitlabform(config, target_path)
+
+        report_header = "📋 Final Remote Mirror Report"
+        assert not any(
+            report_header in msg for msg in gitlabform_logs.info
+        ), "Report header found in logs even though print_details was not enabled."
