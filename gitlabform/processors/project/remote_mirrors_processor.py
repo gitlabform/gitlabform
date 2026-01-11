@@ -204,18 +204,19 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         self, project: Project, payload: Dict[str, Any], raw_url: str
     ) -> Optional[ProjectRemoteMirror]:
         """Creates a new remote mirror and handles API errors."""
-        verbose(f"Creating remote mirror '{raw_url}'")
+        norm_url = self._normalize_url_for_comparison(raw_url)
+        verbose(f"Creating remote mirror '{norm_url}'")
         try:
             return cast(ProjectRemoteMirror, project.remote_mirrors.create(payload))
         except GitlabCreateError:
-            logging.exception("Failed to create remote mirror %s", raw_url)
+            logging.exception("Failed to create remote mirror %s", norm_url)
             return None
 
     def _enforce_mirrors(self, gitlab_mirrors_map: Dict[str, ProjectRemoteMirror], urls_to_keep: Set[str]) -> None:
-        """Deletes mirrors present in GitLab that are not in the 'keep' configuration."""
+        """Deletes mirrors present in GitLab that are not in the configuration."""
         for norm_url, gm in gitlab_mirrors_map.items():
             if norm_url not in urls_to_keep:
-                verbose(f"Enforce: Deleting remote mirror '{gm.url}' as it is not in the 'keep' configuration")
+                verbose(f"Enforce: Deleting remote mirror '{gm.url}' as it is not in the configuration")
                 self._delete_remote_mirror(gm)
 
     def _delete_remote_mirror(self, mirror: ProjectRemoteMirror) -> None:
