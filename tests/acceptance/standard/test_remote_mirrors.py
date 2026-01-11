@@ -413,18 +413,18 @@ class TestRemoteMirrorsProcessor:
 
         # 2. Assertions
         # Normalize the URL as the processor does for logs
-        norm = self._normalize_url_for_comparison(ssh_url)
+        norm_url = self._normalize_url_for_comparison(ssh_url)
 
         # Check that the mirror was created/updated
         assert any(
-            f"Creating remote mirror '{ssh_url}'" in msg or f"Updated remote mirror '{norm}'" in msg
+            f"Creating remote mirror '{norm_url}'" in msg or f"Updated remote mirror '{norm_url}'" in msg
             for msg in gitlabform_logs.debug
         )
 
         # 3. Check for the Public Key Output
         # We look for the generic instructions and the presence of an SSH key pattern
         instruction_text = "This public key must be added to the target repository"
-        key_header = f"🔑 SSH Public Key for mirror '{norm}':"
+        key_header = f"🔑 SSH Public Key for mirror '{norm_url}':"
 
         # Verify the instructional text is in the info stream
         assert any(
