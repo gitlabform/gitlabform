@@ -77,28 +77,15 @@ class TestRemoteMirrorsProcessor:
         Example:
         http://username:password@host/path.git -> http://host/path.git
 
-        This is used to compare mirror URLs without credentials to find matching mirrors.
+        This can be used to compare mirror URLs without credentials to
+        find matching mirrors.
         """
-        from urllib.parse import urlparse, urlunparse
+        from urllib.parse import urlparse
 
         parsed = urlparse(url)
-        # Mypy fixes: handle None types from urlparse
-        hostname = parsed.hostname if parsed.hostname else ""
-        port_suffix = f":{parsed.port}" if parsed.port else ""
-        netloc = hostname + port_suffix
-
-        # Reconstruct URL without userinfo (credentials)
-        normalized = urlunparse(
-            (
-                parsed.scheme,
-                netloc,
-                parsed.path,
-                parsed.params,
-                parsed.query,
-                parsed.fragment,
-            )
-        )
-        return str(normalized)
+        # Remove credentials (user:pass@) from netloc
+        clean_netloc = parsed.netloc.split("@")[-1]
+        return parsed._replace(netloc=clean_netloc).geturl()
 
     def _get_mirror_from_url(self, project: Project, url_with_credentials: str) -> ProjectRemoteMirror | None:
         """Helper method to get a remote mirror by URL.

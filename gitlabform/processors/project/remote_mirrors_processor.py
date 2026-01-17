@@ -1,6 +1,6 @@
 import logging
 from typing import Any, cast, Dict, Set, List, Optional
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse
 
 from cli_ui import debug as verbose, info_1 as info
 
@@ -18,30 +18,21 @@ class RemoteMirrorsProcessor(AbstractProcessor):
     def _normalize_url_for_comparison(url: str) -> str:
         """Normalize URL for comparison by removing credentials.
 
-        GitLab API returns URLs with credentials scrubbed (*****), so we need to
-        compare URLs without credentials to find matching mirrors.
+        Given a mirror URL for password-based authentication,
+        this method returns the corresponding URL without credentials.
+
+        Example:
+        http://username:password@host/path.git -> http://host/path.git
+
+        This can be used to compare mirror URLs without credentials to
+        find matching mirrors.
         """
+        from urllib.parse import urlparse
+
         parsed = urlparse(url)
-
-        # Mypy fix: hostname can be None. If so, default to empty string.
-        hostname = parsed.hostname if parsed.hostname else ""
-        # Mypy fix: port is an int or None.
-        port_suffix = f":{parsed.port}" if parsed.port else ""
-        netloc = hostname + port_suffix
-
-        # Reconstruct URL without userinfo (credentials)
-        # Mypy fix: urlunparse expects exactly a 6-tuple of strings.
-        normalized = urlunparse(
-            (
-                parsed.scheme,
-                netloc,
-                parsed.path,
-                parsed.params,
-                parsed.query,
-                parsed.fragment,
-            )
-        )
-        return str(normalized)
+        # Remove credentials (user:pass@) from netloc
+        clean_netloc = parsed.netloc.split("@")[-1]
+        return parsed._replace(netloc=clean_netloc).geturl()
 
     def _process_configuration(self, project_and_group: str, configuration: Dict[str, Any]) -> None:
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
@@ -148,7 +139,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         else:
             verbose(f"No public key available to display for mirror '{norm_url}'")
 
-    def _needs_update(self, existing_mirror: Any, config_payload: Dict[str, Any]) -> bool:
+    def _needs_update(self, existing_mirror: Dict[str, Any], config_payload: Dict[str, Any]) -> bool:
         """
         Overrides the base comparison to handle GitLab's URL credential masking.
         Normalization is applied so that 'user:pass@host' matches '*****:*****@host'.
@@ -157,13 +148,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         if "url" in comparison_payload:
             comparison_payload["url"] = self._normalize_url_for_comparison(comparison_payload["url"])
 
-        # Mypy fix: Change existing_mirror type to Any in signature to satisfy Liskov,
-        # then convert to dict for processing.
-        existing_mirror_dict: Dict[str, Any]
-        if isinstance(existing_mirror, ProjectRemoteMirror):
-            existing_mirror_dict = existing_mirror.asdict().copy()
-        else:
-            existing_mirror_dict = existing_mirror.copy()
+        existing_mirror_dict = existing_mirror.copy()
 
         existing_mirror_dict["url"] = self._normalize_url_for_comparison(existing_mirror_dict.get("url", ""))
 
@@ -179,7 +164,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
     ) -> None:
         """Compares and updates an existing mirror if changed or if force_update is set."""
 
-        should_update: bool = force_update or self._needs_update(mirror_obj, payload)
+        should_update: bool = force_update or self._needs_update(mirror_obj.asdict(), payload)
 
         if should_update:
             if force_update:
