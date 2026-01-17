@@ -519,12 +519,13 @@ class GitLabFormLogs:
 
     debug: List[str] = field(default_factory=list)
     info: List[str] = field(default_factory=list)
+    warning: List[str] = field(default_factory=list)
     error: List[str] = field(default_factory=list)
 
     @property
     def all(self) -> str:
         """Combines all log levels into a single searchable string."""
-        return "\n".join(self.debug + self.info + self.error)
+        return "\n".join(self.debug + self.info + self.warning + self.error)
 
 
 @pytest.fixture
@@ -562,6 +563,7 @@ def gitlabform_logs(monkeypatch) -> Generator[GitLabFormLogs, None, None]:
     # 1. Global Patch (Catches standard info/error/debug)
     monkeypatch.setattr(cli_ui, "info", lambda *a, **k: _capture(logs.info, *a))
     monkeypatch.setattr(cli_ui, "debug", lambda *a, **k: _capture(logs.debug, *a))
+    monkeypatch.setattr(cli_ui, "warning", lambda *a, **k: _capture(logs.warning, *a))
     monkeypatch.setattr(cli_ui, "error", lambda *a, **k: _capture(logs.error, *a))
 
     # 2. Automated Processor Patching
@@ -573,5 +575,11 @@ def gitlabform_logs(monkeypatch) -> Generator[GitLabFormLogs, None, None]:
             # If the module has 'verbose', we swap it with our capture function
             if hasattr(module, "verbose"):
                 monkeypatch.setattr(f"{name}.verbose", lambda *a, **k: _capture(logs.debug, *a))
+            if hasattr(module, "info"):
+                monkeypatch.setattr(f"{name}.info", lambda *a, **k: _capture(logs.info, *a))
+            if hasattr(module, "warning"):
+                monkeypatch.setattr(f"{name}.warning", lambda *a, **k: _capture(logs.warning, *a))
+            if hasattr(module, "error"):
+                monkeypatch.setattr(f"{name}.error", lambda *a, **k: _capture(logs.error, *a))
 
     yield logs

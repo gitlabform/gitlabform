@@ -1,8 +1,7 @@
-import logging
 from typing import Any, cast, Dict, Set, List, Optional
 from urllib.parse import urlparse
 
-from cli_ui import debug as verbose, info_1 as info
+from cli_ui import debug as verbose, info_1 as info, warning
 
 from gitlab.exceptions import GitlabCreateError, GitlabUpdateError, GitlabDeleteError
 from gitlab.v4.objects import Project, ProjectRemoteMirror
@@ -126,8 +125,8 @@ class RemoteMirrorsProcessor(AbstractProcessor):
                 project.manager.gitlab.http_get(f"/projects/{project.id}/remote_mirrors/{mirror_obj.id}/public_key"),
             )
             public_key = response.get("public_key")
-        except Exception:
-            logging.exception("Failed to retrieve SSH public key for mirror %s", norm_url)
+        except Exception as e:
+            warning(f"Failed to retrieve SSH public key for mirror {norm_url}: {e}")
 
         if public_key:
             info(f"🔑 SSH Public Key for mirror '{norm_url}':")
@@ -180,8 +179,8 @@ class RemoteMirrorsProcessor(AbstractProcessor):
                         f"!!! REMINDER: 'force_update' was used for mirror '{norm_url}'. "
                         "Please remove this flag from your configuration to avoid unnecessary API calls in future runs."
                     )
-            except GitlabUpdateError:
-                logging.exception("Failed to update remote mirror %s", payload.get("url"))
+            except GitlabUpdateError as e:
+                warning(f"Failed to update remote mirror {norm_url}: {e}")
         else:
             verbose(f"Remote mirror '{norm_url}' remains unchanged")
 
@@ -193,8 +192,8 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         verbose(f"Creating remote mirror '{norm_url}'")
         try:
             return cast(ProjectRemoteMirror, project.remote_mirrors.create(payload))
-        except GitlabCreateError:
-            logging.exception("Failed to create remote mirror %s", norm_url)
+        except GitlabCreateError as e:
+            warning(f"Failed to create remote mirror {norm_url}: {e}")
             return None
 
     def _enforce_mirrors(self, gitlab_mirrors_map: Dict[str, ProjectRemoteMirror], urls_to_keep: Set[str]) -> None:
@@ -209,9 +208,9 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         verbose(f"Deleting remote mirror '{mirror.url}'")
         try:
             mirror.delete()
-        except GitlabDeleteError:
-            logging.exception(
-                "Failed to delete remote mirror id=%s url=%s", getattr(mirror, "id", None), getattr(mirror, "url", None)
+        except GitlabDeleteError as e:
+            warning(
+                f"Failed to delete remote mirror id={getattr(mirror, 'id', None)} url={getattr(mirror, 'url', None)}: {e}"
             )
             verbose(f"Failed to delete remote mirror '{mirror.url}'")
 
@@ -224,9 +223,9 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         try:
             result = mirror.sync()
             verbose(f"Triggered sync for remote mirror '{mirror_url}' result={result}")
-        except Exception:
-            logging.exception("Failed to trigger sync for remote mirror id=%s url=%s", mirror_id, mirror_url)
-            verbose(f"Failed to trigger sync for remote mirror '{mirror_url}'")
+        except Exception as e:
+            info(f"Failed to trigger sync for remote mirror id={mirror_id} url={mirror_url}: {e}")
+            # verbose(f"Failed to trigger sync for remote mirror '{mirror_url}'")
 
     def _report_mirror_details(self, mirror: ProjectRemoteMirror) -> None:
         """Prints every attribute of the mirror object, one per line."""

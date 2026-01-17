@@ -175,6 +175,27 @@ class TestRemoteMirrorsProcessor:
             third_mirror_url_ssh_public_key_auth
         )
 
+    def test_remote_mirrors_create_error(self, project: Project, gitlabform_logs: GitLabFormLogs) -> None:
+        """
+        Test that an invalid mirror URL triggers a GitlabCreateError which is caught and logged.
+        """
+        target_path = project.path_with_namespace
+        # Use an invalid scheme to ensure GitLab rejects it
+        invalid_url = "invalid-scheme://invalid-url.com/repo.git"
+
+        config = f"""
+        projects_and_groups:
+          {target_path}:
+            remote_mirrors:
+              {invalid_url}:
+                enabled: true
+        """
+
+        run_gitlabform(config, target_path)
+
+        norm_url = self._normalize_url_for_comparison(invalid_url)
+        assert any(f"Failed to create remote mirror {norm_url}" in msg for msg in gitlabform_logs.warning)
+
     def test_remote_mirrors_update_configuration(
         self, project: Project, mirror_urls: Tuple[str, str, str], gitlabform_logs: GitLabFormLogs
     ) -> None:
@@ -290,6 +311,33 @@ class TestRemoteMirrorsProcessor:
             assert any(
                 expected_info in msg for msg in gitlabform_logs.info
             ), f"Expected info reminder not found for {norm}."
+
+    def test_remote_mirrors_update_error(
+        self, project_for_function: Project, mirror_urls: Tuple[str, str, str], gitlabform_logs: GitLabFormLogs
+    ) -> None:
+        """
+        Test that updating a mirror with invalid parameters triggers GitlabUpdateError which is caught and logged.
+        """
+        first_url, _, _ = mirror_urls
+
+        # Create mirror manually so it exists
+        project_for_function.remote_mirrors.create({"url": first_url, "enabled": True})
+
+        # Try to update with an invalid auth_method that GitLab API doesn't accept
+        config = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            remote_mirrors:
+              {first_url}:
+                enabled: true
+                auth_method: invalid_method
+        """
+
+        run_gitlabform(config, project_for_function.path_with_namespace)
+
+        # The processor logs the normalized URL in update error
+        norm_url = self._normalize_url_for_comparison(first_url)
+        assert any(f"Failed to update remote mirror {norm_url}" in msg for msg in gitlabform_logs.warning)
 
     def test_remote_mirror_http_password_auth_sync(
         self,
