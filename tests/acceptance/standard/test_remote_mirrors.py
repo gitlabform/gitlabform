@@ -422,6 +422,32 @@ class TestRemoteMirrorsProcessor:
             f"'{first_mirror_repo.path_with_namespace}' after {max_retries * retry_interval} seconds."
         )
 
+    def test_remote_mirrors_sync_error(
+        self,
+        project_for_function: Project,
+        gitlabform_logs: GitLabFormLogs,
+    ) -> None:
+        """
+        Test that an error during mirror sync is caught and logged.
+        """
+        target_path = project_for_function.path_with_namespace
+        # Use a dummy URL with wrong credentials
+        mirror_url = "https://user:wrongpass@example.com/repo.git"
+
+        # We set enabled: false to ensure that triggering sync fails synchronously with an error from GitLab
+        config = f"""
+        projects_and_groups:
+          {target_path}:
+            remote_mirrors:
+              {mirror_url}:
+                enabled: false
+                force_push: true
+        """
+
+        run_gitlabform(config, target_path)
+
+        assert any(f"Failed to trigger sync for remote mirror" in msg for msg in gitlabform_logs.warning)
+
     def test_remote_mirrors_ssh_public_key_retrieval(
         self, project_for_function: Project, gitlabform_logs: GitLabFormLogs
     ) -> None:

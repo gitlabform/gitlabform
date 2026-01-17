@@ -224,8 +224,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
             result = mirror.sync()
             verbose(f"Triggered sync for remote mirror '{mirror_url}' result={result}")
         except Exception as e:
-            info(f"Failed to trigger sync for remote mirror id={mirror_id} url={mirror_url}: {e}")
-            # verbose(f"Failed to trigger sync for remote mirror '{mirror_url}'")
+            warning(f"Failed to trigger sync for remote mirror id={mirror_id} url={mirror_url}: {e}")
 
     def _report_mirror_details(self, mirror: ProjectRemoteMirror) -> None:
         """Prints every attribute of the mirror object, one per line."""
