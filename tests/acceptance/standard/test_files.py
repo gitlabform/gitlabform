@@ -117,21 +117,31 @@ class TestFiles:
         assert the_branch.protected is True
 
     def test__set_file_strongly_protected_branch(self, project, no_access_branch):
+        """
+        This test validates that even when a branch is protected,
+        GitLabForm can still update files on that branch by temporarily
+        unprotecting it, making the change, and then protecting it again.
+        """
+        protected_branch = project.protectedbranches.get(no_access_branch.name)
+        push_access_level = protected_branch.push_access_levels[0]["access_level"]
+        merge_access_level = protected_branch.merge_access_levels[0]["access_level"]
+        unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
+
         set_file_specific_branch = f"""
             projects_and_groups:
               {project.path_with_namespace}:
                 branches:
-                  no_access_branch:
+                  {no_access_branch.name}:
                     protected: true
-                    push_access_level: no access
-                    merge_access_level: no access
-                    unprotect_access_level: maintainer
+                    push_access_level: {push_access_level}
+                    merge_access_level: {merge_access_level}
+                    unprotect_access_level: {unprotect_access_level}
                 files:
                   "README.md":
                     overwrite: true
                     branches:
-                      - no_access_branch
-                    content: "Content for no_access_branch only"
+                      - {no_access_branch.name}
+                    content: "Content for {no_access_branch.name} only"
             """
 
         run_gitlabform(set_file_specific_branch, project)
@@ -139,8 +149,8 @@ class TestFiles:
         branch = project.branches.get(no_access_branch.name)
         assert branch.commit["message"] == "Automated change made by gitlabform"
 
-        project_file = project.files.get(ref="no_access_branch", file_path="README.md")
-        assert project_file.decode().decode("utf-8") == "Content for no_access_branch only"
+        project_file = project.files.get(ref=no_access_branch.name, file_path="README.md")
+        assert project_file.decode().decode("utf-8") == f"Content for {no_access_branch.name} only"
 
         project_file = project.files.get(ref="main", file_path="README.md")
         assert project_file.decode().decode("utf-8") == DEFAULT_README

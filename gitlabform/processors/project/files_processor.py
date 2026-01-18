@@ -189,7 +189,9 @@ class FilesProcessor(AbstractProcessor):
             )
 
         except GitlabUpdateError as e:
-            if e.response_code == 400 and "You are not allowed to push into this branch" in e.error_message:
+            if (
+                e.response_code == 400 or e.response_code == 403
+            ) and "You are not allowed to push into this branch" in e.error_message:
                 # ...but if not, then we can unprotect the branch, but only if we know how to
                 # protect it again...
 
