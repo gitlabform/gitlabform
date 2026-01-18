@@ -10,6 +10,36 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
 class RemoteMirrorsProcessor(AbstractProcessor):
+    """
+    A processor for the "remote_mirrors" configuration section.
+
+    Allows creating, updating, and deleting remote mirrors (push mirrors) for a project.
+
+    GitLabForm follows "raw parameter passing" pattern, which means that any parameter
+    supported by the GitLab API for remote mirrors can be used here.
+    The URL containing credentials (if any) is used as the config key for each mirror.
+    All other attributes are passed as-is to the GitLab API.
+    See: https://docs.gitlab.com/ee/api/remote_mirrors.html
+
+    Additionally, the following GitLabForm-specific keys are supported:
+    * enforce: (boolean) If true, mirrors not defined in the config will be deleted. This is a global option, not per-mirror.
+    * print_details: (boolean) If true, prints the full details of all mirrors found in GitLab for the project. This is a global option.
+    * force_push: (boolean) If true, triggers an immediate push sync.
+    * force_update: (boolean) If true, forces an update call even if the config looks unchanged (useful for updating credentials).
+    * print_public_key: (boolean) If true, retrieves and prints the SSH public key for the mirror (if applicable).
+    * delete: (boolean) If true, deletes the specified mirror.
+
+    Configuration example:
+
+    remote_mirrors:
+      enforce: true
+      "https://username:password@example.com/gitlab/project.git":
+        enabled: true
+        auth_method: password
+        only_protected_branches: true
+        force_push: true
+    """
+
     def __init__(self, gitlab: GitLab):
         super().__init__("remote_mirrors", gitlab)
 
