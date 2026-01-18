@@ -1,4 +1,6 @@
+import pytest
 from tests.acceptance import (
+    get_random_name,
     run_gitlabform,
 )
 
@@ -12,23 +14,18 @@ class TestArchiveProject:
               archive: true
         """
 
-        run_gitlabform(config, project)
+        run_gitlabform(config, project.path_with_namespace)
+
+        # Refetch project to get updated info
         project = gl.projects.get(project.id)
         assert project.archived is True
 
-    def test__unarchive_project(self, gl, project, other_group, other_project):
-        archive_project = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project:
-              archive: true
-        """
-
-        run_gitlabform(archive_project, project)
+    def test__unarchive_project(self, gl, project):
+        # Refresh project to ensure it's unarchived at the start
         project = gl.projects.get(project.id)
         assert project.archived is True
 
-        unarchive_project = f"""
+        unarchive_project_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             project:
@@ -39,48 +36,51 @@ class TestArchiveProject:
         # then nothing will happen here as the archived project will be omitted when in
         # the effective list of groups and projects
 
-        run_gitlabform(unarchive_project, "ALL", False)
+        run_gitlabform(unarchive_project_config, "ALL", False)
+
+        # Refetch project to check if it's still archived
         project = gl.projects.get(project.id)
         assert project.archived is True
 
         # 2. only after you run gitlabform ALL, with '--include-archived-projects'
         # (OR pointing to it that project)
         # the target project will be unarchived
-        run_gitlabform(unarchive_project, "ALL")
+        run_gitlabform(unarchive_project_config, "ALL")
         project = gl.projects.get(project.id)
         assert project.archived is False
 
-    def test__dont_edit_archived_project(self, gl, group, project):
-        archive_project = f"""
-        projects_and_groups:
-          {project.path_with_namespace}:
-            project:
-              archive: true
+    def test__dont_edit_archived_project(self, gl, project_for_function, capsys):
         """
-
-        run_gitlabform(archive_project, project)
-        project = gl.projects.get(project.id)
+        Test that editing files in an archived project is not allowed.
+        To setup the test, we first need to create a regular unprotected branch
+        and then archive the project. After that, we will try to edit a file
+        in that archived project on that branch, which should fail.
+        """
+        # Start with archiving the project for testing
+        project = gl.projects.get(project_for_function.id)
+        branch_name = get_random_name("feature-branch-")
+        project.branches.create({"branch": branch_name, "ref": "main"})
+        project.archive()
         assert project.archived is True
 
-        edit_archived_project = f"""
-        # the project has to be configured as archived
-        # for other configs for it to be ignored
+        # Prepare a config that would edit the project (change README.md of a feature branch)
+        edit_archived_project_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            project:
-              archive: true
-
-          {group.full_path}/*:
             files:
               README.md:
                 overwrite: true
                 branches:
-                  - main
+                  - {branch_name}
                 content: |
-                  Some other content that the default one
+                  Some test content
         """
 
-        run_gitlabform(edit_archived_project, project.path_with_namespace)
+        # GitLab now responds with 403 Forbidden when trying to push to an archived project.
+        # Since in above config we are trying to push update to an archived project, we expect
+        # gitlabform to exit with SystemExit exception.
+        with pytest.raises(SystemExit):
+            run_gitlabform(edit_archived_project_config, project.path_with_namespace)
 
-        # the fact that we are not getting an exception because of trying to edit
-        # an archived project means that the test is passing
+        captured = capsys.readouterr()
+        assert "403 Forbidden - You are not allowed to push into this branch" in captured.err
