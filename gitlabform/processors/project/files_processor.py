@@ -192,9 +192,11 @@ class FilesProcessor(AbstractProcessor):
             if (
                 e.response_code == 400 or e.response_code == 403
             ) and "You are not allowed to push into this branch" in e.error_message:
-                # ...but if not, then we can unprotect the branch, but only if we know how to
-                # protect it again...
+                # If the project is archived, modifying files is not allowed
+                if project.archived:
+                    fatal(f"Project is archived, cannot modify files in it.: {e.error_message}")
 
+                # Otherwise, unprotect the branch but only if we know how to protect it again
                 if configuration.get("branches|" + branch.name + "|protected"):
                     debug(f"> Temporarily unprotecting the branch to '{operation}' a file in it...")
                     # Delete operation on protected branch removes the protection only
