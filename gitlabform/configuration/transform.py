@@ -1,10 +1,9 @@
-from logging import debug
 from abc import ABC, abstractmethod
 from ez_yaml import ez_yaml
 from ruamel.yaml import YAML
 from types import SimpleNamespace
 
-from cli_ui import fatal, warning, debug as verbose
+from cli_ui import fatal, warning, debug
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
@@ -78,7 +77,7 @@ class UserTransformer(ConfigurationTransformer):
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         log = ConsolePrinter(logging_args)
         processor = Processor(log, configuration.config)
-        verbose("Getting user ids for users defined in protect_environments config")
+        debug("Getting user ids for users defined in protect_environments config")
         try:
             for node_coordinate in processor.get_nodes(
                 "projects_and_groups.*.protected_environments.*.deploy_access_levels.user",
@@ -92,7 +91,7 @@ class UserTransformer(ConfigurationTransformer):
             # under the given path
             pass
 
-        verbose("Getting user ids for users defined in merge_requests_approval_rules config")
+        debug("Getting user ids for users defined in merge_requests_approval_rules config")
         try:
             for node_coordinate in processor.get_nodes(
                 "**.merge_requests_approval_rules.*.users",

@@ -1,6 +1,5 @@
 import functools
 import os
-from logging import debug
 from urllib import parse
 
 from importlib.metadata import version as package_version
@@ -8,7 +7,7 @@ import requests
 
 # noinspection PyPackageRequirements
 import urllib3
-from cli_ui import debug as verbose, warning
+from cli_ui import debug, warning
 from requests.adapters import HTTPAdapter
 
 # noinspection PyPackageRequirements
@@ -69,7 +68,7 @@ class GitLabCore:
 
         try:
             version = self._make_requests_to_api("version")
-            verbose(f"Connected to GitLab version: {version['version']} ({version['revision']})")
+            debug(f"Connected to GitLab version: {version['version']} ({version['revision']})")
             self.version = version["version"]
 
             current_user = self._make_requests_to_api("user")
@@ -77,7 +76,7 @@ class GitLabCore:
                 self.admin = True
             else:
                 self.admin = False
-            verbose(f"Connected as: {current_user['username']}, admin: {'yes' if self.admin else 'no'}")
+            debug(f"Connected as: {current_user['username']}, admin: {'yes' if self.admin else 'no'}")
             if not self.admin:
                 warning("Connected as non-admin. You may encounter permission issues.")
 

@@ -1,4 +1,4 @@
-from cli_ui import debug as verbose
+from cli_ui import debug
 
 from gitlab.exceptions import GitlabDeleteError
 from gitlab.v4.objects import Project, ProjectIntegration
@@ -18,16 +18,16 @@ class IntegrationsProcessor(AbstractProcessor):
             gl_integration: ProjectIntegration = project.integrations.get(integration, lazy=True)
 
             if configured_integrations[integration].get("delete"):
-                verbose(f"Deleting integration: {integration}")
+                debug(f"Deleting integration: {integration}")
                 try:
                     gl_integration.delete()
                 except GitlabDeleteError as e:
                     # If we get a 404 the integration does not exist, so we can ignore the error
                     if e.response_code == 404:
-                        verbose(f"Integration {integration} does not exist, skipping deletion.")
+                        debug(f"Integration {integration} does not exist, skipping deletion.")
                     else:
-                        verbose(f"Failed to delete integration {integration}: {e}")
+                        debug(f"Failed to delete integration {integration}: {e}")
                         raise
             else:
-                verbose(f"Setting integration: {integration}")
+                debug(f"Setting integration: {integration}")
                 project.integrations.update(integration, configured_integrations[integration])
