@@ -8,9 +8,9 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
 
 1. Make sure you're on `main` branch and it is up-to-date.
 2. Add an entry in [changelog.md](../changelog.md). Remember to give thanks to all the contributors! Commit this change.
-3. Update version using [`tbump`](https://github.com/your-tools/tbump). Run `pipx run tbump <new-semantic-version-number>`.
+3. Update version using [`tbump`](https://github.com/your-tools/tbump). Run `uvx tbump <new-semantic-version-number>`.
 
-    **Note**: You may need to install `pipx` first if it's not already installed. Follow the instructions at [`pipx` documentation](https://pypa.github.io/pipx/installation/).
+    **Note**: You may need to install `uv` first if it's not already installed. Follow the instructions at [`uv` documentation](https://docs.astral.sh/uv/getting-started/).
 
     Executing `tbump` will create a commit containing version updates to necessary files (i.e. `tbump.toml`, `pyproject.toml`), create a new tag from for the new version from the current `ref` in `main` branch, and finally push the commits and tag to remote.
 
