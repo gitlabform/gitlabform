@@ -19,6 +19,10 @@ def configuration_with_subgroups_and_projects():
         project_settings:
           setting_from_subgroup_level_1: foo
 
+      some_group/subgroup_level_1/:
+        project_settings:
+          setting_from_exact_subgroup_level_1: foo
+
       some_group/subgroup_level_1/some_project:
         project_settings:
           setting_from_project: foo
@@ -26,6 +30,10 @@ def configuration_with_subgroups_and_projects():
       some_group/subgroup_level_1/subgroup_level_2/*:
         project_settings:
           setting_from_subgroup_level_2: foo
+
+      some_group/subgroup_level_1/subgroup_level_2/:
+        project_settings:
+          setting_from_exact_subgroup_level_2: foo
 
       some_group/subgroup_level_1/subgroup_level_2/some_project:
           project_settings:
@@ -47,6 +55,7 @@ def test__get_effective_config_for_project__level1(
     assert additive__project_settings == {
         "setting_from_group": "foo",
         "setting_from_subgroup_level_1": "foo",
+        "setting_from_exact_subgroup_level_1": "foo",
         "setting_from_project": "foo",
     }
 
@@ -65,6 +74,7 @@ def test__get_effective_config_for_project__level2(
         "setting_from_group": "foo",
         "setting_from_subgroup_level_1": "foo",
         "setting_from_subgroup_level_2": "foo",
+        "setting_from_exact_subgroup_level_2": "foo",
         "setting_from_project": "foo",
     }
 
@@ -74,11 +84,19 @@ def configuration_with_subgroups_only():
     config_yaml = """
     ---
     projects_and_groups:
+      some_group/:
+        group_settings:
+            visibility: public
+
       some_group/*:
         group_settings:
           project_creation_level: maintainer
           subgroup_creation_level: owner
           visibility: internal
+
+      some_group/subgroup/:
+        group_settings:
+          subgroup_creation_level: developer
 
       some_group/subgroup/*:
         group_settings:
@@ -98,7 +116,7 @@ def test__get_effective_config_for_group__level1(configuration_with_subgroups_on
     assert effective_config == {
         "group_settings": {
             "project_creation_level": "developer",
-            "subgroup_creation_level": "owner",
+            "subgroup_creation_level": "developer",
             "visibility": "internal",
         },
     }
