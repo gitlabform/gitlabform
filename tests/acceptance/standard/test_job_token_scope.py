@@ -1,4 +1,4 @@
-import logging
+import pytest
 from gitlab.v4.objects import Project, Group
 
 from tests.acceptance import (
@@ -7,10 +7,30 @@ from tests.acceptance import (
 
 
 class TestProjectJobTokenScope:
+    @pytest.fixture
+    def ensure_instance_enforcement_disabled(self, gl):
+        instance_settings = gl.settings.get()
+        original_instance_enforcement = instance_settings.enforce_ci_inbound_job_token_scope_enabled
+
+        if original_instance_enforcement:
+            instance_settings.enforce_ci_inbound_job_token_scope_enabled = False
+            instance_settings.save()
+
+        yield
+
+        if original_instance_enforcement:
+            instance_settings.enforce_ci_inbound_job_token_scope_enabled = True
+            instance_settings.save()
+
     def test__enable_limit_access_to_this_project(
         self,
+        ensure_instance_enforcement_disabled,
+        gl,
         project: Project,
     ):
+        """
+        Tests that 'Limit access to this project' can be enabled via GitLabForm.
+        """
         self._setup_limit_access_state(project, False)
 
         job_token_scope = f"""
@@ -31,6 +51,7 @@ class TestProjectJobTokenScope:
 
     def test__disable_limit_access_to_this_project(
         self,
+        ensure_instance_enforcement_disabled,
         gl,
         project: Project,
     ):
@@ -45,36 +66,18 @@ class TestProjectJobTokenScope:
 
         This test requires admin access to modify the instance setting.
         """
-        # Setup: Disable instance-level enforcement to allow project-level configuration
-        instance_settings = gl.settings.get()
-        instance_settings.enforce_ci_inbound_job_token_scope_enabled = False
-        instance_settings.save()
+        # Test: Disable limit access through gitlabform
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            job_token_scope:
+              limit_access_to_this_project: false
+        """
+        run_gitlabform(config, project)
 
-        try:
-            # Setup: Enable limit access at project level
-            self._setup_limit_access_state(project, True)
-
-            # Test: Disable limit access through gitlabform
-            config = f"""
-            projects_and_groups:
-              {project.path_with_namespace}:
-                job_token_scope:
-                  limit_access_to_this_project: false
-            """
-            run_gitlabform(config, project)
-
-            # Verify: Check that limit access is disabled
-            scope = project.job_token_scope.get()
-            assert not scope.inbound_enabled, "Project should have limit access disabled"
-
-        finally:
-            # Cleanup: Restore instance setting to its original state
-            try:
-                instance_settings = gl.settings.get()
-                instance_settings.enforce_ci_inbound_job_token_scope_enabled = True
-                instance_settings.save()
-            except Exception as e:
-                print(f"Warning: Failed to restore instance settings: {str(e)}")
+        # Verify: Check that limit access is disabled
+        scope = project.job_token_scope.get()
+        assert not scope.inbound_enabled, "Project should have limit access disabled"
 
     def test__add_other_project_to_job_token_scope_by_name(
         self,
@@ -222,6 +225,8 @@ class TestProjectJobTokenScope:
 
     def test__existing_projects_and_groups_removed_from_allowlists_when_no_allowlist_provided_in_config_and_limit_access_to_this_project_set_to_false(
         self,
+        ensure_instance_enforcement_disabled,
+        gl,
         project: Project,
         other_project: Project,
         other_group: Group,
@@ -229,9 +234,7 @@ class TestProjectJobTokenScope:
         self._restore_default_allowlist_state(project)
 
         # Limit access and add project + group to allowlist
-        scope = project.job_token_scope.get()
-        scope.enabled = True
-        scope.save()
+        self._setup_limit_access_state(project, True)
 
         self._setup_add_other_project_to_allowlist(other_project, project)
         self._setup_add_other_group_to_allowlist(other_group, project)
