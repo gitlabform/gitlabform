@@ -86,7 +86,11 @@ class GitlabWrapper:
             "retry_transient_errors": True,
         }
         renamed_gitlab_kwargs = {
-            "token": "private_token",
+            # Bandit is used for security scanning and it complains about 'private_token' being
+            # a hardcoded secret. However, in this case we are just renaming a config key
+            # provided by the user to match the parameter name expected by python-gitlab.
+            # Hence, we can safely ignore this code security warning here.
+            "token": "private_token",  # nosec B105
         }
         extra_gitlab_kwargs = {
             **default_gitlab_kwargs,
