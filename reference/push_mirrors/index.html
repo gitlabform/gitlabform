@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../ci_cd_variables/">
+        <link rel="prev" href="../protected_environments/">
       
       
-        <link rel="next" href="../deploy_keys/">
+        <link rel="next" href="../push_rules/">
       
       
         
@@ -23,7 +23,7 @@
     
     
       
-        <title>CI/CD Job Token Scope - GitLabForm</title>
+        <title>Push mirrors - GitLabForm</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cicd-job-token-scope" class="md-skip">
+        <a href="#push-mirrors-remote-mirrors" class="md-skip">
           Skip to content
         </a>
       
@@ -109,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CI/CD Job Token Scope
+              Push mirrors
             
           </span>
         </div>
@@ -611,37 +611,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    CI/CD Job Token Scope
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../job_token_scope/" class="md-nav__link">
         
   
   
@@ -657,37 +630,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#project-cicd-job-token-scope" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Project CI/CD job token scope
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1005,10 +947,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../push_mirrors/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Push mirrors
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1024,6 +993,148 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basic-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic use
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-and-url-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication and URL formats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication and URL formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#limitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#special-configuration-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Special configuration keys
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special configuration keys">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enforce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        enforce
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#print_details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_details
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#force_push" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        force_push
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#force_update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        force_update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#print_public_key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_public_key
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1555,13 +1666,124 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#project-cicd-job-token-scope" class="md-nav__link">
+  <a href="#basic-use" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Project CI/CD job token scope
+        Basic use
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-and-url-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication and URL formats
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication and URL formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#limitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#special-configuration-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Special configuration keys
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special configuration keys">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enforce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        enforce
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#print_details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_details
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#force_push" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        force_push
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#force_update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        force_update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#print_public_key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_public_key
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1585,41 +1807,158 @@
   
 
 
-<h1 id="cicd-job-token-scope">CI/CD job token scope<a class="headerlink" href="#cicd-job-token-scope" title="Permanent link">&para;</a></h1>
-<h2 id="project-cicd-job-token-scope">Project CI/CD job token scope<a class="headerlink" href="#project-cicd-job-token-scope" title="Permanent link">&para;</a></h2>
-<p>This section's purpose is to manage the <a href="https://docs.gitlab.com/ee/ci/jobs/ci_job_token.html#control-job-token-access-to-your-project">project CI/CD job token scope</a>.</p>
-<p>The GitLab UI refers to this setting under "Authorized groups and projects". This controls which projects can use CI/CD job tokens to authenticate with the current project.</p>
-<p>There are two main options in the UI:
-*   <strong>All groups and projects</strong>: This option disables any restrictions, allowing any project to use a job token to access this project. This corresponds to the API field <code>inbound_enabled</code> being <code>false</code>.
-*   <strong>Only this project and any groups and projects in the allowlist</strong>: This option restricts access to only the current project and those explicitly added to the allowlist. This corresponds to the API field <code>inbound_enabled</code> being <code>true</code>.</p>
-<p>It's important to note that this project-level setting can only be controlled if the instance-level setting <code>enforce_ci_inbound_job_token_scope_enabled</code> is disabled. This instance setting requires admin privileges to change.</p>
-<p>In <code>gitlabform</code>, we use the <code>limit_access_to_this_project</code> setting to control the "Authorized groups and projects" option. Setting <code>limit_access_to_this_project: true</code> enables the restriction ("Only this project and any groups and projects in the allowlist"), while <code>limit_access_to_this_project: false</code> disables it ("All groups and projects").</p>
-<p>The <a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html">Job Token Scope API docs</a> use <code>inbound_enabled</code> in GET requests and <code>enabled</code> in PATCH requests, which can be confusing. The <code>gitlabform</code> <code>limit_access_to_this_project</code> setting maps to the API's <code>enabled</code> field in PATCH requests.</p>
-<p>In addition to the main setting, you can manage the project's CI/CD job token allowlist. This allowlist determines which other projects and groups are authorized to use their job tokens to access this project when the "Only this project and any groups and projects in the allowlist" option is enabled.</p>
-<p>Within the <code>allowlist</code> section of the configuration, you can use the <code>enforce</code> setting:</p>
-<ul>
-<li>When <code>enforce: true</code> is set, <code>gitlabform</code> will ensure that the allowlist in GitLab exactly matches the <code>projects</code> and <code>groups</code> specified in your configuration. Any projects or groups found in the GitLab allowlist that are <em>not</em> listed in your <code>gitlabform</code> configuration will be removed.</li>
-<li>If <code>enforce</code> is not set or set to <code>false</code>, <code>gitlabform</code> will only add the projects and groups specified in the configuration to the allowlist, leaving any existing entries in GitLab untouched.</li>
-</ul>
-<p>You can add projects and groups to the allowlist using their ID or path/name:</p>
-<ul>
-<li><a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html#add-a-project-to-a-cicd-job-token-inbound-allowlist">Add other projects to the job token allowlist</a></li>
-<li><a href="https://docs.gitlab.com/ee/api/project_job_token_scopes.html#add-a-group-to-a-cicd-job-token-allowlist">Add groups to the job token allowlist</a></li>
-</ul>
-<p>Example:</p>
+<h1 id="push-mirrors-remote-mirrors">Push mirrors (Remote mirrors)<a class="headerlink" href="#push-mirrors-remote-mirrors" title="Permanent link">&para;</a></h1>
+<p>This section allows to manage <strong><a href="https://docs.gitlab.com/ee/user/project/repository/mirror/push.html">push mirroring</a></strong> for projects.</p>
+<h2 id="basic-use">Basic use<a class="headerlink" href="#basic-use" title="Permanent link">&para;</a></h2>
+<p>All mirrors are defined under the <code>remote_mirrors</code> section/key. Multiple mirrors can be defined as a dictionary. The key name for each mirror is the <strong>mirror target URL</strong> (e.g., <code>https://...</code> or <code>ssh://...</code>) and the values are parameters described in the <strong><a href="https://docs.gitlab.com/ee/api/remote_mirrors.html#create-a-new-push-mirror">Remote mirrors API docs</a></strong>.</p>
+<p>Also, GitLab's UI doesn't allow updating configuration of an existing mirror. One must be deleted and recreated. But, using GitLab's edit API, GitLabForm will modify an existing mirror, if changes to mirror attributes are detected.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">job_token_scope</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">limit_access_to_this_project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="nt">allowlist</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># When enforce enabled, projects/groups set in GitLab but not in Config will be removed from allowlists</span>
-<span class="w">        </span><span class="nt">projects</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123</span><span class="w"> </span><span class="c1"># Add by project ID</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-bar/project-foo</span><span class="w"> </span><span class="c1"># Add by Path/Name</span>
-<span class="w">        </span><span class="nt">groups</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span><span class="c1"># Add by group ID</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-bar</span><span class="w"> </span><span class="c1"># Add by Group Name (will include all sub-groups)</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">group-abc/subgroup-xyz</span><span class="w"> </span><span class="c1"># Add Subgroup </span>
+<span class="w">  </span><span class="nt">my-group/my-project</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">remote_mirrors</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;https://username:password@example.com/path-to/my-repo.git&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">auth_method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;password&quot;</span>
+<span class="w">        </span><span class="nt">only_protected_branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h2 id="authentication-and-url-formats">Authentication and URL formats<a class="headerlink" href="#authentication-and-url-formats" title="Permanent link">&para;</a></h2>
+<p>Unlike the GitLab Web UI, which provides separate fields for usernames and passwords, GitLab API expects authentication credentials to be embedded directly within the URL string. For more details on how GitLab handles mirror authentication, see the <a href="https://docs.gitlab.com/user/project/repository/mirror/#authentication-methods-for-mirrors">GitLab documention on Authentication methods for mirrors</a>.</p>
+<p>The URL Patterns are not clearly documented in GitLab's API documentation. Below are some example URL format:</p>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th><code>auth_method</code></th>
+<th>URL Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTPS (Token)</td>
+<td><code>password</code></td>
+<td><code>https://username:token@github.com/org/repo.git</code></td>
+</tr>
+<tr>
+<td>SSH (Password)</td>
+<td><code>password</code></td>
+<td><code>ssh://username:password@external-host.com/org/repo.git</code></td>
+</tr>
+<tr>
+<td>SSH (Public Key)</td>
+<td><code>ssh_public_key</code></td>
+<td><code>ssh://git@external-host.com/org/repo.git</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Verify your URL format</p>
+<p>If you are unsure of the exact URL format GitLab expects for a specific provider, manually create a mirror in the GitLab UI first and make sure it works. Then, use a <code>curl</code> command to inspect the resulting mirror object:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--header<span class="w"> </span><span class="s2">&quot;PRIVATE-TOKEN: &lt;your_token&gt;&quot;</span><span class="w"> </span><span class="s2">&quot;https://gitlab.example.com/api/v4/projects/&lt;id&gt;/remote_mirrors</span>
+</code></pre></div>
+<p>Note that GitLab will return the URL with credentials masked (e.g., <code>https://*****:*****@...</code>), but the structure will confirm if your URL for GitLabForm configuration is correct.</p>
+</div>
+<h3 id="limitation">Limitation<a class="headerlink" href="#limitation" title="Permanent link">&para;</a></h3>
+<p>For SSH type mirrors, GitLab requires host key of the target where the mirror is located. GitLab's Web UI allows it to either automatically detect the target host using the mirror URL or a host key can be manually entered.</p>
+<p>As of GitLab 18.6, the API does not accept the target's SSH host keys in the request payload. Because of this, SSH based mirror can be configured using GitLabForm, but it will not be functional. GitLab will not be able to push to the target mirror. And unlike the API, GitLab's UI doesn't allow "editing" a mirror either where manual intervention could've been a work-around.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Configuring a SSH based mirror using GitLabForm is possible but it will not be functional due to limitation with GitLab's API not accepting mirror's host key.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Use an HTTP based mirror for completely automatied configuration-as-code workflow for managing push mirrors.</p>
+</div>
+</div>
+<h2 id="special-configuration-keys">Special configuration keys<a class="headerlink" href="#special-configuration-keys" title="Permanent link">&para;</a></h2>
+<h3 id="enforce"><code>enforce</code><a class="headerlink" href="#enforce" title="Permanent link">&para;</a></h3>
+<p>This is a boolean type key that can be set under <code>remote_mirrors</code> section. Set to <code>true</code> to delete any mirrors found in GitLab that are not defined in the config.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-group/my-project</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">remote_mirrors</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># Delete all other mirrors in GitLab that are not defined below</span>
+<span class="w">      </span><span class="s">&quot;https://username:password@example.com/path-to/my-repo.git&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">auth_method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;password&quot;</span>
+<span class="w">        </span><span class="nt">only_protected_branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h3 id="print_details"><code>print_details</code><a class="headerlink" href="#print_details" title="Permanent link">&para;</a></h3>
+<p>Because repository mirror settings are often restricted to users with Maintainer or Owner permissions, regular developers often cannot verify if a mirror is functioning correctly through the GitLab Web UI.</p>
+<p>Set this attribute to true and GitLabForm will retrieve the full state of all remote mirrors in the project and print their attributes to the terminal. This includes the synchronization status, last successful update time, and any error messages returned by GitLab. This is particularly useful in CI/CD logs to monitor the health of your mirrors.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-group/my-project</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">remote_mirrors</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">print_details</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># Global option to report on all mirrors in this project</span>
+<span class="w">      </span><span class="s">&quot;https://username:password@example.com/path-to/my-repo.git&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">auth_method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;password&quot;</span>
+</code></pre></div>
+<p>Example Output in Terminal:</p>
+<div class="highlight"><pre><span></span><code>📋 Final Remote Mirror Report for &#39;my-group/my-project&#39;:
+  ────────────────────────────────────────
+  - enabled: True
+  - auth_method: password
+  - enabled: True
+  - host_keys: []
+  - id: 479
+  - keep_divergent_refs: None
+  - last_error: None
+  - last_successful_update_at: 2026-01-11T10:00:00.000Z
+  - last_update_at: None
+  - last_update_started_at: None
+  - mirror_branch_regex: None
+  - only_protected_branches: False
+  - update_status: ✅ finished
+  - url: https://*****:*****@example.com/path-to/my-repo.git
+  ────────────────────────────────────────
+</code></pre></div>
+<h3 id="delete"><code>delete</code><a class="headerlink" href="#delete" title="Permanent link">&para;</a></h3>
+<p>This is a boolean type key that can be used within indiviudal mirror. Set this to <code>true</code> for the corresponding mirror to be deleted.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-group/my-project</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">remote_mirrors</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># Mirror to GitHub using a Personal Access Token (HTTPS)</span>
+<span class="w">      </span><span class="s">&quot;https://username:github_pat_12345@github.com/my-org/my-repo.git&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">only_protected_branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">keep_divergent_refs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="c1"># Delete an old mirror</span>
+<span class="w">      </span><span class="s">&quot;https://username:password@example.com/path-to/my-repo.git&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">delete</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h3 id="force_push"><code>force_push</code><a class="headerlink" href="#force_push" title="Permanent link">&para;</a></h3>
+<p>Set this to <code>true</code> within a mirror to trigger an immediate push to the remote mirror.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-group/my-project</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">remote_mirrors</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;https://username:password@example.com/path-to/my-repo.git&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">auth_method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;password&quot;</span>
+<span class="w">        </span><span class="nt">only_protected_branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">       </span><span class="c1"># Sync immediately after configuration</span>
+</code></pre></div>
+<h3 id="force_update"><code>force_update</code><a class="headerlink" href="#force_update" title="Permanent link">&para;</a></h3>
+<p>For each mirror, GitLabForm will compare all parameters between the config and what's in GitLab. If changes are detected or has drifted from the config, the mirror configuration in GitLab will be updated.</p>
+<p>However, GitLabForm cannot detect changes to authentication, as GitLab returns credentials in the URL as masked. Set this key to <code>true</code>, in case credentials need to be changed for a mirror. For example: change username/password. Note, changing the rest of URL (i.e. protocol, path, etc.) will result in a new mirror to be created.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-group/my-project</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">remote_mirrors</span><span class="p">:</span>
+<span class="hll"><span class="w">      </span><span class="s">&quot;https://<del class="critic">username</del><ins class="critic">new_username</ins>:<del class="critic">password</del><ins class="critic">new_password</ins>@example.com/path-to/my-repo.git&quot;</span><span class="p p-Indicator">:</span>
+</span><span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">auth_method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;password&quot;</span>
+<span class="w">        </span><span class="nt">only_protected_branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">force_update</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Update the existing mirror with new credentials based on config above</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Only use when needed</p>
+<p>Using this key will result in the mirror being updated <strong>always</strong>. For performance reason, remove this configuration if mirror authentication/credential update is not needed. This will avoid unnecessary API calls to GitLab.</p>
+</div>
+<h3 id="print_public_key"><code>print_public_key</code><a class="headerlink" href="#print_public_key" title="Permanent link">&para;</a></h3>
+<p>If a mirror is configured that is SSH type and <code>auth_method</code> is set to <code>ssh_public_key</code>, GitLab will automatically create a public key. This key will need to be setup in the target system so that GitLab can authenticate and push to the target. In this case, you need a way to retrieve this public key. Set this attribute to <code>true</code> and GitLabForm will retrieve the key and print it in the terminal.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-group/my-project</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">remote_mirrors</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;ssh://git@external-provider.com/repo.git&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">auth_method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ssh_public_key&quot;</span>
+<span class="w">        </span><span class="nt">print_public_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># Prints the key so you can add it to the target</span>
 </code></pre></div>
 
 
