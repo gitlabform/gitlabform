@@ -67,9 +67,6 @@ Since v2.2.0 there is a new way of implementing processors - by inheriting form 
 It should be applied for new features which manage 0-N entities of some kind under a group or a project.
 See `BadgesProcessor` as an example how to use it.
 
-Since v2.10.0 we have a similar solution for features where you manage a single entity - `SingleEntityProcessor` class.
-See `ProjectPushRulesProcessor` as an example how to use it. 
-
 #### Usage
 
 If you want to **add/change/fix things under an existing config section** then most likely you will need to update 
@@ -77,7 +74,7 @@ the code in the processor classes (for example, in `BranchesProcessor`).
 
 If you want to **add support for a new config section** (= completely new feature), then you need to:
 
-0. (TODO: expand this sections) Consider writing a new processor using `MultipleEntitiesProcessor` or `SingleEntityProcessor` class as a base.
+0. (TODO: expand this sections) Consider writing a new processor using `MultipleEntitiesProcessor` class as a base.
 1. Create a new class `group_<new_config_section_name>_processor` (if it applies to the group settings) or 
 `<new_config_section_name>_processor` (if it applies to project settings) and implement two methods:
     - `_process_configuration` - which does the actual processing by calling the API and applying the changes in GitLab;
