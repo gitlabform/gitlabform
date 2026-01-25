@@ -47,8 +47,14 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
 
     def _update_project_security_settings(self, project: Project, settings: dict) -> None:
         """Update project security settings using python-gitlab."""
-        path = f"/projects/{project.encoded_id}/security_settings"
-        self.gl.http_put(path, post_data=settings)
+        try:
+            # TODO: python-gitlab does not yet support updating project security settings
+            # via its dedicated manager, so we use a lower-level http_put method here.
+            # Switch to native method once supported by python-gitlab.  
+            path = f"/projects/{project.encoded_id}/security_settings"
+            self.gl.http_put(path, post_data=settings)
+        except Exception as e:
+            warning(f"Failed to update project security settings for project {project.path_with_namespace}: {e}")
 
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
         entity_in_gitlab = self.get_project_security_settings(project_or_project_and_group)
