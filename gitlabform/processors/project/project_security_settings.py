@@ -11,12 +11,12 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("project_security_settings", gitlab)
 
-    def _process_configuration(self, project_or_project_and_group: str, configuration: dict) -> None:
+    def _process_configuration(self, project_name: str, configuration: dict) -> None:
         debug("Processing project security settings...")
-        project: Project = self.gl.get_project_by_path_cached(project_or_project_and_group)
+        project: Project = self.gl.get_project_by_path_cached(project_name)
 
         security_settings_in_config = configuration.get("project_security_settings", {})
-        security_settings_in_gitlab = self.get_project_security_settings(project_or_project_and_group)
+        security_settings_in_gitlab = self.get_project_security_settings(project_name)
         debug(security_settings_in_gitlab)
         debug("project_security_settings BEFORE: ^^^")
 
