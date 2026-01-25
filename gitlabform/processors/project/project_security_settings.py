@@ -14,7 +14,6 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
         super().__init__("project_security_settings", gitlab)
 
     def _process_configuration(self, project_name: str, configuration: dict) -> None:
-        debug("Processing project security settings...")
         project: Project = self.gl.get_project_by_path_cached(project_name)
 
         security_settings_in_config = configuration.get("project_security_settings", {})
@@ -25,7 +24,6 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
         if self._needs_update(security_settings_in_gitlab, security_settings_in_config):
             debug("Updating project security settings")
             self._update_project_security_settings(project, security_settings_in_config)
-            debug("project_security_settings AFTER: ^^^")
         else:
             debug("No update needed for project security settings")
 
