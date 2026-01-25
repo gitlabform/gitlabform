@@ -16,7 +16,7 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
         project: Project = self.gl.get_project_by_path_cached(project_name)
 
         security_settings_in_config = configuration.get("project_security_settings", {})
-        security_settings_in_gitlab = self.get_project_security_settings(project_name)
+        security_settings_in_gitlab = self.get_project_security_settings(project)
         debug(security_settings_in_gitlab)
         debug("project_security_settings BEFORE: ^^^")
 
@@ -27,9 +27,7 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
         else:
             debug("No update needed for project security settings")
 
-    def get_project_security_settings(self, project_path: str) -> dict:
-        """Get project security settings from GitLab using python-gitlab."""
-        project: Project = self.gl.get_project_by_path_cached(project_path)
+    def get_project_security_settings(self, project: Project) -> dict:
         # Use lower-level http_get as security_settings doesn't have a dedicated manager
         path = f"/projects/{project.encoded_id}/security_settings"
         result = self.gl.http_get(path)
