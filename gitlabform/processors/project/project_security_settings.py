@@ -55,7 +55,8 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
             warning(f"Failed to update project security settings for project {project.path_with_namespace}: {e}")
 
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        entity_in_gitlab = self.get_project_security_settings(project_or_project_and_group)
+        project = self.gl.get_project_by_path_cached(project_or_project_and_group)
+        entity_in_gitlab = self.get_project_security_settings(project)
 
         DifferenceLogger.log_diff(
             f"{self.configuration_name} changes",
