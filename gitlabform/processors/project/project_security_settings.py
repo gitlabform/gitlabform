@@ -24,6 +24,7 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
         if self._needs_update(security_settings_in_gitlab, security_settings_in_config):
             debug("Updating project security settings")
             self._update_project_security_settings(project, security_settings_in_config)
+            debug("project_security_settings AFTER: ^^^")
         else:
             debug("No update needed for project security settings")
 
@@ -50,7 +51,8 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
             # via its dedicated manager, so we use a lower-level http_put method here.
             # Switch to native method once supported by python-gitlab.
             path = f"/projects/{project.encoded_id}/security_settings"
-            self.gl.http_put(path, post_data=settings)
+            updated_security_config = self.gl.http_put(path, post_data=settings)
+            debug(cast(dict[str, Any], updated_security_config))
         except Exception as e:
             warning(f"Failed to update project security settings for project {project.path_with_namespace}: {e}")
 
