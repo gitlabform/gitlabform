@@ -18,13 +18,10 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
 
         security_settings_in_config = configuration.get("project_security_settings", {})
         security_settings_in_gitlab = self.get_project_security_settings(project)
-        debug(security_settings_in_gitlab)
-        debug("project_security_settings BEFORE: ^^^")
 
         if self._needs_update(security_settings_in_gitlab, security_settings_in_config):
             debug("Updating project security settings")
             self._update_project_security_settings(project, security_settings_in_config)
-            debug("project_security_settings AFTER: ^^^")
         else:
             debug("No update needed for project security settings")
 
@@ -35,7 +32,7 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
             # via its dedicated manager, so we use a lower-level http_get method here.
             # Switch to native method once supported by python-gitlab.
 
-            path = f"/projects/{project.encoded_id}/security_settings"
+            path = f"/projects/{project.id}/security_settings"
             result = self.gl.http_get(path)
             # http_get can return Response for streamed requests, but we're not streaming
             # so it will always be a dict
@@ -50,9 +47,12 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
             # TODO: python-gitlab does not yet support updating project security settings
             # via its dedicated manager, so we use a lower-level http_put method here.
             # Switch to native method once supported by python-gitlab.
-            path = f"/projects/{project.encoded_id}/security_settings"
+            debug(security_settings_in_gitlab)
+            debug("project_security_settings BEFORE: ^^^")
+            path = f"/projects/{project.id}/security_settings"
             updated_security_config = self.gl.http_put(path, post_data=settings)
             debug(cast(dict[str, Any], updated_security_config))
+            debug("project_security_settings AFTER: ^^^")
         except Exception as e:
             warning(f"Failed to update project security settings for project {project.path_with_namespace}: {e}")
 
