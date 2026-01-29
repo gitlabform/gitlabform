@@ -36,7 +36,7 @@ dependencies = [
     "requests==2.32.5",
     "ruamel.yaml==0.17.21",
     "types-requests==2.32.4.20260107",
-    "types-setuptools==80.9.0.20251223",
+    "types-setuptools==80.10.0.20260124",
     "yamlpath==3.8.2",
 ]
 
