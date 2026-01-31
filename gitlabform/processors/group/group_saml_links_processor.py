@@ -1,5 +1,6 @@
-from logging import debug
+from logging import debug, warning
 from typing import List
+from cli_ui import info
 
 from gitlabform.gitlab import GitLab
 from gitlab.v4.objects import Group, GroupSAMLGroupLink
@@ -13,6 +14,10 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
 
     def _process_configuration(self, group_path: str, configuration: dict) -> None:
         """Process the SAML links configuration for a group."""
+        if "saml_group_links" in configuration:
+            info(
+                "CONFIG DEPRECATION: The 'saml_group_links' key is deprecated and will be changed to `group_saml_links` in a future version."
+            )
 
         configured_links = configuration.get("saml_group_links", {})
         enforce_links = configuration.get("saml_group_links|enforce", False)
