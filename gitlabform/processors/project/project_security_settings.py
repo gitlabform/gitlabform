@@ -47,7 +47,7 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
             # TODO: python-gitlab does not yet support updating project security settings
             # via its dedicated manager, so we use a lower-level http_put method here.
             # Switch to native method once supported by python-gitlab.
-            debug(security_settings_in_gitlab)
+            debug(settings)
             debug("project_security_settings BEFORE: ^^^")
             path = f"/projects/{project.id}/security_settings"
             updated_security_config = self.gl.http_put(path, post_data=settings)
