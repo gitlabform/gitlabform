@@ -10,7 +10,6 @@ from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.transform import (
     AccessLevelsTransformer,
-    UserTransformer,
     ImplicitNameTransformer,
     MergeRequestApprovalsTransformer,
 )

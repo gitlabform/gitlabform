@@ -4,7 +4,7 @@ from ez_yaml import ez_yaml
 from ruamel.yaml import YAML
 from types import SimpleNamespace
 
-from cli_ui import fatal, warning, debug as verbose
+from cli_ui import fatal, warning
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
@@ -13,22 +13,22 @@ from yamlpath.wrappers import ConsolePrinter
 from gitlabform.constants import EXIT_INVALID_INPUT, APPROVAL_RULE_NAME
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
-from gitlabform.gitlab import GitLab, GitlabWrapper, PythonGitlab
+from gitlabform.gitlab import GitLab
 
 
 # Configuration transformers are classes which take the input configuration as YAML and change it
-# to from the more user-friendly input to an output that is more applicable to passing to GitLab
+# from the more user-friendly input to an output that is more applicable to passing to GitLab
 # over its API.
 #
-# For example, we want to operate on usernames in the configuration while GitLab sometimes operates
-# on user ids. Therefore, one of the transformers changes "user_id: <number>" into "user: <username>".
+# For example, we accept access level names like "maintainer" in the configuration and transform
+# them to numeric values like 40 that the GitLab API expects. Note that username-to-user-id and
+# groupname-to-group-id transformations are now handled in individual processors for better
+# context-specific error handling.
 
 
 class ConfigurationTransformers:
     def __init__(self, gitlab: GitLab):
         self.merge_request_approvals_transformer = MergeRequestApprovalsTransformer(gitlab)
-        self.user_transformer = UserTransformer(gitlab)
-        self.group_transformer = GroupTransformer(gitlab)
         self.implicit_name_transformer = ImplicitNameTransformer(gitlab)
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
 
@@ -36,12 +36,7 @@ class ConfigurationTransformers:
         config_before = ez_yaml.to_string(obj=configuration.config, options={})
         debug(f"Config BEFORE transformations:\n{config_before}")
 
-        # this needs to run before user and group transformer as it may contain users and group
-        # names to convert to ids
         self.merge_request_approvals_transformer.transform(configuration)
-
-        self.user_transformer.transform(configuration)
-        self.group_transformer.transform(configuration)
         self.implicit_name_transformer.transform(configuration)
         self.access_level_transformer.transform(configuration, last=True)
 
@@ -68,93 +63,6 @@ class ConfigurationTransformer(ABC):
         config_yaml_string = ez_yaml.to_string(obj=configuration.config, options={})
         simple_yaml_loader = YAML(typ="safe", pure=True)
         configuration.config = simple_yaml_loader.load(config_yaml_string)
-
-
-class UserTransformer(ConfigurationTransformer):
-    def __init__(self, gitlab: GitLab):
-        self.gl: PythonGitlab = GitlabWrapper(gitlab).get_gitlab()
-
-    def _do_transform(self, configuration: Configuration) -> None:
-        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
-        log = ConsolePrinter(logging_args)
-        processor = Processor(log, configuration.config)
-        verbose("Getting user ids for users defined in protect_environments config")
-        try:
-            for node_coordinate in processor.get_nodes(
-                "projects_and_groups.*.protected_environments.*.deploy_access_levels.user",
-                mustexist=True,
-            ):
-                user = node_coordinate.parent.pop("user")
-
-                user_id = self.gl.get_user_id_cached(user)
-                if user_id is None:
-                    from gitlabform.gitlab.core import NotFoundException
-
-                    raise NotFoundException("No users found when searching for username '%s'" % user)
-                node_coordinate.parent["user_id"] = user_id
-        except YAMLPathException as _:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
-
-        verbose("Getting user ids for users defined in merge_requests_approval_rules config")
-        try:
-            for node_coordinate in processor.get_nodes(
-                "**.merge_requests_approval_rules.*.users",
-                mustexist=True,
-            ):
-                user_ids = []
-                users = node_coordinate.parent.pop("users")
-                for user in users:
-                    user_id = self.gl.get_user_id_cached(user)
-                    if user_id is None:
-                        from gitlabform.gitlab.core import NotFoundException
-
-                        raise NotFoundException("No users found when searching for username '%s'" % user)
-                    user_ids.append(user_id)
-                node_coordinate.parent["user_ids"] = user_ids
-        except YAMLPathException as _:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
-
-
-class GroupTransformer(ConfigurationTransformer):
-    def __init__(self, gitlab: GitLab):
-        self.gl: PythonGitlab = GitlabWrapper(gitlab).get_gitlab()
-
-    def _do_transform(self, configuration: Configuration) -> None:
-        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
-        processor = Processor(ConsolePrinter(logging_args), configuration.config)
-
-        try:
-            for node_coordinate in processor.get_nodes(
-                "projects_and_groups.*.protected_environments.*.deploy_access_levels.group",
-                mustexist=True,
-            ):
-                group = node_coordinate.parent.pop("group")
-                node_coordinate.parent["group_id"] = self.gl.get_group_id(group)
-
-        except YAMLPathException as _:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
-
-        try:
-            for node_coordinate in processor.get_nodes(
-                "**.merge_requests_approval_rules.*.groups",
-                mustexist=True,
-            ):
-                group_ids = []
-                groups = node_coordinate.parent.pop("groups")
-                for group in groups:
-                    group_id = self.gl.get_group_id(group)
-                    group_ids.append(group_id)
-                node_coordinate.parent["group_ids"] = group_ids
-        except YAMLPathException:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
 
 
 class ImplicitNameTransformer(ConfigurationTransformer):
