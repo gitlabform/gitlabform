@@ -16,7 +16,7 @@ jobs:
         with:
           ref: ${{ inputs.BRANCH_REF }}
       - name: Black Code Formatter
-        uses: psf/black@25.12.0 # note: keep this in sync with the version in .pre-commit-config.yaml
+        uses: psf/black@26.1.0 # note: keep this in sync with the version in .pre-commit-config.yaml
         with:
           options: "--check"
           src: "."
