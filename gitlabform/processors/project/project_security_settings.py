@@ -41,7 +41,7 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
             warning(f"Failed to get project security settings for project {project.path_with_namespace}: {e}")
             return {}
 
-    def _update_project_security_settings(self, project: Project, initial_settings: dict, bsettings: dict) -> None:
+    def _update_project_security_settings(self, project: Project, initial_settings: dict, settings: dict) -> None:
         """Update project security settings using python-gitlab."""
         try:
             # TODO: python-gitlab does not yet support updating project security settings
