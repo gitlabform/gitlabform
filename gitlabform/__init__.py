@@ -143,8 +143,7 @@ class GitLabForm:
         :return: a tuple with all the arguments that have been parsed
         """
         parser = argparse.ArgumentParser(
-            description=textwrap.dedent(
-                f"""
+            description=textwrap.dedent(f"""
             🏗 Specialized configuration as a code tool for GitLab projects, groups and more
             using hierarchical configuration written in YAML.
 
@@ -152,8 +151,7 @@ class GitLabForm:
               * 0 - on success,
               * {EXIT_INVALID_INPUT} - on invalid input errors (f.e. bad syntax in the config file) ~ "it's your fault". 😅
               * {EXIT_PROCESSING_ERROR} - if there were backend processing errors (f.e. when requests to GitLab fail) ~ "it's not your fault". 😎
-            """
-            ),
+            """),
             formatter_class=Formatter,
         )
 

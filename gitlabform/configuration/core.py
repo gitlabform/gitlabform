@@ -101,11 +101,11 @@ class ConfigurationCore(ABC):
         if config_string:
             config = textwrap.dedent(source)
             verbose("Reading config from the provided string.")
-            (yaml_data, doc_loaded) = Parsers.get_yaml_data(yaml, log, config, literal=True)
+            yaml_data, doc_loaded = Parsers.get_yaml_data(yaml, log, config, literal=True)
         else:
             config_path = source
             verbose(f"Reading config from file: {config_path}")
-            (yaml_data, doc_loaded) = Parsers.get_yaml_data(yaml, log, config_path)
+            yaml_data, doc_loaded = Parsers.get_yaml_data(yaml, log, config_path)
 
         if doc_loaded:
             debug("Config parsed successfully as YAML.")

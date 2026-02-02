@@ -14,7 +14,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.12]
+        python-version: [3.12, 3.14]
       fail-fast : false
     steps:
       - uses: actions/checkout@v6
@@ -51,7 +51,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [3.12, 3.13]
+        python-version: [3.12, 3.14]
       fail-fast : false
     steps:
       - uses: actions/checkout@v6
@@ -82,15 +82,20 @@ jobs:
 
   security-tests:
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: [ 3.12, 3.14 ]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           pip install wheel
@@ -104,7 +109,7 @@ jobs:
       max-parallel: 2
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [ 3.12, 3.13 ]
+        python-version: [ 3.12, 3.14 ]
       fail-fast: true
     runs-on: ${{ matrix.os }}
     steps:
