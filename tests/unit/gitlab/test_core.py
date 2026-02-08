@@ -127,3 +127,33 @@ class TestGitLabCoreRetryConfiguration:
         assert retry_call_kwargs["total"] == 10
         assert retry_call_kwargs["backoff_factor"] == pytest.approx(0.1)
         assert retry_call_kwargs["status_forcelist"] == []
+
+    @patch("gitlabform.gitlab.core.ssl.get_default_verify_paths")
+    @patch("gitlabform.gitlab.core.os.path.exists")
+    @patch("gitlabform.gitlab.core.requests.Session")
+    @patch("gitlabform.gitlab.core.Configuration")
+    def test_system_ca_bundle_used_when_available(self, mock_configuration, mock_session, mock_exists, mock_ssl_paths):
+        """Test that system CA bundle is used when ssl_verify is True and cafile exists"""
+        mock_configuration.return_value.get.return_value = {
+            "url": "https://gitlab.example.com",
+            "token": "test-token",
+            "ssl_verify": True,
+        }
+        mock_session_instance = MagicMock()
+        mock_session.return_value = mock_session_instance
+
+        mock_paths = MagicMock()
+        mock_paths.cafile = "/etc/ssl/certs/ca-certificates.crt"
+        mock_ssl_paths.return_value = mock_paths
+        mock_exists.return_value = True
+
+        from gitlabform.gitlab.core import GitLabCore
+
+        with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
+            mock_api.side_effect = [
+                {"version": "16.0.0", "revision": "abc123"},
+                {"username": "test_user", "is_admin": True},
+            ]
+            core = GitLabCore()
+
+        assert core.session.verify == "/etc/ssl/certs/ca-certificates.crt"
