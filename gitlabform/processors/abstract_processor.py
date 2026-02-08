@@ -43,10 +43,8 @@ class AbstractProcessor(ABC):
                 project_transfer_source = ""
                 try:
                     project_transfer_source = configuration["project"]["transfer_from"]
-                    verbose(
-                        f"""Project {project_or_project_and_group} is configured to be transferred, 
-                        diffing config from transfer source project {project_transfer_source}."""
-                    )
+                    verbose(f"""Project {project_or_project_and_group} is configured to be transferred, 
+                        diffing config from transfer source project {project_transfer_source}.""")
                 except KeyError:
                     pass
 

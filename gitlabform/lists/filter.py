@@ -5,7 +5,6 @@ from cli_ui import fatal
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
 
-
 # Groups and projects filters jobs is to omit some groups and projects that GitLabForm is requested
 # to process for a speed-up.
 #
