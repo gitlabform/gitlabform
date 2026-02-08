@@ -62,15 +62,23 @@ against a disposable GitLab instance running as a Docker container OR use your o
 
 1. Run below command to start GitLab in a docker container. Note that it may take a few minutes!
 
-```
-./dev/run_gitlab_in_docker.sh
-```
+    ```
+    ./dev/run_gitlab_in_docker.sh
+    ```
 
 2. Run `pytest tests/acceptance` to start all tests.
-To run only a single class with tests run, f.e.:
-- `pytest tests/acceptance -k "TestArchiveProject"`.
-To run a single test method run, f.e.:
-- `pytest tests/acceptance -k "test__set_file_strongly_protected_branch"`.
+
+    To run only a single class with tests run, f.e.:
+
+    ```
+    pytest tests/acceptance -k "TestArchiveProject"
+    ```
+
+    To run a single test method run, f.e.:
+
+    ```
+    pytest tests/acceptance -k "test__set_file_strongly_protected_branch"
+    ```
 
 ### Acceptance tests for GitLab paid features
 
