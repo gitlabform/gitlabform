@@ -17,6 +17,8 @@ from urllib3.util.retry import Retry
 from gitlabform.configuration import Configuration
 from gitlabform.util import to_str
 
+import ssl
+
 
 class GitLabCore:
     def __init__(self, config_path=None, config_string=None):
@@ -54,7 +56,12 @@ class GitLabCore:
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
         self.session.verify = self.gitlab_config["ssl_verify"]
-        if not self.gitlab_config["ssl_verify"]:
+        if self.gitlab_config["ssl_verify"] is True:
+            # Use system CA bundle instead of certifi
+            cafile = ssl.get_default_verify_paths().cafile
+            if cafile and os.path.exists(cafile):
+                self.session.verify = cafile
+        elif not self.gitlab_config["ssl_verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         self.gitlabform_version = package_version("gitlabform")
