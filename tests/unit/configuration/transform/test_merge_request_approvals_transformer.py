@@ -16,7 +16,6 @@ from gitlabform.configuration.transform import (
 )
 from gitlabform.gitlab import GitLab
 
-
 #
 # TODO: remove below test(s) in v4.x
 #

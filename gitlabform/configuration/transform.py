@@ -15,7 +15,6 @@ from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
 from gitlabform.gitlab import GitLab
 
-
 # Configuration transformers are classes which take the input configuration as YAML and change it
 # to from the more user-friendly input to an output that is more applicable to passing to GitLab
 # over its API.
