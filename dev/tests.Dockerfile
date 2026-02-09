@@ -1,4 +1,4 @@
-FROM python:3.12-alpine3.21
+FROM python:3.12-alpine
 
 COPY ../pyproject.toml /gitlabform/
 COPY ../README.md /gitlabform/
