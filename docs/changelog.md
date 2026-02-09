@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.0-beta.4
+
+- Rebased onto v4.7.0
+
 ## 5.0.0-beta.3
 
 ### Chore
@@ -82,56 +86,6 @@ Resolves:
 * Update various dependencies to newer version.
 
 Thanks to all the contributors of this release!
-
-## 5.0.0-beta.3
-
-### Chore
-
-- Rebased onto v4.6.1
-
-## 5.0.0-beta.2
-
-### Bug Fixes
-
-- Fix for Branch Protection changes, GitlabForm attempted to updated users when config has not changed from Gitlab, resulting in API errors and a failed run of GitlabForm. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
-
-#### Variables with same name but different scope should be deletable [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
-As per the referenced issue [#533](https://github.com/gitlabform/gitlabform/issues/533), if there are multiple CI CD variables with same key/name but scoped to different "environment", gitlabform does not make the API call correctly. As a result, the variable cannot be deleted and an error is returned.
-
-Bug fix includes a large refactor to use python-gitlab code and tidy up redundant paths, hence being included as part of v5 Release Candidate testing.
-
-## 5.0.0-beta.1
-
-### Breaking Changes
-
-#### Branch Protection Updates [#1070](https://github.com/gitlabform/gitlabform/pull/1070) ([TimKnight-DWP](https://github.com/TimKnight-DWP) & [br0ziliy](https://github.com/br0ziliy))
-When preventing GitlabForm from un-protecting and then re-protecting the Branch in order to apply configuration changes to the protection rules [#1070](https://github.com/gitlabform/gitlabform/pull/1070), we discovered some functionality that was previously hidden from the user.
-
-Previously if you stopped defining `code_owner_approval_required` or `allow_force_push` in the YAML config, the settings would revert to the default Gitlab settings applied when first protecting the branch, see: [Branch Protection API](https://docs.gitlab.com/api/protected_branches/#protect-repository-branches)
-
-With the changes to perform dynamic updates as required, we follow the GitlabForm convention of **leaving the Gitlab settings as is if the data is no longer defined in configuration**.
-
-Therefore, if you wish to ensure the Protected Branch settings are applied as you intend when running GitlabForm you should define some defaults explicitly:
-
-```yaml
-projects_and_groups:
- my-group/*:
-   branches:
-     main:
-       protected: true
-       allow_force_push: false
-       code_owner_approval_required: true
-```
-
-Full details: [docs/reference/protected_branches.md](reference/protected_branches.md)
-
-- Extension of: https://github.com/gitlabform/gitlabform/pull/996
-
-Resolves:
-- https://github.com/gitlabform/gitlabform/issues/445
-- https://github.com/gitlabform/gitlabform/issues/1061
-- https://github.com/gitlabform/gitlabform/issues/1034
-
 
 ## 4.6.1
 
