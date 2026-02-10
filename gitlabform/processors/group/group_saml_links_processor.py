@@ -10,17 +10,13 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 class GroupSAMLLinksProcessor(AbstractProcessor):
 
     def __init__(self, gitlab: GitLab):
-        super().__init__("saml_group_links", gitlab)
+        super().__init__("group_saml_links", gitlab)
 
     def _process_configuration(self, group_path: str, configuration: dict) -> None:
         """Process the SAML links configuration for a group."""
-        if "saml_group_links" in configuration:
-            info(
-                "CONFIG DEPRECATION: The 'saml_group_links' key is deprecated and will be changed to `group_saml_links` in a future version."
-            )
 
-        configured_links = configuration.get("saml_group_links", {})
-        enforce_links = configuration.get("saml_group_links|enforce", False)
+        configured_links = configuration.get("group_saml_links", {})
+        enforce_links = configuration.get("group_saml_links|enforce", False)
 
         group: Group = self.gl.get_group_by_path_cached(group_path)
         existing_links: List[GroupSAMLGroupLink] = group.saml_group_links.list(get_all=True)
