@@ -1,59 +1,12 @@
 # Changelog
 
-## 4.8.0
+## 5.0.0-beta.5
 
-### Refactors
+- Rebased onto v4.8.0
 
-* migrate project security settings to python-gitlab [#1152](https://github.com/gitlabform/gitlabform/pull/1152). [thomascizeron](https://github.com/thomascizeron))
+## 5.0.0-beta.4
 
-### Documentation
-
-* add deprecation warning for saml_group_links [#1168](https://github.com/gitlabform/gitlabform/pull/1168). ([amimas](https://github.com/amimas))
-* fix broken ordered list formatting [#1174](https://github.com/gitlabform/gitlabform/pull/1174). ([brlin-tw](https://github.com/brlin-tw))
-
-### Style
-
-* Apply black v26 formatting [#1176](https://github.com/gitlabform/gitlabform/pull/1176). ([amimas](https://github.com/amimas))
-
-### Dependencies
-
-* Update various dependencies to newer version.
-
-Thanks to all the contributors of this release!
-
-## 4.7.0
-
-### Features
-
-* Allow configuring any options supported by python-gitlab API client [#1140](https://github.com/gitlabform/gitlabform/pull/1140), [#1151](https://github.com/gitlabform/gitlabform/pull/1151). ([thomascizeron](https://github.com/thomascizeron))
-* Allow configuring `max_retries`, `retry_transient_errors` and `backoff_factor` for legacy Gitlab API client [#1154](https://github.com/gitlabform/gitlabform/pull/1154). ([thomascizeron](https://github.com/thomascizeron))
-* Add support for configuring push/remote mirrors [#1157](https://github.com/gitlabform/gitlabform/pull/1157). ([amimas](https://github.com/amimas))
-
-### Bug Fixes
-
-* Handle 403 Forbidden error when updating files in protected branches [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
-* Handle 403 Forbidden error when editing files in archived projects [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
-
-### Tests
-
-* Fix group push rule test assertion [#1142](https://github.com/gitlabform/gitlabform/pull/1142). ([amimas](https://github.com/amimas))
-* Fix tests for GitLab 18.8 instance enforcement on job token scope [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
-
-### Documentation
-
-* Fix broken ordered list formatting in documentation [#1134](https://github.com/gitlabform/gitlabform/pull/1134). ([brlin-tw](https://github.com/brlin-tw))
-* Improve documentation for gitlab client configuration [#1156](https://github.com/gitlabform/gitlabform/pull/1156). ([thomascizeron](https://github.com/thomascizeron))
-* Add Ströer Online Marketing logo to "Used by" section [#1157](https://github.com/gitlabform/gitlabform/pull/1157). ([lociii](https://github.com/lociii))
-
-### Chores
-
-* Suppress false positive bandit warning for private_token [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
-
-### Dependencies
-
-* Update various dependencies to newer version.
-
-Thanks to all the contributors of this release!
+- Rebased onto v4.7.0
 
 ## 5.0.0-beta.3
 
@@ -104,6 +57,55 @@ Resolves:
 - https://github.com/gitlabform/gitlabform/issues/1061
 - https://github.com/gitlabform/gitlabform/issues/1034
 
+
+## 4.8.0
+
+### Refactors
+
+* migrate project security settings to python-gitlab [#1152](https://github.com/gitlabform/gitlabform/pull/1152). [thomascizeron](https://github.com/thomascizeron))
+
+### Documentation
+
+* add deprecation warning for saml_group_links [#1168](https://github.com/gitlabform/gitlabform/pull/1168). ([amimas](https://github.com/amimas))
+* fix broken ordered list formatting [#1174](https://github.com/gitlabform/gitlabform/pull/1174). ([brlin-tw](https://github.com/brlin-tw))
+
+### Style
+
+* Apply black v26 formatting [#1176](https://github.com/gitlabform/gitlabform/pull/1176). ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+## 4.7.0
+
+### Features
+
+* Allow configuring any options supported by python-gitlab API client [#1140](https://github.com/gitlabform/gitlabform/pull/1140), [#1151](https://github.com/gitlabform/gitlabform/pull/1151). ([thomascizeron](https://github.com/thomascizeron))
+* Allow configuring `max_retries`, `retry_transient_errors` and `backoff_factor` for legacy Gitlab API client [#1154](https://github.com/gitlabform/gitlabform/pull/1154). ([thomascizeron](https://github.com/thomascizeron))
+* Add support for configuring push/remote mirrors [#1157](https://github.com/gitlabform/gitlabform/pull/1157). ([amimas](https://github.com/amimas))
+
+### Bug Fixes
+
+* Handle 403 Forbidden error when updating files in protected branches [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
+* Handle 403 Forbidden error when editing files in archived projects [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
+
+### Tests
+
+* Fix group push rule test assertion [#1142](https://github.com/gitlabform/gitlabform/pull/1142). ([amimas](https://github.com/amimas))
+* Fix tests for GitLab 18.8 instance enforcement on job token scope [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
+
+### Documentation
+
+* Fix broken ordered list formatting in documentation [#1134](https://github.com/gitlabform/gitlabform/pull/1134). ([brlin-tw](https://github.com/brlin-tw))
+* Improve documentation for gitlab client configuration [#1156](https://github.com/gitlabform/gitlabform/pull/1156). ([thomascizeron](https://github.com/thomascizeron))
+* Add Ströer Online Marketing logo to "Used by" section [#1157](https://github.com/gitlabform/gitlabform/pull/1157). ([lociii](https://github.com/lociii))
+
+### Chores
+
+* Suppress false positive bandit warning for private_token [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
 
 ## 4.6.1
 
