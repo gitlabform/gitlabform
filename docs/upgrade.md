@@ -4,11 +4,13 @@ Some of these changes between major application versions may affect the effectiv
 
 ## From 4.\* to 5.\*
 
-### Update `config_version` and remove deprecated MR approval config
+### Update `config_version`
 
-GitLabForm v5 removed configuration syntax for merge request approval settings that were deprecated in v3. To use GitLabForm v5, `config_version` must be set to `4`.
+Update `config_version` to `4`. Then update configuration syntax as described in following sections.
 
-In addition, following config will not be processed anymore.
+#### Remove deprecated MR approval config
+
+GitLabForm v5 removed configuration syntax for merge request approval settings that were deprecated in v3. In addition, following config will not be processed anymore.
 
 ```yaml
 config_version: 4
@@ -47,6 +49,20 @@ projects_and_groups:
       enforce: true
 ```
 
+#### Update config syntax for group saml links
+
+In previous versions of GitLabForm, saml links at a group level were under `saml_group_links`. This key has been renamed to `group_saml_links` to be consistent with other group level configuration syntax.
+
+```yaml
+projects_and_groups:
+  group_1/*:
+    {--saml-group-links:--}
+    {++group_saml_links:++} 
+      devops_are_maintainers: # this is just a label
+        saml_group_name: devops
+        access_level: maintainer
+```
+
 ### Branch Protection Changes
 
 In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach reset all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of [raw parameter passing](reference/index.md#raw-parameters-passing) — where only explicitly configured values are sent, and unspecified ones are left untouched.
@@ -68,7 +84,7 @@ projects_and_groups:
        code_owner_approval_required: true
 ```
 
-### Protected key is Mandatory
+#### Protected key is Mandatory
 The documentation has always mandated that the `protected` key must be present in GitlabForm configuration, set to either `true` or `false`.
 
 From v5 GitlabForm will exit Fatally if there is a branch under `branches` configuration _without_ the protected key, for example the following will now error fatally:
@@ -85,7 +101,7 @@ projects_and_groups:
        protected: true
 ```
 
-## From 3.\* to 4.*\
+## From 3.\* to 4.\*
 
 Relatively minor breaking-change, we dropped support for Python < 3.12, so if you are running locally using Python rather than Docker, ensure you are using Python > 3.12
 
