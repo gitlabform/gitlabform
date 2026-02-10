@@ -9,11 +9,11 @@ pytestmark = pytest.mark.requires_license
 class TestGroupSamlLinks:
     def test__add_saml_links(self, gl, group):
 
-        assert len(group.saml_group_links.list()) == 0, "saml_group_links is not empty"
+        assert len(group.saml_group_links.list()) == 0, "group_saml_links is not empty"
         add_group_saml_settings = f"""
         projects_and_groups:
           {group.full_path}/*:              
-             saml_group_links: 
+             group_saml_links: 
                devops_users:                                 
                  saml_group_name: devops_users
                  access_level: maintainer
@@ -29,11 +29,11 @@ class TestGroupSamlLinks:
 
     def test__update_saml_links(self, gl, group):
 
-        assert len(group.saml_group_links.list()) == 1, "saml_group_links is not empty from previous test"
+        assert len(group.saml_group_links.list()) == 1, "group_saml_links is not empty from previous test"
         add_group_saml_settings = f"""
         projects_and_groups:
           {group.full_path}/*:              
-             saml_group_links: 
+             group_saml_links: 
                devops_users:                                 
                  saml_group_name: devops_users
                  access_level: developer
@@ -48,12 +48,12 @@ class TestGroupSamlLinks:
 
     def test__enforce_saml_links(self, gl, group_for_function):
 
-        assert len(group_for_function.saml_group_links.list()) == 0, "saml_group_links is not empty"
+        assert len(group_for_function.saml_group_links.list()) == 0, "group_saml_links is not empty"
 
         add_group_saml_settings = f"""
           projects_and_groups:
             {group_for_function.full_path}/*:              
-              saml_group_links: 
+              group_saml_links: 
                 devops_are_maintainers:                                 
                   saml_group_name: devops_maintainer
                   access_level: maintainer
@@ -71,7 +71,7 @@ class TestGroupSamlLinks:
         add_group_saml_settings_enforce = f"""
           projects_and_groups:
             {group_for_function.full_path}/*:              
-              saml_group_links: 
+              group_saml_links: 
                 analysts_are_reporters:
                   saml_group_name: analysts_reporter
                   access_level: reporter
