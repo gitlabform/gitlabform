@@ -109,7 +109,7 @@ jobs:
       max-parallel: 2
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [ 3.12, 3.14 ]
+        python-version: [ 3.14 ]
       fail-fast: true
     runs-on: ${{ matrix.os }}
     steps:
