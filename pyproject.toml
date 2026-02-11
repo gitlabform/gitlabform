@@ -11,7 +11,7 @@ keywords = ["cli", "yaml", "gitlab", "configuration-as-code"]
 # there's an issue with the below line as of Feb 2025, see https://stackoverflow.com/q/74818677/2693875
 #license = "MIT"
 classifiers = [
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.14",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Information Technology",
     "Intended Audience :: System Administrators",
@@ -21,6 +21,7 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Topic :: Software Development :: Version Control :: Git",
 ]
+# GitLabForm is tested as running correctly on py3.12 and above, the main images produced use py3.14
 requires-python = ">=3.12.0"
 dependencies = [
     "certifi==2026.1.4",
