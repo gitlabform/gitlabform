@@ -1907,16 +1907,20 @@ too, like this:</p>
 against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.</p>
 <h3 id="running-acceptance-tests-using-gitlab-instance-in-docker">Running acceptance tests using GitLab instance in Docker<a class="headerlink" href="#running-acceptance-tests-using-gitlab-instance-in-docker" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Run below command to start GitLab in a docker container. Note that it may take a few minutes!</li>
-</ol>
+<li>
+<p>Run below command to start GitLab in a docker container. Note that it may take a few minutes!</p>
 <div class="highlight"><pre><span></span><code>./dev/run_gitlab_in_docker.sh
 </code></pre></div>
-<ol>
-<li>Run <code>pytest tests/acceptance</code> to start all tests.
-To run only a single class with tests run, f.e.:</li>
-<li><code>pytest tests/acceptance -k "TestArchiveProject"</code>.
-To run a single test method run, f.e.:</li>
-<li><code>pytest tests/acceptance -k "test__set_file_strongly_protected_branch"</code>.</li>
+</li>
+<li>
+<p>Run <code>pytest tests/acceptance</code> to start all tests.</p>
+<p>To run only a single class with tests run, f.e.:</p>
+<div class="highlight"><pre><span></span><code>pytest tests/acceptance -k &quot;TestArchiveProject&quot;
+</code></pre></div>
+<p>To run a single test method run, f.e.:</p>
+<div class="highlight"><pre><span></span><code>pytest tests/acceptance -k &quot;test__set_file_strongly_protected_branch&quot;
+</code></pre></div>
+</li>
 </ol>
 <h3 id="acceptance-tests-for-gitlab-paid-features">Acceptance tests for GitLab paid features<a class="headerlink" href="#acceptance-tests-for-gitlab-paid-features" title="Permanent link">&para;</a></h3>
 <p>To test features that are only available in paid version of Gitlab, you'll need a Gitlab license so that those features are available and the acceptance tests can use it. You can signup for a Gitlab Trial license. Follow the <a href="https://handbook.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows/#contributing-to-the-gitlab-enterprise-edition-ee">instructions in Gitlab handbook</a> for details on how to get a license for development purpose. Once you've received a license, take the following step:</p>
