@@ -1,5 +1,26 @@
 # Changelog
 
+## 4.8.0
+
+### Refactors
+
+* migrate project security settings to python-gitlab [#1152](https://github.com/gitlabform/gitlabform/pull/1152). [thomascizeron](https://github.com/thomascizeron))
+
+### Documentation
+
+* add deprecation warning for saml_group_links [#1168](https://github.com/gitlabform/gitlabform/pull/1168). ([amimas](https://github.com/amimas))
+* fix broken ordered list formatting [#1174](https://github.com/gitlabform/gitlabform/pull/1174). ([brlin-tw](https://github.com/brlin-tw))
+
+### Style
+
+* Apply black v26 formatting [#1176](https://github.com/gitlabform/gitlabform/pull/1176). ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.7.0
 
 ### Features
