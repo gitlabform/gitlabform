@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.0-beta.5
+
+- Rebased onto v4.8.0
+
 ## 5.0.0-beta.4
 
 - Rebased onto v4.7.0
