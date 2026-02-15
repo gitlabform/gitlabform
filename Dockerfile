@@ -1,5 +1,7 @@
 FROM python:3.12-alpine
 
+COPY . /gitlabform
+
 # delete the pip cache because even with `--no-cache-dir` pip still creates ~1.4MB of cache...
 RUN cd gitlabform \
     && apk add --no-cache build-base \
