@@ -1,34 +1,43 @@
-/.git
-/.github
-/.gitlabform.egg-info
-/.idea
-/.mypy_cache
-/.overrides
-/.pytest_cache
-/.venv
-/config
-/dev
-/dist
-/docs
-# only gitlabform directory is needed
-/tests
-/venv
-.DS_Store
-.coveragerc
-.dockerignore
-.git-blame-ignore-revs
+# Git
+.git
 .gitignore
+.git-blame-ignore-revs
+
+# Docker
+.dockerignore
+Dockerfile
+
+# Python cache and artifacts
+*.pyc
+__pycache__/
+*.egg-info
+.mypy_cache/
+.pytest_cache/
+
+# Test, dev, and local environments
+tests/
+dev/
+venv/
+.venv/
+
+# Documentation
+docs/
+.overrides/
+mkdocs.yml
+*.txt
+*.md
+
+# CI/CD and project config
+.github/
+.pre-commit-config.yaml
+.coveragerc
+codecov.yml
 .lgtm.yml
 .mypy.ini
-.pre-commit-config.yaml
-codecov.yml
-CONTRIBUTING.md
-Dockerfile
-LICENSE
-gitlab_*
-gitlabform.iml
-mkdocs.yml
-output.yml
-# pyproject.toml file is needed
-README.md
+coverage.xml
 tbump.toml
+
+# Editor/IDE config
+.idea/
+.vscode/
+.cursor/
