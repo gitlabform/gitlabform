@@ -59,9 +59,9 @@ test = [
     "pytest==9.0.2",
     "pytest-cov==7.0.0",
     "pytest-rerunfailures==16.1",
-    "xkcdpass==1.30.0",
     "types-requests==2.32.4.20260107",
     "types-setuptools==81.0.0.20260209",
+    "xkcdpass==1.30.0",
 ]
 docs = ["mkdocs", "mkdocs-material"]
 
