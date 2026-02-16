@@ -1,31 +1,6 @@
 # Changelog
 
-## 5.0.0-beta.5
-
-- Rebased onto v4.8.0
-
-## 5.0.0-beta.4
-
-- Rebased onto v4.7.0
-
-## 5.0.0-beta.3
-
-### Chore
-
-- Rebased onto v4.6.1
-
-## 5.0.0-beta.2
-
-### Bug Fixes
-
-- Fix for Branch Protection changes, GitlabForm attempted to updated users when config has not changed from Gitlab, resulting in API errors and a failed run of GitlabForm. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
-
-#### Variables with same name but different scope should be deletable [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
-As per the referenced issue [#533](https://github.com/gitlabform/gitlabform/issues/533), if there are multiple CI CD variables with same key/name but scoped to different "environment", gitlabform does not make the API call correctly. As a result, the variable cannot be deleted and an error is returned.
-
-Bug fix includes a large refactor to use python-gitlab code and tidy up redundant paths, hence being included as part of v5 Release Candidate testing.
-
-## 5.0.0-beta.1
+## 5.0.0
 
 ### Breaking Changes
 
@@ -57,6 +32,38 @@ Resolves:
 - https://github.com/gitlabform/gitlabform/issues/1061
 - https://github.com/gitlabform/gitlabform/issues/1034
 
+#### Renamed Group Level SAML Link config key [1175](https://github.com/gitlabform/gitlabform/pull/1175). ([amimas](https://github.com/amimas))
+
+The group level saml link configuration syntax previously used `saml_group_links` as the config key name. 
+This has been renamed to `group_saml_links` to be consistent with other group level configuration key of gitlabform. 
+Docs changes have been included as well.
+
+Resolves:
+- [#1078](https://github.com/gitlabform/gitlabform/issues/1078)
+
+#### Optimized Docker image [960](https://github.com/gitlabform/gitlabform/pull/960). ([gdubicki](https://github.com/gdubicki) & [amimas](https://github.com/amimas))
+
+Introduces multi-layer builds and reduced dependency overheads.
+This brings down the image size from 88.5MB (v4.8.0) to 68.5MB.
+
+#### Upgrade Python-Gitlab to 8.0.0 [1178](https://github.com/gitlabform/gitlabform/pull/1178)
+
+[Release Notes](https://github.com/python-gitlab/python-gitlab/releases/tag/v8.0.0)
+
+#### Support only Python 3.14 onwards [1177](https://github.com/gitlabform/gitlabform/pull/1177). ([TimKnight01](https://github.com/TimKnight01))
+
+Pyproject.toml supports >=3.14, the latest builds were tested on 3.12, but we wanted to make the break as part of this changeset.
+
+### Bug Fixes
+
+- Fix for Branch Protection changes, GitlabForm attempted to updated users when config has not changed from Gitlab, resulting in API errors and a failed run of GitlabForm. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+
+#### Variables with same name but different scope should be deletable [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
+As per the referenced issue [#533](https://github.com/gitlabform/gitlabform/issues/533), if there are multiple CI CD variables with same key/name but scoped to different "environment", gitlabform does not make the API call correctly. As a result, the variable cannot be deleted and an error is returned.
+
+Bug fix includes a large refactor to use python-gitlab code and tidy up redundant paths, hence being included as part of v5 Release Candidate testing.
+
+Thanks to all the contributors of this release!
 
 ## 4.8.0
 
