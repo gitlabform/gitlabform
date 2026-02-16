@@ -10,7 +10,6 @@ from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.transform import (
     AccessLevelsTransformer,
-    UserTransformer,
     ImplicitNameTransformer,
     MergeRequestApprovalsTransformer,
 )
@@ -204,3 +203,105 @@ def test__config__with_access_level_names__invalid_name():
         transformer.transform(configuration)
 
     assert e.value.code == EXIT_INVALID_INPUT
+
+
+def test__config__with_access_level_names__invalid_in_branches():
+    """Test AccessLevelsTransformer raises SystemExit for invalid access level in branches."""
+    config_yaml = """
+    projects_and_groups:
+      "foo/bar":
+        branches:
+          main:
+            protected: true
+            push_access_level: invalid_level
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+
+    with pytest.raises(SystemExit) as e:
+        transformer.transform(configuration)
+
+    assert e.value.code == EXIT_INVALID_INPUT
+
+
+def test__config__with_access_level_names__tags():
+    """Test AccessLevelsTransformer transforms access levels for tags."""
+    config_yaml = """
+    projects_and_groups:
+      "foo/bar":
+        tags:
+          v*:
+            protected: true
+            create_access_level: maintainer
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+    transformer.transform(configuration)
+
+    config_with_numbers = """
+    projects_and_groups:
+      "foo/bar":
+        tags:
+          v*:
+            protected: true
+            create_access_level: 40
+    """
+    configuration_with_numbers = Configuration(config_string=config_with_numbers)
+
+    assert not DeepDiff(configuration.config, configuration_with_numbers.config)
+
+
+def test__config__with_access_level_names__members():
+    """Test AccessLevelsTransformer transforms access levels for members."""
+    config_yaml = """
+    projects_and_groups:
+      "foo/bar":
+        members:
+          users:
+            alice:
+              access_level: developer
+            bob:
+              access_level: maintainer
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+    transformer.transform(configuration)
+
+    config_with_numbers = """
+    projects_and_groups:
+      "foo/bar":
+        members:
+          users:
+            alice:
+              access_level: 30
+            bob:
+              access_level: 40
+    """
+    configuration_with_numbers = Configuration(config_string=config_with_numbers)
+
+    assert not DeepDiff(configuration.config, configuration_with_numbers.config)
+
+
+def test__config__with_last_parameter():
+    """Test that convert_to_simple_types is called when last=True."""
+    config_yaml = """
+    projects_and_groups:
+      "foo/bar":
+        branches:
+          main:
+            protected: true
+            push_access_level: maintainer
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+
+    # Transform with last=True to trigger convert_to_simple_types
+    transformer.transform(configuration, last=True)
+
+    # After conversion, should be simple dict types
+    assert type(configuration.config) == dict
+    assert type(configuration.config["projects_and_groups"]) == dict
