@@ -1,6 +1,6 @@
 from logging import debug
 from typing import Optional
-from cli_ui import warning, fatal, debug as verbose
+from cli_ui import warning, fatal
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
@@ -8,7 +8,6 @@ from gitlab import (
 )
 from gitlab.v4.objects import Project, ProjectProtectedBranch
 
-from gitlabform import gitlab
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -19,11 +18,11 @@ class BranchesProcessor(AbstractProcessor):
         super().__init__("branches", gitlab)
         self.strict = strict
 
-    def _process_configuration(self, project_and_group: str, configuration: dict):
-        project: Project = self.gl.get_project_by_path_cached(project_and_group)
+    def _process_configuration(self, project_or_project_and_group: str, configuration: dict):
+        project: Project = self.gl.get_project_by_path_cached(project_or_project_and_group)
 
         for branch in sorted(configuration["branches"]):
-            branch_configuration: dict = self.transform_branch_config(configuration["branches"][branch])
+            branch_configuration: dict = configuration["branches"][branch]
 
             self.process_branch_protection(project, branch, branch_configuration)
 
@@ -35,7 +34,7 @@ class BranchesProcessor(AbstractProcessor):
 
         if not self.is_branch_name_wildcard(branch_name):
             try:
-                branch = project.branches.get(branch_name)
+                project.branches.get(branch_name)
             except GitlabGetError:
                 message = f"Branch '{branch_name}' not found when processing it to be protected/unprotected!"
                 if self.strict:
@@ -110,31 +109,6 @@ class BranchesProcessor(AbstractProcessor):
                 )
             else:
                 warning(message)
-
-    def transform_branch_config(self, branch_config: dict):
-        """
-        The branch configuration in gitlabform supports passing users or group using username
-        or group name but GitLab only supports their id. This method will transform the
-        config by replacing them with ids.
-        """
-        verbose("Transforming User and Group names in Branch configuration to Ids")
-
-        for key in branch_config:
-            if isinstance(branch_config[key], list):
-                for item in branch_config[key]:
-                    if isinstance(item, dict):
-                        if "user" in item:
-                            user_id = self.gl.get_user_id_cached(item.pop("user"))
-                            if user_id is None:
-                                raise GitlabGetError(
-                                    f"transform_branch_config - No users found when searching for username {item.pop("user")}",
-                                    404,
-                                )
-                            item["user_id"] = user_id
-                        elif "group" in item:
-                            item["group_id"] = self.gl.get_group_id(item.pop("group"))
-
-        return branch_config
 
     @staticmethod
     def is_branch_name_wildcard(branch):
