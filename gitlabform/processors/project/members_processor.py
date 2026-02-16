@@ -1,6 +1,6 @@
-from cli_ui import debug as verbose, warning, info, error
+from cli_ui import debug as verbose, info, error
 from cli_ui import fatal
-from gitlab import GitlabGetError, GitlabDeleteError
+from gitlab import GitlabDeleteError
 from gitlab.v4.objects import Project, User
 
 from gitlabform.constants import EXIT_INVALID_INPUT
@@ -91,11 +91,8 @@ class MembersProcessor(AbstractProcessor):
             for user in users:
                 info(f"Processing user '{user}'...")
 
-                gitlab_user = self.gl.get_user_by_username_cached(user)
-                if gitlab_user is None:
-                    warning(f"Could not find user '{user}' in Gitlab, skipping...")
-                    continue
-                user_id = gitlab_user.id
+                # user_id is pre-resolved by PrincipalIdsTransformer
+                user_id = users[user]["user_id"]
 
                 expires_at = users[user]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[user] else None
                 access_level = users[user]["access_level"] if "access_level" in users[user] else None

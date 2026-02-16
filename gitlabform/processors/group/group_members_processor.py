@@ -6,7 +6,7 @@ from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlab.v4.objects import Group, GroupMember, User
-from gitlab import GitlabDeleteError, GitlabError, GitlabGetError
+from gitlab import GitlabDeleteError, GitlabError
 
 
 class GroupMembersProcessor(AbstractProcessor):
@@ -108,7 +108,8 @@ class GroupMembersProcessor(AbstractProcessor):
                     f"Adding group {share_with_group_path} who previously was not a member.",
                 )
 
-                share_with_group_id = self.gl.get_group_id(share_with_group_path)
+                # group_id is pre-resolved by PrincipalIdsTransformer
+                share_with_group_id = groups_to_share_with_by_path[share_with_group_path]["group_id"]
                 try:
                     group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
                 except GitlabError as e:
@@ -190,11 +191,8 @@ class GroupMembersProcessor(AbstractProcessor):
 
                     common_username = user.lower()
 
-                    user_id = self.gl.get_user_id_cached(user)
-                    if user_id is None:
-                        message = f"Could not find User '{user}' on the Instance"
-                        error(message)
-                        raise GitlabGetError(message, 404)
+                    # user_id is pre-resolved by PrincipalIdsTransformer
+                    user_id = users_to_set_by_username[user]["user_id"]
 
                     if common_username in users_before:
                         group_member: GroupMember = group.members.get(user_id)
