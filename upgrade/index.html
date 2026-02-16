@@ -1292,6 +1292,101 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#from-4-to-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 4.* to 5.*
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From 4.* to 5.*">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-config_version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update config_version
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update config_version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#remove-deprecated-mr-approval-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove deprecated MR approval config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-config-syntax-for-group-saml-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update config syntax for group saml links
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#branch-protection-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branch Protection Changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Branch Protection Changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#protected-key-is-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protected key is Mandatory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-3-to-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 3.* to 4.*
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#from-2-to-3" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1564,6 +1659,101 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#from-4-to-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 4.* to 5.*
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From 4.* to 5.*">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-config_version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update config_version
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update config_version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#remove-deprecated-mr-approval-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove deprecated MR approval config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-config-syntax-for-group-saml-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update config syntax for group saml links
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#branch-protection-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branch Protection Changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Branch Protection Changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#protected-key-is-mandatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protected key is Mandatory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-3-to-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 3.* to 4.*
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#from-2-to-3" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1607,6 +1797,85 @@
 
 <h1 id="upgrading-to-new-major-versions">Upgrading to new major versions<a class="headerlink" href="#upgrading-to-new-major-versions" title="Permanent link">&para;</a></h1>
 <p>Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.</p>
+<h2 id="from-4-to-5">From 4.* to 5.*<a class="headerlink" href="#from-4-to-5" title="Permanent link">&para;</a></h2>
+<h3 id="update-config_version">Update <code>config_version</code><a class="headerlink" href="#update-config_version" title="Permanent link">&para;</a></h3>
+<p>Update <code>config_version</code> to <code>4</code>. Then update configuration syntax as described in following sections.</p>
+<h4 id="remove-deprecated-mr-approval-config">Remove deprecated MR approval config<a class="headerlink" href="#remove-deprecated-mr-approval-config" title="Permanent link">&para;</a></h4>
+<p>GitLabForm v5 removed configuration syntax for merge request approval settings that were deprecated in v3. In addition, following config will not be processed anymore.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">config_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+
+<span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">merge_requests</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">approvals</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">approvals_before_merge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">        </span><span class="nt">reset_approvals_on_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">disable_overriding_approvers_per_merge_request</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">approvers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user2</span>
+<span class="w">      </span><span class="nt">approver_groups</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-group</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-group1/subgroup</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-group2/subgroup/subsubgroup</span>
+<span class="w">      </span><span class="nt">remove_other_approval_rules</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
+<p>New config syntax supported as of GitLabForm v3.4.0:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">config_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+
+<span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">merge_requests_approvals</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">disable_overriding_approvers_per_merge_request</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">merge_requests_approval_rules</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">any</span><span class="p">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">approvals_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Any</span><span class="nv"> </span><span class="s">member&quot;</span>
+<span class="w">        </span><span class="nt">rule_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any_approver</span>
+<span class="w">      </span><span class="nt">enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h4 id="update-config-syntax-for-group-saml-links">Update config syntax for group saml links<a class="headerlink" href="#update-config-syntax-for-group-saml-links" title="Permanent link">&para;</a></h4>
+<p>In previous versions of GitLabForm, saml links at a group level were under <code>saml_group_links</code>. This key has been renamed to <code>group_saml_links</code> to be consistent with other group level configuration syntax.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain"><del class="critic">saml-group-links:</del></span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain"><ins class="critic">group_saml_links:</ins></span><span class="w"> </span>
+<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">devops_are_maintainers</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="c1"># this is just a label</span>
+<span class="w">        </span><span class="nt">saml_group_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">devops</span>
+<span class="w">        </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+</code></pre></div>
+<h3 id="branch-protection-changes">Branch Protection Changes<a class="headerlink" href="#branch-protection-changes" title="Permanent link">&para;</a></h3>
+<p>In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach reset all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of <a href="../reference/#raw-parameters-passing">raw parameter passing</a> — where only explicitly configured values are sent, and unspecified ones are left untouched.</p>
+<p>This unintended consequence meant:</p>
+<ul>
+<li>A user configuring only some protection attributes (e.g. <code>push_access_level</code>) would find others reset to default (e.g. <code>code_owner_approval_required</code>) on re-run.</li>
+<li>GitLabForm was no longer idempotent unless all settings were always provided.</li>
+</ul>
+<p>This issue is being fixed by following original intended behaviour of GitLabForm. Therefore, if you wish to ensure the Protected Branch settings are applied as you intend when running GitlabForm you should define some defaults explicitly:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">my-group/*</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">main</span><span class="p">:</span>
+<span class="w">       </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">       </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">       </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h4 id="protected-key-is-mandatory">Protected key is Mandatory<a class="headerlink" href="#protected-key-is-mandatory" title="Permanent link">&para;</a></h4>
+<p>The documentation has always mandated that the <code>protected</code> key must be present in GitlabForm configuration, set to either <code>true</code> or <code>false</code>.</p>
+<p>From v5 GitlabForm will exit Fatally if there is a branch under <code>branches</code> configuration <em>without</em> the protected key, for example the following will now error fatally:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">my-group/*</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">main</span><span class="p">:</span>
+<span class="w">       </span><span class="c1"># This configuration is now invalid due to lacking the `protected` flag and will cause GitlabForm to fail</span>
+<span class="w">       </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">       </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">     </span><span class="nt">my_other_protected_branch</span><span class="p">:</span>
+<span class="w">       </span><span class="c1"># Valid configuration</span>
+<span class="w">       </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div></p>
+<h2 id="from-3-to-4">From 3.* to 4.*<a class="headerlink" href="#from-3-to-4" title="Permanent link">&para;</a></h2>
+<p>Relatively minor breaking-change, we dropped support for Python &lt; 3.12, so if you are running locally using Python rather than Docker, ensure you are using Python &gt; 3.12</p>
 <h2 id="from-2-to-3">From 2.* to 3.*<a class="headerlink" href="#from-2-to-3" title="Permanent link">&para;</a></h2>
 <p>Steps outline:</p>
 <ol>
