@@ -4,10 +4,6 @@
 
     This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)
 
-!!! new
-
-    The syntax described below has been introduced in v3.4.0 of GitLabForm. The old syntax, that used to be documented here,
-    will still supported until the release of v4.* of GitLabForm, but is deprecated and you should migrate to the new one.
 
 These sections' purpose is to manage the project-Level Merge Requests **configuration** and **rules**.
 

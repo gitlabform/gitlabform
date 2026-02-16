@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitlabform"
-version = "4.8.0"
+version = "5.0.0-rc.2"
 authors = [{ name = "Greg Dubicki and Contributors" }]
 description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
 keywords = ["cli", "yaml", "gitlab", "configuration-as-code"]
@@ -21,8 +21,7 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Topic :: Software Development :: Version Control :: Git",
 ]
-# GitLabForm is tested as running correctly on py3.12 and above, the main images produced use py3.14
-requires-python = ">=3.12.0"
+requires-python = ">=3.14.0"
 dependencies = [
     "certifi==2026.1.4",
     "cli-ui==0.19.0",
@@ -32,12 +31,10 @@ dependencies = [
     "MarkupSafe==3.0.3",
     "mergedeep==1.3.4",
     "packaging==26.0",
-    "python-gitlab==7.1.0",
-    "python-gitlab[graphql]==7.1.0",
+    "python-gitlab==8.0.0",
+    "python-gitlab[graphql]==8.0.0",
     "requests==2.32.5",
     "ruamel.yaml==0.17.21",
-    "types-requests==2.32.4.20260107",
-    "types-setuptools==81.0.0.20260209",
     "yamlpath==3.8.2",
 ]
 
@@ -62,6 +59,8 @@ test = [
     "pytest==9.0.2",
     "pytest-cov==7.0.0",
     "pytest-rerunfailures==16.1",
+    "types-requests==2.32.4.20260107",
+    "types-setuptools==81.0.0.20260209",
     "xkcdpass==1.30.0",
 ]
 docs = ["mkdocs", "mkdocs-material"]

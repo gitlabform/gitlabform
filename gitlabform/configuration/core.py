@@ -52,9 +52,9 @@ class ConfigurationCore(ABC):
                         exit_code=EXIT_INVALID_INPUT,
                     )
 
-                if self.config.get("config_version", 1) != 3:
+                if self.config.get("config_version", 1) != 4:
                     fatal(
-                        "This version of GitLabForm requires 'config_version: 3' entry in the config. "
+                        "This version of GitLabForm requires 'config_version: 4' entry in the config. "
                         "This ensures that if the application behavior changes in a backward-incompatible way,"
                         " you won't apply unwanted configuration to your GitLab instance.\n"
                         "Please follow this guide: https://gitlabform.github.io/gitlabform/upgrade/\n",
@@ -66,7 +66,7 @@ class ConfigurationCore(ABC):
             # we are NOT checking for the existence of non-empty 'projects_and_groups' key here
             # as it would break using GitLabForm as a library
 
-        except (FileNotFoundError, OSError):
+        except FileNotFoundError, OSError:
             raise ConfigFileNotFoundException(config_path)
 
         except Exception as e:
