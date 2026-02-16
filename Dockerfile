@@ -1,5 +1,5 @@
 # ---- Builder Stage ----
-FROM python:3.12-alpine AS builder
+FROM python:3.14-alpine AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY gitlabform ./gitlabform
 RUN pip install --no-deps --no-cache-dir --prefix=/install .
 
 # ---- Final Stage ----
-FROM python:3.12-alpine AS final
+FROM python:3.14-alpine AS final
 
 # Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
