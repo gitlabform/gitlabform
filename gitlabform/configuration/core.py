@@ -66,7 +66,7 @@ class ConfigurationCore(ABC):
             # we are NOT checking for the existence of non-empty 'projects_and_groups' key here
             # as it would break using GitLabForm as a library
 
-        except (FileNotFoundError, OSError):
+        except FileNotFoundError, OSError:
             raise ConfigFileNotFoundException(config_path)
 
         except Exception as e:
