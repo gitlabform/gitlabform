@@ -22,6 +22,9 @@ class TestProjectJobTokenScope:
             instance_settings.enforce_ci_inbound_job_token_scope_enabled = True
             instance_settings.save()
 
+    @pytest.mark.skip(
+        reason="Job token scope cannot be disabled for this project because it is enforced for the instance."
+    )
     def test__enable_limit_access_to_this_project(
         self,
         ensure_instance_enforcement_disabled,

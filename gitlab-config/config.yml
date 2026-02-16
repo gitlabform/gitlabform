@@ -1,0 +1,9 @@
+config_version: 4
+
+gitlab:
+  url: https://gitlab.com
+
+projects_and_groups:
+  gitlabform/gitlabform:
+    merge_requests_approvals:
+      disable_overriding_approvers_per_merge_request: true
