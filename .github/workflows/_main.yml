@@ -1,9 +1,19 @@
 name: Main branch
 
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  discussions: write
+  statuses: write
+
+concurrency:
+  group: ${{github.workflow}}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
 
 jobs:
 

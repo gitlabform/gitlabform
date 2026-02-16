@@ -1,23 +1,26 @@
 name: Linter and tests (PRs)
 
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+concurrency:
+  group: ${{github.workflow}}-${{ github.ref }}
+  cancel-in-progress: true
 on:
-  pull_request_target:
-    branches:
-      - main
-      - v5
+  pull_request:
+    branches: ["main", "v5"]
 
 jobs:
 
   approve:
     runs-on: ubuntu-latest
-
     steps:
       - name: Approve
         run: echo For security reasons, all pull requests need to be approved first before running the Premium Acceptance Tests.
 
   codeql:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -38,16 +41,25 @@ jobs:
 
   build-docs:
     uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       branch_ref: ${{ github.event.pull_request.head.sha }}
 
   linters:
     uses: ./.github/workflows/linters.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       branch_ref: ${{ github.event.pull_request.head.sha }}
 
   tests-standard:
     uses: ./.github/workflows/tests-standard.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       branch_ref: ${{ github.event.pull_request.head.sha }}
 
@@ -55,15 +67,13 @@ jobs:
   # so we have to copy "tests-premium.yml" here :(
   acceptance-tests-premium:
     runs-on: ubuntu-latest
-
     needs: [ approve ] # Require the first step to finish
     environment:
       name: Integrate Pull Request # Our dummy environment
-
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.12]
+        python-version: [3.14]
       fail-fast : false
     steps:
       - name: Checkout code from the PR
@@ -103,15 +113,13 @@ jobs:
   # so we have to copy "tests-ultimate.yml" here :(
   acceptance-tests-ultimate:
     runs-on: ubuntu-latest
-
     needs: [ approve ] # Require the first step to finish
     environment:
       name: Integrate Pull Request # Our dummy environment
-
     strategy:
       max-parallel: 5
       matrix:
-        python-version: [3.12]
+        python-version: [3.14]
       fail-fast : false
     steps:
       - name: Checkout code from the PR
