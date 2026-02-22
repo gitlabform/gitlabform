@@ -1,11 +1,10 @@
-from logging import debug
+from logging import debug, warning, error
 from abc import ABC, abstractmethod
 from ez_yaml import ez_yaml
 from ruamel.yaml import YAML
 from types import SimpleNamespace
 from gitlab import GitlabGetError
 
-from cli_ui import fatal, warning
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
@@ -142,10 +141,12 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                         access_level_string = str(node_coordinate.node)
                         node_coordinate.parent[node_coordinate.parentref] = AccessLevel.get_value(access_level_string)
                     except KeyError:
-                        fatal(
+                        error(
                             f"Configuration string '{access_level_string}' is not one of the valid access levels:"
                             f" {', '.join(AccessLevel.get_canonical_names())}",
-                            exit_code=EXIT_INVALID_INPUT,
+                        )
+                        exit(
+                            EXIT_INVALID_INPUT,
                         )
             except YAMLPathException:
                 # this just means that we haven't found any keys in YAML
@@ -172,10 +173,12 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                                 access_level_string
                             )
                         except KeyError:
-                            fatal(
+                            error(
                                 f"Configuration string '{access_level_string}' is not one of the valid access levels:"
                                 f" {', '.join(AccessLevel.get_canonical_names())}",
-                                exit_code=EXIT_INVALID_INPUT,
+                            )
+                            exit(
+                                EXIT_INVALID_INPUT,
                             )
             except YAMLPathException:
                 # this just means that we haven't found any keys in YAML
@@ -420,17 +423,17 @@ class MergeRequestApprovalsTransformer(ConfigurationTransformer):
                 if old_syntax_found:
                     where_to_add_new_syntax.pop("merge_requests")
 
-                    warning(
-                        "The 'merge_requests' configuration section syntax works but is deprecated and will be removed "
-                        "in the next major version of GitLabForm. "
-                        "Please migrate to the new syntax using the 'merge_requests_approvals' "
-                        "and the 'merge_requests_approval_rules' sections."
-                    )
+                    warning("""
+                        The 'merge_requests' configuration section syntax works but is deprecated and will be removed
+                        in the next major version of GitLabForm.
+                        Please migrate to the new syntax using the 'merge_requests_approvals'
+                        and the 'merge_requests_approval_rules' sections.
+                        """)
                 if approvals_required_guessed:
-                    warning(
-                        "'approvals_before_merge' not found in the old 'merge_requests' configuration section",
-                        "- assuming that it is set to 2.",
-                    )
+                    warning("""
+                        'approvals_before_merge' not found in the old 'merge_requests' configuration section
+                        - assuming that it is set to 2.
+                        """)
 
         except YAMLPathException:
             # this just means that we haven't found any keys in YAML

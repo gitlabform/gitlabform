@@ -1,5 +1,4 @@
-from logging import debug
-from cli_ui import warning, fatal
+from logging import debug, warning, error
 
 from gitlabform.constants import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
@@ -70,17 +69,21 @@ class TagsProcessor(AbstractProcessor):
             except GitlabDeleteError:
                 message = f"Tag '{tag}' not found when trying to unprotect it!"
                 if self.strict:
-                    fatal(
+                    error(
                         message,
-                        exit_code=EXIT_PROCESSING_ERROR,
+                    )
+                    exit(
+                        EXIT_PROCESSING_ERROR,
                     )
                 else:
                     warning(message)
             except GitlabGetError as e:
                 if self.strict:
-                    fatal(
+                    error(
                         e,
-                        exit_code=EXIT_PROCESSING_ERROR,
+                    )
+                    exit(
+                        EXIT_PROCESSING_ERROR,
                     )
                 else:
                     warning(message)
