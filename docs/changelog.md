@@ -1,72 +1,45 @@
 # Changelog
 
-## 5.0.0-rc.2
-Release Candidate including all the below.
+This changelog follows industry-standard best practices. Each release includes the version, date, and a list of categorized changes: `Breaking Changes`, `Features`, `Bug Fixes`, `Documentation`, `Refactors`, `Dependencies`, and `Chores`.
+
+For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
+
+---
 
 ## 5.0.0
 
 ### Breaking Changes
 
-#### Branch Protection Updates [#1070](https://github.com/gitlabform/gitlabform/pull/1070) ([TimKnight-DWP](https://github.com/TimKnight-DWP) & [br0ziliy](https://github.com/br0ziliy))
-When preventing GitlabForm from un-protecting and then re-protecting the Branch in order to apply configuration changes to the protection rules [#1070](https://github.com/gitlabform/gitlabform/pull/1070), we discovered some functionality that was previously hidden from the user.
+* **Branch Protection**: Dynamic updates to branch protection rules instead of unprotect-and-reprotect proecss. [#1070](https://github.com/gitlabform/gitlabform/pull/1070) ([TimKnight-DWP](https://github.com/TimKnight-DWP) & [br0ziliy](https://github.com/br0ziliy))
+* **Group SAML Links**: The group-level SAML link configuration key `saml_group_links` has been renamed to `group_saml_links` for consistency [#1175](https://github.com/gitlabform/gitlabform/pull/1175) ([amimas](https://github.com/amimas))
+* **Removed Deprecated MR Approval Config**: The v3-deprecated syntax for merge request approvals (`merge_requests.approvals`, `merge_requests.approvers`, etc.) has been removed. Please use the `merge_requests_approvals` and `merge_requests_approval_rules` syntax. [#926](https://github.com/gitlabform/gitlabform/pull/926) ([amimas](https://github.com/amimas))
 
-Previously if you stopped defining `code_owner_approval_required` or `allow_force_push` in the YAML config, the settings would revert to the default Gitlab settings applied when first protecting the branch, see: [Branch Protection API](https://docs.gitlab.com/api/protected_branches/#protect-repository-branches)
-
-With the changes to perform dynamic updates as required, we follow the GitlabForm convention of **leaving the Gitlab settings as is if the data is no longer defined in configuration**.
-
-Therefore, if you wish to ensure the Protected Branch settings are applied as you intend when running GitlabForm you should define some defaults explicitly:
-
-```yaml
-projects_and_groups:
- my-group/*:
-   branches:
-     main:
-       protected: true
-       allow_force_push: false
-       code_owner_approval_required: true
-```
-
-Full details: [docs/reference/protected_branches.md](reference/protected_branches.md)
-
-- Extension of: https://github.com/gitlabform/gitlabform/pull/996
-
-Resolves:
-- https://github.com/gitlabform/gitlabform/issues/445
-- https://github.com/gitlabform/gitlabform/issues/1061
-- https://github.com/gitlabform/gitlabform/issues/1034
-
-#### Renamed Group Level SAML Link config key [1175](https://github.com/gitlabform/gitlabform/pull/1175). ([amimas](https://github.com/amimas))
-
-The group level saml link configuration syntax previously used `saml_group_links` as the config key name. 
-This has been renamed to `group_saml_links` to be consistent with other group level configuration key of gitlabform. 
-Docs changes have been included as well.
-
-Resolves:
-- [#1078](https://github.com/gitlabform/gitlabform/issues/1078)
-
-#### Optimized Docker image [960](https://github.com/gitlabform/gitlabform/pull/960). ([gdubicki](https://github.com/gdubicki) & [amimas](https://github.com/amimas))
-
-Introduces multi-layer builds and reduced dependency overheads.
-This brings down the image size from 88.5MB (v4.8.0) to 68.5MB.
-
-#### Upgrade Python-Gitlab to 8.0.0 [1178](https://github.com/gitlabform/gitlabform/pull/1178)
-
-[Release Notes](https://github.com/python-gitlab/python-gitlab/releases/tag/v8.0.0)
-
-#### Support only Python 3.14 onwards [1177](https://github.com/gitlabform/gitlabform/pull/1177). ([TimKnight01](https://github.com/TimKnight01))
-
-Pyproject.toml supports >=3.14, the latest builds were tested on 3.12, but we wanted to make the break as part of this changeset.
+See [upgrade guide](upgrade.md) for important upgrade instructions and migration details.
 
 ### Bug Fixes
 
-- Fix for Branch Protection changes, GitlabForm attempted to updated users when config has not changed from Gitlab, resulting in API errors and a failed run of GitlabForm. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+* Fixed an issue where branch protection changes would cause unnecessary API errors when the configuration had not changed. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+* Fixed a bug that prevented the deletion of CI/CD variables with the same name but different scopes. [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
 
-#### Variables with same name but different scope should be deletable [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
-As per the referenced issue [#533](https://github.com/gitlabform/gitlabform/issues/533), if there are multiple CI CD variables with same key/name but scoped to different "environment", gitlabform does not make the API call correctly. As a result, the variable cannot be deleted and an error is returned.
 
-Bug fix includes a large refactor to use python-gitlab code and tidy up redundant paths, hence being included as part of v5 Release Candidate testing.
+### Build
+
+* Optimized Docker image: Multi-layer builds, reduced size from 88.5MB to 68.5MB. [#960](https://github.com/gitlabform/gitlabform/pull/960) ([amimas](https://github.com/amimas))
+* Add support for Python 3.14 and dropped python 3.12. ([#1177](https://github.com/gitlabform/gitlabform/pull/1177)) ([TimKnight01](https://github.com/TimKnight01))
+
+### Dependencies
+
+* Update various dependencies to newer version.
 
 Thanks to all the contributors of this release!
+
+## 5.0.0-rc.1
+
+First release candidate for v5.0.0. All changes are included in the final `5.0.0` release notes above.
+
+### Chores
+
+* Rebased on v4.8.0 so that latest changes from v4 are availabe in v5 rc.1.
 
 ## 4.8.0
 
@@ -117,6 +90,19 @@ Thanks to all the contributors of this release!
 
 * Suppress false positive bandit warning for private_token [#1163](https://github.com/gitlabform/gitlabform/pull/1163). ([amimas](https://github.com/amimas))
 
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+
+## 5.0.0-beta.3
+
+### Chore
+
+* Rebased on v4.6.1 so that latest changes from v4 are availabe in v5 beta.
+
 ## 4.6.1
 
 ### Bug Fixes
@@ -147,6 +133,27 @@ Thanks to all the contributors of this release!
 ### Dependencies
 
 * Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+## 5.0.0-beta.2
+
+### Bug Fixes
+
+* Fixed an issue where branch protection changes would cause unnecessary API errors when the configuration had not changed. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP)
+* Fixed a bug that prevented the deletion of CI/CD variables with the same name but different scopes. [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
+
+
+Thanks to all the contributors of this release!
+
+
+## 5.0.0-beta.1
+
+### Breaking Changes
+
+* **Branch Protection**: Dynamic updates to branch protection rules instead of unprotect-and-reprotect proecss. [#1070](https://github.com/gitlabform/gitlabform/pull/1070) ([TimKnight-DWP](https://github.com/TimKnight-DWP) & [br0ziliy](https://github.com/br0ziliy))
+
+See upgrade.md for important upgrade instructions and migration details.
 
 Thanks to all the contributors of this release!
 
