@@ -8,9 +8,9 @@ Some of these changes between major application versions may affect the effectiv
 
 Update `config_version` to `4`. Then update configuration syntax as described in following sections.
 
-#### Remove deprecated MR approval config
+#### Removed Deprecated MR Approval Config
 
-GitLabForm v5 removed configuration syntax for merge request approval settings that were deprecated in v3. In addition, following config will not be processed anymore.
+GitLabForm v5 removed configuration syntax for merge request approval settings that were deprecated in v3. Following config will not be processed anymore.
 
 ```yaml
 config_version: 4
@@ -32,7 +32,7 @@ projects_and_groups:
       remove_other_approval_rules: false
 ```
 
-New config syntax supported as of GitLabForm v3.4.0:
+Update to new config syntax supported as of GitLabForm v3.4.0:
 
 ```yaml
 config_version: 4
@@ -49,7 +49,7 @@ projects_and_groups:
       enforce: true
 ```
 
-#### Update config syntax for group saml links
+#### Group SAML Links
 
 In previous versions of GitLabForm, saml links at a group level were under `saml_group_links`. This key has been renamed to `group_saml_links` to be consistent with other group level configuration syntax.
 
@@ -63,13 +63,13 @@ projects_and_groups:
         access_level: maintainer
 ```
 
-### Branch Protection Changes
+### Branch Protection
 
-In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach reset all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of [raw parameter passing](reference/index.md#raw-parameters-passing) — where only explicitly configured values are sent, and unspecified ones are left untouched.
+In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach resets all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of [raw parameter passing](reference/index.md#raw-parameters-passing) — where only explicitly configured values are sent, and unspecified ones are left untouched.
 
 This unintended consequence meant:
 
-- A user configuring only some protection attributes (e.g. `push_access_level`) would find others reset to default (e.g. `code_owner_approval_required`) on re-run.
+- A user configuring only some protection attributes (e.g. `push_access_level`) would find others being reset to default (e.g. `code_owner_approval_required`) on re-run.
 - GitLabForm was no longer idempotent unless all settings were always provided.
 
 This issue is being fixed by following original intended behaviour of GitLabForm. Therefore, if you wish to ensure the Protected Branch settings are applied as you intend when running GitlabForm you should define some defaults explicitly:
@@ -84,8 +84,9 @@ projects_and_groups:
        code_owner_approval_required: true
 ```
 
-#### Protected key is Mandatory
-The documentation has always mandated that the `protected` key must be present in GitlabForm configuration, set to either `true` or `false`.
+#### `protected` key is Mandatory
+
+The documentation has always mandated that the `protected` key for branch protection must be present in GitlabForm configuration, set to either `true` or `false`.
 
 From v5 GitlabForm will exit Fatally if there is a branch under `branches` configuration _without_ the protected key, for example the following will now error fatally:
 ```yaml
