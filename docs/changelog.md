@@ -25,7 +25,7 @@ See [upgrade guide](upgrade.md) for important upgrade instructions and migration
 ### Build
 
 * Optimized Docker image: Multi-layer builds, reduced size from 88.5MB to 68.5MB. [#960](https://github.com/gitlabform/gitlabform/pull/960) ([amimas](https://github.com/amimas))
-* Add support for Python 3.14 and dropped python 3.12. ([#1177](https://github.com/gitlabform/gitlabform/pull/1177)) ([TimKnight01](https://github.com/TimKnight01))
+* Add support for Python 3.14 ([#1177](https://github.com/gitlabform/gitlabform/pull/1177)) ([TimKnight01](https://github.com/TimKnight01))
 
 ### Dependencies
 
