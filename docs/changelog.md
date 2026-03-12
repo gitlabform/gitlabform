@@ -1,5 +1,38 @@
 # Changelog
 
+This changelog follows industry-standard best practices. Each release includes the version, date, and a list of categorized changes: `Breaking Changes`, `Features`, `Bug Fixes`, `Documentation`, `Refactors`, `Dependencies`, and `Chores`.
+
+For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
+
+---
+
+## 5.0.0
+
+### Breaking Changes
+
+* **Branch Protection**: Dynamic updates to branch protection rules instead of unprotect-and-reprotect proecss. [#1070](https://github.com/gitlabform/gitlabform/pull/1070) ([TimKnight-DWP](https://github.com/TimKnight-DWP) & [br0ziliy](https://github.com/br0ziliy))
+* **Group SAML Links**: The group-level SAML link configuration key `saml_group_links` has been renamed to `group_saml_links` for consistency [#1175](https://github.com/gitlabform/gitlabform/pull/1175) ([amimas](https://github.com/amimas))
+* **Removed Deprecated MR Approval Config**: The v3-deprecated syntax for merge request approvals (`merge_requests.approvals`, `merge_requests.approvers`, etc.) has been removed. Please use the `merge_requests_approvals` and `merge_requests_approval_rules` syntax. [#926](https://github.com/gitlabform/gitlabform/pull/926) ([amimas](https://github.com/amimas))
+
+See [upgrade guide](upgrade.md) for important upgrade instructions and migration details.
+
+### Bug Fixes
+
+* Fixed an issue where branch protection changes would cause unnecessary API errors when the configuration had not changed. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP))
+* Fixed a bug that prevented the deletion of CI/CD variables with the same name but different scopes. [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
+
+
+### Build
+
+* Optimized Docker image: Multi-layer builds, reduced size from 88.5MB to 68.5MB. [#960](https://github.com/gitlabform/gitlabform/pull/960) ([amimas](https://github.com/amimas))
+* Add support for Python 3.14 ([#1177](https://github.com/gitlabform/gitlabform/pull/1177)) ([TimKnight01](https://github.com/TimKnight01))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 4.8.0
 
 ### Refactors
@@ -54,7 +87,6 @@ Thanks to all the contributors of this release!
 * Update various dependencies to newer version.
 
 Thanks to all the contributors of this release!
-
 
 ## 4.6.1
 
