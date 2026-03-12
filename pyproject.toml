@@ -35,8 +35,6 @@ dependencies = [
     "python-gitlab[graphql]==8.0.0",
     "requests==2.32.5",
     "ruamel.yaml==0.17.21",
-    "types-requests==2.32.4.20260107",
-    "types-setuptools==82.0.0.20260210",
     "yamlpath==3.8.2",
 ]
 
@@ -62,7 +60,7 @@ test = [
     "pytest-cov==7.0.0",
     "pytest-rerunfailures==16.1",
     "types-requests==2.32.4.20260107",
-    "types-setuptools==81.0.0.20260209",
+    "types-setuptools==82.0.0.20260210",
     "xkcdpass==1.30.0",
 ]
 docs = ["mkdocs", "mkdocs-material"]
