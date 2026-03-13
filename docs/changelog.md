@@ -33,6 +33,14 @@ See [upgrade guide](upgrade.md) for important upgrade instructions and migration
 
 Thanks to all the contributors of this release!
 
+## 5.0.0-rc.1
+
+First release candidate for v5.0.0. All features/fixes are included from the final `5.0.0` release notes above. The v5.0.0 includes a few additional dependency updates that are not included in this.
+
+### Chores
+
+* Rebased on v4.8.0 so that latest changes from v4 are availabe in v5 rc.1.
+
 ## 4.8.0
 
 ### Refactors
@@ -88,6 +96,13 @@ Thanks to all the contributors of this release!
 
 Thanks to all the contributors of this release!
 
+
+## 5.0.0-beta.3
+
+### Chore
+
+* Rebased on v4.6.1 so that latest changes from v4 are availabe in v5 beta.
+
 ## 4.6.1
 
 ### Bug Fixes
@@ -118,6 +133,27 @@ Thanks to all the contributors of this release!
 ### Dependencies
 
 * Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
+## 5.0.0-beta.2
+
+### Bug Fixes
+
+* Fixed an issue where branch protection changes would cause unnecessary API errors when the configuration had not changed. [#1107](https://github.com/gitlabform/gitlabform/pull/1107) ([TimKnight-DWP](https://github.com/TimKnight-DWP)
+* Fixed a bug that prevented the deletion of CI/CD variables with the same name but different scopes. [#962](https://github.com/gitlabform/gitlabform/pull/962) ([amimas](https://github.com/amimas))
+
+
+Thanks to all the contributors of this release!
+
+
+## 5.0.0-beta.1
+
+### Breaking Changes
+
+* **Branch Protection**: Dynamic updates to branch protection rules instead of unprotect-and-reprotect proecss. [#1070](https://github.com/gitlabform/gitlabform/pull/1070) ([TimKnight-DWP](https://github.com/TimKnight-DWP) & [br0ziliy](https://github.com/br0ziliy))
+
+See upgrade.md for important upgrade instructions and migration details.
 
 Thanks to all the contributors of this release!
 
