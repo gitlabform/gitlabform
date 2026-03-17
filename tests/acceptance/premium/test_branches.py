@@ -176,6 +176,7 @@ class TestBranches:
         )
 
         # 2. Second run (Idempotency check)
+        # This step previously failed for redundant user/role rules due to incorrect matching logic.
         run_gitlabform(config_with_more_user_ids, project_for_function.path_with_namespace)
 
         (
@@ -493,7 +494,7 @@ class TestBranches:
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         # Add manual approval rule on the protected branch
-        protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
+        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
 
         project_for_function.approvalrules.create(
             {
@@ -536,7 +537,7 @@ class TestBranches:
 
         # If the branch was unprotected and then re-protected the branch id of the protected branch would likely differ
         # from that stored in the branch approval rule
-        protected_branch: ProjectProtectedBranch = project_for_function.protectedbranches.get(branch_for_function)
+        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
 
         approval_rules = project_for_function.approvalrules.list(get_all=True)
         assert len(approval_rules) == 1
