@@ -1,4 +1,6 @@
 import pytest
+import time
+
 from gitlab import GitlabGetError
 
 from gitlabform.gitlab import AccessLevel
@@ -21,6 +23,127 @@ class TestBranches:
             run_gitlabform(config_protect_branch, project.path_with_namespace)
         assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == 1
+
+    def test__can_add_branch_protection_with_only_push_access_level_defined(self, project_for_function):
+        """
+        Issue: https://github.com/gitlabform/gitlabform/issues/1193
+        Operating on 'main' when it is un-protected
+        """
+
+        # Wait a little to ensure Gitlab has caught up with creating the project
+        # (which by default will set main to protected)
+        time.sleep(2)
+
+        # Unprotect Main
+        protected_branch_main = project_for_function.protectedbranches.get("main")
+        assert protected_branch_main is not None
+        protected_branch_main.delete()
+        try:
+            protected_branch_main = project_for_function.protectedbranches.get("main")
+            # This should never hit here as it will throw a 404 instead but this assert will fail if it hasn't
+            # deleted for whatever reason
+            assert protected_branch_main is None
+        except GitlabGetError as e:
+            assert e is not None
+            assert e.response_code == 404
+
+        config_protect_branch = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            branches:
+              main:
+               protected: true
+               allow_force_push: false
+               push_access_level: maintainer
+               code_owner_approval_required: false
+        """
+
+        run_gitlabform(config_protect_branch, project_for_function.path_with_namespace)
+
+        protected_branch_main = project_for_function.protectedbranches.get("main")
+        assert protected_branch_main.allow_force_push is False
+        assert protected_branch_main.code_owner_approval_required is False
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            unprotect_access_level,
+        ) = get_only_branch_access_levels(project_for_function, "main")
+        assert push_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
+        assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+    def test__can_update_branch_protection_with_only_push_access_level_defined(self, project_for_function):
+        """
+        Issue: https://github.com/gitlabform/gitlabform/issues/1193
+        Operating on 'main' immediately after it is created as part of creating the project.
+        Gitlab defaults 'main' to protected on project creation with unprotect access level set to None, which differs
+        to what it defaults unprotect access level to when calling branch protection endpoint without specifying that
+        access level
+        """
+
+        # Wait a little to ensure Gitlab has caught up with creating the project
+        # (which by default will set main to protected)
+        time.sleep(2)
+
+        # Validate default protection levels - susceptible to breaking depending on Gitlab API changes
+        protected_branch_main = project_for_function.protectedbranches.get("main")
+        assert protected_branch_main.allow_force_push is False
+        assert protected_branch_main.code_owner_approval_required is False
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            unprotect_access_level,
+        ) = get_only_branch_access_levels(project_for_function, "main")
+        assert push_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
+        # By default, Gitlab sets unprotect access level to None when protected main as part of project creation process
+        assert unprotect_access_level is None
+
+        config_protect_branch = f"""
+         projects_and_groups:
+           {project_for_function.path_with_namespace}:
+             branches:
+               main:
+                protected: true
+                allow_force_push: false
+                push_access_level: maintainer
+                code_owner_approval_required: false
+         """
+
+        run_gitlabform(config_protect_branch, project_for_function.path_with_namespace)
+
+        protected_branch_main = project_for_function.protectedbranches.get("main")
+        assert protected_branch_main.allow_force_push is False
+        assert protected_branch_main.code_owner_approval_required is False
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            unprotect_access_level,
+        ) = get_only_branch_access_levels(project_for_function, "main")
+        assert push_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == []
+        assert merge_access_user_ids == []
+        assert unprotect_access_level is None
 
     def test__can_protect_and_unprotect_a_branch(self, project, branch):
         config_protect_branch = f"""
@@ -149,7 +272,7 @@ class TestBranches:
                {branch_for_function}:
                  protected: true
                  push_access_level: {AccessLevel.MAINTAINER.value}
-                 merge_access_level: {AccessLevel.MAINTAINER.value}
+                 merge_access_level: no access
                  unprotect_access_level: {AccessLevel.MAINTAINER.value}
          """
 
@@ -165,7 +288,7 @@ class TestBranches:
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
-        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_levels == [AccessLevel.NO_ACCESS.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value

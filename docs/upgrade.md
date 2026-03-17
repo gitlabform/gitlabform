@@ -84,6 +84,32 @@ projects_and_groups:
        code_owner_approval_required: true
 ```
 
+If you do not provide all attributes when first protecting a branch, then default access levels will be set by Gitlab's REST API implementation: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches, we do not attempt to maintain 'defaulting' logic to keep in parity with Gitlab's APIs as that would make GitLabForm more fragile.
+If you remove an access level from your configuration, then it will be left at whatever the previous value in the configuration was, if you want to remove access you must define the level as `no access` or `0`.
+
+For example when updating this configuration:
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       protected: true
+       allow_force_push: false
+       code_owner_approval_required: true
+       push_access_level: developer
+```
+to:
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       protected: true
+       allow_force_push: false
+       code_owner_approval_required: true
+```
+will result in **No Change** to the `push_access_level` setting on `main`.
+
 #### `protected` key is Mandatory
 
 The documentation has always mandated that the `protected` key for branch protection must be present in GitlabForm configuration, set to either `true` or `false`.
