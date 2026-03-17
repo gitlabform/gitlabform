@@ -122,47 +122,19 @@ class TestBranches:
             ]
         )
 
-    def test__does_not_attempt_to_modify_unchanged_branch_protection_when_users_are_present(
-        self, project_for_function, branch_for_function, gl
-    ):
-        # https://github.com/gitlabform/gitlabform/issues/1101
+    def test__branch_protection_idempotency_with_users_and_roles(self, project_for_function, branch_for_function, gl):
+        """
+        Tests that branch protection with users and roles is idempotent.
+        Merges scenarios:
+        1. Explicit list of users
+        2. User redundant with role
+        """
         first_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
         second_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
         third_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
 
-        project_for_function.protectedbranches.create(
-            {
-                "name": branch_for_function,
-                "allowed_to_merge": [{"access_level": AccessLevel.MAINTAINER.value}],
-                "allowed_to_push": [
-                    {"user_id": first_user.id},
-                    {"user_id": second_user.id},
-                    {"user_id": third_user.id},
-                ],
-                "allowed_to_unprotect": [{"access_level": AccessLevel.MAINTAINER.value}],
-            }
-        )
-
-        (
-            push_access_levels,
-            merge_access_levels,
-            push_access_user_ids,
-            merge_access_user_ids,
-            _,
-            _,
-            unprotect_access_level,
-        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
-
-        assert unprotect_access_level == AccessLevel.MAINTAINER.value
-        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids == sorted(
-            [
-                first_user.id,
-                second_user.id,
-                third_user.id,
-            ]
-        )
-        assert len(merge_access_user_ids) == 0
+        # Eventual consistency
+        time.sleep(2)
 
         config_with_more_user_ids = f"""
         projects_and_groups:
@@ -170,16 +142,17 @@ class TestBranches:
             branches:
               {branch_for_function}:
                 protected: true
-                allowed_to_merge:
-                  - access_level: maintainer
-                allowed_to_unprotect:
-                  - access_level: maintainer
                 allowed_to_push:
                   - user: {first_user.username}
                   - user: {second_user.username}
+                allowed_to_merge:
                   - user: {third_user.username}
+                  - access_level: maintainer
+                allowed_to_unprotect:
+                  - access_level: maintainer
         """
 
+        # 1. First run
         run_gitlabform(config_with_more_user_ids, project_for_function.path_with_namespace)
 
         (
@@ -194,14 +167,32 @@ class TestBranches:
 
         assert unprotect_access_level == AccessLevel.MAINTAINER.value
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_user_ids == sorted([third_user.id])
         assert push_access_user_ids == sorted(
             [
                 first_user.id,
                 second_user.id,
-                third_user.id,
             ]
         )
-        assert len(merge_access_user_ids) == 0
+
+        # 2. Second run (Idempotency check)
+        run_gitlabform(config_with_more_user_ids, project_for_function.path_with_namespace)
+
+        (
+            push_access_levels_after,
+            merge_access_levels_after,
+            push_access_user_ids_after,
+            merge_access_user_ids_after,
+            _,
+            _,
+            unprotect_access_level_after,
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+
+        assert push_access_levels_after == push_access_levels
+        assert merge_access_levels_after == merge_access_levels
+        assert push_access_user_ids_after == push_access_user_ids
+        assert merge_access_user_ids_after == merge_access_user_ids
+        assert unprotect_access_level_after == unprotect_access_level
 
     def test__can_remove_users_from_branch_protection_rules(self, project_for_function, branch_for_function, gl):
         first_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
