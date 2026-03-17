@@ -116,7 +116,8 @@ class BranchesProcessor(AbstractProcessor):
             verbose("Creating data to update merge_access_levels as necessary")
             merge_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("merge_access_levels"),
-                existing_records=tuple(protected_branch.merge_access_levels),
+                # API may return None instead of empty list, so we default to [] to prevent TypeError
+                existing_records=tuple(protected_branch.merge_access_levels or []),
             )
             if len(merge_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items_patch_data
@@ -124,7 +125,8 @@ class BranchesProcessor(AbstractProcessor):
             verbose("Creating data to update push_access_levels as necessary")
             push_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("push_access_levels"),
-                existing_records=tuple(protected_branch.push_access_levels),
+                # API may return None instead of empty list, so we default to [] to prevent TypeError
+                existing_records=tuple(protected_branch.push_access_levels or []),
             )
             if len(push_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_push"] = push_access_items_patch_data
@@ -132,7 +134,8 @@ class BranchesProcessor(AbstractProcessor):
             verbose("Creating data to update unprotect_access_levels as necessary")
             unprotect_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
-                existing_records=tuple(protected_branch.unprotect_access_levels),
+                # API may return None instead of empty list, so we default to [] to prevent TypeError
+                existing_records=tuple(protected_branch.unprotect_access_levels or []),
             )
             if len(unprotect_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_unprotect"] = unprotect_access_items_patch_data
@@ -374,14 +377,20 @@ class BranchesProcessor(AbstractProcessor):
                 matching_item_to_be_created = None
 
                 for item in patch_data:
-                    if (
+                    # We prioritize user_id and group_id matches over access_level.
+                    # This avoids ambiguity because a user/group record from GitLab also contains an access_level.
+                    # If we matched by access_level first, we might incorrectly pair a specific user's rule
+                    # with a generic role-based rule from the config.
+                    if existing_records_user_id is not None and item.get("user_id") == existing_records_user_id:
+                        matching_item_to_be_created = item
+                        break
+                    elif existing_records_group_id is not None and item.get("group_id") == existing_records_group_id:
+                        matching_item_to_be_created = item
+                        break
+                    elif (
                         existing_records_access_level is not None
                         and item.get("access_level") == existing_records_access_level
                     ):
-                        matching_item_to_be_created = item
-                    elif existing_records_user_id is not None and item.get("user_id") == existing_records_user_id:
-                        matching_item_to_be_created = item
-                    elif existing_records_group_id is not None and item.get("group_id") == existing_records_group_id:
                         matching_item_to_be_created = item
 
                 if matching_item_to_be_created is not None:
