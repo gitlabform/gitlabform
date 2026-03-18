@@ -24,34 +24,16 @@ class TestBranches:
         assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == 1
 
-    def test__can_add_branch_protection_with_only_push_access_level_defined(self, project_for_function):
+    def test__can_protect_branch_with_limited_configuration(self, project_for_function, branch_for_function):
         """
-        Issue: https://github.com/gitlabform/gitlabform/issues/1193
-        Operating on 'main' when it is un-protected
+        Apply limited configuration to protect main via GLF, some settings will have defaults applied by Gitlab
         """
-
-        # Wait a little to ensure Gitlab has caught up with creating the project
-        # (which by default will set main to protected)
-        time.sleep(2)
-
-        # Unprotect Main
-        protected_branch_main = project_for_function.protectedbranches.get("main")
-        assert protected_branch_main is not None
-        protected_branch_main.delete()
-        try:
-            protected_branch_main = project_for_function.protectedbranches.get("main")
-            # This should never hit here as it will throw a 404 instead but this assert will fail if it hasn't
-            # deleted for whatever reason
-            assert protected_branch_main is None
-        except GitlabGetError as e:
-            assert e is not None
-            assert e.response_code == 404
 
         config_protect_branch = f"""
         projects_and_groups:
           {project_for_function.path_with_namespace}:
             branches:
-              main:
+              {branch_for_function}:
                protected: true
                allow_force_push: false
                push_access_level: maintainer
@@ -60,39 +42,38 @@ class TestBranches:
 
         run_gitlabform(config_protect_branch, project_for_function.path_with_namespace)
 
-        protected_branch_main = project_for_function.protectedbranches.get("main")
-        assert protected_branch_main.allow_force_push is False
-        assert protected_branch_main.code_owner_approval_required is False
+        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
+        assert protected_branch.allow_force_push is False
+        assert protected_branch.code_owner_approval_required is False
 
         (
             push_access_levels,
             merge_access_levels,
-            push_access_user_ids,
-            merge_access_user_ids,
+            _,
+            _,
             _,
             _,
             unprotect_access_level,
-        ) = get_only_branch_access_levels(project_for_function, "main")
+        ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+        # We set Push Access Level to Maintainer
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
+
+        # Where not provided Merge and Unprotect access levels; Gitlab will default to Maintainer when protected an
+        # unprotected branch: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids == []
-        assert merge_access_user_ids == []
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-    def test__can_update_branch_protection_with_only_push_access_level_defined(self, project_for_function):
+    def test__can_update_projects_default_branch_branch_protection(self, project_for_function):
         """
-        Issue: https://github.com/gitlabform/gitlabform/issues/1193
-        Operating on 'main' immediately after it is created as part of creating the project.
-        Gitlab defaults 'main' to protected on project creation with unprotect access level set to None, which differs
-        to what it defaults unprotect access level to when calling branch protection endpoint without specifying that
-        access level
+        1. When creating a project, the default branch (e.g. 'main') is automatically Protected
+        2. We should be able to update the protection rules of the default branch
         """
 
-        # Wait a little to ensure Gitlab has caught up with creating the project
-        # (which by default will set main to protected)
+        # Eventual consistency - wait for Gitlab to protect project_for_functions default branch
         time.sleep(2)
 
-        # Validate default protection levels - susceptible to breaking depending on Gitlab API changes
+        # Validate Protection Levels set when creating Project (tested on GL v18.9)
+        assert project_for_function.default_branch == "main"
         protected_branch_main = project_for_function.protectedbranches.get("main")
         assert protected_branch_main.allow_force_push is False
         assert protected_branch_main.code_owner_approval_required is False
@@ -100,19 +81,18 @@ class TestBranches:
         (
             push_access_levels,
             merge_access_levels,
-            push_access_user_ids,
-            merge_access_user_ids,
+            _,
+            _,
             _,
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, "main")
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids == []
-        assert merge_access_user_ids == []
-        # By default, Gitlab sets unprotect access level to None when protected main as part of project creation process
+        # By default, Gitlab does not set unprotect access level when protecting default branch on Project Creation
         assert unprotect_access_level is None
 
+        # Test changing push_access_level to "Admin"
         config_protect_branch = f"""
          projects_and_groups:
            {project_for_function.path_with_namespace}:
@@ -120,7 +100,7 @@ class TestBranches:
                main:
                 protected: true
                 allow_force_push: false
-                push_access_level: maintainer
+                push_access_level: admin
                 code_owner_approval_required: false
          """
 
@@ -133,17 +113,47 @@ class TestBranches:
         (
             push_access_levels,
             merge_access_levels,
-            push_access_user_ids,
-            merge_access_user_ids,
+            _,
+            _,
             _,
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, "main")
-        assert push_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_levels == [AccessLevel.ADMIN.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids == []
-        assert merge_access_user_ids == []
         assert unprotect_access_level is None
+
+        # Test setting unprotect_access_level to any value
+        config_protect_branch = f"""
+         projects_and_groups:
+           {project_for_function.path_with_namespace}:
+             branches:
+               main:
+                protected: true
+                allow_force_push: false
+                push_access_level: admin
+                code_owner_approval_required: false
+                unprotect_access_level: maintainer
+         """
+
+        run_gitlabform(config_protect_branch, project_for_function.path_with_namespace)
+
+        protected_branch_main = project_for_function.protectedbranches.get("main")
+        assert protected_branch_main.allow_force_push is False
+        assert protected_branch_main.code_owner_approval_required is False
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            _,
+            _,
+            _,
+            _,
+            unprotect_access_level,
+        ) = get_only_branch_access_levels(project_for_function, "main")
+        assert push_access_levels == [AccessLevel.ADMIN.value]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
     def test__can_protect_and_unprotect_a_branch(self, project, branch):
         config_protect_branch = f"""
