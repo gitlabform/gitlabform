@@ -135,13 +135,10 @@ class BranchesProcessor(AbstractProcessor):
 
             verbose("Creating data to update unprotect_access_levels as necessary")
 
-            unprotect_access_items_patch_data = []
-            # Community Edition does not provide unprotect_access_levels
-            if self.gitlab.enterprise:
-                unprotect_access_items_patch_data = self.build_patch_request_data(
-                    transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
-                    existing_records=tuple(self._get_list_attribute(protected_branch, "unprotect_access_levels")),
-                )
+            unprotect_access_items_patch_data = self.build_patch_request_data(
+                transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
+                existing_records=tuple(self._get_list_attribute(protected_branch, "unprotect_access_levels")),
+            )
 
             if len(unprotect_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_unprotect"] = unprotect_access_items_patch_data
