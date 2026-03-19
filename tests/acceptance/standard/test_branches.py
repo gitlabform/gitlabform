@@ -335,10 +335,7 @@ class TestBranches:
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         # By default, Gitlab does not set unprotect access level when protecting default branch on Project Creation
-        if is_enterprise_edition:
-            assert unprotect_access_level is not None
-        else:
-            assert unprotect_access_level is None
+        assert unprotect_access_level is None
 
         # Test changing push_access_level to "Admin"
         config_protect_branch = f"""
@@ -372,10 +369,7 @@ class TestBranches:
         ) = get_only_branch_access_levels(project_for_function, "main")
         assert push_access_levels == [AccessLevel.ADMIN.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
-        if is_enterprise_edition:
-            assert unprotect_access_level is not None
-        else:
-            assert unprotect_access_level is None
+        assert unprotect_access_level is None
 
         # Test setting unprotect_access_level to any value
         config_protect_branch = f"""
