@@ -1,7 +1,7 @@
 import random
 import re
 from logging import debug
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from gitlab.base import RESTObjectList, RESTObject
 from gitlab.v4.objects import Project, ProjectPipelineSchedule
@@ -44,9 +44,11 @@ class SchedulesProcessor(AbstractProcessor):
             else:
                 entity_config = configured_schedules[schedule_description]
 
+                updated_config = self._transform_config(entity_config, project.id)
+
                 if schedule_ids and len(schedule_ids) == 1:
                     schedule = project.pipelineschedules.get(schedule_ids[0])
-                    self._update_existing_schedule(entity_config, project, schedule, schedule_description)
+                    self._update_existing_schedule(updated_config, project, schedule, schedule_description)
                 elif schedule_ids:
                     debug(
                         "Replacing existing pipeline schedules '%s'",
@@ -55,10 +57,10 @@ class SchedulesProcessor(AbstractProcessor):
                     for schedule_id in schedule_ids:
                         project.pipelineschedules.get(schedule_id).delete()
 
-                    self._create_schedule_with_variables(entity_config, project, schedule_description)
+                    self._create_schedule_with_variables(updated_config, project, schedule_description)
                 else:
                     debug("Creating pipeline schedule '%s'", schedule_description)
-                    self._create_schedule_with_variables(entity_config, project, schedule_description)
+                    self._create_schedule_with_variables(updated_config, project, schedule_description)
 
         if enforce_schedules:
             debug("Delete unconfigured schedules because enforce is enabled")
@@ -72,7 +74,6 @@ class SchedulesProcessor(AbstractProcessor):
         schedule_in_gitlab: ProjectPipelineSchedule,
         schedule_description: str,
     ):
-        entity_config["cron"] = _replace_extended_cron_pattern(project.id, entity_config["cron"])
         if self._needs_update(schedule_in_gitlab.asdict(), entity_config):
             debug("Changing existing pipeline schedule '%s'", schedule_description)
             # In order to edit a Schedule created by someone else we need to take ownership:
@@ -98,7 +99,6 @@ class SchedulesProcessor(AbstractProcessor):
         project: Project,
         schedule_description: str,
     ):
-        entity_config["cron"] = _replace_extended_cron_pattern(project.id, entity_config["cron"])
         schedule_data = {"description": schedule_description, **entity_config}
         debug("Creating pipeline schedule using data: '%s'", schedule_data)
         created_schedule_id = project.pipelineschedules.create(schedule_data).id
@@ -112,6 +112,55 @@ class SchedulesProcessor(AbstractProcessor):
             )
 
         created_schedule.save()
+
+    def _transform_config(self, entity_config: dict, project_id: int) -> dict:
+        """
+        Transform entity_config into format compatible with Gitlab's APIs
+        """
+        transformed_config = entity_config.copy()
+
+        cron = entity_config.get("cron")
+        if cron is not None:
+            transformed_config["cron"] = _replace_extended_cron_pattern(project_id, cron)
+
+        inputs = entity_config.get("inputs")
+        if inputs is not None:
+            transformed_config["inputs"] = self._transform_inputs(inputs)
+
+        return transformed_config
+
+    @staticmethod
+    def _transform_inputs(inputs: dict) -> list:
+        """
+        Transform inputs from YAML config format into Gitlab API format:
+        https://docs.gitlab.com/api/pipeline_schedules/#create-a-new-pipeline-schedule
+
+        YAML format:
+            inputs:
+              deploy_strategy: "blue-green"
+              feature_flags:
+                - flag1
+                - flag2
+
+        REST format:
+            "inputs": [
+                {
+                    "name": "deploy_strategy",
+                    "value": "blue-green"
+                },
+                {
+                    "name": "feature_flags",
+                    "value": ["flag1", "flag2"]
+                }
+            ]
+        """
+        transformed_inputs = []
+        for key in inputs.keys():
+            value = inputs[key]
+            transformed_input = {"name": key, "value": value}
+            transformed_inputs.append(transformed_input)
+
+        return transformed_inputs
 
     @staticmethod
     def _set_schedule_variables(schedule: ProjectPipelineSchedule, variables: Dict) -> None:

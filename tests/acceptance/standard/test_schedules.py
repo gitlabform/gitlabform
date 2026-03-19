@@ -92,6 +92,45 @@ class TestSchedules:
         assert schedule.cron_timezone == "UTC"
         assert schedule.active is True
 
+    def test__add_new_schedule_with_inputs(self, project, schedules):
+        add_schedule_mandatory_fields_only = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            schedules:
+              "New schedule with inputs":
+                ref: main
+                cron: "0 2 * * *"
+                cron_timezone: "Europe/Paris"
+                active: true
+                inputs:
+                  deploy_strategy: "blue-green"
+                  environment: "staging"
+                  feature_flags:
+                    - flag1
+                    - flag2
+        """
+
+        run_gitlabform(add_schedule_mandatory_fields_only, project)
+
+        schedule = self.__find_pipeline_schedule_by_description_and_get_first(project, "New schedule with inputs")
+        assert schedule is not None
+        assert schedule.active is True
+        assert schedule.description == "New schedule with inputs"
+        assert schedule.ref == "refs/heads/main"
+        assert schedule.cron == "0 2 * * *"
+        assert schedule.cron_timezone == "Europe/Paris"
+
+        schedule_inputs = schedule.inputs
+        assert len(schedule_inputs) == 3
+        assert schedule_inputs[0]["name"] == "deploy_strategy"
+        assert schedule_inputs[0]["value"] == "blue-green"
+
+        assert schedule_inputs[1]["name"] == "environment"
+        assert schedule_inputs[1]["value"] == "staging"
+
+        assert schedule_inputs[2]["name"] == "feature_flags"
+        assert schedule_inputs[2]["value"] == ["flag1", "flag2"]
+
     def test__set_schedule_variables(self, project, schedules):
         add_schedule_with_variables = f"""
         projects_and_groups:
@@ -295,6 +334,7 @@ class TestSchedules:
         """
 
         schedules_before = project.pipelineschedules.list()
+        assert len(schedules_before) == 7
 
         run_gitlabform(new_schedule, project)
 
@@ -303,7 +343,6 @@ class TestSchedules:
         schedule = self.__find_pipeline_schedule_by_description_and_get_first(
             project, "New schedule to test enforce config"
         )
-        assert len(schedules_before) == 6
         assert len(schedules_after) == 1
         assert schedule is not None
         assert schedule.description == "New schedule to test enforce config"
