@@ -4,10 +4,8 @@ from cli_ui import info, warning, error, fatal, debug as verbose
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
-    GitlabCreateError,
-    GitlabUpdateError,
+    GitlabOperationError,
 )
-from gitlab.const import AccessLevel
 from gitlab.v4.objects import Project, ProjectProtectedBranch
 
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
@@ -197,7 +195,7 @@ class BranchesProcessor(AbstractProcessor):
                 project.protectedbranches.update(branch_name, branch_config)
             else:
                 project.protectedbranches.create({"name": branch_name, **branch_config})
-        except GitlabCreateError | GitlabUpdateError as e:
+        except GitlabOperationError as e:
             message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
 
             if self.strict:
@@ -381,7 +379,6 @@ class BranchesProcessor(AbstractProcessor):
                 existing_records_access_level = existing_record.get("access_level")
                 existing_records_user_id = existing_record.get("user_id")
                 existing_records_group_id = existing_record.get("group_id")
-                existing_record_id = existing_record.get("id")
 
                 matching_item_to_be_created = None
 
@@ -396,20 +393,19 @@ class BranchesProcessor(AbstractProcessor):
                     elif existing_records_group_id is not None and item.get("group_id") == existing_records_group_id:
                         matching_item_to_be_created = item
                         break
-                    elif existing_records_access_level is not None and item.get("access_level") is not None:
+                    elif (
+                        existing_records_access_level is not None
+                        and item.get("access_level") == existing_records_access_level
+                    ):
                         matching_item_to_be_created = item
-                        break
 
                 if matching_item_to_be_created is not None:
-                    if matching_item_to_be_created.get("access_level") != existing_records_access_level:
-                        # We can update an access_level record by referencing the id of the existing access_level record
-                        matching_item_to_be_created["id"] = existing_record_id
-                    else:
-                        # If we found an existing item matching one that has been configured, remove the item
-                        # to be created and don't mark the existing record for deletion
-                        patch_data.remove(matching_item_to_be_created)
+                    # If we found an existing item matching one that has been configured, remove the item
+                    # to be created and don't mark the existing record for deletion
+                    patch_data.remove(matching_item_to_be_created)
                 else:
-                    patch_data.append({"id": existing_record_id, "_destroy": True})
+                    record_id = existing_record.get("id")
+                    patch_data.append({"id": record_id, "_destroy": True})
         else:
             verbose("No configuration defined for this access level. No changes will be made.")
 
@@ -465,8 +461,9 @@ class BranchesProcessor(AbstractProcessor):
         For example in CE: unprotect_access_levels is not returned on the protected_branch, so trying to access directly
         throws a runtime-exception
         """
-        existing_list_value = []
+        existing_list_value: list[Any] = []
         # Get from the "attributes" as this is the raw dict
-        if protected_branch.attributes.get(attribute_name) is not None:
-            existing_list_value = protected_branch.attributes.get(attribute_name)
+        existing_attr = protected_branch.attributes.get(attribute_name)
+        if existing_attr is not None:
+            existing_list_value = existing_attr
         return existing_list_value

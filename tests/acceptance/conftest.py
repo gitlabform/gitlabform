@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 import os
 import sys
-from typing import Callable, Optional, Generator, List
+from typing import Callable, Optional, Generator, List, cast, Dict, Any
 
 import pytest
 from cryptography.hazmat.primitives import serialization as crypto_serialization
@@ -58,7 +58,11 @@ def requires_license(gl: Gitlab, request):
 
 @pytest.fixture(scope="session")
 def is_enterprise_edition(gl: Gitlab):
-    metadata = gl.http_get("/metadata")
+    # Mypy fix: cast the union return type (dict | Response) to dict[str, Any]
+    metadata = cast(
+        Dict[str, Any],
+        gl.http_get("/metadata"),
+    )
     return metadata.get("enterprise") or False
 
 

@@ -200,8 +200,8 @@ def get_only_branch_access_levels(project: Project, branch: str) -> Tuple[
     merge_access_group_ids: set[int] = set()
     unprotect_access_level: Optional[int] = None
 
-    if "push_access_levels" in protected_branch.attributes:
-        for push_access in protected_branch.attributes.get("push_access_levels"):
+    if protected_branch.attributes.get("push_access_levels") is not None:
+        for push_access in protected_branch.push_access_levels:
             if push_access.get("user_id") is None and push_access.get("group_id") is None:
                 push_access_levels.add(push_access.get("access_level"))
             elif push_access.get("user_id") is not None:
@@ -209,8 +209,8 @@ def get_only_branch_access_levels(project: Project, branch: str) -> Tuple[
             elif push_access.get("group_id") is not None:
                 push_access_group_ids.add(push_access.get("group_id"))
 
-    if "merge_access_levels" in protected_branch.attributes:
-        for merge_access in protected_branch.attributes.get("merge_access_levels"):
+    if protected_branch.attributes.get("merge_access_levels") is not None:
+        for merge_access in protected_branch.merge_access_levels:
             if merge_access.get("user_id") is None and merge_access.get("group_id") is None:
                 merge_access_levels.add(merge_access.get("access_level"))
             elif merge_access.get("user_id") is not None:
@@ -218,11 +218,9 @@ def get_only_branch_access_levels(project: Project, branch: str) -> Tuple[
             elif merge_access.get("group_id") is not None:
                 merge_access_group_ids.add(merge_access.get("group_id"))
 
-    if (
-        "unprotect_access_levels" in protected_branch.attributes
-        and len(protected_branch.attributes.get("unprotect_access_levels")) == 1
-    ):
-        unprotect_access_level = protected_branch.attributes.get("unprotect_access_levels")[0]["access_level"]
+    if protected_branch.attributes.get("unprotect_access_levels") is not None:
+        if len(protected_branch.unprotect_access_levels) == 1:
+            unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
 
     return (
         sorted(push_access_levels),
