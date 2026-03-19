@@ -57,6 +57,12 @@ def requires_license(gl: Gitlab, request):
 
 
 @pytest.fixture(scope="session")
+def is_enterprise_edition(gl: Gitlab):
+    metadata = gl.http_get("/metadata")
+    return metadata.get("enterprise") or False
+
+
+@pytest.fixture(scope="session")
 def root_user(gl):
     return gl.users.list(username="root")[0]
 

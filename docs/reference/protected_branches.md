@@ -2,6 +2,17 @@
 
 This section purpose is to manage the [protected branches](https://docs.gitlab.com/ee/user/project/protected_branches.html).
 
+## Community Edition vs Enterprise Edition
+Note: that Gitlab Community Edition does not support setting `unprotect_access_level` and will always return `None` from the API, and there is also no way to manually set this through the UI.
+
+### Functionality Differences
+In Gitlab EE versions <=15.6.0 and Gitlab Community Edition, GitLabForm uses older functionality where to update Branch Protection rules, GitLabForm will remove protection and then re-protect the Branch using the new configuration.
+
+- For EE: this is because the Update POST API was only added after 15.6.0
+- For CE: this is because the Update POST API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37
+
+In later versions of Gitlab EE, GitLabForm will modify the Branch Protection rules in-place, see the [V4->V5 upgrade notes](../upgrade.md)
+
 ## Common features
 
 The key names here may be:

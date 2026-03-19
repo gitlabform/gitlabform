@@ -65,6 +65,12 @@ against a disposable GitLab instance running as a Docker container OR use your o
     ```
     ./dev/run_gitlab_in_docker.sh
     ```
+   
+   To run against Gitlab CE instead of EE:
+
+    ```
+    ./dev/run_gitlab_in_docker.sh --gitlab-flavor ce
+    ```
 
 2. Run `pytest tests/acceptance` to start all tests.
 

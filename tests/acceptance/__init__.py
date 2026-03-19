@@ -201,25 +201,28 @@ def get_only_branch_access_levels(project: Project, branch: str) -> Tuple[
     unprotect_access_level: Optional[int] = None
 
     if "push_access_levels" in protected_branch.attributes:
-        for push_access in protected_branch.push_access_levels:
-            if not push_access["user_id"] and not push_access["group_id"]:
-                push_access_levels.add(push_access["access_level"])
-            elif push_access["user_id"]:
-                push_access_user_ids.add(push_access["user_id"])
-            elif push_access["group_id"]:
-                push_access_group_ids.add(push_access["group_id"])
+        for push_access in protected_branch.attributes.get("push_access_levels"):
+            if push_access.get("user_id") is None and push_access.get("group_id") is None:
+                push_access_levels.add(push_access.get("access_level"))
+            elif push_access.get("user_id") is not None:
+                push_access_user_ids.add(push_access.get("user_id"))
+            elif push_access.get("group_id") is not None:
+                push_access_group_ids.add(push_access.get("group_id"))
 
     if "merge_access_levels" in protected_branch.attributes:
-        for merge_access in protected_branch.merge_access_levels:
-            if not merge_access["user_id"] and not merge_access["group_id"]:
-                merge_access_levels.add(merge_access["access_level"])
-            elif merge_access["user_id"]:
-                merge_access_user_ids.add(merge_access["user_id"])
-            elif merge_access["group_id"]:
-                merge_access_group_ids.add(merge_access["group_id"])
+        for merge_access in protected_branch.attributes.get("merge_access_levels"):
+            if merge_access.get("user_id") is None and merge_access.get("group_id") is None:
+                merge_access_levels.add(merge_access.get("access_level"))
+            elif merge_access.get("user_id") is not None:
+                merge_access_user_ids.add(merge_access.get("user_id"))
+            elif merge_access.get("group_id") is not None:
+                merge_access_group_ids.add(merge_access.get("group_id"))
 
-    if "unprotect_access_levels" in protected_branch.attributes and len(protected_branch.unprotect_access_levels) == 1:
-        unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
+    if (
+        "unprotect_access_levels" in protected_branch.attributes
+        and len(protected_branch.attributes.get("unprotect_access_levels")) == 1
+    ):
+        unprotect_access_level = protected_branch.attributes.get("unprotect_access_levels")[0]["access_level"]
 
     return (
         sorted(push_access_levels),
