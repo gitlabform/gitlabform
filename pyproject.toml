@@ -75,8 +75,10 @@ exclude = ["tests*"]
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
 
+[pytest]
 markers = [
     "requires_license: marks tests which require GitLab paid (Premium/Ultimate) license '-m \"not requires_license\"')",
+    "ce: marks tests which need to be run against GitLab CE image as well as the standard EE image"
 ]
 
 #uncomment below for debug logging ALWAYS, even if the tests are passing
