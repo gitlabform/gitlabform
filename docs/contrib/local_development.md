@@ -89,7 +89,7 @@ against a disposable GitLab instance running as a Docker container OR use your o
    To run tests validating known GitLab CE issues:
 
    ```commandline
-   pytest -m ce tests/acceptance/standard tests/acceptance/standard
+   pytest -m ce tests/acceptance/standard
    ```
 
 ### Acceptance tests for GitLab paid features
