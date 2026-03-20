@@ -7,6 +7,7 @@ from gitlabform.gitlab import AccessLevel
 from tests.acceptance import get_only_branch_access_levels, run_gitlabform
 
 
+@pytest.mark.ce
 class TestBranches:
     def test__not_supplying_protected_keyword(self, project, branch):
         config_protect_branch = f"""
