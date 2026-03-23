@@ -19,7 +19,6 @@ class TestProjectJobTokenScope:
             time.sleep(2)
             instance_settings.enforce_ci_inbound_job_token_scope_enabled = False
             instance_settings.save()
-            time.sleep(2)
 
     def test__enable_limit_access_to_this_project(
         self,

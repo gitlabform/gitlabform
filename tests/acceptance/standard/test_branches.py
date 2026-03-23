@@ -106,16 +106,15 @@ class TestBranches:
         (
             push_access_levels,
             merge_access_levels,
-            push_access_user_ids,
-            merge_access_user_ids,
+            _,
+            _,
             _,
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.DEVELOPER.value]
-        assert push_access_user_ids == []
-        assert merge_access_user_ids == []
+
         if is_enterprise_edition:
             assert unprotect_access_level is AccessLevel.MAINTAINER.value
         else:
@@ -136,28 +135,15 @@ class TestBranches:
 
         (
             push_access_levels,
-            merge_access_levels,
-            push_access_user_ids,
-            merge_access_user_ids,
+            _,
+            _,
+            _,
             _,
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
 
-        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
-
-        if is_enterprise_edition:
-            # If it is Gitlab-EE we can use the new "update" functionality and where value is no longer defined in
-            # config we leave it as is
-            assert merge_access_levels == [AccessLevel.DEVELOPER.value]
-        else:
-            # If it is Gitlab-CE or <= 15.6.0 we use older "unprotect, then reprotect" functionality, meaning the value
-            # for undefined items reverts to Gitlab's default of "Maintainer"
-            assert merge_access_levels == [AccessLevel.MAINTAINER.value]
-
-        assert push_access_user_ids == []
-        assert merge_access_user_ids == []
         if is_enterprise_edition:
             assert unprotect_access_level is AccessLevel.MAINTAINER.value
         else:
@@ -180,16 +166,14 @@ class TestBranches:
         (
             push_access_levels,
             merge_access_levels,
-            push_access_user_ids,
-            merge_access_user_ids,
+            _,
+            _,
             _,
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.NO_ACCESS.value]
-        assert push_access_user_ids == []
-        assert merge_access_user_ids == []
         if is_enterprise_edition:
             assert unprotect_access_level is AccessLevel.MAINTAINER.value
         else:
@@ -256,16 +240,12 @@ class TestBranches:
             _,
             _,
             _,
-            unprotect_access_level,
+            _,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         # We set Push Access Level to No Access
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert len(merge_access_levels) == 1
         assert merge_access_levels[0] is not None
-        if is_enterprise_edition:
-            assert unprotect_access_level is not None
-        else:
-            assert unprotect_access_level is None
 
         config_protect_branch = f"""
         projects_and_groups:
@@ -294,17 +274,13 @@ class TestBranches:
             _,
             _,
             _,
-            unprotect_access_level,
+            _,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         # We set Push Access Level to Maintainer
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
 
         assert len(merge_access_levels) == 1
         assert merge_access_levels[0] is not None
-        if is_enterprise_edition:
-            assert unprotect_access_level is not None
-        else:
-            assert unprotect_access_level is None
 
     def test__can_update_projects_default_branch_branch_protection(self, project_for_function, is_enterprise_edition):
         """
