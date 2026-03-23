@@ -57,7 +57,7 @@ test = [
     "mypy-extensions==1.1.0",
     "pre-commit==2.21.0",
     "pytest==9.0.2",
-    "pytest-cov==7.0.0",
+    "pytest-cov==7.1.0",
     "pytest-rerunfailures==16.1",
     "types-requests==2.32.4.20260107",
     "types-setuptools==82.0.0.20260210",
