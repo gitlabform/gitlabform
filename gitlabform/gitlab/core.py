@@ -72,12 +72,12 @@ class GitLabCore:
         )
 
         try:
-            metadata = self._make_requests_to_api("metadata")
+            version_response = self._make_requests_to_api("version")
             verbose(
-                f"Connected to GitLab version: {metadata['version']} ({metadata['revision']}), Enterprise Edition: {metadata['enterprise']}"
+                f"Connected to GitLab version: {version_response['version']} ({version_response['revision']}), Enterprise Edition: {version_response['enterprise']}"
             )
-            self.version = metadata["version"]
-            self.enterprise = metadata["enterprise"]
+            self.version = version_response["version"]
+            self.enterprise = version_response["enterprise"]
 
             current_user = self._make_requests_to_api("user")
             if current_user.get("is_admin", False):
