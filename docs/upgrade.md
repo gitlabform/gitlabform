@@ -67,8 +67,8 @@ projects_and_groups:
 
 In Gitlab EE versions <=15.6.0 and Gitlab Community Edition, GitLabForm retains the "older" functionality where to update Branch Protection rules, GitLabForm will remove protection and then re-protect the Branch using the new configuration.
 
-- For EE: this is because the Update POST API was only added after 15.6.0
-- For CE: this is because the Update POST API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37
+- For EE: this is because the Update `PATCH` API was only added after 15.6.0
+- For CE: this is because the Update `PATCH` API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37
 
 #### Gitlab Enterprise Edition versions >15.6.0
 In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach resets all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of [raw parameter passing](reference/index.md#raw-parameters-passing) — where only explicitly configured values are sent, and unspecified ones are left untouched.
