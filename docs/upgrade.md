@@ -65,7 +65,10 @@ projects_and_groups:
 
 ### Branch Protection
 
-In Gitlab EE versions <=15.6.0 and Gitlab Community Edition, GitLabForm retains the "older" functionality where to update Branch Protection rules, GitLabForm will remove protection and then re-protect the Branch using the new configuration.
+
+#### Gitlab Enterprise Edition versions <= 15.6.0 and Community Edition
+
+In Gitlab EE versions <=15.6.0 and Gitlab CE, GitLabForm retains the "older" functionality where to update Branch Protection rules, GitLabForm will remove existing protection and then re-protect the Branch using GitLabForm configuration.
 
 - For EE: this is because the Update `PATCH` API was only added after 15.6.0
 - For CE: this is because the Update `PATCH` API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37
