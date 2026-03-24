@@ -123,44 +123,7 @@ class SchedulesProcessor(AbstractProcessor):
         if cron is not None:
             transformed_config["cron"] = _replace_extended_cron_pattern(project_id, cron)
 
-        inputs = entity_config.get("inputs")
-        if inputs is not None:
-            transformed_config["inputs"] = self._transform_inputs(inputs)
-
         return transformed_config
-
-    @staticmethod
-    def _transform_inputs(inputs: dict) -> list:
-        """
-        Transform inputs from YAML config format into Gitlab API format:
-        https://docs.gitlab.com/api/pipeline_schedules/#create-a-new-pipeline-schedule
-
-        YAML format:
-            inputs:
-              deploy_strategy: "blue-green"
-              feature_flags:
-                - flag1
-                - flag2
-
-        REST format:
-            "inputs": [
-                {
-                    "name": "deploy_strategy",
-                    "value": "blue-green"
-                },
-                {
-                    "name": "feature_flags",
-                    "value": ["flag1", "flag2"]
-                }
-            ]
-        """
-        transformed_inputs = []
-        for key in inputs.keys():
-            value = inputs[key]
-            transformed_input = {"name": key, "value": value}
-            transformed_inputs.append(transformed_input)
-
-        return transformed_inputs
 
     @staticmethod
     def _set_schedule_variables(schedule: ProjectPipelineSchedule, variables: Dict) -> None:
