@@ -62,6 +62,15 @@ projects_and_groups:
         cron: "0 * * * MON-FRI"
         cron_timezone: "London"
         active: false
+        inputs:
+          - name: deploy_strategy
+            value: blue-green
+          - name: environment
+            value: staging
+          - name: feature_flags
+            value: 
+              - flag1
+              - flag2
 ```
 
 ## Extended syntax
