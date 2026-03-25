@@ -65,6 +65,12 @@ against a disposable GitLab instance running as a Docker container OR use your o
     ```
     ./dev/run_gitlab_in_docker.sh
     ```
+   
+   To run against Gitlab CE instead of EE:
+
+    ```
+    ./dev/run_gitlab_in_docker.sh --gitlab-flavor ce
+    ```
 
 2. Run `pytest tests/acceptance` to start all tests.
 
@@ -79,7 +85,7 @@ against a disposable GitLab instance running as a Docker container OR use your o
     ```
     pytest tests/acceptance -k "test__set_file_strongly_protected_branch"
     ```
-
+   
 ### Acceptance tests for GitLab paid features
 
 To test features that are only available in paid version of Gitlab, you'll need a Gitlab license so that those features are available and the acceptance tests can use it. You can signup for a Gitlab Trial license. Follow the [instructions in Gitlab handbook](https://handbook.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows/#contributing-to-the-gitlab-enterprise-edition-ee) for details on how to get a license for development purpose. Once you've received a license, take the following step:

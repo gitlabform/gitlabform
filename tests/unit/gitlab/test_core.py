@@ -30,7 +30,7 @@ class TestGitLabCoreRetryConfiguration:
 
         with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
             mock_api.side_effect = [
-                {"version": "16.0.0", "revision": "abc123"},
+                {"version": "16.0.0", "revision": "abc123", "enterprise": True},
                 {"username": "test_user", "is_admin": True},
             ]
             core = GitLabCore(config_string="gitlab:\n  url: https://gitlab.example.com\n  token: test-token")
@@ -39,6 +39,7 @@ class TestGitLabCoreRetryConfiguration:
         assert core.gitlab_config["max_retries"] == 3
         assert core.gitlab_config["backoff_factor"] == pytest.approx(0.25)
         assert core.gitlab_config["retry_transient_errors"] is True
+        assert core.enterprise is True
 
     @patch("gitlabform.gitlab.core.requests.Session")
     @patch("gitlabform.gitlab.core.Configuration")
@@ -58,7 +59,7 @@ class TestGitLabCoreRetryConfiguration:
 
         with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
             mock_api.side_effect = [
-                {"version": "16.0.0", "revision": "abc123"},
+                {"version": "16.0.0", "revision": "abc123", "enterprise": True},
                 {"username": "test_user", "is_admin": True},
             ]
             core = GitLabCore()
@@ -87,7 +88,7 @@ class TestGitLabCoreRetryConfiguration:
 
         with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
             mock_api.side_effect = [
-                {"version": "16.0.0", "revision": "abc123"},
+                {"version": "16.0.0", "revision": "abc123", "enterprise": True},
                 {"username": "test_user", "is_admin": True},
             ]
             _ = GitLabCore()
@@ -117,7 +118,7 @@ class TestGitLabCoreRetryConfiguration:
 
         with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
             mock_api.side_effect = [
-                {"version": "16.0.0", "revision": "abc123"},
+                {"version": "16.0.0", "revision": "abc123", "enterprise": True},
                 {"username": "test_user", "is_admin": True},
             ]
             _ = GitLabCore()

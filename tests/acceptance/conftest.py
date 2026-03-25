@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 import os
 import sys
-from typing import Callable, Optional, Generator, List
+from typing import Callable, Optional, Generator, List, cast, Dict, Any
 
 import pytest
 from cryptography.hazmat.primitives import serialization as crypto_serialization
@@ -54,6 +54,16 @@ def requires_license(gl: Gitlab, request):
     gitlab_license = gl.get_license()
     if not gitlab_license or gitlab_license["expired"]:
         pytest.skip("this test requires a GitLab license (Paid/Trial)")
+
+
+@pytest.fixture(scope="session")
+def is_enterprise_edition(gl: Gitlab):
+    # Mypy fix: cast the union return type (dict | Response) to dict[str, Any]
+    metadata = cast(
+        Dict[str, Any],
+        gl.http_get("/version"),
+    )
+    return metadata.get("enterprise") or False
 
 
 @pytest.fixture(scope="session")

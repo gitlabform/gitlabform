@@ -1,14 +1,15 @@
-from typing import Optional
+from typing import Optional, Any
+
 from cli_ui import info, warning, error, fatal, debug as verbose
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
-    GitlabCreateError,
+    GitlabOperationError,
 )
 from gitlab.v4.objects import Project, ProjectProtectedBranch
 
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
-from gitlabform.gitlab import GitLab, AccessLevel
+from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
@@ -80,10 +81,13 @@ class BranchesProcessor(AbstractProcessor):
                 return
 
             # https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch was only introduced after 15.6
-            # for user's on older versions of Gitlab we need to unprotect and then reprotect the branch to apply the
+            # for user's on older versions of Gitlab or Community Edition (https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37)
+            # We need to unprotect and then reprotect the branch to apply the
             # defined configuration
-            if self.gitlab.is_version_less_than("15.6.0"):
-                self.process_branch_config_gitlab_15_6_0_or_older(branch_config, branch_name, project, protected_branch)
+            if self.gitlab.is_version_less_than("15.6.0") or (self.gitlab.enterprise == False):
+                self.process_branch_config_gitlab_under_15_6_0_or_ce(
+                    branch_config, branch_name, project, protected_branch
+                )
                 return
 
             # For later Gitlab versions we dynamically generate the data to send to the update endpoint based on the
@@ -116,8 +120,7 @@ class BranchesProcessor(AbstractProcessor):
             verbose("Creating data to update merge_access_levels as necessary")
             merge_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("merge_access_levels"),
-                # API may return None instead of empty list, so we default to [] to prevent TypeError
-                existing_records=tuple(protected_branch.merge_access_levels or []),
+                existing_records=tuple(self._get_list_attribute(protected_branch, "merge_access_levels")),
             )
             if len(merge_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items_patch_data
@@ -125,18 +128,18 @@ class BranchesProcessor(AbstractProcessor):
             verbose("Creating data to update push_access_levels as necessary")
             push_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("push_access_levels"),
-                # API may return None instead of empty list, so we default to [] to prevent TypeError
-                existing_records=tuple(protected_branch.push_access_levels or []),
+                existing_records=tuple(self._get_list_attribute(protected_branch, "push_access_levels")),
             )
             if len(push_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_push"] = push_access_items_patch_data
 
             verbose("Creating data to update unprotect_access_levels as necessary")
+
             unprotect_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
-                # API may return None instead of empty list, so we default to [] to prevent TypeError
-                existing_records=tuple(protected_branch.unprotect_access_levels or []),
+                existing_records=tuple(self._get_list_attribute(protected_branch, "unprotect_access_levels")),
             )
+
             if len(unprotect_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_unprotect"] = unprotect_access_items_patch_data
 
@@ -149,9 +152,9 @@ class BranchesProcessor(AbstractProcessor):
             info(f"Removing branch protection for {branch_name}")
             self.unprotect_branch(protected_branch)
 
-    def process_branch_config_gitlab_15_6_0_or_older(self, branch_config, branch_name, project, protected_branch):
+    def process_branch_config_gitlab_under_15_6_0_or_ce(self, branch_config, branch_name, project, protected_branch):
         """
-        Processes the branches configuration for gitlab version 15.6.0 or older,
+        Processes the branches configuration for gitlab version <=15.6.0 or Community Edition,
         first checking if the branch needs to be updated, if it does, then the branch will be unprotected prior to being
         reprotected with the YAML configuration.
         """
@@ -189,7 +192,7 @@ class BranchesProcessor(AbstractProcessor):
                 project.protectedbranches.update(branch_name, branch_config)
             else:
                 project.protectedbranches.create({"name": branch_name, **branch_config})
-        except GitlabCreateError as e:
+        except GitlabOperationError as e:
             message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
 
             if self.strict:
@@ -445,3 +448,19 @@ class BranchesProcessor(AbstractProcessor):
         https://docs.gitlab.com/user/project/repository/branches/protected/#use-wildcard-rules
         """
         return "*" in branch
+
+    @staticmethod
+    def _get_list_attribute(protected_branch: ProjectProtectedBranch, attribute_name: str) -> list[Any]:
+        """
+        Gets list attribute such as unprotect_access_levels, merge_access_levels, push_access_levels, etc.
+        Uses the python-gitlab attributes raw dict rather than direct parameter to gracefully handle when an attribute
+        is not present in the API response.
+        For example in CE: unprotect_access_levels is not returned on the protected_branch, so trying to access directly
+        throws a runtime-exception
+        """
+        existing_list_value: list[Any] = []
+        # Get from the "attributes" as this is the raw dict
+        existing_attr = protected_branch.attributes.get(attribute_name)
+        if existing_attr is not None:
+            existing_list_value = existing_attr
+        return existing_list_value

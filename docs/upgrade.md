@@ -65,6 +65,15 @@ projects_and_groups:
 
 ### Branch Protection
 
+
+#### Gitlab Enterprise Edition versions <= 15.6.0 and Community Edition
+
+In Gitlab EE versions <=15.6.0 and Gitlab CE, GitLabForm retains the "older" functionality where to update Branch Protection rules, GitLabForm will remove existing protection and then re-protect the Branch using GitLabForm configuration.
+
+- For EE: this is because the Update `PATCH` API was only added after 15.6.0
+- For CE: this is because the Update `PATCH` API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37
+
+#### Gitlab Enterprise Edition versions >15.6.0
 In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach resets all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of [raw parameter passing](reference/index.md#raw-parameters-passing) — where only explicitly configured values are sent, and unspecified ones are left untouched.
 
 This unintended consequence meant:
@@ -83,6 +92,32 @@ projects_and_groups:
        allow_force_push: false
        code_owner_approval_required: true
 ```
+
+If you do not provide all attributes when first protecting a branch, then default access levels will be set by Gitlab's REST API implementation: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches, we do not attempt to maintain 'defaulting' logic to keep in parity with Gitlab's APIs as that would make GitLabForm more fragile.
+If you remove an access level from your configuration, then it will be left at whatever the previous value in the configuration was, if you want to remove access you must define the level as `no access` or `0`.
+
+For example when updating this configuration:
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       protected: true
+       allow_force_push: false
+       code_owner_approval_required: true
+       push_access_level: developer
+```
+to:
+```yaml
+projects_and_groups:
+ my-group/*:
+   branches:
+     main:
+       protected: true
+       allow_force_push: false
+       code_owner_approval_required: true
+```
+will result in **No Change** to the `push_access_level` setting on `main`.
 
 #### `protected` key is Mandatory
 
