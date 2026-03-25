@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -1863,14 +1863,12 @@ executed on the project level are located.</p>
 <p>Since v2.2.0 there is a new way of implementing processors - by inheriting form <code>MultipleEntitiesProcessor</code> class.
 It should be applied for new features which manage 0-N entities of some kind under a group or a project.
 See <code>BadgesProcessor</code> as an example how to use it.</p>
-<p>Since v2.10.0 we have a similar solution for features where you manage a single entity - <code>SingleEntityProcessor</code> class.
-See <code>ProjectPushRulesProcessor</code> as an example how to use it. </p>
 <h4 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h4>
 <p>If you want to <strong>add/change/fix things under an existing config section</strong> then most likely you will need to update 
 the code in the processor classes (for example, in <code>BranchesProcessor</code>).</p>
 <p>If you want to <strong>add support for a new config section</strong> (= completely new feature), then you need to:</p>
 <ol>
-<li>(TODO: expand this sections) Consider writing a new processor using <code>MultipleEntitiesProcessor</code> or <code>SingleEntityProcessor</code> class as a base.</li>
+<li>(TODO: expand this sections) Consider writing a new processor using <code>MultipleEntitiesProcessor</code> class as a base.</li>
 <li>Create a new class <code>group_&lt;new_config_section_name&gt;_processor</code> (if it applies to the group settings) or 
 <code>&lt;new_config_section_name&gt;_processor</code> (if it applies to project settings) and implement two methods:<ul>
 <li><code>_process_configuration</code> - which does the actual processing by calling the API and applying the changes in GitLab;</li>

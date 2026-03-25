@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -616,6 +616,34 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#community-edition-vs-enterprise-edition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community Edition vs Enterprise Edition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Community Edition vs Enterprise Edition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#functionality-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functionality Differences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#common-features" class="md-nav__link">
@@ -1566,6 +1594,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#community-edition-vs-enterprise-edition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community Edition vs Enterprise Edition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Community Edition vs Enterprise Edition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#functionality-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functionality Differences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#common-features" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1609,6 +1665,15 @@
 
 <h1 id="protected-branches">Protected branches<a class="headerlink" href="#protected-branches" title="Permanent link">&para;</a></h1>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/protected_branches.html">protected branches</a>.</p>
+<h2 id="community-edition-vs-enterprise-edition">Community Edition vs Enterprise Edition<a class="headerlink" href="#community-edition-vs-enterprise-edition" title="Permanent link">&para;</a></h2>
+<p>Note: that Gitlab Community Edition does not support setting <code>unprotect_access_level</code> and will always return <code>None</code> from the API, and there is also no way to manually set this through the UI.</p>
+<h3 id="functionality-differences">Functionality Differences<a class="headerlink" href="#functionality-differences" title="Permanent link">&para;</a></h3>
+<p>In Gitlab EE versions &lt;=15.6.0 and Gitlab Community Edition, GitLabForm uses older functionality where to update Branch Protection rules, GitLabForm will remove protection and then re-protect the Branch using the new configuration.</p>
+<ul>
+<li>For EE: this is because the Update POST API was only added after 15.6.0</li>
+<li>For CE: this is because the Update POST API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37</li>
+</ul>
+<p>In later versions of Gitlab EE, GitLabForm will modify the Branch Protection rules in-place, see the <a href="../../upgrade/">V4-&gt;V5 upgrade notes</a></p>
 <h2 id="common-features">Common features<a class="headerlink" href="#common-features" title="Permanent link">&para;</a></h2>
 <p>The key names here may be:</p>
 <ul>

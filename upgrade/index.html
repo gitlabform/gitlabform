@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -1355,6 +1355,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#gitlab-enterprise-edition-versions-1560-and-community-edition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gitlab Enterprise Edition versions &lt;= 15.6.0 and Community Edition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitlab-enterprise-edition-versions-1560" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gitlab Enterprise Edition versions &gt;15.6.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#protected-key-is-mandatory" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1722,6 +1744,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#gitlab-enterprise-edition-versions-1560-and-community-edition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gitlab Enterprise Edition versions &lt;= 15.6.0 and Community Edition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitlab-enterprise-edition-versions-1560" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gitlab Enterprise Edition versions &gt;15.6.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#protected-key-is-mandatory" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1845,6 +1889,13 @@
 <span class="w">        </span><span class="nt">access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
 </code></pre></div>
 <h3 id="branch-protection">Branch Protection<a class="headerlink" href="#branch-protection" title="Permanent link">&para;</a></h3>
+<h4 id="gitlab-enterprise-edition-versions-1560-and-community-edition">Gitlab Enterprise Edition versions &lt;= 15.6.0 and Community Edition<a class="headerlink" href="#gitlab-enterprise-edition-versions-1560-and-community-edition" title="Permanent link">&para;</a></h4>
+<p>In Gitlab EE versions &lt;=15.6.0 and Gitlab CE, GitLabForm retains the "older" functionality where to update Branch Protection rules, GitLabForm will remove existing protection and then re-protect the Branch using GitLabForm configuration.</p>
+<ul>
+<li>For EE: this is because the Update <code>PATCH</code> API was only added after 15.6.0</li>
+<li>For CE: this is because the Update <code>PATCH</code> API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37</li>
+</ul>
+<h4 id="gitlab-enterprise-edition-versions-1560">Gitlab Enterprise Edition versions &gt;15.6.0<a class="headerlink" href="#gitlab-enterprise-edition-versions-1560" title="Permanent link">&para;</a></h4>
 <p>In GitLabForm v4, branch protection config introduced a bug. GitLabForm would remove and re-add branch protection on every run, because GitLab's API did not support in-place updates. Besides causing audit noise because of constant change, this approach resets all unspecified attributes to GitLab defaults, breaking GitLabForm’s core behavior of <a href="../reference/#raw-parameters-passing">raw parameter passing</a> — where only explicitly configured values are sent, and unspecified ones are left untouched.</p>
 <p>This unintended consequence meant:</p>
 <ul>
@@ -1860,6 +1911,28 @@
 <span class="w">       </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">       </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
+<p>If you do not provide all attributes when first protecting a branch, then default access levels will be set by Gitlab's REST API implementation: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches, we do not attempt to maintain 'defaulting' logic to keep in parity with Gitlab's APIs as that would make GitLabForm more fragile.
+If you remove an access level from your configuration, then it will be left at whatever the previous value in the configuration was, if you want to remove access you must define the level as <code>no access</code> or <code>0</code>.</p>
+<p>For example when updating this configuration:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">my-group/*</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">main</span><span class="p">:</span>
+<span class="w">       </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">       </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">       </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">       </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span>
+</code></pre></div>
+to:
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w"> </span><span class="nt">my-group/*</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">main</span><span class="p">:</span>
+<span class="w">       </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">       </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">       </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+will result in <strong>No Change</strong> to the <code>push_access_level</code> setting on <code>main</code>.</p>
 <h4 id="protected-key-is-mandatory"><code>protected</code> key is Mandatory<a class="headerlink" href="#protected-key-is-mandatory" title="Permanent link">&para;</a></h4>
 <p>The documentation has always mandated that the <code>protected</code> key for branch protection must be present in GitlabForm configuration, set to either <code>true</code> or <code>false</code>.</p>
 <p>From v5 GitlabForm will exit Fatally if there is a branch under <code>branches</code> configuration <em>without</em> the protected key, for example the following will now error fatally:

@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -1912,6 +1912,14 @@ against a disposable GitLab instance running as a Docker container OR use your o
 <div class="highlight"><pre><span></span><code>./dev/run_gitlab_in_docker.sh
 </code></pre></div>
 </li>
+</ol>
+<p>To run against Gitlab CE instead of EE:</p>
+<div class="codehilite"><pre><span></span><code><span class="s">```</span>
+./dev/run_gitlab_in_docker.sh --gitlab-flavor ce
+<span class="s">```</span>
+</code></pre></div>
+
+<ol>
 <li>
 <p>Run <code>pytest tests/acceptance</code> to start all tests.</p>
 <p>To run only a single class with tests run, f.e.:</p>
