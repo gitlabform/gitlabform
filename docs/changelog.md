@@ -6,6 +6,27 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 5.0.1
+
+### Bug Fixes
+
+* idempotent branch protection updates for redundant user/role rules [#1194](https://github.com/gitlabform/gitlabform/pull/1194). ([amimas](https://github.com/amimas))
+* branch protection to be successful in GitLab CE [#1195](https://github.com/gitlabform/gitlabform/pull/1195). ([timknight01](https://github.com/TimKnight01))
+
+### Refactoring
+
+* Remove legacy SingleEntityProcessor [#1164](https://github.com/gitlabform/gitlabform/pull/1164). ([thomascizeron](https://github.com/thomascizeron))
+
+### Documentation
+
+* document and test syntax for inputs in pipeline schedules [#1196](https://github.com/gitlabform/gitlabform/pull/1196). ([timknight01](https://github.com/TimKnight01))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 5.0.0
 
 ### Breaking Changes
