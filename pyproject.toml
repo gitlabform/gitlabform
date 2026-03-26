@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitlabform"
-version = "5.0.1"
+version = "5.0.2"
 authors = [{ name = "Greg Dubicki and Contributors" }]
 description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
 keywords = ["cli", "yaml", "gitlab", "configuration-as-code"]
@@ -33,7 +33,7 @@ dependencies = [
     "packaging==26.0",
     "python-gitlab==8.1.0",
     "python-gitlab[graphql]==8.1.0",
-    "requests==2.32.5",
+    "requests==2.33.0",
     "ruamel.yaml==0.17.21",
     "yamlpath==3.8.2",
 ]

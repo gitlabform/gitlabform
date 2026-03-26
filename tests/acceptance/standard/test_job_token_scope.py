@@ -1,6 +1,7 @@
 import pytest
 import time
 
+from gitlab.exceptions import GitlabUpdateError
 from gitlab.v4.objects import Project, Group
 
 from tests.acceptance import (
@@ -8,17 +9,20 @@ from tests.acceptance import (
 )
 
 
+@pytest.mark.ce
 class TestProjectJobTokenScope:
     @pytest.fixture
     def ensure_instance_enforcement_disabled(self, gl):
         instance_settings = gl.settings.get()
-        original_instance_enforcement = instance_settings.enforce_ci_inbound_job_token_scope_enabled
 
-        if original_instance_enforcement:
-            # Wait a little to ensure Gitlab has caught up to any other instance level API changes
-            time.sleep(2)
+        if instance_settings.enforce_ci_inbound_job_token_scope_enabled:
             instance_settings.enforce_ci_inbound_job_token_scope_enabled = False
             instance_settings.save()
+
+            # Experience shows that even after the instance/application API
+            # reflects the change, internal enforcement logic can lag significantly.
+            # 20 seconds is a more robust delay for local or busy environments.
+            time.sleep(20)
 
     def test__enable_limit_access_to_this_project(
         self,
@@ -397,9 +401,19 @@ class TestProjectJobTokenScope:
 
     @staticmethod
     def _setup_limit_access_state(project: Project, state: bool):
-        scope = project.job_token_scope.get()
-        scope.enabled = state
-        scope.save()
+        # Even with the `ensure_instance_enforcement_disabled` fixture waiting, sometimes internal caches in GitLab lag.
+        # Retrying the update operation here is the most robust way to handle this.
+        for i in range(10):
+            try:
+                scope = project.job_token_scope.get()
+                scope.enabled = state
+                scope.save()
+                return
+            except GitlabUpdateError as e:
+                if e.response_code == 400 and "enforced for the instance" in str(e) and i < 9:
+                    time.sleep(2)
+                    continue
+                raise
 
     @staticmethod
     def _setup_add_other_project_to_allowlist(other_project: Project, project: Project):
