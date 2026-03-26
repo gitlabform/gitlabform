@@ -81,7 +81,7 @@ class GitLabCore:
 
             if self.is_version_less_than("16"):
                 warning(
-                    f"Support for GitLab version {version} is Deprecated. See Requirements: https://gitlabform.github.io/gitlabform/requirements/"
+                    f"Support for GitLab version {self.version} is Deprecated. See Requirements: https://gitlabform.github.io/gitlabform/requirements/"
                 )
 
             current_user = self._make_requests_to_api("user")
