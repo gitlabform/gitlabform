@@ -1670,8 +1670,8 @@
 <h3 id="functionality-differences">Functionality Differences<a class="headerlink" href="#functionality-differences" title="Permanent link">&para;</a></h3>
 <p>In Gitlab EE versions &lt;=15.6.0 and Gitlab Community Edition, GitLabForm uses older functionality where to update Branch Protection rules, GitLabForm will remove protection and then re-protect the Branch using the new configuration.</p>
 <ul>
-<li>For EE: this is because the Update POST API was only added after 15.6.0</li>
-<li>For CE: this is because the Update POST API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37</li>
+<li>For EE: this is because the Update PATCH API was only added after 15.6.0</li>
+<li>For CE: this is because the Update PATCH API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37</li>
 </ul>
 <p>In later versions of Gitlab EE, GitLabForm will modify the Branch Protection rules in-place, see the <a href="../../upgrade/">V4-&gt;V5 upgrade notes</a></p>
 <h2 id="common-features">Common features<a class="headerlink" href="#common-features" title="Permanent link">&para;</a></h2>
