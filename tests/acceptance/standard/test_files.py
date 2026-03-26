@@ -55,6 +55,7 @@ def file2(request):
 
 
 class TestFiles:
+    @pytest.mark.ce
     def test__set_file_specific_branch(self, project, branch):
         set_file_specific_branch = f"""
         projects_and_groups:
@@ -87,6 +88,7 @@ class TestFiles:
         # check if main stays protected after the file update
         assert the_branch.protected is True
 
+    @pytest.mark.ce
     def test__does_not_commit_file_if_content_matches(self, project_for_function):
         set_file_specific_branch = f"""
         projects_and_groups:
@@ -116,7 +118,8 @@ class TestFiles:
         # check if main stays protected after the file update
         assert the_branch.protected is True
 
-    def test__set_file_strongly_protected_branch(self, project, no_access_branch):
+    @pytest.mark.ce
+    def test__set_file_strongly_protected_branch(self, project, no_access_branch, is_enterprise_edition):
         """
         This test validates that even when a branch is protected,
         GitLabForm can still update files on that branch by temporarily
@@ -125,7 +128,11 @@ class TestFiles:
         protected_branch = project.protectedbranches.get(no_access_branch.name)
         push_access_level = protected_branch.push_access_levels[0]["access_level"]
         merge_access_level = protected_branch.merge_access_levels[0]["access_level"]
-        unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
+
+        if is_enterprise_edition:
+            unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
+        else:
+            unprotect_access_level = AccessLevel.MAINTAINER.value
 
         set_file_specific_branch = f"""
             projects_and_groups:
@@ -168,6 +175,7 @@ class TestFiles:
                 break
         assert is_protected == True
 
+    @pytest.mark.ce
     def test__delete_file_protected_branch(self, project, branch):
         set_file_specific_branch = f"""
             projects_and_groups:
@@ -235,7 +243,8 @@ class TestFiles:
         branch = project.branches.get(branch)
         assert branch.commit["message"] == "Preconfigured commit message [skip ci]"
 
-    def test__set_file_single_protected_branch(self, project, branch):
+    @pytest.mark.ce
+    def test__set_file_single_protected_branch(self, project, branch, is_enterprise_edition):
         test_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -259,6 +268,11 @@ class TestFiles:
         project_file = project.files.get(ref=branch, file_path="anyfile1")
         assert project_file.decode().decode("utf-8") == "foobar"
 
+        """
+        In order to push Files to a Protected branch, GitLabForm needs to modify the protection rules, make
+        the File change and then set the protection rules back to what they were.
+        So validate the protection access_levels match what we set earlier.
+        """
         (
             push_access_levels,
             merge_access_levels,
@@ -272,8 +286,10 @@ class TestFiles:
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
-        assert unprotect_access_level is AccessLevel.MAINTAINER.value
+        if is_enterprise_edition:
+            assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
+    @pytest.mark.ce
     def test__set_file_single_protected_branch_not_all_levels(self, project, branch):
         test_config = f"""
             projects_and_groups:
@@ -298,6 +314,11 @@ class TestFiles:
         project_file = project.files.get(ref=branch, file_path="anyfile2")
         assert project_file.decode().decode("utf-8") == "barfoo"
 
+        """
+        In order to push Files to a Protected branch, GitLabForm needs to modify the protection rules, make
+        the File change and then set the protection rules back to what they were.
+        So validate the protection access_levels match what we set earlier.
+        """
         (
             push_access_levels,
             merge_access_levels,
@@ -305,15 +326,12 @@ class TestFiles:
             merge_access_user_ids,
             _,
             _,
-            unprotect_access_level,
+            _,
         ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
-        # the default value
-        # according to https://docs.gitlab.com/ee/api/protected_branches.html#protect-repository-branches
-        assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
     def test__set_file_with_chinese_characters(self, project, branch):
         set_file_chinese_characters = f"""
