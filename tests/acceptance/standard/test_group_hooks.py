@@ -1,6 +1,8 @@
 import logging
 import pytest
 from typing import TYPE_CHECKING
+
+from gitlab import exceptions
 from gitlab.v4.objects import GroupHook
 
 from tests.acceptance import run_gitlabform, get_random_name
@@ -18,10 +20,12 @@ def urls():
 
 
 class TestGroupHooksProcessor:
-    def get_hook_from_url(self, group, url):
+    @staticmethod
+    def get_hook_from_url(group, url):
         return next(h for h in group.hooks.list() if h.url == url)
 
-    def test_hooks_create(self, gl, group, urls):
+    @pytest.mark.ce
+    def test_hooks_create(self, gl, group, urls, is_enterprise_edition):
         first_url, second_url, third_url = urls
 
         test_yaml = f"""
@@ -42,6 +46,12 @@ class TestGroupHooksProcessor:
             """
 
         run_gitlabform(test_yaml, group)
+
+        if not is_enterprise_edition:
+            logging.info(
+                "Community Edition does not support Webhooks. Code executed to ensure GitLabForm can still run gracefully"
+            )
+            return
 
         first_created_hook = self.get_hook_from_url(group, first_url)
         second_created_hook = self.get_hook_from_url(group, second_url)
@@ -65,7 +75,10 @@ class TestGroupHooksProcessor:
             third_created_hook.merge_requests_events,
         ) == (True, True)
 
-    def test_hooks_update(self, caplog, gl, group, urls):
+    def test_hooks_update(self, caplog, gl, group, urls, is_enterprise_edition):
+        if not is_enterprise_edition:
+            pytest.skip("Community Edition does not support Webhooks")
+
         first_url, second_url, third_url = urls
         first_hook = self.get_hook_from_url(group, first_url)
         second_hook = self.get_hook_from_url(group, second_url)
@@ -127,7 +140,10 @@ class TestGroupHooksProcessor:
                 updated_third_hook.merge_requests_events,
             ) == (True, True)
 
-    def test_hooks_delete(self, gl, group, urls, caplog):
+    def test_hooks_delete(self, gl, group, urls, caplog, is_enterprise_edition):
+        if not is_enterprise_edition:
+            pytest.skip("Community Edition does not support Webhooks")
+
         first_url, second_url, third_url = urls
         second_hook_before_test = self.get_hook_from_url(group, second_url)
         third_hook_before_test = self.get_hook_from_url(group, third_url)
@@ -170,7 +186,10 @@ class TestGroupHooksProcessor:
         with caplog.at_level(logging.DEBUG):
             assert f"Not deleting group hook '{non_existent_hook_url}', because it doesn't exist" in caplog.text
 
-    def test_hooks_enforce(self, gl, group, urls):
+    def test_hooks_enforce(self, gl, group, urls, is_enterprise_edition):
+        if not is_enterprise_edition:
+            pytest.skip("Community Edition does not support Webhooks")
+
         first_url, second_url, third_url = urls
         hooks_before_test = [h.url for h in group.hooks.list()]
 

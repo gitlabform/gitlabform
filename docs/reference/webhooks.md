@@ -52,6 +52,9 @@ group-1/project-1:
 
 ## Group Webhooks
 
+Group Webhooks are **not** supported by GitLab Community Edition, if they are defined in your configuration, GitLabForm 
+will raise an error but continue to run the rest of your configuration in.
+
 This section purpose is to manage the
 [Group Webhooks](https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#group-webhooks).
 
