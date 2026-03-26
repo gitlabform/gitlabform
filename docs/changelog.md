@@ -6,6 +6,18 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 5.0.2
+
+### Documentation
+
+* Fix typo in protected_branches documentation, should refer to PATCH api
+
+### Tests
+
+* Stabilize job token scope tests [#1209](https://github.com/gitlabform/gitlabform/pull/1209). ([amimas](https://github.com/amimas))
+
+Thanks to all the contributors of this release!
+
 ## 5.0.1
 
 ### Bug Fixes
