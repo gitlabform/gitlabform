@@ -75,6 +75,7 @@ class TestGroupHooksProcessor:
             third_created_hook.merge_requests_events,
         ) == (True, True)
 
+    @pytest.mark.ce
     def test_hooks_update(self, caplog, gl, group, urls, is_enterprise_edition):
         if not is_enterprise_edition:
             pytest.skip("Community Edition does not support Webhooks")
@@ -140,6 +141,7 @@ class TestGroupHooksProcessor:
                 updated_third_hook.merge_requests_events,
             ) == (True, True)
 
+    @pytest.mark.ce
     def test_hooks_delete(self, gl, group, urls, caplog, is_enterprise_edition):
         if not is_enterprise_edition:
             pytest.skip("Community Edition does not support Webhooks")
@@ -186,6 +188,7 @@ class TestGroupHooksProcessor:
         with caplog.at_level(logging.DEBUG):
             assert f"Not deleting group hook '{non_existent_hook_url}', because it doesn't exist" in caplog.text
 
+    @pytest.mark.ce
     def test_hooks_enforce(self, gl, group, urls, is_enterprise_edition):
         if not is_enterprise_edition:
             pytest.skip("Community Edition does not support Webhooks")
