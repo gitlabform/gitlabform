@@ -1,4 +1,4 @@
-from logging import debug, error
+from logging import debug, warning
 from typing import Dict, Any, List
 
 from gitlab.base import RESTObject, RESTObjectList
@@ -13,15 +13,19 @@ class GroupHooksProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_hooks", gitlab)
 
+    def _can_proceed(self, project_or_group: str, configuration: dict):
+        if not self.gitlab.enterprise:
+            hooks_in_config = configuration["group_hooks"]
+            if hooks_in_config is not None and len(hooks_in_config) > 0:
+                # Only raise error if user has defined hooks in config, otherwise exit silently out of processor
+                warning("GitLab Community Edition does not support Group Webhooks")
+
+            return False
+
+        return True
+
     def _process_configuration(self, group_path_and_name: str, configuration: dict):
         hooks_in_config: tuple[str, ...] = tuple(x for x in sorted(configuration["group_hooks"]) if x != "enforce")
-
-        if not self.gitlab.enterprise:
-            if len(hooks_in_config) > 0:
-                # Only raise error if user has defined hooks in config, otherwise exit silently out of processor
-                error("GitLab Community Edition does not support Group Webhooks")
-
-            return
 
         debug("Processing group hooks...")
         group: Group = self.gl.get_group_by_path_cached(group_path_and_name)
