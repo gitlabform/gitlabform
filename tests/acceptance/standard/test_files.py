@@ -328,7 +328,6 @@ class TestFiles:
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
 
-
     def test__set_file_with_chinese_characters(self, project, branch):
         set_file_chinese_characters = f"""
         projects_and_groups:
