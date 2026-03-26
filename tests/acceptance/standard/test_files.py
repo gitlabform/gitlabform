@@ -54,6 +54,7 @@ def file2(request):
     request.addfinalizer(fin)
 
 
+@pytest.mark.ce
 class TestFiles:
     def test__set_file_specific_branch(self, project, branch):
         set_file_specific_branch = f"""
@@ -116,7 +117,7 @@ class TestFiles:
         # check if main stays protected after the file update
         assert the_branch.protected is True
 
-    def test__set_file_strongly_protected_branch(self, project, no_access_branch):
+    def test__set_file_strongly_protected_branch(self, project, no_access_branch, is_enterprise_edition):
         """
         This test validates that even when a branch is protected,
         GitLabForm can still update files on that branch by temporarily
@@ -125,7 +126,13 @@ class TestFiles:
         protected_branch = project.protectedbranches.get(no_access_branch.name)
         push_access_level = protected_branch.push_access_levels[0]["access_level"]
         merge_access_level = protected_branch.merge_access_levels[0]["access_level"]
-        unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
+
+        # Unprotect access level is not available in GitLab CE.
+        # So, we need to check if it's EE before trying to access it.
+        unprotect_access_level_config = ""
+        if is_enterprise_edition:
+            unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
+            unprotect_access_level_config = f"unprotect_access_level: {unprotect_access_level}"
 
         set_file_specific_branch = f"""
             projects_and_groups:
@@ -135,7 +142,7 @@ class TestFiles:
                     protected: true
                     push_access_level: {push_access_level}
                     merge_access_level: {merge_access_level}
-                    unprotect_access_level: {unprotect_access_level}
+                    {unprotect_access_level_config}
                 files:
                   "README.md":
                     overwrite: true
@@ -235,7 +242,14 @@ class TestFiles:
         branch = project.branches.get(branch)
         assert branch.commit["message"] == "Preconfigured commit message [skip ci]"
 
-    def test__set_file_single_protected_branch(self, project, branch):
+    def test__set_file_single_protected_branch(self, project, branch, is_enterprise_edition):
+
+        # Unprotect access level is not available in GitLab CE.
+        # So, we need to check if it's EE before preparing a test config for it.
+        unprotect_access_level_config = ""
+        if is_enterprise_edition:
+            unprotect_access_level_config = f"unprotect_access_level: {AccessLevel.MAINTAINER.value}"
+
         test_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -244,7 +258,7 @@ class TestFiles:
                 protected: true
                 push_access_level: {AccessLevel.MAINTAINER.value}
                 merge_access_level: {AccessLevel.MAINTAINER.value}
-                unprotect_access_level: {AccessLevel.MAINTAINER.value}
+                {unprotect_access_level_config}
             files:
               anyfile1:
                 overwrite: true
@@ -272,9 +286,11 @@ class TestFiles:
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
-        assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
-    def test__set_file_single_protected_branch_not_all_levels(self, project, branch):
+        if is_enterprise_edition:
+            assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+    def test__set_file_single_protected_branch_not_all_levels(self, project, branch, is_enterprise_edition):
         test_config = f"""
             projects_and_groups:
               {project.path_with_namespace}:
@@ -311,9 +327,11 @@ class TestFiles:
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
-        # the default value
-        # according to https://docs.gitlab.com/ee/api/protected_branches.html#protect-repository-branches
-        assert unprotect_access_level is AccessLevel.MAINTAINER.value
+
+        # In previous test, we set unprotect_access_level to MAINTAINER, so it should remain unchanged after the file update
+        # But, this assertion is only valid for GitLab EE, as unprotect_access_level is not available in GitLab CE
+        if is_enterprise_edition:
+            assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
     def test__set_file_with_chinese_characters(self, project, branch):
         set_file_chinese_characters = f"""
