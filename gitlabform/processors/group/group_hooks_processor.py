@@ -14,15 +14,18 @@ class GroupHooksProcessor(AbstractProcessor):
         super().__init__("group_hooks", gitlab)
 
     def _process_configuration(self, group_path_and_name: str, configuration: dict):
+        hooks_in_config: tuple[str, ...] = tuple(x for x in sorted(configuration["group_hooks"]) if x != "enforce")
+
         if not self.gitlab.enterprise:
-            error("GitLab Community Edition does not support Group Webhooks")
+            if len(hooks_in_config) > 0:
+                # Only raise error if user has defined hooks in config, otherwise exit silently out of processor
+                error("GitLab Community Edition does not support Group Webhooks")
+
             return
 
         debug("Processing group hooks...")
         group: Group = self.gl.get_group_by_path_cached(group_path_and_name)
         group_hooks: list[GroupHook] = group.hooks.list(get_all=True)
-
-        hooks_in_config: tuple[str, ...] = tuple(x for x in sorted(configuration["group_hooks"]) if x != "enforce")
 
         for hook in hooks_in_config:
             hook_in_gitlab: RESTObject | None = next((h for h in group_hooks if h.url == hook), None)
