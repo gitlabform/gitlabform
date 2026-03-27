@@ -21,6 +21,13 @@ def urls():
 
 @pytest.mark.ce
 class TestGroupHooksProcessor:
+    @pytest.fixture(autouse=True)
+    def skip_if_ce(self, request, is_enterprise_edition):
+        # We allow test_hooks_create to run on CE to validate graceful handling/logging.
+        # All other tests in this class require Group Webhooks which is an EE-only feature.
+        if not is_enterprise_edition and request.function.__name__ != "test_hooks_create":
+            pytest.skip("Community Edition does not support Group Webhooks")
+
     @staticmethod
     def get_hook_from_url(group, url):
         return next(h for h in group.hooks.list() if h.url == url)
@@ -75,10 +82,7 @@ class TestGroupHooksProcessor:
             third_created_hook.merge_requests_events,
         ) == (True, True)
 
-    def test_hooks_update(self, caplog, gl, group, urls, is_enterprise_edition):
-        if not is_enterprise_edition:
-            pytest.skip("Community Edition does not support Webhooks")
-
+    def test_hooks_update(self, caplog, gl, group, urls):
         first_url, second_url, third_url = urls
         first_hook = self.get_hook_from_url(group, first_url)
         second_hook = self.get_hook_from_url(group, second_url)
@@ -140,10 +144,7 @@ class TestGroupHooksProcessor:
                 updated_third_hook.merge_requests_events,
             ) == (True, True)
 
-    def test_hooks_delete(self, gl, group, urls, caplog, is_enterprise_edition):
-        if not is_enterprise_edition:
-            pytest.skip("Community Edition does not support Webhooks")
-
+    def test_hooks_delete(self, gl, group, urls, caplog):
         first_url, second_url, third_url = urls
         second_hook_before_test = self.get_hook_from_url(group, second_url)
         third_hook_before_test = self.get_hook_from_url(group, third_url)
@@ -186,10 +187,7 @@ class TestGroupHooksProcessor:
         with caplog.at_level(logging.DEBUG):
             assert f"Not deleting group hook '{non_existent_hook_url}', because it doesn't exist" in caplog.text
 
-    def test_hooks_enforce(self, gl, group, urls, is_enterprise_edition):
-        if not is_enterprise_edition:
-            pytest.skip("Community Edition does not support Webhooks")
-
+    def test_hooks_enforce(self, gl, group, urls):
         first_url, second_url, third_url = urls
         hooks_before_test = [h.url for h in group.hooks.list()]
 
