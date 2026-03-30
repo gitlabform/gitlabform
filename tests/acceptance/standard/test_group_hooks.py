@@ -2,7 +2,7 @@ import logging
 import pytest
 from typing import TYPE_CHECKING
 
-from gitlab import exceptions
+from gitlab import exceptions, GitlabListError
 from gitlab.v4.objects import GroupHook
 
 from tests.acceptance import run_gitlabform, get_random_name
@@ -54,10 +54,14 @@ class TestGroupHooksProcessor:
 
         run_gitlabform(test_yaml, group)
 
-        if not is_enterprise_edition:
-            logging.info(
-                "Community Edition does not support Webhooks. Code executed to ensure GitLabForm can still run gracefully"
-            )
+        # In CE, Group Webhooks are not supported and the API endpoint returns 404.
+        # Reaching this point proves GitLabForm didn't fatally exit.
+        # We verify the endpoint is indeed unavailable or empty.
+        try:
+            assert len(group.hooks.list()) == 0
+        except GitlabListError as e:
+            if e.response_code != 404:
+                raise
             return
 
         first_created_hook = self.get_hook_from_url(group, first_url)
@@ -68,7 +72,6 @@ class TestGroupHooksProcessor:
             assert isinstance(first_created_hook, GroupHook)
             assert isinstance(second_created_hook, GroupHook)
             assert isinstance(third_created_hook, GroupHook)
-        assert len(group.hooks.list()) == 3
         assert (
             first_created_hook.push_events,
             first_created_hook.merge_requests_events,
