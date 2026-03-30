@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 import time
 
@@ -85,7 +87,7 @@ class TestProjectJobTokenScope:
         self,
         project: Project,
         other_project: Project,
-        message_recorder,
+        caplog,
     ):
         self._restore_default_allowlist_state(project)
 
@@ -103,7 +105,8 @@ class TestProjectJobTokenScope:
                   - {other_project.path_with_namespace}
         """
 
-        run_gitlabform(job_token_scope, project)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(job_token_scope, project)
 
         scope = project.job_token_scope.get()
 
@@ -116,13 +119,13 @@ class TestProjectJobTokenScope:
         # Validate nothing on groups_allowlist
         assert len(scope.groups_allowlist.list()) == 0
 
-        assert message_recorder.find(f"Added Project {other_project.get_id()} to allowlist")
+        assert f"Added Project {other_project.get_id()} to allowlist" in caplog.text
 
     def test__adding_project_already_on_allowlist_via_config(
         self,
         project: Project,
         other_project: Project,
-        message_recorder,
+        caplog,
     ):
         self._restore_default_allowlist_state(project)
 
@@ -145,7 +148,8 @@ class TestProjectJobTokenScope:
                   - {other_project.path_with_namespace}
         """
 
-        run_gitlabform(job_token_scope_config, project)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(job_token_scope_config, project)
 
         scope = project.job_token_scope.get()
 
@@ -158,7 +162,7 @@ class TestProjectJobTokenScope:
         # Validate nothing on groups_allowlist
         assert len(scope.groups_allowlist.list()) == 0
 
-        assert message_recorder.find(f"Added Project {other_project.get_id()} to allowlist") is None
+        assert f"Added Project {other_project.get_id()} to allowlist" not in caplog.text
 
     def test__add_other_project_to_job_token_scope_by_id(
         self,
@@ -339,7 +343,7 @@ class TestProjectJobTokenScope:
         self,
         project: Project,
         other_group: Group,
-        message_recorder,
+        caplog,
     ):
         self._restore_default_allowlist_state(project)
 
@@ -353,7 +357,8 @@ class TestProjectJobTokenScope:
                   - {other_group.name}
         """
 
-        run_gitlabform(job_token_scope, project)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(job_token_scope, project)
 
         scope = project.job_token_scope.get()
 
@@ -363,13 +368,13 @@ class TestProjectJobTokenScope:
 
         assert any(allowed.id == other_group.id for allowed in groups_allowlist_after)
 
-        assert message_recorder.find(f"Added Group {other_group.get_id()} to allowlist")
+        assert f"Added Group {other_group.get_id()} to allowlist" in caplog.text
 
     def test__adding_group_already_on_allowlist_via_config(
         self,
         project: Project,
         other_group: Group,
-        message_recorder,
+        caplog,
     ):
         self._restore_default_allowlist_state(project)
 
@@ -387,7 +392,8 @@ class TestProjectJobTokenScope:
                      - {other_group.name}
            """
 
-        run_gitlabform(job_token_scope_config, project)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(job_token_scope_config, project)
 
         scope = project.job_token_scope.get()
 
@@ -397,7 +403,7 @@ class TestProjectJobTokenScope:
 
         assert any(allowed.id == other_group.id for allowed in groups_allowlist_after)
 
-        assert message_recorder.find(f"Added Group {other_group.get_id()} to allowlist") is None
+        assert f"Added Group {other_group.get_id()} to allowlist" not in caplog.text
 
     @staticmethod
     def _setup_limit_access_state(project: Project, state: bool):
