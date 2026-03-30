@@ -24,7 +24,6 @@ classifiers = [
 requires-python = ">=3.12.0"
 dependencies = [
     "certifi==2026.2.25",
-    "cli-ui==0.19.0",
     "ez-yaml==1.2.0",
     "Jinja2==3.1.6",
     "luddite==1.0.4",
@@ -34,6 +33,7 @@ dependencies = [
     "python-gitlab==8.2.0",
     "python-gitlab[graphql]==8.2.0",
     "requests==2.33.1",
+    "rich==14.3.3",
     "ruamel.yaml==0.17.21",
     "yamlpath==3.8.2",
 ]
@@ -78,10 +78,6 @@ markers = [
     "requires_license: marks tests which require GitLab paid (Premium/Ultimate) license '-m \"not requires_license\"')",
     "ce: marks tests which need to be run against GitLab CE image as well as the standard EE image"
 ]
-
-#uncomment below for debug logging ALWAYS, even if the tests are passing
-#log_cli = true
-#log_cli_level = "DEBUG"
 
 [tool.black]
 line-length = 120

@@ -1,7 +1,7 @@
 from unittest.mock import patch
 import pytest
 from tests.acceptance import run_gitlabform
-from cli_ui import debug as verbose  # for wraps
+from logging import info
 
 
 class TestGroupVariables:
@@ -75,7 +75,7 @@ class TestGroupVariables:
         )
         assert variables[3].value == expected_message
 
-    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=verbose)
+    @patch("gitlabform.processors.util.variables_processor.info", wraps=info)
     def test__update_variables(self, mock_verbose, group):
         """Test case: update variables that were added in previous test case"""
 

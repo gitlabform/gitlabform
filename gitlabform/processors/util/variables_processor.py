@@ -1,5 +1,4 @@
-from cli_ui import debug as verbose
-from cli_ui import warning
+from logging import warning, info
 from typing import Dict, List, Any, Set, Tuple, Callable, cast, overload
 
 from gitlab.v4.objects import Group, Project, GroupVariable, ProjectVariable
@@ -44,12 +43,12 @@ class VariablesProcessor:
         try:
             # Get existing variables
             existing_variables = self.get_variables_from_gitlab(group_or_project)
-            verbose(f"Found {len(existing_variables)} existing variables in {group_or_project.name}")
+            info(f"Found {len(existing_variables)} existing variables in {group_or_project.name}")
 
             # Process configured variables
             processed_vars = set()
             if configured_variables:
-                verbose(f"Processing {len(configured_variables)} variables from configuration")
+                info(f"Processing {len(configured_variables)} variables from configuration")
                 for var_config in configured_variables.values():
                     self._handle_variable(group_or_project, var_config, existing_variables)
                     processed_vars.add((var_config["key"], var_config.get("environment_scope", "*")))
@@ -104,7 +103,7 @@ class VariablesProcessor:
                     self._update_variable(group_or_project, var_config)
                     return
                 else:
-                    verbose(f"Variable {key} with scope {scope} already matches configuration, no update needed")
+                    info(f"Variable {key} with scope {scope} already matches configuration, no update needed")
                     return
 
     def _handle_enforce_mode(
@@ -121,24 +120,24 @@ class VariablesProcessor:
         ]
 
         if vars_to_delete:
-            verbose(f"Enforce mode will delete {len(vars_to_delete)} variables")
+            info(f"Enforce mode will delete {len(vars_to_delete)} variables")
             for var in vars_to_delete:
                 self._delete_variable(group_or_project, var.key, getattr(var, "environment_scope", "*"))
 
     def _create_variable(self, group_or_project: Group | Project, var_config: Dict[str, Any]) -> None:
         """Create a new variable."""
         attrs = var_config.copy()
-        verbose(f"Creating variable {attrs['key']}")
+        info(f"Creating variable {attrs['key']}")
         group_or_project.variables.create(attrs)
 
     def _update_variable(self, group_or_project: Group | Project, var_config: Dict[str, Any]) -> None:
         """Update an existing variable."""
         attrs = var_config.copy()
         scope = attrs.get("environment_scope", "*")
-        verbose(f"Updating variable {attrs['key']}")
+        info(f"Updating variable {attrs['key']}")
         group_or_project.variables.update(attrs["key"], attrs, filter={"environment_scope": scope})
 
     def _delete_variable(self, group_or_project: Group | Project, key: str, scope: str) -> None:
         """Delete a variable."""
-        verbose(f"Deleting variable {key}")
+        info(f"Deleting variable {key}")
         group_or_project.variables.delete(key, filter={"environment_scope": scope})

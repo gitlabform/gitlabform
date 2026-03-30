@@ -1,30 +1,17 @@
 import sys
-from logging import debug
+from logging import debug, critical, error, warning, info
+
+# Use Rich to make logs have a colorized and formatted output
+from rich.logging import RichHandler
+from rich.console import Console
 
 import argparse
-import cli_ui
 import logging
 import luddite
 from importlib.metadata import version as package_version
 import textwrap
 import traceback
-from cli_ui import (
-    Symbol,
-    reset,
-    blue,
-    message,
-    error,
-    info,
-    fatal,
-    info_1,
-    debug as verbose,
-    red,
-    green,
-    yellow,
-    Token,
-    purple,
-    warning,
-)
+
 from packaging import version
 from typing import Any, Tuple
 
@@ -45,6 +32,8 @@ from gitlabform.output import EffectiveConfigurationFile
 from gitlabform.processors.application import ApplicationProcessors
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
+
+console = Console()
 
 
 class GitLabForm:
@@ -109,10 +98,8 @@ class GitLabForm:
                 sys.exit(0)
 
             if not self.target:
-                fatal(
-                    "target parameter is required.",
-                    exit_code=EXIT_INVALID_INPUT,
-                )
+                critical("target parameter is required.")
+                sys.exit(EXIT_INVALID_INPUT)
 
         self.gitlab, self.configuration = self._initialize_configuration_and_gitlab()
 
@@ -326,37 +313,30 @@ class GitLabForm:
 
     def _configure_output(self, tests=False) -> None:
         """
-        Configures the application output using cli_ui and logging, based on debug and verbose flags:
+        Configures the application output using logging, based on debug and verbose flags:
 
-        * normal mode - print cli_ui.* except debug as verbose
-        * verbose mode - print all cli_ui.*, including debug as verbose
-        * debug / tests mode - like above + (logging.)debug
+        * normal mode - logging only FATAL logs
+        * verbose mode - logging INFO level and above
+        * debug / tests mode - llogging DEBUG level and above
 
         :param tests: True if we are running in tests mode
         """
-
-        logging.basicConfig()
-
-        if self.debug or tests:
-            # debug / tests
-            cli_ui_verbose = True
+        if tests:
             level = logging.DEBUG
+            rich_tracebacks = True
+        elif self.debug:
+            level = logging.DEBUG
+            rich_tracebacks = False
         elif self.verbose:
-            # verbose
-            cli_ui_verbose = True
-            # de facto disabled as we don't use logging different from debug in this project
-            level = logging.FATAL
+            level = logging.WARNING
+            rich_tracebacks = True
         else:
-            # normal
-            cli_ui_verbose = False
-            # de facto disabled as we don't use logging different from debug in this project
             level = logging.FATAL
+            rich_tracebacks = False
 
-        cli_ui.setup(verbose=cli_ui_verbose)
-        logging.getLogger().setLevel(level)
-
-        fmt = logging.Formatter("%(message)s")
-        logging.getLogger().handlers[0].setFormatter(fmt)
+        logging.basicConfig(
+            level=level, format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=rich_tracebacks)]
+        )
 
     def _initialize_configuration_and_gitlab(self) -> Tuple[GitLab, Configuration]:
         """
@@ -378,20 +358,14 @@ class GitLabForm:
             configuration_transformers.transform(configuration)
 
         except ConfigFileNotFoundException as e:
-            fatal(
-                f"Config file not found at: {e}",
-                exit_code=EXIT_INVALID_INPUT,
-            )
+            critical(f"Config file not found at: {e}")
+            sys.exit(EXIT_INVALID_INPUT)
         except ConfigInvalidException as e:
-            fatal(
-                f"Invalid config:\n{e.underlying}",
-                exit_code=EXIT_INVALID_INPUT,
-            )
+            critical(f"Invalid config:\n{e.underlying}")
+            sys.exit(EXIT_INVALID_INPUT)
         except TestRequestFailedException as e:
-            fatal(
-                f"GitLab test request failed:\n{e.underlying}",
-                exit_code=EXIT_PROCESSING_ERROR,
-            )
+            critical(f"GitLab test request failed:\n{e.underlying}")
+            sys.exit(EXIT_INVALID_INPUT)
 
         return gitlab, configuration
 
@@ -430,9 +404,8 @@ class GitLabForm:
                     "@",
                     group_number,
                     len(groups),
-                    yellow,
+                    "yellow",
                     f"Skipping group {group} as requested to start from {self.start_from_group}...",
-                    reset,
                 )
                 continue
 
@@ -444,6 +417,7 @@ class GitLabForm:
                 "@",
                 group_number,
                 len(groups),
+                "black",
                 f"Processing group: {group}",
             )
 
@@ -489,9 +463,8 @@ class GitLabForm:
                     "*",
                     project_number,
                     len(projects),
-                    yellow,
+                    "yellow",
                     f"Skipping project {project_and_group} as requested to start from {self.start_from}...",
-                    reset,
                 )
                 continue
 
@@ -503,6 +476,7 @@ class GitLabForm:
                 "*",
                 project_number,
                 len(projects),
+                "black",
                 f"Processing project: {project_and_group}",
             )
 
@@ -564,11 +538,8 @@ class GitLabForm:
 
         local_version = package_version("gitlabform")
 
-        # fmt: off
-        tower_crane = Symbol("🏗", "")
-        to_show = [reset, tower_crane, "GitLabForm version:", blue, local_version, reset]
-        # fmt: on
-        message(*to_show, sep=" ", end="")
+        console.print(":construction_site: GitLabForm version:")
+        console.print(local_version, style="blue")
 
         if skip_version_check:
             # just print end of the line
@@ -583,23 +554,14 @@ class GitLabForm:
                 return
 
             if local_version == latest_version:
-                # fmt: off
-                happy = Symbol("😊", ":)")
-                to_show = ["= the latest stable ", happy]
-                # fmt: on
+                to_show = "= the latest stable :blush:"
             elif version.parse(local_version) < version.parse(latest_version):
-                # fmt: off
-                sad = Symbol("😔", ":(")
-                to_show = ["= outdated ", sad, " , please update! (the latest stable is ", latest_version, ")"]
-                # fmt: on
+                to_show = f"= outdated :pensive: , please update! (the latest stable is {latest_version})"
             else:
-                # fmt: off
-                excited = Symbol("🤩", "8)")
-                to_show = ["= pre-release ", excited, " (the latest stable is ", latest_version, ")"]
-                # fmt: on
+                to_show = f"= pre-release: :star_struck: (the latest stable is {latest_version})"
 
             # complete the line with a line ending
-            message(*to_show, sep="")
+            console.print(to_show)
 
     def _get_groups_and_projects(
         self,
@@ -633,10 +595,8 @@ class GitLabForm:
                 error_message = "Configuration does not have any groups or projects defined!"
             else:
                 error_message = f"Project or group {target} cannot be found in GitLab!"
-            fatal(
-                error_message,
-                exit_code=EXIT_INVALID_INPUT,
-            )
+            critical(error_message)
+            sys.exit(EXIT_INVALID_INPUT)
 
         self.groups_and_projects_filters.filter(groups, projects)
 
@@ -652,7 +612,7 @@ class GitLabForm:
 
         :param entities: groups or projects
         """
-        info_1(f"# of {entities.name} to process: {len(entities.get_effective())}")
+        info(f"# of {entities.name} to process: {len(entities.get_effective())}")
 
         entities_omitted = ""
         entities_verbose = f"{entities.name}: {entities.get_effective()}"
@@ -669,9 +629,9 @@ class GitLabForm:
             entities_omitted += ")"
 
         if entities_omitted:
-            info_1(entities_omitted)
+            info(entities_omitted)
 
-        verbose(entities_verbose)
+        info(entities_verbose)
 
     @classmethod
     def _show_summary(
@@ -695,50 +655,40 @@ class GitLabForm:
         """
 
         if len(effective_groups) > 0 or len(effective_projects) > 0:
-            info_1(f"# of groups processed successfully: {successful_groups}")
-            info_1(f"# of projects processed successfully: {successful_projects}")
+            info(f"# of groups processed successfully: {successful_groups}")
+            info(f"# of projects processed successfully: {successful_projects}")
 
         if len(failed_groups) > 0:
-            info_1(red, f"# of groups failed: {len(failed_groups)}", reset)
+            console.print(f"# of groups failed: {len(failed_groups)}", style="red")
             for group_number in failed_groups.keys():
-                # fmt: off
-                info_1(red, f"Failed group {group_number}: {failed_groups[group_number]}", reset)
-                # fmt: on
+                console.print(f"Failed group {group_number}: {failed_groups[group_number]}", style="red")
         if len(failed_projects) > 0:
-            # fmt: off
-            info_1(red, f"# of projects failed: {len(failed_projects)}", reset)
-            # fmt: on
+            console.print(f"# of projects failed: {len(failed_projects)}", style="red")
             for project_number in failed_projects.keys():
-                # fmt: off
-                info_1(red, f"Failed project {project_number}: {failed_projects[project_number]}", reset)
-                # fmt: on
+                console.print(f"Failed project {project_number}: {failed_projects[project_number]}", style="red")
 
         if len(failed_groups) > 0 or len(failed_projects) > 0:
             sys.exit(EXIT_PROCESSING_ERROR)
         elif successful_groups > 0 or successful_projects > 0:
-            # fmt: off
-            shine = Symbol("✨", "!!!")
-            info_1(green, "All requested groups/projects processed successfully!", reset, shine)
-            # fmt: on
+            console.print("All requested groups/projects processed successfully! :sparkles:", style="green")
         else:
-            # fmt: off
-            info_1(yellow, "Nothing to do.", reset)
-            # fmt: on
+            console.print("Nothing to do.", style="yellow")
 
     @classmethod
-    def _info_group_count(cls, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
-        cls._info_count(purple, prefix, i, n, *rest, **kwargs)
+    def _info_group_count(cls, prefix, i: int, n: int, second_color: str, second_text: str) -> None:
+        cls._info_count("purple", prefix, i, n, second_color, second_text)
 
     @classmethod
-    def _info_project_count(cls, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
-        cls._info_count(green, prefix, i, n, *rest, **kwargs)
+    def _info_project_count(cls, prefix, i: int, n: int, second_color: str, second_text: str) -> None:
+        cls._info_count("green", prefix, i, n, second_color, second_text)
 
     @classmethod
-    def _info_count(cls, color, prefix, i: int, n: int, *rest: Token, **kwargs: Any) -> None:
+    def _info_count(cls, color: str, prefix, i: int, n: int, second_color: str, second_text: str) -> None:
         num_digits = len(str(n))
         counter_format = f"(%{num_digits}d/%d)"
         counter_str = counter_format % (i, n)
-        info(color, prefix, reset, counter_str, reset, *rest, **kwargs)
+        console.print(f"{prefix} {counter_str}", style=color)
+        console.print(second_text, style=second_color)
 
 
 class Formatter(

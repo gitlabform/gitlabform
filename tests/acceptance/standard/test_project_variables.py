@@ -1,5 +1,5 @@
 import pytest
-from cli_ui import debug as verbose  # for wraps
+from logging import info  # for wraps
 from unittest.mock import patch
 from gitlab.exceptions import GitlabListError
 
@@ -116,7 +116,7 @@ class TestVariables:
         assert variables[4].value == expected_message
         assert variables[4].environment_scope == "*"  # default scope if not configured
 
-    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=verbose)
+    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=info)
     def test__update_variables(self, mock_verbose, project):
         """Test case: update variables that were added in previous test case"""
 

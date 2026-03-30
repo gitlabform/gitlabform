@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from cli_ui import debug as verbose
+from logging import info
 from gitlabform.gitlab import GitLab
 from gitlab.v4.objects import Group
 
@@ -19,7 +19,7 @@ class GroupVariablesProcessor(AbstractProcessor):
         enforce_mode: bool = configured_variables.get("enforce", False)
 
         if enforce_mode:
-            verbose(f"Enforce mode enabled for variables in {project_and_group}")
+            info(f"Enforce mode enabled for variables in {project_and_group}")
             # Remove 'enforce' key from the config so that it's not treated as a variable
             configured_variables.pop("enforce")
 

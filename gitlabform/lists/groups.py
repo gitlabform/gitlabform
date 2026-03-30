@@ -1,4 +1,5 @@
-from cli_ui import fatal
+import sys
+from logging import critical
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.lists import OmissionReason, Groups
@@ -74,10 +75,8 @@ class GroupsProvider:
             try:
                 self.gitlab.get_group_case_insensitive(group)
             except NotFoundException:
-                fatal(
-                    f"Configuration contains group {group} but it cannot be found in GitLab!",
-                    exit_code=EXIT_INVALID_INPUT,
-                )
+                critical(f"Configuration contains group {group} but it cannot be found in GitLab!")
+                sys.exit(EXIT_INVALID_INPUT)
 
     def _get_skipped_groups(self, groups: list) -> list:
         skipped = []

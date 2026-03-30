@@ -1,8 +1,7 @@
 from unittest.mock import patch
 import pytest
-from cli_ui import debug as verbose  # for wraps
+from logging import info
 from tests.acceptance import run_gitlabform
-from gitlabform.constants import EXIT_PROCESSING_ERROR
 
 pytestmark = pytest.mark.requires_license
 
@@ -52,7 +51,7 @@ class TestGroupVariablesPremium:
         assert variables[1].value == "prod-value"
         assert variables[1].environment_scope == "prod"
 
-    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=verbose)
+    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=info)
     def test__update_variables_with_env_scope(self, mock_verbose, group):
         """Test case: update variables that were added in previous test case"""
 
