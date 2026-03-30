@@ -539,7 +539,7 @@ class GitLabForm:
         local_version = package_version("gitlabform")
 
         version_text = "GitLabForm version:"
-        # Legacy windows console (as used in smoke-tests) cannot support unicode emoji rendering via Rich
+        # Legacy windows console  cannot support unicode emoji rendering via Rich
         if not console.legacy_windows:
             version_text = f"🏗️ {version_text}"
 
@@ -562,7 +562,7 @@ class GitLabForm:
 
             if local_version == latest_version:
                 to_show = "= the latest stable"
-                # Legacy windows console (as used in smoke-tests) cannot support unicode emoji rendering via Rich
+                # Legacy windows console  cannot support unicode emoji rendering via Rich
                 if not console.legacy_windows:
                     to_show = f"{to_show} ☺️"
             elif version.parse(local_version) < version.parse(latest_version):
