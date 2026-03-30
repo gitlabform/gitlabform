@@ -61,7 +61,7 @@ gitlab:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `ssl_verify` | bool | `true` | Whether to verify SSL certificate. Set to `false` for self-signed certificates (not recommended) |
+| `ssl_verify` | bool | `true` | Whether to verify SSL certificate. By default, root certificates from the Certifi package are used for verification. For guidance on using system or custom CA bundles while keeping SSL verification enabled, see [Using an alternative CA store for SSL verification](../running.md#using-an-alternative-ca-store-for-ssl-verification). Set to `false` for self-signed certificates (not recommended) |
 | `timeout` | int | `10` | Timeout for requests to the GitLab API, in seconds |
 
 #### Advanced parameters
