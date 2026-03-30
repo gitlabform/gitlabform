@@ -538,7 +538,7 @@ class GitLabForm:
 
         local_version = package_version("gitlabform")
 
-        console.print(":construction_site: GitLabForm version:")
+        console.print(f"🏗️ GitLabForm version:")
         console.print(local_version, style="blue")
 
         if skip_version_check:
@@ -554,11 +554,11 @@ class GitLabForm:
                 return
 
             if local_version == latest_version:
-                to_show = "= the latest stable :blush:"
+                to_show = "= the latest stable ☺️"
             elif version.parse(local_version) < version.parse(latest_version):
-                to_show = f"= outdated :pensive: , please update! (the latest stable is {latest_version})"
+                to_show = f"= outdated 😔 , please update! (the latest stable is {latest_version})"
             else:
-                to_show = f"= pre-release: :star_struck: (the latest stable is {latest_version})"
+                to_show = f"= pre-release: 🤩 (the latest stable is {latest_version})"
 
             # complete the line with a line ending
             console.print(to_show)
