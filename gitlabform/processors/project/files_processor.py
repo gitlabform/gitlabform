@@ -16,6 +16,7 @@ from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.project.branches_processor import BranchesProcessor
+from cli_ui import fatal
 
 
 class FilesProcessor(AbstractProcessor):
@@ -192,6 +193,7 @@ class FilesProcessor(AbstractProcessor):
                 # If the project is archived, modifying files is not allowed
                 if project.archived:
                     critical(f"Project is archived, cannot modify files in it.: {e.error_message}")
+                    sys.exit(1)
 
                 # Otherwise, unprotect the branch but only if we know how to protect it again
                 if configuration.get("branches|" + branch.name + "|protected"):
@@ -203,9 +205,9 @@ class FilesProcessor(AbstractProcessor):
                         f"Operation '{operation}' on file in branch {branch.name} not permitted."
                         f" We don't have a branch protection configuration provided for this"
                         f" branch. Breaking as we cannot unprotect the branch as we would not know"
-                        f" how to protect it again.",
-                        EXIT_INVALID_INPUT,
+                        f" how to protect it again."
                     )
+                    sys.exit(EXIT_INVALID_INPUT)
 
                 try:
                     debug("> Attempt updating file again")

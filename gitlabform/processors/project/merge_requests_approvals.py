@@ -1,3 +1,4 @@
+import sys
 from logging import debug, info, critical
 from typing import Callable
 from gitlab.v4.objects import Project
@@ -41,6 +42,7 @@ class MergeRequestsApprovals(AbstractProcessor):
                 "as it is not clear which rule does it apply to. "
                 "Please set it inside the specific approval rules in the 'merge_requests_approval_rules' section."
             )
+            sys.exit(1)
         else:
             return True
 
