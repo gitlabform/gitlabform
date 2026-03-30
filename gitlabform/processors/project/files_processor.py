@@ -16,7 +16,6 @@ from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.project.branches_processor import BranchesProcessor
-from cli_ui import fatal
 
 
 class FilesProcessor(AbstractProcessor):
