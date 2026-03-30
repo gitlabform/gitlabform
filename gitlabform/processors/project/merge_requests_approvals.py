@@ -3,6 +3,7 @@ from logging import debug, info, critical
 from typing import Callable
 from gitlab.v4.objects import Project
 
+from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.difference_logger import DifferenceLogger
@@ -42,7 +43,7 @@ class MergeRequestsApprovals(AbstractProcessor):
                 "as it is not clear which rule does it apply to. "
                 "Please set it inside the specific approval rules in the 'merge_requests_approval_rules' section."
             )
-            sys.exit(1)
+            sys.exit(EXIT_INVALID_INPUT)
         else:
             return True
 

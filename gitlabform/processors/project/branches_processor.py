@@ -42,7 +42,7 @@ class BranchesProcessor(AbstractProcessor):
             branch_config = configuration["branches"][branch]
             if branch_config.get("protected") is None:
                 critical(f"The Protected key is mandatory in branches configuration, fix {branch} YAML config")
-                sys.exit(1)
+                sys.exit(EXIT_INVALID_INPUT)
 
         return True
 

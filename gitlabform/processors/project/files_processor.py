@@ -11,7 +11,7 @@ from gitlab import GitlabGetError, GitlabUpdateError
 from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
 from gitlab.base import RESTObject
 
-from gitlabform.constants import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -193,7 +193,7 @@ class FilesProcessor(AbstractProcessor):
                 # If the project is archived, modifying files is not allowed
                 if project.archived:
                     critical(f"Project is archived, cannot modify files in it.: {e.error_message}")
-                    sys.exit(1)
+                    sys.exit(EXIT_PROCESSING_ERROR)
 
                 # Otherwise, unprotect the branch but only if we know how to protect it again
                 if configuration.get("branches|" + branch.name + "|protected"):
