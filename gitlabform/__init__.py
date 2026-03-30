@@ -538,7 +538,12 @@ class GitLabForm:
 
         local_version = package_version("gitlabform")
 
-        console.print(f"🏗️ GitLabForm version:")
+        version_text = "GitLabForm version:"
+        # Legacy windows console (as used in smoke-tests) cannot support unicode emoji rendering via Rich
+        if not console.legacy_windows:
+            version_text = f"🏗️ {version_text}"
+
+        console.print(version_text)
         console.print(local_version, style="blue")
 
         if skip_version_check:
@@ -553,12 +558,23 @@ class GitLabForm:
                 error(f"Checking latest version failed:\n{e}")
                 return
 
+            latest_stable_text = "(the latest stable is {latest_version})"
+
             if local_version == latest_version:
-                to_show = "= the latest stable ☺️"
+                to_show = "= the latest stable"
+                # Legacy windows console (as used in smoke-tests) cannot support unicode emoji rendering via Rich
+                if not console.legacy_windows:
+                    to_show = f"{to_show} ☺️"
             elif version.parse(local_version) < version.parse(latest_version):
-                to_show = f"= outdated 😔 , please update! (the latest stable is {latest_version})"
+                to_show = f"= outdated, please update"
+                if not console.legacy_windows:
+                    to_show = f"{to_show} 😔"
+                to_show = f"{to_show}! {latest_stable_text}"
             else:
-                to_show = f"= pre-release: 🤩 (the latest stable is {latest_version})"
+                to_show = f"= pre-release: "
+                if not console.legacy_windows:
+                    to_show = f"{to_show} 🤩"
+                to_show = f"{to_show} {latest_stable_text}"
 
             # complete the line with a line ending
             console.print(to_show)
