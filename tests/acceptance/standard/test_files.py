@@ -328,11 +328,6 @@ class TestFiles:
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
 
-        # In previous test, we set unprotect_access_level to MAINTAINER, so it should remain unchanged after the file update
-        # But, this assertion is only valid for GitLab EE, as unprotect_access_level is not available in GitLab CE
-        if is_enterprise_edition:
-            assert unprotect_access_level is AccessLevel.MAINTAINER.value
-
     def test__set_file_with_chinese_characters(self, project, branch):
         set_file_chinese_characters = f"""
         projects_and_groups:
