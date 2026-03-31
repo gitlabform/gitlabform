@@ -535,13 +535,11 @@ class GitLabForm:
 
         local_version = package_version("gitlabform")
 
-        version_text = "GitLabForm version:"
+        version_text = ""
         # Legacy windows console  cannot support unicode emoji rendering via Rich
         if not console.legacy_windows:
-            version_text = f"🏗️ {version_text}"
-
-        console.print(version_text)
-        console.print(local_version, style="blue")
+            version_text = "🏗 "
+        version_text += f"GitLabForm version: [bold blue]{local_version}[/]"
 
         if skip_version_check:
             # just print end of the line
@@ -558,23 +556,23 @@ class GitLabForm:
             latest_stable_text = "(the latest stable is {latest_version})"
 
             if local_version == latest_version:
-                to_show = "= the latest stable"
+                version_info = "= the latest stable"
                 # Legacy windows console  cannot support unicode emoji rendering via Rich
                 if not console.legacy_windows:
-                    to_show = f"{to_show} ☺️"
+                    version_info = f"{version_info} ☺️"
             elif version.parse(local_version) < version.parse(latest_version):
-                to_show = f"= outdated, please update"
+                version_info = f"= outdated, please update"
                 if not console.legacy_windows:
-                    to_show = f"{to_show} 😔"
-                to_show = f"{to_show}! {latest_stable_text}"
+                    version_info = f"{version_info} 😔"
+                version_info = f"{version_info}! {latest_stable_text}"
             else:
-                to_show = f"= pre-release: "
+                version_info = f"= pre-release: "
                 if not console.legacy_windows:
-                    to_show = f"{to_show} 🤩"
-                to_show = f"{to_show} {latest_stable_text}"
+                    version_info = f"{version_info} 🤩"
+                version_info = f"{version_info} {latest_stable_text}"
 
             # complete the line with a line ending
-            console.print(to_show)
+            console.print(f"{version_text} {version_info}")
 
     def _get_groups_and_projects(
         self,
