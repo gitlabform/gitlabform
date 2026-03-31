@@ -317,19 +317,16 @@ class GitLabForm:
 
         * normal mode - logging only FATAL logs
         * verbose mode - logging INFO level and above
-        * debug / tests mode - llogging DEBUG level and above
+        * debug / tests mode - logging DEBUG level and above, along with rich exception tracebacks (may expose secrets)
 
         :param tests: True if we are running in tests mode
         """
-        if tests:
+        if tests or self.debug:
             level = logging.DEBUG
             rich_tracebacks = True
-        elif self.debug:
-            level = logging.DEBUG
-            rich_tracebacks = False
         elif self.verbose:
-            level = logging.WARNING
-            rich_tracebacks = True
+            level = logging.INFO
+            rich_tracebacks = False
         else:
             level = logging.FATAL
             rich_tracebacks = False
