@@ -54,11 +54,17 @@ class TestGroupHooksProcessor:
 
         run_gitlabform(test_yaml, group)
 
-        # In CE, Group Webhooks are not supported and the API endpoint returns 404.
+        if is_enterprise_edition:
+            number_of_hooks = 3
+        else:
+            number_of_hooks = 0
+
+        # In CE, Group Webhooks are not supported and the List API endpoint should return 404 or 0 hooks present
         # Reaching this point proves GitLabForm didn't fatally exit.
-        # We verify the endpoint is indeed unavailable or empty.
         try:
-            assert len(group.hooks.list()) == 0
+            assert len(group.hooks.list()) == number_of_hooks
+            if not is_enterprise_edition:
+                return
         except GitlabListError as e:
             if e.response_code != 404:
                 raise

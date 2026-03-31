@@ -1,4 +1,4 @@
-from cli_ui import debug, warning
+from logging import debug, warning
 from typing import Dict, Any, List
 
 from gitlab.base import RESTObject, RESTObjectList
