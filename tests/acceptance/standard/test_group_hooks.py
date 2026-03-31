@@ -1,6 +1,8 @@
 import logging
 import pytest
 from typing import TYPE_CHECKING
+
+from gitlab import exceptions, GitlabListError
 from gitlab.v4.objects import GroupHook
 
 from tests.acceptance import run_gitlabform, get_random_name
@@ -17,11 +19,20 @@ def urls():
     return first_url, second_url, third_url
 
 
+@pytest.mark.ce
 class TestGroupHooksProcessor:
-    def get_hook_from_url(self, group, url):
+    @pytest.fixture(autouse=True)
+    def skip_if_ce(self, request, is_enterprise_edition):
+        # We allow test_hooks_create to run on CE to validate graceful handling/logging.
+        # All other tests in this class require Group Webhooks which is an EE-only feature.
+        if not is_enterprise_edition and request.function.__name__ != "test_hooks_create":
+            pytest.skip("Community Edition does not support Group Webhooks")
+
+    @staticmethod
+    def get_hook_from_url(group, url):
         return next(h for h in group.hooks.list() if h.url == url)
 
-    def test_hooks_create(self, gl, group, urls):
+    def test_hooks_create(self, gl, group, urls, is_enterprise_edition):
         first_url, second_url, third_url = urls
 
         test_yaml = f"""
@@ -43,6 +54,15 @@ class TestGroupHooksProcessor:
 
         run_gitlabform(test_yaml, group)
 
+        # In CE, Group Webhooks are not supported and the List API endpoint should return 404
+        # Reaching this point proves GitLabForm didn't fatally exit.
+        try:
+            assert len(group.hooks.list()) == 3
+        except GitlabListError as e:
+            if e.response_code != 404:
+                raise
+            return
+
         first_created_hook = self.get_hook_from_url(group, first_url)
         second_created_hook = self.get_hook_from_url(group, second_url)
         third_created_hook = self.get_hook_from_url(group, third_url)
@@ -51,7 +71,6 @@ class TestGroupHooksProcessor:
             assert isinstance(first_created_hook, GroupHook)
             assert isinstance(second_created_hook, GroupHook)
             assert isinstance(third_created_hook, GroupHook)
-        assert len(group.hooks.list()) == 3
         assert (
             first_created_hook.push_events,
             first_created_hook.merge_requests_events,
