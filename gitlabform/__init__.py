@@ -542,8 +542,8 @@ class GitLabForm:
         version_text += f"GitLabForm version: [bold blue]{local_version}[/]"
 
         if skip_version_check:
-            # just print end of the line
-            print()
+            # just print version in use
+            console.print(version_text)
         else:
             try:
                 latest_version = luddite.get_version_pypi("gitlabform")
