@@ -59,3 +59,17 @@ gitlabform --exclude-sections group-settings,project-settings
 !!! warning
 
     gitlabform cannot guarantee consistent functionality when excluding and including different sections in executions of the tool, as Gitlab itself may require a specific set of operations. For example, provisioning of User and Group Permissions often needs to occur prior to other operations, we maintain a list within the `ProjectProcessors` and `GroupProcessors` classes in valid order of operations.
+
+## Using an alternative CA store for SSL verification
+
+By default, gitlabform uses the CA certificate bundle provided by the `certifi` package for SSL verification.
+
+If you need to use the system CA store or a custom CA certificate bundle, specify the path to the certificate file using the `REQUESTS_CA_BUNDLE` environment variable:
+
+```shell
+REQUESTS_CA_BUNDLE=/path/to/ca-bundle.crt gitlabform my-group/my-project1
+```
+
+!!! note
+
+    The path to the system CA store varies by operating system. Refer to your system’s documentation to locate the correct path for your environment.
