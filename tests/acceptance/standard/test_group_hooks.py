@@ -58,8 +58,6 @@ class TestGroupHooksProcessor:
         # Reaching this point proves GitLabForm didn't fatally exit.
         try:
             assert len(group.hooks.list()) == 3
-            if not is_enterprise_edition:
-                return
         except GitlabListError as e:
             if e.response_code != 404:
                 raise
