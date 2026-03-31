@@ -2,7 +2,7 @@
 
 !!! important
   
-  Support for GitLab versions earlier than 16.x is DEPRECATED and will be removed in GitLabForm v6
+  Support for GitLab versions earlier than 16.x is DEPRECATED and will be removed in GitLabForm v7
 
 
 * Built on Python 3.14, backwards-compatible to Python 3.12
