@@ -69,6 +69,7 @@ gitlab:
 Any additional parameters specified under `gitlab:` will be passed to the [python-gitlab](https://python-gitlab.readthedocs.io/en/stable/api-usage.html#gitlab-client) library if supported.
 
 !!! note "Migration in progress"
+
     GitLabForm hasn't yet fully migrated to python-gitlab. Some processors still use a legacy REST client.
     See [issue #73](https://github.com/gitlabform/gitlabform/issues/73) for migration progress.
 
