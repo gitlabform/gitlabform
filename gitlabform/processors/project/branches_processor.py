@@ -76,7 +76,7 @@ class BranchesProcessor(AbstractProcessor):
 
         if branch_config.get("protected"):
             if not protected_branch:
-                info(f"Creating branch protection for {branch_name}")
+                verbose(f"Creating branch protection for {branch_name}")
                 self.protect_branch(project, branch_name, branch_config, False)
                 return
 
@@ -145,11 +145,11 @@ class BranchesProcessor(AbstractProcessor):
 
             if protected_branch_api_patch_data != {}:
                 # We have some updates to make
-                info(f"Updating protected branch {branch_name} with {protected_branch_api_patch_data}")
+                verbose(f"Updating protected branch {branch_name} with {protected_branch_api_patch_data}")
                 self.protect_branch(project, branch_name, protected_branch_api_patch_data, True)
 
         elif protected_branch and not branch_config.get("protected"):
-            info(f"Removing branch protection for {branch_name}")
+            verbose(f"Removing branch protection for {branch_name}")
             self.unprotect_branch(protected_branch)
 
     def process_branch_config_gitlab_under_15_6_0_or_ce(self, branch_config, branch_name, project, protected_branch):
