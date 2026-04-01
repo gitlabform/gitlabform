@@ -32,7 +32,7 @@ jobs:
           pip install -e .[test]
       - name: Start GitLab in Docker
         run: ./dev/run_gitlab_in_docker.sh
-      - name: Run acceptance tests
+      - name: Run standard acceptance tests against Enterprise Edition
         run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
@@ -69,9 +69,8 @@ jobs:
           pip install -e .[test]
       - name: Start GitLab in Docker
         run: ./dev/run_gitlab_in_docker.sh --gitlab-flavor ce
-      # TODO: once we have stabilised and fixed tests which break against CE remove the "flag" -m ce
-      - name: Run subset of "standard" acceptance tests to validate known issues with Community Edition
-        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 -m ce tests/acceptance/standard
+      - name: Run standard acceptance tests against Community Edition
+        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
