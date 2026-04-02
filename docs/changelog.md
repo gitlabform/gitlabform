@@ -5,6 +5,30 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+## 5.1.0
+
+### Deprecations
+
+* GitLab versions <16 are Deprecated and will be removed in v7 [#1215](https://github.com/gitlabform/gitlabform/pull/1215). ([timknight01](https://github.com/TimKnight01)
+
+### Bug Fixes
+
+* Reduce excessive Info level logs from Branches Protection [#1224](https://github.com/gitlabform/gitlabform/pull/1224). ([amimas](https://github.com/amimas))
+* Hooks processor should error gracefully against Community Edition [#1213](https://github.com/gitlabform/gitlabform/pull/1213). ([timknight01](https://github.com/TimKnight01))
+
+### Build
+
+* Ensure standard acceptance tests are run against GitLab Community Edition in addition to Enterprise Edition [#1225](https://github.com/gitlabform/gitlabform/pull/12250) ([timknight01](https://github.com/TimKnight01))
+
+### Tests
+
+* Stabilizing Tests to run against Community Edition [#1214](https://github.com/gitlabform/gitlabform/pull/1214), [#1209](https://github.com/gitlabform/gitlabform/pull/1209), [#1208](https://github.com/gitlabform/gitlabform/pull/1208). ([amimas](https://github.com/amimas)) 
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
 
 ## 5.0.2
 
