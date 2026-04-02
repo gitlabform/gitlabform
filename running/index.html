@@ -1238,6 +1238,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#using-an-alternative-ca-store-for-ssl-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using an alternative CA store for SSL verification
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1597,6 +1608,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#using-an-alternative-ca-store-for-ssl-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using an alternative CA store for SSL verification
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1649,6 +1671,15 @@
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>gitlabform cannot guarantee consistent functionality when excluding and including different sections in executions of the tool, as Gitlab itself may require a specific set of operations. For example, provisioning of User and Group Permissions often needs to occur prior to other operations, we maintain a list within the <code>ProjectProcessors</code> and <code>GroupProcessors</code> classes in valid order of operations.</p>
+</div>
+<h2 id="using-an-alternative-ca-store-for-ssl-verification">Using an alternative CA store for SSL verification<a class="headerlink" href="#using-an-alternative-ca-store-for-ssl-verification" title="Permanent link">&para;</a></h2>
+<p>By default, gitlabform uses the CA certificate bundle provided by the <code>certifi</code> package for SSL verification.</p>
+<p>If you need to use the system CA store or a custom CA certificate bundle, specify the path to the certificate file using the <code>REQUESTS_CA_BUNDLE</code> environment variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">REQUESTS_CA_BUNDLE</span><span class="o">=</span>/path/to/ca-bundle.crt<span class="w"> </span>gitlabform<span class="w"> </span>my-group/my-project1
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The path to the system CA store varies by operating system. Refer to your system’s documentation to locate the correct path for your environment.</p>
 </div>
 
 

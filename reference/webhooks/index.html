@@ -1690,6 +1690,11 @@ The other values of the URL keys are the parameters described at <a href="https:
 <span class="w">      </span><span class="nt">job_events</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <h2 id="group-webhooks">Group Webhooks<a class="headerlink" href="#group-webhooks" title="Permanent link">&para;</a></h2>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Group Webhooks are <strong>not</strong> supported by GitLab Community Edition, if they are defined in your configuration, GitLabForm 
+will raise an error but continue to run the rest of your configuration in.</p>
+</div>
 <p>This section purpose is to manage the
 <a href="https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#group-webhooks">Group Webhooks</a>.</p>
 <p>The key names here are webhook URLs, except if the key name is <code>enforce</code> and is

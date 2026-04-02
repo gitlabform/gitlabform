@@ -1517,6 +1517,10 @@
 
 
 <h1 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h1>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+</div>
+<p>Support for GitLab versions earlier than 16.x is DEPRECATED and will be removed in GitLabForm v7</p>
 <ul>
 <li>Built on Python 3.14, backwards-compatible to Python 3.12<ul>
 <li>you can use Docker image or <a href="https://github.com/pyenv/pyenv">pyenv</a> if your OS does not have a required Python version</li>
@@ -1527,8 +1531,13 @@
 </ul>
 </li>
 </ul>
-<p><strong>Note 1:</strong> GitLabForm is built and tested against <a href="https://hub.docker.com/r/gitlab/gitlab-ee/tags"><code>gitlab-ee/latest</code></a>, so some features may require a newer version.</p>
-<p><strong>Note 2:</strong> Some features may not be available in SaaS GitLab @ gitlab.com because of gitlab.com's limitations.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+</div>
+<ol>
+<li>GitLabForm is built and tested against <a href="https://hub.docker.com/r/gitlab/gitlab-ee/tags"><code>gitlab-ee/latest</code></a>, so some features may require a newer version.</li>
+<li>Some features may not be available in SaaS GitLab @ gitlab.com because of gitlab.com's limitations.</li>
+</ol>
 
 
 
