@@ -102,20 +102,24 @@ class BranchesProcessor(AbstractProcessor):
             # compare states easier to determine what PATCH request we need to send (if any)
             transformed_branch_config = self.map_config_to_protected_branch_get_data(branch_config)
 
-            verbose("Creating data to update code_owner_approval_required as necessary")
             # We only build PATCH data for items requiring updates, e.g. if a merge_access_level has been changed or removed,
             # or if the code_owner_approval_required state has changed.
             # If we send everything the PATCH endpoint will return a 200 but not apply any updates.
             protected_branch_api_patch_data: dict = {}
 
-            code_owner_approval_required_config = transformed_branch_config.get("code_owner_approval_required")
-            if code_owner_approval_required_config is not None:
-                protected_branch_api_patch_data["code_owner_approval_required"] = code_owner_approval_required_config
-
-            verbose("Creating data to update allow_force_push as necessary")
-            allow_force_push_config = transformed_branch_config.get("allow_force_push")
-            if allow_force_push_config is not None:
-                protected_branch_api_patch_data["allow_force_push"] = allow_force_push_config
+            # Handle all top-level attributes generically to support raw parameter passing for updates
+            special_list_keys = [
+                "merge_access_levels",
+                "push_access_levels",
+                "unprotect_access_levels",
+            ]
+            for key, value in transformed_branch_config.items():
+                if key not in special_list_keys:
+                    # Check if this attribute exists on the GitLab object and needs an update
+                    existing_value = getattr(protected_branch, key, None)
+                    if existing_value != value:
+                        verbose(f"Creating data to update {key} as necessary")
+                        protected_branch_api_patch_data[key] = value
 
             verbose("Creating data to update merge_access_levels as necessary")
             merge_access_items_patch_data = self.build_patch_request_data(
@@ -235,10 +239,11 @@ class BranchesProcessor(AbstractProcessor):
                 for item in branch_config[key]:
                     if isinstance(item, dict):
                         if "user" in item:
-                            user_id = self.gl.get_user_id_cached(item.pop("user"))
+                            username = item.pop("user")
+                            user_id = self.gl.get_user_id_cached(username)
                             if user_id is None:
                                 raise GitlabGetError(
-                                    f"transform_branch_config - No users found when searching for username {item.pop("user")}",
+                                    f"transform_branch_config - No users found when searching for username {username}",
                                     404,
                                 )
                             item["user_id"] = user_id
@@ -277,11 +282,12 @@ class BranchesProcessor(AbstractProcessor):
         new_branch_config = our_branch_config.copy()
         for key in our_branch_config:
             if key in local_keys_to_gitlab_keys_map.keys():
+                target_key = local_keys_to_gitlab_keys_map[key]
                 # *_access_level in gitlabform will have been transformed to it's int representation already if defined
                 # by the user as "merge_access_level: Maintainer"
                 if isinstance(our_branch_config[key], int):
                     access_level = new_branch_config.pop(key)
-                    new_branch_config[local_keys_to_gitlab_keys_map[key]] = [
+                    new_branch_config[target_key] = [
                         {
                             "id": None,
                             "access_level": access_level,
@@ -292,48 +298,23 @@ class BranchesProcessor(AbstractProcessor):
                     ]
                 # allowed_to_* are lists...
                 elif isinstance(our_branch_config[key], list):
-                    new_branch_config[local_keys_to_gitlab_keys_map[key]] = []
+                    mapped_list = []
                     for item in our_branch_config[key]:
-                        if "access_level" in item:
-                            new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
-                                {
-                                    "id": None,
-                                    "access_level": item["access_level"],
-                                    "user_id": None,
-                                    "group_id": None,
-                                    "deploy_key_id": None,
-                                }
-                            )
-                        elif "group_id" in item:
-                            new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
-                                {
-                                    "id": None,
-                                    "access_level": None,
-                                    "user_id": None,
-                                    "group_id": item["group_id"],
-                                    "deploy_key_id": None,
-                                }
-                            )
-                        elif "user_id" in item:
-                            new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
-                                {
-                                    "id": None,
-                                    "access_level": None,
-                                    "user_id": item["user_id"],
-                                    "group_id": None,
-                                    "deploy_key_id": None,
-                                }
-                            )
-                        elif "deploy_key_id" in item:
-                            new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
-                                {
-                                    "id": None,
-                                    "access_level": None,
-                                    "user_id": None,
-                                    "group_id": None,
-                                    "deploy_key_id": item["deploy_key_id"],
-                                }
-                            )
+                        # Raw Parameter Passing: Ensure comparison keys exist, but preserve everything else (like _destroy)
+                        mapped_item = {
+                            "id": None,
+                            "access_level": item.get("access_level"),
+                            "user_id": item.get("user_id"),
+                            "group_id": item.get("group_id"),
+                            "deploy_key_id": item.get("deploy_key_id"),
+                            **{
+                                k: v
+                                for k, v in item.items()
+                                if k not in ["access_level", "user_id", "group_id", "deploy_key_id", "id"]
+                            },
+                        }
+                        mapped_list.append(mapped_item)
+                    new_branch_config[target_key] = mapped_list
                     new_branch_config.pop(key)
 
         # this key is not present in
@@ -364,53 +345,11 @@ class BranchesProcessor(AbstractProcessor):
 
         if transformed_access_levels is not None:
             # User has defined in configuration some access level for this resource on the protected branch
-            # Create Patch Data for the defined configuration and then determine what existing records need deleting or
-            # just updating
+            # Prepare patch data using raw parameters from config.
+            # We only send non-None values and omit the internal 'id' placeholder used for mapping.
             for configuration in transformed_access_levels:
-                configured_access_level = configuration.get("access_level")
-                configured_user_id = configuration.get("user_id")
-                configured_group_id = configuration.get("group_id")
-                configured_deploy_key_id = configuration.get("deploy_key_id")
-
-                if configured_access_level is not None:
-                    # Entry to configure an access level e.g.
-                    # push_access_level: Maintainer
-                    #
-                    # or:
-                    # allowed_to_push:
-                    #   - access_level: Maintainer
-                    patch_data.append(
-                        {
-                            "access_level": configured_access_level,
-                        }
-                    )
-                elif configured_user_id is not None:
-                    # Entry to configure a user to have access, only available for users with "Premium" or "Ultimate" e.g.
-                    # allowed_to_push:
-                    #   - user: tim-knight
-                    patch_data.append(
-                        {
-                            "user_id": configured_user_id,
-                        }
-                    )
-                elif configured_group_id is not None:
-                    # Entry to configure a group to have access, only available for users with "Premium" or "Ultimate" e.g.
-                    # allowed_to_push:
-                    #   - group_id: 15
-                    patch_data.append(
-                        {
-                            "group_id": configured_group_id,
-                        }
-                    )
-                elif configured_deploy_key_id is not None:
-                    # Entry to configure a deploy key to have access
-                    # allowed_to_push:
-                    #   - deploy_key_id: 15
-                    patch_data.append(
-                        {
-                            "deploy_key_id": configured_deploy_key_id,
-                        }
-                    )
+                item_to_add = {k: v for k, v in configuration.items() if v is not None and k != "id"}
+                patch_data.append(item_to_add)
 
             # Check if we need to make the update (e.g. an existing record for that user_id or access_level exists)
             # and mark existing records for deletion if the access_level does not match
@@ -422,7 +361,8 @@ class BranchesProcessor(AbstractProcessor):
                 existing_records_group_id = existing_record.get("group_id")
                 existing_records_deploy_key_id = existing_record.get("deploy_key_id")
 
-                matching_item_to_be_created = None
+                is_match = False
+                matching_item_in_patch = None
 
                 for item in patch_data:
                     # We prioritize user_id and group_id matches over access_level.
@@ -430,30 +370,23 @@ class BranchesProcessor(AbstractProcessor):
                     # If we matched by access_level first, we might incorrectly pair a specific user's rule
                     # with a generic role-based rule from the config.
                     if existing_records_user_id is not None and item.get("user_id") == existing_records_user_id:
-                        matching_item_to_be_created = item
-                        break
+                        is_match = True
                     elif existing_records_group_id is not None and item.get("group_id") == existing_records_group_id:
-                        matching_item_to_be_created = item
-                        break
+                        is_match = True
                     elif (
                         existing_records_deploy_key_id is not None
                         and item.get("deploy_key_id") == existing_records_deploy_key_id
                     ):
-                        matching_item_to_be_created = item
-                        break
+                        is_match = True
                     elif (
                         item.get("user_id") is None
                         and item.get("group_id") is None
                         and item.get("deploy_key_id") is None
-                        and existing_records_user_id is None
-                        and existing_records_group_id is None
-                        and existing_records_deploy_key_id is None
                     ):
                         # Role-based rule logic
                         local_level = item.get("access_level")
                         if local_level == existing_records_access_level:
-                            matching_item_to_be_created = item
-                            break
+                            is_match = True
                         elif local_level == 0 or existing_records_access_level == 0:
                             # "No Access" (0) is mutually exclusive with any other role.
                             # Mark existing for destruction so the new state can be applied.
@@ -461,12 +394,17 @@ class BranchesProcessor(AbstractProcessor):
                             patch_data.append({"id": record_id, "_destroy": True})
                             break
 
-                if matching_item_to_be_created is not None:
-                    # If we found an existing item matching one that has been configured, remove the item
-                    # to be created and don't mark the existing record for deletion
-                    patch_data.remove(matching_item_to_be_created)
-                # GitLabForm's design is to be additive, so we do not mark items for destruction
-                # unless explicit removal is requested (e.g. through 'enforce' flag which is not yet implemented)
+                    if is_match:
+                        matching_item_in_patch = item
+                        break
+
+                if matching_item_in_patch:
+                    # Rule already exists in GitLab, remove from the patch list to maintain idempotency
+                    patch_data.remove(matching_item_in_patch)
+
+                # Note: GitLabForm is additive by default. Explicit removal via user-provided _destroy is disabled
+                # to preserve the core design principles.
+
         else:
             verbose("No configuration defined for this access level. No changes will be made.")
 
