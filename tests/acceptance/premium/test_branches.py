@@ -195,7 +195,9 @@ class TestBranches:
         assert merge_access_user_ids_after == merge_access_user_ids
         assert unprotect_access_level_after == unprotect_access_level
 
-    def test__can_remove_users_from_branch_protection_rules(self, project_for_function, branch_for_function, gl):
+    def test__users_are_not_removed_from_branch_protection_rules_by_omission(
+        self, project_for_function, branch_for_function, gl
+    ):
         first_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
         second_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
         third_user = create_project_member(gl, project_for_function, AccessLevel.MAINTAINER.value)
@@ -268,6 +270,7 @@ class TestBranches:
         assert push_access_user_ids == sorted(
             [
                 first_user.id,
+                second_user.id,  # Additive design: omitted user should still be present
                 third_user.id,
             ]
         )
@@ -394,8 +397,10 @@ class TestBranches:
         ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids == []
-        assert merge_access_user_ids == []
+        # Additive design for entities: Users added in the previous config step
+        # should still be present even though we switched back to standard role-based keys.
+        assert sorted(push_access_user_ids) == sorted([project_user_allowed_to_push.id])
+        assert sorted(merge_access_user_ids) == sorted([project_user_allowed_to_merge.id])
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
         # Apply "Premium" allowed_to_push protection
@@ -453,8 +458,9 @@ class TestBranches:
         ) = get_only_branch_access_levels(project, branch)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
         assert merge_access_levels == [AccessLevel.MAINTAINER.value]
-        assert push_access_user_ids == []
-        assert merge_access_user_ids == []
+        # Verify entities (users) are STILL present because the standard run was additive
+        assert sorted(push_access_user_ids) == sorted([project_user_allowed_to_push.id])
+        assert sorted(merge_access_user_ids) == sorted([project_user_allowed_to_merge.id])
         assert unprotect_access_level is AccessLevel.MAINTAINER.value
 
     def test__if_protected_branch_config_does_not_change_then_branch_approval_rules_are_retained(

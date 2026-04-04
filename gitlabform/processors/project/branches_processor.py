@@ -282,7 +282,13 @@ class BranchesProcessor(AbstractProcessor):
                 if isinstance(our_branch_config[key], int):
                     access_level = new_branch_config.pop(key)
                     new_branch_config[local_keys_to_gitlab_keys_map[key]] = [
-                        {"id": None, "access_level": access_level, "user_id": None, "group_id": None}
+                        {
+                            "id": None,
+                            "access_level": access_level,
+                            "user_id": None,
+                            "group_id": None,
+                            "deploy_key_id": None,
+                        }
                     ]
                 # allowed_to_* are lists...
                 elif isinstance(our_branch_config[key], list):
@@ -290,15 +296,43 @@ class BranchesProcessor(AbstractProcessor):
                     for item in our_branch_config[key]:
                         if "access_level" in item:
                             new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
-                                {"id": None, "access_level": item["access_level"], "user_id": None, "group_id": None}
+                                {
+                                    "id": None,
+                                    "access_level": item["access_level"],
+                                    "user_id": None,
+                                    "group_id": None,
+                                    "deploy_key_id": None,
+                                }
                             )
                         elif "group_id" in item:
                             new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
-                                {"id": None, "access_level": None, "user_id": None, "group_id": item["group_id"]}
+                                {
+                                    "id": None,
+                                    "access_level": None,
+                                    "user_id": None,
+                                    "group_id": item["group_id"],
+                                    "deploy_key_id": None,
+                                }
                             )
                         elif "user_id" in item:
                             new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
-                                {"id": None, "access_level": None, "user_id": item["user_id"], "group_id": None}
+                                {
+                                    "id": None,
+                                    "access_level": None,
+                                    "user_id": item["user_id"],
+                                    "group_id": None,
+                                    "deploy_key_id": None,
+                                }
+                            )
+                        elif "deploy_key_id" in item:
+                            new_branch_config[local_keys_to_gitlab_keys_map[key]].append(
+                                {
+                                    "id": None,
+                                    "access_level": None,
+                                    "user_id": None,
+                                    "group_id": None,
+                                    "deploy_key_id": item["deploy_key_id"],
+                                }
                             )
                     new_branch_config.pop(key)
 
@@ -336,6 +370,7 @@ class BranchesProcessor(AbstractProcessor):
                 configured_access_level = configuration.get("access_level")
                 configured_user_id = configuration.get("user_id")
                 configured_group_id = configuration.get("group_id")
+                configured_deploy_key_id = configuration.get("deploy_key_id")
 
                 if configured_access_level is not None:
                     # Entry to configure an access level e.g.
@@ -358,13 +393,22 @@ class BranchesProcessor(AbstractProcessor):
                             "user_id": configured_user_id,
                         }
                     )
-                else:
+                elif configured_group_id is not None:
                     # Entry to configure a group to have access, only available for users with "Premium" or "Ultimate" e.g.
                     # allowed_to_push:
                     #   - group_id: 15
                     patch_data.append(
                         {
                             "group_id": configured_group_id,
+                        }
+                    )
+                elif configured_deploy_key_id is not None:
+                    # Entry to configure a deploy key to have access
+                    # allowed_to_push:
+                    #   - deploy_key_id: 15
+                    patch_data.append(
+                        {
+                            "deploy_key_id": configured_deploy_key_id,
                         }
                     )
 
@@ -376,6 +420,7 @@ class BranchesProcessor(AbstractProcessor):
                 existing_records_access_level = existing_record.get("access_level")
                 existing_records_user_id = existing_record.get("user_id")
                 existing_records_group_id = existing_record.get("group_id")
+                existing_records_deploy_key_id = existing_record.get("deploy_key_id")
 
                 matching_item_to_be_created = None
 
@@ -391,18 +436,37 @@ class BranchesProcessor(AbstractProcessor):
                         matching_item_to_be_created = item
                         break
                     elif (
-                        existing_records_access_level is not None
-                        and item.get("access_level") == existing_records_access_level
+                        existing_records_deploy_key_id is not None
+                        and item.get("deploy_key_id") == existing_records_deploy_key_id
                     ):
                         matching_item_to_be_created = item
+                        break
+                    elif (
+                        item.get("user_id") is None
+                        and item.get("group_id") is None
+                        and item.get("deploy_key_id") is None
+                        and existing_records_user_id is None
+                        and existing_records_group_id is None
+                        and existing_records_deploy_key_id is None
+                    ):
+                        # Role-based rule logic
+                        local_level = item.get("access_level")
+                        if local_level == existing_records_access_level:
+                            matching_item_to_be_created = item
+                            break
+                        elif local_level == 0 or existing_records_access_level == 0:
+                            # "No Access" (0) is mutually exclusive with any other role.
+                            # Mark existing for destruction so the new state can be applied.
+                            record_id = existing_record.get("id")
+                            patch_data.append({"id": record_id, "_destroy": True})
+                            break
 
                 if matching_item_to_be_created is not None:
                     # If we found an existing item matching one that has been configured, remove the item
                     # to be created and don't mark the existing record for deletion
                     patch_data.remove(matching_item_to_be_created)
-                else:
-                    record_id = existing_record.get("id")
-                    patch_data.append({"id": record_id, "_destroy": True})
+                # GitLabForm's design is to be additive, so we do not mark items for destruction
+                # unless explicit removal is requested (e.g. through 'enforce' flag which is not yet implemented)
         else:
             verbose("No configuration defined for this access level. No changes will be made.")
 
@@ -410,36 +474,67 @@ class BranchesProcessor(AbstractProcessor):
 
     @staticmethod
     def naive_access_level_diff_analyzer(_, cfg_in_gitlab: list, local_cfg: list):
+        """
+        Determines if the branch protection rules need updating.
+        Following GitLabForm's additive design, an update is needed if any rule
+        defined in the local configuration is missing from GitLab.
+        """
+        # 1. Check if any local rule is missing from GitLab (Additive check)
+        for local_item in local_cfg:
+            found = False
+            for gl_item in cfg_in_gitlab:
+                # User Match
+                if local_item.get("user_id") is not None:
+                    if local_item.get("user_id") == gl_item.get("user_id"):
+                        found = True
+                        break
+                # Group Match
+                elif local_item.get("group_id") is not None:
+                    if local_item.get("group_id") == gl_item.get("group_id"):
+                        found = True
+                        break
+                # Deploy Key Match
+                elif local_item.get("deploy_key_id") is not None:
+                    if local_item.get("deploy_key_id") == gl_item.get("deploy_key_id"):
+                        found = True
+                        break
+                # Role Match (Ensure GL item is also a role rule)
+                if (
+                    local_item.get("access_level") is not None
+                    and local_item.get("access_level") == gl_item.get("access_level")
+                    and gl_item.get("user_id") is None
+                    and gl_item.get("group_id") is None
+                    and gl_item.get("deploy_key_id") is None
+                ):
+                    found = True
+                    break
 
-        if len(cfg_in_gitlab) != len(local_cfg):
+            if not found:
+                verbose("naive_access_level_diff_analyzer - needs_update: True (missing rule found)")
+                return True
+
+        # 2. Role exclusivity check (No Access handling)
+        # Even if all local rules are "found", we need an update if GitLab has a "No Access" rule
+        # while we want specific roles, or vice-versa.
+        gl_role_levels = {
+            r.get("access_level")
+            for r in cfg_in_gitlab
+            if r.get("user_id") is None and r.get("group_id") is None and r.get("deploy_key_id") is None
+        }
+        local_role_levels = {
+            r.get("access_level")
+            for r in local_cfg
+            if r.get("user_id") is None and r.get("group_id") is None and r.get("deploy_key_id") is None
+        }
+
+        if (0 in gl_role_levels and any(lev > 0 for lev in local_role_levels)) or (
+            0 in local_role_levels and any(lev > 0 for lev in gl_role_levels)
+        ):
+            verbose("naive_access_level_diff_analyzer - needs_update: True (No Access / Roles conflict)")
             return True
 
-        # GitLab UI, API, python-gitlab and GitLabForm itself make it impossible
-        # to set "access_level", "user_id" and/or "group_id" at the same time,
-        # so we take a naive approach here and kind of expect it will always be
-        # either one of those, but not a combination
-        needs_update = False
-        changes_found = 0
-        for item in local_cfg:
-            if item["access_level"] and item["access_level"] >= 0:
-                access_level = item["access_level"]
-                for gl_item in cfg_in_gitlab:
-                    if gl_item["access_level"] != access_level:
-                        changes_found += 1
-            elif item["user_id"] and item["user_id"] >= 0:
-                user_id = item["user_id"]
-                for gl_item in cfg_in_gitlab:
-                    if gl_item["user_id"] != user_id:
-                        changes_found += 1
-            elif item["group_id"] and item["group_id"] >= 0:
-                group_id = item["group_id"]
-                for gl_item in cfg_in_gitlab:
-                    if gl_item["group_id"] != group_id:
-                        changes_found += 1
-        if changes_found > 0:
-            needs_update = True
-        verbose(f"naive_access_level_diff_analyzer - needs_update: {needs_update}, changes_found: {changes_found}")
-        return needs_update
+        verbose("naive_access_level_diff_analyzer - needs_update: False")
+        return False
 
     @staticmethod
     def branch_name_contains_supported_wildcard(branch):
