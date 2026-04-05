@@ -582,3 +582,86 @@ class TestBranches:
         assert approval_rule.approvals_required == 2
         pb_ar = approval_rule.protected_branches[0]
         assert pb_ar.get("id") == protected_branch.id
+
+    def test__can_add_deploy_key_to_branch_protection_rules(
+        self, project, branch, public_ssh_key, other_public_ssh_key
+    ):
+        """
+        Tests that deploy keys can be added to branch protection rules (allowed_to_push).
+        This test specifically validates the additive nature of deploy key rules
+        and ensures that existing deploy keys are not removed when new ones are added.
+        """
+        # Reset branch protection state to ensure idempotency and prevent interference
+        try:
+            project.protectedbranches.get(branch).delete()
+        except GitlabGetError:
+            pass
+
+        # Create two deploy keys with push access
+        deploy_key_1 = project.keys.create(
+            {
+                "title": "test-deploy-key-1",
+                "key": public_ssh_key,
+                "can_push": True,
+            }
+        )
+        deploy_key_2 = project.keys.create(
+            {
+                "title": "test-deploy-key-2",
+                "key": other_public_ssh_key,
+                "can_push": True,
+            }
+        )
+
+        # 1. Protect the branch initially without the deploy key
+        initial_config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                push_access_level: {AccessLevel.MAINTAINER.value}
+                merge_access_level: {AccessLevel.MAINTAINER.value}
+        """
+        run_gitlabform(initial_config, project.path_with_namespace)
+
+        # 2. Update the protection to include the first deploy key
+        config_with_deploy_key_1 = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                allowed_to_push:
+                  - deploy_key_id: {deploy_key_1.id}
+                allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+        """
+        run_gitlabform(config_with_deploy_key_1, project.path_with_namespace)
+
+        protected_branch = project.protectedbranches.get(branch)
+        push_access_levels = protected_branch.push_access_levels
+        found_deploy_key_1 = any(access.get("deploy_key_id") == deploy_key_1.id for access in push_access_levels)
+        assert found_deploy_key_1 is True, "First deploy key should have been added during update"
+
+        # 3. Update the protection to include the second deploy key (additive check)
+        config_with_deploy_key_2 = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                allowed_to_push:
+                  - deploy_key_id: {deploy_key_2.id}
+                allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+        """
+        run_gitlabform(config_with_deploy_key_2, project.path_with_namespace)
+
+        protected_branch = project.protectedbranches.get(branch)
+        push_access_levels = protected_branch.push_access_levels
+        found_deploy_key_1 = any(access.get("deploy_key_id") == deploy_key_1.id for access in push_access_levels)
+        found_deploy_key_2 = any(access.get("deploy_key_id") == deploy_key_2.id for access in push_access_levels)
+
+        assert found_deploy_key_1 is True, "First deploy key should still be present (additive design)"
+        assert found_deploy_key_2 is True, "Second deploy key should have been added"

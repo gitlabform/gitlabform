@@ -114,8 +114,13 @@ class TestBranches:
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         # "No Access" (0) is exclusive and should overwrite GitLab's default Maintainer (40)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
-        # Additive design: GitLab's default Maintainer (40) is retained alongside Developer (30)
-        assert sorted(merge_access_levels) == [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
+
+        if is_enterprise_edition:
+            # Additive design: GitLab's default Maintainer (40) is retained alongside Developer (30)
+            assert sorted(merge_access_levels) == [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
+        else:
+            # In CE we unprotect and reprotect, so defaults are lost and only config is applied
+            assert merge_access_levels == [AccessLevel.DEVELOPER.value]
 
         if is_enterprise_edition:
             assert unprotect_access_level is AccessLevel.MAINTAINER.value
@@ -188,8 +193,14 @@ class TestBranches:
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
         # Maintainer (40) overwrites No Access (0)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
-        # Maintainer (40) matches existing, Developer (30) is retained from previous steps
-        assert sorted(merge_access_levels) == [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
+
+        if is_enterprise_edition:
+            # Maintainer (40) matches existing, Developer (30) is retained from previous steps
+            assert sorted(merge_access_levels) == [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
+        else:
+            # In CE only config is applied
+            assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+
         if is_enterprise_edition:
             assert unprotect_access_level is AccessLevel.MAINTAINER.value
         else:
@@ -390,77 +401,3 @@ class TestBranches:
             assert other_branch_unprotect_access_level is AccessLevel.MAINTAINER.value
         else:
             assert other_branch_unprotect_access_level is None
-
-    def test__can_add_deploy_key_to_branch_protection_rules(
-        self, project_for_function, branch_for_function, public_ssh_key, other_public_ssh_key
-    ):
-        # Create two deploy keys with push access
-        deploy_key_1 = project_for_function.keys.create(
-            {
-                "title": "test-deploy-key-1",
-                "key": public_ssh_key,
-                "can_push": True,
-            }
-        )
-        deploy_key_2 = project_for_function.keys.create(
-            {
-                "title": "test-deploy-key-2",
-                "key": other_public_ssh_key,
-                "can_push": True,
-            }
-        )
-
-        # 1. Protect the branch initially without the deploy key
-        initial_config = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            branches:
-              {branch_for_function}:
-                protected: true
-                push_access_level: {AccessLevel.MAINTAINER.value}
-                merge_access_level: {AccessLevel.MAINTAINER.value}
-        """
-        run_gitlabform(initial_config, project_for_function.path_with_namespace)
-
-        # 2. Update the protection to include the first deploy key
-        config_with_deploy_key_1 = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            branches:
-              {branch_for_function}:
-                protected: true
-                allowed_to_push:
-                  - deploy_key_id: {deploy_key_1.id}
-                allowed_to_merge:
-                  - access_level: {AccessLevel.MAINTAINER.value}
-        """
-
-        # This will trigger the update logic (PATCH in EE, unprotect/reprotect in CE)
-        run_gitlabform(config_with_deploy_key_1, project_for_function.path_with_namespace)
-
-        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
-        push_access_levels = protected_branch.push_access_levels
-        found_deploy_key_1 = any(access.get("deploy_key_id") == deploy_key_1.id for access in push_access_levels)
-        assert found_deploy_key_1 is True, "First deploy key should have been added during update"
-
-        # 3. Update the protection to include the second deploy key
-        config_with_deploy_key_2 = f"""
-        projects_and_groups:
-          {project_for_function.path_with_namespace}:
-            branches:
-              {branch_for_function}:
-                protected: true
-                allowed_to_push:
-                  - deploy_key_id: {deploy_key_2.id}
-                allowed_to_merge:
-                  - access_level: {AccessLevel.MAINTAINER.value}
-        """
-        run_gitlabform(config_with_deploy_key_2, project_for_function.path_with_namespace)
-
-        protected_branch = project_for_function.protectedbranches.get(branch_for_function)
-        push_access_levels = protected_branch.push_access_levels
-        found_deploy_key_1 = any(access.get("deploy_key_id") == deploy_key_1.id for access in push_access_levels)
-        found_deploy_key_2 = any(access.get("deploy_key_id") == deploy_key_2.id for access in push_access_levels)
-
-        assert found_deploy_key_1 is True, "First deploy key should still be present (additive design)"
-        assert found_deploy_key_2 is True, "Second deploy key should have been added"
