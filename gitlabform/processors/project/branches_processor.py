@@ -14,6 +14,16 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
 class BranchesProcessor(AbstractProcessor):
+    """
+    Processor for branch protection settings.
+
+    This processor is complex because GitLab's Protected Branches API uses different
+    data structures for Create (POST), Get (GET), and Update (PATCH) operations.
+
+    It implements 'Additive Design' (existing rules are preserved) and
+    'Raw Parameter Passing' (arbitrary keys in config are sent to the API).
+    """
+
     def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("branches", gitlab)
         self.strict = strict
@@ -37,7 +47,7 @@ class BranchesProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         """
         Called from process defined in abstract_processor.py after checking self._can_proceed
-        Processes the branches configuration
+        Iterates through all branches defined in the configuration and applies protection rules.
         """
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
@@ -49,7 +59,13 @@ class BranchesProcessor(AbstractProcessor):
 
     def process_branch_protection(self, project: Project, branch_name: str, branch_config: dict):
         """
-        Process branch protection according to gitlabform config.
+        High-level logic for processing branch protection.
+
+        1. Validates branch existence (unless wildcard).
+        2. Handles 'protected: false' (unprotecting).
+        3. Handles 'protected: true':
+           - If not currently protected: Create protection.
+           - If protected: Update using PATCH (EE > 15.6) or Unprotect/Reprotect (CE/Old EE).
         """
         protected_branch: Optional[ProjectProtectedBranch] = None
 
@@ -102,12 +118,11 @@ class BranchesProcessor(AbstractProcessor):
             # compare states easier to determine what PATCH request we need to send (if any)
             transformed_branch_config = self.map_config_to_protected_branch_get_data(branch_config)
 
-            # We only build PATCH data for items requiring updates, e.g. if a merge_access_level has been changed or removed,
-            # or if the code_owner_approval_required state has changed.
-            # If we send everything the PATCH endpoint will return a 200 but not apply any updates.
             protected_branch_api_patch_data: dict = {}
 
-            # Handle all top-level attributes generically to support raw parameter passing for updates
+            # RAW PARAMETER PASSING (Top-Level):
+            # Iterate through any top-level flags (e.g., allow_force_push, code_owner_approval_required)
+            # and include them in the PATCH request if they differ from the current GitLab state.
             special_list_keys = [
                 "merge_access_levels",
                 "push_access_levels",
@@ -159,8 +174,8 @@ class BranchesProcessor(AbstractProcessor):
     def process_branch_config_gitlab_under_15_6_0_or_ce(self, branch_config, branch_name, project, protected_branch):
         """
         Processes the branches configuration for gitlab version <=15.6.0 or Community Edition,
-        first checking if the branch needs to be updated, if it does, then the branch will be unprotected prior to being
-        reprotected with the YAML configuration.
+        where in-place updates (PATCH) are not supported or effective.
+        If a change is detected, the branch is unprotected and then reprotected from scratch.
         """
 
         # Gitlab returns the allowed_to_merge etc data in a different format from GET endpoint than it takes in
@@ -228,8 +243,8 @@ class BranchesProcessor(AbstractProcessor):
 
     def convert_user_and_group_names_to_ids(self, branch_config: dict):
         """
-        The branch configuration in gitlabform supports passing users or group using username
-        or group name but GitLab only supports their id. This method will transform the
+        Pre-processor to resolve names to IDs.
+        Translates 'user: username' or 'group: name' into 'user_id' or 'group_id' as
         config by replacing them with ids.
         """
         verbose("Transforming User and Group names in Branch configuration to Ids")
@@ -255,11 +270,13 @@ class BranchesProcessor(AbstractProcessor):
     @staticmethod
     def map_config_to_protected_branch_get_data(our_branch_config: dict):
         """
-        Branch protection CRUD API in python-gitlab (and GitLab itself) is
-        inconsistent, the structure needed to create a branch protection rule is
-        different from structure needed to update a rule in place.
+        Normalizes the user-provided YAML config into the format returned by GitLab's GET endpoint.
 
-        Also, "protected" attribute is missing from GitLab side of things.
+        GitLab API Mappings:
+        - 'merge_access_level' (Standard) -> 'merge_access_levels' (List)
+        - 'allowed_to_merge' (Premium) -> 'merge_access_levels' (List)
+
+        This transformation allows for a direct comparison between the desired state and current state.
         This method will normalize gitlabform branch_config to accommodate this.
 
         Args:
@@ -300,7 +317,8 @@ class BranchesProcessor(AbstractProcessor):
                 elif isinstance(our_branch_config[key], list):
                     mapped_list = []
                     for item in our_branch_config[key]:
-                        # Raw Parameter Passing: Ensure comparison keys exist, but preserve everything else (like _destroy)
+                        # RAW PARAMETER PASSING: We ensure the core identity keys exist for comparison,
+                        # but we preserve all other arbitrary keys provided by the user.
                         mapped_item = {
                             "id": None,
                             "access_level": item.get("access_level"),
@@ -326,13 +344,13 @@ class BranchesProcessor(AbstractProcessor):
     @staticmethod
     def build_patch_request_data(transformed_access_levels: list[dict] | None, existing_records: tuple) -> list[dict]:
         """
-        Compares the access_levels configuration (transformed to match the Gitlab GET response) to the existing access_level record in Gitlab.
-        If there are no changes for a given access_level record an empty list is returned.
-        Otherwise, data is returned to add/update access_level records and remove any outdated records.
+        Calculates the specific payload for the PATCH (update) API.
 
-        Gitlab supports merge_access_level for users with a Standard license and allowed_to_merge etc for users with Premium
-        or Ultimate licenses.
-        We need to support both options, and potentially blended configuration for users with Premium+ licenses.
+        Matching Logic:
+        1. For each rule in the config, check if an identical rule already exists in GitLab.
+        2. Rule Identity is determined by: user_id OR group_id OR deploy_key_id OR (role-only access_level).
+        3. If a match is found, the rule is skipped (idempotency).
+        4. If 'No Access' (0) is requested but other roles exist, the existing roles are marked for destruction.
 
         args:
             transformed_access_levels (list[dict|None]): transformed merge_access_levels or push_access_levels or unprotect_access_levels configration generated by transform_branch_config_access_levels
@@ -402,8 +420,8 @@ class BranchesProcessor(AbstractProcessor):
                     # Rule already exists in GitLab, remove from the patch list to maintain idempotency
                     patch_data.remove(matching_item_in_patch)
 
-                # Note: GitLabForm is additive by default. Explicit removal via user-provided _destroy is disabled
-                # to preserve the core design principles.
+                # NOTE: GitLabForm is additive. We do not destroy existing records unless they
+                # conflict with a 'No Access' rule.
 
         else:
             verbose("No configuration defined for this access level. No changes will be made.")
@@ -413,8 +431,9 @@ class BranchesProcessor(AbstractProcessor):
     @staticmethod
     def naive_access_level_diff_analyzer(_, cfg_in_gitlab: list, local_cfg: list):
         """
-        Determines if the branch protection rules need updating.
-        Following GitLabForm's additive design, an update is needed if any rule
+        Custom diff analyzer for branch rules.
+
+        Following GitLabForm's ADDITIVE DESIGN, an update is needed if any rule
         defined in the local configuration is missing from GitLab.
         """
         # 1. Check if any local rule is missing from GitLab (Additive check)
