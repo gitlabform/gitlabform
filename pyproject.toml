@@ -33,7 +33,7 @@ dependencies = [
     "packaging==26.0",
     "python-gitlab==8.2.0",
     "python-gitlab[graphql]==8.2.0",
-    "requests==2.33.0",
+    "requests==2.33.1",
     "ruamel.yaml==0.17.21",
     "yamlpath==3.8.2",
 ]
