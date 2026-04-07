@@ -130,14 +130,18 @@ docs = [
 
 # Commands available via 'uv run <command>' or entry points after installation.
 [project.scripts]
+build = "dev.main:build"
+clean = "dev.main:clean"
+docs-build = "dev.main:docs_build"
+docs-serve = "dev.main:docs_serve"
+format = "dev.main:format_code"
+gitlab-down = "dev.main:gitlab_down"
+gitlab-up = "dev.main:gitlab_up"
 gitlabform = "gitlabform.run:run"
-setup = "dev.manage:setup"
-lint = "dev.manage:lint"
-format = "dev.manage:format_code"
-test = "dev.manage:test"
-clean = "dev.manage:clean"
-build = "dev.manage:build"
-verify = "dev.manage:verify"
+lint = "dev.main:lint"
+setup = "dev.main:setup"
+test = "dev.main:test"
+verify = "dev.main:verify"
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]

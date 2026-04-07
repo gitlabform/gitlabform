@@ -1,13 +1,18 @@
+#!/usr/bin/env python3
 import argparse
 import subprocess
 import sys
 import shutil
+import time
 from pathlib import Path
 import tempfile
 
 
 def run_command(command: list[str], description: str):
-    """Helper to run a command and exit on failure."""
+    """Helper to run a command and exit on failure.
+
+    Provides a consistent UI prefix for all development tasks.
+    """
     print(f"==> {description}...")
     try:
         subprocess.run(command, check=True)
@@ -62,6 +67,25 @@ def docs_build():
     run_command(["uv", "run", "mkdocs", "build"], "Building static documentation site")
 
 
+def gitlab_up():
+    """Starts the local GitLab instance via the dedicated setup script."""
+    script_path = Path("dev/gitlab/run_gitlab_in_docker.sh")
+    if not script_path.exists():
+        print(f"❌ Could not find {script_path}.")
+        print("Please ensure GitLab assets are moved to 'dev/gitlab/'.")
+        sys.exit(1)
+    run_command(["bash", str(script_path)], "Executing GitLab setup script")
+
+
+def gitlab_down():
+    """Stops and removes the local GitLab container, with a grace period."""
+    # Use a longer timeout for stopping, as GitLab can take time to shut down.
+    run_command(["docker", "stop", "--time=30", "gitlab"], "Stopping GitLab container")
+    print("==> Waiting 5 seconds for container to fully terminate before removal...")
+    time.sleep(5)  # Give Docker a moment to clean up after stopping
+    run_command(["docker", "rm", "gitlab"], "Removing GitLab container")
+
+
 def build():
     """Builds the source distribution and wheel."""
     run_command(["uv", "build"], "Building package distributions")
@@ -75,6 +99,7 @@ def verify():
     # 1. Early exit if dist directory is missing or empty
     if not dist_path.exists() or not any(dist_path.iterdir()):
         print(f"❌ Build output directory '{dist_path}/' is missing or empty.")
+        print("Hint: Run 'uv run build' first to create the distribution files.")
         sys.exit(1)
 
     # 2. Resolve file paths manually (subprocess does not expand globs like '*')
@@ -142,43 +167,43 @@ def clean():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="GitLabForm Development Tool")
+    """Main entry point for direct script execution."""
+    parser = argparse.ArgumentParser(description="GitLabForm Development Toolkit")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    subparsers.add_parser("setup", help="Sync dependencies and install git hooks")
-    subparsers.add_parser("lint", help="Check code style and types")
-    subparsers.add_parser("format", help="Auto-format code")
-    subparsers.add_parser("test", help="Run tests")
-    subparsers.add_parser("clean", help="Remove environment and cache artifacts")
-    subparsers.add_parser("docs-serve", help="Start local docs server")
-    subparsers.add_parser("docs-build", help="Build static docs site")
-    subparsers.add_parser("build", help="Build the project distributions")
-    subparsers.add_parser("verify", help="Validate built artifacts")
-
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(0)
+    subparsers.add_parser("setup", help="Initialize development environment and git hooks")
+    subparsers.add_parser("lint", help="Run linters and formatting checks")
+    subparsers.add_parser("format", help="Automatically format code")
+    subparsers.add_parser("test", help="Run the project test suite")
+    subparsers.add_parser("gitlab-up", help="Start local GitLab instance via Docker")
+    subparsers.add_parser("gitlab-down", help="Stop local GitLab instance")
+    subparsers.add_parser("docs-serve", help="Serve documentation with live-reload")
+    subparsers.add_parser("docs-build", help="Build static documentation site")
+    subparsers.add_parser("build", help="Build source distribution and wheel")
+    subparsers.add_parser("verify", help="Verify built artifacts in isolated environment")
+    subparsers.add_parser("clean", help="Remove environment, cache, and build artifacts")
 
     args = parser.parse_args()
 
-    if args.command == "setup":
-        setup()
-    elif args.command == "lint":
-        lint()
-    elif args.command == "format":
-        format_code()
-    elif args.command == "test":
-        test()
-    elif args.command == "clean":
-        clean()
-    elif args.command == "docs-serve":
-        docs_serve()
-    elif args.command == "docs-build":
-        docs_build()
-    elif args.command == "build":
-        build()
-    elif args.command == "verify":
-        verify()
+    # Mapping command strings to the functional logic
+    dispatch = {
+        "setup": setup,
+        "lint": lint,
+        "format": format_code,
+        "test": test,
+        "gitlab-up": gitlab_up,
+        "gitlab-down": gitlab_down,
+        "docs-serve": docs_serve,
+        "docs-build": docs_build,
+        "build": build,
+        "verify": verify,
+        "clean": clean,
+    }
+
+    if args.command in dispatch:
+        dispatch[args.command]()
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":

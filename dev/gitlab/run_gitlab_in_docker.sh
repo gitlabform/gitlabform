@@ -116,7 +116,10 @@ done
 # ============================================================================
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-repo_root_dir="$script_dir/.."
+
+# The repository root is two levels up from dev/gitlab/
+# Using 'cd' ensures we get a clean absolute path regardless of how the script was invoked.
+repo_root_dir=$(cd "$script_dir/../.." && pwd)
 
 # Determine the appropriate GitLab image
 if [[ "$gitlab_flavor" == "ce" ]]; then
@@ -176,8 +179,8 @@ docker run --detach \
   --publish 443:443 --publish 80:80 --publish 2022:22 \
   --name gitlab \
   --restart always \
-  --volume "$repo_root_dir/dev/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
-  --volume "$repo_root_dir/dev/gitlab.rb:/etc/gitlab/gitlab.rb" \
+  --volume "$script_dir/healthcheck-and-setup.sh:/healthcheck-and-setup.sh" \
+  --volume "$script_dir/gitlab.rb:/etc/gitlab/gitlab.rb" \
   $config_volume \
   $extra_options \
   --health-cmd '/healthcheck-and-setup.sh' \
