@@ -61,6 +61,7 @@ dev = [
     "check-wheel-contents==0.6.1",
     "commitizen==4.3.0",
     "prek==0.3.8",
+    "rich==13.9.4",
     "twine==6.1.0",
 ]
 # Minimum set of dependencies required to execute the test suite.
