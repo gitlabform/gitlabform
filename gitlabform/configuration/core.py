@@ -179,11 +179,11 @@ class ConfigurationCore(ABC):
 
         merged_dict = merge({}, more_general_config, more_specific_config)
 
-        def break_inheritance(specific_config, parent_key=""):
+        def break_inheritance(specific_config, parent_path=()):
             for key, value in specific_config.items():
                 if "inherit" == key:
                     if not value:
-                        replace_config_sections(merged_dict, parent_key, specific_config)
+                        replace_config_section(merged_dict, parent_path, specific_config)
                         break
                     elif value:
                         fatal(
@@ -191,16 +191,16 @@ class ConfigurationCore(ABC):
                             exit_code=EXIT_INVALID_INPUT,
                         )
                 elif type(value) in [CommentedMap, dict]:
-                    break_inheritance(value, key)
+                    break_inheritance(value, parent_path + (key,))
 
-        def replace_config_sections(merged_config, specific_key, specific_config):
-            for key, value in merged_config.items():
-                if specific_key == key:
-                    del specific_config["inherit"]
-                    merged_config[key] = specific_config
-                    break
-                elif type(value) in [CommentedMap, dict]:
-                    replace_config_sections(value, specific_key, specific_config)
+        def replace_config_section(merged_config, parent_path, specific_config):
+            target_config = merged_config
+            for key in parent_path[:-1]:
+                target_config = target_config[key]
+
+            replacement_config = deepcopy(specific_config)
+            replacement_config.pop("inherit", None)
+            target_config[parent_path[-1]] = replacement_config
 
         break_inheritance(more_specific_config)
 
