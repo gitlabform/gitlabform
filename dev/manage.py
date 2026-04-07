@@ -3,6 +3,7 @@ import subprocess
 import sys
 import shutil
 from pathlib import Path
+import tempfile
 
 
 def run_command(command: list[str], description: str):
@@ -52,6 +53,60 @@ def test():
     run_command(["uv", "run", "pytest"], "Running tests with pytest")
 
 
+def build():
+    """Builds the source distribution and wheel."""
+    run_command(["uv", "build"], "Building package distributions")
+
+
+def verify():
+    """Validates the built artifacts."""
+    print("==> Verifying built artifacts...")
+    dist_path = Path("dist")
+
+    # 1. Early exit if dist directory is missing or empty
+    if not dist_path.exists() or not any(dist_path.iterdir()):
+        print(f"❌ Build output directory '{dist_path}/' is missing or empty.")
+        sys.exit(1)
+
+    # 2. Resolve file paths manually (subprocess does not expand globs like '*')
+    wheels = [str(p) for p in dist_path.glob("*.whl")]
+    sdists = [str(p) for p in dist_path.glob("*.tar.gz")]
+
+    if not wheels:
+        print(f"❌ No .whl files found in '{dist_path}/'. Run 'uv run build' first.")
+        sys.exit(1)
+
+    # 3. Check metadata via Twine
+    run_command(["uv", "run", "twine", "check"] + wheels + sdists, "Checking metadata via Twine")
+
+    # 4. Check for common wheel packaging errors
+    run_command(["uv", "run", "check-wheel-contents"] + wheels, "Checking wheel contents")
+
+    # 5. Smoke test: Verify the entry point is executable from the built wheel
+    # This ensures that the published artifact will function correctly.
+    wheel_to_test = wheels[0]
+
+    print("==> Verifying gitlabform executable from built wheel in an isolated environment...")
+    # tempfile.TemporaryDirectory() creates a unique directory in the system TEMP location
+    # (e.g. /tmp/...). It is NOT created in the project root and is deleted automatically.
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_venv = Path(tmpdir) / "venv"
+        print(f"Creating ephemeral virtual environment for smoke test...")
+
+        # Create venv and install the wheel using the uv binary from the temp venv
+        subprocess.run(["uv", "venv", str(temp_venv)], check=True)
+
+        python_exe = str(temp_venv / "bin" / "python")
+        # Use 'uv pip install' to install the local wheel into the ephemeral venv
+        subprocess.run(["uv", "pip", "install", "--python", python_exe, wheel_to_test], check=True)
+
+        # Execute the entry point directly from the ephemeral venv
+        gitlabform_exe = str(temp_venv / "bin" / "gitlabform")
+        subprocess.run([gitlabform_exe, "--version"], check=True)
+
+    print("\n✅ Verification complete. Artifacts in 'dist/' are ready for release.")
+
+
 def clean():
     """Removes the virtual environment and build artifacts."""
     # Clear pre-commit/prek cache
@@ -85,6 +140,8 @@ def main():
     subparsers.add_parser("format", help="Auto-format code")
     subparsers.add_parser("test", help="Run tests")
     subparsers.add_parser("clean", help="Remove environment and cache artifacts")
+    subparsers.add_parser("build", help="Build the project distributions")
+    subparsers.add_parser("verify", help="Validate built artifacts")
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -102,6 +159,10 @@ def main():
         test()
     elif args.command == "clean":
         clean()
+    elif args.command == "build":
+        build()
+    elif args.command == "verify":
+        verify()
 
 
 if __name__ == "__main__":
