@@ -25,9 +25,8 @@ def setup():
     # prek install writes the actual hook files into .git/hooks/
     # We must include both 'pre-commit' (for Black) and 'commit-msg' (for Commitizen)
     # to ensure the full quality gate is active.
-    print("==> Installing Git hooks via prek...")
-    subprocess.run(["uv", "run", "prek", "install", "--hook-type", "pre-commit"], check=True)
-    subprocess.run(["uv", "run", "prek", "install", "--hook-type", "commit-msg"], check=True)
+    run_command(["uv", "run", "prek", "install", "--hook-type", "pre-commit"], "Installing pre-commit hooks")
+    run_command(["uv", "run", "prek", "install", "--hook-type", "commit-msg"], "Installing commit-msg hooks")
 
     print("\n✅ Setup complete! You are ready to develop.")
 
@@ -51,6 +50,16 @@ def format_code():
 def test():
     """Runs the test suite."""
     run_command(["uv", "run", "pytest"], "Running tests with pytest")
+
+
+def docs_serve():
+    """Starts the local documentation development server."""
+    run_command(["uv", "run", "mkdocs", "serve"], "Starting MkDocs development server")
+
+
+def docs_build():
+    """Builds the static documentation site."""
+    run_command(["uv", "run", "mkdocs", "build"], "Building static documentation site")
 
 
 def build():
@@ -119,6 +128,7 @@ def clean():
         ".pytest_cache",
         "dist",
         "build",
+        "site",
     ]
     for path_str in paths_to_remove:
         path = Path(path_str)
@@ -140,6 +150,8 @@ def main():
     subparsers.add_parser("format", help="Auto-format code")
     subparsers.add_parser("test", help="Run tests")
     subparsers.add_parser("clean", help="Remove environment and cache artifacts")
+    subparsers.add_parser("docs-serve", help="Start local docs server")
+    subparsers.add_parser("docs-build", help="Build static docs site")
     subparsers.add_parser("build", help="Build the project distributions")
     subparsers.add_parser("verify", help="Validate built artifacts")
 
@@ -159,6 +171,10 @@ def main():
         test()
     elif args.command == "clean":
         clean()
+    elif args.command == "docs-serve":
+        docs_serve()
+    elif args.command == "docs-build":
+        docs_build()
     elif args.command == "build":
         build()
     elif args.command == "verify":

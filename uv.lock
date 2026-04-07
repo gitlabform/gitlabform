@@ -553,29 +553,47 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "bandit" },
+    { name = "black" },
     { name = "check-wheel-contents" },
+    { name = "codespell" },
     { name = "commitizen" },
+    { name = "coverage" },
+    { name = "cryptography" },
+    { name = "deepdiff" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mypy" },
+    { name = "mypy-extensions" },
     { name = "prek" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-rerunfailures" },
+    { name = "ruff" },
     { name = "twine" },
+    { name = "types-requests" },
+    { name = "xkcdpass" },
 ]
 docs = [
     { name = "mkdocs" },
     { name = "mkdocs-material" },
 ]
-test = [
+lint = [
     { name = "bandit" },
     { name = "black" },
     { name = "codespell" },
+    { name = "mypy" },
+    { name = "mypy-extensions" },
+    { name = "ruff" },
+    { name = "types-requests" },
+]
+test = [
     { name = "coverage" },
     { name = "cryptography" },
     { name = "deepdiff" },
-    { name = "mypy" },
-    { name = "mypy-extensions" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-rerunfailures" },
-    { name = "ruff" },
-    { name = "types-requests" },
     { name = "xkcdpass" },
 ]
 
@@ -597,29 +615,47 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "bandit", specifier = "==1.8.3" },
+    { name = "black", specifier = "==26.3.0" },
     { name = "check-wheel-contents", specifier = "==0.6.1" },
+    { name = "codespell", specifier = "==2.4.1" },
     { name = "commitizen", specifier = "==4.3.0" },
+    { name = "coverage", specifier = "==7.13.5" },
+    { name = "cryptography", specifier = "==46.0.6" },
+    { name = "deepdiff", specifier = "==9.0.0" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mypy", specifier = "==1.19.1" },
+    { name = "mypy-extensions", specifier = "==1.1.0" },
     { name = "prek", specifier = "==0.3.8" },
+    { name = "pytest", specifier = "==9.0.2" },
+    { name = "pytest-cov", specifier = "==7.1.0" },
+    { name = "pytest-rerunfailures", specifier = "==16.1" },
+    { name = "ruff", specifier = "==0.9.0" },
     { name = "twine", specifier = "==6.1.0" },
+    { name = "types-requests", specifier = "==2.33.0.20260327" },
+    { name = "xkcdpass", specifier = "==1.30.0" },
 ]
 docs = [
     { name = "mkdocs" },
     { name = "mkdocs-material" },
 ]
-test = [
+lint = [
     { name = "bandit", specifier = "==1.8.3" },
     { name = "black", specifier = "==26.3.0" },
     { name = "codespell", specifier = "==2.4.1" },
+    { name = "mypy", specifier = "==1.19.1" },
+    { name = "mypy-extensions", specifier = "==1.1.0" },
+    { name = "ruff", specifier = "==0.9.0" },
+    { name = "types-requests", specifier = "==2.33.0.20260327" },
+]
+test = [
     { name = "coverage", specifier = "==7.13.5" },
     { name = "cryptography", specifier = "==46.0.6" },
     { name = "deepdiff", specifier = "==9.0.0" },
-    { name = "mypy", specifier = "==1.19.1" },
-    { name = "mypy-extensions", specifier = "==1.1.0" },
     { name = "pytest", specifier = "==9.0.2" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "pytest-rerunfailures", specifier = "==16.1" },
-    { name = "ruff", specifier = "==0.9.0" },
-    { name = "types-requests", specifier = "==2.33.0.20260327" },
     { name = "xkcdpass", specifier = "==1.30.0" },
 ]
 
