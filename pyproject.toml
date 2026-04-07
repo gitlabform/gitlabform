@@ -60,7 +60,7 @@ test = [
     "pytest-cov==7.1.0",
     "pytest-rerunfailures==16.1",
     "types-requests==2.33.0.20260402",
-    "types-setuptools==82.0.0.20260210",
+    "types-setuptools==82.0.0.20260402",
     "xkcdpass==1.30.0",
 ]
 docs = ["mkdocs", "mkdocs-material"]
