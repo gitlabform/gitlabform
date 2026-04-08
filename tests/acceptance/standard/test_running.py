@@ -42,7 +42,7 @@ class TestRunning:
 
         path = Path("output.yml")
         yaml = YAML(typ="safe")
-        assert yaml.load(path)
+        assert yaml.safe_load(path)
 
     # noinspection PyPep8Naming
     def test__ALL_dry_run(self, gl, project, other_project):
