@@ -19,7 +19,13 @@ def format_code():
     logger.info("[bold green]✅ Code formatted.[/bold green]")
 
 
-def test():
-    """Runs the project test suite using pytest."""
-    # Note: Acceptance tests may require a local GitLab instance (run gitlab-up first)
-    run_command(["uv", "run", "pytest"], "Running tests with pytest")
+def test(extra_args: list[str] = None):
+    """Runs the project test suite using pytest.
+
+    Args:
+        extra_args: Additional arguments to pass directly to pytest (e.g., file paths, filters).
+    """
+    command = ["uv", "run", "pytest"]
+    if extra_args:
+        command.extend(extra_args)
+    run_command(command, "Running tests with pytest")

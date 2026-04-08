@@ -1,1 +1,1 @@
-# GitLabForm development utilities.
+# GitLabForm development toolkit.

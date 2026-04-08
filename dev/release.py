@@ -3,8 +3,7 @@
 import subprocess
 import sys
 import tempfile
-from pathlib import Path
-from dev.common import logger, run_command
+from dev.common import REPO_ROOT, logger, run_command
 
 
 def build():
@@ -15,7 +14,7 @@ def build():
 def verify():
     """Performs rigorous verification of the built artifacts in an isolated environment."""
     logger.info("[bold blue]==>[/bold blue] Verifying built artifacts...")
-    dist_path = Path("dist")
+    dist_path = REPO_ROOT / "dist"
 
     # 1. Ensure build artifacts exist
     if not dist_path.exists() or not any(dist_path.iterdir()):

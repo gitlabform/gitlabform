@@ -131,17 +131,28 @@ docs = [
 
 # Commands available via 'uv run <command>' or entry points after installation.
 [project.scripts]
-build = "dev.main:build"
-clean = "dev.main:clean"
-docs-build = "dev.main:docs_build"
-docs-serve = "dev.main:docs_serve"
-format = "dev.main:format_code"
-gitlab-down = "dev.main:gitlab_down"
-gitlab-up = "dev.main:gitlab_up"
+# Primary application entrypoint
 gitlabform = "gitlabform.run:run"
-lint = "dev.main:lint"
+
+# Development toolkit and environment management
+dev = "dev.main:main"
 setup = "dev.main:setup"
+clean = "dev.main:clean"
+
+# Development workflow (Linting, Formatting, and Testing)
+format = "dev.main:format_code"
+lint = "dev.main:lint"
 test = "dev.main:test"
+
+# Local infrastructure management
+gitlab-local = "dev.main:gitlab_local"
+
+# Documentation workflow
+docs-serve = "dev.main:docs_serve"
+docs-build = "dev.main:docs_build"
+
+# Packaging and distribution verification
+build = "dev.main:build"
 verify = "dev.main:verify"
 
 [tool.pytest.ini_options]

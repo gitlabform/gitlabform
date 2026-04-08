@@ -1,8 +1,7 @@
 """Tasks related to environment initialization and cleanup."""
 
-import shutil
 from pathlib import Path
-from dev.common import logger, run_command
+from dev.common import REPO_ROOT, delete_path, logger, run_command
 
 
 def setup():
@@ -32,8 +31,7 @@ def clean():
         "site",
     ]
     for path_str in paths_to_remove:
-        path = Path(path_str)
-        if path.exists():
-            logger.info(f"[bold blue]==>[/bold blue] Removing {path}...")
-            shutil.rmtree(path) if path.is_dir() else path.unlink()
+        # Ensure we are deleting paths relative to the repository root
+        delete_path(REPO_ROOT / path_str)
+
     logger.info("[bold green]✅ Cleanup complete.[/bold green]")
