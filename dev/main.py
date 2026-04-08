@@ -12,8 +12,17 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from dev.docs import docs_build, docs_serve
 from dev.env import clean, setup
 from dev.infra import gitlab_down, gitlab_up
-from dev.qa import format_code, lint, test as run_test_logic
+from dev.qa import format_code, lint as run_lint_logic, test as run_test_logic
 from dev.release import build, verify
+
+
+def lint():
+    """CLI entry point for the 'lint' command that handles optional toggles."""
+    parser = argparse.ArgumentParser(prog="lint", description="Run parallel linters or a specific tool")
+    parser.add_argument("linter", nargs="?", help="Specific linter to run (e.g., ruff, all)")
+    parser.add_argument("extra_args", nargs=argparse.REMAINDER, help="Arguments for the specific linter")
+    args = parser.parse_args()
+    run_lint_logic(linter_name=args.linter, extra_args=args.extra_args)
 
 
 def test():
@@ -46,7 +55,10 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     subparsers.add_parser("setup", help="Initialize development environment and git hooks")
-    subparsers.add_parser("lint", help="Run linters and formatting checks")
+    lint_parser = subparsers.add_parser("lint", help="Run parallel linters or a specific tool")
+    lint_parser.add_argument("linter", nargs="?", help="Linter name (ruff, codespell, bandit, etc.) or 'all'")
+    lint_parser.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for the linter")
+
     subparsers.add_parser("format", help="Automatically format code")
     test_parser = subparsers.add_parser("test", help="Run the project test suite")
     test_parser.add_argument("extra_args", nargs=argparse.REMAINDER, help="Arguments to pass to pytest")
@@ -70,7 +82,6 @@ def main():
     # Mapping command strings to the functional logic
     dispatch = {
         "setup": setup,
-        "lint": lint,
         "format": format_code,
         "docs-serve": docs_serve,
         "docs-build": docs_build,
@@ -81,6 +92,8 @@ def main():
 
     if args.command in dispatch:
         dispatch[args.command]()
+    elif args.command == "lint":
+        run_lint_logic(linter_name=args.linter, extra_args=args.extra_args)
     elif args.command == "test":
         run_test_logic(args.extra_args)
     elif args.command == "gitlab-local":
