@@ -41,3 +41,6 @@ tbump.toml
 .idea/
 .vscode/
 .cursor/
+
+# Exceptions
+!README.md

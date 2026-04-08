@@ -154,6 +154,8 @@ docs-build = "dev.main:docs_build"
 # Packaging and distribution verification
 build = "dev.main:build"
 verify = "dev.main:verify"
+docker-build = "dev.main:docker_build"
+docker-verify = "dev.main:docker_verify"
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]

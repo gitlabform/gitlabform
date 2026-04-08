@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 from dev.common import REPO_ROOT, logger, run_command
 
 
@@ -54,3 +55,25 @@ def verify():
         subprocess.run([gitlabform_exe, "--version"], check=True)
 
     logger.info("[bold green]✅ Verification complete. Artifacts are ready for release.[/bold green]")
+
+
+def docker_build(image: str = "localhost/gitlabform", tag: str = "latest", push: bool = False):
+    """Builds the GitLabForm Docker image."""
+    image_name = f"{image}:{tag}"
+
+    run_command(
+        ["docker", "build", "--pull", "-t", image_name, str(REPO_ROOT)],
+        f"Building Docker image: [bold cyan]{image_name}[/bold cyan]",
+    )
+
+    if push:
+        run_command(["docker", "push", image_name], f"Pushing Docker image: [bold cyan]{image_name}[/bold cyan]")
+
+
+def docker_verify(image: str = "localhost/gitlabform", tag: str = "latest"):
+    """Verifies the built Docker image with a smoke test."""
+    image_name = f"{image}:{tag}"
+    run_command(
+        ["docker", "run", "--rm", image_name, "gitlabform", "--version"],
+        f"Verifying Docker image: [bold cyan]{image_name}[/bold cyan]",
+    )
