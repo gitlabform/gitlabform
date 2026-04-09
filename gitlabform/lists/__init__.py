@@ -13,6 +13,7 @@ from enum import Enum
 @enum.unique
 class OmissionReason(Enum):
     ARCHIVED = "archived"
+    SCHEDULED_FOR_DELETION = "scheduled for deletion"
     EMPTY = "empty effective config"
     SKIPPED = "skipped"
 

@@ -334,6 +334,7 @@ def run_gitlabform(
     config: str,
     target: Union[Group, Project, str],
     include_archived_projects: bool = True,
+    include_projects_scheduled_for_deletion: bool = True,
     noop: bool = False,
     output_file: Optional[str] = None,
     recurse_subgroups: bool = True,
@@ -355,6 +356,7 @@ def run_gitlabform(
 
     gf = GitLabForm(
         include_archived_projects=include_archived_projects,
+        include_projects_scheduled_for_deletion=include_projects_scheduled_for_deletion,
         config_string=config,
         target=target,
         noop=noop,

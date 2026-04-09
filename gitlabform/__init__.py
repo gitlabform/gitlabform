@@ -51,6 +51,7 @@ class GitLabForm:
     def __init__(
         self,
         include_archived_projects=True,
+        include_projects_scheduled_for_deletion=True,
         target=None,
         config_string=None,
         noop=False,
@@ -72,6 +73,7 @@ class GitLabForm:
             self.output_file = output_file
             self.skip_version_check = True
             self.include_archived_projects = include_archived_projects
+            self.include_projects_scheduled_for_deletion = include_projects_scheduled_for_deletion
             self.just_show_version = False
             self.terminate_after_error = True
             self.only_sections = "all"
@@ -95,6 +97,7 @@ class GitLabForm:
                 self.output_file,
                 self.skip_version_check,
                 self.include_archived_projects,
+                self.include_projects_scheduled_for_deletion,
                 self.just_show_version,
                 self.terminate_after_error,
                 self.only_sections,
@@ -128,6 +131,7 @@ class GitLabForm:
             self.gitlab,
             self.configuration,
             self.include_archived_projects,
+            self.include_projects_scheduled_for_deletion,
             self.recurse_subgroups,
         )
 
@@ -237,6 +241,13 @@ class GitLabForm:
         )
 
         parser.add_argument(
+            "--include-projects-scheduled-for-deletion",
+            dest="include_projects_scheduled_for_deletion",
+            action="store_true",
+            help="Includes processing projects that are scheduled for deletion",
+        )
+
+        parser.add_argument(
             "-t",
             "--terminate",
             dest="terminate_after_error",
@@ -317,6 +328,7 @@ class GitLabForm:
             args.output_file,
             args.skip_version_check,
             args.include_archived_projects,
+            args.include_projects_scheduled_for_deletion,
             args.just_show_version,
             args.terminate_after_error,
             args.only_sections,
