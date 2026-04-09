@@ -180,6 +180,14 @@ class ConfigurationCore(ABC):
         merged_dict = merge({}, more_general_config, more_specific_config)
 
         def break_inheritance(specific_config, parent_path=()):
+            """
+            Walk the specific config tree and replace only the exact nested section
+            that declares ``inherit: false``.
+
+            ``parent_path`` stores the full key path to the current section because
+            the same section name, like ``variables``, can appear in multiple branches.
+            Replacing by section name alone can therefore update the wrong subtree.
+            """
             for key, value in specific_config.items():
                 if "inherit" == key:
                     if not value:
@@ -194,6 +202,10 @@ class ConfigurationCore(ABC):
                     break_inheritance(value, parent_path + (key,))
 
         def replace_config_section(merged_config, parent_path, specific_config):
+            """
+            Replace the merged section at ``parent_path`` with the specific section
+            that requested an inheritance break, dropping the control flag itself.
+            """
             target_config = merged_config
             for key in parent_path[:-1]:
                 target_config = target_config[key]
