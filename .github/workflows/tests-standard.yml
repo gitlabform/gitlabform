@@ -25,15 +25,14 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          pip install wheel
-          pip install -e .
-          pip install -e .[test]
+      - name: Install uv
+        run: pip install uv==0.11.2
       - name: Start GitLab in Docker
-        run: ./dev/run_gitlab_in_docker.sh
+        run: |
+          uv sync --frozen --no-dev --group test
+          uv run --no-sync gitlab-local up
       - name: Run standard acceptance tests against Enterprise Edition
-        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/standard
+        run: uv run --no-sync test --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/standard
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
@@ -62,15 +61,14 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          pip install wheel
-          pip install -e .
-          pip install -e .[test]
+      - name: Install uv
+        run: pip install uv==0.11.2
       - name: Start GitLab in Docker
-        run: ./dev/run_gitlab_in_docker.sh --gitlab-flavor ce
+        run: |
+          uv sync --frozen --no-dev --group test
+          uv run --no-sync gitlab-local up --flavor ce
       - name: Run standard acceptance tests against Community Edition
-        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/standard
+        run: uv run --no-sync test --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/standard
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
@@ -99,13 +97,12 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install test dependencies
-        run: |
-          pip install wheel
-          pip install -e .[test]
+      - name: Install uv
+        run: pip install uv==0.11.2
       - name: Run unit tests
         run: |
-          pytest --cov=. --cov-report=xml tests/unit
+          uv sync --frozen --no-dev --group test
+          uv run --no-sync test --cov=. --cov-report=xml tests/unit
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
@@ -133,13 +130,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Run security checks
         run: |
-          pip install wheel
-          pip install bandit
-      - name: Run bandit
-        run: |
-          bandit -r gitlabform
+          pip install uv==0.11.2
+          uv sync --frozen --no-dev --group lint
+          uv run --no-sync lint bandit gitlabform
 
   smoke-tests:
     strategy:
@@ -158,10 +153,10 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install runtime dependencies
+      - name: Install uv
         run: |
-          pip install wheel
-          pip install -e .
+          pip install uv==0.11.2
       - name: Check if the app starts
         run: |
-          gitlabform -V
+          uv sync --frozen --no-dev
+          uv run --no-sync gitlabform -V

@@ -16,6 +16,7 @@ from dev.qa import format_code, lint as run_lint_logic, test as run_test_logic
 from dev.release import (
     build as run_build_logic,
     docker_build as run_docker_build_logic,
+    publish as run_publish_logic,
     docker_verify as run_docker_verify_logic,
     verify as run_verify_logic,
 )
@@ -48,6 +49,13 @@ def verify():
     parser = argparse.ArgumentParser(prog="verify", description="Verify built artifacts in isolated environment")
     parser.parse_args()
     run_verify_logic()
+
+
+def publish():
+    """CLI entry point for the 'publish' command."""
+    parser = argparse.ArgumentParser(prog="publish", description="Publish built artifacts to PyPI")
+    parser.parse_args()
+    run_publish_logic()
 
 
 def docker_build():
@@ -143,6 +151,7 @@ def main():
         "docs-build": docs_build,
         "build": run_build_logic,
         "verify": run_verify_logic,
+        "publish": run_publish_logic,
         "clean": clean,
     }
 

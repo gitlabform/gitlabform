@@ -19,11 +19,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: 3.14
-      - name: Black Code Formatter
-        uses: psf/black@26.3.1 # note: keep this in sync with the version in .pre-commit-config.yaml
-        with:
-          options: "--check"
-          src: "."
+      - name: Run black
+        run: |
+          pip install uv==0.11.2
+          uv sync --frozen --no-dev --group lint
+          uv run --no-sync lint black --check .
 
   types:
     runs-on: ubuntu-latest
@@ -40,12 +40,8 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install test dependencies
-        run: |
-          pip install wheel
-          pip install -e .[test]
       - name: Run mypy
         run: |
-          mypy . || true
-          mypy --install-types --non-interactive
-          mypy .
+          pip install uv==0.11.2
+          uv sync --frozen --no-dev --group lint
+          uv run --no-sync lint mypy .

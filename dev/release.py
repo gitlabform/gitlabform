@@ -12,6 +12,11 @@ def build():
     run_command(["uv", "build"], "Building package distributions")
 
 
+def publish():
+    """Publishes the built artifacts to PyPI."""
+    run_command(["uv", "publish"], "Publishing package to PyPI")
+
+
 def verify():
     """Performs rigorous verification of the built artifacts in an isolated environment."""
     logger.info("[bold blue]==>[/bold blue] Verifying built artifacts...")

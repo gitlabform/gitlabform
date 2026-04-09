@@ -54,18 +54,21 @@ dependencies = [
 # PEP 735 Dependency Groups.
 # Managed by uv. dev is the parent group for local development.
 [dependency-groups]
+dev-toolkit = [
+    "rich==13.9.4",
+]
 dev = [
+    { include-group = "dev-toolkit" },
     { include-group = "test" },
     { include-group = "lint" },
     { include-group = "docs" },
-    "check-wheel-contents==0.6.1",
+    { include-group = "release" },
     "commitizen==4.3.0",
     "prek==0.3.8",
-    "rich==13.9.4",
-    "twine==6.1.0",
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
+    { include-group = "dev-toolkit" },
     "coverage==7.13.5",
     "cryptography==46.0.6",
     "deepdiff==9.0.0",
@@ -76,6 +79,7 @@ test = [
 ]
 # Static analysis and formatting tools.
 lint = [
+    { include-group = "dev-toolkit" },
     "bandit==1.8.3",
     "black==26.3.0",
     "codespell==2.4.1",
@@ -86,8 +90,15 @@ lint = [
 ]
 # Documentation generation stack.
 docs = [
+    { include-group = "dev-toolkit" },
     "mkdocs",
     "mkdocs-material",
+]
+# Tools required for building and verifying releases.
+release = [
+    { include-group = "dev-toolkit" },
+    "check-wheel-contents==0.6.1",
+    "twine==6.1.0",
 ]
 
 [project.urls]
@@ -154,6 +165,7 @@ docs-build = "dev.main:docs_build"
 # Packaging and distribution verification
 build = "dev.main:build"
 verify = "dev.main:verify"
+publish = "dev.main:publish"
 docker-build = "dev.main:docker_build"
 docker-verify = "dev.main:docker_verify"
 

@@ -575,9 +575,13 @@ dev = [
     { name = "types-requests" },
     { name = "xkcdpass" },
 ]
+dev-toolkit = [
+    { name = "rich" },
+]
 docs = [
     { name = "mkdocs" },
     { name = "mkdocs-material" },
+    { name = "rich" },
 ]
 lint = [
     { name = "bandit" },
@@ -585,8 +589,14 @@ lint = [
     { name = "codespell" },
     { name = "mypy" },
     { name = "mypy-extensions" },
+    { name = "rich" },
     { name = "ruff" },
     { name = "types-requests" },
+]
+release = [
+    { name = "check-wheel-contents" },
+    { name = "rich" },
+    { name = "twine" },
 ]
 test = [
     { name = "coverage" },
@@ -595,6 +605,7 @@ test = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-rerunfailures" },
+    { name = "rich" },
     { name = "xkcdpass" },
 ]
 
@@ -638,9 +649,11 @@ dev = [
     { name = "types-requests", specifier = "==2.33.0.20260327" },
     { name = "xkcdpass", specifier = "==1.30.0" },
 ]
+dev-toolkit = [{ name = "rich", specifier = "==13.9.4" }]
 docs = [
     { name = "mkdocs" },
     { name = "mkdocs-material" },
+    { name = "rich", specifier = "==13.9.4" },
 ]
 lint = [
     { name = "bandit", specifier = "==1.8.3" },
@@ -648,8 +661,14 @@ lint = [
     { name = "codespell", specifier = "==2.4.1" },
     { name = "mypy", specifier = "==1.19.1" },
     { name = "mypy-extensions", specifier = "==1.1.0" },
+    { name = "rich", specifier = "==13.9.4" },
     { name = "ruff", specifier = "==0.9.0" },
     { name = "types-requests", specifier = "==2.33.0.20260327" },
+]
+release = [
+    { name = "check-wheel-contents", specifier = "==0.6.1" },
+    { name = "rich", specifier = "==13.9.4" },
+    { name = "twine", specifier = "==6.1.0" },
 ]
 test = [
     { name = "coverage", specifier = "==7.13.5" },
@@ -658,6 +677,7 @@ test = [
     { name = "pytest", specifier = "==9.0.2" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "pytest-rerunfailures", specifier = "==16.1" },
+    { name = "rich", specifier = "==13.9.4" },
     { name = "xkcdpass", specifier = "==1.30.0" },
 ]
 
