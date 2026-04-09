@@ -112,8 +112,15 @@ class TestBranches:
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+        # "No Access" (0) is exclusive and should overwrite GitLab's default Maintainer (40)
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
-        assert merge_access_levels == [AccessLevel.DEVELOPER.value]
+
+        if is_enterprise_edition:
+            # Additive design: GitLab's default Maintainer (40) is retained alongside Developer (30)
+            assert sorted(merge_access_levels) == [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
+        else:
+            # In CE we unprotect and reprotect, so defaults are lost and only config is applied
+            assert merge_access_levels == [AccessLevel.DEVELOPER.value]
 
         if is_enterprise_edition:
             assert unprotect_access_level is AccessLevel.MAINTAINER.value
@@ -142,12 +149,14 @@ class TestBranches:
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+        # Omission results in retention
         assert push_access_levels == [AccessLevel.NO_ACCESS.value]
 
         if is_enterprise_edition:
             # In EE our update strategy should retain the previously defined merge_access_level even though
             # it was removed from config
-            assert merge_access_levels == [AccessLevel.DEVELOPER.value]
+            # Result includes both the previously added Developer and the default Maintainer
+            assert sorted(merge_access_levels) == [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
         else:
             # In CE, due to: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37, we unprotect and reprotect
             # a branch to apply changes. Therefore, merge_access_levels should be not None but we don't want to tie our
@@ -182,8 +191,16 @@ class TestBranches:
             _,
             unprotect_access_level,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
+        # Maintainer (40) overwrites No Access (0)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
-        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+
+        if is_enterprise_edition:
+            # Maintainer (40) matches existing, Developer (30) is retained from previous steps
+            assert sorted(merge_access_levels) == [AccessLevel.DEVELOPER.value, AccessLevel.MAINTAINER.value]
+        else:
+            # In CE only config is applied
+            assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+
         if is_enterprise_edition:
             assert unprotect_access_level is AccessLevel.MAINTAINER.value
         else:
@@ -259,8 +276,8 @@ class TestBranches:
             _,
             _,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
-        # We set Push Access Level to No Access
-        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        # No Access (0) clears default Maintainer (40)
+        assert AccessLevel.NO_ACCESS.value in push_access_levels
 
         # Update push_access_level to Maintainer
         config_protect_branch = f"""
@@ -287,7 +304,7 @@ class TestBranches:
             _,
             _,
         ) = get_only_branch_access_levels(project_for_function, branch_for_function)
-        # We set Push Access Level to Maintainer
+        # Maintainer (40) overwrites No Access (0)
         assert push_access_levels == [AccessLevel.MAINTAINER.value]
 
     def test__config_with_access_level_names(self, project, branch, is_enterprise_edition):
@@ -314,6 +331,7 @@ class TestBranches:
             unprotect_access_level,
         ) = get_only_branch_access_levels(project, branch)
         assert push_access_level == [AccessLevel.NO_ACCESS.value]
+        # On creation, GitLab sets exactly what is provided in the configuration.
         assert merge_access_level == [AccessLevel.DEVELOPER.value]
         assert push_access_user_ids == []
         assert merge_access_user_ids == []
