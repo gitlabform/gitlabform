@@ -2,7 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from gitlabform.lists import OmissionReason
+from gitlabform.gitlab.core import NotFoundException
+from gitlabform.lists import OmissionReason, Groups
 from gitlabform.lists.projects import ProjectsProvider
 
 
@@ -188,3 +189,71 @@ class TestVerifyIfProjectsExistAndGetOmittedProjects:
 
         assert archived == ["group/project1"]
         assert scheduled == ["group/project1"]
+
+    def test__transfer_source_scheduled_for_deletion__in_scheduled_list(self, gitlab_mock, configuration_mock):
+        # Project does not exist at the target path; it's configured to be transferred
+        gitlab_mock.get_project_case_insensitive.side_effect = [
+            NotFoundException("not found at target path"),
+            {
+                "path_with_namespace": "old_group/project1",
+                "archived": False,
+                "marked_for_deletion_on": "2026-04-15",
+            },
+        ]
+        configuration_mock.config = {
+            "projects_and_groups": {
+                "new_group/project1": {"project": {"transfer_from": "old_group/project1"}},
+            }
+        }
+
+        provider = make_provider(gitlab_mock, configuration_mock)
+        archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["new_group/project1"])
+
+        assert archived == []
+        assert scheduled == ["new_group/project1"]
+
+
+class TestGetProjects:
+    def _make_groups(self, effective):
+        groups = Groups()
+        groups.add_requested(effective)
+        return groups
+
+    def test__scheduled_for_deletion_added_to_omitted_from_groups(self, gitlab_mock, configuration_mock):
+        gitlab_mock.get_projects.return_value = [
+            {"path_with_namespace": "group/project1", "archived": False, "marked_for_deletion_on": None},
+            {"path_with_namespace": "group/project2", "archived": False, "marked_for_deletion_on": "2026-04-15"},
+        ]
+        configuration_mock.get_projects.return_value = []
+        configuration_mock.is_project_skipped.return_value = False
+
+        provider = make_provider(
+            gitlab_mock, configuration_mock, include_archived=True, include_scheduled_for_deletion=False
+        )
+        groups = self._make_groups(["group"])
+
+        projects = provider._get_projects("ALL", groups)
+
+        assert "group/project1" in projects.get_effective()
+        assert "group/project2" not in projects.get_effective()
+        assert projects.get_omitted(OmissionReason.SCHEDULED_FOR_DELETION) == ["group/project2"]
+
+    def test__all_defined__scheduled_for_deletion_from_configuration(self, gitlab_mock, configuration_mock):
+        gitlab_mock.get_projects.return_value = []
+        gitlab_mock.get_project_case_insensitive.return_value = {
+            "path_with_namespace": "group/project1",
+            "archived": False,
+            "marked_for_deletion_on": "2026-04-15",
+        }
+        configuration_mock.get_projects.return_value = ["group/project1"]
+        configuration_mock.is_project_skipped.return_value = False
+
+        provider = make_provider(
+            gitlab_mock, configuration_mock, include_archived=True, include_scheduled_for_deletion=False
+        )
+        groups = self._make_groups([])
+
+        projects = provider._get_projects("ALL_DEFINED", groups)
+
+        assert projects.get_omitted(OmissionReason.SCHEDULED_FOR_DELETION) == ["group/project1"]
+        assert "group/project1" not in projects.get_effective()
