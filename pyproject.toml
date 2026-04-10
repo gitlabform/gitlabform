@@ -54,11 +54,7 @@ dependencies = [
 # PEP 735 Dependency Groups.
 # Managed by uv. dev is the parent group for local development.
 [dependency-groups]
-dev-toolkit = [
-    "rich==13.9.4",
-]
 dev = [
-    { include-group = "dev-toolkit" },
     { include-group = "test" },
     { include-group = "lint" },
     { include-group = "docs" },
@@ -68,7 +64,6 @@ dev = [
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
-    { include-group = "dev-toolkit" },
     "coverage==7.13.5",
     "cryptography==46.0.6",
     "deepdiff==9.0.0",
@@ -79,7 +74,6 @@ test = [
 ]
 # Static analysis and formatting tools.
 lint = [
-    { include-group = "dev-toolkit" },
     "bandit==1.8.3",
     "black==26.3.0",
     "codespell==2.4.1",
@@ -90,7 +84,6 @@ lint = [
 ]
 # Documentation generation stack.
 docs = [
-    { include-group = "dev-toolkit" },
     "markdown==3.7",
     "mkdocs==1.6.1",
     "mkdocs-material==9.7.6",
@@ -100,7 +93,6 @@ docs = [
 ]
 # Tools required for building and verifying releases.
 release = [
-    { include-group = "dev-toolkit" },
     "check-wheel-contents==0.6.1",
     "twine==6.1.0",
 ]
@@ -114,35 +106,6 @@ Changelog = "https://gitlabform.github.io/gitlabform/changelog/"
 [project.readme]
 file = "README.md"
 content-type = "text/markdown"
-
-[dependency-groups]
-dev = [
-    "prek==0.3.8",
-    "commitizen==4.3.0",
-    "twine==6.1.0",
-    "check-wheel-contents==0.6.1",
-]
-
-test = [
-    "bandit==1.8.3",
-    "black==26.3.0",
-    "codespell==2.4.1",
-    "coverage==7.13.5",
-    "cryptography==46.0.7",
-    "deepdiff==9.0.0",
-    "mypy==1.20.1",
-    "mypy-extensions==1.1.0",
-    "pytest==9.0.3",
-    "pytest-cov==7.1.0",
-    "pytest-rerunfailures==16.1",
-    "ruff==0.9.0",
-    "types-requests==2.33.0.20260408",
-    "xkcdpass==1.30.0",
-]
-docs = [
-    "mkdocs",
-    "mkdocs-material",
-]
 
 # Commands available via 'uv run <command>' or entry points after installation.
 [project.scripts]
