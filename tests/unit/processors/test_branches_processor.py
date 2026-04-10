@@ -90,20 +90,28 @@ class TestBranchesProcessor:
         result_allowed_to = self.processor.map_config_to_protected_branch_get_data(our_branch_config_allowed_to)
 
         expected_result_access_level = {
-            "merge_access_levels": [{"id": None, "access_level": 40, "user_id": None, "group_id": None}],
-            "push_access_levels": [{"id": None, "access_level": 30, "user_id": None, "group_id": None}],
-            "unprotect_access_levels": [{"id": None, "access_level": 20, "user_id": None, "group_id": None}],
+            "merge_access_levels": [
+                {"id": None, "access_level": 40, "user_id": None, "group_id": None, "deploy_key_id": None}
+            ],
+            "push_access_levels": [
+                {"id": None, "access_level": 30, "user_id": None, "group_id": None, "deploy_key_id": None}
+            ],
+            "unprotect_access_levels": [
+                {"id": None, "access_level": 20, "user_id": None, "group_id": None, "deploy_key_id": None}
+            ],
         }
 
         expected_result_allowed_to = {
             "merge_access_levels": [
-                {"id": None, "access_level": 50, "user_id": None, "group_id": None},
-                {"id": None, "access_level": None, "user_id": 123, "group_id": None},
+                {"id": None, "access_level": 50, "user_id": None, "group_id": None, "deploy_key_id": None},
+                {"id": None, "access_level": None, "user_id": 123, "group_id": None, "deploy_key_id": None},
             ],
-            "push_access_levels": [{"id": None, "access_level": None, "user_id": None, "group_id": 456}],
+            "push_access_levels": [
+                {"id": None, "access_level": None, "user_id": None, "group_id": 456, "deploy_key_id": None}
+            ],
             "unprotect_access_levels": [
-                {"id": None, "access_level": 60, "user_id": None, "group_id": None},
-                {"id": None, "access_level": None, "user_id": 789, "group_id": None},
+                {"id": None, "access_level": 60, "user_id": None, "group_id": None, "deploy_key_id": None},
+                {"id": None, "access_level": None, "user_id": 789, "group_id": None, "deploy_key_id": None},
             ],
         }
 
@@ -193,16 +201,12 @@ class TestBranchesProcessor:
             [
                 {"access_level": AccessLevel.MAINTAINER.value, "id": 17},
                 {
-                    "used_id": 23,
+                    "user_id": 23,
                     "id": 18,
                 },
             ]
         )
 
         result = BranchesProcessor.build_patch_request_data(transformed_access_levels, existing_records)
-        assert result == [
-            {
-                "id": 18,
-                "_destroy": True,
-            },
-        ]
+        # Additive Design: Omitted users should be retained, not destroyed.
+        assert result == []

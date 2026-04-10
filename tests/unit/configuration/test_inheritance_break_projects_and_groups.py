@@ -187,3 +187,51 @@ class TestInheritanceBreakProjectsAndGroups:
         assert variables == {
             "secret3": {"key": "bizz", "value": "buzz"},
         }
+
+    def test__inheritance_break__flag_set_at_nested_level__replaces_only_matching_path(
+        self,
+    ):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            project_settings:
+              section_a:
+                variables:
+                  secret1:
+                    key: foo
+                    value: bar
+              section_b:
+                variables:
+                  secret2:
+                    key: fizz
+                    value: buzz
+
+          "some_group/my_project":
+            project_settings:
+              section_b:
+                variables:
+                  inherit: false
+                  secret3:
+                    key: bizz
+                    value: fuzz
+        """
+
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_project("some_group/my_project")
+
+        assert effective_config == {
+            "project_settings": {
+                "section_a": {
+                    "variables": {
+                        "secret1": {"key": "foo", "value": "bar"},
+                    }
+                },
+                "section_b": {
+                    "variables": {
+                        "secret3": {"key": "bizz", "value": "fuzz"},
+                    }
+                },
+            }
+        }
