@@ -5,7 +5,7 @@ from dev.common import run_command
 
 def docs_serve():
     """Starts the local documentation development server with live-reloading."""
-    run_command(["uv", "run", "mkdocs", "serve"], "Starting MkDocs development server")
+    run_command(["uv", "run", "mkdocs", "serve", "--livereload"], "Starting MkDocs development server")
 
 
 def docs_build():

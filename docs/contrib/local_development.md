@@ -1,14 +1,14 @@
 # Local Development
 
-Welcome to the GitLabForm development guide. We use **uv** and a unified development toolkit to manage our lifecycle, ensuring a fast, deterministic, and reproducible environment for all contributors.
+Welcome to the GitLabForm development guide. We use **`uv`** and a unified development toolkit to manage our lifecycle, ensuring a fast, deterministic, and reproducible environment for all contributors.
 
 ## Required tools
 
 Following tools are used in this project. Please make sure you have them installed:
 
-- **uv**: The primary tool for dependency management and running development tasks. It automatically manages the required Python version and virtual environment. [Install uv](https://docs.astral.sh/uv/getting-started/installation/).
+- **`uv`**: The primary tool for dependency management and running development tasks. It automatically manages the required Python version and virtual environment. [Install `uv`](https://docs.astral.sh/uv/getting-started/installation/).
 - **Docker**: Required for running local GitLab instances and for building container images. [Install Docker](https://docs.docker.com/get-docker/).
-- **jq**: A command-line JSON processor used for orchestrating local GitLab instances. [Install jq](https://jqlang.github.io/jq/download/).
+- **`jq`**: A command-line JSON processor used for orchestrating local GitLab instances. [Install `jq`](https://jqlang.github.io/jq/download/).
 
 ## Typical development workflow
 
@@ -20,18 +20,25 @@ uv run dev --help
 
 A standard lifecycle for implementing a new feature or bug fix typically involves:
 
-1. **Setup**: Initialize or update your local environment using `uv run setup`. This also installs the Git hooks. See [Environment setup](#environment-setup) section for more details.
-2. **Develop**: Implement your logic or fix in the codebase.
-3. **Quality**: Format and lint your code. See [Code quality](#code-quality) section for more details.
-4. **Test**: Be sure to include/update tests for your changes. See [Testing](#testing) section for more details.
-5. **Validate**: Perform a final check on the build artifacts. See [Building & Verification](#building-verification) section for more details.
-6. **Commit**: Record your changes using the **Conventional Commits** standard. The Git hooks installed during setup will automatically validate your commit messages.
-    - *Tip*: You can use `uv run cz commit` for a guided experience.
-7. **Documentation**: Add/update documentation if necessary for the change being introduced. See [Documentation](#documentation) section for more details.
+1. **New branch**: Create a new branch for your changes.
+2. **Setup**: Initialize or update your local environment using `uv run setup`. This also installs the Git hooks. See [Environment setup](#environment-setup) section for more details.
+3. **Develop**: Implement your logic or fix in the codebase.
+4. **Quality**: Format and lint your code. See [Code quality](#code-quality) section for more details.
+5. **Test**: Be sure to include/update tests for your changes. See [Testing](#testing) section for more details.
+6. **Validate**: Perform a final check on the build artifacts. See [Building & Verification](#building-verification) section for more details.
+7. **Commit**: Record your changes using the **Conventional Commits** standard. The Git hooks installed during setup will automatically validate your commit messages.
+
+    !!! tip "Guided experience via Commitizen"
+
+        You can use `uv run cz commit` that will present an interactive option in the terminal for selecting and commiting your changes.
+
+8. **Documentation**: Add/update documentation if necessary for the change being introduced. See [Documentation](#documentation) section for more details.
+9. **Open/Update PR**: Push your changes to GitHub and create/update a pull request.
+
 
 ## Environment setup
 
-Initializing your development environment is a single-step process. We use **uv** to provide a consistent, isolated, and reproducible workspace. Everything is contained within a virtual environment (`.venv`) that is automatically managed by the toolchain.
+Initializing your development environment is a single-step process. We use **`uv`** to provide a consistent, isolated, and reproducible workspace. Everything is contained within a virtual environment (`.venv`) that is automatically managed by the toolchain.
 
 ```bash
 uv run setup
@@ -87,11 +94,13 @@ uv run lint --help
 We use **pytest** as the underlying engine for our entire test suite. The toolkit's `test` command acts as a passthrough, meaning any valid `pytest` argument or flag can be provided directly.
 
 To discover all available testing options:
+
 ```bash
 uv run test --help
 ```
 
 **Common examples:**
+
 - Run tests matching a keyword: `uv run test -k "archive"`
 - Run tests with verbose output: `uv run test -v`
 - Run with coverage reporting: `uv run test --cov=.`
@@ -110,43 +119,47 @@ uv run test tests/unit
 
 Acceptance tests perform real operations against a running GitLab instance. Because they interact with an actual API, they are slower and require more setup than unit tests.
 
-#### 1. Start Local GitLab
+1. Start Local GitLab
 
-We recommend running tests against a disposable GitLab instance in Docker to ensure your environment matches our CI/CD pipelines:
+    We recommend running tests against a disposable GitLab instance in Docker to ensure your environment matches our CI/CD pipelines:
 
-```bash
-uv run gitlab-local up # Starts Enterprise Edition (EE) by default
-```
+    ```bash
+    uv run gitlab-local up # Starts Enterprise Edition (EE) by default
+    uv run gitlab-local down # Cleanup: Stops and removes the local GitLab container
+    ```
 
-*Note: Use `uv run gitlab-local up --flavor ce` to test against Community Edition.*
+    !!! note
+    
+        Use `uv run gitlab-local up --flavor ce` to test against Community Edition.
 
-To see all available infrastructure management options:
+    To see all available infrastructure management options:
 
-```bash
-uv run gitlab-local --help
-```
+    ```bash
+    uv run gitlab-local --help
+    ```
+    
+    !!! tip "Testing against specific versions"
+        You can test against specific GitLab releases using the version flag: `uv run gitlab-local up --version 17.5.0-ee`.
 
-#### 2. Run the Suite
+    !!! note "Testing paid features"
+    
+        To test features requiring a GitLab instance with **Premium** or **Ultimate** tier, you'll need to have a license from GitLab that can be used for enabling those features in your local GitLab instance.
+        
+        Once you've obtained your license, you can set the `GITLAB_EE_LICENSE` environment variable or place your license in a file named `Gitlab.gitlab-license` in the project root. Our dev toolkit will automatically detect and apply this license during the setup. This file is also included in `.gitignore` so that it's not committed to the repository.
 
-Once the GitLab instance is healthy and accessible, execute the acceptance suite:
 
-```bash
-uv run test tests/acceptance
-```
+2. Run the tests
 
-To run a specific test class or method:
+    Once the GitLab instance is healthy and accessible, execute the acceptance located in `tests/acceptance/` directory. See the examples above on how to run the tests.
 
-```bash
-uv run test tests/acceptance -k "TestArchiveProject"
-```
+    !!! tip
 
-#### 3. Paid Features
+        Acceptance tests are usually slower than unit tests since they run against a real GitLab instance. This involves creating, updating, and deleting resources in GitLab. You may find it helpful to run only select tests instead of entire test suite. For example: run all tests related to the feature you're working on.
 
-To test features requiring a Premium or Ultimate license, set the `GITLAB_EE_LICENSE` environment variable or place your license in a file named `Gitlab.gitlab-license` in the project root. Our infrastructure scripts will automatically detect and apply this license during the setup.
 
 ### Using a Remote GitLab Instance
 
-If you prefer to run tests against your own instance, provide the credentials via environment variables:
+It's not recommended, but if you prefer to run tests against non-local/disposable GitLab instance, provide the credentials via environment variables:
 
 ```bash
 export GITLAB_URL="https://mygitlab.company.com"
@@ -172,17 +185,12 @@ To see available build options:
 uv run build --help
 ```
 
-The `verify` command performs a rigorous audit of the built files to ensure they are ready for release. This includes metadata validation via **Twine**, content auditing via **check-wheel-contents**, and an automated smoke test that installs the wheel in an isolated environment to check the entry point.
+The `verify` command performs a rigorous audit of the built files to ensure they are ready for release. This includes metadata validation via **`twine`**, content auditing via **`check-wheel-contents`**, and an automated smoke test that installs the wheel in a temporary isolated environment to check the entry point.
 
 ```bash
 uv run verify
 ```
 
-To see the verification steps:
-
-```bash
-uv run verify --help
-```
 
 ### Docker Images
 
@@ -226,7 +234,7 @@ To serve the documentation with live-reloading. This is ideal for seeing your ch
 uv run docs-serve
 ```
 
-The site will be available at http://localhost:8000.
+The site will be available at `http://localhost:8000`.
 
 To generate the static documentation site in the `site/` directory (used for deployment to GitHub Pages):
 

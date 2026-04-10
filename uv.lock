@@ -561,11 +561,15 @@ dev = [
     { name = "coverage" },
     { name = "cryptography" },
     { name = "deepdiff" },
+    { name = "markdown" },
     { name = "mkdocs" },
     { name = "mkdocs-material" },
+    { name = "mkdocs-material-extensions" },
     { name = "mypy" },
     { name = "mypy-extensions" },
     { name = "prek" },
+    { name = "pygments" },
+    { name = "pymdown-extensions" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-rerunfailures" },
@@ -579,8 +583,12 @@ dev-toolkit = [
     { name = "rich" },
 ]
 docs = [
+    { name = "markdown" },
     { name = "mkdocs" },
     { name = "mkdocs-material" },
+    { name = "mkdocs-material-extensions" },
+    { name = "pygments" },
+    { name = "pymdown-extensions" },
     { name = "rich" },
 ]
 lint = [
@@ -635,11 +643,15 @@ dev = [
     { name = "coverage", specifier = "==7.13.5" },
     { name = "cryptography", specifier = "==46.0.6" },
     { name = "deepdiff", specifier = "==9.0.0" },
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
+    { name = "markdown", specifier = "==3.7" },
+    { name = "mkdocs", specifier = "==1.6.1" },
+    { name = "mkdocs-material", specifier = "==9.7.6" },
+    { name = "mkdocs-material-extensions", specifier = "==1.3.1" },
     { name = "mypy", specifier = "==1.19.1" },
     { name = "mypy-extensions", specifier = "==1.1.0" },
     { name = "prek", specifier = "==0.3.8" },
+    { name = "pygments", specifier = "==2.19.1" },
+    { name = "pymdown-extensions", specifier = "==10.14.3" },
     { name = "pytest", specifier = "==9.0.2" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "pytest-rerunfailures", specifier = "==16.1" },
@@ -651,8 +663,12 @@ dev = [
 ]
 dev-toolkit = [{ name = "rich", specifier = "==13.9.4" }]
 docs = [
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
+    { name = "markdown", specifier = "==3.7" },
+    { name = "mkdocs", specifier = "==1.6.1" },
+    { name = "mkdocs-material", specifier = "==9.7.6" },
+    { name = "mkdocs-material-extensions", specifier = "==1.3.1" },
+    { name = "pygments", specifier = "==2.19.1" },
+    { name = "pymdown-extensions", specifier = "==10.14.3" },
     { name = "rich", specifier = "==13.9.4" },
 ]
 lint = [
@@ -923,11 +939,11 @@ wheels = [
 
 [[package]]
 name = "markdown"
-version = "3.10.2"
+version = "3.7"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2b/f4/69fa6ed85ae003c2378ffa8f6d2e3234662abd02c10d216c0ba96081a238/markdown-3.10.2.tar.gz", hash = "sha256:994d51325d25ad8aa7ce4ebaec003febcce822c3f8c911e3b17c52f7f589f950", size = 368805, upload-time = "2026-02-09T14:57:26.942Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/54/28/3af612670f82f4c056911fbbbb42760255801b3068c48de792d354ff4472/markdown-3.7.tar.gz", hash = "sha256:2ae2471477cfd02dbbf038d5d9bc226d40def84b4fe2986e49b59b6b472bbed2", size = 357086, upload-time = "2024-08-16T15:55:17.812Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/1f/77fa3081e4f66ca3576c896ae5d31c3002ac6607f9747d2e3aa49227e464/markdown-3.10.2-py3-none-any.whl", hash = "sha256:e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36", size = 108180, upload-time = "2026-02-09T14:57:25.787Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/08/83871f3c50fc983b88547c196d11cf8c3340e37c32d2e9d6152abe2c61f7/Markdown-3.7-py3-none-any.whl", hash = "sha256:7eb6df5690b81a1d7942992c97fad2938e956e79df20cbc6186e9c3a77b1c803", size = 106349, upload-time = "2024-08-16T15:55:16.176Z" },
 ]
 
 [[package]]
@@ -1547,24 +1563,24 @@ wheels = [
 
 [[package]]
 name = "pygments"
-version = "2.20.0"
+version = "2.19.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f", size = 4955991, upload-time = "2026-03-29T13:29:33.898Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7c/2d/c3338d48ea6cc0feb8446d8e6937e1408088a72a39937982cc6111d17f84/pygments-2.19.1.tar.gz", hash = "sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f", size = 4968581, upload-time = "2025-01-06T17:26:30.443Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f4/7e/a72dd26f3b0f4f2bf1dd8923c85f7ceb43172af56d63c7383eb62b332364/pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176", size = 1231151, upload-time = "2026-03-29T13:29:30.038Z" },
+    { url = "https://files.pythonhosted.org/packages/8a/0b/9fcc47d19c48b59121088dd6da2488a49d5f72dacf8262e2790a1d2c7d15/pygments-2.19.1-py3-none-any.whl", hash = "sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c", size = 1225293, upload-time = "2025-01-06T17:26:25.553Z" },
 ]
 
 [[package]]
 name = "pymdown-extensions"
-version = "10.21"
+version = "10.14.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/63/06673d1eb6d8f83c0ea1f677d770e12565fb516928b4109c9e2055656a9e/pymdown_extensions-10.21.tar.gz", hash = "sha256:39f4a020f40773f6b2ff31d2cd2546c2c04d0a6498c31d9c688d2be07e1767d5", size = 853363, upload-time = "2026-02-15T20:44:06.748Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7c/44/e6de2fdc880ad0ec7547ca2e087212be815efbc9a425a8d5ba9ede602cbb/pymdown_extensions-10.14.3.tar.gz", hash = "sha256:41e576ce3f5d650be59e900e4ceff231e0aed2a88cf30acaee41e02f063a061b", size = 846846, upload-time = "2025-02-01T15:43:15.42Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6f/2c/5b079febdc65e1c3fb2729bf958d18b45be7113828528e8a0b5850dd819a/pymdown_extensions-10.21-py3-none-any.whl", hash = "sha256:91b879f9f864d49794c2d9534372b10150e6141096c3908a455e45ca72ad9d3f", size = 268877, upload-time = "2026-02-15T20:44:05.464Z" },
+    { url = "https://files.pythonhosted.org/packages/eb/f5/b9e2a42aa8f9e34d52d66de87941ecd236570c7ed2e87775ed23bbe4e224/pymdown_extensions-10.14.3-py3-none-any.whl", hash = "sha256:05e0bee73d64b9c71a4ae17c72abc2f700e8bc8403755a00580b49a4e9f189e9", size = 264467, upload-time = "2025-02-01T15:43:13.995Z" },
 ]
 
 [[package]]
