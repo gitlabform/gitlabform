@@ -5,6 +5,19 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+## 5.1.1
+
+### Bug Fixes
+
+* KeyError: 'inherit' when using inherit: false in nested config sections with repeated key names [#1238](https://github.com/gitlabform/gitlabform/pull/1238). ([sentoz](https://github.com/sentoz))
+* Branch protection to support deploy key id [#1232](https://github.com/gitlabform/gitlabform/pull/1232). ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 5.1.0
 
 ### Deprecations
