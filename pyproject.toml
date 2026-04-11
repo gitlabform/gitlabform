@@ -114,27 +114,20 @@ gitlabform = "gitlabform.run:run"
 
 # Development toolkit and environment management
 dev = "dev.main:main"
-setup = "dev.main:setup"
-clean = "dev.main:clean"
+workspace = "dev.main:workspace"
 
 # Development workflow (Linting, Formatting, and Testing)
-format = "dev.main:format_code"
-lint = "dev.main:lint"
-test = "dev.main:test"
+qa = "dev.main:qa"
 
 # Local infrastructure management
 gitlab-local = "dev.main:gitlab_local"
 
 # Documentation workflow
-docs-serve = "dev.main:docs_serve"
-docs-build = "dev.main:docs_build"
+docs = "dev.main:docs"
 
 # Packaging and distribution verification
-build = "dev.main:build"
-verify = "dev.main:verify"
-publish = "dev.main:publish"
-docker-build = "dev.main:docker_build"
-docker-verify = "dev.main:docker_verify"
+package = "dev.main:package"
+docker = "dev.main:docker"
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]

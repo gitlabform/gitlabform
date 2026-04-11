@@ -12,18 +12,33 @@ Following tools are used in this project. Please make sure you have them install
 
 ## Typical development workflow
 
-The project provides a comprehensive CLI (the **development toolkit**) to manage the entire development lifecycle. You can discover all available commands and their specific options by running:
+The project provides a comprehensive CLI (**the development toolkit**) organized into task domains. You can discover the available domains by running the main entry point:
 
 ```bash
 uv run dev --help
 ```
 
+### Command Shortcuts
+
+While `dev` is the central entry point, each domain is also registered as a direct shortcut in your environment. You can omit the `dev` prefix from any command for a more concise experience. For example, these two commands are identical:
+
+* Full: `uv run dev workspace setup`
+* Shortcut: `uv run workspace setup`
+
+Each domain (like qa, docs, or workspace) provides its own help context. If you are ever unsure of the available sub-commands or arguments, simply run the domain name or add the `--help` flag:
+
+```bash
+uv run workspace            # Shows help for workspace setup and cleanup
+uv run workspace --help     # Same as above
+uv run docker build --help  # Shows help and available flags for Docker builds
+```
+
 A standard lifecycle for implementing a new feature or bug fix typically involves:
 
 1. **New branch**: Create a new branch for your changes.
-2. **Setup**: Initialize or update your local environment using `uv run setup`. This also installs the Git hooks. See [Environment setup](#environment-setup) section for more details.
+2. **Setup**: Initialize or update your local workspace using uv run workspace setup. This also installs the Git hooks. See Workspace Management section for more details. See [Workspace management](#workspace-management) section for more details.
 3. **Develop**: Implement your logic or fix in the codebase.
-4. **Quality**: Format and lint your code. See [Code quality](#code-quality) section for more details.
+4. **Quality**: Format and lint your code via the qa domain. See [Code quality](#code-quality) section for more details.
 5. **Test**: Be sure to include/update tests for your changes. See [Testing](#testing) section for more details.
 6. **Validate**: Perform a final check on the build artifacts. See [Building & Verification](#building-verification) section for more details.
 7. **Commit**: Record your changes using the **Conventional Commits** standard. The Git hooks installed during setup will automatically validate your commit messages.
@@ -36,12 +51,12 @@ A standard lifecycle for implementing a new feature or bug fix typically involve
 9. **Open/Update PR**: Push your changes to GitHub and create/update a pull request.
 
 
-## Environment setup
+## Workspace Management
 
-Initializing your development environment is a single-step process. We use **`uv`** to provide a consistent, isolated, and reproducible workspace. Everything is contained within a virtual environment (`.venv`) that is automatically managed by the toolchain.
+Managing your development environment is handled by the workspace domain. We use `uv` to provide a consistent, isolated, and reproducible environment where everything is contained within an automatically managed `.venv`.
 
 ```bash
-uv run setup
+uv run workspace setup
 ```
 
 This command performs several automated tasks:
@@ -51,10 +66,10 @@ This command performs several automated tasks:
 3. **Dependency Synchronization**: Installs all required runtime and development dependencies, ensuring your environment exactly matches the `uv.lock` file.
 4. **Git Hook Installation**: Configures Git hooks to enforce linting, formatting, and Conventional Commit standards.
 
-To reset your environment and remove all build artifacts, caches, and the virtual environment:
+To reset your workspace and remove all build artifacts, caches, and the virtual environment:
 
 ```bash
-uv run clean
+uv run workspace clean
 ```
 
 ## Code Quality
@@ -63,10 +78,10 @@ Maintaining high code quality is essential for the stability and readability of 
 
 ### Formatting
 
-We use black to enforce a consistent code style across the entire repository. This ensures that the codebase remains readable and reduces friction during code reviews.
+We use **black** to enforce a consistent code style across the entire repository. This ensures that the codebase remains readable and reduces friction during code reviews.
 
 ```bash
-uv run format
+uv run qa format
 ```
 
 ### Linting
@@ -74,45 +89,45 @@ uv run format
 We use several tools (including `mypy` for type checking and `bandit` for security auditing) to catch potential issues before they are committed. By default, the `lint` command runs all configured checks in parallel.
 
 ```bash
-uv run lint
+uv run qa lint
 ```
 
 You can also run a specific tool or pass additional arguments directly to the underlying linter. For example, to run only mypy with specific flags:
 
 ```bash
-uv run lint mypy .
+uv run qa lint mypy .
 ```
 
 To see the list of available linting tools and help:
 
 ```bash
-uv run lint --help
+uv run qa lint --help
 ```
 
 ## Testing
 
 We use **pytest** as the underlying engine for our entire test suite. The toolkit's `test` command acts as a passthrough, meaning any valid `pytest` argument or flag can be provided directly.
 
-To discover all available testing options:
+To discover all available testing options for the `qa` domain:
 
 ```bash
-uv run test --help
+uv run qa test --help
 ```
 
 **Common examples:**
 
-- Run tests matching a keyword: `uv run test -k "archive"`
-- Run tests with verbose output: `uv run test -v`
-- Run with coverage reporting: `uv run test --cov=.`
-- Run a specific test file/suite: `uv run test tests/<path-to-test-file>`
-- Run a specific test within a test file/suite: `uv run test tests/<path-to-test-file>::<test-class>::<test-method>`
+- Run tests matching a keyword: `uv run qa test -k "archive"`
+- Run tests with verbose output: `uv run qa test -v`
+- Run with coverage reporting: `uv run qa test --cov=.`
+- Run a specific test file/suite: `uv run qa test tests/<path-to-test-file>`
+- Run a specific test within a test file/suite: `uv run qa test tests/<path-to-test-file>::<test-class>::<test-method>`
 
 ### Unit Tests
 
 Unit tests are fast, isolated, and do not require a running GitLab instance. They are ideal for validating logic and configuration parsing:
 
 ```bash
-uv run test tests/unit
+uv run qa test tests/unit
 ```
 
 ### Acceptance Tests
@@ -164,7 +179,7 @@ It's not recommended, but if you prefer to run tests against non-local/disposabl
 ```bash
 export GITLAB_URL="https://mygitlab.company.com"
 export GITLAB_TOKEN="<admin_api_token>"
-uv run test tests/acceptance
+uv run qa test tests/acceptance
 ```
 
 ## Building & Verification
@@ -176,19 +191,19 @@ This section covers creating the distributable artifacts for the project, includ
 We generate standard Python distribution artifacts (source distribution and wheels) that can be uploaded to PyPI. To generate the artifacts in the `dist/` directory:
 
 ```bash
-uv run build
+uv run package build
 ```
 
 To see available build options:
 
 ```bash
-uv run build --help
+uv run package build --help
 ```
 
-The `verify` command performs a rigorous audit of the built files to ensure they are ready for release. This includes metadata validation via **`twine`**, content auditing via **`check-wheel-contents`**, and an automated smoke test that installs the wheel in a temporary isolated environment to check the entry point.
+The `package verify` command performs an audit of the built files to ensure they are ready for release. This includes metadata validation via `twine`, content auditing via `check-wheel-contents`, and an automated smoke test that installs the wheel in a temporary isolated environment to check the entry point.
 
 ```bash
-uv run verify
+uv run package verify
 ```
 
 
@@ -197,41 +212,41 @@ uv run verify
 The Docker image is the recommended way to run GitLabForm in CI/CD environments. To build the image locally using our multi-stage `Dockerfile`:
 
 ```bash
-uv run docker-build
+uv run docker build
 ```
 
 You can customize the image name and tag via arguments:
 
 ```bash
-uv run docker-build --image my-registry/gitlabform --tag dev
+uv run docker build --image my-registry/gitlabform --tag dev
 ```
 
 To see all Docker build options:
 
 ```bash
-uv run docker-build --help
+uv run docker build --help
 ```
 
 To ensure the newly built image is functional, run a smoke test that executes the application version check inside a container:
 
 ```bash
-uv run docker-verify
+uv run docker verify
 ```
 
 To see options for Docker verification:
 
 ```bash
-uv run docker-verify --help
+uv run docker verify --help
 ```
 
 ## Documentation
 
-We use **MkDocs** with the **Material** theme to generate our project documentation. The toolkit provides commands to preview changes locally and build the final static site.
+We use **MkDocs** with the **Material** theme to generate our project documentation. The toolkit provides commands via the `docs` domain to preview changes locally and build the final static site.
 
-To serve the documentation with live-reloading. This is ideal for seeing your changes in real-time as you edit the markdown files:
+To serve the documentation with live-reloading (ideal for seeing your changes in real-time as you edit the markdown files):
 
 ```bash
-uv run docs-serve
+uv run docs serve
 ```
 
 The site will be available at `http://localhost:8000`.
@@ -239,5 +254,11 @@ The site will be available at `http://localhost:8000`.
 To generate the static documentation site in the `site/` directory (used for deployment to GitHub Pages):
 
 ```bash
-uv run docs-build
+uv run docs build
+```
+
+To see all documentation management options:
+
+```bash
+uv run docs --help
 ```

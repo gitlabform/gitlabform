@@ -54,9 +54,14 @@ def lint(linter_name: str | None = None, extra_args: list[str] | None = None):
     logger.info("[bold green]✅ Linting passed.[/bold green]")
 
 
-def format_code():
-    """Automatically formats the codebase using Black."""
-    run_command(["uv", "run", "black", "."], "Formatting code with Black")
+def format_code(extra_args: list[str] | None = None):
+    """Automatically formats the codebase using Black.
+
+    Args:
+        extra_args: Additional arguments to pass to black (e.g., --check, --diff).
+    """
+    cmd = ["uv", "run", "black", "."] + (extra_args or [])
+    run_command(cmd, "Formatting code with Black")
     logger.info("[bold green]✅ Code formatted.[/bold green]")
 
 

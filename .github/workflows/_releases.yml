@@ -52,7 +52,7 @@ jobs:
         run: |
           pip install uv==0.11.2
           uv sync --frozen --no-dev --group docs
-          uv run --no-sync docs-build
+          uv run --no-sync docs build
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
@@ -95,9 +95,9 @@ jobs:
         run: |
           pip install uv==0.11.2
           uv sync --frozen --no-dev --group release
-          uv run --no-sync build
-          uv run --no-sync verify
-          uv run --no-sync publish
+          uv run --no-sync package build
+          uv run --no-sync package verify
+          uv run --no-sync package publish
 
   publish-to-ghcr:
     needs:

@@ -23,7 +23,7 @@ jobs:
         run: |
           pip install uv==0.11.2
           uv sync --frozen --no-dev --group lint
-          uv run --no-sync lint black --check .
+          uv run --no-sync qa lint black --check .
 
   types:
     runs-on: ubuntu-latest
@@ -44,4 +44,4 @@ jobs:
         run: |
           pip install uv==0.11.2
           uv sync --frozen --no-dev --group lint
-          uv run --no-sync lint mypy .
+          uv run --no-sync qa lint mypy .

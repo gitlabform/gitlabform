@@ -1,24 +1,37 @@
 """Tasks related to building distributions and verifying package integrity."""
 
 import subprocess
+import argparse
 import sys
 import tempfile
 from pathlib import Path
-from dev.common import REPO_ROOT, logger, run_command
+from dev.common import REPO_ROOT, logger, run_command, get_executable
 
 
-def build():
-    """Builds the source distribution and wheel using the configured build backend."""
-    run_command(["uv", "build"], "Building package distributions")
+def build(extra_args: list[str] | None = None):
+    """Builds the source distribution and wheel using the configured build backend.
+
+    Args:
+        extra_args: Additional arguments for uv build.
+    """
+    run_command(["uv", "build"] + (extra_args or []), "Building package distributions")
 
 
-def publish():
-    """Publishes the built artifacts to PyPI."""
-    run_command(["uv", "publish"], "Publishing package to PyPI")
+def publish(extra_args: list[str] | None = None):
+    """Publishes the built artifacts to PyPI.
+
+    Args:
+        extra_args: Additional arguments for uv publish.
+    """
+    run_command(["uv", "publish"] + (extra_args or []), "Publishing package to PyPI")
 
 
-def verify():
-    """Performs rigorous verification of the built artifacts in an isolated environment."""
+def verify(extra_args: list[str] | None = None):
+    """Performs rigorous verification of the built artifacts in an isolated environment.
+
+    Args:
+        extra_args: Additional arguments for verification tools (e.g. twine check).
+    """
     logger.info("[bold blue]==>[/bold blue] Verifying built artifacts...")
     dist_path = REPO_ROOT / "dist"
 
@@ -36,7 +49,7 @@ def verify():
         sys.exit(1)
 
     # 2. Check metadata compliance via Twine
-    run_command(["uv", "run", "twine", "check"] + wheels + sdists, "Checking metadata via Twine")
+    run_command(["uv", "run", "twine", "check"] + wheels + sdists + (extra_args or []), "Checking metadata via Twine")
 
     # 3. Audit wheel contents for accidental inclusion of dev files
     run_command(["uv", "run", "check-wheel-contents"] + wheels, "Checking wheel contents")
@@ -62,23 +75,52 @@ def verify():
     logger.info("[bold green]✅ Verification complete. Artifacts are ready for release.[/bold green]")
 
 
-def docker_build(image: str = "localhost/gitlabform", tag: str = "latest", push: bool = False):
-    """Builds the GitLabForm Docker image."""
-    image_name = f"{image}:{tag}"
+def docker_build(extra_args: list[str] | None = None):
+    """Builds the GitLabForm Docker image, parsing image/tag/push from extra_args.
+
+    Args:
+        extra_args: All arguments passed to the docker build command.
+    """
+    # Internal parser to handle defaults for local development
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--image", default="localhost/gitlabform")
+    parser.add_argument("--tag", default="latest")
+    parser.add_argument("--push", action="store_true")
+
+    parsed, remaining = parser.parse_known_args(extra_args or [])
+    image_name = f"{parsed.image}:{parsed.tag}"
+
+    # Construct the docker build command with passthrough for any other docker flags
+    docker_bin = get_executable("docker")
+    cmd = [docker_bin, "build", "--pull", "-t", image_name] + remaining + [str(REPO_ROOT)]
 
     run_command(
-        ["docker", "build", "--pull", "-t", image_name, str(REPO_ROOT)],
+        cmd,
         f"Building Docker image: [bold cyan]{image_name}[/bold cyan]",
     )
 
-    if push:
-        run_command(["docker", "push", image_name], f"Pushing Docker image: [bold cyan]{image_name}[/bold cyan]")
+    if parsed.push:
+        docker_bin = get_executable("docker")
+        run_command([docker_bin, "push", image_name], f"Pushing Docker image: [bold cyan]{image_name}[/bold cyan]")
 
 
-def docker_verify(image: str = "localhost/gitlabform", tag: str = "latest"):
-    """Verifies the built Docker image with a smoke test."""
-    image_name = f"{image}:{tag}"
+def docker_verify(extra_args: list[str] | None = None):
+    """Verifies the built Docker image with a smoke test, parsing image/tag from extra_args.
+
+    Args:
+        extra_args: All arguments passed to the docker verify command.
+    """
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--image", default="localhost/gitlabform")
+    parser.add_argument("--tag", default="latest")
+
+    parsed, remaining = parser.parse_known_args(extra_args or [])
+    image_name = f"{parsed.image}:{parsed.tag}"
+
+    # Construct the docker run command
+    docker_bin = get_executable("docker")
+    cmd = [docker_bin, "run", "--rm"] + remaining + [image_name, "gitlabform", "--version"]
     run_command(
-        ["docker", "run", "--rm", image_name, "gitlabform", "--version"],
+        cmd,
         f"Verifying Docker image: [bold cyan]{image_name}[/bold cyan]",
     )
