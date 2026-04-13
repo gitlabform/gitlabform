@@ -315,7 +315,7 @@ class GitLabForm:
         """
         Configures the application output using logging, based on debug and verbose flags:
 
-        * normal mode - logging only FATAL logs
+        * normal mode - logging only WARNING logs
         * verbose mode - logging INFO level and above
         * debug / tests mode - logging DEBUG level and above, along with rich exception tracebacks (may expose secrets)
 
@@ -328,7 +328,7 @@ class GitLabForm:
             level = logging.INFO
             rich_tracebacks = False
         else:
-            level = logging.FATAL
+            level = logging.WARNING
             rich_tracebacks = False
 
         logging.basicConfig(
@@ -698,8 +698,7 @@ class GitLabForm:
         num_digits = len(str(n))
         counter_format = f"(%{num_digits}d/%d)"
         counter_str = counter_format % (i, n)
-        console.print(f"{prefix} {counter_str}", style=color)
-        console.print(second_text, style=second_color)
+        console.print(f"[bold {color}]{prefix} {counter_str}[/] [{second_color}]{second_text}[/]")
 
 
 class Formatter(
