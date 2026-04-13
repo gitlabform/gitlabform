@@ -137,18 +137,20 @@ class ProjectsProvider(GroupsProvider):
         for project in projects:
             try:
                 project_object = self.gitlab.get_project_case_insensitive(project)
-                if project_object["archived"]:
+                if not self.include_archived_projects and project_object["archived"]:
                     archived.append(project_object["path_with_namespace"])
-                if project_object.get("marked_for_deletion_on"):
+                if not self.include_projects_scheduled_for_deletion and project_object.get("marked_for_deletion_on"):
                     scheduled_for_deletion.append(project_object["path_with_namespace"])
             except NotFoundException:
                 debug("Could not find '%s'", project)
                 if project_transfer_source := self._get_project_transfer_source_from_config(project):
                     source_project = self._find_project_transfer_source_in_gitlab(project_transfer_source)
                     if source_project:
-                        if source_project["archived"]:
+                        if not self.include_archived_projects and source_project["archived"]:
                             archived.append(project)
-                        if source_project.get("marked_for_deletion_on"):
+                        if not self.include_projects_scheduled_for_deletion and source_project.get(
+                            "marked_for_deletion_on"
+                        ):
                             scheduled_for_deletion.append(project)
                     else:
                         fatal(

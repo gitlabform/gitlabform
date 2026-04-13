@@ -145,53 +145,82 @@ class TestVerifyIfProjectsExistAndGetOmittedProjects:
             "marked_for_deletion_on": None,
         }
 
-        provider = make_provider(gitlab_mock, configuration_mock)
+        provider = make_provider(
+            gitlab_mock, configuration_mock, include_archived=False, include_scheduled_for_deletion=False
+        )
         archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["group/project1"])
 
         assert archived == []
         assert scheduled == []
 
-    def test__archived_project__in_archived_list(self, gitlab_mock, configuration_mock):
+    def test__archived_project__omitted_when_flag_false(self, gitlab_mock, configuration_mock):
         gitlab_mock.get_project_case_insensitive.return_value = {
             "path_with_namespace": "group/project1",
             "archived": True,
             "marked_for_deletion_on": None,
         }
 
-        provider = make_provider(gitlab_mock, configuration_mock)
+        provider = make_provider(gitlab_mock, configuration_mock, include_archived=False)
         archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["group/project1"])
 
         assert archived == ["group/project1"]
         assert scheduled == []
 
-    def test__scheduled_for_deletion_project__in_scheduled_list(self, gitlab_mock, configuration_mock):
+    def test__archived_project__not_omitted_when_flag_true(self, gitlab_mock, configuration_mock):
+        gitlab_mock.get_project_case_insensitive.return_value = {
+            "path_with_namespace": "group/project1",
+            "archived": True,
+            "marked_for_deletion_on": None,
+        }
+
+        provider = make_provider(gitlab_mock, configuration_mock, include_archived=True)
+        archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["group/project1"])
+
+        assert archived == []
+        assert scheduled == []
+
+    def test__scheduled_for_deletion_project__omitted_when_flag_false(self, gitlab_mock, configuration_mock):
         gitlab_mock.get_project_case_insensitive.return_value = {
             "path_with_namespace": "group/project1",
             "archived": False,
             "marked_for_deletion_on": "2026-04-15",
         }
 
-        provider = make_provider(gitlab_mock, configuration_mock)
+        provider = make_provider(gitlab_mock, configuration_mock, include_scheduled_for_deletion=False)
         archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["group/project1"])
 
         assert archived == []
         assert scheduled == ["group/project1"]
 
-    def test__both_archived_and_scheduled__in_both_lists(self, gitlab_mock, configuration_mock):
+    def test__scheduled_for_deletion_project__not_omitted_when_flag_true(self, gitlab_mock, configuration_mock):
+        gitlab_mock.get_project_case_insensitive.return_value = {
+            "path_with_namespace": "group/project1",
+            "archived": False,
+            "marked_for_deletion_on": "2026-04-15",
+        }
+
+        provider = make_provider(gitlab_mock, configuration_mock, include_scheduled_for_deletion=True)
+        archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["group/project1"])
+
+        assert archived == []
+        assert scheduled == []
+
+    def test__both_archived_and_scheduled__in_both_lists_when_flags_false(self, gitlab_mock, configuration_mock):
         gitlab_mock.get_project_case_insensitive.return_value = {
             "path_with_namespace": "group/project1",
             "archived": True,
             "marked_for_deletion_on": "2026-04-15",
         }
 
-        provider = make_provider(gitlab_mock, configuration_mock)
+        provider = make_provider(
+            gitlab_mock, configuration_mock, include_archived=False, include_scheduled_for_deletion=False
+        )
         archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["group/project1"])
 
         assert archived == ["group/project1"]
         assert scheduled == ["group/project1"]
 
-    def test__transfer_source_scheduled_for_deletion__in_scheduled_list(self, gitlab_mock, configuration_mock):
-        # Project does not exist at the target path; it's configured to be transferred
+    def test__transfer_source_scheduled_for_deletion__omitted_when_flag_false(self, gitlab_mock, configuration_mock):
         gitlab_mock.get_project_case_insensitive.side_effect = [
             NotFoundException("not found at target path"),
             {
@@ -206,11 +235,32 @@ class TestVerifyIfProjectsExistAndGetOmittedProjects:
             }
         }
 
-        provider = make_provider(gitlab_mock, configuration_mock)
+        provider = make_provider(gitlab_mock, configuration_mock, include_scheduled_for_deletion=False)
         archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["new_group/project1"])
 
         assert archived == []
         assert scheduled == ["new_group/project1"]
+
+    def test__transfer_source_scheduled_for_deletion__not_omitted_when_flag_true(self, gitlab_mock, configuration_mock):
+        gitlab_mock.get_project_case_insensitive.side_effect = [
+            NotFoundException("not found at target path"),
+            {
+                "path_with_namespace": "old_group/project1",
+                "archived": False,
+                "marked_for_deletion_on": "2026-04-15",
+            },
+        ]
+        configuration_mock.config = {
+            "projects_and_groups": {
+                "new_group/project1": {"project": {"transfer_from": "old_group/project1"}},
+            }
+        }
+
+        provider = make_provider(gitlab_mock, configuration_mock, include_scheduled_for_deletion=True)
+        archived, scheduled = provider._verify_if_projects_exist_and_get_omitted_projects(["new_group/project1"])
+
+        assert archived == []
+        assert scheduled == []
 
 
 class TestGetProjects:
