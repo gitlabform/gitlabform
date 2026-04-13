@@ -43,7 +43,7 @@ def requires_license(gl: Gitlab, request):
 
     gitlab_license = gl.get_license()
     if not gitlab_license:
-        pytest.skip("this test requires a GitLab license (Paid/Trial)")
+        pytest.fail("This test requires a GitLab license")
     if gitlab_license["expired"]:
         pytest.fail("GitLab license has expired, please request a new one")
 
