@@ -34,8 +34,11 @@ dependencies = [
     "python-gitlab[graphql]==8.2.0",
     "requests==2.33.1",
     "rich==15.0.0",
-    "ruamel.yaml==0.19.1",
-    "yamlpath==3.9.0",
+    # yamlpath and ruamel and tightly coupled, currently 0.19.1 of ruamel and 3.9.0 of yamlpath break support for
+    # yaml 1.1 "yes" -> True conversion. If we want to upgrade we'd need to make a breaking-change and drop support for
+    # unannotated yaml 1.1
+    "ruamel.yaml==0.17.21",
+    "yamlpath==3.8.2",
 ]
 
 [project.urls]
