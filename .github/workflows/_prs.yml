@@ -89,12 +89,12 @@ jobs:
         run: |
           pip install wheel
           pip install -e .[test]
-      - name: Run acceptance tests that require premium license
+      - name: Start GitLab Premium in Docker
         env:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
-        run: |
-          ./dev/run_gitlab_in_docker.sh
-          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
+        run: ./dev/run_gitlab_in_docker.sh
+      - name: Run acceptance tests that require premium license
+        run: pytest -v --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
@@ -135,15 +135,14 @@ jobs:
         run: |
           pip install wheel
           pip install -e .[test]
-      - name: Run acceptance tests that require Ultimate license (OPTIONAL)
-        continue-on-error: true # Ultimate License via link only lasts for 90days so may need renewing, don't block other PRs
+      - name: Start GitLab Ultimate in Docker
         env:
           # requested via: https://handbook.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows/#contributing-to-the-gitlab-enterprise-edition-ee
           # https://gitlab.com/gitlab-org/developer-relations/contributor-success/team-task/-/issues
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_ULTIMATE_LICENSE }}
-        run: |
-          ./dev/run_gitlab_in_docker.sh
-          pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate
+        run: ./dev/run_gitlab_in_docker.sh
+      - name: Run acceptance tests that require Ultimate license
+        run: pytest -v --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
