@@ -35,7 +35,7 @@ dependencies = [
     "requests==2.33.1",
     "rich==14.3.3",
     "ruamel.yaml==0.17.21",
-    "yamlpath==3.8.2",
+    "yamlpath==3.9.0",
 ]
 
 [project.urls]
