@@ -4,6 +4,8 @@ from gitlabform import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform
 
+pytestmark = pytest.mark.requires_ultimate_license
+
 
 class TestGroupMembers:
     def test__add_user_to_group_members_with_custom_role_by_id(self, gl, group_for_function, users, random_string):

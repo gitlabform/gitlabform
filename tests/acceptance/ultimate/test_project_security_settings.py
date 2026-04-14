@@ -1,7 +1,11 @@
+import pytest
+
 from tests.acceptance import run_gitlabform
 from gitlabform.processors.project.project_security_settings import (
     ProjectSecuritySettingsProcessor,
 )
+
+pytestmark = pytest.mark.requires_ultimate_license
 
 
 class TestProjectSecuritySettings:

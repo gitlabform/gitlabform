@@ -4,7 +4,7 @@ from gitlab.v4.objects import Project, Group
 
 from tests.acceptance import run_gitlabform
 
-pytestmark = pytest.mark.requires_license
+pytestmark = pytest.mark.requires_ultimate_license
 
 
 class TestProjectSettings:
