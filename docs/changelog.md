@@ -5,6 +5,23 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+## 5.2.0
+
+## Features
+
+* Replace cli_ui with native logging to improve messaging consistency [#1218](https://github.com/gitlabform/gitlabform/pull/1218). ([TimKnight01](https://github.com/TimKnight01)))
+  - Cli_UI was deprecated in Feb 2026: https://github.com/your-tools/python-cli-ui
+  - resolves: [#920](https://github.com/gitlabform/gitlabform/issues/920)
+  - previous "verbose" logging and cli flag `-v` is retained, with those logs output at INFO level
+  - by default logging level set to WARNING
+  - uses Rich's direct console logger to nicely format the processing and version info into CLI
+
+### Dependencies
+
+* Update various dependencies to newer version.
+
+Thanks to all the contributors of this release!
+
 ## 5.1.1
 
 ### Bug Fixes
