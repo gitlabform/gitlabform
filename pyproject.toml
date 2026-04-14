@@ -24,7 +24,6 @@ classifiers = [
 requires-python = ">=3.12.0"
 dependencies = [
     "certifi==2026.2.25",
-    "ez-yaml==2.2.0",
     "Jinja2==3.1.6",
     "luddite==1.0.4",
     "MarkupSafe==3.0.3",
@@ -39,6 +38,8 @@ dependencies = [
     # unannotated yaml 1.1
     "ruamel.yaml==0.17.21",
     "yamlpath==3.8.2",
+    # ez_yaml >1.2.0 changes imports and also uses ruamel.yaml tied to 1.2 so wouldn't support "yes" as True
+    "ez-yaml==1.2.0",
 ]
 
 [project.urls]
