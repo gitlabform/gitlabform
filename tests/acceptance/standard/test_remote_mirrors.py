@@ -1,3 +1,4 @@
+import logging
 import os
 import pytest
 import time
@@ -5,7 +6,6 @@ from typing import cast, Tuple, Generator
 from gitlab.v4.objects import Project, ProjectRemoteMirror, ProjectBranch, Group
 
 from tests.acceptance import run_gitlabform, get_random_name, create_project
-from tests.acceptance.conftest import GitLabFormLogs
 
 
 @pytest.fixture(scope="class")
@@ -175,7 +175,7 @@ class TestRemoteMirrorsProcessor:
             third_mirror_url_ssh_public_key_auth
         )
 
-    def test_remote_mirrors_create_error(self, project: Project, gitlabform_logs: GitLabFormLogs) -> None:
+    def test_remote_mirrors_create_error(self, project: Project, caplog) -> None:
         """
         Test that an invalid mirror URL triggers a GitlabCreateError which is caught and logged.
         """
@@ -191,25 +191,38 @@ class TestRemoteMirrorsProcessor:
                 enabled: true
         """
 
-        run_gitlabform(config, target_path)
+        with caplog.at_level(logging.WARNING):
+            run_gitlabform(config, target_path)
 
         norm_url = self._normalize_url_for_comparison(invalid_url)
-        assert any(f"Failed to create remote mirror {norm_url}" in msg for msg in gitlabform_logs.warning)
+        assert f"Failed to create remote mirror {norm_url}" in caplog.text
 
     def test_remote_mirrors_update_configuration(
-        self, project: Project, mirror_urls: Tuple[str, str, str], gitlabform_logs: GitLabFormLogs
+        self, project_for_function: Project, mirror_urls: Tuple[str, str, str], caplog
     ) -> None:
         """
-        This test validates configuration update of remote mirror by spying on
-        gitlabform's verbose logs.
+        Test can update a remote mirror configuration
         """
 
         # 1. Setup the mirror URLs from the fixture
         first_url, second_url, _ = mirror_urls
 
+        # Create mirrors on project so we can test update functionality in isolation, rather than relying on earlier
+        # tests in this File having created some mirrors
+        project_for_function.remote_mirrors.create({"url": first_url, "enabled": True, "auth_method": "password"})
+
+        project_for_function.remote_mirrors.create(
+            {
+                "url": second_url,
+                "enabled": True,
+                "auth_method": "password",
+                "keep_divergent_refs": True,
+            }
+        )
+
         gitlabform_config = f"""
         projects_and_groups:
-          {project.path_with_namespace}:
+          {project_for_function.path_with_namespace}:
             remote_mirrors:
               {first_url}:
                 enabled: true
@@ -221,36 +234,33 @@ class TestRemoteMirrorsProcessor:
         """
 
         # 2. Run GitLabForm
-        run_gitlabform(gitlabform_config, project.path_with_namespace)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(gitlabform_config, project_for_function.path_with_namespace)
 
         # 3. Get normalized URLs for the assertions
-        first_mirror = self._get_mirror_from_url(project, first_url)
+        first_mirror = self._get_mirror_from_url(project_for_function, first_url)
         assert first_mirror is not None
         first_norm = self._normalize_url_for_comparison(first_mirror.url)
 
-        second_mirror = self._get_mirror_from_url(project, second_url)
+        second_mirror = self._get_mirror_from_url(project_for_function, second_url)
         assert second_mirror is not None
         second_norm = self._normalize_url_for_comparison(second_mirror.url)
 
         # 4. Assertions
         assert first_mirror.enabled is True
         assert first_mirror.auth_method == "password"
-        # Use substring matching (in) because cli_ui often adds prefixes like '* ' or ':: '
+        # Use substring matching (in)
         expected_unchanged = f"Remote mirror '{first_norm}' remains unchanged"
-        assert any(
-            expected_unchanged in msg for msg in gitlabform_logs.debug
-        ), f"Expected unchanged message not found. Captured: {gitlabform_logs.debug}"
+        assert expected_unchanged in caplog.text, f"Expected unchanged message not found. Captured: {caplog.text}"
 
         assert second_mirror.enabled is True
         assert second_mirror.auth_method == "password"
         assert getattr(second_mirror, "keep_divergent_refs", None) is False
         expected_updated = f"Updated remote mirror '{second_norm}'"
-        assert any(
-            expected_updated in msg for msg in gitlabform_logs.debug
-        ), f"Expected update message not found. Captured: {gitlabform_logs.debug}"
+        assert expected_updated in caplog.text, f"Expected updated message not found. Captured: {caplog.text}"
 
     def test_remote_mirrors_update_credentials(
-        self, project_for_function: Project, root_username: str, root_access_token: str, gitlabform_logs: GitLabFormLogs
+        self, project_for_function: Project, root_username: str, root_access_token: str, caplog
     ) -> None:
         """
         Validates credential updates for 3 mirror types (HTTP, SSH+Pass, SSH+Key).
@@ -294,7 +304,8 @@ class TestRemoteMirrorsProcessor:
                 force_update: true
         """
 
-        run_gitlabform(config, target_path)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(config, target_path)
 
         # 3. Assertions
         for url in urls:
@@ -302,18 +313,14 @@ class TestRemoteMirrorsProcessor:
 
             # Check Debug Log: Confirms the Processor triggered the update despite masked credentials
             expected_debug = f"Updating remote mirror '{norm}' with latest config"
-            assert any(
-                expected_debug in msg for msg in gitlabform_logs.debug
-            ), f"Expected update log not found for {norm}."
+            assert expected_debug in caplog.text, f"Expected update log not found for {norm}."
 
             # Check Info Log: Confirms the reminder was printed at the standard output level
             expected_info = f"!!! REMINDER: 'force_update' was used for mirror '{norm}'"
-            assert any(
-                expected_info in msg for msg in gitlabform_logs.info
-            ), f"Expected info reminder not found for {norm}."
+            assert expected_info in caplog.text, f"Expected info reminder not found for {norm}."
 
     def test_remote_mirrors_update_error(
-        self, project_for_function: Project, mirror_urls: Tuple[str, str, str], gitlabform_logs: GitLabFormLogs
+        self, project_for_function: Project, mirror_urls: Tuple[str, str, str], caplog
     ) -> None:
         """
         Test that updating a mirror with invalid parameters triggers GitlabUpdateError which is caught and logged.
@@ -333,11 +340,12 @@ class TestRemoteMirrorsProcessor:
                 auth_method: invalid_method
         """
 
-        run_gitlabform(config, project_for_function.path_with_namespace)
+        with caplog.at_level(logging.WARNING):
+            run_gitlabform(config, project_for_function.path_with_namespace)
 
         # The processor logs the normalized URL in update error
         norm_url = self._normalize_url_for_comparison(first_url)
-        assert any(f"Failed to update remote mirror {norm_url}" in msg for msg in gitlabform_logs.warning)
+        assert f"Failed to update remote mirror {norm_url}" in caplog.text
 
     def test_remote_mirror_http_password_auth_sync(
         self,
@@ -425,7 +433,7 @@ class TestRemoteMirrorsProcessor:
     def test_remote_mirrors_sync_error(
         self,
         project_for_function: Project,
-        gitlabform_logs: GitLabFormLogs,
+        caplog,
     ) -> None:
         """
         Test that an error during mirror sync is caught and logged.
@@ -444,13 +452,12 @@ class TestRemoteMirrorsProcessor:
                 force_push: true
         """
 
-        run_gitlabform(config, target_path)
+        with caplog.at_level(logging.WARNING):
+            run_gitlabform(config, target_path)
 
-        assert any(f"Failed to trigger sync for remote mirror" in msg for msg in gitlabform_logs.warning)
+        assert f"Failed to trigger sync for remote mirror" in caplog.text
 
-    def test_remote_mirrors_ssh_public_key_retrieval(
-        self, project_for_function: Project, gitlabform_logs: GitLabFormLogs
-    ) -> None:
+    def test_remote_mirrors_ssh_public_key_retrieval(self, project_for_function: Project, caplog) -> None:
         """
         Validates that when print_public_key is true, the SSH public key is
         retrieved and printed to the console.
@@ -470,16 +477,17 @@ class TestRemoteMirrorsProcessor:
                 print_public_key: true
         """
 
-        run_gitlabform(config, target_path)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(config, target_path)
 
         # 2. Assertions
         # Normalize the URL as the processor does for logs
         norm_url = self._normalize_url_for_comparison(ssh_url)
 
         # Check that the mirror was created/updated
-        assert any(
-            f"Creating remote mirror '{norm_url}'" in msg or f"Updated remote mirror '{norm_url}'" in msg
-            for msg in gitlabform_logs.debug
+        assert (
+            f"Creating remote mirror '{norm_url}'" in caplog.text
+            or f"Updated remote mirror '{norm_url}'" in caplog.text
         )
 
         # 3. Check for the Public Key Output
@@ -488,23 +496,17 @@ class TestRemoteMirrorsProcessor:
         key_header = f"🔑 SSH Public Key for mirror '{norm_url}':"
 
         # Verify the instructional text is in the info stream
-        assert any(
-            instruction_text in msg for msg in gitlabform_logs.info
-        ), f"Instructional text not found in info logs. Captured: {gitlabform_logs.info}"
+        assert instruction_text in caplog.text, f"Instructional text not found in info logs. Captured: {caplog.text}"
 
-        assert any(
-            key_header in msg for msg in gitlabform_logs.info
-        ), f"Key header not found in info logs. Captured: {gitlabform_logs.info}"
+        assert key_header in caplog.text, f"Key header not found in info logs. Captured: {caplog.text}"
 
         # Check if any message in the info stream looks like a public key (starts with ssh-rsa, ecdsa, etc.)
         ssh_key_patterns = ["ssh-rsa", "ssh-ed25519", "ecdsa-sha2-nistp256"]
-        found_key = any(any(pattern in msg for pattern in ssh_key_patterns) for msg in gitlabform_logs.info)
+        found_key = any(key in caplog.text for key in ssh_key_patterns)
 
-        assert found_key, f"No SSH public key pattern found in info logs. Captured: {gitlabform_logs.info}"
+        assert found_key, f"No SSH public key pattern found in info logs. Captured: {caplog.text}"
 
-    def test_remote_mirrors_delete(
-        self, project: Project, mirror_urls: Tuple[str, str, str], gitlabform_logs: GitLabFormLogs
-    ) -> None:
+    def test_remote_mirrors_delete(self, project: Project, mirror_urls: Tuple[str, str, str], caplog) -> None:
         """Test deleting remote mirrors using the delete flag.
 
         This test verifies that:
@@ -525,7 +527,9 @@ class TestRemoteMirrorsProcessor:
                 delete: true
         """
 
-        run_gitlabform(delete_yaml, project.path_with_namespace)
+        with caplog.at_level(logging.DEBUG):
+            run_gitlabform(delete_yaml, project.path_with_namespace)
+
         mirrors_after_test = project.remote_mirrors.list(get_all=True)
         second_mirror_after_test = self._get_mirror_from_url(project, second_url)
         third_mirror_after_test = self._get_mirror_from_url(project, third_url)
@@ -549,9 +553,7 @@ class TestRemoteMirrorsProcessor:
         # The last mirror configured for deletion but it was never setup in gitlab.
         # Ensure expected error message is reported.
         expected = f"Skip deleting remote mirror '{self._normalize_url_for_comparison(non_existent_mirror_url)}', because it doesn't exist"
-        assert any(
-            expected in msg for msg in gitlabform_logs.debug
-        ), f"Expected message not found. Captured: {gitlabform_logs.debug}"
+        assert expected in caplog.text, f"Expected message not found. Captured: {caplog.text}"
 
     def test_remote_mirrors_enforce_false(self, project: Project, mirror_urls: Tuple[str, str, str]) -> None:
         """Test the additive behavior when enforce: false is set.
@@ -739,9 +741,9 @@ class TestRemoteMirrorsProcessor:
         self,
         project: Project,
         mirror_urls: Tuple[str, str, str],
-        gitlabform_logs: GitLabFormLogs,
         root_username,
         root_access_token,
+        caplog,
     ) -> None:
         """
         Validates that when print_details is true, the full mirror object
@@ -772,40 +774,39 @@ class TestRemoteMirrorsProcessor:
                 only_protected_branches: true
         """
 
-        run_gitlabform(config, target_path)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(config, target_path)
 
         # 3. Assertions: Check for the Report Header
         report_header = f"📋 Final Remote Mirror Report for '{target_path}':"
-        assert any(
-            report_header in msg for msg in gitlabform_logs.info
-        ), f"Report header not found in info logs. Captured: {gitlabform_logs.info}"
+        assert report_header in caplog.text, f"Report header not found in info logs. Captured: {caplog.text}"
 
         # 4. Assertions: Check for Mirror 1 (from config)
         # We expect GitLab to have masked the username and the token/password
         # resulting in "https://*****:*****@..."
         expected_api_url = first_url.replace(root_username, "*****").replace(root_access_token, "*****")
-        assert any(f"- url: {expected_api_url}" in msg for msg in gitlabform_logs.info)
-        assert any("- only_protected_branches: True" in msg for msg in gitlabform_logs.info)
+        assert f"- url: {expected_api_url}" in caplog.text
+        assert "- only_protected_branches: True" in caplog.text
 
         # 5. Assertions: Check for Mirror 2 (unconfigured but existing in GitLab)
         # We expect GitLab to have masked the username and the token/password
         # resulting in "https://*****:*****@..."
         # This confirms the report shows all mirrors if enforce is false
         expected_api_url = second_url.replace(root_username, "*****").replace(root_access_token, "*****")
-        assert any(f"- url: {expected_api_url}" in msg for msg in gitlabform_logs.info)
+        assert f"- url: {expected_api_url}" in caplog.text
 
         # 6. Check for status with icon (Default status for new/idle mirrors is 'none')
         # We check for 'none' or 'finished' depending on how fast GitLab processed the sync
         status_pattern = ["update_status: ⚪ none", "update_status: ✅ finished"]
-        found_status = any(any(pattern in msg for pattern in status_pattern) for msg in gitlabform_logs.info)
-        assert found_status, f"Mirror status icon not found in report. Logs: {gitlabform_logs.info}"
+        found_status = any(pattern in caplog.text for pattern in status_pattern)
+        assert found_status, f"Mirror status icon not found in report. Logs: {caplog.text}"
 
         # 7. Verify visual separators
         separator = "─" * 30
-        assert any(separator in msg for msg in gitlabform_logs.info), "Visual separator line not found in report logs."
+        assert separator in caplog.text, "Visual separator line not found in report logs."
 
     def test_remote_mirrors_print_details_disabled_by_default(
-        self, project_for_function: Project, mirror_urls: Tuple[str, str, str], gitlabform_logs: GitLabFormLogs
+        self, project_for_function: Project, mirror_urls: Tuple[str, str, str], caplog
     ) -> None:
         """
         Ensures that no detailed report is printed when print_details is not set.
@@ -821,9 +822,10 @@ class TestRemoteMirrorsProcessor:
                 enabled: true
         """
 
-        run_gitlabform(config, target_path)
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(config, target_path)
 
         report_header = "📋 Final Remote Mirror Report"
-        assert not any(
-            report_header in msg for msg in gitlabform_logs.info
+        assert (
+            not report_header in caplog.text
         ), "Report header found in logs even though print_details was not enabled."

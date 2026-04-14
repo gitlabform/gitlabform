@@ -1,6 +1,7 @@
+import sys
 from typing import Optional, Any
 
-from cli_ui import info, warning, error, fatal, debug as verbose
+from logging import info, warning, error, critical
 from gitlab import (
     GitlabGetError,
     GitlabDeleteError,
@@ -40,7 +41,8 @@ class BranchesProcessor(AbstractProcessor):
         for branch in sorted(configuration["branches"]):
             branch_config = configuration["branches"][branch]
             if branch_config.get("protected") is None:
-                fatal(f"The Protected key is mandatory in branches configuration, fix {branch} YAML config")
+                critical(f"The Protected key is mandatory in branches configuration, fix {branch} YAML config")
+                sys.exit(EXIT_INVALID_INPUT)
 
         return True
 
@@ -77,10 +79,8 @@ class BranchesProcessor(AbstractProcessor):
             except GitlabGetError:
                 message = f"Branch '{branch_name}' not found when processing it to be protected/unprotected!"
                 if self.strict:
-                    fatal(
-                        message,
-                        exit_code=EXIT_INVALID_INPUT,
-                    )
+                    critical(message)
+                    sys.exit(EXIT_INVALID_INPUT)
                 else:
                     warning(message)
 
@@ -88,11 +88,11 @@ class BranchesProcessor(AbstractProcessor):
             protected_branch = project.protectedbranches.get(branch_name)
         except GitlabGetError:
             message = f"The branch '{branch_name}' is not protected!"
-            verbose(message)
+            info(message)
 
         if branch_config.get("protected"):
             if not protected_branch:
-                verbose(f"Creating branch protection for {branch_name}")
+                info(f"Creating branch protection for {branch_name}")
                 self.protect_branch(project, branch_name, branch_config, False)
                 return
 
@@ -133,10 +133,10 @@ class BranchesProcessor(AbstractProcessor):
                     # Check if this attribute exists on the GitLab object and needs an update
                     existing_value = getattr(protected_branch, key, None)
                     if existing_value != value:
-                        verbose(f"Creating data to update {key} as necessary")
+                        info(f"Creating data to update {key} as necessary")
                         protected_branch_api_patch_data[key] = value
 
-            verbose("Creating data to update merge_access_levels as necessary")
+            info("Creating data to update merge_access_levels as necessary")
             merge_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("merge_access_levels"),
                 existing_records=tuple(self._get_list_attribute(protected_branch, "merge_access_levels")),
@@ -144,7 +144,7 @@ class BranchesProcessor(AbstractProcessor):
             if len(merge_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items_patch_data
 
-            verbose("Creating data to update push_access_levels as necessary")
+            info("Creating data to update push_access_levels as necessary")
             push_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("push_access_levels"),
                 existing_records=tuple(self._get_list_attribute(protected_branch, "push_access_levels")),
@@ -152,7 +152,7 @@ class BranchesProcessor(AbstractProcessor):
             if len(push_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_push"] = push_access_items_patch_data
 
-            verbose("Creating data to update unprotect_access_levels as necessary")
+            info("Creating data to update unprotect_access_levels as necessary")
 
             unprotect_access_items_patch_data = self.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
@@ -164,11 +164,11 @@ class BranchesProcessor(AbstractProcessor):
 
             if protected_branch_api_patch_data != {}:
                 # We have some updates to make
-                verbose(f"Updating protected branch {branch_name} with {protected_branch_api_patch_data}")
+                info(f"Updating protected branch {branch_name} with {protected_branch_api_patch_data}")
                 self.protect_branch(project, branch_name, protected_branch_api_patch_data, True)
 
         elif protected_branch and not branch_config.get("protected"):
-            verbose(f"Removing branch protection for {branch_name}")
+            info(f"Removing branch protection for {branch_name}")
             self.unprotect_branch(protected_branch)
 
     def process_branch_config_gitlab_under_15_6_0_or_ce(self, branch_config, branch_name, project, protected_branch):
@@ -185,7 +185,7 @@ class BranchesProcessor(AbstractProcessor):
         # Therefore we first transform the configured YAML into a state matching the gitlab GET endpoint,
         # before checking if it needs_update
         if self._needs_update(protected_branch.attributes, self.map_config_to_protected_branch_get_data(branch_config)):
-            verbose(
+            info(
                 f"Gitlab version is less than 15.6.0, so un-protecting and reprotecting branch {branch_name} to apply new config..."
             )
             self.unprotect_branch(protected_branch)
@@ -215,10 +215,8 @@ class BranchesProcessor(AbstractProcessor):
             message = f"Protecting branch '{branch_name}' failed! Error '{e.error_message}"
 
             if self.strict:
-                fatal(
-                    message,
-                    exit_code=EXIT_PROCESSING_ERROR,
-                )
+                critical(message)
+                sys.exit(EXIT_PROCESSING_ERROR)
             else:
                 error(message)
 
@@ -234,10 +232,8 @@ class BranchesProcessor(AbstractProcessor):
         except GitlabDeleteError as e:
             message = f"Branch '{protected_branch.name}' could not be unprotected! Error '{e.error_message}'"
             if self.strict:
-                fatal(
-                    message,
-                    exit_code=EXIT_PROCESSING_ERROR,
-                )
+                critical(message)
+                sys.exit(EXIT_PROCESSING_ERROR)
             else:
                 warning(message)
 
@@ -247,7 +243,7 @@ class BranchesProcessor(AbstractProcessor):
         Translates 'user: username' or 'group: name' into 'user_id' or 'group_id' as
         config by replacing them with ids.
         """
-        verbose("Transforming User and Group names in Branch configuration to Ids")
+        info("Transforming User and Group names in Branch configuration to Ids")
 
         for key in branch_config:
             if isinstance(branch_config[key], list):
@@ -287,7 +283,7 @@ class BranchesProcessor(AbstractProcessor):
         """
         # Also see https://github.com/python-gitlab/python-gitlab/issues/2850
 
-        verbose("Transforming *_access_level and allowed_to_* keys in Branch configuration")
+        info("Transforming *_access_level and allowed_to_* keys in Branch configuration")
         local_keys_to_gitlab_keys_map = {
             "merge_access_level": "merge_access_levels",
             "push_access_level": "push_access_levels",
@@ -424,7 +420,7 @@ class BranchesProcessor(AbstractProcessor):
                 # conflict with a 'No Access' rule.
 
         else:
-            verbose("No configuration defined for this access level. No changes will be made.")
+            info("No configuration defined for this access level. No changes will be made.")
 
         return patch_data
 
@@ -467,7 +463,7 @@ class BranchesProcessor(AbstractProcessor):
                     break
 
             if not found:
-                verbose("naive_access_level_diff_analyzer - needs_update: True (missing rule found)")
+                info("naive_access_level_diff_analyzer - needs_update: True (missing rule found)")
                 return True
 
         # 2. Role exclusivity check (No Access handling)
@@ -487,10 +483,10 @@ class BranchesProcessor(AbstractProcessor):
         if (0 in gl_role_levels and any(lev > 0 for lev in local_role_levels)) or (
             0 in local_role_levels and any(lev > 0 for lev in gl_role_levels)
         ):
-            verbose("naive_access_level_diff_analyzer - needs_update: True (No Access / Roles conflict)")
+            info("naive_access_level_diff_analyzer - needs_update: True (No Access / Roles conflict)")
             return True
 
-        verbose("naive_access_level_diff_analyzer - needs_update: False")
+        info("naive_access_level_diff_analyzer - needs_update: False")
         return False
 
     @staticmethod

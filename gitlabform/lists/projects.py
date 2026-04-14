@@ -1,6 +1,7 @@
+import sys
 from typing import Optional, Tuple
 from logging import debug
-from cli_ui import fatal
+from logging import critical
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
@@ -54,11 +55,11 @@ class ProjectsProvider(GroupsProvider):
                 if self._find_project_transfer_source_in_gitlab(project_transfer_source):
                     projects.add_requested([target])
                 else:
-                    fatal(
+                    critical(
                         f"""Configuration contains project {target} to be transferred from {project_transfer_source}
-                            but the source project cannot be found in GitLab!""",
-                        exit_code=EXIT_INVALID_INPUT,
+                            but the source project cannot be found in GitLab!"""
                     )
+                    sys.exit(EXIT_INVALID_INPUT)
 
         return projects
 
@@ -131,16 +132,16 @@ class ProjectsProvider(GroupsProvider):
                         if source_project["archived"]:
                             archived.append(project)
                     else:
-                        fatal(
+                        critical(
                             f"""Configuration contains project {project} to be transferred from {project_transfer_source}
-                                but the source project cannot be found in GitLab!""",
-                            exit_code=EXIT_INVALID_INPUT,
+                                but the source project cannot be found in GitLab!"""
                         )
+                        sys.exit(EXIT_INVALID_INPUT)
                 else:
-                    fatal(
-                        f"Configuration contains project {project} but it cannot be found in GitLab and it's not a project that is configured to be transferred from elsewhere.",
-                        exit_code=EXIT_INVALID_INPUT,
+                    critical(
+                        f"Configuration contains project {project} but it cannot be found in GitLab and it's not a project that is configured to be transferred from elsewhere."
                     )
+                    sys.exit(EXIT_INVALID_INPUT)
 
         return archived
 

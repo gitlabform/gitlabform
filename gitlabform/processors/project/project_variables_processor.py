@@ -1,6 +1,5 @@
 from typing import Dict, Any, List, cast
-from cli_ui import debug as verbose
-from cli_ui import warning
+from logging import warning, info
 
 import copy
 import textwrap
@@ -26,7 +25,7 @@ class ProjectVariablesProcessor(AbstractProcessor):
         enforce_mode: bool = configured_variables.get("enforce", False)
 
         if enforce_mode:
-            verbose(f"Enforce mode enabled for variables in {project_and_group}")
+            info(f"Enforce mode enabled for variables in {project_and_group}")
             # Remove 'enforce' key from the config so that it's not treated as a variable
             configured_variables.pop("enforce")
 
@@ -65,17 +64,17 @@ class ProjectVariablesProcessor(AbstractProcessor):
                     var_dict["environment_scope"] = variable.environment_scope
                 variables_list.append(var_dict)
 
-            verbose(f"Variables for {project_and_group} in GitLab:")
-            verbose(
+            info(f"Variables for {project_and_group} in GitLab:")
+            info(
                 textwrap.indent(
                     ez_yaml.to_string(variables_list),
                     "  ",
                 )
             )
         except GitlabGetError:
-            verbose(f"Variables for {project_and_group} in GitLab cannot be checked.")
+            info(f"Variables for {project_and_group} in GitLab cannot be checked.")
 
-        verbose(f"Variables in {project_and_group} in configuration:")
+        info(f"Variables in {project_and_group} in configuration:")
 
         configured_variables = copy.deepcopy(configuration)
         enforce_variables = configured_variables.get("enforce", False)
@@ -87,7 +86,7 @@ class ProjectVariablesProcessor(AbstractProcessor):
         for key in configured_variables.keys():
             configured_variables[key]["value"] = hide(configured_variables[key]["value"])
 
-        verbose(
+        info(
             textwrap.indent(
                 ez_yaml.to_string(configured_variables),
                 "  ",

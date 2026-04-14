@@ -1,8 +1,6 @@
-from logging import debug
+from logging import debug, warning
 from typing import Any, cast
 from gitlab.v4.objects import Project
-
-from cli_ui import warning
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor

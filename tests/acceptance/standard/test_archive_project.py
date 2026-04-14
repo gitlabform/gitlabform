@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 from tests.acceptance import (
     get_random_name,
@@ -49,7 +51,7 @@ class TestArchiveProject:
         project = gl.projects.get(project.id)
         assert project.archived is False
 
-    def test__dont_edit_archived_project(self, gl, project_for_function, capsys):
+    def test__dont_edit_archived_project(self, gl, project_for_function, caplog):
         """
         Test that editing files in an archived project is not allowed.
         To setup the test, we first need to create a regular unprotected branch
@@ -79,8 +81,8 @@ class TestArchiveProject:
         # GitLab now responds with 403 Forbidden when trying to push to an archived project.
         # Since in above config we are trying to push update to an archived project, we expect
         # gitlabform to exit with SystemExit exception.
-        with pytest.raises(SystemExit):
-            run_gitlabform(edit_archived_project_config, project.path_with_namespace)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(SystemExit):
+                run_gitlabform(edit_archived_project_config, project.path_with_namespace)
 
-        captured = capsys.readouterr()
-        assert "403 Forbidden - You are not allowed to push into this branch" in captured.err
+        assert "403 Forbidden - You are not allowed to push into this branch" in caplog.text
