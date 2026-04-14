@@ -51,7 +51,7 @@ class TestGroupVariablesPremium:
         assert variables[1].value == "prod-value"
         assert variables[1].environment_scope == "prod"
 
-    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=info)
+    @patch("gitlabform.processors.util.variables_processor.info", wraps=info)
     def test__update_variables_with_env_scope(self, mock_verbose, group):
         """Test case: update variables that were added in previous test case"""
 
