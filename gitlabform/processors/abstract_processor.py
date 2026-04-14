@@ -3,7 +3,7 @@ from logging import debug
 from typing import Callable, Union
 
 import requests
-from cli_ui import debug as verbose
+from logging import info
 
 from gitlabform.gitlab import GitLab, PythonGitlab
 from gitlabform.gitlab import GitlabWrapper
@@ -32,18 +32,18 @@ class AbstractProcessor(ABC):
     ):
         if self._section_is_in_config(configuration):
             if configuration.get(f"{self.configuration_name}|skip"):
-                verbose(f"Skipping section '{self.configuration_name}' - explicitly configured to do so.")
+                info(f"Skipping section '{self.configuration_name}' - explicitly configured to do so.")
                 return
             elif configuration.get("project|archive") and self.configuration_name != "project":
-                verbose(f"Skipping section '{self.configuration_name}' - it is configured to be archived.")
+                info(f"Skipping section '{self.configuration_name}' - it is configured to be archived.")
                 return
 
             if dry_run:
-                verbose(f"Processing section '{self.configuration_name}' in dry-run mode.")
+                info(f"Processing section '{self.configuration_name}' in dry-run mode.")
                 project_transfer_source = ""
                 try:
                     project_transfer_source = configuration["project"]["transfer_from"]
-                    verbose(f"""Project {project_or_project_and_group} is configured to be transferred, 
+                    info(f"""Project {project_or_project_and_group} is configured to be transferred, 
                         diffing config from transfer source project {project_transfer_source}.""")
                 except KeyError:
                     pass
@@ -54,7 +54,7 @@ class AbstractProcessor(ABC):
                     diff_only_changed=diff_only_changed,
                 )
             else:
-                verbose(f"Processing section '{self.configuration_name}'")
+                info(f"Processing section '{self.configuration_name}'")
                 if self._can_proceed(project_or_project_and_group, configuration):
                     self._process_configuration_with_retries(project_or_project_and_group, configuration)
 
@@ -64,7 +64,7 @@ class AbstractProcessor(ABC):
                 configuration.get(self.configuration_name),
             )
         else:
-            verbose(f"Skipping section '{self.configuration_name}' - not in config.")
+            info(f"Skipping section '{self.configuration_name}' - not in config.")
 
     def _section_is_in_config(self, configuration: dict):
         return self.configuration_name in configuration
@@ -76,7 +76,7 @@ class AbstractProcessor(ABC):
         while True:
             try:
                 if retry > 1:
-                    verbose(f"Retrying section '{self.configuration_name}' - {retry}/{max_retries}...")
+                    info(f"Retrying section '{self.configuration_name}' - {retry}/{max_retries}...")
 
                 self._process_configuration(
                     project_or_project_and_group,
@@ -124,7 +124,7 @@ class AbstractProcessor(ABC):
         pass
 
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        verbose(f"Diffing for section '{self.configuration_name}' is not supported yet")
+        info(f"Diffing for section '{self.configuration_name}' is not supported yet")
 
     def _needs_update(
         self,

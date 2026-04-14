@@ -1,5 +1,7 @@
+import logging
+
 import pytest
-from cli_ui import debug as verbose  # for wraps
+from logging import info  # for wraps
 from unittest.mock import patch
 from gitlab.exceptions import GitlabListError
 
@@ -116,7 +118,7 @@ class TestVariables:
         assert variables[4].value == expected_message
         assert variables[4].environment_scope == "*"  # default scope if not configured
 
-    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=verbose)
+    @patch("gitlabform.processors.util.variables_processor.info", wraps=info)
     def test__update_variables(self, mock_verbose, project):
         """Test case: update variables that were added in previous test case"""
 
@@ -220,7 +222,7 @@ class TestVariables:
         assert variables[4].value == expected_message
         assert variables[4].environment_scope == "*"  # default scope if not configured
 
-    def test__delete_variables(self, project, capsys):
+    def test__delete_variables(self, project, caplog):
         """Test case: Variable deletion scenarios"""
 
         # Clear any existing variables from previous tests since 'project' is class-scoped
@@ -304,10 +306,10 @@ class TestVariables:
                 value: wrong-value
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_wrong_value, project)
-        captured = capsys.readouterr()
-        assert "Cannot delete WRONG_VALUE - attributes don't match" in captured.err
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_wrong_value, project)
+        assert "Cannot delete WRONG_VALUE - attributes don't match" in caplog.text
 
         # Test 5: Delete should fail with wrong scope
         config_wrong_scope = f"""
@@ -319,10 +321,10 @@ class TestVariables:
                 environment_scope: dev  # wrong scope, actual is 'prod'
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_wrong_scope, project)
-        captured = capsys.readouterr()
-        assert "Cannot delete variable 'WRONG_SCOPE' with scope 'dev' - variable does not exist" in captured.err
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_wrong_scope, project)
+        assert "Cannot delete variable 'WRONG_SCOPE' with scope 'dev' - variable does not exist" in caplog.text
 
         # Test 6: Delete should fail for non-existent variable
         config_non_existent = f"""
@@ -333,10 +335,10 @@ class TestVariables:
                 key: NON_EXISTENT
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_non_existent, project)
-        captured = capsys.readouterr()
-        assert "Cannot delete variable 'NON_EXISTENT' with scope '*' - variable does not exist" in captured.err
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_non_existent, project)
+        assert "Cannot delete variable 'NON_EXISTENT' with scope '*' - variable does not exist" in caplog.text
 
         # Test 7: Delete should fail when specified attributes don't match
         config_mismatch = f"""
@@ -350,10 +352,10 @@ class TestVariables:
                 environment_scope: prod # match
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_mismatch, project)
-        captured = capsys.readouterr()
-        assert "Cannot delete MULTI_ATTR - attributes don't match" in captured.err
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_mismatch, project)
+        assert "Cannot delete MULTI_ATTR - attributes don't match" in caplog.text
 
         # Test 8: Delete should succeed when providing subset of attributes
         config_partial = f"""

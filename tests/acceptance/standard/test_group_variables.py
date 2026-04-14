@@ -1,7 +1,8 @@
+import logging
 from unittest.mock import patch
 import pytest
 from tests.acceptance import run_gitlabform
-from cli_ui import debug as verbose  # for wraps
+from logging import info
 
 
 class TestGroupVariables:
@@ -75,7 +76,7 @@ class TestGroupVariables:
         )
         assert variables[3].value == expected_message
 
-    @patch("gitlabform.processors.util.variables_processor.verbose", wraps=verbose)
+    @patch("gitlabform.processors.util.variables_processor.info", wraps=info)
     def test__update_variables(self, mock_verbose, group):
         """Test case: update variables that were added in previous test case"""
 
@@ -159,7 +160,7 @@ class TestGroupVariables:
         )
         assert variables[3].value == expected_message
 
-    def test__delete_variables(self, group, capsys):
+    def test__delete_variables(self, group, caplog):
         """Test case: Variable deletion scenarios"""
 
         # Clear any existing variables from previous tests since 'group' is class-scoped
@@ -225,10 +226,11 @@ class TestGroupVariables:
                 value: wrong-value
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_wrong_value, group)
-        captured = capsys.readouterr()
-        assert "Cannot delete WRONG_VALUE - attributes don't match" in captured.err
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_wrong_value, group)
+        assert "Cannot delete WRONG_VALUE - attributes don't match" in caplog.text
+        caplog.clear()
 
         # Test 4: Delete should fail for non-existent variable
         config_non_existent = f"""
@@ -239,10 +241,11 @@ class TestGroupVariables:
                 key: NON_EXISTENT
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_non_existent, group)
-        captured = capsys.readouterr()
-        assert "Cannot delete variable 'NON_EXISTENT' with scope '*' - variable does not exist" in captured.err
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_non_existent, group)
+        assert "Cannot delete variable 'NON_EXISTENT' with scope '*' - variable does not exist" in caplog.text
+        caplog.clear()
 
         # Test 5: Delete should fail when specified attributes don't match
         config_mismatch = f"""
@@ -255,10 +258,11 @@ class TestGroupVariables:
                 protected: False        # doesn't match
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_mismatch, group)
-        captured = capsys.readouterr()
-        assert "Cannot delete MULTI_ATTR - attributes don't match" in captured.err
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_mismatch, group)
+        assert "Cannot delete MULTI_ATTR - attributes don't match" in caplog.text
+        caplog.clear()
 
         # Test 6: Delete should succeed when providing subset of attributes
         config_partial = f"""

@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 import time
 
@@ -48,7 +50,7 @@ class TestResourceGroups:
         assert resource_group.key == "production"
         assert resource_group.process_mode == "newest_first"
 
-    def test__resource_group_process_mode_invalid_value(self, project, add_gitlab_ci_config, capsys):
+    def test__resource_group_process_mode_invalid_value(self, project, add_gitlab_ci_config, caplog):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -57,15 +59,15 @@ class TestResourceGroups:
                 process_mode: foo
             """
 
-        with pytest.raises(SystemExit) as exception:
-            run_gitlabform(update_resource_group_config, project)
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exception:
+                run_gitlabform(update_resource_group_config, project)
 
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
-        captured = capsys.readouterr()
-        assert "Resource group update failed" in captured.err
+        assert "Resource group update failed" in caplog.text
 
-    def test__ensure_exists_default_true(self, project, capsys):
+    def test__ensure_exists_default_true(self, project, caplog):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -74,14 +76,14 @@ class TestResourceGroups:
                 process_mode: newest_first
             """
 
-        with pytest.raises(SystemExit) as exception:
-            run_gitlabform(update_resource_group_config, project)
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exception:
+                run_gitlabform(update_resource_group_config, project)
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
-        captured = capsys.readouterr()
-        assert "Project is not configured to use resource group" in captured.err
+        assert "Project is not configured to use resource group" in caplog.text
 
-    def test__ensure_exists_equals_true(self, project, capsys):
+    def test__ensure_exists_equals_true(self, project, caplog):
         update_resource_group_config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -91,12 +93,12 @@ class TestResourceGroups:
                 process_mode: newest_first
             """
 
-        with pytest.raises(SystemExit) as exception:
-            run_gitlabform(update_resource_group_config, project)
+        with caplog.at_level(logging.WARNING):
+            with pytest.raises(SystemExit) as exception:
+                run_gitlabform(update_resource_group_config, project)
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
-        captured = capsys.readouterr()
-        assert "Project is not configured to use resource group" in captured.err
+        assert "Project is not configured to use resource group" in caplog.text
 
     def test__ensure_exists_equals_false(self, project):
         update_resource_group_config = f"""

@@ -2,7 +2,7 @@ from typing import List
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors import AbstractProcessor
-from cli_ui import warning, info, debug
+from logging import warning, info, debug
 
 from gitlab.v4.objects import Project, ProjectJobTokenScope
 

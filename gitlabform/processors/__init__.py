@@ -1,7 +1,6 @@
 from abc import ABC
 
-import requests
-from cli_ui import debug as verbose
+from logging import info
 
 from typing import List
 
@@ -39,6 +38,6 @@ class AbstractProcessors(ABC):
                         effective_configuration,
                     )
                 else:
-                    verbose(f"Skipping section '{processor.configuration_name}' - not in --only-sections list.")
+                    info(f"Skipping section '{processor.configuration_name}' - not in --only-sections list.")
             else:
-                verbose(f"Excluding section '{processor.configuration_name}'.")
+                info(f"Excluding section '{processor.configuration_name}'.")
