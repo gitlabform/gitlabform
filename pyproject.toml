@@ -24,7 +24,7 @@ classifiers = [
 requires-python = ">=3.12.0"
 dependencies = [
     "certifi==2026.2.25",
-    "ez-yaml==1.2.0",
+    "ez-yaml==2.2.0",
     "Jinja2==3.1.6",
     "luddite==1.0.4",
     "MarkupSafe==3.0.3",
@@ -33,8 +33,8 @@ dependencies = [
     "python-gitlab==8.2.0",
     "python-gitlab[graphql]==8.2.0",
     "requests==2.33.1",
-    "rich==14.3.3",
-    "ruamel.yaml==0.17.21",
+    "rich==15.0.0",
+    "ruamel.yaml==0.19.1",
     "yamlpath==3.9.0",
 ]
 
