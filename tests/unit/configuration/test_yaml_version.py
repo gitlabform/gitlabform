@@ -15,5 +15,22 @@ def configuration_with_yes():
     return Configuration(config_string=config_yaml)
 
 
+@pytest.fixture
+def configuration_with_yes_annotated():
+    config_yaml = """
+    %YAML 1.1
+    ---
+    projects_and_groups:
+      some_group/*:
+        project_settings:
+          foo: yes          # in YAML 1.1 this should be interpreted as boolean true
+    """
+    return Configuration(config_string=config_yaml)
+
+
 def test__default_yaml_11(configuration_with_yes):
     assert configuration_with_yes.get("projects_and_groups|some_group/*|project_settings") == {"foo": True}
+
+
+def test__annotated_yaml_11(configuration_with_yes_annotated):
+    assert configuration_with_yes_annotated.get("projects_and_groups|some_group/*|project_settings") == {"foo": True}
