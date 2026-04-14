@@ -2,7 +2,42 @@
 
 This section purpose is to manage the [protected branches](https://docs.gitlab.com/ee/user/project/protected_branches.html).
 
-## Community Edition vs Enterprise Edition
+## Group-level protected branches
+
+!!! info
+
+    This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)
+
+!!! warning
+
+    Protected branch settings for groups are restricted to top-level groups only.
+
+This section purpose is to manage the [group-level protected branches](https://docs.gitlab.com/ee/api/group_protected_branches.html).
+
+The configuration supports the same keys as project-level protected branches: `protected`, `push_access_level`, `merge_access_level`, `unprotect_access_level`, `allow_force_push`, `code_owner_approval_required`, `allowed_to_push`, `allowed_to_merge`, and `allowed_to_unprotect`.
+
+Example:
+
+```yaml
+projects_and_groups:
+  group_1/*:
+    group_branches:
+      main:
+        protected: true
+        push_access_level: no access
+        merge_access_level: maintainer
+      release/*:
+        protected: true
+        allowed_to_push:
+          - access_level: no access
+        allowed_to_merge:
+          - access_level: maintainer
+          - user: jsmith
+```
+
+## Project-level protected branches
+
+### Community Edition vs Enterprise Edition
 Note: that Gitlab Community Edition does not support setting `unprotect_access_level` and will always return `None` from the API, and there is also no way to manually set this through the UI.
 
 ### Functionality Differences
@@ -13,7 +48,7 @@ In Gitlab EE versions <=15.6.0 and Gitlab Community Edition, GitLabForm uses old
 
 In later versions of Gitlab EE, GitLabForm will modify the Branch Protection rules in-place, see the [V4->V5 upgrade notes](../upgrade.md)
 
-## Common features
+### Common features
 
 The key names here may be:
 
@@ -63,7 +98,7 @@ projects_and_groups:
         allow_force_push: true
 ```
 
-## Premium-only features
+### Premium-only features
 
 !!! info
 
