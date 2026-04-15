@@ -42,8 +42,29 @@ def requires_license(gl: Gitlab, request):
         return
 
     gitlab_license = gl.get_license()
-    if not gitlab_license or gitlab_license["expired"]:
-        pytest.skip("this test requires a GitLab license (Paid/Trial)")
+    requires_active_license(gitlab_license, "premium")
+
+
+@pytest.fixture(autouse=True)
+def requires_ultimate_license(gl: Gitlab, request):
+    if not request.node.get_closest_marker("requires_ultimate_license"):
+        return
+
+    gitlab_license = gl.get_license()
+    requires_active_license(gitlab_license, "ultimate")
+
+    if gitlab_license.get("plan", "") != "ultimate":
+        pytest.fail("Test requires GitLab Ultimate license")
+
+
+def requires_active_license(gitlab_license, license_type: str):
+    if not gitlab_license:
+        pytest.fail(f"This test requires a GitLab {license_type} license")
+
+    expires_at_string = gitlab_license.get("expires_at")
+    if expires_at_string is not None:
+        if date.fromisoformat(expires_at_string) <= date.today():
+            pytest.fail(f"GitLab {license_type} license has expired, please request a new one")
 
 
 @pytest.fixture(scope="session")
