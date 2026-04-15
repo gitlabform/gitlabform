@@ -53,7 +53,7 @@ def requires_ultimate_license(gl: Gitlab, request):
     gitlab_license = gl.get_license()
     requires_active_license(gitlab_license, "ultimate")
 
-    if gitlab_license.get("plan", "").lower() != "ultimate":
+    if gitlab_license.get("plan", "") != "ultimate":
         pytest.fail("Test requires GitLab Ultimate license")
 
 
