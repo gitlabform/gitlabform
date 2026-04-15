@@ -19,9 +19,17 @@ class ProjectsProvider(GroupsProvider):
     Because the projects depend on groups requested, this class inherits GroupsProvider.
     """
 
-    def __init__(self, gitlab, configuration, include_archived_projects, recurse_subgroups):
+    def __init__(
+        self,
+        gitlab,
+        configuration,
+        include_archived_projects,
+        include_projects_scheduled_for_deletion,
+        recurse_subgroups,
+    ):
         super().__init__(gitlab, configuration, recurse_subgroups)
         self.include_archived_projects = include_archived_projects
+        self.include_projects_scheduled_for_deletion = include_projects_scheduled_for_deletion
 
     def get_projects(self, target: str) -> Projects:
         """
@@ -70,9 +78,11 @@ class ProjectsProvider(GroupsProvider):
         (
             projects_from_groups,
             archived_projects_from_groups,
-        ) = self._get_all_and_archived_projects_from_groups(groups.get_effective())
+            scheduled_for_deletion_projects_from_groups,
+        ) = self._get_all_and_omitted_projects_from_groups(groups.get_effective())
         projects.add_requested(projects_from_groups)
         projects.add_omitted(OmissionReason.ARCHIVED, archived_projects_from_groups)
+        projects.add_omitted(OmissionReason.SCHEDULED_FOR_DELETION, scheduled_for_deletion_projects_from_groups)
 
         projects_from_configuration = self.configuration.get_projects()
 
@@ -84,16 +94,21 @@ class ProjectsProvider(GroupsProvider):
         if target == "ALL_DEFINED":
             # in this case we also need to get the list of projects explicitly
             # defined in the configuration, but we don't need to re-check for
-            # being archived projects that we already got from groups
+            # being archived or scheduled for deletion projects that we already got from groups
 
-            archived_projects_from_configuration_not_from_groups = (
-                self._verify_if_projects_exist_and_get_archived_projects(projects_from_configuration_not_from_groups)
-            )
+            (
+                archived_projects_from_configuration_not_from_groups,
+                scheduled_for_deletion_projects_from_configuration_not_from_groups,
+            ) = self._verify_if_projects_exist_and_get_omitted_projects(projects_from_configuration_not_from_groups)
 
             projects.add_requested(projects_from_configuration_not_from_groups)
             projects.add_omitted(
                 OmissionReason.ARCHIVED,
                 archived_projects_from_configuration_not_from_groups,
+            )
+            projects.add_omitted(
+                OmissionReason.SCHEDULED_FOR_DELETION,
+                scheduled_for_deletion_projects_from_configuration_not_from_groups,
             )
         else:
             # in all other cases, we also need to look for projects in the config
@@ -117,20 +132,27 @@ class ProjectsProvider(GroupsProvider):
 
         return projects
 
-    def _verify_if_projects_exist_and_get_archived_projects(self, projects: list) -> list:
+    def _verify_if_projects_exist_and_get_omitted_projects(self, projects: list) -> Tuple[list, list]:
         archived = []
+        scheduled_for_deletion = []
         for project in projects:
             try:
                 project_object = self.gitlab.get_project_case_insensitive(project)
-                if project_object["archived"]:
+                if not self.include_archived_projects and project_object["archived"]:
                     archived.append(project_object["path_with_namespace"])
+                if not self.include_projects_scheduled_for_deletion and project_object.get("marked_for_deletion_on"):
+                    scheduled_for_deletion.append(project_object["path_with_namespace"])
             except NotFoundException:
                 debug("Could not find '%s'", project)
                 if project_transfer_source := self._get_project_transfer_source_from_config(project):
                     source_project = self._find_project_transfer_source_in_gitlab(project_transfer_source)
                     if source_project:
-                        if source_project["archived"]:
+                        if not self.include_archived_projects and source_project["archived"]:
                             archived.append(project)
+                        if not self.include_projects_scheduled_for_deletion and source_project.get(
+                            "marked_for_deletion_on"
+                        ):
+                            scheduled_for_deletion.append(project)
                     else:
                         critical(
                             f"""Configuration contains project {project} to be transferred from {project_transfer_source}
@@ -143,25 +165,30 @@ class ProjectsProvider(GroupsProvider):
                     )
                     sys.exit(EXIT_INVALID_INPUT)
 
-        return archived
+        return archived, scheduled_for_deletion
 
-    def _get_all_and_archived_projects_from_groups(self, groups: list) -> Tuple[list, list]:
+    def _get_all_and_omitted_projects_from_groups(self, groups: list) -> Tuple[list, list, list]:
         all = []
         archived = []
+        scheduled_for_deletion = []
         for group in groups:
-            if self.include_archived_projects:
+            if self.include_archived_projects and self.include_projects_scheduled_for_deletion:
                 all += self.gitlab.get_projects(group, include_archived=True)
             else:
                 project_objects = self.gitlab.get_projects(group, include_archived=True, only_names=False)
                 for project_object in project_objects:
                     project = project_object["path_with_namespace"]
                     all.append(project)
-                    if project_object["archived"]:
+                    if not self.include_archived_projects and project_object["archived"]:
                         archived.append(project)
+                    if not self.include_projects_scheduled_for_deletion and project_object.get(
+                        "marked_for_deletion_on"
+                    ):
+                        scheduled_for_deletion.append(project)
 
         # deduplicate as we may have a group X and its subgroup X/Y in the groups list so the effective projects
         # may occur more than once
-        return list(set(all)), list(set(archived))
+        return list(set(all)), list(set(archived)), list(set(scheduled_for_deletion))
 
     def _get_skipped_projects(self, projects: list) -> list:
         skipped = []
