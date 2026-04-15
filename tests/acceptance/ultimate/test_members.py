@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from gitlabform import EXIT_PROCESSING_ERROR
@@ -105,7 +107,7 @@ class TestMembers:
         assert member.member_role["base_access_level"] == base_access_level
 
     def test__cannot_add_user_to_project_with_custom_role_where_custom_role_does_not_exist(
-        self, gl, group, project_for_function, outsider_user, random_string, capsys
+        self, gl, group, project_for_function, outsider_user, random_string, caplog
     ):
         base_access_level = AccessLevel.REPORTER.value
 
@@ -122,16 +124,16 @@ class TestMembers:
                      member_role: {random_string}
            """
 
-        with pytest.raises(SystemExit) as exception:
-            run_gitlabform(add_users, project_for_function)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(SystemExit) as exception:
+                run_gitlabform(add_users, project_for_function)
 
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
-        captured = capsys.readouterr()
-        assert f"Member Role with name or id {random_string} could not be found" in captured.err
+        assert f"Member Role with name or id {random_string} could not be found" in caplog.text
 
     def test__cannot_add_user_to_project_with_different_access_than_base_custom_role(
-        self, gl, group, project_for_function, outsider_user, random_string, capsys
+        self, gl, group, project_for_function, outsider_user, random_string, caplog
     ):
         base_access_level = AccessLevel.MAINTAINER.value
         member_role_id = self._create_custom_role(gl, base_access_level, random_string)
@@ -149,16 +151,16 @@ class TestMembers:
                      member_role: {member_role_id}
            """
 
-        with pytest.raises(SystemExit) as exception:
-            run_gitlabform(add_users, project_for_function)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(SystemExit) as exception:
+                run_gitlabform(add_users, project_for_function)
 
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
-        captured = capsys.readouterr()
-        assert "the custom role's base access level does not match the current access level" in captured.err
+        assert "the custom role's base access level does not match the current access level" in caplog.text
 
     def test__cannot_add_user_to_project_with_custom_role_but_no_access_level(
-        self, gl, group, project_for_function, outsider_user, random_string, capsys
+        self, gl, group, project_for_function, outsider_user, random_string, caplog
     ):
         base_access_level = AccessLevel.MAINTAINER.value
         member_role_id = self._create_custom_role(gl, base_access_level, random_string)
@@ -175,13 +177,13 @@ class TestMembers:
                      member_role: {member_role_id}
            """
 
-        with pytest.raises(SystemExit) as exception:
-            run_gitlabform(add_users, project_for_function)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(SystemExit) as exception:
+                run_gitlabform(add_users, project_for_function)
 
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
-        captured = capsys.readouterr()
-        assert "the custom role's base access level does not match the current access level" in captured.err
+        assert "the custom role's base access level does not match the current access level" in caplog.text
 
     def _create_custom_role(self, gl, base_access_level, random_string):
         # Python-Gitlab does not directly support Member Roles

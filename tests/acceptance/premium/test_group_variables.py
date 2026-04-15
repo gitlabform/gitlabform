@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import patch
 import pytest
 from logging import info
@@ -121,7 +122,7 @@ class TestGroupVariablesPremium:
         assert variables[1].value == "prod-new-value"
         assert variables[1].environment_scope == "prod"
 
-    def test__delete_variables_with_env_scope(self, group, capsys):
+    def test__delete_variables_with_env_scope(self, group, caplog):
         """Test case: Variable deletion scenarios"""
 
         # Clear any existing variables from previous tests since 'group' is class-scoped
@@ -173,10 +174,10 @@ class TestGroupVariablesPremium:
                 environment_scope: dev  # wrong scope, actual is 'prod'
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_wrong_scope, group)
-        captured = capsys.readouterr()
-        assert "Cannot delete variable 'WRONG_SCOPE' with scope 'dev' - variable does not exist" in captured.err
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_wrong_scope, group)
+        assert "Cannot delete variable 'WRONG_SCOPE' with scope 'dev' - variable does not exist" in caplog.text
 
         # Test 3: Delete should fail when specified attributes don't match
         config_mismatch = f"""
@@ -190,10 +191,10 @@ class TestGroupVariablesPremium:
                 environment_scope: prod # match
                 delete: true
         """
-        with pytest.raises(SystemExit) as exc_info:
-            run_gitlabform(config_mismatch, group)
-        captured = capsys.readouterr()
-        assert "Cannot delete MULTI_ATTR - attributes don't match" in captured.err
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(SystemExit) as exc_info:
+                run_gitlabform(config_mismatch, group)
+        assert "Cannot delete MULTI_ATTR - attributes don't match" in caplog.text
 
         # Test 4: Delete should succeed when providing subset of attributes
         config_partial = f"""

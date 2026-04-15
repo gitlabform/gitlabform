@@ -321,15 +321,14 @@ class GitLabForm:
 
         :param tests: True if we are running in tests mode
         """
+        rich_tracebacks = False
         if tests or self.debug:
             level = logging.DEBUG
             rich_tracebacks = True
         elif self.verbose:
             level = logging.INFO
-            rich_tracebacks = False
         else:
             level = logging.WARNING
-            rich_tracebacks = False
 
         logging.basicConfig(
             level=level, format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=rich_tracebacks)]

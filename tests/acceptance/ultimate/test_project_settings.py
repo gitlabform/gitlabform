@@ -8,6 +8,12 @@ pytestmark = pytest.mark.requires_ultimate_license
 
 
 class TestProjectSettings:
+    @pytest.mark.skip(
+        reason=(
+            "GitLab Duo is only available now to instances with a synchronized subscription, which our Free "
+            "Trial Ultimate keys will not have"
+        )
+    )
     def test__can_set_duo_features_enabled(
         self, gl: Gitlab, gl_graphql: GraphQL, group: Group, project: Project, other_project: Project
     ) -> None:

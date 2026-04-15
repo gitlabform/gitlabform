@@ -33,7 +33,7 @@ jobs:
       - name: Start GitLab in Docker
         run: ./dev/run_gitlab_in_docker.sh
       - name: Run standard acceptance tests against Enterprise Edition
-        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
+        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/standard
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
@@ -70,7 +70,7 @@ jobs:
       - name: Start GitLab in Docker
         run: ./dev/run_gitlab_in_docker.sh --gitlab-flavor ce
       - name: Run standard acceptance tests against Community Edition
-        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/standard
+        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/standard
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
