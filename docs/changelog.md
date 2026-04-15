@@ -5,9 +5,21 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+## 5.3.0
+
+### Features
+
+* add support for not including projects that are scheduled for deletion [#1240](https://github.com/gitlabform/gitlabform/pull/1240). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Build
+
+* restore Premium & Ultimate test functionality in CI [#1241](https://github.com/gitlabform/gitlabform/pull/1241). ([TimKnight01](https://github.com/TimKnight01))
+
+Thanks to all the contributors of this release!
+
 ## 5.2.0
 
-## Features
+### Features
 
 * Replace cli_ui with native logging to improve messaging consistency [#1218](https://github.com/gitlabform/gitlabform/pull/1218). ([TimKnight01](https://github.com/TimKnight01)))
   - Cli_UI was deprecated in Feb 2026: https://github.com/your-tools/python-cli-ui
