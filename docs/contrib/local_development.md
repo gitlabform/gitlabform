@@ -72,7 +72,7 @@ against a disposable GitLab instance running as a Docker container OR use your o
     ./dev/run_gitlab_in_docker.sh --gitlab-flavor ce
     ```
 
-2. Run `pytest tests/acceptance` to start all tests.
+2. Run `pytest tests/acceptance --log-cli-level=INFO` to start all tests.
 
     To run only a single class with tests run, f.e.:
 

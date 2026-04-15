@@ -1,8 +1,12 @@
+import logging
+
 import pytest
 
 from gitlabform import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import run_gitlabform
+
+pytestmark = pytest.mark.requires_ultimate_license
 
 
 class TestGroupMembers:
@@ -87,7 +91,7 @@ class TestGroupMembers:
         assert member.member_role["base_access_level"] == base_access_level
 
     def test__cannot_add_user_to_group_members_with_custom_role_where_custom_role_does_not_exist(
-        self, gl, group_for_function, users, random_string, capsys
+        self, gl, group_for_function, users, random_string, caplog
     ):
         base_access_level = AccessLevel.REPORTER.value
 
@@ -101,13 +105,13 @@ class TestGroupMembers:
                           member_role: {random_string.lower()}
                 """
 
-        with pytest.raises(SystemExit) as exception:
-            run_gitlabform(add_users, group_for_function)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(SystemExit) as exception:
+                run_gitlabform(add_users, group_for_function)
 
         assert exception.type == SystemExit
         assert exception.value.code == EXIT_PROCESSING_ERROR
-        captured = capsys.readouterr()
-        assert f"Member Role with name or id {random_string} could not be found" in captured.err
+        assert f"Member Role with name or id {random_string} could not be found" in caplog.text
 
     def _create_custom_role(self, gl, base_access_level, random_string):
         # Python-Gitlab does not directly support Member Roles
