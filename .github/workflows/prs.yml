@@ -8,7 +8,7 @@ concurrency:
   group: ${{github.workflow}}-${{ github.ref }}
   cancel-in-progress: true
 on:
-  pull_request:
+  pull_request_target:
     branches: [ "main" ]
 
 jobs:
@@ -74,7 +74,7 @@ jobs:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: ./dev/run_gitlab_in_docker.sh
       - name: Run acceptance tests that require premium license
-        run: pytest -v --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
+        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/premium
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
@@ -122,7 +122,7 @@ jobs:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_ULTIMATE_LICENSE }}
         run: ./dev/run_gitlab_in_docker.sh
       - name: Run acceptance tests that require Ultimate license
-        run: pytest -v --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/ultimate
+        run: pytest --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/ultimate
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
