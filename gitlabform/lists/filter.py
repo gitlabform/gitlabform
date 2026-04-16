@@ -1,6 +1,7 @@
+import sys
 from abc import ABC, abstractmethod
 
-from cli_ui import fatal
+from logging import critical
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
@@ -52,10 +53,8 @@ class OmitEmptyConfigs(GroupsAndProjectsFilter):
         self.project_processors = project_processors
 
         if not self.configuration.get("projects_and_groups", {}):
-            fatal(
-                "Configuration has to contain non-empty 'projects_and_groups' key.",
-                exit_code=EXIT_INVALID_INPUT,
-            )
+            critical("Configuration has to contain non-empty 'projects_and_groups' key.")
+            sys.exit(EXIT_INVALID_INPUT)
 
     def filter(self, groups: Groups, projects: Projects) -> None:
         """

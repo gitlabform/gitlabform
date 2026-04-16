@@ -1,10 +1,9 @@
 import os
 import re
+import sys
 from pathlib import Path
 
-from logging import debug
-from cli_ui import debug as verbose
-from cli_ui import warning, fatal
+from logging import debug, info, warning, critical
 from typing import List
 
 from jinja2 import Environment, FileSystemLoader
@@ -12,7 +11,7 @@ from gitlab import GitlabGetError, GitlabUpdateError
 from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
 from gitlab.base import RESTObject
 
-from gitlabform.constants import EXIT_INVALID_INPUT
+from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -53,10 +52,8 @@ class FilesProcessor(AbstractProcessor):
                     except GitlabGetError:
                         message = f"! Branch '{branch_name}' not found, not processing file '{file}' in it"
                         if self.strict:
-                            fatal(
-                                message,
-                                exit_code=EXIT_INVALID_INPUT,
-                            )
+                            critical(message)
+                            sys.exit(EXIT_INVALID_INPUT)
                         else:
                             warning(message)
 
@@ -67,14 +64,14 @@ class FilesProcessor(AbstractProcessor):
             )
 
             for branch in branches_to_update:
-                verbose(f"Processing file '{file}' in branch '{branch.name}'")
+                info(f"Processing file '{file}' in branch '{branch.name}'")
 
                 if configuration.get("files|" + file + "|content") and configuration.get("files|" + file + "|file"):
-                    fatal(
+                    critical(
                         f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
-                        "use only one of these keys.",
-                        exit_code=EXIT_INVALID_INPUT,
+                        "use only one of these keys."
                     )
+                    sys.exit(EXIT_INVALID_INPUT)
 
                 if configuration.get("files|" + file + "|delete"):
                     try:
@@ -163,7 +160,7 @@ class FilesProcessor(AbstractProcessor):
                         )
 
                 if configuration.get("files|" + file + "|only_first_branch"):
-                    verbose("Skipping other branches for this file, as configured.")
+                    info("Skipping other branches for this file, as configured.")
                     break
 
     def modify_file_dealing_with_branch_protection(
@@ -194,7 +191,8 @@ class FilesProcessor(AbstractProcessor):
             ) and "You are not allowed to push into this branch" in e.error_message:
                 # If the project is archived, modifying files is not allowed
                 if project.archived:
-                    fatal(f"Project is archived, cannot modify files in it.: {e.error_message}")
+                    critical(f"Project is archived, cannot modify files in it.: {e.error_message}")
+                    sys.exit(EXIT_PROCESSING_ERROR)
 
                 # Otherwise, unprotect the branch but only if we know how to protect it again
                 if configuration.get("branches|" + branch.name + "|protected"):
@@ -202,13 +200,13 @@ class FilesProcessor(AbstractProcessor):
                     # Delete operation on protected branch removes the protection only
                     project.protectedbranches.delete(branch.name)
                 else:
-                    fatal(
+                    critical(
                         f"Operation '{operation}' on file in branch {branch.name} not permitted."
                         f" We don't have a branch protection configuration provided for this"
                         f" branch. Breaking as we cannot unprotect the branch as we would not know"
-                        f" how to protect it again.",
-                        EXIT_INVALID_INPUT,
+                        f" how to protect it again."
                     )
+                    sys.exit(EXIT_INVALID_INPUT)
 
                 try:
                     debug("> Attempt updating file again")

@@ -9,7 +9,7 @@ pytestmark = pytest.mark.requires_license
 
 
 class TestGroupBranches:
-    def test__create_group_protected_branch(self, group, project):
+    def test__create_group_protected_branch(self, group):
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -39,7 +39,7 @@ class TestGroupBranches:
         assert AccessLevel.NO_ACCESS.value in push_levels
         assert AccessLevel.MAINTAINER.value in merge_levels
 
-    def test__update_group_protected_branch(self, group, project):
+    def test__update_group_protected_branch(self, group):
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -68,7 +68,7 @@ class TestGroupBranches:
         assert AccessLevel.DEVELOPER.value in push_levels
         assert AccessLevel.DEVELOPER.value in merge_levels
 
-    def test__unprotect_group_branch(self, group, project):
+    def test__unprotect_group_branch(self, group):
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -82,7 +82,7 @@ class TestGroupBranches:
         with pytest.raises(GitlabGetError):
             group.protectedbranches.get("main")
 
-    def test__group_branch_protection_with_allow_force_push(self, group, project):
+    def test__group_branch_protection_with_allow_force_push(self, group):
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -98,10 +98,7 @@ class TestGroupBranches:
         protected_branch = group.protectedbranches.get("main")
         assert protected_branch.allow_force_push is True
 
-        # Clean up
-        protected_branch.delete()
-
-    def test__group_branch_protection_idempotency(self, group, project):
+    def test__group_branch_protection_idempotency(self, group):
         config = f"""
         projects_and_groups:
           {group.full_path}/*:
@@ -112,12 +109,8 @@ class TestGroupBranches:
                 merge_access_level: {AccessLevel.MAINTAINER.value}
         """
 
-        # Run twice - second run should not error
         run_gitlabform(config, group)
         run_gitlabform(config, group)
 
         protected_branch = group.protectedbranches.get("main")
         assert protected_branch is not None
-
-        # Clean up
-        protected_branch.delete()

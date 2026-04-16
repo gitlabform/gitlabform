@@ -1,0 +1,29 @@
+name: Linter and tests (PRs raised from Forks)
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+concurrency:
+  group: ${{github.workflow}}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  pr_jobs:
+    # github.event.pull_request object defined here: https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#get-a-pull-request
+    if: ${{ github.event.pull_request.head.repo.full_name != 'gitlabform/gitlabform' }}
+    uses: ./.github/workflows/prs.yml
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      pull-requests: write
+      security-events: write
+    with:
+      branch_ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit

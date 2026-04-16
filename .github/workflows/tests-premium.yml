@@ -32,7 +32,7 @@ jobs:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: ./dev/run_gitlab_in_docker.sh
       - name: Run acceptance tests that require premium license
-        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 tests/acceptance/premium
+        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/premium
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:

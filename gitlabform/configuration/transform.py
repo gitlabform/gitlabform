@@ -1,10 +1,10 @@
-from logging import debug
+import sys
+from logging import debug, info, critical
 from abc import ABC, abstractmethod
 from ez_yaml import ez_yaml
 from ruamel.yaml import YAML
 from types import SimpleNamespace
 
-from cli_ui import fatal, warning, debug as verbose
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
@@ -72,7 +72,7 @@ class UserTransformer(ConfigurationTransformer):
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         log = ConsolePrinter(logging_args)
         processor = Processor(log, configuration.config)
-        verbose("Getting user ids for users defined in protect_environments config")
+        info("Getting user ids for users defined in protect_environments config")
         try:
             for node_coordinate in processor.get_nodes(
                 "projects_and_groups.*.protected_environments.*.deploy_access_levels.user",
@@ -86,7 +86,7 @@ class UserTransformer(ConfigurationTransformer):
             # under the given path
             pass
 
-        verbose("Getting user ids for users defined in merge_requests_approval_rules config")
+        info("Getting user ids for users defined in merge_requests_approval_rules config")
         try:
             for node_coordinate in processor.get_nodes(
                 "**.merge_requests_approval_rules.*.users",
@@ -218,11 +218,11 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                         access_level_string = str(node_coordinate.node)
                         node_coordinate.parent[node_coordinate.parentref] = AccessLevel.get_value(access_level_string)
                     except KeyError:
-                        fatal(
+                        critical(
                             f"Configuration string '{access_level_string}' is not one of the valid access levels:"
-                            f" {', '.join(AccessLevel.get_canonical_names())}",
-                            exit_code=EXIT_INVALID_INPUT,
+                            f" {', '.join(AccessLevel.get_canonical_names())}"
                         )
+                        sys.exit(EXIT_INVALID_INPUT)
             except YAMLPathException:
                 # this just means that we haven't found any keys in YAML
                 # under the given path
@@ -248,11 +248,11 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                                 access_level_string
                             )
                         except KeyError:
-                            fatal(
+                            critical(
                                 f"Configuration string '{access_level_string}' is not one of the valid access levels:"
-                                f" {', '.join(AccessLevel.get_canonical_names())}",
-                                exit_code=EXIT_INVALID_INPUT,
+                                f" {', '.join(AccessLevel.get_canonical_names())}"
                             )
+                            sys.exit(EXIT_INVALID_INPUT)
             except YAMLPathException:
                 # this just means that we haven't found any keys in YAML
                 # under the given path

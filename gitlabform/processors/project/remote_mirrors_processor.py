@@ -1,7 +1,5 @@
 from typing import Any, cast, Dict, Set, List, Optional
-from urllib.parse import urlparse
-
-from cli_ui import debug as verbose, info_1 as info, warning
+from logging import info, warning
 
 from gitlab.exceptions import GitlabCreateError, GitlabUpdateError, GitlabDeleteError
 from gitlab.v4.objects import Project, ProjectRemoteMirror
@@ -92,7 +90,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
                     self._delete_remote_mirror(mirror_in_gitlab)
                     gitlab_mirrors_map.pop(norm_url, None)
                 else:
-                    verbose(f"Skip deleting remote mirror '{norm_url}', because it doesn't exist")
+                    info(f"Skip deleting remote mirror '{norm_url}', because it doesn't exist")
                 continue
 
             # --- CASE: CREATE OR UPDATE ---
@@ -140,7 +138,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         """
         # Only attempt retrieval if the auth method supports it
         if getattr(mirror_obj, "auth_method", None) != "ssh_public_key":
-            verbose(f"Skipping public key display for '{norm_url}': auth_method is not 'ssh_public_key'")
+            info(f"Skipping public key display for '{norm_url}': auth_method is not 'ssh_public_key'")
             return
 
         public_key: Optional[str] = None
@@ -166,7 +164,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
                 "Please consult the GitLab documentation on 'Repository Mirroring' for specific setup instructions for your target platform."
             )
         else:
-            verbose(f"No public key available to display for mirror '{norm_url}'")
+            info(f"No public key available to display for mirror '{norm_url}'")
 
     def _needs_update(self, existing_mirror: Dict[str, Any], config_payload: Dict[str, Any]) -> bool:
         """
@@ -197,12 +195,12 @@ class RemoteMirrorsProcessor(AbstractProcessor):
 
         if should_update:
             if force_update:
-                verbose(f"Mirror '{norm_url}' update is being forced via 'force_update' flag.")
+                info(f"Mirror '{norm_url}' update is being forced via 'force_update' flag.")
 
-            verbose(f"Updating remote mirror '{norm_url}' with latest config")
+            info(f"Updating remote mirror '{norm_url}' with latest config")
             try:
                 project.remote_mirrors.update(id=mirror_obj.id, new_data=payload)
-                verbose(f"Updated remote mirror '{norm_url}'")
+                info(f"Updated remote mirror '{norm_url}'")
 
                 if force_update:
                     info(
@@ -212,14 +210,14 @@ class RemoteMirrorsProcessor(AbstractProcessor):
             except GitlabUpdateError as e:
                 warning(f"Failed to update remote mirror {norm_url}: {e}")
         else:
-            verbose(f"Remote mirror '{norm_url}' remains unchanged")
+            info(f"Remote mirror '{norm_url}' remains unchanged")
 
     def _create_new_mirror(
         self, project: Project, payload: Dict[str, Any], raw_url: str
     ) -> Optional[ProjectRemoteMirror]:
         """Creates a new remote mirror and handles API errors."""
         norm_url = self._normalize_url_for_comparison(raw_url)
-        verbose(f"Creating remote mirror '{norm_url}'")
+        info(f"Creating remote mirror '{norm_url}'")
         try:
             return cast(ProjectRemoteMirror, project.remote_mirrors.create(payload))
         except GitlabCreateError as e:
@@ -230,29 +228,29 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         """Deletes mirrors present in GitLab that are not in the configuration."""
         for norm_url, gm in gitlab_mirrors_map.items():
             if norm_url not in urls_to_keep:
-                verbose(f"Enforce: Deleting remote mirror '{gm.url}' as it is not in the configuration")
+                info(f"Enforce: Deleting remote mirror '{gm.url}' as it is not in the configuration")
                 self._delete_remote_mirror(gm)
 
     def _delete_remote_mirror(self, mirror: ProjectRemoteMirror) -> None:
         """Delete the given `ProjectRemoteMirror` and handle errors."""
-        verbose(f"Deleting remote mirror '{mirror.url}'")
+        info(f"Deleting remote mirror '{mirror.url}'")
         try:
             mirror.delete()
         except GitlabDeleteError as e:
             warning(
                 f"Failed to delete remote mirror id={getattr(mirror, 'id', None)} url={getattr(mirror, 'url', None)}: {e}"
             )
-            verbose(f"Failed to delete remote mirror '{mirror.url}'")
+            info(f"Failed to delete remote mirror '{mirror.url}'")
 
     def _sync_remote_mirror(self, mirror: ProjectRemoteMirror) -> None:
         """Trigger sync for remote mirror when `force_push` is requested."""
         mirror_id = getattr(mirror, "id", None)
         mirror_url = getattr(mirror, "url", None)
-        verbose(f"Attempting sync for remote mirror id={mirror_id} url={mirror_url}")
+        info(f"Attempting sync for remote mirror id={mirror_id} url={mirror_url}")
 
         try:
             result = mirror.sync()
-            verbose(f"Triggered sync for remote mirror '{mirror_url}' result={result}")
+            info(f"Triggered sync for remote mirror '{mirror_url}' result={result}")
         except Exception as e:
             warning(f"Failed to trigger sync for remote mirror id={mirror_id} url={mirror_url}: {e}")
 

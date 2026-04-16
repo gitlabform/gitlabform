@@ -1,0 +1,30 @@
+name: Linter and tests (PRs raised on main repo)
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+concurrency:
+  group: ${{github.workflow}}-${{ github.ref }}
+  cancel-in-progress: true
+# On Forks only run jobs using pull_request_target -> so that they can pick up Secrets from main repository
+# On main repo run jobs using pull_request -> so that we can test CI changes (only maintainers can make branches on main repo)
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pr_jobs:
+    # github.event.pull_request object defined here: https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#get-a-pull-request
+    if: ${{ github.event.pull_request.head.repo.full_name == 'gitlabform/gitlabform' }}
+    uses: ./.github/workflows/prs.yml
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      pull-requests: write
+      security-events: write
+    with:
+      branch_ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit

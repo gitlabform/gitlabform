@@ -1,7 +1,6 @@
-from cli_ui import debug as verbose, info, warning
+from logging import info, warning
 from typing import Dict, List, Callable, Union
 
-from gitlab.base import RESTObjectList, RESTObject
 from gitlab.v4.objects import Group, Project, ProjectLabel, GroupLabel
 
 
@@ -30,7 +29,7 @@ class LabelsProcessor:
         for label_to_update in existing_group_labels:
             label_name_in_gl = label_to_update.name
             updated_label = False
-            verbose(f"Checking if {label_name_in_gl} is in Configuration to update or delete")
+            info(f"Checking if {label_name_in_gl} is in Configuration to update or delete")
 
             for key, configured_label in configured_labels.items():
                 configured_label_name = configured_label.get("name")
@@ -47,7 +46,7 @@ class LabelsProcessor:
                             parent_object_type,
                         )
                     else:
-                        verbose(f"No update required for label: {label_name_in_gl}")
+                        info(f"No update required for label: {label_name_in_gl}")
                     break
 
             if not updated_label:
@@ -57,7 +56,7 @@ class LabelsProcessor:
         for label_to_delete in gitlab_labels_to_delete:
             label_name_in_gl = label_to_delete.name
 
-            verbose(f"{label_name_in_gl} not in configured labels")
+            info(f"{label_name_in_gl} not in configured labels")
             # only delete labels when enforce is true, because user's maybe automatically applying labels based
             # on Repo state, for example: Compliance Framework labels based on language or CI-template status
             if enforce:

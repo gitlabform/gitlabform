@@ -1,6 +1,5 @@
-from logging import debug, warning
+from logging import debug
 from typing import List
-from cli_ui import info
 
 from gitlabform.gitlab import GitLab
 from gitlab.v4.objects import Group, GroupSAMLGroupLink

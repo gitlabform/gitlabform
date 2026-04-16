@@ -1,6 +1,7 @@
+import sys
 from typing import Optional, Any
 
-from cli_ui import warning, error, fatal, debug as verbose
+from logging import info, warning, error, critical, debug
 from gitlab import GitlabGetError, GitlabDeleteError, GitlabOperationError
 from gitlab.v4.objects.branches import GroupProtectedBranch
 from gitlab.v4.objects.groups import Group
@@ -25,7 +26,8 @@ class GroupBranchesProcessor(AbstractProcessor):
         for branch in sorted(configuration["group_branches"]):
             branch_config = configuration["group_branches"][branch]
             if branch_config.get("protected") is None:
-                fatal(f"The Protected key is mandatory in group_branches configuration, fix {branch} YAML config")
+                critical(f"The Protected key is mandatory in group_branches configuration, fix {branch} YAML config")
+                sys.exit(EXIT_INVALID_INPUT)
 
         return True
 
@@ -33,14 +35,14 @@ class GroupBranchesProcessor(AbstractProcessor):
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
 
         for branch in sorted(configuration["group_branches"]):
-            branch_configuration: dict = self._convert_user_and_group_names_to_ids(
+            branch_configuration: dict = self.convert_user_and_group_names_to_ids(
                 configuration["group_branches"][branch]
             )
 
-            self._process_branch_protection(gitlab_group, branch, branch_configuration)
+            self.process_branch_protection(gitlab_group, branch, branch_configuration)
 
-    def _convert_user_and_group_names_to_ids(self, branch_config: dict) -> dict:
-        verbose("Transforming User and Group names in group branch configuration to Ids")
+    def convert_user_and_group_names_to_ids(self, branch_config: dict) -> dict:
+        debug("Transforming User and Group names in group branch configuration to Ids")
 
         for key in branch_config:
             if isinstance(branch_config[key], list):
@@ -60,18 +62,18 @@ class GroupBranchesProcessor(AbstractProcessor):
 
         return branch_config
 
-    def _process_branch_protection(self, group: Group, branch_name: str, branch_config: dict):
+    def process_branch_protection(self, group: Group, branch_name: str, branch_config: dict):
         protected_branch: Optional[GroupProtectedBranch] = None
 
         try:
             protected_branch = group.protectedbranches.get(branch_name)
         except GitlabGetError:
-            verbose(f"The branch '{branch_name}' is not protected at group level!")
+            debug(f"The branch '{branch_name}' is not protected at group level!")
 
         if branch_config.get("protected"):
             if not protected_branch:
-                verbose(f"Creating group-level branch protection for {branch_name}")
-                self._protect_branch(group, branch_name, branch_config, False)
+                info(f"Creating group-level branch protection for {branch_name}")
+                self.protect_branch(group, branch_name, branch_config, False)
                 return
 
             transformed_branch_config = BranchesProcessor.map_config_to_protected_branch_get_data(branch_config)
@@ -87,10 +89,10 @@ class GroupBranchesProcessor(AbstractProcessor):
                 if key not in special_list_keys:
                     existing_value = getattr(protected_branch, key, None)
                     if existing_value != value:
-                        verbose(f"Creating data to update {key} as necessary")
+                        debug(f"Creating data to update {key} as necessary")
                         protected_branch_api_patch_data[key] = value
 
-            verbose("Creating data to update merge_access_levels as necessary")
+            debug("Creating data to update merge_access_levels as necessary")
             merge_access_items_patch_data = BranchesProcessor.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("merge_access_levels"),
                 existing_records=tuple(self._get_list_attribute(protected_branch, "merge_access_levels")),
@@ -98,7 +100,7 @@ class GroupBranchesProcessor(AbstractProcessor):
             if len(merge_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items_patch_data
 
-            verbose("Creating data to update push_access_levels as necessary")
+            debug("Creating data to update push_access_levels as necessary")
             push_access_items_patch_data = BranchesProcessor.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("push_access_levels"),
                 existing_records=tuple(self._get_list_attribute(protected_branch, "push_access_levels")),
@@ -106,7 +108,7 @@ class GroupBranchesProcessor(AbstractProcessor):
             if len(push_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_push"] = push_access_items_patch_data
 
-            verbose("Creating data to update unprotect_access_levels as necessary")
+            debug("Creating data to update unprotect_access_levels as necessary")
             unprotect_access_items_patch_data = BranchesProcessor.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
                 existing_records=tuple(self._get_list_attribute(protected_branch, "unprotect_access_levels")),
@@ -115,14 +117,14 @@ class GroupBranchesProcessor(AbstractProcessor):
                 protected_branch_api_patch_data["allowed_to_unprotect"] = unprotect_access_items_patch_data
 
             if protected_branch_api_patch_data != {}:
-                verbose(f"Updating group-level protected branch {branch_name} with {protected_branch_api_patch_data}")
-                self._protect_branch(group, branch_name, protected_branch_api_patch_data, True)
+                info(f"Updating group-level protected branch {branch_name} with {protected_branch_api_patch_data}")
+                self.protect_branch(group, branch_name, protected_branch_api_patch_data, True)
 
         elif protected_branch and not branch_config.get("protected"):
-            verbose(f"Removing group-level branch protection for {branch_name}")
-            self._unprotect_branch(protected_branch)
+            info(f"Removing group-level branch protection for {branch_name}")
+            self.unprotect_branch(protected_branch)
 
-    def _protect_branch(self, group: Group, branch_name: str, branch_config: dict, update_only: bool = False):
+    def protect_branch(self, group: Group, branch_name: str, branch_config: dict, update_only: bool = False):
         try:
             if update_only:
                 group.protectedbranches.update(branch_name, branch_config)
@@ -132,14 +134,12 @@ class GroupBranchesProcessor(AbstractProcessor):
             message = f"Protecting branch '{branch_name}' at group level failed! Error '{e.error_message}"
 
             if self.strict:
-                fatal(
-                    message,
-                    exit_code=EXIT_PROCESSING_ERROR,
-                )
+                critical(message)
+                sys.exit(EXIT_PROCESSING_ERROR)
             else:
                 error(message)
 
-    def _unprotect_branch(self, protected_branch: GroupProtectedBranch):
+    def unprotect_branch(self, protected_branch: GroupProtectedBranch):
         try:
             protected_branch.delete()
         except GitlabDeleteError as e:
@@ -147,10 +147,8 @@ class GroupBranchesProcessor(AbstractProcessor):
                 f"Branch '{protected_branch.name}' could not be unprotected at group level! Error '{e.error_message}'"
             )
             if self.strict:
-                fatal(
-                    message,
-                    exit_code=EXIT_PROCESSING_ERROR,
-                )
+                critical(message)
+                sys.exit(EXIT_PROCESSING_ERROR)
             else:
                 warning(message)
 

@@ -1,3 +1,4 @@
+import sys
 from typing import Any
 
 import os
@@ -10,8 +11,8 @@ from pathlib import Path
 from ruamel.yaml.scalarstring import ScalarString
 from types import SimpleNamespace
 
-from cli_ui import debug as verbose
-from cli_ui import fatal
+from logging import critical, info
+
 from mergedeep import merge
 from yamlpath.common import Parsers
 from yamlpath.wrappers import ConsolePrinter
@@ -28,10 +29,8 @@ class ConfigurationCore(ABC):
 
     def __init__(self, config_path=None, config_string=None):
         if config_path and config_string:
-            fatal(
-                "Please initialize with either config_path or config_string, not both.",
-                exit_code=EXIT_INVALID_INPUT,
-            )
+            critical("Please initialize with either config_path or config_string, not both.")
+            sys.exit(EXIT_INVALID_INPUT)
         try:
             if config_string:
                 self.config = self._parse_yaml(config_string, config_string=True)
@@ -44,22 +43,22 @@ class ConfigurationCore(ABC):
                 # below checks are only needed in the non-test mode, when the config is read from file
 
                 if self.config.get("example_config"):
-                    fatal(
+                    critical(
                         "Example config detected, aborting.\n"
                         "Haven't you forgotten to use `-c <config_file>` parameter?\n"
                         "If you created your config based on the example config.yml,"
-                        " then please remove 'example_config' key.",
-                        exit_code=EXIT_INVALID_INPUT,
+                        " then please remove 'example_config' key."
                     )
+                    sys.exit(EXIT_INVALID_INPUT)
 
                 if self.config.get("config_version", 1) != 4:
-                    fatal(
+                    critical(
                         "This version of GitLabForm requires 'config_version: 4' entry in the config. "
                         "This ensures that if the application behavior changes in a backward-incompatible way,"
                         " you won't apply unwanted configuration to your GitLab instance.\n"
-                        "Please follow this guide: https://gitlabform.github.io/gitlabform/upgrade/\n",
-                        exit_code=EXIT_INVALID_INPUT,
+                        "Please follow this guide: https://gitlabform.github.io/gitlabform/upgrade/\n"
                     )
+                    sys.exit(EXIT_INVALID_INPUT)
 
             self._find_almost_duplicates()
 
@@ -100,11 +99,11 @@ class ConfigurationCore(ABC):
 
         if config_string:
             config = textwrap.dedent(source)
-            verbose("Reading config from the provided string.")
+            info("Reading config from the provided string.")
             yaml_data, doc_loaded = Parsers.get_yaml_data(yaml, log, config, literal=True)
         else:
             config_path = source
-            verbose(f"Reading config from file: {config_path}")
+            info(f"Reading config from file: {config_path}")
             yaml_data, doc_loaded = Parsers.get_yaml_data(yaml, log, config_path)
 
         if doc_loaded:
@@ -159,11 +158,11 @@ class ConfigurationCore(ABC):
         for key, value in config.items():
             if "inherit" == key:
                 parent_key_description = ' under key "' + parent_key + '"' if parent_key else ""
-                fatal(
+                critical(
                     f'The inheritance-break flag set in "{section_name}"{parent_key_description} is invalid\n'
-                    f"because it has no higher level setting to inherit from.\n",
-                    exit_code=EXIT_INVALID_INPUT,
+                    f"because it has no higher level setting to inherit from.\n"
                 )
+                sys.exit(EXIT_INVALID_INPUT)
             elif type(value) in [CommentedMap, dict]:
                 ConfigurationCore._validate_break_inheritance_flag(value, section_name, key)
 
@@ -194,10 +193,8 @@ class ConfigurationCore(ABC):
                         replace_config_section(merged_dict, parent_path, specific_config)
                         break
                     elif value:
-                        fatal(
-                            f"Cannot set the inheritance break flag with true\n",
-                            exit_code=EXIT_INVALID_INPUT,
-                        )
+                        critical(f"Cannot set the inheritance break flag with true\n")
+                        sys.exit(EXIT_INVALID_INPUT)
                 elif type(value) in [CommentedMap, dict]:
                     break_inheritance(value, parent_path + (key,))
 
@@ -262,12 +259,12 @@ class ConfigurationCore(ABC):
             if self.get(path, 0):
                 almost_duplicates = self._find_almost_duplicates_in(path)
                 if almost_duplicates:
-                    fatal(
+                    critical(
                         f"There are almost duplicates in the keys of {path} - they differ only in case.\n"
                         f"They are: {', '.join(almost_duplicates)}\n"
-                        f"This is not allowed as we ignore the case for group and project names.",
-                        exit_code=EXIT_INVALID_INPUT,
+                        f"This is not allowed as we ignore the case for group and project names."
                     )
+                    sys.exit(EXIT_INVALID_INPUT)
 
     def _find_almost_duplicates_in(self, configuration_path):
         """
@@ -322,7 +319,5 @@ class KeyNotFoundException(Exception):
         if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
             self.key = key
         else:
-            fatal(
-                f"Unable to find the key: {key.replace('|', '.')}\n",
-                exit_code=EXIT_INVALID_INPUT,
-            )
+            critical(f"Unable to find the key: {key.replace('|', '.')}\n")
+            sys.exit(EXIT_INVALID_INPUT)

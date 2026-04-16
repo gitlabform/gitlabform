@@ -1,6 +1,5 @@
-from logging import debug
-from cli_ui import debug as verbose
-from cli_ui import fatal
+import sys
+from logging import debug, info, critical
 
 import abc
 from typing import Callable, Union, Any
@@ -100,7 +99,7 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
         if enforce:
             for entity_name, entity_config in entities_only_in_gitlab.items():
                 # no need to validate if we have what's needed to delete as we got the entities from gitlab
-                verbose(
+                info(
                     f"Deleting entity no {entity_name} of {self.configuration_name} in {project_or_group} "
                     f"as it's not in config and enforce is set to true."
                 )
@@ -112,27 +111,27 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             entity_in_gitlab = self._is_in(entity_config, entities_in_gitlab)
             if entity_config.get("delete", False):
                 self._validate_required_to_delete(project_or_group, entity_name, entity_config)
-                verbose(f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}")
+                info(f"Deleting {entity_name} of {self.configuration_name} in {project_or_group}")
                 self.delete_method(project_or_group, entity_in_gitlab)
             elif self._needs_update(entity_in_gitlab, entity_config):
                 self._validate_required_to_create_or_update(project_or_group, entity_name, entity_config)
                 if self.edit_method:
-                    verbose(f"Editing {entity_name} of {self.configuration_name} in {project_or_group}")
+                    info(f"Editing {entity_name} of {self.configuration_name} in {project_or_group}")
                     self.edit_method(project_or_group, entity_in_gitlab, entity_config)
                     debug(f"{self.configuration_name} AFTER: ^^^")
                 else:
-                    verbose(f" * Recreating {entity_name} of {self.configuration_name} in {project_or_group}")
+                    info(f" * Recreating {entity_name} of {self.configuration_name} in {project_or_group}")
                     self.delete_method(project_or_group, entity_in_gitlab)
                     self.add_method(project_or_group, entity_config)
                     debug(f"{self.configuration_name} AFTER: ^^^")
             else:
-                verbose(f" * {entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update.")
+                info(f" * {entity_name} of {self.configuration_name} in {project_or_group} doesn't need an update.")
 
         # add c) (or do nothing if marked as "delete")
 
         for entity_name, entity_config in entities_only_in_configuration.items():
             self._validate_required_to_create_or_update(project_or_group, entity_name, entity_config)
-            verbose(f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}")
+            info(f" * Adding {entity_name} of {self.configuration_name} in {project_or_group}")
             self.add_method(project_or_group, entity_config)
             debug(f"{self.configuration_name} AFTER: ^^^")
 
@@ -141,28 +140,28 @@ class MultipleEntitiesProcessor(AbstractProcessor, metaclass=abc.ABCMeta):
             for second_key, second_value in entities_in_configuration.items():
                 if first_key != second_key:
                     if self.defining.matches(first_value, second_value):
-                        fatal(
+                        critical(
                             f"Entities {first_key} and {second_key} in {self.configuration_name} for {project_or_group}"
-                            f" are the same in terms of their defining keys: {self.defining.explain()}",
-                            exit_code=EXIT_INVALID_INPUT,
+                            f" are the same in terms of their defining keys: {self.defining.explain()}"
                         )
+                        sys.exit(EXIT_INVALID_INPUT)
 
     def _validate_required_to_create_or_update(self, project_or_group: str, entity_name: str, entity_dict: dict):
         if not self.required_to_create_or_update.contains(entity_dict):
-            fatal(
+            critical(
                 f"Entity {entity_name} in {self.configuration_name} for {project_or_group}"
                 f" doesn't have some of its keys required to create or update:"
-                f" {self.required_to_create_or_update.explain()}",
-                exit_code=EXIT_INVALID_INPUT,
+                f" {self.required_to_create_or_update.explain()}"
             )
+            sys.exit(EXIT_INVALID_INPUT)
 
     def _validate_required_to_delete(self, project_or_group: str, entity_name: str, entity_dict: dict):
         if not self.defining.contains(entity_dict):
-            fatal(
+            critical(
                 f"Entity {entity_name} in {self.configuration_name} for {project_or_group}"
-                f" doesn't have some of its defining keys required to delete it: {self.defining.explain()}",
-                exit_code=EXIT_INVALID_INPUT,
+                f" doesn't have some of its defining keys required to delete it: {self.defining.explain()}"
             )
+            sys.exit(EXIT_INVALID_INPUT)
 
     def _is_in(self, entity: dict, dict_of_entities: dict):
         for entity_name, entity_config in dict_of_entities.items():
