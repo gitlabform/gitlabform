@@ -6,9 +6,15 @@ on:
       BRANCH_REF:
         type: string
         required: true
+      environment:
+        description: "Environment to run tests in: 'Integrate Pull Request' for PRs (requires approval) or 'Main' for Main."
+        type: string
+        required: true
 
 jobs:
   acceptance-tests-ultimate:
+    environment:
+      name: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
