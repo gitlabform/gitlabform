@@ -7,8 +7,7 @@ permissions:
 concurrency:
   group: ${{github.workflow}}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
-# On Forks only run jobs using pull_request_target -> so that they can pick up Secrets from main repository
-# On main repo run jobs using pull_request -> so that we can test CI changes (only maintainers can make branches on main repo)
+
 on:
   pull_request:
     branches:

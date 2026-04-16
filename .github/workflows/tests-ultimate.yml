@@ -14,7 +14,7 @@ on:
 jobs:
   acceptance-tests-ultimate:
     environment:
-      name: ${{ inputs.environment }}
+      name: ${{ inputs.environment_name }}
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
