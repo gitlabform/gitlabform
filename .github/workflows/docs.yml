@@ -10,16 +10,21 @@ on:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: 3.14
+      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
-      - name: Build docs
+          fetch-depth: 2
+      - name: Install uv
         run: |
-          pip install uv==0.11.2
+          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup Python ${{ UV_PYTHON }} and install dependencies
+        run: |
           uv sync --frozen --no-dev --group docs
+      - name: Build documentation
+        run: |
           uv run --no-sync docs build

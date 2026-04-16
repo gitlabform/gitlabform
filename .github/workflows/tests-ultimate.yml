@@ -21,24 +21,31 @@ jobs:
       matrix:
         python-version: [3.14]
       fail-fast : false
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install uv
-        run: pip install uv==0.11.2
-      - name: Run acceptance tests that require Ultimate license
+      - name: Install uv (pinned) and Python ${{ matrix.python-version }}
+        run: |
+          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup Python ${{ matrix.python-version }} and install dependencies
+        # uv will automatically create and use a virtual environment for the specified Python version
+        # Only install dependencies needed for running tests, to save time and resources.
+        run: |
+          uv sync --frozen --no-dev --group test
+      - name: Start GitLab in Docker
         env:
           # requested via: https://handbook.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows/#contributing-to-the-gitlab-enterprise-edition-ee
           # https://gitlab.com/gitlab-org/developer-relations/contributor-success/team-task/-/issues
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_ULTIMATE_LICENSE }}
         run: |
-          uv sync --frozen --no-dev --group test
           uv run --no-sync gitlab-local up
+      - name: Run acceptance tests for ultimate features
+        run: |
           uv run --no-sync qa test tests/acceptance/ultimate --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3

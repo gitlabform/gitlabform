@@ -10,19 +10,23 @@ on:
 jobs:
   black-formatting:
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: 3.14
+      UV_VERSION: 0.11.7
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
-      - name: Set up Python 3.14
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
-      - name: Run black
+          fetch-depth: 2
+      - name: Install uv
         run: |
-          pip install uv==0.11.2
+          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup Python ${{ UV_PYTHON }} and install dependencies
+        run: |
           uv sync --frozen --no-dev --group lint
+      - name: Run black formatting check
+        run: |
           uv run --no-sync qa lint black --check .
 
   types:
@@ -32,16 +36,42 @@ jobs:
       matrix:
         python-version: [3.14]
       fail-fast: false
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
+          fetch-depth: 2
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup Python ${{ matrix.python-version }} and install dependencies
+        run: |
+          uv sync --frozen --no-dev --group lint
       - name: Run mypy
         run: |
-          pip install uv==0.11.2
-          uv sync --frozen --no-dev --group lint
           uv run --no-sync qa lint mypy .
+
+  bandit:
+    runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: 3.14
+      UV_VERSION: 0.11.7
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup Python ${{ UV_PYTHON }} and install dependencies
+        run: |
+          uv sync --frozen --no-dev --group lint
+      - name: Run bandit
+        run: |
+          uv run --no-sync qa lint bandit .

@@ -21,22 +21,27 @@ jobs:
       matrix:
         python-version: [3.14]
       fail-fast : false
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
       - name: Install uv
-        run: pip install uv==0.11.2
-      - name: Run acceptance tests that require premium license
+        run: |
+          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup Python ${{ matrix.python-version }} and install dependencies
+        run: |
+          uv sync --frozen --no-dev --group test
+      - name: Start GitLab in Docker
         env:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
         run: |
-          uv sync --frozen --no-dev --group test
           uv run --no-sync gitlab-local up
+      - name: Run acceptance tests for premium features
+        run: |
           uv run --no-sync qa test tests/acceptance/premium --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3

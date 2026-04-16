@@ -39,19 +39,23 @@ jobs:
       - tests-standard
       - tests-premium
     runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: 3.14
+      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup Python ${{ UV_PYTHON }} and install dependencies
+        run: |
+          uv sync --frozen --no-dev --group docs
       - name: Build docs
         run: |
-          pip install uv==0.11.2
-          uv sync --frozen --no-dev --group docs
           uv run --no-sync docs build
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.8.0
@@ -85,18 +89,27 @@ jobs:
       url: https://pypi.org/p/gitlabform
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    env:
+      UV_PYTHON: 3.14
+      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
-      - name: Set up Python
-        uses: actions/setup-python@v6
         with:
-          python-version: 3.14
-      - name: Build, Verify and Publish
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Install uv
         run: |
-          pip install uv==0.11.2
+          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup Python ${{ UV_PYTHON }} and install dependencies
+        run: |
           uv sync --frozen --no-dev --group release
+      - name: Build and verify the package
+        run: |
           uv run --no-sync package build
           uv run --no-sync package verify
+      - name: Publish to PyPI
+        run: |
           uv run --no-sync package publish
 
   publish-to-ghcr:
