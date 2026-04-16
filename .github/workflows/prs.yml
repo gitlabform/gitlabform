@@ -41,12 +41,18 @@ jobs:
 
   tests-premium:
     uses: ./.github/workflows/tests-premium.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       branch_ref: ${{ inputs.BRANCH_REF }}
     secrets: inherit
 
   tests-ultimate:
     uses: ./.github/workflows/tests-ultimate.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       branch_ref: ${{ inputs.BRANCH_REF }}
     secrets: inherit
