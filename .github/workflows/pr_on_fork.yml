@@ -15,7 +15,8 @@ on:
 
 jobs:
   pr_jobs:
-    if: github.event.pull_request.repo.full_name != 'gitlabform/gitlabform'
+    # github.event.pull_request object defined here: https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#get-a-pull-request
+    if: ${{ github.event.pull_request.head.repo.full_name != 'gitlabform/gitlabform' }}
     uses: ./.github/workflows/prs.yml
     permissions:
       actions: read
