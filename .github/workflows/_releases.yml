@@ -51,7 +51,7 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Setup Python ${{ UV_PYTHON }} and install dependencies
+      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group docs
       - name: Build docs
@@ -101,7 +101,7 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Setup Python ${{ UV_PYTHON }} and install dependencies
+      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group release
       - name: Build and verify the package
