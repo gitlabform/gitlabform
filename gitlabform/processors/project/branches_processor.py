@@ -1,5 +1,5 @@
 import sys
-from typing import Optional
+from typing import Optional, Any
 
 from logging import info, warning, error, critical
 from gitlab import (
