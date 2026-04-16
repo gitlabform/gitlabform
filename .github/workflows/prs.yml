@@ -10,14 +10,12 @@ on:
 jobs:
 
   approve:
-    if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
     runs-on: ubuntu-latest
     steps:
       - name: Approve
         run: echo For security reasons, all pull requests need to be approved first before running the Premium Acceptance Tests.
 
   build-docs:
-    if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
     uses: ./.github/workflows/docs.yml
     permissions:
       contents: read
@@ -26,7 +24,6 @@ jobs:
       branch_ref: ${{ inputs.BRANCH_REF }}
 
   linters:
-    if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
     uses: ./.github/workflows/linters.yml
     permissions:
       contents: read
@@ -35,7 +32,6 @@ jobs:
       branch_ref: ${{ inputs.BRANCH_REF }}
 
   tests-standard:
-    if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
     uses: ./.github/workflows/tests-standard.yml
     permissions:
       contents: read
@@ -46,7 +42,6 @@ jobs:
   # you cannot use reusable workflows with an "environment" key,
   # so we have to copy "tests-premium.yml" here :(
   acceptance-tests-premium:
-    if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
     runs-on: ubuntu-latest
     needs: [ approve ] # Require the first step to finish
     environment:
@@ -93,7 +88,6 @@ jobs:
   # you cannot use reusable workflows with an "environment" key,
   # so we have to copy "tests-ultimate.yml" here :(
   acceptance-tests-ultimate:
-    if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
     runs-on: ubuntu-latest
     needs: [ approve ] # Require the first step to finish
     environment:
@@ -139,7 +133,6 @@ jobs:
           attempt_delay: 10000
 
   analyze:
-    if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
     name: Analyze (${{ matrix.language }})
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
