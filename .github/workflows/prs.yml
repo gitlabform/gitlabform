@@ -1,21 +1,11 @@
 name: Linter and tests (PRs)
 
-permissions:
-  actions: read
-  contents: read
-  pull-requests: write
-concurrency:
-  group: ${{github.workflow}}-${{ github.ref }}
-  cancel-in-progress: true
-# On Forks only run jobs using pull_request_target -> so that they can pick up Secrets from main repository
-# On main repo run jobs using pull_request -> so that we can test CI changes (only maintainers can make branches on main repo)
 on:
-  pull_request_target:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      BRANCH_REF:
+        type: string
+        required: true
 
 jobs:
 
@@ -33,7 +23,7 @@ jobs:
       contents: read
       pull-requests: write
     with:
-      branch_ref: ${{ github.event.pull_request.head.sha }}
+      branch_ref: ${{ inputs.BRANCH_REF }}
 
   linters:
     if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
@@ -42,7 +32,7 @@ jobs:
       contents: read
       pull-requests: write
     with:
-      branch_ref: ${{ github.event.pull_request.head.sha }}
+      branch_ref: ${{ inputs.BRANCH_REF }}
 
   tests-standard:
     if: ${{ (github.event_name == 'pull_request_target' && github.repository != 'gitlabform/gitlabform') || (github.event_name == 'pull_request' && github.repository == 'gitlabform/gitlabform') }}
@@ -51,7 +41,7 @@ jobs:
       contents: read
       pull-requests: write
     with:
-      branch_ref: ${{ github.event.pull_request.head.sha }}
+      branch_ref: ${{ inputs.BRANCH_REF }}
 
   # you cannot use reusable workflows with an "environment" key,
   # so we have to copy "tests-premium.yml" here :(
@@ -70,7 +60,7 @@ jobs:
       - name: Checkout code from the PR
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -95,7 +85,7 @@ jobs:
             flags: integration
             fail_ci_if_error: true
             override_pr: ${{ github.event.number }}
-            override_commit: ${{ github.event.pull_request.head.sha }}
+            override_commit: ${{ inputs.BRANCH_REF }}
             token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
@@ -117,7 +107,7 @@ jobs:
       - name: Checkout code from the PR
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -143,7 +133,7 @@ jobs:
             name: codecov-acceptance-test-ultimate
             flags: integration
             override_pr: ${{ github.event.number }}
-            override_commit: ${{ github.event.pull_request.head.sha }}
+            override_commit: ${{ inputs.BRANCH_REF }}
             token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
@@ -190,7 +180,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.pull_request.head.sha }}
+        ref: ${{ inputs.BRANCH_REF }}
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
