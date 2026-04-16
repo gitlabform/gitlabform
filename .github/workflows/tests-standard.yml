@@ -32,7 +32,7 @@ jobs:
           uv sync --frozen --no-dev --group test
           uv run --no-sync gitlab-local up
       - name: Run standard acceptance tests against Enterprise Edition
-        run: uv run --no-sync qa test --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/standard
+        run: uv run --no-sync qa test tests/acceptance/standard --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
@@ -68,7 +68,7 @@ jobs:
           uv sync --frozen --no-dev --group test
           uv run --no-sync gitlab-local up --flavor ce
       - name: Run standard acceptance tests against Community Edition
-        run: uv run --no-sync qa test --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/standard
+        run: uv run --no-sync qa test tests/acceptance/standard --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
@@ -102,7 +102,7 @@ jobs:
       - name: Run unit tests
         run: |
           uv sync --frozen --no-dev --group test
-          uv run --no-sync qa test --cov=. --cov-report=xml --log-cli-level=WARNING tests/unit
+          uv run --no-sync qa test tests/unit --cov=. --cov-report=xml --log-cli-level=WARNING
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:

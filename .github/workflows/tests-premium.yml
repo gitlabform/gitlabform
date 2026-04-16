@@ -37,7 +37,7 @@ jobs:
         run: |
           uv sync --frozen --no-dev --group test
           uv run --no-sync gitlab-local up
-          uv run --no-sync qa test --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/premium
+          uv run --no-sync qa test tests/acceptance/premium --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
