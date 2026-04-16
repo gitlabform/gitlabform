@@ -6,8 +6,13 @@ us by GitLab's customer success team.
 These tests are run in an GitHub Environment, requiring approval from a maintainer, and the licenses assigned to this
 project's maintainers are stored as GitHub Repository Secrets to prevent misuse.
 
-We use `pull_request_target` as the event to trigger PR pipelines - which has a downside that we can't test our 
-pipelines until merged into main, but allows us to pass License Secrets to Forks more easily.
+## Pipeline Trigger 
+We use `pull_request_target` as the event to trigger PR pipelines on Forks- which has a downside that we can't test 
+pipeline changes submitted from forks until merged into main, but allows us to pass License Secrets to Forks more easily.
+
+We use `pull_request` as the event to trigger PR pipelines on the main repository, which allows us to test pipeline 
+changes submitted before merging into main, with a Branch Protection rule in place to lock branch pushes to maintainers
+only on the main repository.
 
 ## License management
 
