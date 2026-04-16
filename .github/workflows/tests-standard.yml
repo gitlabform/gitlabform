@@ -166,6 +166,7 @@ jobs:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Install uv
+        shell: bash
         run: |
           curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
