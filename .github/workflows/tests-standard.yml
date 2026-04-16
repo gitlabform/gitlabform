@@ -165,11 +165,17 @@ jobs:
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
-      - name: Install uv
-        shell: bash
+      - name: Install uv (Unix)
+        if: runner.os != 'Windows'
         run: |
           curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install uv (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $env:UV_VERSION = "${{ env.UV_VERSION }}"
+          irm https://astral.sh/uv/install.ps1 | iex
+          echo "$HOME\.local\bin" >> $env:GITHUB_PATH
       - name: Setup Python ${{ matrix.python-version }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group test
