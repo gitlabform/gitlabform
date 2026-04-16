@@ -310,7 +310,19 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
 
                 parent[to_key] = lookup(node, path)
                 del parent[from_key]
-        except YAMLPathException:
+        except YAMLPathException as e:
+            # Failed to find any keys on the path, which could be perfectly valid or could be the result of malformed
+            # YAML, so we should debug log it out for users
+            # Malformed YAML example:
+            # users:
+            # my-name:
+            #  access-level: owner
+            #
+            # instead of:
+            # users:
+            #   my-name:
+            #     access-level: owner
+            debug(f"YAMLPathException while transforming principals to IDs for path '{path}': {e}")
             pass
 
     def _transform_dict_keys_to_ids(self, processor, path: str, id_key: str, lookup):
@@ -326,7 +338,8 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
                     continue
                 key = str(node_coordinate.parentref)
                 node[id_key] = lookup(key, path)
-        except YAMLPathException:
+        except YAMLPathException as e:
+            debug(f"YAMLPathException while transforming dict keys to IDs for path '{path}': {e}")
             pass
 
     def _get_user_id(self, username: str, path: str) -> int:

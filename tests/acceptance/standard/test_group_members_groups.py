@@ -224,20 +224,20 @@ class TestGroupMembersGroups:
         no_of_members_before = len(group.members.list())
 
         add_shared_with = f"""
-            projects_and_groups:
-              {group.full_path}/*:
-                group_members:
-                  enforce: true
-                  keep_bots: true
-                  users:
-                  {users[0].username}:
-                    access_level: owner
-                  groups:
-                    {groups[0].full_path}:
-                      group_access: developer
-                    {groups[1].full_path}:
-                      group_access: developer
-            """
+        projects_and_groups:
+          {group.full_path}/*:
+            group_members:
+              enforce: true
+              keep_bots: true
+              users:
+                {users[0].username}:
+                  access_level: owner
+              groups:
+                {groups[0].full_path}:
+                  group_access: developer
+                {groups[1].full_path}:
+                  group_access: developer
+        """
 
         run_gitlabform(add_shared_with, group)
 
