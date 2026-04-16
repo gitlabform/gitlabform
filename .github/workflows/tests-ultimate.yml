@@ -9,6 +9,8 @@ on:
 
 jobs:
   acceptance-tests-ultimate:
+    environment:
+      name: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5

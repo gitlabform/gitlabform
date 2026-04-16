@@ -22,6 +22,7 @@ jobs:
       pull-requests: write
     with:
       branch_ref: ${{ inputs.BRANCH_REF }}
+      environment: Integrate Pull Request # Our dummy environment
 
   linters:
     uses: ./.github/workflows/linters.yml
@@ -30,6 +31,7 @@ jobs:
       pull-requests: write
     with:
       branch_ref: ${{ inputs.BRANCH_REF }}
+      environment: Integrate Pull Request # Our dummy environment
 
   tests-standard:
     uses: ./.github/workflows/tests-standard.yml
