@@ -18,8 +18,11 @@ jobs:
     if: github.repository != 'gitlabform/gitlabform'
     uses: ./.github/workflows/prs.yml
     permissions:
+      actions: read
       contents: read
+      packages: read
       pull-requests: write
+      security-events: write
     with:
       branch_ref: ${{ github.event.pull_request.head.sha }}
     secrets: inherit
