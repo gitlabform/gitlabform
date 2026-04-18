@@ -10,18 +10,13 @@ on:
 jobs:
   black-formatting:
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON: 3.14
-      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group lint
@@ -36,18 +31,15 @@ jobs:
       matrix:
         python-version: [3.14]
       fail-fast: false
-    env:
-      UV_PYTHON: ${{ matrix.python-version }}
-      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Setup Python ${{ matrix.python-version }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group lint
@@ -57,18 +49,13 @@ jobs:
 
   bandit:
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON: 3.14
-      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group lint

@@ -39,18 +39,13 @@ jobs:
       - tests-standard
       - tests-premium
     runs-on: ubuntu-latest
-    env:
-      UV_PYTHON: 3.14
-      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.BRANCH_REF }}
+          ref: ${{ github.ref }}
           fetch-depth: 2
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group docs
@@ -89,18 +84,13 @@ jobs:
       url: https://pypi.org/p/gitlabform
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
-    env:
-      UV_PYTHON: 3.14
-      UV_VERSION: 0.11.7
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.BRANCH_REF }}
+          ref: ${{ github.ref }}
           fetch-depth: 2
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group release
@@ -120,20 +110,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
       - name: Install dependencies
         run: |
-          pip install wheel
-          pip install packaging
+          uv pip install wheel packaging
       - name: Get the version from the tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
       - name: Wait for PyPI release
         run: |
-          pip download gitlabform==${{ env.VERSION }} > /dev/null
-          while [ $? -ne 0 ]; do sleep 10; pip3 download gitlabform==${{ env.VERSION }} > /dev/null ; done
+          uv pip download gitlabform==${{ env.VERSION }} > /dev/null
+          while [ $? -ne 0 ]; do sleep 10; uv pip download gitlabform==${{ env.VERSION }} > /dev/null ; done
         shell: bash {0}
       - name: Docker metadata
         id: metadata
