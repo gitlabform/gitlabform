@@ -229,5 +229,5 @@ cecho b '(This is the only way to make GitLab in Docker stable.)'
 echo ''
 
 cecho b 'To start the acceptance tests, run:'
-cecho y 'pytest tests/acceptance'
+cecho y 'uv run qa test tests/acceptance'
 echo ''
