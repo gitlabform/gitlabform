@@ -11,6 +11,9 @@ on:
         type: string
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   acceptance-tests-ultimate:
     environment:
