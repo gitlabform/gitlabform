@@ -224,7 +224,7 @@ def _domain_entrypoint(prog, description, setup_fn, dispatch_fn):
         if args.extra_args is None:
             args.extra_args = extra
         else:
-            args.extra_args.extend(extra)
+            args.extra_args = extra + args.extra_args
 
     if not args.command:
         parser.print_help()
@@ -297,7 +297,7 @@ def main():
         if args.extra_args is None:
             args.extra_args = extra
         else:
-            args.extra_args.extend(extra)
+            args.extra_args = extra + args.extra_args
 
     if not args.domain:
         parser.print_help()
