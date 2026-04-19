@@ -11,6 +11,17 @@ permissions:
   contents: read
 
 jobs:
+  lockfile-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Verify that uv.lock is in sync with pyproject.toml
+        run: |
+          uv lock --check
 
   acceptance-tests:
     runs-on: ubuntu-latest
