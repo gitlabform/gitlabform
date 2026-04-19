@@ -25,12 +25,14 @@ jobs:
     uses: ./.github/workflows/tests-premium.yml
     with:
       BRANCH_REF: ${{ github.ref }}
+      environment: Main Tests
     secrets: inherit
 
   tests-ultimate:
     uses: ./.github/workflows/tests-ultimate.yml
     with:
       BRANCH_REF: ${{ github.ref }}
+      environment: Main Tests
     secrets: inherit
 
   publish-docs:
@@ -38,6 +40,7 @@ jobs:
       - linters
       - tests-standard
       - tests-premium
+      - tests-ultimate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -63,6 +66,7 @@ jobs:
       - linters
       - tests-standard
       - tests-premium
+      - tests-ultimate
     runs-on: ubuntu-latest
     steps:
       - name: Create release in GitHub
@@ -78,6 +82,7 @@ jobs:
       - linters
       - tests-standard
       - tests-premium
+      - tests-ultimate
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -107,6 +112,7 @@ jobs:
       - linters
       - tests-standard
       - tests-premium
+      - tests-ultimate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -116,7 +122,7 @@ jobs:
         run: |
           uv pip install wheel packaging
       - name: Get the version from the tag
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Wait for PyPI release
         run: |
           uv pip download gitlabform==${{ env.VERSION }} > /dev/null
