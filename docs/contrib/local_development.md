@@ -145,16 +145,16 @@ Acceptance tests perform real operations against a running GitLab instance. Beca
 
     !!! note
     
-        Use `uv run gitlab-local up --flavor ce` to test against Community Edition.
+        Use `uv run gitlab-local up --gitlab-flavor ce` to test against Community Edition.
 
     To see all available infrastructure management options:
 
     ```bash
-    uv run gitlab-local --help
+    uv run gitlab-local up --help
     ```
     
     !!! tip "Testing against specific versions"
-        You can test against specific GitLab releases using the version flag: `uv run gitlab-local up --version 17.5.0-ee`.
+        You can test against specific GitLab releases using the version flag: `uv run gitlab-local up --gitlab-version 17.5.0-ee`.
 
     !!! note "Testing paid features"
     

@@ -219,6 +219,9 @@ echo ''
 
 # Provide instructions for stopping and starting GitLab
 cecho b 'To stop and delete the GitLab container, run:'
+cecho y 'uv run gitlab-local down'
+echo ''
+cecho b 'Alternatively to do it manually, you can run:'
 cecho r "docker stop --time=30 gitlab"
 cecho r "docker rm gitlab"
 echo ''

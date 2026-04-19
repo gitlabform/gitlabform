@@ -151,10 +151,10 @@ def _add_infra_subcommands(subparsers):
     up = subparsers.add_parser(
         "up",
         help="Start a local GitLab Docker instance",
-        description="Start a local GitLab instance in Docker. Allows specifying the edition (EE/CE) and version tag for targeted testing.",
+        description="Start a local GitLab instance in Docker. This command passes all arguments to the setup script. Use 'up --help' to see script-specific options.",
+        add_help=False,  # We disable the default help to provide a custom message that includes script options.
     )
-    up.add_argument("--version", default="latest", help="GitLab version tag (default: latest)")
-    up.add_argument("--flavor", default="ee", choices=["ee", "ce"], help="GitLab flavor (default: ee)")
+    up.add_argument("extra_args", nargs=argparse.REMAINDER, help="Arguments passed to run_gitlab_in_docker.sh")
 
     subparsers.add_parser(
         "down",
@@ -166,7 +166,7 @@ def _add_infra_subcommands(subparsers):
 def _dispatch_infra(args):
     """Executes infrastructure logic."""
     if args.command == "up":
-        gitlab_up(version=args.version, flavor=args.flavor)
+        gitlab_up(args.extra_args)
     elif args.command == "down":
         gitlab_down()
 
@@ -216,7 +216,15 @@ def _domain_entrypoint(prog, description, setup_fn, dispatch_fn):
     """Generic helper for domain-specific entry points."""
     parser = argparse.ArgumentParser(prog=prog, description=description)
     setup_fn(parser.add_subparsers(dest="command"))
-    args = parser.parse_args()
+    args, extra = parser.parse_known_args()
+
+    # Combine unknown arguments (like flags) with the 'extra_args' list if it exists.
+    # This allows passthrough commands like 'up' to receive flags like --help.
+    if hasattr(args, "extra_args") and extra:
+        if args.extra_args is None:
+            args.extra_args = extra
+        else:
+            args.extra_args.extend(extra)
 
     if not args.command:
         parser.print_help()
@@ -281,7 +289,15 @@ def main():
         setup_fn(p.add_subparsers(dest="command"))
         parsers[name] = p
 
-    args = parser.parse_args()
+    args, extra = parser.parse_known_args()
+
+    # Combine unknown arguments (flags) with the 'extra_args' list if it exists.
+    # This applies when running via the main 'dev' entrypoint.
+    if hasattr(args, "extra_args") and extra:
+        if args.extra_args is None:
+            args.extra_args = extra
+        else:
+            args.extra_args.extend(extra)
 
     if not args.domain:
         parser.print_help()

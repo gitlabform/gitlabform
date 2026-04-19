@@ -17,12 +17,11 @@ def _check_docker_running():
         sys.exit(1)
 
 
-def gitlab_up(version: str = "latest", flavor: str = "ee"):
+def gitlab_up(extra_args: list[str] | None = None):
     """Starts the local GitLab instance using the legacy setup script.
 
     Args:
-        version: The GitLab Docker image tag (e.g., 'latest', '16.5.0-ee.0').
-        flavor: The GitLab edition ('ee' or 'ce').
+        extra_args: Additional arguments passed directly to the setup script.
     """
     _check_docker_running()
     script_path = REPO_ROOT / "dev/gitlab/run_gitlab_in_docker.sh"
@@ -31,11 +30,14 @@ def gitlab_up(version: str = "latest", flavor: str = "ee"):
         logger.info("Ensure GitLab assets are correctly located in 'dev/gitlab/'.")
         sys.exit(1)
 
-    cmd = ["bash", str(script_path), "--gitlab-version", version, "--gitlab-flavor", flavor]
+    cmd = ["bash", str(script_path)]
+    if extra_args:
+        cmd.extend(extra_args)
     # We pass a 'clean' environment to the legacy bash script.
     # This ensures that any calls to 'docker' inside the script resolve to the
     # system binary rather than recursing into our own toolkit entrypoint.
-    run_command(cmd, f"Executing GitLab setup script (Flavor: {flavor}, Version: {version})", env=get_clean_env())
+    desc = f"Executing GitLab setup script {' '.join(extra_args) if extra_args else ''}".strip()
+    run_command(cmd, desc, env=get_clean_env())
 
 
 def gitlab_down():
