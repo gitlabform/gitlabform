@@ -11,6 +11,9 @@ on:
         type: string
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   acceptance-tests-premium:
     environment:
@@ -25,20 +28,21 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install test dependencies
+      - name: Setup Python ${{ matrix.python-version }} and install dependencies
         run: |
-          pip install wheel
-          pip install -e .[test]
+          uv sync --frozen --no-dev --group test
       - name: Start GitLab in Docker
         env:
           GITLAB_EE_LICENSE: ${{ secrets.GITLAB_EE_LICENSE }}
-        run: ./dev/run_gitlab_in_docker.sh
-      - name: Run acceptance tests that require premium license
-        run: pytest --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING tests/acceptance/premium
+        run: |
+          uv run --no-sync gitlab-local up
+      - name: Run acceptance tests for premium features
+        run: |
+          uv run --no-sync qa test tests/acceptance/premium --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage to Codecov
         uses: Wandalen/wretry.action@v3
         with:
