@@ -190,37 +190,13 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
         self.gitlab = gitlab
 
     # Factorized mapping path lists to keep transformation paths in one place
-    user_mapping_paths = {
-        "lists": [
-            "projects_and_groups.*.merge_requests_approval_rules.*.users",
-        ],
-        "values": [
-            "projects_and_groups.*.protected_environments.*.deploy_access_levels.*.user",
-            "projects_and_groups.*.tags.*.allowed_to_create.*.user",
-            "projects_and_groups.*.branches.*.allowed_to_push.*.user",
-            "projects_and_groups.*.branches.*.allowed_to_merge.*.user",
-            "projects_and_groups.*.branches.*.allowed_to_unprotect.*.user",
-        ],
-        "dict_keys": [
-            "projects_and_groups.*.members.users.*",
-            "projects_and_groups.*.group_members.users.*",
-        ],
-    }
-
     group_mapping_paths = {
-        "lists": [
-            "projects_and_groups.*.merge_requests_approval_rules.*.groups",
-        ],
         "values": [
-            "projects_and_groups.*.protected_environments.*.deploy_access_levels.*.group",
-            "projects_and_groups.*.tags.*.allowed_to_create.*.group",
-            "projects_and_groups.*.branches.*.allowed_to_push.*.group",
-            "projects_and_groups.*.branches.*.allowed_to_merge.*.group",
-            "projects_and_groups.*.branches.*.allowed_to_unprotect.*.group",
+            "projects_and_groups.*.**.group",
+            "projects_and_groups.**.groups",
         ],
         "dict_keys": [
-            "projects_and_groups.*.members.groups.*",
-            "projects_and_groups.*.group_members.groups.*",
+            "projects_and_groups.**.groups.*",
         ],
     }
 
@@ -228,63 +204,63 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
 
-        for path in self.user_mapping_paths.get("lists", []):
-            self._transform_principal_to_ids(
-                processor,
-                path,
-                from_key="users",
-                to_key="user_ids",
-                lookup=self._get_user_id,
-            )
+        self._transform_users(processor)
 
-        for path in self.group_mapping_paths.get("lists", []):
-            self._transform_principal_to_ids(
-                processor,
-                path,
-                from_key="groups",
-                to_key="group_ids",
-                lookup=self._get_group_id,
-            )
+        self._transform_groups(processor)
 
-        for path in self.user_mapping_paths.get("values", []):
-            self._transform_principal_to_ids(
-                processor,
-                path,
-                from_key="user",
-                to_key="user_id",
-                lookup=self._get_user_id,
-            )
+    def _transform_groups(self, processor: Processor):
+        self._transform_principal_to_ids(
+            processor,
+            path="projects_and_groups.*.**.group",
+            from_key="group",
+            to_key="group_id",
+            get_id_from_name_function=self._get_group_id,
+        )
 
-        for path in self.group_mapping_paths.get("values", []):
-            self._transform_principal_to_ids(
-                processor,
-                path,
-                from_key="group",
-                to_key="group_id",
-                lookup=self._get_group_id,
-            )
+        self._transform_principal_to_ids(
+            processor,
+            path="projects_and_groups.*.**.groups",
+            from_key="groups",
+            to_key="group_ids",
+            get_id_from_name_function=self._get_group_id,
+        )
 
-        for path in self.user_mapping_paths.get("dict_keys", []):
-            self._transform_dict_keys_to_ids(
-                processor,
-                path,
-                id_key="user_id",
-                lookup=self._get_user_id,
-            )
+        self._transform_dict_keys_to_ids(
+            processor,
+            path="projects_and_groups.*.**.groups.*",
+            id_key="group_id",
+            lookup=self._get_group_id,
+        )
 
-        for path in self.group_mapping_paths.get("dict_keys", []):
-            self._transform_dict_keys_to_ids(
-                processor,
-                path,
-                id_key="group_id",
-                lookup=self._get_group_id,
-            )
+    def _transform_users(self, processor: Processor):
+        self._transform_principal_to_ids(
+            processor,
+            path="projects_and_groups.*.**.user",
+            from_key="user",
+            to_key="user_id",
+            get_id_from_name_function=self._get_user_id,
+        )
+
+        self._transform_principal_to_ids(
+            processor,
+            path="projects_and_groups.*.**.users",
+            from_key="users",
+            to_key="user_ids",
+            get_id_from_name_function=self._get_user_id,
+        )
+
+        self._transform_dict_keys_to_ids(
+            processor,
+            path="projects_and_groups.*.**.users.*",
+            id_key="user_id",
+            lookup=self._get_user_id,
+        )
 
     @staticmethod
     def _dedupe(items: list[int]) -> list[int]:
         return list(dict.fromkeys(items))
 
-    def _transform_principal_to_ids(self, processor, path: str, from_key: str, to_key: str, lookup):
+    def _transform_principal_to_ids(self, processor, path: str, from_key: str, to_key: str, get_id_from_name_function):
         try:
             for node_coordinate in processor.get_nodes(path, mustexist=True):
                 if node_coordinate.parentref != from_key:
@@ -293,9 +269,14 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
                 parent = node_coordinate.parent
                 node = node_coordinate.node
 
+                # if it's a dict_key, do nothing here, we'll transform it in _transform_dict_keys_to_ids
+                # TODO: REFACTOR?
+                if isinstance(node, CommentedMap):
+                    continue
+
                 # list of principals -> normalize to *_ids list
                 if isinstance(node, list):
-                    mapped_values = [lookup(value, path) for value in node]
+                    mapped_values = [get_id_from_name_function(value, path) for value in node]
                     if to_key in parent and isinstance(parent[to_key], list):
                         mapped_values = parent[to_key] + mapped_values
                     parent[to_key] = self._dedupe(mapped_values)
@@ -308,7 +289,7 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
                     del parent[from_key]
                     continue
 
-                parent[to_key] = lookup(node, path)
+                parent[to_key] = get_id_from_name_function(node, path)
                 del parent[from_key]
         except YAMLPathException as e:
             # Failed to find any keys on the path, which could be perfectly valid or could be the result of malformed
