@@ -1,10 +1,17 @@
 [build-system]
-requires = ["setuptools>=61.2"]
-build-backend = "setuptools.build_meta"
+# Modern build backend (PEP 517). Pinned for reproducibility.
+# hatchling is preferred for uv-centric projects.
+requires = ["hatchling==1.29.0"]
+build-backend = "hatchling.build"
+
+# Build backend configuration.
+[tool.hatch.build.targets.wheel]
+packages = ["gitlabform"]
 
 [project]
 name = "gitlabform"
 version = "5.3.0"
+requires-python = ">=3.12.0"
 authors = [{ name = "Greg Dubicki and Contributors" }]
 description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
 keywords = ["cli", "yaml", "gitlab", "configuration-as-code"]
@@ -21,15 +28,18 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Topic :: Software Development :: Version Control :: Git",
 ]
-requires-python = ">=3.12.0"
+
+# Main runtime dependencies. Pinned strictly to ensure production stability.
 dependencies = [
     "certifi==2026.2.25",
-    "Jinja2==3.1.6",
+    "cli-ui==0.19.0",
+    # ez_yaml >1.2.0 changes imports and also uses ruamel.yaml tied to 1.2 so wouldn't support "yes" as True
+    "ez-yaml==1.2.0",
+    "jinja2==3.1.6",
     "luddite==1.0.4",
-    "MarkupSafe==3.0.3",
+    "markupsafe==3.0.3",
     "mergedeep==1.3.4",
     "packaging==26.0",
-    "python-gitlab==8.2.0",
     "python-gitlab[graphql]==8.2.0",
     "requests==2.33.1",
     "rich==15.0.0",
@@ -38,8 +48,52 @@ dependencies = [
     # unannotated yaml 1.1
     "ruamel.yaml==0.17.21",
     "yamlpath==3.8.2",
-    # ez_yaml >1.2.0 changes imports and also uses ruamel.yaml tied to 1.2 so wouldn't support "yes" as True
-    "ez-yaml==1.2.0",
+]
+
+# PEP 735 Dependency Groups.
+# Managed by uv. dev is the parent group for local development.
+[dependency-groups]
+dev = [
+    { include-group = "test" },
+    { include-group = "lint" },
+    { include-group = "docs" },
+    { include-group = "release" },
+    "commitizen==4.3.0",
+    "prek==0.3.8",
+]
+# Minimum set of dependencies required to execute the test suite.
+test = [
+    "coverage==7.13.5",
+    "cryptography==46.0.6",
+    "deepdiff==9.0.0",
+    "pytest==9.0.2",
+    "pytest-cov==7.1.0",
+    "pytest-rerunfailures==16.1",
+    "xkcdpass==1.30.0",
+]
+# Static analysis and formatting tools.
+lint = [
+    "bandit==1.8.3",
+    "black==26.3.1",
+    "codespell==2.4.1",
+    "mypy==1.19.1",
+    "mypy-extensions==1.1.0",
+    "ruff==0.9.0",
+    "types-requests==2.33.0.20260327",
+]
+# Documentation generation stack.
+docs = [
+    "markdown==3.7",
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.7.6",
+    "mkdocs-material-extensions==1.3.1",
+    "pygments==2.19.1",
+    "pymdown-extensions==10.14.3",
+]
+# Tools required for building and verifying releases.
+release = [
+    "check-wheel-contents==0.6.1",
+    "twine==6.1.0",
 ]
 
 [project.urls]
@@ -52,29 +106,27 @@ Changelog = "https://gitlabform.github.io/gitlabform/changelog/"
 file = "README.md"
 content-type = "text/markdown"
 
-[project.optional-dependencies]
-test = [
-    "coverage==7.13.5",
-    "cryptography==46.0.7",
-    "deepdiff==9.0.0",
-    "mypy==1.20.1",
-    "mypy-extensions==1.1.0",
-    "pre-commit==2.21.0",
-    "pytest==9.0.3",
-    "pytest-cov==7.1.0",
-    "pytest-rerunfailures==16.1",
-    "types-requests==2.33.0.20260408",
-    "types-setuptools==82.0.0.20260402",
-    "xkcdpass==1.30.0",
-]
-docs = ["mkdocs", "mkdocs-material"]
-
+# Commands available via 'uv run <command>' or entry points after installation.
 [project.scripts]
+# Primary application entrypoint
 gitlabform = "gitlabform.run:run"
 
-[tool.setuptools.packages.find]
-namespaces = false
-exclude = ["tests*"]
+# Development toolkit and environment management
+dev = "dev.main:main"
+workspace = "dev.main:workspace"
+
+# Development workflow (Linting, Formatting, and Testing)
+qa = "dev.main:qa"
+
+# Local infrastructure management
+gitlab-local = "dev.main:gitlab_local"
+
+# Documentation workflow
+docs = "dev.main:docs"
+
+# Packaging and distribution verification
+package = "dev.main:package"
+docker = "dev.main:docker"
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
@@ -86,3 +138,14 @@ markers = [
 
 [tool.black]
 line-length = 120
+
+# uv specific configuration.
+[tool.uv]
+# Ensures 'uv sync' or 'uv run' implicitly includes development tools.
+default-groups = ["dev"]
+
+[tool.commitizen]
+# Configuration for conventional commit enforcement and version management.
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_provider = "pep621"

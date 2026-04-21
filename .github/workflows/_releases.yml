@@ -25,12 +25,14 @@ jobs:
     uses: ./.github/workflows/tests-premium.yml
     with:
       BRANCH_REF: ${{ github.ref }}
+      environment: Main Tests
     secrets: inherit
 
   tests-ultimate:
     uses: ./.github/workflows/tests-ultimate.yml
     with:
       BRANCH_REF: ${{ github.ref }}
+      environment: Main Tests
     secrets: inherit
 
   publish-docs:
@@ -38,22 +40,21 @@ jobs:
       - linters
       - tests-standard
       - tests-premium
+      - tests-ultimate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
-      - name: Install dependencies
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
-          pip install -e .[docs]
+          uv sync --frozen --no-dev --group docs
       - name: Build docs
         run: |
-          mkdocs build
+          uv run --no-sync docs build
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
@@ -65,6 +66,7 @@ jobs:
       - linters
       - tests-standard
       - tests-premium
+      - tests-ultimate
     runs-on: ubuntu-latest
     steps:
       - name: Create release in GitHub
@@ -80,6 +82,7 @@ jobs:
       - linters
       - tests-standard
       - tests-premium
+      - tests-ultimate
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -88,39 +91,39 @@ jobs:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v6
-      - name: Set up Python
-        uses: actions/setup-python@v6
         with:
-          python-version: 3.14
-      - name: Build
+          ref: ${{ github.ref }}
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
-          pip install wheel build
-          python -m build
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+          uv sync --frozen --no-dev --group release
+      - name: Build and verify the package
+        run: |
+          uv run --no-sync package build
+          uv run --no-sync package verify
+      - name: Publish to PyPI
+        run: |
+          uv run --no-sync package publish
 
   publish-to-ghcr:
     needs:
       - linters
       - tests-standard
       - tests-premium
+      - tests-ultimate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
-      - name: Install dependencies
-        run: |
-          pip install wheel
-          pip install packaging
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
       - name: Get the version from the tag
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Wait for PyPI release
         run: |
-          pip download gitlabform==${{ env.VERSION }} > /dev/null
-          while [ $? -ne 0 ]; do sleep 10; pip3 download gitlabform==${{ env.VERSION }} > /dev/null ; done
+          uv pip download gitlabform==${{ env.VERSION }} > /dev/null
+          while [ $? -ne 0 ]; do sleep 10; uv pip download gitlabform==${{ env.VERSION }} > /dev/null ; done
         shell: bash {0}
       - name: Docker metadata
         id: metadata
