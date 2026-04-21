@@ -29,32 +29,6 @@ class TestGroupBranchesProcessor:
         with pytest.raises(SystemExit):
             self.processor._can_proceed("group", configuration)
 
-    def test_convert_user_and_group_names_to_ids(self):
-        self.processor.gl = MagicMock()
-        self.processor.gl.get_user_id_cached.return_value = 42
-        self.processor.gl.get_group_id.return_value = 99
-
-        # Test with user
-        config_with_user = {"allowed_to_merge": [{"user": "jsmith"}], "protected": True}
-        result = self.processor.convert_user_and_group_names_to_ids(config_with_user)
-        assert result["allowed_to_merge"][0]["user_id"] == 42
-        assert "user" not in result["allowed_to_merge"][0]
-
-        # Test with group
-        config_with_group = {"allowed_to_push": [{"group": "my-group"}], "protected": True}
-        result = self.processor.convert_user_and_group_names_to_ids(config_with_group)
-        assert result["allowed_to_push"][0]["group_id"] == 99
-        assert "group" not in result["allowed_to_push"][0]
-
-    def test_convert_user_and_group_names_to_ids_unknown_user(self):
-        self.processor.gl = MagicMock()
-        self.processor.gl.get_user_id_cached.return_value = None
-
-        config = {"allowed_to_merge": [{"user": "nonexistent"}], "protected": True}
-
-        with pytest.raises(GitlabGetError):
-            self.processor.convert_user_and_group_names_to_ids(config)
-
     def test_process_configuration_iterates_branches(self):
         self.processor.gl = MagicMock()
         group = MagicMock()

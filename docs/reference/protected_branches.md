@@ -14,7 +14,9 @@ This section purpose is to manage the [protected branches](https://docs.gitlab.c
 
 This section purpose is to manage the [group-level protected branches](https://docs.gitlab.com/ee/api/group_protected_branches.html).
 
-The configuration supports the same keys as project-level protected branches: `protected`, `push_access_level`, `merge_access_level`, `unprotect_access_level`, `allow_force_push`, `code_owner_approval_required`, `allowed_to_push`, `allowed_to_merge`, and `allowed_to_unprotect`.
+Note: group protected branches only support access levels. Individual users and groups cannot be specified (this is a GitLab API limitation).
+
+The supported keys are: `protected`, `push_access_level`, `merge_access_level`, `unprotect_access_level`, `allow_force_push`, and `code_owner_approval_required`.
 
 Example:
 
@@ -28,11 +30,9 @@ projects_and_groups:
         merge_access_level: maintainer
       release/*:
         protected: true
-        allowed_to_push:
-          - access_level: no access
-        allowed_to_merge:
-          - access_level: maintainer
-          - user: jsmith
+        push_access_level: no access
+        merge_access_level: maintainer
+        unprotect_access_level: maintainer
 ```
 
 ## Project-level protected branches

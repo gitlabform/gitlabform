@@ -9,7 +9,7 @@ from gitlab.v4.objects.groups import Group
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.project.branches_processor import BranchesProcessor
+from gitlabform.processors.util.branch_protection import BranchProtection
 
 
 class GroupBranchesProcessor(AbstractProcessor):
@@ -18,9 +18,9 @@ class GroupBranchesProcessor(AbstractProcessor):
         super().__init__("group_branches", gitlab)
         self.strict = strict
 
-        self.custom_diff_analyzers["merge_access_levels"] = BranchesProcessor.naive_access_level_diff_analyzer
-        self.custom_diff_analyzers["push_access_levels"] = BranchesProcessor.naive_access_level_diff_analyzer
-        self.custom_diff_analyzers["unprotect_access_levels"] = BranchesProcessor.naive_access_level_diff_analyzer
+        self.custom_diff_analyzers["merge_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
+        self.custom_diff_analyzers["push_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
+        self.custom_diff_analyzers["unprotect_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
 
     def _can_proceed(self, group: str, configuration: dict):
         for branch in sorted(configuration["group_branches"]):
@@ -35,32 +35,9 @@ class GroupBranchesProcessor(AbstractProcessor):
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
 
         for branch in sorted(configuration["group_branches"]):
-            branch_configuration: dict = self.convert_user_and_group_names_to_ids(
-                configuration["group_branches"][branch]
-            )
+            branch_configuration: dict = configuration["group_branches"][branch]
 
             self.process_branch_protection(gitlab_group, branch, branch_configuration)
-
-    def convert_user_and_group_names_to_ids(self, branch_config: dict) -> dict:
-        debug("Transforming User and Group names in group branch configuration to Ids")
-
-        for key in branch_config:
-            if isinstance(branch_config[key], list):
-                for item in branch_config[key]:
-                    if isinstance(item, dict):
-                        if "user" in item:
-                            username = item.pop("user")
-                            user_id = self.gl.get_user_id_cached(username)
-                            if user_id is None:
-                                raise GitlabGetError(
-                                    f"No users found when searching for username {username}",
-                                    404,
-                                )
-                            item["user_id"] = user_id
-                        elif "group" in item:
-                            item["group_id"] = self.gl.get_group_id(item.pop("group"))
-
-        return branch_config
 
     def process_branch_protection(self, group: Group, branch_name: str, branch_config: dict):
         protected_branch: Optional[GroupProtectedBranch] = None
@@ -76,7 +53,7 @@ class GroupBranchesProcessor(AbstractProcessor):
                 self.protect_branch(group, branch_name, branch_config, False)
                 return
 
-            transformed_branch_config = BranchesProcessor.map_config_to_protected_branch_get_data(branch_config)
+            transformed_branch_config = BranchProtection.map_config_to_protected_branch_get_data(branch_config)
 
             protected_branch_api_patch_data: dict = {}
 
@@ -93,7 +70,7 @@ class GroupBranchesProcessor(AbstractProcessor):
                         protected_branch_api_patch_data[key] = value
 
             debug("Creating data to update merge_access_levels as necessary")
-            merge_access_items_patch_data = BranchesProcessor.build_patch_request_data(
+            merge_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("merge_access_levels"),
                 existing_records=tuple(self._get_list_attribute(protected_branch, "merge_access_levels")),
             )
@@ -101,7 +78,7 @@ class GroupBranchesProcessor(AbstractProcessor):
                 protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items_patch_data
 
             debug("Creating data to update push_access_levels as necessary")
-            push_access_items_patch_data = BranchesProcessor.build_patch_request_data(
+            push_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("push_access_levels"),
                 existing_records=tuple(self._get_list_attribute(protected_branch, "push_access_levels")),
             )
@@ -109,7 +86,7 @@ class GroupBranchesProcessor(AbstractProcessor):
                 protected_branch_api_patch_data["allowed_to_push"] = push_access_items_patch_data
 
             debug("Creating data to update unprotect_access_levels as necessary")
-            unprotect_access_items_patch_data = BranchesProcessor.build_patch_request_data(
+            unprotect_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
                 existing_records=tuple(self._get_list_attribute(protected_branch, "unprotect_access_levels")),
             )
