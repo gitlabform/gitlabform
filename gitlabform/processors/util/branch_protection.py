@@ -77,9 +77,7 @@ class BranchProtection:
         return new_branch_config
 
     @staticmethod
-    def build_patch_request_data(
-        transformed_access_levels: list[dict] | None, existing_records: tuple
-    ) -> list[dict]:
+    def build_patch_request_data(transformed_access_levels: list[dict] | None, existing_records: tuple) -> list[dict]:
         """
         Calculates the specific payload for the PATCH (update) API.
 
