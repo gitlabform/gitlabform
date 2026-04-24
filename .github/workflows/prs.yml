@@ -17,13 +17,10 @@ jobs:
     with:
       branch_ref: ${{ inputs.BRANCH_REF }}
 
-  linters:
-    uses: ./.github/workflows/linters.yml
-    permissions:
-      contents: read
-      pull-requests: write
+  static-analysis:
+    uses: ./.github/workflows/static-analysis.yml
     with:
-      branch_ref: ${{ inputs.BRANCH_REF }}
+      BRANCH_REF: ${{ inputs.BRANCH_REF }}
 
   tests-acceptance:
     uses: ./.github/workflows/tests-acceptance.yml

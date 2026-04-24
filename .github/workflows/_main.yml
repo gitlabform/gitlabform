@@ -23,8 +23,8 @@ jobs:
     with:
       BRANCH_REF: ${{ github.ref }}
 
-  linters:
-    uses: ./.github/workflows/linters.yml
+  static-analysis:
+    uses: ./.github/workflows/static-analysis.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 

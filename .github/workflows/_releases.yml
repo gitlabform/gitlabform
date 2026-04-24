@@ -11,8 +11,8 @@ permissions:
 
 jobs:
 
-  linters:
-    uses: ./.github/workflows/linters.yml
+  static-analysis:
+    uses: ./.github/workflows/static-analysis.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 
@@ -24,7 +24,7 @@ jobs:
 
   publish-docs:
     needs:
-      - linters
+      - static-analysis
       - tests-acceptance
     runs-on: ubuntu-latest
     steps:

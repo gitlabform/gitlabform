@@ -11,18 +11,6 @@ permissions:
   contents: read
 
 jobs:
-  lockfile-verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.BRANCH_REF }}
-      - name: Configure uv environment
-        uses: ./.github/actions/setup-uv-local
-      - name: Verify that uv.lock is in sync with pyproject.toml
-        run: |
-          uv lock --check
-
   unit-tests:
     runs-on: ubuntu-latest
     strategy:
@@ -55,29 +43,6 @@ jobs:
             token: 3e6d6cb5-fcdb-41ea-b134-f6c5856363e9
           attempt_limit: 5
           attempt_delay: 10000
-
-  security-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
-      matrix:
-        python-version: [ 3.14, 3.12 ]
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.BRANCH_REF }}
-          fetch-depth: 2
-      - name: Configure uv environment
-        uses: ./.github/actions/setup-uv-local
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Setup Python ${{ matrix.python-version }} and install dependencies
-        run: |
-          uv sync --frozen --no-dev --group test
-      - name: Run security tests
-        run: |
-          uv run --no-sync qa lint bandit gitlabform
 
   smoke-tests:
     strategy:
