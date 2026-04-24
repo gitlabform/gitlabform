@@ -8,13 +8,13 @@ This section purpose is to manage the [group-level protected branches](https://d
 
 !!! info
 
-    This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)
+    This section requires GitLab Premium (paid). (This is a GitLab limitation, not GitLabForm's.)
 
 !!! warning
 
-    Protected branch settings for groups are restricted to top-level groups only. (This is a GitLab's limitation, not GitLabForm's.)
+    Protected branch settings for groups are restricted to top-level groups only. (This is a GitLab limitation, not GitLabForm's.)
 
-    Group protected branches only support access levels. Individual users and groups cannot be specified (this is a GitLab API limitation).
+    Group protected branches only support access levels. Individual users and groups cannot be specified. (This is a GitLab API limitation).
 
 Example:
 
