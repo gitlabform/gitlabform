@@ -22,6 +22,12 @@ jobs:
     with:
       BRANCH_REF: ${{ inputs.BRANCH_REF }}
 
+  tests-unit:
+    uses: ./.github/workflows/tests-unit.yml
+    with:
+      BRANCH_REF: ${{ inputs.BRANCH_REF }}
+    secrets: inherit
+
   tests-acceptance:
     uses: ./.github/workflows/tests-acceptance.yml
     with:
