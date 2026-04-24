@@ -1,0 +1,84 @@
+name: Tests Acceptance
+
+on:
+  workflow_call:
+    inputs:
+      BRANCH_REF:
+        type: string
+        required: true
+    secrets:
+      GITLAB_EE_LICENSE:
+        required: false
+      GITLAB_EE_ULTIMATE_LICENSE:
+        required: false
+      CODECOV_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+  actions: read # Required by codecov/codecov-action
+
+jobs:
+  acceptance-standard:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: [ce, ee]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Setup python and install dependencies
+        run: uv sync --frozen --no-dev --group test
+      - name: Start GitLab (${{ matrix.flavor }}) in docker
+        run: uv run --no-sync gitlab-local up --gitlab-flavor ${{ matrix.flavor }}
+      - name: Run Standard acceptance tests for ${{ matrix.flavor }} flavor
+        run: uv run --no-sync qa test tests/acceptance/standard --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
+      - name: Upload coverage
+        uses: Wandalen/wretry.action@v3
+        with:
+          action: codecov/codecov-action@v3
+          with: |
+            name: codecov-acceptance-test-standard-${{ matrix.flavor }}
+            flags: integration
+            token: ${{ secrets.CODECOV_TOKEN }}
+          attempt_limit: 5
+          attempt_delay: 10000
+
+  acceptance-licensed:
+    needs: [acceptance-standard]
+    environment: Main Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tier: [premium, ultimate]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Setup python and install dependencies
+        run: uv sync --frozen --no-dev --group test
+      - name: Start GitLab (${{ matrix.tier }}) in docker
+        env:
+          GITLAB_EE_LICENSE: ${{ matrix.tier == 'premium' && secrets.GITLAB_EE_LICENSE || secrets.GITLAB_EE_ULTIMATE_LICENSE }}
+        run: uv run --no-sync gitlab-local up
+      - name: Run acceptance Tests for ${{ matrix.tier }} features
+        run: uv run --no-sync qa test tests/acceptance/${{ matrix.tier }} --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
+      - name: Upload coverage
+        uses: Wandalen/wretry.action@v3
+        with:
+          action: codecov/codecov-action@v3
+          with: |
+            name: codecov-acceptance-test-${{ matrix.tier }}
+            flags: integration
+            token: ${{ secrets.CODECOV_TOKEN }}
+          attempt_limit: 5
+          attempt_delay: 10000

@@ -9,12 +9,6 @@ on:
 
 jobs:
 
-  approve:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Approve
-        run: echo For security reasons, all pull requests need to be approved first before running the Premium Acceptance Tests.
-
   build-docs:
     uses: ./.github/workflows/docs.yml
     permissions:
@@ -31,32 +25,10 @@ jobs:
     with:
       branch_ref: ${{ inputs.BRANCH_REF }}
 
-  tests-standard:
-    uses: ./.github/workflows/tests-standard.yml
-    permissions:
-      contents: read
-      pull-requests: write
+  tests-acceptance:
+    uses: ./.github/workflows/tests-acceptance.yml
     with:
-      branch_ref: ${{ inputs.BRANCH_REF }}
-
-  tests-premium:
-    uses: ./.github/workflows/tests-premium.yml
-    permissions:
-      contents: read
-      pull-requests: write
-    with:
-      branch_ref: ${{ inputs.BRANCH_REF }}
-      environment: Integrate Pull Request # Our dummy environment
-    secrets: inherit
-
-  tests-ultimate:
-    uses: ./.github/workflows/tests-ultimate.yml
-    permissions:
-      contents: read
-      pull-requests: write
-    with:
-      branch_ref: ${{ inputs.BRANCH_REF }}
-      environment: Integrate Pull Request # Our dummy environment
+      BRANCH_REF: ${{ inputs.BRANCH_REF }}
     secrets: inherit
 
   analyze:

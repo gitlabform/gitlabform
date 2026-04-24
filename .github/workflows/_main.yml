@@ -28,21 +28,8 @@ jobs:
     with:
       BRANCH_REF: ${{ github.ref }}
 
-  tests-standard:
-    uses: ./.github/workflows/tests-standard.yml
+  tests-acceptance:
+    uses: ./.github/workflows/tests-acceptance.yml
     with:
       BRANCH_REF: ${{ github.ref }}
-
-  tests-premium:
-    uses: ./.github/workflows/tests-premium.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
-    secrets: inherit
-
-  tests-ultimate:
-    uses: ./.github/workflows/tests-ultimate.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
     secrets: inherit

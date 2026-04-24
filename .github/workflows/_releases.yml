@@ -16,31 +16,16 @@ jobs:
     with:
       BRANCH_REF: ${{ github.ref }}
 
-  tests-standard:
-    uses: ./.github/workflows/tests-standard.yml
+  tests-acceptance:
+    uses: ./.github/workflows/tests-acceptance.yml
     with:
       BRANCH_REF: ${{ github.ref }}
-
-  tests-premium:
-    uses: ./.github/workflows/tests-premium.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
-    secrets: inherit
-
-  tests-ultimate:
-    uses: ./.github/workflows/tests-ultimate.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
     secrets: inherit
 
   publish-docs:
     needs:
       - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - tests-acceptance
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -64,9 +49,7 @@ jobs:
   publish-to-github:
     needs:
       - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - tests-acceptance
     runs-on: ubuntu-latest
     steps:
       - name: Create release in GitHub
@@ -80,9 +63,7 @@ jobs:
   publish-to-pypi:
     needs:
       - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - tests-acceptance
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -110,9 +91,7 @@ jobs:
   publish-to-ghcr:
     needs:
       - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - tests-acceptance
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
