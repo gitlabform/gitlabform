@@ -4,17 +4,17 @@ This section purpose is to manage the [protected branches](https://docs.gitlab.c
 
 ## Group-level protected branches
 
+This section purpose is to manage the [group-level protected branches](https://docs.gitlab.com/ee/api/group_protected_branches.html).
+
 !!! info
 
     This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)
 
 !!! warning
 
-    Protected branch settings for groups are restricted to top-level groups only.
+    Protected branch settings for groups are restricted to top-level groups only. (This is a GitLab's limitation, not GitLabForm's.)
 
-This section purpose is to manage the [group-level protected branches](https://docs.gitlab.com/ee/api/group_protected_branches.html).
-
-Note: group protected branches only support access levels. Individual users and groups cannot be specified (this is a GitLab API limitation).
+    Group protected branches only support access levels. Individual users and groups cannot be specified (this is a GitLab API limitation).
 
 Example:
 
