@@ -16,8 +16,6 @@ This section purpose is to manage the [group-level protected branches](https://d
 
 Note: group protected branches only support access levels. Individual users and groups cannot be specified (this is a GitLab API limitation).
 
-The supported keys are: `protected`, `push_access_level`, `merge_access_level`, `unprotect_access_level`, `allow_force_push`, and `code_owner_approval_required`.
-
 Example:
 
 ```yaml
