@@ -14,7 +14,8 @@ jobs:
   lockfile-verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
       - name: Configure uv environment
@@ -30,7 +31,8 @@ jobs:
         check: [black, mypy, bandit]
         python-version: ["3.14", "3.12"]
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2

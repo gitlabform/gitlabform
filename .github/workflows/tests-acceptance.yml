@@ -26,13 +26,14 @@ jobs:
         flavor: [ce, ee]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
-      - name: Setup python and install dependencies
+      - name: Install dependencies
         run: uv sync --frozen --no-dev --group test
       - name: Start GitLab (${{ matrix.flavor }}) in docker
         run: uv run --no-sync gitlab-local up --gitlab-flavor ${{ matrix.flavor }}
@@ -58,13 +59,14 @@ jobs:
         tier: [premium, ultimate]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
-      - name: Setup python and install dependencies
+      - name: Install dependencies
         run: uv sync --frozen --no-dev --group test
       - name: Start GitLab (${{ matrix.tier }}) in docker
         env:

@@ -42,7 +42,8 @@ jobs:
       - build-and-test-artifacts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
@@ -85,7 +86,8 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
@@ -109,7 +111,8 @@ jobs:
       - build-and-test-artifacts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
         with:
