@@ -1,0 +1,70 @@
+name: Build and Artifacts
+
+on:
+  workflow_call:
+    inputs:
+      BRANCH_REF:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package Build & Verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev --group release
+      - name: Build and verify the package
+        run: |
+          uv run --no-sync package build
+          uv run --no-sync package verify
+
+  docs:
+    name: Documentation Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev --group docs
+      - name: Build documentation
+        run: uv run --no-sync docs build
+
+  smoke-tests:
+    name: Smoke Test (${{ matrix.os }}, ${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.14", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev --group test
+      - name: Run smoke tests
+        run: uv run --no-sync gitlabform -V

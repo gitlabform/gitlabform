@@ -28,11 +28,18 @@ jobs:
       BRANCH_REF: ${{ github.ref }}
     secrets: inherit
 
-  publish-docs:
+  build-and-test-artifacts:
     needs:
       - static-analysis
       - tests-unit
       - tests-acceptance
+    uses: ./.github/workflows/build-artifacts.yml
+    with:
+      BRANCH_REF: ${{ github.ref }}
+
+  publish-docs:
+    needs:
+      - build-and-test-artifacts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -41,10 +48,12 @@ jobs:
           fetch-depth: 2
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group docs
-      - name: Build docs
+      - name: Build documentation
         run: |
           uv run --no-sync docs build
       - name: Deploy 🚀
@@ -55,9 +64,7 @@ jobs:
 
   publish-to-github:
     needs:
-      - static-analysis
-      - tests-unit
-      - tests-acceptance
+      - build-and-test-artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Create release in GitHub
@@ -70,9 +77,7 @@ jobs:
 
   publish-to-pypi:
     needs:
-      - static-analysis
-      - tests-unit
-      - tests-acceptance
+      - build-and-test-artifacts
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -86,6 +91,8 @@ jobs:
           fetch-depth: 2
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group release
@@ -99,14 +106,14 @@ jobs:
 
   publish-to-ghcr:
     needs:
-      - static-analysis
-      - tests-unit
-      - tests-acceptance
+      - build-and-test-artifacts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
       - name: Get the version from the tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Wait for PyPI release

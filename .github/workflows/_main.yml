@@ -18,8 +18,8 @@ on:
 
 jobs:
 
-  build-docs:
-    uses: ./.github/workflows/docs.yml
+  build-artifacts:
+    uses: ./.github/workflows/build-artifacts.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 

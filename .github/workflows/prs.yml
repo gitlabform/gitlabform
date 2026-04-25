@@ -9,13 +9,10 @@ on:
 
 jobs:
 
-  build-docs:
-    uses: ./.github/workflows/docs.yml
-    permissions:
-      contents: read
-      pull-requests: write
+  build-artifacts:
+    uses: ./.github/workflows/build-artifacts.yml
     with:
-      branch_ref: ${{ inputs.BRANCH_REF }}
+      BRANCH_REF: ${{ inputs.BRANCH_REF }}
 
   static-analysis:
     uses: ./.github/workflows/static-analysis.yml
