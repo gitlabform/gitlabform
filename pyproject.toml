@@ -93,7 +93,7 @@ docs = [
 # Tools required for building and verifying releases.
 release = [
     "check-wheel-contents==0.6.1",
-    "twine==6.1.0",
+    "twine==6.2.0",
 ]
 
 [project.urls]
