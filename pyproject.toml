@@ -83,7 +83,7 @@ lint = [
 ]
 # Documentation generation stack.
 docs = [
-    "markdown==3.7",
+    "markdown==3.10.2",
     "mkdocs==1.6.1",
     "mkdocs-material==9.7.6",
     "mkdocs-material-extensions==1.3.1",
