@@ -13,11 +13,46 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "/"
     schedule:
       interval: "weekly"
     groups:
-      python-gitlab:
+      # Group dependencies by their type (testing, linting, documentation, release tools)
+      # to avoid overwhelming PRs and to allow for more focused updates.
+      # The patterns are based on the names of the dependencies as they appear in the pyproject.toml file
+      # and how they are grouped in the uv configuration.
+      # Dependencies that match the patterns will be grouped together in the same PR.
+       testing:
         patterns:
-          - "python-gitlab*"
+          - "pytest*"
+          - "coverage"
+          - "cryptography"
+          - "deepdiff"
+          - "xkcdpass"
+      testing:
+        patterns:
+          - "pytest*"
+          - "coverage"
+          - "cryptography"
+          - "deepdiff"
+          - "xkcdpass"
+      linting:
+        patterns:
+          - "bandit"
+          - "black"
+          - "codespell"
+          - "mypy*"
+          - "ruff"
+          - "types-*"
+      documentation:
+        patterns:
+          - "markdown*"
+          - "mkdocs*"
+          - "pygments*"
+      release-tools:
+        patterns:
+          - "check-wheel-contents"
+          - "twine"
+          - "commitizen"
+          - "prek"
