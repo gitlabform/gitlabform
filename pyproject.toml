@@ -31,7 +31,7 @@ classifiers = [
 
 # Main runtime dependencies. Pinned strictly to ensure production stability.
 dependencies = [
-    "certifi==2026.2.25",
+    "certifi==2026.4.22",
     "cli-ui==0.19.0",
     # ez_yaml >1.2.0 changes imports and also uses ruamel.yaml tied to 1.2 so wouldn't support "yes" as True
     "ez-yaml==1.2.0",
