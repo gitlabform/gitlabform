@@ -64,7 +64,7 @@ dev = [
 # Minimum set of dependencies required to execute the test suite.
 test = [
     "coverage==7.13.5",
-    "cryptography==46.0.6",
+    "cryptography==46.0.7",
     "deepdiff==9.0.0",
     "pytest==9.0.2",
     "pytest-cov==7.1.0",
