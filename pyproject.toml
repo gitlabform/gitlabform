@@ -73,13 +73,13 @@ test = [
 ]
 # Static analysis and formatting tools.
 lint = [
-    "bandit==1.8.3",
+    "bandit==1.9.4",
     "black==26.3.1",
-    "codespell==2.4.1",
-    "mypy==1.19.1",
+    "codespell==2.4.2",
+    "mypy==1.20.2",
     "mypy-extensions==1.1.0",
-    "ruff==0.9.0",
-    "types-requests==2.33.0.20260327",
+    "ruff==0.15.12",
+    "types-requests==2.33.0.20260408",
 ]
 # Documentation generation stack.
 docs = [
