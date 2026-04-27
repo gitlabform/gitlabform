@@ -39,7 +39,7 @@ dependencies = [
     "luddite==1.0.4",
     "markupsafe==3.0.3",
     "mergedeep==1.3.4",
-    "packaging==26.0",
+    "packaging==26.2",
     "python-gitlab[graphql]==8.2.0",
     "requests==2.33.1",
     "rich==15.0.0",
