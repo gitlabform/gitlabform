@@ -29,6 +29,19 @@ class TestGroupBranchesProcessor:
         with pytest.raises(SystemExit):
             self.processor._can_proceed("group", configuration)
 
+    def test_process_configuration_skips_subgroups(self):
+        self.processor.gl = MagicMock()
+
+        configuration = {
+            "group_branches": {
+                "main": {"protected": True, "push_access_level": 0},
+            }
+        }
+
+        self.processor._process_configuration("my-group/my-subgroup", configuration)
+
+        self.processor.gl.get_group_by_path_cached.assert_not_called()
+
     def test_process_configuration_iterates_branches(self):
         self.processor.gl = MagicMock()
         group = MagicMock()

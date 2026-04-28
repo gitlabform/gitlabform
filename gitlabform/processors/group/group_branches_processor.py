@@ -32,6 +32,10 @@ class GroupBranchesProcessor(AbstractProcessor):
         return True
 
     def _process_configuration(self, group: str, configuration: dict):
+        if "/" in group:
+            debug(f"Skipping group_branches for '{group}' - only supported for top-level groups")
+            return
+
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
 
         for branch in sorted(configuration["group_branches"]):
