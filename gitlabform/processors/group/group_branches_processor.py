@@ -1,5 +1,5 @@
 import sys
-from typing import Optional, Any
+from typing import Optional
 
 from logging import info, warning, error, critical, debug
 from gitlab import GitlabGetError, GitlabDeleteError, GitlabOperationError
@@ -49,7 +49,7 @@ class GroupBranchesProcessor(AbstractProcessor):
         try:
             protected_branch = group.protectedbranches.get(branch_name)
         except GitlabGetError:
-            debug(f"The branch '{branch_name}' is not protected at group level!")
+            info(f"The branch '{branch_name}' is not protected at group level!")
 
         if branch_config.get("protected"):
             if not protected_branch:
@@ -70,29 +70,31 @@ class GroupBranchesProcessor(AbstractProcessor):
                 if key not in special_list_keys:
                     existing_value = getattr(protected_branch, key, None)
                     if existing_value != value:
-                        debug(f"Creating data to update {key} as necessary")
+                        info(f"Creating data to update {key} as necessary")
                         protected_branch_api_patch_data[key] = value
 
-            debug("Creating data to update merge_access_levels as necessary")
+            info("Creating data to update merge_access_levels as necessary")
             merge_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("merge_access_levels"),
-                existing_records=tuple(self._get_list_attribute(protected_branch, "merge_access_levels")),
+                existing_records=tuple(BranchProtection.get_list_attribute(protected_branch, "merge_access_levels")),
             )
             if len(merge_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items_patch_data
 
-            debug("Creating data to update push_access_levels as necessary")
+            info("Creating data to update push_access_levels as necessary")
             push_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("push_access_levels"),
-                existing_records=tuple(self._get_list_attribute(protected_branch, "push_access_levels")),
+                existing_records=tuple(BranchProtection.get_list_attribute(protected_branch, "push_access_levels")),
             )
             if len(push_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_push"] = push_access_items_patch_data
 
-            debug("Creating data to update unprotect_access_levels as necessary")
+            info("Creating data to update unprotect_access_levels as necessary")
             unprotect_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
-                existing_records=tuple(self._get_list_attribute(protected_branch, "unprotect_access_levels")),
+                existing_records=tuple(
+                    BranchProtection.get_list_attribute(protected_branch, "unprotect_access_levels")
+                ),
             )
             if len(unprotect_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_unprotect"] = unprotect_access_items_patch_data
@@ -132,11 +134,3 @@ class GroupBranchesProcessor(AbstractProcessor):
                 sys.exit(EXIT_PROCESSING_ERROR)
             else:
                 warning(message)
-
-    @staticmethod
-    def _get_list_attribute(protected_branch: GroupProtectedBranch, attribute_name: str) -> list[Any]:
-        existing_list_value: list[Any] = []
-        existing_attr = protected_branch.attributes.get(attribute_name)
-        if existing_attr is not None:
-            existing_list_value = existing_attr
-        return existing_list_value

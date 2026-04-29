@@ -117,7 +117,7 @@ class BranchesProcessor(AbstractProcessor):
             # PATCH: https://docs.gitlab.com/api/protected_branches/#update-a-protected-branch
             # Therefore we first transform the configured YAML into a state matching the gitlab GET endpoint so we can
             # compare states easier to determine what PATCH request we need to send (if any)
-            transformed_branch_config = self.map_config_to_protected_branch_get_data(branch_config)
+            transformed_branch_config = BranchProtection.map_config_to_protected_branch_get_data(branch_config)
 
             protected_branch_api_patch_data: dict = {}
 
@@ -138,26 +138,28 @@ class BranchesProcessor(AbstractProcessor):
                         protected_branch_api_patch_data[key] = value
 
             info("Creating data to update merge_access_levels as necessary")
-            merge_access_items_patch_data = self.build_patch_request_data(
+            merge_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("merge_access_levels"),
-                existing_records=tuple(self._get_list_attribute(protected_branch, "merge_access_levels")),
+                existing_records=tuple(BranchProtection.get_list_attribute(protected_branch, "merge_access_levels")),
             )
             if len(merge_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_merge"] = merge_access_items_patch_data
 
             info("Creating data to update push_access_levels as necessary")
-            push_access_items_patch_data = self.build_patch_request_data(
+            push_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("push_access_levels"),
-                existing_records=tuple(self._get_list_attribute(protected_branch, "push_access_levels")),
+                existing_records=tuple(BranchProtection.get_list_attribute(protected_branch, "push_access_levels")),
             )
             if len(push_access_items_patch_data) > 0:
                 protected_branch_api_patch_data["allowed_to_push"] = push_access_items_patch_data
 
             info("Creating data to update unprotect_access_levels as necessary")
 
-            unprotect_access_items_patch_data = self.build_patch_request_data(
+            unprotect_access_items_patch_data = BranchProtection.build_patch_request_data(
                 transformed_access_levels=transformed_branch_config.get("unprotect_access_levels"),
-                existing_records=tuple(self._get_list_attribute(protected_branch, "unprotect_access_levels")),
+                existing_records=tuple(
+                    BranchProtection.get_list_attribute(protected_branch, "unprotect_access_levels")
+                ),
             )
 
             if len(unprotect_access_items_patch_data) > 0:
@@ -185,7 +187,9 @@ class BranchesProcessor(AbstractProcessor):
         # POST: https://docs.gitlab.com/api/protected_branches/#protect-repository-branches
         # Therefore we first transform the configured YAML into a state matching the gitlab GET endpoint,
         # before checking if it needs_update
-        if self._needs_update(protected_branch.attributes, self.map_config_to_protected_branch_get_data(branch_config)):
+        if self._needs_update(
+            protected_branch.attributes, BranchProtection.map_config_to_protected_branch_get_data(branch_config)
+        ):
             info(
                 f"Gitlab version is less than 15.6.0, so un-protecting and reprotecting branch {branch_name} to apply new config..."
             )
@@ -265,37 +269,9 @@ class BranchesProcessor(AbstractProcessor):
         return branch_config
 
     @staticmethod
-    def map_config_to_protected_branch_get_data(our_branch_config: dict):
-        return BranchProtection.map_config_to_protected_branch_get_data(our_branch_config)
-
-    @staticmethod
-    def build_patch_request_data(transformed_access_levels: list[dict] | None, existing_records: tuple) -> list[dict]:
-        return BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
-
-    @staticmethod
-    def naive_access_level_diff_analyzer(_, cfg_in_gitlab: list, local_cfg: list):
-        return BranchProtection.naive_access_level_diff_analyzer(_, cfg_in_gitlab, local_cfg)
-
-    @staticmethod
     def branch_name_contains_supported_wildcard(branch):
         """
         Gitlab supports "*" wildcards when protecting branches:
         https://docs.gitlab.com/user/project/repository/branches/protected/#use-wildcard-rules
         """
         return "*" in branch
-
-    @staticmethod
-    def _get_list_attribute(protected_branch: ProjectProtectedBranch, attribute_name: str) -> list[Any]:
-        """
-        Gets list attribute such as unprotect_access_levels, merge_access_levels, push_access_levels, etc.
-        Uses the python-gitlab attributes raw dict rather than direct parameter to gracefully handle when an attribute
-        is not present in the API response.
-        For example in CE: unprotect_access_levels is not returned on the protected_branch, so trying to access directly
-        throws a runtime-exception
-        """
-        existing_list_value: list[Any] = []
-        # Get from the "attributes" as this is the raw dict
-        existing_attr = protected_branch.attributes.get(attribute_name)
-        if existing_attr is not None:
-            existing_list_value = existing_attr
-        return existing_list_value

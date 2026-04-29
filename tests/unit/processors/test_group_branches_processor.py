@@ -4,6 +4,7 @@ import pytest
 from gitlab import GitlabGetError, GitlabDeleteError, GitlabOperationError
 
 from gitlabform.processors.group.group_branches_processor import GroupBranchesProcessor
+from gitlabform.processors.util.branch_protection import BranchProtection
 
 
 class TestGroupBranchesProcessor:
@@ -91,7 +92,7 @@ class TestGroupBranchesProcessor:
         branch_config = {
             "protected": True,
             "push_access_level": 0,
-            "merge_access_level": 40,
+            "merge_access_level": 30,
             "allow_force_push": True,
         }
 
@@ -101,6 +102,8 @@ class TestGroupBranchesProcessor:
         call_args = group.protectedbranches.update.call_args
         assert call_args[0][0] == "main"
         assert call_args[0][1]["allow_force_push"] is True
+        assert "allowed_to_push" in call_args[0][1]
+        assert "allowed_to_merge" in call_args[0][1]
 
     def test_process_branch_protection_update_unprotect_access_level(self):
         protected_branch = MagicMock()
@@ -230,7 +233,7 @@ class TestGroupBranchesProcessor:
         protected_branch = MagicMock()
         protected_branch.attributes = {"merge_access_levels": [{"access_level": 40}]}
 
-        result = GroupBranchesProcessor._get_list_attribute(protected_branch, "merge_access_levels")
+        result = BranchProtection.get_list_attribute(protected_branch, "merge_access_levels")
 
         assert result == [{"access_level": 40}]
 
@@ -238,6 +241,6 @@ class TestGroupBranchesProcessor:
         protected_branch = MagicMock()
         protected_branch.attributes = {}
 
-        result = GroupBranchesProcessor._get_list_attribute(protected_branch, "merge_access_levels")
+        result = BranchProtection.get_list_attribute(protected_branch, "merge_access_levels")
 
         assert result == []

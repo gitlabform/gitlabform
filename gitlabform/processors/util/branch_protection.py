@@ -1,4 +1,7 @@
 from logging import info
+from typing import Any
+
+from gitlab.base import RESTObject
 
 
 class BranchProtection:
@@ -227,3 +230,19 @@ class BranchProtection:
 
         info("naive_access_level_diff_analyzer - needs_update: False")
         return False
+
+    @staticmethod
+    def get_list_attribute(protected_branch: RESTObject, attribute_name: str) -> list[Any]:
+        """
+        Gets list attribute such as unprotect_access_levels, merge_access_levels, push_access_levels, etc.
+        Uses the python-gitlab attributes raw dict rather than direct parameter to gracefully handle when an attribute
+        is not present in the API response.
+        For example in CE: unprotect_access_levels is not returned on the protected_branch, so trying to access directly
+        throws a runtime-exception
+        """
+        existing_list_value: list[Any] = []
+        # Get from the "attributes" as this is the raw dict
+        existing_attr = protected_branch.attributes.get(attribute_name)
+        if existing_attr is not None:
+            existing_list_value = existing_attr
+        return existing_list_value
