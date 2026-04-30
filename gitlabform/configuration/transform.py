@@ -298,10 +298,24 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             debug(f"YAMLPathException while transforming principals to IDs for path '{path}': {e}")
             pass
 
-    def _transform_dict_keys_to_ids(self, processor, path: str, id_key: str, lookup):
-        """For each dict entry matched by ``path``, resolve the dict key
-        (username / group-path) to a numeric ID and inject it as
-        ``id_key`` into the entry's value dict."""
+    @staticmethod
+    def _transform_dict_keys_to_ids(processor, path: str, id_key: str, lookup):
+        """Adds an id field to a dictionary key where the key is a name string.
+
+        For example, transforms this:
+
+        group_members:
+           users:
+              some-user:
+                 access_level: 40
+
+        Into:
+           group_members:
+           users:
+              some-user:
+                 access_level: 40
+                 user_id: 123
+        """
         try:
             for node_coordinate in processor.get_nodes(path, mustexist=True):
                 node = node_coordinate.node
