@@ -62,7 +62,7 @@ class PythonGitlab(Gitlab):
         user = self.get_user_by_username_cached(username)
 
         if user is None:
-            return None
+            raise GitlabGetError("No user found when getting '%s'" % username, 404)
 
         return user.id
 
