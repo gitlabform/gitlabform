@@ -254,6 +254,21 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
     def _transform_principal_to_ids(
         self, processor, path: str, from_key: str, to_key: str, get_id_from_name_function: Callable[[str], int]
     ):
+        """
+        Will transform the names into ids and store under the _ids node
+
+        For example:
+
+        allowlist:
+            groups:
+                - my-group
+
+        Is transformed into:
+
+        allowlist:
+            group_ids:
+                - 123
+        """
         try:
             for node_coordinate in processor.get_nodes(path, mustexist=True):
                 if node_coordinate.parentref != from_key:

@@ -34,7 +34,7 @@ class JobTokenScopeProcessor(AbstractProcessor):
 
         enforce = allowlist_config.get("enforce", False)
 
-        self._process_groups(job_token_scope, allowlist_config.get("groups", []), enforce)
+        self._process_groups(job_token_scope, allowlist_config.get("group_ids", []), enforce)
 
         self._process_projects(project, job_token_scope, allowlist_config.get("projects", []), enforce)
 
