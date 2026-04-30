@@ -50,8 +50,8 @@ def test__transform_for_protected_environments_sanity_check():
     assert DeepDiff(configuration.config, expected_transformed_config.config)
 
 
-def test__transform_with_non_dict_value():
-    """Test ImplicitNameTransformer skips non-dict/CommentedMap nodes."""
+def test__implicit_name_transformer_does_not_transform_key_value_pairs():
+    """Test ImplicitNameTransformer only transforms keys with an array of values aka dict_keys"""
     config_yaml = """
     projects_and_groups:
       "foo/bar":
