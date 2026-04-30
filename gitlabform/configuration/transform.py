@@ -1,6 +1,8 @@
 import sys
 from logging import debug, critical, warning
 from abc import ABC, abstractmethod
+from typing import Callable
+
 from ez_yaml import ez_yaml
 from ruamel.yaml import YAML
 from types import SimpleNamespace
@@ -189,17 +191,6 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
     def __init__(self, gitlab: PythonGitlab):
         self.gitlab = gitlab
 
-    # Factorized mapping path lists to keep transformation paths in one place
-    group_mapping_paths = {
-        "values": [
-            "projects_and_groups.*.**.group",
-            "projects_and_groups.**.groups",
-        ],
-        "dict_keys": [
-            "projects_and_groups.**.groups.*",
-        ],
-    }
-
     def _do_transform(self, configuration: Configuration) -> None:
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
@@ -214,7 +205,7 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             path="projects_and_groups.*.**.group",
             from_key="group",
             to_key="group_id",
-            get_id_from_name_function=self._get_group_id,
+            get_id_from_name_function=self.gitlab.get_group_id,
         )
 
         self._transform_principal_to_ids(
@@ -222,14 +213,14 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             path="projects_and_groups.*.**.groups",
             from_key="groups",
             to_key="group_ids",
-            get_id_from_name_function=self._get_group_id,
+            get_id_from_name_function=self.gitlab.get_group_id,
         )
 
         self._transform_dict_keys_to_ids(
             processor,
             path="projects_and_groups.*.**.groups.*",
             id_key="group_id",
-            lookup=self._get_group_id,
+            lookup=self.gitlab.get_group_id,
         )
 
     def _transform_users(self, processor: Processor):
@@ -238,7 +229,7 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             path="projects_and_groups.*.**.user",
             from_key="user",
             to_key="user_id",
-            get_id_from_name_function=self._get_user_id,
+            get_id_from_name_function=self.gitlab.get_user_id_cached,
         )
 
         self._transform_principal_to_ids(
@@ -246,21 +237,23 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             path="projects_and_groups.*.**.users",
             from_key="users",
             to_key="user_ids",
-            get_id_from_name_function=self._get_user_id,
+            get_id_from_name_function=self.gitlab.get_user_id_cached,
         )
 
         self._transform_dict_keys_to_ids(
             processor,
             path="projects_and_groups.*.**.users.*",
             id_key="user_id",
-            lookup=self._get_user_id,
+            lookup=self.gitlab.get_user_id_cached,
         )
 
     @staticmethod
     def _dedupe(items: list[int]) -> list[int]:
         return list(dict.fromkeys(items))
 
-    def _transform_principal_to_ids(self, processor, path: str, from_key: str, to_key: str, get_id_from_name_function):
+    def _transform_principal_to_ids(
+        self, processor, path: str, from_key: str, to_key: str, get_id_from_name_function: Callable[[str], int]
+    ):
         try:
             for node_coordinate in processor.get_nodes(path, mustexist=True):
                 if node_coordinate.parentref != from_key:
@@ -270,7 +263,6 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
                 node = node_coordinate.node
 
                 # if it's a dict_key, do nothing here, we'll transform it in _transform_dict_keys_to_ids
-                # TODO: REFACTOR?
                 if isinstance(node, CommentedMap):
                     continue
 
@@ -322,21 +314,3 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
         except YAMLPathException as e:
             debug(f"YAMLPathException while transforming dict keys to IDs for path '{path}': {e}")
             pass
-
-    def _get_user_id(self, username: str, path: str) -> int:
-        user_id = self.gitlab.get_user_id_cached(username)
-        if user_id is None:
-            raise GitlabGetError(
-                f"No users found when searching for username '{username}' while transforming path '{path}'",
-                404,
-            )
-        return user_id
-
-    def _get_group_id(self, groupname: str, path: str) -> int:
-        try:
-            return self.gitlab.get_group_id(groupname)
-        except GitlabGetError as error:
-            raise GitlabGetError(
-                f"No groups found when searching for group '{groupname}' while transforming path '{path}'",
-                404,
-            ) from error
