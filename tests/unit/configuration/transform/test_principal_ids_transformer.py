@@ -2,6 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 from gitlab import GitlabGetError
+from ruamel.yaml.compat import ordereddict
+from yamlpath.patches.timestamp import AnchoredDate
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.transform import PrincipalIdsTransformer
@@ -154,10 +156,10 @@ def test__transform__injects_user_id_into_members_users_dict_keys():
     transformer.transform(configuration)
 
     users = configuration.config["projects_and_groups"]["foo/bar"]["members"]["users"]
-    assert users["user1"]["user_id"] == 101
-    assert users["user1"]["access_level"] == 30
-    assert users["user2"]["user_id"] == 102
-    assert users["user2"]["access_level"] == 40
+    assert users == {
+        "user1": {"access_level": 30, "user_id": 101},
+        "user2": {"access_level": 40, "user_id": 102, "expires_at": AnchoredDate(2026, 1, 1, 0, 0)},
+    }
 
 
 def test__transform__injects_group_id_into_members_groups_dict_keys():
@@ -179,8 +181,9 @@ def test__transform__injects_group_id_into_members_groups_dict_keys():
     transformer.transform(configuration)
 
     groups = configuration.config["projects_and_groups"]["foo/bar"]["members"]["groups"]
-    assert groups["group/a"]["group_id"] == 201
-    assert groups["group/a"]["group_access"] == 30
+    assert groups == {
+        "group/a": {"group_access": 30, "group_id": 201},
+    }
 
 
 def test__transform__injects_user_id_into_group_members_users_dict_keys():
@@ -204,8 +207,10 @@ def test__transform__injects_user_id_into_group_members_users_dict_keys():
     transformer.transform(configuration)
 
     users = configuration.config["projects_and_groups"]["my-group"]["group_members"]["users"]
-    assert users["user1"]["user_id"] == 101
-    assert users["user2"]["user_id"] == 102
+    assert users == {
+        "user1": {"access_level": 50, "user_id": 101},
+        "user2": {"access_level": 30, "user_id": 102},
+    }
 
 
 def test__transform__injects_group_id_into_group_members_groups_dict_keys():
@@ -229,8 +234,10 @@ def test__transform__injects_group_id_into_group_members_groups_dict_keys():
     transformer.transform(configuration)
 
     groups = configuration.config["projects_and_groups"]["my-group"]["group_members"]["groups"]
-    assert groups["group/a"]["group_id"] == 201
-    assert groups["team/dev"]["group_id"] == 202
+    assert groups == {
+        "group/a": {"group_access": 30, "group_id": 201},
+        "team/dev": {"group_access": 40, "group_id": 202},
+    }
 
 
 def test__transform__skips_dict_key_when_id_already_present():
@@ -255,3 +262,6 @@ def test__transform__skips_dict_key_when_id_already_present():
 
     users = configuration.config["projects_and_groups"]["foo/bar"]["members"]["users"]
     assert users["user1"]["user_id"] == 999
+    assert users == {
+        "user1": {"access_level": 30, "user_id": 999},
+    }

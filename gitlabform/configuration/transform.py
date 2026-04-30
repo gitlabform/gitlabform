@@ -268,6 +268,25 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
         allowlist:
             group_ids:
                 - 123
+
+        And:
+        tags:
+          v*:
+            protected: true
+            allowed_to_create:
+              - user: user1
+              - group: team/dev
+              - user_id: 999
+
+        Is transformed into:
+
+        tags:
+          v*:
+            protected: true
+            allowed_to_create:
+              - user_id: 971
+              - group_id: 12
+              - user_id: 999
         """
         try:
             for node_coordinate in processor.get_nodes(path, mustexist=True):
