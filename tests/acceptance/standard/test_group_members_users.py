@@ -246,14 +246,15 @@ class TestGroupMembersUsers:
         projects_and_groups:
           {group.full_path}/*:
             group_members:
-              {users[0].username}:
-                access_level: owner
-              {users[1].username}:
-                access_level: developer
-              {users[2].username}:
-                access_level: developer
-              {user_to_add}: # new user 1
-                access_level: developer
+              users:
+                {users[0].username}:
+                  access_level: owner
+                {users[1].username}:
+                  access_level: developer
+                {users[2].username}:
+                  access_level: developer
+                {user_to_add}: # new user 1
+                  access_level: developer
         """
 
         run_gitlabform(add_users, group)
