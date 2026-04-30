@@ -268,7 +268,7 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
 
                 # list of principals -> normalize to *_ids list
                 if isinstance(node, list):
-                    mapped_values = [get_id_from_name_function(value, path) for value in node]
+                    mapped_values = [get_id_from_name_function(value) for value in node]
                     if to_key in parent and isinstance(parent[to_key], list):
                         mapped_values = parent[to_key] + mapped_values
                     parent[to_key] = self._dedupe(mapped_values)
@@ -281,7 +281,7 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
                     del parent[from_key]
                     continue
 
-                parent[to_key] = get_id_from_name_function(node, path)
+                parent[to_key] = get_id_from_name_function(node)
                 del parent[from_key]
         except YAMLPathException as e:
             # Failed to find any keys on the path, which could be perfectly valid or could be the result of malformed
@@ -310,7 +310,7 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
                 if id_key in node:
                     continue
                 key = str(node_coordinate.parentref)
-                node[id_key] = lookup(key, path)
+                node[id_key] = lookup(key)
         except YAMLPathException as e:
             debug(f"YAMLPathException while transforming dict keys to IDs for path '{path}': {e}")
             pass

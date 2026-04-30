@@ -124,11 +124,11 @@ def test__transform__raises_for_missing_user():
     configuration = Configuration(config_string=config_yaml)
 
     gitlab = MagicMock()
-    gitlab.get_user_id_cached.return_value = None
+    gitlab.get_user_id_cached.side_effect = GitlabGetError
 
     transformer = PrincipalIdsTransformer(gitlab)
 
-    with pytest.raises(GitlabGetError, match="No users found when searching for username 'missing-user'"):
+    with pytest.raises(GitlabGetError):
         transformer.transform(configuration)
 
 
