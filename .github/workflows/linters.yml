@@ -7,23 +7,25 @@ on:
         type: string
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   black-formatting:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
-      - name: Set up Python 3.14
-        uses: actions/setup-python@v6
-        with:
-          python-version: 3.14
-      - name: Black Code Formatter
-        uses: psf/black@26.3.1 # note: keep this in sync with the version in .pre-commit-config.yaml
-        with:
-          options: "--check"
-          src: "."
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
+        run: |
+          uv sync --frozen --no-dev --group lint
+      - name: Run black formatting check
+        run: |
+          uv run --no-sync qa lint black --check .
 
   types:
     runs-on: ubuntu-latest
@@ -36,16 +38,30 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.BRANCH_REF }}
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install test dependencies
+      - name: Setup Python ${{ matrix.python-version }} and install dependencies
         run: |
-          pip install wheel
-          pip install -e .[test]
+          uv sync --frozen --no-dev --group lint
       - name: Run mypy
         run: |
-          mypy . || true
-          mypy --install-types --non-interactive
-          mypy .
+          uv run --no-sync qa lint mypy .
+
+  bandit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
+        run: |
+          uv sync --frozen --no-dev --group lint
+      - name: Run bandit
+        run: |
+          uv run --no-sync qa lint bandit .

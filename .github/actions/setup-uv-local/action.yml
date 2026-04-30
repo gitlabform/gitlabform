@@ -1,0 +1,30 @@
+name: 'Setup uv Local'
+description: 'Centrally manages uv installation and versioning'
+inputs:
+  python-version:
+    description: 'Python version to use. Defaults to 3.14 if not provided.'
+    required: false
+    default: '3.14'
+runs:
+  using: 'composite'
+  steps:
+    - name: Export UV_PYTHON to environment
+      shell: bash
+      run: |
+        echo "UV_PYTHON=${{ inputs.python-version }}" >> $GITHUB_ENV
+        echo "UV_VERSION=0.11.7" >> $GITHUB_ENV
+
+    - name: Install uv (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        curl -LsSf https://astral.sh/uv/${{ env.UV_VERSION }}/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install uv (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $env:UV_VERSION = "${{ env.UV_VERSION }}"
+        irm https://astral.sh/uv/install.ps1 | iex
+        echo "$HOME\.local\bin" >> $env:GITHUB_PATH

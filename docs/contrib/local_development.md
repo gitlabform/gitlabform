@@ -1,136 +1,264 @@
 # Local Development
 
+Welcome to the GitLabForm development guide. We use **`uv`** and a unified development toolkit to manage our lifecycle, ensuring a fast, deterministic, and reproducible environment for all contributors.
+
 ## Required tools
 
-- Python 3 and Pip 3 for development
-- Docker for running Gitlab on local machine
-- `jq` used in local environment setup scripts
-- [`pre-commit`](https://pre-commit.com/#install) used to run linters and checks prior to commits made locally
+Following tools are used in this project. Please make sure you have them installed:
 
-## Environment setup
+- **`uv`**: The primary tool for dependency management and running development tasks. It automatically manages the required Python version and virtual environment. [Install `uv`](https://docs.astral.sh/uv/getting-started/installation/).
+- **Docker**: Required for running local GitLab instances and for building container images. [Install Docker](https://docs.docker.com/get-docker/).
+- **`jq`**: A command-line JSON processor used for orchestrating local GitLab instances. [Install `jq`](https://jqlang.github.io/jq/download/).
 
-1. Create virtualenv with Python 3, for example in `venv` dir which is in `.gitignore` and activate it:
-```
-python3 -m venv venv
-. venv/bin/activate
-```
+## Typical development workflow
 
-2. Install GitLabForm in develop mode:
-```
-pip install -e .
+The project provides a comprehensive CLI (**the development toolkit**) organized into task domains. You can discover the available domains by running the main entry point:
+
+```bash
+uv run dev --help
 ```
 
-Now you can run and debug the app locally.
+### Command Shortcuts
 
-## Running unit tests
+While `dev` is the central entry point, each domain is also registered as a direct shortcut in your environment. You can omit the `dev` prefix from any command for a more concise experience. For example, these two commands are identical:
 
-GitLabForm uses `pytest` for tests. You can run unit tests directly on your machine or in a Docker container.
+* Full: `uv run dev workspace setup`
+* Shortcut: `uv run workspace setup`
 
-### Running unit tests locally
+Each domain (like qa, docs, or workspace) provides its own help context. If you are ever unsure of the available sub-commands or arguments, simply run the domain name or add the `--help` flag:
 
-To run unit tests locally:
-
-1. Activate the virtualenv created above
-
-2. Install the dependencies for tests:
-```
-pip install -e '.[test]'
+```bash
+uv run workspace            # Shows help for workspace setup and cleanup
+uv run workspace --help     # Same as above
+uv run docker build --help  # Shows help and available flags for Docker builds
 ```
 
-3. Run `pytest tests/unit` to run all the unit tests.
+A standard lifecycle for implementing a new feature or bug fix typically involves:
 
-### Running unit tests in a Docker container
+1. **New branch**: Create a new branch for your changes.
+2. **Setup**: Initialize or update your local workspace using uv run workspace setup. This also installs the Git hooks. See Workspace Management section for more details. See [Workspace management](#workspace-management) section for more details.
+3. **Develop**: Implement your logic or fix in the codebase.
+4. **Quality**: Format and lint your code via the qa domain. See [Code quality](#code-quality) section for more details.
+5. **Test**: Be sure to include/update tests for your changes. See [Testing](#testing) section for more details.
+6. **Validate**: Perform a final check on the build artifacts. See [Building & Verification](#building-verification) section for more details.
+7. **Commit**: Record your changes using the **Conventional Commits** standard. The Git hooks installed during setup will automatically validate your commit messages.
 
-If you have a problem with installing the test dependencies on your localhost, you can run the tests in Docker container
-too, like this:
+    !!! tip "Guided experience via Commitizen"
 
-1. Build the image:
+        You can use `uv run cz commit` that will present an interactive option in the terminal for selecting and commiting your changes.
+
+8. **Documentation**: Add/update documentation if necessary for the change being introduced. See [Documentation](#documentation) section for more details.
+9. **Open/Update PR**: Push your changes to GitHub and create/update a pull request.
+
+
+## Workspace Management
+
+Managing your development environment is handled by the workspace domain. We use `uv` to provide a consistent, isolated, and reproducible environment where everything is contained within an automatically managed `.venv`.
+
+```bash
+uv run workspace setup
 ```
-docker build . -f ./dev/tests.Dockerfile -t gitlabform-tests:latest
+
+This command performs several automated tasks:
+
+1. **Python Management**: Automatically downloads and installs the specific Python version required by the project.
+2. **Virtual Environment**: Creates a `.venv` directory in the project root. You do not need to manually create or activate this environment. `uv run` handles the activation context for you.
+3. **Dependency Synchronization**: Installs all required runtime and development dependencies, ensuring your environment exactly matches the `uv.lock` file.
+4. **Git Hook Installation**: Configures Git hooks to enforce linting, formatting, and Conventional Commit standards.
+
+To reset your workspace and remove all build artifacts, caches, and the virtual environment:
+
+```bash
+uv run workspace clean
 ```
-2. Use it to run the tests:
+
+## Code Quality
+
+Maintaining high code quality is essential for the stability and readability of the project. We use a suite of tools for automatic formatting and static analysis.
+
+### Formatting
+
+We use **black** to enforce a consistent code style across the entire repository. This ensures that the codebase remains readable and reduces friction during code reviews.
+
+```bash
+uv run qa format
 ```
-docker run -it -v $(pwd):/code gitlabform-tests:latest /bin/ash -c "cd /code && pytest tests/acceptance"
+
+### Linting
+
+We use several tools (including `mypy` for type checking and `bandit` for security auditing) to catch potential issues before they are committed. By default, the `lint` command runs all configured checks in parallel.
+
+```bash
+uv run qa lint
 ```
 
-## Running acceptance tests
+You can also run a specific tool or pass additional arguments directly to the underlying linter. For example, to run only mypy with specific flags:
 
-Most GitLabForm test are the ones that make real operations on a running GitLab instance. You can run them
-against a disposable GitLab instance running as a Docker container OR use your own GitLab instance.
+```bash
+uv run qa lint mypy .
+```
 
-### Running acceptance tests using GitLab instance in Docker
+To see the list of available linting tools and help:
 
-1. Run below command to start GitLab in a docker container. Note that it may take a few minutes!
+```bash
+uv run qa lint --help
+```
 
+## Testing
+
+We use **pytest** as the underlying engine for our entire test suite. The toolkit's `test` command acts as a passthrough, meaning any valid `pytest` argument or flag can be provided directly.
+
+To discover all available testing options for the `qa` domain:
+
+```bash
+uv run qa test --help
+```
+
+**Common examples:**
+
+- Run tests matching a keyword: `uv run qa test -k "archive"`
+- Run tests with verbose output: `uv run qa test -v`
+- Run with coverage reporting: `uv run qa test --cov=.`
+- Run a specific test file/suite: `uv run qa test tests/<path-to-test-file>`
+- Run a specific test within a test file/suite: `uv run qa test tests/<path-to-test-file>::<test-class>::<test-method>`
+
+### Unit Tests
+
+Unit tests are fast, isolated, and do not require a running GitLab instance. They are ideal for validating logic and configuration parsing:
+
+```bash
+uv run qa test tests/unit
+```
+
+### Acceptance Tests
+
+Acceptance tests perform real operations against a running GitLab instance. Because they interact with an actual API, they are slower and require more setup than unit tests.
+
+1. Start Local GitLab
+
+    We recommend running tests against a disposable GitLab instance in Docker to ensure your environment matches our CI/CD pipelines:
+
+    ```bash
+    uv run gitlab-local up # Starts Enterprise Edition (EE) by default
+    uv run gitlab-local down # Cleanup: Stops and removes the local GitLab container
     ```
-    ./dev/run_gitlab_in_docker.sh
+
+    !!! note
+    
+        Use `uv run gitlab-local up --gitlab-flavor ce` to test against Community Edition.
+
+    To see all available infrastructure management options:
+
+    ```bash
+    uv run gitlab-local up --help
     ```
-   
-   To run against Gitlab CE instead of EE:
+    
+    !!! tip "Testing against specific versions"
+        You can test against specific GitLab releases using the version flag: `uv run gitlab-local up --gitlab-version 17.5.0-ee`.
 
-    ```
-    ./dev/run_gitlab_in_docker.sh --gitlab-flavor ce
-    ```
+    !!! note "Testing paid features"
+    
+        To test features requiring a GitLab instance with **Premium** or **Ultimate** tier, you'll need to have a license from GitLab that can be used for enabling those features in your local GitLab instance.
+        
+        Once you've obtained your license, you can set the `GITLAB_EE_LICENSE` environment variable or place your license in a file named `Gitlab.gitlab-license` in the project root. Our dev toolkit will automatically detect and apply this license during the setup. This file is also included in `.gitignore` so that it's not committed to the repository.
 
-2. Run `pytest tests/acceptance --log-cli-level=INFO` to start all tests.
 
-    To run only a single class with tests run, f.e.:
+2. Run the tests
 
-    ```
-    pytest tests/acceptance -k "TestArchiveProject"
-    ```
+    Once the GitLab instance is healthy and accessible, execute the acceptance located in `tests/acceptance/` directory. See the examples above on how to run the tests.
 
-    To run a single test method run, f.e.:
+    !!! tip
 
-    ```
-    pytest tests/acceptance -k "test__set_file_strongly_protected_branch"
-    ```
-   
-### Acceptance tests for GitLab paid features
+        Acceptance tests are usually slower than unit tests since they run against a real GitLab instance. This involves creating, updating, and deleting resources in GitLab. You may find it helpful to run only select tests instead of entire test suite. For example: run all tests related to the feature you're working on.
 
-To test features that are only available in paid version of Gitlab, you'll need a Gitlab license so that those features are available and the acceptance tests can use it. You can signup for a Gitlab Trial license. Follow the [instructions in Gitlab handbook](https://handbook.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows/#contributing-to-the-gitlab-enterprise-edition-ee) for details on how to get a license for development purpose. Once you've received a license, take the following step:
 
-1. Copy your license and save it as an `GITLAB_EE_LICENSE` environment variable or in a file named `Gitlab.gitlab-license`. This file is already in `.gitignore`; so it will not be included in your commit.
-2. Follow the steps mentioned in previous section.
+### Using a Remote GitLab Instance
 
-### Running acceptance tests using your own GitLab instance
+It's not recommended, but if you prefer to run tests against non-local/disposable GitLab instance, provide the credentials via environment variables:
 
-**Note**: GitLabForm acceptance tests operate own their own groups, projects and users and it should be safe
-to run them on any GitLab instance. However we do not take any responsibility for it. Please review 
-the code to ensure what it does and run it at your own risk!
-
-1. Get an admin user API token and put it into `GITLAB_TOKEN` env variable. Do the same with your GitLab instance URL
-and put it into `GITLAB_URL` env variable:
-```
+```bash
 export GITLAB_URL="https://mygitlab.company.com"
-export GITLAB_TOKEN="<my admin user API token>"
+export GITLAB_TOKEN="<admin_api_token>"
+uv run qa test tests/acceptance
 ```
 
-2. Run `pytest tests/acceptance` to start all tests
-To run only a single class with tests run f.e. `pytest tests/acceptance -k "TestArchiveProject"`.
+## Building & Verification
 
-## Preview docs website locally
+This section covers creating the distributable artifacts for the project, including the Python package and the Docker image.
 
-To make mkdocs build the app website and serve it on your loopback interface do this:
-```shell
-. venv/bin/activate
-pip install -e '.[docs]'
-mkdocs serve
+### Python Distributions
+
+We generate standard Python distribution artifacts (source distribution and wheels) that can be uploaded to PyPI. To generate the artifacts in the `dist/` directory:
+
+```bash
+uv run package build
 ```
-...and open the provided link (probably [http://127.0.0.1:8000/](http://127.0.0.1:8000/)) in your browser.
 
-## Testing types
+To see available build options:
 
-Please run `mypy` to test static types:
-```shell
-mypy .
+```bash
+uv run package build --help
 ```
-(You may also need to run `mypy --install-types --non-interactive`)
 
-## Code formatting
+The `package verify` command performs an audit of the built files to ensure they are ready for release. This includes metadata validation via `twine`, content auditing via `check-wheel-contents`, and an automated smoke test that installs the wheel in a temporary isolated environment to check the entry point.
 
-Please run `black` to format coding style:
+```bash
+uv run package verify
+```
 
-```shell
-black .
+
+### Docker Images
+
+The Docker image is the recommended way to run GitLabForm in CI/CD environments. To build the image locally using our multi-stage `Dockerfile`:
+
+```bash
+uv run docker build
+```
+
+You can customize the image name and tag via arguments:
+
+```bash
+uv run docker build --image my-registry/gitlabform --tag dev
+```
+
+To see all Docker build options:
+
+```bash
+uv run docker build --help
+```
+
+To ensure the newly built image is functional, run a smoke test that executes the application version check inside a container:
+
+```bash
+uv run docker verify
+```
+
+To see options for Docker verification:
+
+```bash
+uv run docker verify --help
+```
+
+## Documentation
+
+We use **MkDocs** with the **Material** theme to generate our project documentation. The toolkit provides commands via the `docs` domain to preview changes locally and build the final static site.
+
+To serve the documentation with live-reloading (ideal for seeing your changes in real-time as you edit the markdown files):
+
+```bash
+uv run docs serve
+```
+
+The site will be available at `http://localhost:8000`.
+
+To generate the static documentation site in the `site/` directory (used for deployment to GitHub Pages):
+
+```bash
+uv run docs build
+```
+
+To see all documentation management options:
+
+```bash
+uv run docs --help
 ```

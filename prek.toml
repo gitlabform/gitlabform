@@ -1,0 +1,18 @@
+# Native prek configuration
+# Using 'repo = "local"' with 'language = "system"' ensures hooks use 
+# the versions defined in pyproject.toml via the uv environment.
+
+[[repos]]
+repo = "local"
+hooks = [
+    { id = "black", name = "black", entry = "uv run black --check", language = "system", types = ["python"] },
+    { id = "commitizen", name = "commitizen", entry = "uv run cz check --commit-msg-file", stages = ["commit-msg"], language = "system" },
+]
+
+[[repos]]
+# pngquant is an external binary, so we maintain it as a remote repository hook.
+repo = "https://github.com/gdubicki/pre-commit-pngquant"
+rev = "9010345cf034fe1097b3b7bb9ecd5ea92dcf85dc"
+hooks = [
+    { id = "pngquant", args = ["--speed=1"] }
+]
