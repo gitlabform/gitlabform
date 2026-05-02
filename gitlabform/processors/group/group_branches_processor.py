@@ -23,18 +23,30 @@ class GroupBranchesProcessor(AbstractProcessor):
         self.custom_diff_analyzers["unprotect_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
 
     def _can_proceed(self, group: str, configuration: dict):
+        if "/" in group:
+            debug(f"Skipping group_branches for '{group}' - only supported for top-level groups")
+            return False
+
         for branch in sorted(configuration["group_branches"]):
             branch_config = configuration["group_branches"][branch]
             if branch_config.get("protected") is None:
                 critical(f"The Protected key is mandatory in group_branches configuration, fix {branch} YAML config")
                 sys.exit(EXIT_INVALID_INPUT)
 
+            for key in ("allowed_to_push", "allowed_to_merge", "allowed_to_unprotect"):
+                if key in branch_config:
+                    for item in branch_config[key]:
+                        if isinstance(item, dict) and (
+                            "user" in item or "user_id" in item or "group" in item or "group_id" in item
+                        ):
+                            warning(
+                                f"Group protected branches do not support individual users or groups in '{key}' for branch '{branch}'. "
+                                f"Only access_level is supported. The user/group entry will be ignored by GitLab."
+                            )
+
         return True
 
     def _process_configuration(self, group: str, configuration: dict):
-        if "/" in group:
-            debug(f"Skipping group_branches for '{group}' - only supported for top-level groups")
-            return
 
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
 

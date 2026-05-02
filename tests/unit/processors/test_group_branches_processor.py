@@ -30,18 +30,55 @@ class TestGroupBranchesProcessor:
         with pytest.raises(SystemExit):
             self.processor._can_proceed("group", configuration)
 
-    def test_process_configuration_skips_subgroups(self):
-        self.processor.gl = MagicMock()
+    def test_can_proceed_warns_on_allowed_to_with_users(self, caplog):
+        configuration = {
+            "group_branches": {
+                "main": {
+                    "protected": True,
+                    "allowed_to_push": [{"user_id": 42}],
+                },
+            }
+        }
+        result = self.processor._can_proceed("group", configuration)
 
+        assert result is True
+        assert "do not support individual users or groups" in caplog.text
+
+    def test_can_proceed_warns_on_allowed_to_with_groups(self, caplog):
+        configuration = {
+            "group_branches": {
+                "main": {
+                    "protected": True,
+                    "allowed_to_merge": [{"group_id": 99}],
+                },
+            }
+        }
+        result = self.processor._can_proceed("group", configuration)
+
+        assert result is True
+        assert "do not support individual users or groups" in caplog.text
+
+    def test_can_proceed_no_warning_on_allowed_to_with_access_level_only(self, caplog):
+        configuration = {
+            "group_branches": {
+                "main": {
+                    "protected": True,
+                    "allowed_to_push": [{"access_level": 0}],
+                },
+            }
+        }
+        result = self.processor._can_proceed("group", configuration)
+
+        assert result is True
+        assert "do not support individual users or groups" not in caplog.text
+
+    def test_can_proceed_skips_subgroups(self):
         configuration = {
             "group_branches": {
                 "main": {"protected": True, "push_access_level": 0},
             }
         }
-
-        self.processor._process_configuration("my-group/my-subgroup", configuration)
-
-        self.processor.gl.get_group_by_path_cached.assert_not_called()
+        assert self.processor._can_proceed("my-group/my-subgroup", configuration) is False
 
     def test_process_configuration_iterates_branches(self):
         self.processor.gl = MagicMock()

@@ -110,7 +110,43 @@ class TestGroupBranches:
         """
 
         run_gitlabform(config, group)
+
+        protected_branch_after_first_run = group.protectedbranches.get("main")
+        first_run_push_levels = sorted([r["access_level"] for r in protected_branch_after_first_run.push_access_levels])
+        first_run_merge_levels = sorted(
+            [r["access_level"] for r in protected_branch_after_first_run.merge_access_levels]
+        )
+
         run_gitlabform(config, group)
 
+        protected_branch_after_second_run = group.protectedbranches.get("main")
+        second_run_push_levels = sorted(
+            [r["access_level"] for r in protected_branch_after_second_run.push_access_levels]
+        )
+        second_run_merge_levels = sorted(
+            [r["access_level"] for r in protected_branch_after_second_run.merge_access_levels]
+        )
+
+        assert first_run_push_levels == second_run_push_levels
+        assert first_run_merge_levels == second_run_merge_levels
+
+    def test__group_branch_protection_skips_subgroups(self, group, subgroup):
+        config = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_branches:
+              main:
+                protected: true
+                push_access_level: {AccessLevel.NO_ACCESS.value}
+                merge_access_level: {AccessLevel.MAINTAINER.value}
+        """
+
+        run_gitlabform(config, group)
+
+        # Top-level group should have the protection
         protected_branch = group.protectedbranches.get("main")
         assert protected_branch is not None
+
+        # Subgroup should not have the protection
+        with pytest.raises(GitlabGetError):
+            subgroup.protectedbranches.get("main")

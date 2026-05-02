@@ -2,6 +2,11 @@
 
 This section purpose is to manage the [protected branches](https://docs.gitlab.com/ee/user/project/protected_branches.html).
 
+GitLabForm supports two different ways to manage branch protection:
+
+* **Group-level protected branches** (`group_branches`) — Uses GitLab's [Group Protected Branches API](https://docs.gitlab.com/ee/api/group_protected_branches.html) to set branch protection rules that are inherited by all projects in a top-level group. Requires GitLab Premium.
+* **Project-level protected branches** (`branches`) — Sets branch protection rules on individual projects. When configured under a group wildcard (e.g. `group/*`), GitLabForm applies the rules to each project separately. Works with all GitLab tiers.
+
 ## Group-level protected branches
 
 This section purpose is to manage the [group-level protected branches](https://docs.gitlab.com/ee/api/group_protected_branches.html).
