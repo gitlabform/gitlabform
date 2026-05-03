@@ -638,7 +638,7 @@ requires-dist = [
     { name = "markupsafe", specifier = "==3.0.3" },
     { name = "mergedeep", specifier = "==1.3.4" },
     { name = "packaging", specifier = "==26.2" },
-    { name = "python-gitlab", extras = ["graphql"], specifier = "==8.2.0" },
+    { name = "python-gitlab", extras = ["graphql"], specifier = "==8.3.0" },
     { name = "requests", specifier = "==2.33.1" },
     { name = "rich", specifier = "==15.0.0" },
     { name = "ruamel-yaml", specifier = "==0.17.21" },
@@ -1656,15 +1656,15 @@ wheels = [
 
 [[package]]
 name = "python-gitlab"
-version = "8.2.0"
+version = "8.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "requests" },
     { name = "requests-toolbelt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/77/9c/ec0073c260812bca170418e8e259a2ed0728200af4b3f7120badf2e6f05a/python_gitlab-8.2.0.tar.gz", hash = "sha256:de874dc538db6dceb48929f4c8fb55d6064dd19cb3ffdad1100190f835c5b674", size = 407110, upload-time = "2026-03-28T01:50:07.66Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/86/00/9a9eb79cf3608f9ab172bc6311b40a7ed128cae7be42dbf2d3830d713a48/python_gitlab-8.3.0.tar.gz", hash = "sha256:2ca67cf64b8d9290fe64463cfef6e77dbde066285dd848db2eb7816d6a7e9ec9", size = 410332, upload-time = "2026-04-28T02:32:30.16Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/38/ee/a61bb562bdf6f0bc6c51cdcf80ab5503cbb4b2f5053fa4b054cc0a56e48a/python_gitlab-8.2.0-py3-none-any.whl", hash = "sha256:884618d4d60beadb21bb0c5f0cca46e70c6e501784f136bf0b6f85f5bc15ce62", size = 147477, upload-time = "2026-03-28T01:50:06.237Z" },
+    { url = "https://files.pythonhosted.org/packages/df/b1/3e3144c3ada2ae1a60a378396629064ef14e425e356c8e7c1db3a50ef351/python_gitlab-8.3.0-py3-none-any.whl", hash = "sha256:7aace3585d57ee97ebcb74bc776f30af3e861e285290082a91646348aca3f22a", size = 148177, upload-time = "2026-04-28T02:32:28.133Z" },
 ]
 
 [package.optional-dependencies]
