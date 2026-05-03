@@ -528,14 +528,11 @@ wheels = [
 
 [[package]]
 name = "ez-yaml"
-version = "1.2.0"
+version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "ruamel-yaml" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a2/72/9102232c4cfde3cc62de8e873fe11689bc357c2b18c552e7c82ca1c51e29/ez_yaml-1.2.0.tar.gz", hash = "sha256:563d6b6d096e353b673d7884d779d3ea37a20377a4acc70e18ee2dcb95deacbe", size = 3400, upload-time = "2022-03-11T16:29:36.766Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2f/5c/bc0e52d9ea94a90d63645dc4df2724ad212ef918f3c89101dff78a4f8ed1/ez_yaml-2.2.0.tar.gz", hash = "sha256:aa02f14683cd4a32a1be621c5acabe587ddf0e647fef7e075b3c942db722d331", size = 381857, upload-time = "2024-02-02T16:37:34.999Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/1e/7668017df0b2eeafefc29c305ec7bcebb733ab11f46b3d11447aed370f2b/ez_yaml-1.2.0-py3-none-any.whl", hash = "sha256:429a0d7eee26b29de5a69937bceadc816210435cf4725bedaebb0025a2ce1d51", size = 3385, upload-time = "2022-03-11T16:29:35.354Z" },
+    { url = "https://files.pythonhosted.org/packages/a6/f8/c7b927a739a658b6d574deabcd0eb293454c5218a3c0208595c98453f12e/ez_yaml-2.2.0-py3-none-any.whl", hash = "sha256:fb1fa5734c7ce948ba146d9efab0d5017a94f1e0eeb2a112d40b62df30468de2", size = 346960, upload-time = "2024-02-02T16:37:32.937Z" },
 ]
 
 [[package]]
@@ -632,7 +629,7 @@ test = [
 requires-dist = [
     { name = "certifi", specifier = "==2026.4.22" },
     { name = "cli-ui", specifier = "==0.19.0" },
-    { name = "ez-yaml", specifier = "==1.2.0" },
+    { name = "ez-yaml", specifier = "==2.2.0" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "luddite", specifier = "==1.0.4" },
     { name = "markupsafe", specifier = "==3.0.3" },
