@@ -40,7 +40,7 @@ dependencies = [
     "markupsafe==3.0.3",
     "mergedeep==1.3.4",
     "packaging==26.2",
-    "python-gitlab[graphql]==8.2.0",
+    "python-gitlab[graphql]==8.3.0",
     "requests==2.33.1",
     "rich==15.0.0",
     # yamlpath and ruamel and tightly coupled, currently 0.19.1 of ruamel and 3.9.0 of yamlpath break support for
