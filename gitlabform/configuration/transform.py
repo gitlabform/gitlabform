@@ -200,6 +200,19 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
         self._transform_groups(processor)
 
     def _transform_groups(self, processor: Processor):
+        # Find all keys under `group` headings in the YAML and convert from Name -> ID
+        # e.g.
+        # protected_environments:
+        #   production:
+        #     deploy_access_levels:
+        #      - group: group/a
+        #
+        # becomes
+        #
+        # protected_environments:
+        #   production:
+        #     deploy_access_levels:
+        #       - group: 10
         self._transform_principal_to_ids(
             processor,
             path="projects_and_groups.*.**.group",
@@ -208,6 +221,19 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             get_id_from_name_function=self.gitlab.get_group_id,
         )
 
+        # Find all keys under `groups` headings in the YAML and convert from Name -> ID
+        # e.g.
+        # merge_requests_approval_rules:
+        #  sec-review:
+        #    groups:
+        #      - group/b
+        #
+        # becomes
+        #
+        # merge_requests_approval_rules:
+        #  sec-review:
+        #    groups:
+        #      - 12
         self._transform_principal_to_ids(
             processor,
             path="projects_and_groups.*.**.groups",
@@ -216,6 +242,20 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             get_id_from_name_function=self.gitlab.get_group_id,
         )
 
+        # Find all dictionary-keys under `groups` headings in the YAML and add an Id field rather than trying to mutate
+        # e.g.
+        # members:
+        #  groups:
+        #    group/a:
+        #      access_level: 30
+        #
+        # becomes
+        #
+        # members:
+        #  groups:
+        #    group/a:
+        #      access_level: 30
+        #      group_id: 10
         self._transform_dict_keys_to_ids(
             processor,
             path="projects_and_groups.*.**.groups.*",
@@ -224,6 +264,19 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
         )
 
     def _transform_users(self, processor: Processor):
+        # Find all keys under `user` headings in the YAML and convert from Name -> ID
+        # e.g.
+        # protected_environments:
+        #   production:
+        #     deploy_access_levels:
+        #       - user: user1
+        #
+        # becomes
+        #
+        # protected_environments:
+        #   production:
+        #     deploy_access_levels:
+        #       - user: 102
         self._transform_principal_to_ids(
             processor,
             path="projects_and_groups.*.**.user",
@@ -232,6 +285,19 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             get_id_from_name_function=self.gitlab.get_user_id_cached,
         )
 
+        # Find all keys under `users` headings in the YAML and convert from Name -> ID
+        # e.g.
+        # merge_requests_approval_rules:
+        #  sec-review:
+        #    users:
+        #      - user1
+        #
+        # becomes
+        #
+        # merge_requests_approval_rules:
+        #  sec-review:
+        #    users:
+        #      - 102
         self._transform_principal_to_ids(
             processor,
             path="projects_and_groups.*.**.users",
@@ -240,6 +306,20 @@ class PrincipalIdsTransformer(ConfigurationTransformer):
             get_id_from_name_function=self.gitlab.get_user_id_cached,
         )
 
+        # Find all dictionary-keys under `users` headings in the YAML and add an Id field rather than trying to mutate
+        # e.g.
+        # members:
+        #  users:
+        #    user1:
+        #      access_level: 30
+        #
+        # becomes
+        #
+        # members:
+        #  users:
+        #    user1:
+        #      access_level: 30
+        #      user_id: 102
         self._transform_dict_keys_to_ids(
             processor,
             path="projects_and_groups.*.**.users.*",
