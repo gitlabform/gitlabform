@@ -53,7 +53,7 @@ class PythonGitlab(Gitlab):
         # https://python-gitlab.readthedocs.io/en/stable/api-usage-graphql.html
         self.graphql = graphql
 
-    def get_user_id_cached(self, username) -> int | None:
+    def get_user_id_cached(self, username) -> int:
         """
         Get user id from username
         API call layer "get_user_by_username" is cached, we do not cache at this level as it would add
@@ -62,7 +62,7 @@ class PythonGitlab(Gitlab):
         user = self.get_user_by_username_cached(username)
 
         if user is None:
-            return None
+            raise GitlabGetError("No user found when getting '%s'" % username, 404)
 
         return user.id
 

@@ -1,9 +1,12 @@
 import sys
-from logging import debug, info, critical
+from logging import debug, critical, warning
 from abc import ABC, abstractmethod
+from typing import Callable
+
 from ez_yaml import ez_yaml
 from ruamel.yaml import YAML
 from types import SimpleNamespace
+from gitlab import GitlabGetError
 
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
@@ -12,31 +15,30 @@ from yamlpath.wrappers import ConsolePrinter
 
 from gitlabform.constants import EXIT_INVALID_INPUT, APPROVAL_RULE_NAME
 from gitlabform.configuration import Configuration
-from gitlabform.gitlab import AccessLevel
-from gitlabform.gitlab import GitLab
+from gitlabform.gitlab import AccessLevel, GitLab, GitlabWrapper, PythonGitlab
 
 # Configuration transformers are classes which take the input configuration as YAML and change it
-# to from the more user-friendly input to an output that is more applicable to passing to GitLab
+# from the more user-friendly input to an output that is more applicable to passing to GitLab
 # over its API.
 #
-# For example, we want to operate on usernames in the configuration while GitLab sometimes operates
-# on user ids. Therefore, one of the transformers changes "user_id: <number>" into "user: <username>".
+# For example, we accept access level names like "maintainer" in the configuration and transform
+# them to numeric values like 40 that the GitLab API expects. Username-to-user-id and
+# groupname-to-group-id transformations are handled centrally at this stage.
 
 
 class ConfigurationTransformers:
     def __init__(self, gitlab: GitLab):
-        self.user_transformer = UserTransformer(gitlab)
-        self.group_transformer = GroupTransformer(gitlab)
+        python_gitlab: PythonGitlab = GitlabWrapper(gitlab).get_gitlab()
         self.implicit_name_transformer = ImplicitNameTransformer(gitlab)
+        self.principal_ids_transformer = PrincipalIdsTransformer(python_gitlab)
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
 
     def transform(self, configuration: Configuration) -> None:
         config_before = ez_yaml.to_string(obj=configuration.config, options={})
         debug(f"Config BEFORE transformations:\n{config_before}")
 
-        self.user_transformer.transform(configuration)
-        self.group_transformer.transform(configuration)
         self.implicit_name_transformer.transform(configuration)
+        self.principal_ids_transformer.transform(configuration)
         self.access_level_transformer.transform(configuration, last=True)
 
         config_after = ez_yaml.to_string(obj=configuration.config, options={})
@@ -62,84 +64,6 @@ class ConfigurationTransformer(ABC):
         config_yaml_string = ez_yaml.to_string(obj=configuration.config, options={})
         simple_yaml_loader = YAML(typ="safe", pure=True)
         configuration.config = simple_yaml_loader.load(config_yaml_string)
-
-
-class UserTransformer(ConfigurationTransformer):
-    def __init__(self, gitlab: GitLab):
-        self.gitlab = gitlab
-
-    def _do_transform(self, configuration: Configuration) -> None:
-        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
-        log = ConsolePrinter(logging_args)
-        processor = Processor(log, configuration.config)
-        info("Getting user ids for users defined in protect_environments config")
-        try:
-            for node_coordinate in processor.get_nodes(
-                "projects_and_groups.*.protected_environments.*.deploy_access_levels.user",
-                mustexist=True,
-            ):
-                user = node_coordinate.parent.pop("user")
-
-                node_coordinate.parent["user_id"] = self.gitlab._get_user_id(user)
-        except YAMLPathException as e:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
-
-        info("Getting user ids for users defined in merge_requests_approval_rules config")
-        try:
-            for node_coordinate in processor.get_nodes(
-                "**.merge_requests_approval_rules.*.users",
-                mustexist=True,
-            ):
-                user_ids = []
-                users = node_coordinate.parent.pop("users")
-                for user in users:
-                    user_id = self.gitlab._get_user_id(user)
-                    user_ids.append(user_id)
-                node_coordinate.parent["user_ids"] = user_ids
-        except YAMLPathException as e:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
-
-
-class GroupTransformer(ConfigurationTransformer):
-    def __init__(self, gitlab: GitLab):
-        self.gitlab = gitlab
-
-    def _do_transform(self, configuration: Configuration) -> None:
-        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
-        processor = Processor(ConsolePrinter(logging_args), configuration.config)
-
-        try:
-            for node_coordinate in processor.get_nodes(
-                "projects_and_groups.*.protected_environments.*.deploy_access_levels.group",
-                mustexist=True,
-            ):
-                group = node_coordinate.parent.pop("group")
-                node_coordinate.parent["group_id"] = self.gitlab._get_group_id(group)
-
-        except YAMLPathException as e:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
-
-        try:
-            for node_coordinate in processor.get_nodes(
-                "**.merge_requests_approval_rules.*.groups",
-                mustexist=True,
-            ):
-                group_ids = []
-                groups = node_coordinate.parent.pop("groups")
-                for group in groups:
-                    group_id = self.gitlab._get_group_id(group)
-                    group_ids.append(group_id)
-                node_coordinate.parent["group_ids"] = group_ids
-        except YAMLPathException:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
 
 
 class ImplicitNameTransformer(ConfigurationTransformer):
@@ -257,3 +181,264 @@ class AccessLevelsTransformer(ConfigurationTransformer):
                 # this just means that we haven't found any keys in YAML
                 # under the given path
                 pass
+
+
+class PrincipalIdsTransformer(ConfigurationTransformer):
+    """
+    Transform user/group references in configuration into user_id/group_id.
+    """
+
+    def __init__(self, gitlab: PythonGitlab):
+        self.gitlab = gitlab
+
+    def _do_transform(self, configuration: Configuration) -> None:
+        logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
+        processor = Processor(ConsolePrinter(logging_args), configuration.config)
+
+        self._transform_users(processor)
+
+        self._transform_groups(processor)
+
+    def _transform_groups(self, processor: Processor):
+        # Find all keys under `group` headings in the YAML and convert from Name -> ID
+        # e.g.
+        # protected_environments:
+        #   production:
+        #     deploy_access_levels:
+        #      - group: group/a
+        #
+        # becomes
+        #
+        # protected_environments:
+        #   production:
+        #     deploy_access_levels:
+        #       - group: 10
+        self._transform_principal_to_ids(
+            processor,
+            path="projects_and_groups.*.**.group",
+            from_key="group",
+            to_key="group_id",
+            get_id_from_name_function=self.gitlab.get_group_id,
+        )
+
+        # Find all keys under `groups` headings in the YAML and convert from Name -> ID
+        # e.g.
+        # merge_requests_approval_rules:
+        #  sec-review:
+        #    groups:
+        #      - group/b
+        #
+        # becomes
+        #
+        # merge_requests_approval_rules:
+        #  sec-review:
+        #    groups:
+        #      - 12
+        self._transform_principal_to_ids(
+            processor,
+            path="projects_and_groups.*.**.groups",
+            from_key="groups",
+            to_key="group_ids",
+            get_id_from_name_function=self.gitlab.get_group_id,
+        )
+
+        # Find all dictionary-keys under `groups` headings in the YAML and add an Id field rather than trying to mutate
+        # e.g.
+        # members:
+        #  groups:
+        #    group/a:
+        #      access_level: 30
+        #
+        # becomes
+        #
+        # members:
+        #  groups:
+        #    group/a:
+        #      access_level: 30
+        #      group_id: 10
+        self._transform_dict_keys_to_ids(
+            processor,
+            path="projects_and_groups.*.**.groups.*",
+            id_key="group_id",
+            lookup=self.gitlab.get_group_id,
+        )
+
+    def _transform_users(self, processor: Processor):
+        # Find all keys under `user` headings in the YAML and convert from Name -> ID
+        # e.g.
+        # protected_environments:
+        #   production:
+        #     deploy_access_levels:
+        #       - user: user1
+        #
+        # becomes
+        #
+        # protected_environments:
+        #   production:
+        #     deploy_access_levels:
+        #       - user: 102
+        self._transform_principal_to_ids(
+            processor,
+            path="projects_and_groups.*.**.user",
+            from_key="user",
+            to_key="user_id",
+            get_id_from_name_function=self.gitlab.get_user_id_cached,
+        )
+
+        # Find all keys under `users` headings in the YAML and convert from Name -> ID
+        # e.g.
+        # merge_requests_approval_rules:
+        #  sec-review:
+        #    users:
+        #      - user1
+        #
+        # becomes
+        #
+        # merge_requests_approval_rules:
+        #  sec-review:
+        #    users:
+        #      - 102
+        self._transform_principal_to_ids(
+            processor,
+            path="projects_and_groups.*.**.users",
+            from_key="users",
+            to_key="user_ids",
+            get_id_from_name_function=self.gitlab.get_user_id_cached,
+        )
+
+        # Find all dictionary-keys under `users` headings in the YAML and add an Id field rather than trying to mutate
+        # e.g.
+        # members:
+        #  users:
+        #    user1:
+        #      access_level: 30
+        #
+        # becomes
+        #
+        # members:
+        #  users:
+        #    user1:
+        #      access_level: 30
+        #      user_id: 102
+        self._transform_dict_keys_to_ids(
+            processor,
+            path="projects_and_groups.*.**.users.*",
+            id_key="user_id",
+            lookup=self.gitlab.get_user_id_cached,
+        )
+
+    @staticmethod
+    def _dedupe(items: list[int]) -> list[int]:
+        return list(dict.fromkeys(items))
+
+    def _transform_principal_to_ids(
+        self, processor, path: str, from_key: str, to_key: str, get_id_from_name_function: Callable[[str], int]
+    ):
+        """
+        Will transform the names into ids and store under the _ids node
+
+        For example:
+
+        allowlist:
+            groups:
+                - my-group
+
+        Is transformed into:
+
+        allowlist:
+            group_ids:
+                - 123
+
+        And:
+        tags:
+          v*:
+            protected: true
+            allowed_to_create:
+              - user: user1
+              - group: team/dev
+              - user_id: 999
+
+        Is transformed into:
+
+        tags:
+          v*:
+            protected: true
+            allowed_to_create:
+              - user_id: 971
+              - group_id: 12
+              - user_id: 999
+        """
+        try:
+            for node_coordinate in processor.get_nodes(path, mustexist=True):
+                if node_coordinate.parentref != from_key:
+                    continue
+
+                parent = node_coordinate.parent
+                node = node_coordinate.node
+
+                # if it's a dict_key, do nothing here, we'll transform it in _transform_dict_keys_to_ids
+                if isinstance(node, CommentedMap):
+                    continue
+
+                # list of principals -> normalize to *_ids list
+                if isinstance(node, list):
+                    mapped_values = [get_id_from_name_function(value) for value in node]
+                    if to_key in parent and isinstance(parent[to_key], list):
+                        mapped_values = parent[to_key] + mapped_values
+                    parent[to_key] = self._dedupe(mapped_values)
+                    del parent[from_key]
+                    continue
+
+                # single principal value -> normalize to single *_id
+                if to_key in parent:
+                    # numeric id already present, just remove textual key
+                    del parent[from_key]
+                    continue
+
+                parent[to_key] = get_id_from_name_function(node)
+                del parent[from_key]
+        except YAMLPathException as e:
+            # Failed to find any keys on the path, which could be perfectly valid or could be the result of malformed
+            # YAML, so we should debug log it out for users
+            # Malformed YAML example:
+            # users:
+            # my-name:
+            #  access-level: owner
+            #
+            # instead of:
+            # users:
+            #   my-name:
+            #     access-level: owner
+            debug(f"YAMLPathException while transforming principals to IDs for path '{path}': {e}")
+            pass
+
+    @staticmethod
+    def _transform_dict_keys_to_ids(processor, path: str, id_key: str, lookup):
+        """Adds an id field to a dictionary key where the key is a name string.
+
+        For example, transforms this:
+
+        group_members:
+           users:
+              some-user:
+                 access_level: 40
+
+        Into:
+           group_members:
+           users:
+              some-user:
+                 access_level: 40
+                 user_id: 123
+        """
+        try:
+            for node_coordinate in processor.get_nodes(path, mustexist=True):
+                node = node_coordinate.node
+                if not isinstance(node, (dict, CommentedMap)):
+                    continue
+                if id_key in node:
+                    continue
+                key = str(node_coordinate.parentref)
+                node[id_key] = lookup(key)
+        except YAMLPathException as e:
+            debug(f"YAMLPathException while transforming dict keys to IDs for path '{path}': {e}")
+            pass

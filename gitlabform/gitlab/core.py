@@ -138,18 +138,6 @@ class GitLabCore:
         return not self.is_version_at_least(max_version)
 
     @functools.lru_cache()
-    def _get_user_id(self, username: str) -> int:
-        users = self._make_requests_to_api("users?username=%s", username, "GET")
-
-        # this API endpoint is for lookup, not search, so 'username' has to be full and exact username
-        # also it's not possible to get more than 1 user as a result
-
-        if len(users) == 0:
-            raise NotFoundException("No users found when searching for username '%s'" % username)
-
-        return int(users[0]["id"])
-
-    @functools.lru_cache()
     def _get_group_id(self, path) -> int:
         group = self._make_requests_to_api("groups/%s", path, "GET")
         return int(group["id"])
