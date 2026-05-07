@@ -19,6 +19,10 @@ class MembersProcessor(AbstractProcessor):
 
         groups = configuration.get("members|groups", {})
 
+        # We define that users must be key-ed by Username rather than id e.g.:
+        # members:
+        #   users:
+        #     user-name:
         users = configuration.get("members|users", {})
 
         if not groups and not users and not enforce_members:
@@ -83,20 +87,23 @@ class MembersProcessor(AbstractProcessor):
     ):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
 
-        current_members = self._get_members_from_project(project)
+        users_in_gitlab_by_lowercase_name = self._get_members_from_project_by_lowercase_username(project)
 
         if users:
             info("Processing users as members...")
 
-            for user in users:
-                info(f"Processing user '{user}'...")
+            for username in users:
+                info(f"Processing user '{username}'...")
 
-                # user_id is pre-resolved by PrincipalIdsTransformer
-                user_id = users[user]["user_id"]
+                # PrincipalIdsTransformer adds the user_id under the username key so we can get it from the config
+                # without needing to do an extra API call here
+                user_id = users[username]["user_id"]
 
-                expires_at = users[user]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[user] else None
-                access_level = users[user]["access_level"] if "access_level" in users[user] else None
-                member_role_id_or_name = users[user]["member_role"] if "member_role" in users[user] else None
+                expires_at = (
+                    users[username]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[username] else None
+                )
+                access_level = users[username]["access_level"] if "access_level" in users[username] else None
+                member_role_id_or_name = users[username]["member_role"] if "member_role" in users[username] else None
                 if member_role_id_or_name:
                     group_name_and_path = project.namespace["full_path"]
                     member_role_id = self.gl.get_member_role_id_cached(member_role_id_or_name, group_name_and_path)
@@ -107,10 +114,10 @@ class MembersProcessor(AbstractProcessor):
                 # To make sure that the user hasn't been added in a different
                 # case, we enforce that the username is always in lowercase for
                 # checks.
-                common_username = user.lower()
+                lowercase_username = username.lower()
 
-                if common_username in current_members:
-                    current_member = current_members[common_username]
+                if lowercase_username in users_in_gitlab_by_lowercase_name:
+                    current_member = users_in_gitlab_by_lowercase_name[lowercase_username]
                     if hasattr(current_member, "member_role"):
                         member_role_id_before = current_member.member_role["id"]
                     else:
@@ -120,11 +127,13 @@ class MembersProcessor(AbstractProcessor):
                         and access_level == current_member.access_level
                         and member_role_id == member_role_id_before
                     ):
-                        info(f"Nothing to change for user '{common_username}' - same config now as to set.")
-                        info(f"Current settings for '{common_username}' are: {current_members[common_username]}")
+                        info(f"Nothing to change for user '{lowercase_username}' - same config now as to set.")
+                        info(
+                            f"Current settings for '{lowercase_username}' are: {users_in_gitlab_by_lowercase_name[lowercase_username]}"
+                        )
                     else:
                         info(
-                            f"Editing user '{common_username}' membership to change their access level or expires at",
+                            f"Editing user '{lowercase_username}' membership to change their access level or expires at",
                         )
 
                         project_member = project.members.get(id=user_id)
@@ -136,7 +145,7 @@ class MembersProcessor(AbstractProcessor):
 
                 else:
                     info(
-                        f"Adding user '{common_username}' who previously was not a member.",
+                        f"Adding user '{lowercase_username}' who previously was not a member.",
                     )
                     create_data = {
                         "user_id": user_id,
@@ -155,7 +164,7 @@ class MembersProcessor(AbstractProcessor):
             info("Enforcing Project members")
             # Enforce that all usernames are lowercase for comparisons.
             users_in_config = [username.lower() for username in users.keys()]
-            users_in_gitlab = current_members.keys()
+            users_in_gitlab = users_in_gitlab_by_lowercase_name.keys()
             users_not_in_config = set(users_in_gitlab) - set(users_in_config)
             for user_not_in_config in users_not_in_config:
                 info(f"Removing user '{user_not_in_config}' that is not configured to be a member.")
@@ -185,7 +194,7 @@ class MembersProcessor(AbstractProcessor):
             info("Not enforcing user members.")
 
     @staticmethod
-    def _get_members_from_project(project):
+    def _get_members_from_project_by_lowercase_username(project):
         # Only get direct members from Python Gitlab (matches previous implementation)
         # https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#id14
         project_members = project.members.list(iterator=True)

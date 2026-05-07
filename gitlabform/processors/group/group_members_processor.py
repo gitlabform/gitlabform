@@ -195,7 +195,7 @@ class GroupMembersProcessor(AbstractProcessor):
 
                     lower_case_username = username.lower()
 
-                    # PrincipalIdsTransformer adds the user_id under the username key so we can get it from there
+                    # PrincipalIdsTransformer adds the user_id under the username key so we can get it from the config
                     # without needing to do an extra API call here
                     user_id = usernames_in_config[username]["user_id"]
 
