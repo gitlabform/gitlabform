@@ -19,12 +19,17 @@ class GroupMembersProcessor(AbstractProcessor):
 
         enforce_group_members = configuration.get("group_members|enforce", False)
 
+        # We define that Group_Member users must be key-ed by Username rather than id e.g.:
+        # group_members:
+        #   users:
+        #     user-name:
+
         (
             groups_to_set_by_group_path,
-            users_to_set_by_username,
-        ) = self._get_groups_and_users_to_set(configuration)
+            usernames_in_config,
+        ) = self._get_groups_and_users_from_config(configuration)
 
-        if enforce_group_members and not groups_to_set_by_group_path and not users_to_set_by_username:
+        if enforce_group_members and not groups_to_set_by_group_path and not usernames_in_config:
             critical(
                 "Group members configuration section has to contain"
                 " some 'users' or 'groups' defined as Owners,"
@@ -37,28 +42,28 @@ class GroupMembersProcessor(AbstractProcessor):
         self._process_groups(group, groups_to_set_by_group_path, enforce_group_members)
 
         self._process_users(
-            users_to_set_by_username,
+            usernames_in_config,
             enforce_group_members,
             keep_bots,
             group,
         )
 
     @staticmethod
-    def _get_groups_and_users_to_set(configuration: dict) -> Tuple[dict, dict]:
+    def _get_groups_and_users_from_config(configuration: dict) -> Tuple[dict, dict]:
         groups_to_set_by_group_path = configuration.get("group_members|groups", {})
 
-        users_to_set_by_username = configuration.get("group_members", {})
-        if users_to_set_by_username:
+        users_in_config = configuration.get("group_members", {})
+        if users_in_config:
             proper_users_to_set_by_username = configuration.get("group_members|users", {})
             if proper_users_to_set_by_username:
-                users_to_set_by_username = proper_users_to_set_by_username
-            else:
-                users_to_set_by_username.pop("enforce", None)
-                users_to_set_by_username.pop("users", None)
-                users_to_set_by_username.pop("groups", None)
-                users_to_set_by_username.pop("keep_bots", None)
+                return groups_to_set_by_group_path, proper_users_to_set_by_username
 
-        return groups_to_set_by_group_path, users_to_set_by_username
+            users_in_config.pop("enforce", None)
+            users_in_config.pop("users", None)
+            users_in_config.pop("groups", None)
+            users_in_config.pop("keep_bots", None)
+
+        return groups_to_set_by_group_path, users_in_config
 
     def _process_groups(
         self,
@@ -145,23 +150,21 @@ class GroupMembersProcessor(AbstractProcessor):
 
     def _process_users(
         self,
-        users_to_set_by_username: dict,
+        usernames_in_config: dict,
         enforce_group_members: bool,
         keep_bots: bool,
         group: Group,
     ):
-        # group users before by username
-        # (note: we DON'T get inherited users as we don't manage them at this level anyway)
-        users_before = self.get_group_members(group)
+        users_in_gitlab_by_lowercase_name = self.get_group_members_by_lowercase_name(group)
 
-        info("Group members BEFORE: %s", users_before.keys())
+        info("Group members BEFORE: %s", users_in_gitlab_by_lowercase_name.keys())
 
-        if users_to_set_by_username:
+        if usernames_in_config:
             # group users to set by access level
             users_to_set_by_access_level: Dict[int, list] = dict()
-            for user in users_to_set_by_username:
-                access_level = users_to_set_by_username[user]["access_level"]
-                users_to_set_by_access_level.setdefault(access_level, []).append(user)
+            for username in usernames_in_config:
+                access_level = usernames_in_config[username]["access_level"]
+                users_to_set_by_access_level.setdefault(access_level, []).append(username)
 
             # we HAVE TO start configuring access from the highest access level - in case of groups this is Owner
             # - to ensure that we won't end up with no Owner in a group
@@ -170,17 +173,17 @@ class GroupMembersProcessor(AbstractProcessor):
                     users_to_set_by_access_level[level] if level in users_to_set_by_access_level else []
                 )
 
-                for user in users_to_set_with_this_level:
-                    access_level_to_set = users_to_set_by_username[user]["access_level"]
+                for username in users_to_set_with_this_level:
+                    access_level_to_set = usernames_in_config[username]["access_level"]
                     expires_at_to_set = (
-                        users_to_set_by_username[user]["expires_at"]
-                        if "expires_at" in users_to_set_by_username[user]
+                        usernames_in_config[username]["expires_at"]
+                        if "expires_at" in usernames_in_config[username]
                         else None
                     )
 
                     member_role_id_or_name = (
-                        users_to_set_by_username[user]["member_role"]
-                        if "member_role" in users_to_set_by_username[user]
+                        usernames_in_config[username]["member_role"]
+                        if "member_role" in usernames_in_config[username]
                         else None
                     )
                     if member_role_id_or_name:
@@ -190,19 +193,20 @@ class GroupMembersProcessor(AbstractProcessor):
                     else:
                         member_role_id_to_set = None
 
-                    common_username = user.lower()
+                    lower_case_username = username.lower()
 
-                    # user_id is pre-resolved by PrincipalIdsTransformer
-                    user_id = users_to_set_by_username[user]["user_id"]
+                    # PrincipalIdsTransformer adds the user_id under the username key so we can get it from there
+                    # without needing to do an extra API call here
+                    user_id = usernames_in_config[username]["user_id"]
 
-                    if common_username in users_before:
+                    if lower_case_username in users_in_gitlab_by_lowercase_name:
                         group_member: GroupMember = group.members.get(user_id)
 
-                        user_before = users_before[common_username]
-                        access_level_before = user_before.access_level
-                        expires_at_before = user_before.expires_at
-                        if hasattr(user_before, "member_role"):
-                            member_role_id_before = user_before.member_role["id"]
+                        user_in_gitlab = users_in_gitlab_by_lowercase_name[lower_case_username]
+                        access_level_before = user_in_gitlab.access_level
+                        expires_at_before = user_in_gitlab.expires_at
+                        if hasattr(user_in_gitlab, "member_role"):
+                            member_role_id_before = user_in_gitlab.member_role["id"]
                         else:
                             member_role_id_before = None
 
@@ -213,11 +217,11 @@ class GroupMembersProcessor(AbstractProcessor):
                         ):
                             info(
                                 "Nothing to change for user '%s' - same config now as to set.",
-                                common_username,
+                                lower_case_username,
                             )
                         else:
                             info(
-                                f"Editing user {common_username} to change their access level to {access_level_to_set},"
+                                f"Editing user {lower_case_username} to change their access level to {access_level_to_set},"
                                 f" expires at to {expires_at_to_set},"
                                 f" and member_role_id to {member_role_id_to_set}."
                             )
@@ -228,11 +232,11 @@ class GroupMembersProcessor(AbstractProcessor):
                             try:
                                 group_member.save()
                             except GitlabError as e:
-                                error(f"Could not save user {common_username}, error: {e.error_message}")
+                                error(f"Could not save user {lower_case_username}, error: {e.error_message}")
                                 raise e
 
                     else:
-                        info(f"Adding user {common_username} who previously was not a member.")
+                        info(f"Adding user {lower_case_username} who previously was not a member.")
                         group.members.create(
                             {
                                 "user_id": user_id,
@@ -245,30 +249,30 @@ class GroupMembersProcessor(AbstractProcessor):
         if enforce_group_members:
             # remove users not configured explicitly
             # note: only direct members are removed - inherited are left
-            users_not_configured = set(users_before.keys()) - set(
-                [username.lower() for username in users_to_set_by_username.keys()]
+            users_not_configured = set(users_in_gitlab_by_lowercase_name.keys()) - set(
+                [username.lower() for username in usernames_in_config.keys()]
             )
-            for user in users_not_configured:
-                info(f"Removing user {user} who is not configured to be a member.")
+            for username in users_not_configured:
+                info(f"Removing user {username} who is not configured to be a member.")
 
-                gl_user: User | None = self.gl.get_user_by_username_cached(user)
+                gl_user: User | None = self.gl.get_user_by_username_cached(username)
 
                 if gl_user is None:
                     # User does not exist an instance level but is for whatever reason present on a Group/Project
                     # We should raise error into Logs but not prevent the rest of GitLabForm from executing
                     # This error is more likely to be prevalent in Dedicated instances; it is unlikely for a User to
                     # be completely deleted from gitlab.com
-                    error(f"Could not find User '{user}' on the Instance so can not remove User from Group")
+                    error(f"Could not find User '{username}' on the Instance so can not remove User from Group")
                     continue
 
                 if keep_bots and gl_user.bot:
-                    info(f"Will not remove bot user '{user}' as the 'keep_bots' option is true.")
+                    info(f"Will not remove bot user '{username}' as the 'keep_bots' option is true.")
                     continue
 
                 try:
                     group.members.delete(gl_user.id)
                 except GitlabDeleteError as delete_error:
-                    error(f"Member '{user}' could not be deleted: {delete_error}")
+                    error(f"Member '{username}' could not be deleted: {delete_error}")
                     raise delete_error
 
         else:
@@ -277,7 +281,7 @@ class GroupMembersProcessor(AbstractProcessor):
         info(f"Group members AFTER: {group.members.list(get_all=True)}")
 
     @staticmethod
-    def get_group_members(group) -> dict:
+    def get_group_members_by_lowercase_name(group) -> dict:
         members = group.members.list(get_all=True)
         users = {}
         for member in members:
