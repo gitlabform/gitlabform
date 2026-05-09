@@ -1,6 +1,6 @@
 # Protected branches
 
-This section purpose is to manage the [protected branches](https://docs.gitlab.com/ee/user/project/protected_branches.html).
+This section purpose is to manage the [protected branches](https://docs.gitlab.com/user/project/repository/branches/protected/).
 
 ## Community Edition vs Enterprise Edition
 Note: that Gitlab Community Edition does not support setting `unprotect_access_level` and will always return `None` from the API, and there is also no way to manually set this through the UI.
@@ -18,13 +18,13 @@ In later versions of Gitlab EE, GitLabForm will modify the Branch Protection rul
 The key names here may be:
 
 * exact branch names,
-* [branch names using wildcards](https://docs.gitlab.com/ee/user/project/protected_branches.html#configure-multiple-protected-branches-by-using-a-wildcard),
+* [branch names using wildcards](https://docs.gitlab.com/user/project/repository/branches/protected/#use-wildcard-rules),
 
 The values:
 
 * have to contain a `protected` key set to `true` or `false`,
 * if `protected: true`, then you can configure the protection using:
-    * `push_access_level`, `merge_access_level`, `unprotect_access_level` keys, each set to one of the [valid access levels](https://docs.gitlab.com/ee/api/members.html#valid-access-levels) that will be the minimal access level required for a given action,
+    * `push_access_level`, `merge_access_level`, `unprotect_access_level` keys, each set to one of the [valid access levels](https://docs.gitlab.com/api/members/#valid-access-levels) that will be the minimal access level required for a given action,
     * (optional) `allow_force_push` key set to `true` or `false`,
 
 Example:
@@ -77,7 +77,7 @@ In GitLab Premium instances you can also use the following extra keys under each
     * `user_id` set to user id,
     * `group` set to group name (path),
     * `group_id` set to group id,
-    * `access_level` set to [valid access level](https://docs.gitlab.com/ee/api/members.html#valid-access-levels)
+    * `access_level` set to [valid access level](https://docs.gitlab.com/api/members/#valid-access-levels)
 
 Note that you should NOT use both `*_access_level` and `allowed_to_*` keys - the result could be ambiguous, please choose the first or the second set.
 
