@@ -4,7 +4,7 @@ import time
 from gitlab import GitlabGetError
 
 from gitlabform.gitlab import AccessLevel
-from tests.acceptance import get_only_branch_access_levels, run_gitlabform
+from tests.acceptance import get_only_branch_access_levels, run_gitlabform, get_random_name
 
 
 @pytest.mark.ce
@@ -401,3 +401,54 @@ class TestBranches:
             assert other_branch_unprotect_access_level is AccessLevel.MAINTAINER.value
         else:
             assert other_branch_unprotect_access_level is None
+
+    def test__can_protect_branches_with_wildcard(self, project_for_function, branch_for_function):
+        # Setup Test
+
+        ### Test-config:
+        set_file_protected_branches = f"""
+        protected branch: &protected_branch
+          allow_force_push: false
+          code_owner_approval_required: true
+          merge_access_level: developer
+          protected: true
+          push_access_level: maintainer
+          unprotect_access_level: maintainer
+
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            branches:
+              main: *protected_branch
+              bugfix/*: *protected_branch
+        """
+
+        ### Make sure "main" exists on project
+        main_branch_name: str = "main"
+        assert project_for_function.branches.get(main_branch_name) is not None
+
+        ### Make sure "branch_for_function" exists on project
+        assert project_for_function.branches.get(branch_for_function) is not None
+
+        ### Add a "bugfix/some-branch" and a "bugfix/other-fix" to project
+        bug_fix_branch_name_1 = f"bugfix/{get_random_name("branch")}"
+        bug_fix_branch_name_2 = f"bugfix/{get_random_name("branch")}"
+
+        project_for_function.branches.create({"branch": bug_fix_branch_name_1, "ref": "main"})
+        project_for_function.branches.create({"branch": bug_fix_branch_name_2, "ref": "main"})
+
+        time.sleep(5)
+        # Wait a bit to make sure GitLab has asynchronously created the branches before we run GitLabForm
+
+        # Run Test
+        run_gitlabform(set_file_protected_branches, project_for_function.path_with_namespace)
+
+        # Assert correct changes are applied
+        ### Check Main branch is protected
+        assert project_for_function.branches.get(main_branch_name).protected is True
+
+        ### Check both Bugfix branches are protected
+        assert project_for_function.branches.get(bug_fix_branch_name_1).protected is True
+        assert project_for_function.branches.get(bug_fix_branch_name_2).protected is True
+
+        ### Check branch_for_function is not protected
+        assert project_for_function.branches.get(branch_for_function).protected is False
