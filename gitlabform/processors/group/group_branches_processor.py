@@ -34,15 +34,11 @@ class GroupBranchesProcessor(AbstractProcessor):
                 sys.exit(EXIT_INVALID_INPUT)
 
             for key in ("allowed_to_push", "allowed_to_merge", "allowed_to_unprotect"):
-                if key in branch_config:
-                    for item in branch_config[key]:
-                        if isinstance(item, dict) and (
-                            "user" in item or "user_id" in item or "group" in item or "group_id" in item
-                        ):
-                            warning(
-                                f"Group protected branches do not support individual users or groups in '{key}' for branch '{branch}'. "
-                                f"Only access_level is supported. The user/group entry will be ignored by GitLab."
-                            )
+                if BranchProtection.branch_protection_config_contains_user_or_group(branch_config, key):
+                    warning(
+                        f"Group protected branches do not support individual users or groups in '{key}' for branch '{branch}'. "
+                        f"Only access_level is supported. The user/group entry will be ignored by GitLab."
+                    )
 
         return True
 

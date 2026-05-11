@@ -232,6 +232,21 @@ class BranchProtection:
         return False
 
     @staticmethod
+    def branch_protection_config_contains_user_or_group(branch_config: dict, key: str) -> bool:
+        """
+        Check if any item under branch_config[key] specifies a user or group
+        (via "user", "user_id", "group", or "group_id").
+        """
+        if key not in branch_config:
+            return False
+        for item in branch_config[key]:
+            if isinstance(item, dict) and (
+                "user" in item or "user_id" in item or "group" in item or "group_id" in item
+            ):
+                return True
+        return False
+
+    @staticmethod
     def get_list_attribute(protected_branch: RESTObject, attribute_name: str) -> list[Any]:
         """
         Gets list attribute such as unprotect_access_levels, merge_access_levels, push_access_levels, etc.
