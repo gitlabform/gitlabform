@@ -8,7 +8,7 @@ from typing import List
 
 from jinja2 import Environment, FileSystemLoader
 from gitlab import GitlabGetError, GitlabUpdateError
-from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
+from gitlab.v4.objects import Project, ProjectFile, ProjectBranch, ProjectProtectedBranch
 from gitlab.base import RESTObject
 
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
@@ -35,7 +35,7 @@ class FilesProcessor(AbstractProcessor):
                 continue
 
             config_target_ref = configuration["files"][file]["branches"]
-            branches_to_update: List[ProjectBranch] = []
+            branches_to_update: List[ProjectBranch | ProjectProtectedBranch] = []
 
             if isinstance(config_target_ref, str):
                 # Target ref could be either 'all' or 'protected'.
