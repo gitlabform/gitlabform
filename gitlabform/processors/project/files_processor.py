@@ -84,7 +84,12 @@ class FilesProcessor(AbstractProcessor):
                     break
 
     def process_branch(
-        self, branch: ProjectBranch, configuration: dict, file: str, project: Project, project_and_group: str
+        self,
+        branch: ProjectBranch | ProjectProtectedBranch,
+        configuration: dict,
+        file: str,
+        project: Project,
+        project_and_group: str,
     ):
         info(f"Processing file '{file}' in branch '{branch.name}'")
 
