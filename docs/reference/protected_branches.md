@@ -25,7 +25,7 @@ Example:
 
 ```yaml
 projects_and_groups:
-  group_1/*:
+  group_1:
     group_branches:
       main:
         protected: true
@@ -37,6 +37,8 @@ projects_and_groups:
         merge_access_level: maintainer
         unprotect_access_level: maintainer
 ```
+
+Note: the configuration is placed directly under the top-level group key (`group_1:`), not under a wildcard (`group_1/*:`). Group-level protected branches apply only to the top-level group itself, so the wildcard syntax (which means "apply to all subgroups and projects") is not appropriate here.
 
 ## Project-level protected branches
 

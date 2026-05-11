@@ -12,7 +12,7 @@ class TestGroupBranches:
     def test__create_group_protected_branch(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
+          {group.full_path}:
             group_branches:
               main:
                 protected: true
@@ -42,7 +42,7 @@ class TestGroupBranches:
     def test__update_group_protected_branch(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
+          {group.full_path}:
             group_branches:
               main:
                 protected: true
@@ -71,7 +71,7 @@ class TestGroupBranches:
     def test__unprotect_group_branch(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
+          {group.full_path}:
             group_branches:
               main:
                 protected: false
@@ -85,7 +85,7 @@ class TestGroupBranches:
     def test__group_branch_protection_with_allow_force_push(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
+          {group.full_path}:
             group_branches:
               main:
                 protected: true
@@ -101,7 +101,7 @@ class TestGroupBranches:
     def test__group_branch_protection_idempotency(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
+          {group.full_path}:
             group_branches:
               main:
                 protected: true
@@ -133,7 +133,7 @@ class TestGroupBranches:
     def test__group_branch_protection_skips_subgroups(self, group, subgroup):
         config = f"""
         projects_and_groups:
-          {group.full_path}/*:
+          {group.full_path}:
             group_branches:
               main:
                 protected: true
