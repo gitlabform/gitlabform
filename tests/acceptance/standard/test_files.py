@@ -531,8 +531,11 @@ class TestFiles:
         ### Check branch_for_function is not protected and does not have CODEOWNERS added
         branch = project_for_function.branches.get(branch_for_function)
         assert branch.protected is False
-        file_on_branch = project_for_function.files.get(ref=branch_for_function, file_path="CODEOWNERS")
-        assert file_on_branch is None
+        with pytest.raises(GitlabGetError) as get_exception:
+            file_on_branch = project_for_function.files.get(ref=branch_for_function, file_path="CODEOWNERS")
+            assert file_on_branch is None
+        assert get_exception is not None
+        assert "File Not Found" in get_exception.value.error_message
 
     @staticmethod
     def validate_branch_is_protected_and_contains_file(
