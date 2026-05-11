@@ -46,11 +46,11 @@ class FilesProcessor(AbstractProcessor):
                     branches_to_update.extend(project.protectedbranches.list(get_all=True, lazy=True))
             elif isinstance(config_target_ref, list):
                 # Get a list of branches from the config that should be updated.
-                for branch_name in config_target_ref:
+                for ref in config_target_ref:
                     try:
-                        branches_to_update.append(project.branches.get(branch_name))
+                        branches_to_update.append(project.branches.get(ref))
                     except GitlabGetError:
-                        message = f"! Branch '{branch_name}' not found, not processing file '{file}' in it"
+                        message = f"! Branch '{ref}' not found, not processing file '{file}' in it"
                         if self.strict:
                             critical(message)
                             sys.exit(EXIT_INVALID_INPUT)
@@ -64,7 +64,7 @@ class FilesProcessor(AbstractProcessor):
             )
 
             for branch in branches_to_update:
-                process_only_first: bool = configuration.get("files|" + file + "|only_first_branch")
+                process_only_first: bool = configuration.get("files|" + file + "|only_first_branch", False)
 
                 branch_name: str = branch.name
                 if branch_name.endswith("/*"):
