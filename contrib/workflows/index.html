@@ -1491,6 +1491,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pipeline-trigger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Trigger
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#license-management" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1526,8 +1537,12 @@
 us by GitLab's customer success team.</p>
 <p>These tests are run in an GitHub Environment, requiring approval from a maintainer, and the licenses assigned to this
 project's maintainers are stored as GitHub Repository Secrets to prevent misuse.</p>
-<p>We use <code>pull_request_target</code> as the event to trigger PR pipelines - which has a downside that we can't test our 
-pipelines until merged into main, but allows us to pass License Secrets to Forks more easily.</p>
+<h2 id="pipeline-trigger">Pipeline Trigger<a class="headerlink" href="#pipeline-trigger" title="Permanent link">&para;</a></h2>
+<p>We use <code>pull_request_target</code> as the event to trigger PR pipelines on Forks- which has a downside that we can't test 
+pipeline changes submitted from forks until merged into main, but allows us to pass License Secrets to Forks more easily.</p>
+<p>We use <code>pull_request</code> as the event to trigger PR pipelines on the main repository, which allows us to test pipeline 
+changes submitted before merging into main, with a Branch Protection rule in place to lock branch pushes to maintainers
+only on the main repository.</p>
 <h2 id="license-management">License management<a class="headerlink" href="#license-management" title="Permanent link">&para;</a></h2>
 <p>Requesting new Premium/Ultimate Licenses is done via GitLab's Contribution to EE process <a href="https://handbook.gitlab.com/handbook/marketing/developer-relations/contributor-success/community-contributors-workflows/#contributing-to-the-gitlab-enterprise-edition-ee">here</a>.</p>
 <p>As a Maintainer, when you receive a new license key, please add/update it to the GitHub Repository Secrets.</p>

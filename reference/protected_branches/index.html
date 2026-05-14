@@ -1664,7 +1664,7 @@
 
 
 <h1 id="protected-branches">Protected branches<a class="headerlink" href="#protected-branches" title="Permanent link">&para;</a></h1>
-<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/user/project/protected_branches.html">protected branches</a>.</p>
+<p>This section purpose is to manage the <a href="https://docs.gitlab.com/user/project/repository/branches/protected/">protected branches</a>.</p>
 <h2 id="community-edition-vs-enterprise-edition">Community Edition vs Enterprise Edition<a class="headerlink" href="#community-edition-vs-enterprise-edition" title="Permanent link">&para;</a></h2>
 <p>Note: that Gitlab Community Edition does not support setting <code>unprotect_access_level</code> and will always return <code>None</code> from the API, and there is also no way to manually set this through the UI.</p>
 <h3 id="functionality-differences">Functionality Differences<a class="headerlink" href="#functionality-differences" title="Permanent link">&para;</a></h3>
@@ -1678,13 +1678,13 @@
 <p>The key names here may be:</p>
 <ul>
 <li>exact branch names,</li>
-<li><a href="https://docs.gitlab.com/ee/user/project/protected_branches.html#configure-multiple-protected-branches-by-using-a-wildcard">branch names using wildcards</a>,</li>
+<li><a href="https://docs.gitlab.com/user/project/repository/branches/protected/#use-wildcard-rules">branch names using wildcards</a>,</li>
 </ul>
 <p>The values:</p>
 <ul>
 <li>have to contain a <code>protected</code> key set to <code>true</code> or <code>false</code>,</li>
 <li>if <code>protected: true</code>, then you can configure the protection using:<ul>
-<li><code>push_access_level</code>, <code>merge_access_level</code>, <code>unprotect_access_level</code> keys, each set to one of the <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access levels</a> that will be the minimal access level required for a given action,</li>
+<li><code>push_access_level</code>, <code>merge_access_level</code>, <code>unprotect_access_level</code> keys, each set to one of the <a href="https://docs.gitlab.com/api/members/#valid-access-levels">valid access levels</a> that will be the minimal access level required for a given action,</li>
 <li>(optional) <code>allow_force_push</code> key set to <code>true</code> or <code>false</code>,</li>
 </ul>
 </li>
@@ -1735,7 +1735,7 @@
 <li><code>user_id</code> set to user id,</li>
 <li><code>group</code> set to group name (path),</li>
 <li><code>group_id</code> set to group id,</li>
-<li><code>access_level</code> set to <a href="https://docs.gitlab.com/ee/api/members.html#valid-access-levels">valid access level</a></li>
+<li><code>access_level</code> set to <a href="https://docs.gitlab.com/api/members/#valid-access-levels">valid access level</a></li>
 </ul>
 </li>
 </ul>
