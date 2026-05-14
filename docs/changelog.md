@@ -5,6 +5,23 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+## 5.4.0
+
+### Build
+
+* migrate GitLabForm to [uv](https://docs.astral.sh/uv/) and add a dev toolkit [#1257](https://github.com/gitlabform/gitlabform/pull/1257). ([amimas](https://github.com/amimas))
+* updated github workflows and deduplicated actions [#1249](https://github.com/gitlabform/gitlabform/pull/1249). ([TimKnight01](https://github.com/TimKnight01))
+
+### Documentation
+
+* fix broken documentation links in protected_branches [#1276](https://github.com/gitlabform/gitlabform/pull/1276). ([ktdreyer](https://github.com/ktdreyer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 5.3.0
 
 ### Features
