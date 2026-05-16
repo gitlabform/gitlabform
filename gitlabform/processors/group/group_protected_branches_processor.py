@@ -12,10 +12,10 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.branch_protection import BranchProtection
 
 
-class GroupBranchesProcessor(AbstractProcessor):
+class GroupProtectedBranchesProcessor(AbstractProcessor):
 
     def __init__(self, gitlab: GitLab, strict: bool):
-        super().__init__("group_branches", gitlab)
+        super().__init__("group_protected_branches", gitlab)
         self.strict = strict
 
         self.custom_diff_analyzers["merge_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
@@ -24,13 +24,15 @@ class GroupBranchesProcessor(AbstractProcessor):
 
     def _can_proceed(self, group: str, configuration: dict):
         if "/" in group:
-            debug(f"Skipping group_branches for '{group}' - only supported for top-level groups")
+            debug(f"Skipping group_protected_branches for '{group}' - only supported for top-level groups")
             return False
 
-        for branch in sorted(configuration["group_branches"]):
-            branch_config = configuration["group_branches"][branch]
+        for branch in sorted(configuration["group_protected_branches"]):
+            branch_config = configuration["group_protected_branches"][branch]
             if branch_config.get("protected") is None:
-                critical(f"The Protected key is mandatory in group_branches configuration, fix {branch} YAML config")
+                critical(
+                    f"The Protected key is mandatory in group_protected_branches configuration, fix {branch} YAML config"
+                )
                 sys.exit(EXIT_INVALID_INPUT)
 
             for key in ("allowed_to_push", "allowed_to_merge", "allowed_to_unprotect"):
@@ -46,8 +48,8 @@ class GroupBranchesProcessor(AbstractProcessor):
 
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
 
-        for branch in sorted(configuration["group_branches"]):
-            branch_configuration: dict = configuration["group_branches"][branch]
+        for branch in sorted(configuration["group_protected_branches"]):
+            branch_configuration: dict = configuration["group_protected_branches"][branch]
 
             self.process_branch_protection(gitlab_group, branch, branch_configuration)
 

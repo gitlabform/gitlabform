@@ -4,7 +4,7 @@ This section purpose is to manage the [protected branches](https://docs.gitlab.c
 
 GitLabForm supports two different ways to manage branch protection:
 
-* **Group-level protected branches** (`group_branches`) — Uses GitLab's [Group Protected Branches API](https://docs.gitlab.com/ee/api/group_protected_branches.html) to set branch protection rules that are inherited by all projects in a top-level group. Requires GitLab Premium.
+* **Group-level protected branches** (`group_protected_branches`) — Uses GitLab's [Group Protected Branches API](https://docs.gitlab.com/ee/api/group_protected_branches.html) to set branch protection rules that are inherited by all projects in a top-level group. Requires GitLab Premium.
 * **Project-level protected branches** (`branches`) — Sets branch protection rules on individual projects. When configured under a group wildcard (e.g. `group/*`), GitLabForm applies the rules to each project separately. Works with all GitLab tiers.
 
 ## Group-level protected branches
@@ -17,7 +17,7 @@ This section purpose is to manage the [group-level protected branches](https://d
 
 !!! warning
 
-    Protected branch settings for groups are restricted to top-level groups only. (This is a GitLab limitation, not GitLabForm's.)
+    Protected branch settings for groups are restricted to top-level groups only. (This is a GitLab limitation, not GitLabForm's.) GitLabForm applies this section only to the top-level group; when the configuration is inherited by subgroups via the `group_1/*` wildcard, GitLabForm skips the subgroups.
 
     Group protected branches only support access levels. Individual users and groups cannot be specified. (This is a GitLab API limitation).
 
@@ -25,8 +25,8 @@ Example:
 
 ```yaml
 projects_and_groups:
-  group_1:
-    group_branches:
+  group_1/*:
+    group_protected_branches:
       main:
         protected: true
         push_access_level: no access
@@ -37,8 +37,6 @@ projects_and_groups:
         merge_access_level: maintainer
         unprotect_access_level: maintainer
 ```
-
-Note: the configuration is placed directly under the top-level group key (`group_1:`), not under a wildcard (`group_1/*:`). Group-level protected branches apply only to the top-level group itself, so the wildcard syntax (which means "apply to all subgroups and projects") is not appropriate here.
 
 ## Project-level protected branches
 

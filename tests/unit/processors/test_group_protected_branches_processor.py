@@ -3,19 +3,19 @@ from unittest.mock import MagicMock
 import pytest
 from gitlab import GitlabGetError, GitlabDeleteError, GitlabOperationError
 
-from gitlabform.processors.group.group_branches_processor import GroupBranchesProcessor
+from gitlabform.processors.group.group_protected_branches_processor import GroupProtectedBranchesProcessor
 from gitlabform.processors.util.branch_protection import BranchProtection
 
 
-class TestGroupBranchesProcessor:
+class TestGroupProtectedBranchesProcessor:
     def setup_method(self):
         self.gitlab = MagicMock()
         self.strict = True
-        self.processor = GroupBranchesProcessor(self.gitlab, self.strict)
+        self.processor = GroupProtectedBranchesProcessor(self.gitlab, self.strict)
 
     def test_can_proceed_valid_config(self):
         configuration = {
-            "group_branches": {
+            "group_protected_branches": {
                 "main": {"protected": True},
             }
         }
@@ -23,7 +23,7 @@ class TestGroupBranchesProcessor:
 
     def test_can_proceed_missing_protected_key(self):
         configuration = {
-            "group_branches": {
+            "group_protected_branches": {
                 "main": {"push_access_level": 0},
             }
         }
@@ -32,7 +32,7 @@ class TestGroupBranchesProcessor:
 
     def test_can_proceed_warns_on_allowed_to_with_users(self, caplog):
         configuration = {
-            "group_branches": {
+            "group_protected_branches": {
                 "main": {
                     "protected": True,
                     "allowed_to_push": [{"user_id": 42}],
@@ -46,7 +46,7 @@ class TestGroupBranchesProcessor:
 
     def test_can_proceed_warns_on_allowed_to_with_groups(self, caplog):
         configuration = {
-            "group_branches": {
+            "group_protected_branches": {
                 "main": {
                     "protected": True,
                     "allowed_to_merge": [{"group_id": 99}],
@@ -60,7 +60,7 @@ class TestGroupBranchesProcessor:
 
     def test_can_proceed_no_warning_on_allowed_to_with_access_level_only(self, caplog):
         configuration = {
-            "group_branches": {
+            "group_protected_branches": {
                 "main": {
                     "protected": True,
                     "allowed_to_push": [{"access_level": 0}],
@@ -74,7 +74,7 @@ class TestGroupBranchesProcessor:
 
     def test_can_proceed_skips_subgroups(self):
         configuration = {
-            "group_branches": {
+            "group_protected_branches": {
                 "main": {"protected": True, "push_access_level": 0},
             }
         }
@@ -87,7 +87,7 @@ class TestGroupBranchesProcessor:
         group.protectedbranches.get.side_effect = GitlabGetError("not found", 404)
 
         configuration = {
-            "group_branches": {
+            "group_protected_branches": {
                 "main": {"protected": True, "push_access_level": 0},
                 "develop": {"protected": True, "merge_access_level": 30},
             }

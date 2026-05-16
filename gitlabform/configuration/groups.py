@@ -17,19 +17,14 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
 
     def get_groups(self) -> list:
         """
-        :return: sorted list of groups that are EXPLICITLY defined in the config.
-                 Groups can be defined either as "group/*" (config inherited by subgroups
-                 and projects) or as bare "group" (config applies only to the group itself).
+        :return: sorted list of groups that are EXPLICITLY defined in the config
         """
-        groups = set()
+        groups = []
         projects_and_groups = self.get("projects_and_groups")
         for element in projects_and_groups.keys():
             if element.endswith("/*"):
                 # cut off that "/*"
-                groups.add(element[:-2])
-            elif "/" not in element:
-                # bare top-level group key (no "/" means it's not a project or subgroup)
-                groups.add(element)
+                groups.append(element[:-2])
         return sorted(groups)
 
     def is_group_skipped(self, group):
@@ -126,11 +121,6 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         """
         :param group: group/subgroup
         :return: configuration for this group/subgroup or empty dict if not defined,
-                 ignoring the case. Looks up "group/*" first (config inherited by
-                 subgroups and projects), then falls back to bare "group" (config
-                 applies only to the group itself).
+                 ignoring the case
         """
-        config = self._get_case_insensitively(self.get("projects_and_groups"), f"{group}/*")
-        if not config:
-            config = self._get_case_insensitively(self.get("projects_and_groups"), group)
-        return config
+        return self._get_case_insensitively(self.get("projects_and_groups"), f"{group}/*")

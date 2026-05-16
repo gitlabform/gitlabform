@@ -8,12 +8,12 @@ from tests.acceptance import run_gitlabform
 pytestmark = pytest.mark.requires_license
 
 
-class TestGroupBranches:
+class TestGroupProtectedBranches:
     def test__create_group_protected_branch(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}:
-            group_branches:
+          {group.full_path}/*:
+            group_protected_branches:
               main:
                 protected: true
                 push_access_level: {AccessLevel.NO_ACCESS.value}
@@ -42,8 +42,8 @@ class TestGroupBranches:
     def test__update_group_protected_branch(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}:
-            group_branches:
+          {group.full_path}/*:
+            group_protected_branches:
               main:
                 protected: true
                 push_access_level: {AccessLevel.DEVELOPER.value}
@@ -71,8 +71,8 @@ class TestGroupBranches:
     def test__unprotect_group_branch(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}:
-            group_branches:
+          {group.full_path}/*:
+            group_protected_branches:
               main:
                 protected: false
         """
@@ -85,8 +85,8 @@ class TestGroupBranches:
     def test__group_branch_protection_with_allow_force_push(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}:
-            group_branches:
+          {group.full_path}/*:
+            group_protected_branches:
               main:
                 protected: true
                 allow_force_push: true
@@ -101,8 +101,8 @@ class TestGroupBranches:
     def test__group_branch_protection_idempotency(self, group):
         config = f"""
         projects_and_groups:
-          {group.full_path}:
-            group_branches:
+          {group.full_path}/*:
+            group_protected_branches:
               main:
                 protected: true
                 push_access_level: {AccessLevel.NO_ACCESS.value}
@@ -133,8 +133,8 @@ class TestGroupBranches:
     def test__group_branch_protection_skips_subgroups(self, group, subgroup):
         config = f"""
         projects_and_groups:
-          {group.full_path}:
-            group_branches:
+          {group.full_path}/*:
+            group_protected_branches:
               main:
                 protected: true
                 push_access_level: {AccessLevel.NO_ACCESS.value}
