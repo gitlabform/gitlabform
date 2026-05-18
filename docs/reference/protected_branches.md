@@ -38,6 +38,10 @@ projects_and_groups:
         unprotect_access_level: maintainer
 ```
 
+!!! note
+
+    A group-level protected branch also appears under the protected branches list of every project in the group, marked with a lock icon. Inherited rules cannot be edited or removed from the project. Projects can still define their own additional protected branch rules on top of the inherited ones via the project-level [`branches`](#project-level-protected-branches) section.
+
 ## Project-level protected branches
 
 ### Community Edition vs Enterprise Edition
