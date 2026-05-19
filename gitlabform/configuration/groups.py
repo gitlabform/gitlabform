@@ -26,6 +26,10 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
                 # cut off that "/*"
                 group_name = element[:-2]
                 groups.append(group_name)
+            if element.endswith("/"):
+                # cut off that "/"
+                group_name = element[:-1]
+                groups.append(group_name)
         return sorted(groups)
 
     def is_group_skipped(self, group):
@@ -53,6 +57,7 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
             group_config = self._get_effective_subgroup_config(group)
         else:
             group_config = self._get_group_config(group)
+        group_config = self._merge_configs(group_config, self._get_group_config(group, exact=True))
         debug("*Effective* group/subgroup config: %s", to_str(group_config))
 
         if not common_config and group_config:
@@ -118,10 +123,10 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
 
         return effective_config
 
-    def _get_group_config(self, group) -> dict:
+    def _get_group_config(self, group, exact=False) -> dict:
         """
         :param group: group/subgroup
         :return: configuration for this group/subgroup or empty dict if not defined,
                  ignoring the case
         """
-        return self._get_case_insensitively(self.get("projects_and_groups"), f"{group}/*")
+        return self._get_case_insensitively(self.get("projects_and_groups"), f"{group}/{'' if exact else '*'}")
