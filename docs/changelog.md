@@ -5,6 +5,18 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+## 5.5.0
+
+### Features
+
+* added support for group level branch protection settings. Resolves [#1049](https://github.com/gitlabform/gitlabform/issues/1049). [#1251](https://github.com/gitlabform/gitlabform/pull/1251), ([rickbrouwer](https://github.com/rickbrouwer)).
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 5.4.0
 
 ### Build
