@@ -2,7 +2,49 @@
 
 This section purpose is to manage the [protected branches](https://docs.gitlab.com/user/project/repository/branches/protected/).
 
-## Community Edition vs Enterprise Edition
+GitLabForm supports two different ways to manage branch protection:
+
+* **Group-level protected branches** (`group_protected_branches`) — Uses GitLab's [Group Protected Branches API](https://docs.gitlab.com/ee/api/group_protected_branches.html) to set branch protection rules that are inherited by all projects in a top-level group. Requires GitLab Premium.
+* **Project-level protected branches** (`branches`) — Sets branch protection rules on individual projects. When configured under a group wildcard (e.g. `group/*`), GitLabForm applies the rules to each project separately. Works with all GitLab tiers.
+
+## Group-level protected branches
+
+This section purpose is to manage the [group-level protected branches](https://docs.gitlab.com/ee/api/group_protected_branches.html).
+
+!!! info
+
+    This section requires GitLab Premium (paid). (This is a GitLab limitation, not GitLabForm's.)
+
+!!! warning
+
+    Protected branch settings for groups are restricted to top-level groups only. (This is a GitLab limitation, not GitLabForm's.) GitLabForm applies this section only to the top-level group; when the configuration is inherited by subgroups via the `group_1/*` wildcard, GitLabForm skips the subgroups.
+
+    Group protected branches only support access levels. Individual users and groups cannot be specified. (This is a GitLab API limitation).
+
+Example:
+
+```yaml
+projects_and_groups:
+  group_1/*:
+    group_protected_branches:
+      main:
+        protected: true
+        push_access_level: no access
+        merge_access_level: maintainer
+      release/*:
+        protected: true
+        push_access_level: no access
+        merge_access_level: maintainer
+        unprotect_access_level: maintainer
+```
+
+!!! note
+
+    A group-level protected branch also appears under the protected branches list of every project in the group, marked with a lock icon. Inherited rules cannot be edited or removed from the project. Projects can still define their own additional protected branch rules on top of the inherited ones via the project-level [`branches`](#project-level-protected-branches) section.
+
+## Project-level protected branches
+
+### Community Edition vs Enterprise Edition
 Note: that Gitlab Community Edition does not support setting `unprotect_access_level` and will always return `None` from the API, and there is also no way to manually set this through the UI.
 
 ### Functionality Differences
@@ -13,7 +55,7 @@ In Gitlab EE versions <=15.6.0 and Gitlab Community Edition, GitLabForm uses old
 
 In later versions of Gitlab EE, GitLabForm will modify the Branch Protection rules in-place, see the [V4->V5 upgrade notes](../upgrade.md)
 
-## Common features
+### Common features
 
 The key names here may be:
 
@@ -63,7 +105,7 @@ projects_and_groups:
         allow_force_push: true
 ```
 
-## Premium-only features
+### Premium-only features
 
 !!! info
 

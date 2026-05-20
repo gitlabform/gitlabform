@@ -24,8 +24,7 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         for element in projects_and_groups.keys():
             if element.endswith("/*"):
                 # cut off that "/*"
-                group_name = element[:-2]
-                groups.append(group_name)
+                groups.append(element[:-2])
         return sorted(groups)
 
     def is_group_skipped(self, group):
