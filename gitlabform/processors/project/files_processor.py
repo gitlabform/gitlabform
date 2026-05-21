@@ -49,8 +49,7 @@ class FilesProcessor(AbstractProcessor):
                 for ref in config_target_ref:
                     try:
                         if "*" in ref:
-                            branch_regex = ref
-                            wildcard_branches = project.branches.list(get_all=True, regex=branch_regex)
+                            wildcard_branches = project.branches.list(get_all=True, regex=ref)
                             for wildcard_branch in wildcard_branches:
                                 project_branch = project.branches.get(wildcard_branch.get_id())
                                 branches_to_update.append(project_branch)
