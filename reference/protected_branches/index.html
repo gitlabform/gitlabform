@@ -618,6 +618,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#group-level-protected-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Group-level protected branches
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-level-protected-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project-level protected branches
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Project-level protected branches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#community-edition-vs-enterprise-edition" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -626,8 +649,7 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Community Edition vs Enterprise Edition">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
   <a href="#functionality-differences" class="md-nav__link">
@@ -640,12 +662,7 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#common-features" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -655,8 +672,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#premium-only-features" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -664,6 +681,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1594,6 +1616,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#group-level-protected-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Group-level protected branches
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-level-protected-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project-level protected branches
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Project-level protected branches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#community-edition-vs-enterprise-edition" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1602,8 +1647,7 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Community Edition vs Enterprise Edition">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
   <a href="#functionality-differences" class="md-nav__link">
@@ -1616,12 +1660,7 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#common-features" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1631,8 +1670,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#premium-only-features" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1640,6 +1679,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1665,7 +1709,42 @@
 
 <h1 id="protected-branches">Protected branches<a class="headerlink" href="#protected-branches" title="Permanent link">&para;</a></h1>
 <p>This section purpose is to manage the <a href="https://docs.gitlab.com/user/project/repository/branches/protected/">protected branches</a>.</p>
-<h2 id="community-edition-vs-enterprise-edition">Community Edition vs Enterprise Edition<a class="headerlink" href="#community-edition-vs-enterprise-edition" title="Permanent link">&para;</a></h2>
+<p>GitLabForm supports two different ways to manage branch protection:</p>
+<ul>
+<li><strong>Group-level protected branches</strong> (<code>group_protected_branches</code>) — Uses GitLab's <a href="https://docs.gitlab.com/ee/api/group_protected_branches.html">Group Protected Branches API</a> to set branch protection rules that are inherited by all projects in a top-level group. Requires GitLab Premium.</li>
+<li><strong>Project-level protected branches</strong> (<code>branches</code>) — Sets branch protection rules on individual projects. When configured under a group wildcard (e.g. <code>group/*</code>), GitLabForm applies the rules to each project separately. Works with all GitLab tiers.</li>
+</ul>
+<h2 id="group-level-protected-branches">Group-level protected branches<a class="headerlink" href="#group-level-protected-branches" title="Permanent link">&para;</a></h2>
+<p>This section purpose is to manage the <a href="https://docs.gitlab.com/ee/api/group_protected_branches.html">group-level protected branches</a>.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>This section requires GitLab Premium (paid). (This is a GitLab limitation, not GitLabForm's.)</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Protected branch settings for groups are restricted to top-level groups only. (This is a GitLab limitation, not GitLabForm's.) GitLabForm applies this section only to the top-level group; when the configuration is inherited by subgroups via the <code>group_1/*</code> wildcard, GitLabForm skips the subgroups.</p>
+<p>Group protected branches only support access levels. Individual users and groups cannot be specified. (This is a GitLab API limitation).</p>
+</div>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/*</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">group_protected_branches</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">main</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+<span class="w">      </span><span class="nt">release/*</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+<span class="w">        </span><span class="nt">unprotect_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A group-level protected branch also appears under the protected branches list of every project in the group, marked with a lock icon. Inherited rules cannot be edited or removed from the project. Projects can still define their own additional protected branch rules on top of the inherited ones via the project-level <a href="#project-level-protected-branches"><code>branches</code></a> section.</p>
+</div>
+<h2 id="project-level-protected-branches">Project-level protected branches<a class="headerlink" href="#project-level-protected-branches" title="Permanent link">&para;</a></h2>
+<h3 id="community-edition-vs-enterprise-edition">Community Edition vs Enterprise Edition<a class="headerlink" href="#community-edition-vs-enterprise-edition" title="Permanent link">&para;</a></h3>
 <p>Note: that Gitlab Community Edition does not support setting <code>unprotect_access_level</code> and will always return <code>None</code> from the API, and there is also no way to manually set this through the UI.</p>
 <h3 id="functionality-differences">Functionality Differences<a class="headerlink" href="#functionality-differences" title="Permanent link">&para;</a></h3>
 <p>In Gitlab EE versions &lt;=15.6.0 and Gitlab Community Edition, GitLabForm uses older functionality where to update Branch Protection rules, GitLabForm will remove protection and then re-protect the Branch using the new configuration.</p>
@@ -1674,7 +1753,7 @@
 <li>For CE: this is because the Update PATCH API does nothing, nor throws an error, see: https://gitlab.com/rluna-gitlab/gitlab-ce/-/work_items/37</li>
 </ul>
 <p>In later versions of Gitlab EE, GitLabForm will modify the Branch Protection rules in-place, see the <a href="../../upgrade/">V4-&gt;V5 upgrade notes</a></p>
-<h2 id="common-features">Common features<a class="headerlink" href="#common-features" title="Permanent link">&para;</a></h2>
+<h3 id="common-features">Common features<a class="headerlink" href="#common-features" title="Permanent link">&para;</a></h3>
 <p>The key names here may be:</p>
 <ul>
 <li>exact branch names,</li>
@@ -1722,7 +1801,7 @@
 <span class="w">        </span><span class="nt">unprotect_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
 <span class="w">        </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
-<h2 id="premium-only-features">Premium-only features<a class="headerlink" href="#premium-only-features" title="Permanent link">&para;</a></h2>
+<h3 id="premium-only-features">Premium-only features<a class="headerlink" href="#premium-only-features" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
 <p>Below syntax and features require GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)</p>
