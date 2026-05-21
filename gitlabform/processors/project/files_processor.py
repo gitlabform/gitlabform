@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 from logging import debug, info, warning, critical
-from typing import List
+from typing import List, Optional
 
 from jinja2 import Environment, FileSystemLoader
 from gitlab import GitlabGetError, GitlabUpdateError
@@ -48,7 +48,15 @@ class FilesProcessor(AbstractProcessor):
                 # Get a list of branches from the config that should be updated.
                 for ref in config_target_ref:
                     try:
-                        branches_to_update.append(project.branches.get(ref))
+                        if "*" in ref:
+                            branch_regex = ref
+                            wildcard_branches = project.branches.list(get_all=True, regex=branch_regex)
+                            for wildcard_branch in wildcard_branches:
+                                project_branch = project.branches.get(wildcard_branch.get_id())
+                                branches_to_update.append(project_branch)
+                        else:
+                            branches_to_update.append(project.branches.get(ref))
+
                     except GitlabGetError:
                         message = f"! Branch '{ref}' not found, not processing file '{file}' in it"
                         if self.strict:
@@ -67,7 +75,7 @@ class FilesProcessor(AbstractProcessor):
                 process_only_first: bool = configuration.get("files|" + file + "|only_first_branch", False)
 
                 branch_name: str = branch.name
-                if branch_name.endswith("/*"):
+                if "*" in branch_name:
                     debug(f"Processing wildcard branches matching {branch_name}")
                     wildcard_branches = project.branches.list(get_all=True, regex=branch_name)
                     for wildcard_branch in wildcard_branches:
