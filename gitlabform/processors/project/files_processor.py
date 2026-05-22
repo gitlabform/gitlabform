@@ -4,11 +4,10 @@ import sys
 from pathlib import Path
 
 from logging import debug, info, warning, critical
-from typing import List, Optional
 
 from jinja2 import Environment, FileSystemLoader
 from gitlab import GitlabGetError, GitlabUpdateError
-from gitlab.v4.objects import Project, ProjectFile, ProjectBranch, ProjectProtectedBranch
+from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
 from gitlab.base import RESTObject
 
 from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
@@ -35,34 +34,20 @@ class FilesProcessor(AbstractProcessor):
                 continue
 
             config_target_ref = configuration["files"][file]["branches"]
-            branches_to_update: List[ProjectBranch | ProjectProtectedBranch] = []
+            branches_to_update: list[ProjectBranch] = []
 
-            if isinstance(config_target_ref, str):
-                # Target ref could be either 'all' or 'protected'.
-                # Get a list of branches that should be updated.
-                if config_target_ref == "all":
-                    branches_to_update.extend(project.branches.list(get_all=True, lazy=True))
-                elif config_target_ref == "protected":
-                    branches_to_update.extend(project.protectedbranches.list(get_all=True, lazy=True))
+            if config_target_ref == "all":
+                # Get all Branches in the Project
+                branches_to_update.extend(project.branches.list(get_all=True, lazy=True))
+            elif config_target_ref == "protected":
+                # Get all Protected Branch definitions -> this could return wildcard branch names
+                protected_branches = project.protectedbranches.list(get_all=True, lazy=True)
+                for protected_branch in protected_branches:
+                    self.append_branches_matching_ref(branches_to_update, file, project, protected_branch.name)
             elif isinstance(config_target_ref, list):
-                # Get a list of branches from the config that should be updated.
+                # List of specific branch refs to update -> this could contain wildcard branch names
                 for ref in config_target_ref:
-                    try:
-                        if "*" in ref:
-                            wildcard_branches = project.branches.list(get_all=True, regex=ref)
-                            for wildcard_branch in wildcard_branches:
-                                project_branch = project.branches.get(wildcard_branch.get_id())
-                                branches_to_update.append(project_branch)
-                        else:
-                            branches_to_update.append(project.branches.get(ref))
-
-                    except GitlabGetError:
-                        message = f"! Branch '{ref}' not found, not processing file '{file}' in it"
-                        if self.strict:
-                            critical(message)
-                            sys.exit(EXIT_INVALID_INPUT)
-                        else:
-                            warning(message)
+                    self.append_branches_matching_ref(branches_to_update, file, project, ref)
 
             debug(
                 "File '%s' to be updated in '%s' branche(s)",
@@ -70,29 +55,38 @@ class FilesProcessor(AbstractProcessor):
                 len(branches_to_update),
             )
 
-            for branch in branches_to_update:
+            for branch_to_update in branches_to_update:
                 process_only_first: bool = configuration.get("files|" + file + "|only_first_branch", False)
 
-                branch_name: str = branch.name
-                if "*" in branch_name:
-                    debug(f"Processing wildcard branches matching {branch_name}")
-                    wildcard_branches = project.branches.list(get_all=True, regex=branch_name)
-                    for wildcard_branch in wildcard_branches:
-                        self.process_branch(wildcard_branch, configuration, file, project, project_and_group)
-
-                        if process_only_first:
-                            info("Skipping other wildcard branches for this file, as configured by only_first_branch.")
-                            break
-                else:
-                    self.process_branch(branch, configuration, file, project, project_and_group)
+                self.process_branch(branch_to_update, configuration, file, project, project_and_group)
 
                 if process_only_first:
                     info("Skipping other branches for this file, as configured by only_first_branch.")
                     break
 
+    def append_branches_matching_ref(self, branches_to_update: list[ProjectBranch], file, project: Project, ref: str):
+        try:
+            if "*" in ref:
+                wildcard_branches = project.branches.list(get_all=True, regex=ref)
+                for wildcard_branch in wildcard_branches:
+                    branch_id = wildcard_branch.get_id()
+                    if branch_id:
+                        project_branch = project.branches.get(branch_id)
+                        branches_to_update.append(project_branch)
+            else:
+                branches_to_update.append(project.branches.get(ref))
+
+        except GitlabGetError:
+            message = f"! Branch '{ref}' not found, not processing file '{file}' in it"
+            if self.strict:
+                critical(message)
+                sys.exit(EXIT_INVALID_INPUT)
+            else:
+                warning(message)
+
     def process_branch(
         self,
-        branch: ProjectBranch | ProjectProtectedBranch,
+        branch: ProjectBranch,
         configuration: dict,
         file: str,
         project: Project,
