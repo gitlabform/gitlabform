@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -122,8 +124,10 @@ jobs:
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Wait for PyPI release
         run: |
-          uv pip download gitlabform==${{ env.VERSION }} > /dev/null
-          while [ $? -ne 0 ]; do sleep 10; uv pip download gitlabform==${{ env.VERSION }} > /dev/null ; done
+          until uv pip install gitlabform==${{ env.VERSION }} --dry-run > /dev/null 2>&1; do
+            echo "Waiting for gitlabform==${{ env.VERSION }} to be available on PyPI..."
+            sleep 10
+          done
         shell: bash {0}
       - name: Docker metadata
         id: metadata
