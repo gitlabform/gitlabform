@@ -5,6 +5,15 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+
+## 5.5.1
+
+### Build
+
+* Fix issue where tagged images were no longer being published to Github Container Registry [#1291](https://github.com/gitlabform/gitlabform/pull/1291). ([amimas](https://github.com/amimas))
+
+Thanks to all the contributors of this release!
+
 ## 5.5.0
 
 ### Features
