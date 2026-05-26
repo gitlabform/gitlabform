@@ -6,6 +6,13 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 5.5.3
+
+### Build
+
+* Fix issue where uv could not install gitlabform from pypi when publishing to GHCR. ([timknight01](https://github.com/TimKnight01))
+
+
 ## 5.5.2
 
 ### Build
