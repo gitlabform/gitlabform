@@ -115,6 +115,7 @@ jobs:
       - tests-standard
       - tests-premium
       - tests-ultimate
+      - publish-to-pypi
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -124,10 +125,8 @@ jobs:
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Wait for PyPI release
         run: |
-          until uv pip install gitlabform==${{ env.VERSION }} --dry-run > /dev/null 2>&1; do
-            echo "Waiting for gitlabform==${{ env.VERSION }} to be available on PyPI..."
-            sleep 10
-          done
+          uv pip install gitlabform==${{ env.VERSION }} --dry-run > /dev/null
+          while [ $? -ne 0 ]; do echo "Waiting for gitlabform==${{ env.VERSION }} to be available on PyPI..."; sleep 10; uv pip install gitlabform==${{ env.VERSION }} --dry-run > /dev/null ; done
         shell: bash {0}
       - name: Docker metadata
         id: metadata
