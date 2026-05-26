@@ -6,6 +6,12 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 5.5.2
+
+### Build
+
+* Fix issue where uv would infintely wait for PyPi even when release was available. ([timknight01](https://github.com/TimKnight01))
+
 ## 5.5.1
 
 ### Build
