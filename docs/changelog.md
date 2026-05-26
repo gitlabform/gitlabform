@@ -5,6 +5,12 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+## 5.5.4
+
+### Build
+
+* Simplify publishing to GHCR to remove direct need to check PyPi before building Docker image. ([timknight01](https://github.com/TimKnight01))
+
 
 ## 5.5.3
 
