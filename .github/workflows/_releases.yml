@@ -125,8 +125,8 @@ jobs:
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Wait for PyPI release
         run: |
-          uv pip install gitlabform==${{ env.VERSION }} --dry-run > /dev/null
-          while [ $? -ne 0 ]; do echo "Waiting for gitlabform==${{ env.VERSION }} to be available on PyPI..."; sleep 10; uv pip install gitlabform==${{ env.VERSION }} --dry-run > /dev/null ; done
+          uv pip install gitlabform==${{ env.VERSION }} --dry-run --system > /dev/null
+          while [ $? -ne 0 ]; do echo "Waiting for gitlabform==${{ env.VERSION }} to be available on PyPI..."; sleep 10; uv pip install gitlabform==${{ env.VERSION }} --dry-run --system > /dev/null ; done
         shell: bash {0}
       - name: Docker metadata
         id: metadata
