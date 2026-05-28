@@ -63,12 +63,12 @@ dev = [
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
-    "coverage==7.14.0",
+    "coverage==7.14.1",
     "cryptography==48.0.0",
     "deepdiff==9.1.0",
     "pytest==9.0.3",
     "pytest-cov==7.1.0",
-    "pytest-rerunfailures==16.2",
+    "pytest-rerunfailures==16.3",
     "xkcdpass==1.30.0",
 ]
 # Static analysis and formatting tools.
