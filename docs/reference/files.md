@@ -104,7 +104,7 @@ projects_and_groups:
       "README.md":
         overwrite: false
         branches:
-          - "*gitlab*"
+          - ".*gitlab*"
         skip_ci: true
         content: |
           This is a default README. Please replace it with a proper one!
