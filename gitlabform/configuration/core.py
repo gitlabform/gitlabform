@@ -332,7 +332,7 @@ class ConfigurationCore(ABC):
         the ``propagate`` key itself, so they can be removed from descendant
         inheritance payloads later.
         """
-        blocked_paths = set()
+        blocked_paths: set[tuple[str, ...]] = set()
 
         if type(config) not in [CommentedMap, dict]:
             return blocked_paths
@@ -403,7 +403,7 @@ class ConfigurationCore(ABC):
         """
         Collect paths for every mapping section in ``config``.
         """
-        paths = set()
+        paths: set[tuple[str, ...]] = set()
 
         if type(config) not in [CommentedMap, dict]:
             return paths
