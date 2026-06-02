@@ -5,7 +5,7 @@ from logging import info  # for wraps
 from unittest.mock import patch
 from gitlab.exceptions import GitlabListError
 
-from tests.acceptance import run_gitlabform
+from tests.acceptance import create_project, run_gitlabform
 
 
 class TestVariables:
@@ -523,3 +523,62 @@ class TestVariables:
         assert variables[1].value == "456_updated"
         assert variables[2].key == "QUX"
         assert variables[2].value == "new"
+
+
+class TestVariablesPropagation:
+    def test__group_level_propagation_break__direct_project_does_not_inherit_variables(
+        self,
+        group_for_function,
+    ):
+        project = create_project(group_for_function, "propagation_break_direct_project")
+        try:
+            config = f"""
+            projects_and_groups:
+              {group_for_function.full_path}/*:
+                variables:
+                  propagate: false
+                  blocked_variable:
+                    key: BLOCKED_VARIABLE
+                    value: blocked-value
+            """
+
+            run_gitlabform(config, group_for_function.full_path)
+
+            variables = project.variables.list(get_all=True)
+
+            assert len(variables) == 0
+        finally:
+            project.delete()
+
+    def test__common_level_propagation_break__subgroup_local_redefinition_flows_to_projects_below(
+        self,
+        group_for_function,
+        subgroup_for_function,
+    ):
+        project = create_project(subgroup_for_function, "propagation_break_subgroup_project")
+        try:
+            config = f"""
+            projects_and_groups:
+              "*":
+                variables:
+                  propagate: false
+                  global_variable:
+                    key: GLOBAL_VARIABLE
+                    value: global-value
+
+              {subgroup_for_function.full_path}/*:
+                variables:
+                  local_variable:
+                    key: LOCAL_VARIABLE
+                    value: local-value
+            """
+
+            run_gitlabform(config, group_for_function.full_path)
+
+            variables = project.variables.list(get_all=True)
+
+            assert len(variables) == 1
+            assert variables[0].key == "LOCAL_VARIABLE"
+            assert variables[0].value == "local-value"
+        finally:
+            project.delete()

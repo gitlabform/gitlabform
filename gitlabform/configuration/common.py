@@ -1,6 +1,6 @@
 from abc import ABC
 
-from gitlabform.configuration.core import ConfigurationCore
+from gitlabform.configuration.core import ConfigurationCore, ConfigurationState
 
 
 class ConfigurationCommon(ConfigurationCore, ABC):
@@ -12,8 +12,15 @@ class ConfigurationCommon(ConfigurationCore, ABC):
         """
         :return: literal common configuration or empty dict if not defined
         """
+        return self._get_common_state().effective_config
+
+    def _get_common_state(self) -> ConfigurationState:
+        """
+        Return the effective and propagatable state for the common ``*`` config.
+        """
         common_config = self.get("projects_and_groups|*", {})
         if common_config:
             section_name = "*"
             self._validate_break_inheritance_flag(common_config, section_name)
-        return common_config
+
+        return self._build_configuration_state({}, common_config)

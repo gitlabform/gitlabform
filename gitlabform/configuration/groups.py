@@ -4,6 +4,7 @@ import functools
 from logging import debug
 
 from gitlabform.configuration import ConfigurationCommon
+from gitlabform.configuration.core import ConfigurationState
 from gitlabform.util import to_str
 
 
@@ -45,27 +46,37 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
             debug(f"Group {group} is skipped, returning empty config")
             return {}
 
-        common_config = self.get_common_config()
-        debug("*Effective* common config: %s", to_str(common_config))
+        group_state = self._get_group_state(group)
+        debug("*Effective* config common+group/subgroup: %s", to_str(group_state.effective_config))
 
-        if "/" in group:
-            group_config = self._get_effective_subgroup_config(group)
-        else:
-            group_config = self._get_group_config(group)
-        debug("*Effective* group/subgroup config: %s", to_str(group_config))
+        return group_state.effective_config
 
-        if not common_config and group_config:
-            self._validate_break_inheritance_flag(group_config, group)
-
-        effective_config_for_group = self._merge_configs(common_config, group_config)
+    @functools.lru_cache()
+    def _get_group_state(self, group) -> ConfigurationState:
         debug(
-            "*Effective* config common+group/subgroup: %s",
-            to_str(effective_config_for_group),
+            "Building group state for '%s'",
+            group,
         )
 
-        return effective_config_for_group
+        common_state = self._get_common_state()
+        debug("*Effective* common config: %s", to_str(common_state.effective_config))
+        debug("*Propagatable* common config: %s", to_str(common_state.propagatable_config))
 
-    def _get_effective_subgroup_config(self, subgroup):
+        if "/" in group:
+            return self._get_effective_subgroup_state(group, common_state)
+
+        group_config = self._get_group_config(group)
+        debug("*Raw* group config: %s", to_str(group_config))
+
+        if not common_state.propagatable_config and group_config:
+            self._validate_break_inheritance_flag(group_config, group)
+
+        return self._build_configuration_state(common_state.propagatable_config, group_config)
+
+    def _get_effective_subgroup_state(self, subgroup: str, common_state: ConfigurationState) -> ConfigurationState:
+        """
+        Return the configuration state for ``subgroup`` across the whole hierarchy.
+        """
         #
         # Goes through a subgroups hierarchy, from top to bottom
         #
@@ -80,14 +91,22 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         #
         # ...where a = merged_config("x", "x/y") and b = merged_config(a, "x/y/z")
         #
-
-        effective_config = {}
         elements = subgroup.split("/")
         last_element = None
+        inherited_state = common_state
+
         for element in elements:
             if not last_element:
-                effective_config = self._get_group_config(element)
-                debug("First level config for '%s': %s", element, to_str(effective_config))
+                first_level_group_config = self._get_group_config(element)
+                debug("First level config for '%s': %s", element, to_str(first_level_group_config))
+
+                if not inherited_state.propagatable_config and first_level_group_config:
+                    self._validate_break_inheritance_flag(first_level_group_config, element)
+
+                inherited_state = self._build_configuration_state(
+                    inherited_state.propagatable_config,
+                    first_level_group_config,
+                )
                 last_element = element
             else:
                 next_level_subgroup = last_element + "/" + element
@@ -98,24 +117,22 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
                     to_str(next_level_subgroup_config),
                 )
 
-                if effective_config:
-                    self._validate_break_inheritance_flag(effective_config, subgroup)
-                elif not effective_config and next_level_subgroup_config:
+                if not inherited_state.propagatable_config and next_level_subgroup_config:
                     self._validate_break_inheritance_flag(next_level_subgroup_config, next_level_subgroup)
 
-                effective_config = self._merge_configs(
-                    effective_config,
+                inherited_state = self._build_configuration_state(
+                    inherited_state.propagatable_config,
                     next_level_subgroup_config,
                 )
                 debug(
                     "Merged previous level config for '%s' with config for '%s': %s",
                     last_element,
                     next_level_subgroup,
-                    to_str(effective_config),
+                    to_str(inherited_state.effective_config),
                 )
-                last_element = last_element + "/" + element
+                last_element = next_level_subgroup
 
-        return effective_config
+        return inherited_state
 
     def _get_group_config(self, group) -> dict:
         """

@@ -162,7 +162,7 @@ projects_and_groups:
   group_1/*:
     project_settings:
       visibility: private # <-- different value!
-``` 
+```
 With this configuration, for a project `group_1/project_1` the effective configuration will be like:
 ```yaml
 project_settings:
@@ -181,7 +181,7 @@ projects_and_groups:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
         title: global_key
         can_push: false
-  
+
   group_1/*:
     deploy_keys:
       key_b: # <-- another key under deploy_keys!
@@ -279,6 +279,57 @@ deploy_keys:
 !!! important
 
     `inherit: false` can be placed at ANY place in the configuration (if it makes sense).
+
+### Stopping propagation to descendants
+
+You can also apply a section at the current level while preventing that same section from flowing further down the hierarchy by placing `propagate: false` under that section.
+
+Example:
+
+```yaml
+projects_and_groups:
+  team_a/*:
+    variables:
+      propagate: false
+      team_secret:
+        key: TEAM_SECRET
+        value: team-value
+```
+
+For the above configuration:
+
+- group `team_a` gets the `variables` section,
+- subgroup `team_a/subgroup_1` does not inherit that `variables` section,
+- project `team_a/project_1` does not inherit that `variables` section either.
+
+A deeper level can define the same section locally to start a new inheritance source for its own subtree:
+
+```yaml
+projects_and_groups:
+  team_a/*:
+    variables:
+      propagate: false
+      team_secret:
+        key: TEAM_SECRET
+        value: team-value
+
+  team_a/subgroup_1/*:
+    variables:
+      subgroup_secret:
+        key: SUBGROUP_SECRET
+        value: subgroup-value
+```
+
+With this configuration, `team_a/subgroup_1` and projects below it inherit only `subgroup_secret`.
+
+!!! important
+
+    `propagate: false` is supported in the same configuration locations where `inherit: false` is supported.
+
+Comparison:
+
+- `inherit: false` means: "this level does not inherit the section from above"
+- `propagate: false` means: "this level applies the section here, but does not pass it further down"
 
 ### Skipping sections
 

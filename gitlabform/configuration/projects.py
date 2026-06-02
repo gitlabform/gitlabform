@@ -45,24 +45,26 @@ class ConfigurationProjects(ConfigurationGroups, ABC):
 
         group, _ = group_and_project.rsplit("/", 1)
 
-        effective_config_for_group = self.get_effective_config_for_group(group)
+        group_state = self._get_group_state(group)
+        debug("*Effective* group config for project inheritance: %s", to_str(group_state.effective_config))
+        debug("*Propagatable* group config for project inheritance: %s", to_str(group_state.propagatable_config))
 
         project_config = self._get_project_config(group_and_project)
         debug("Project config: %s", to_str(project_config))
 
-        if not effective_config_for_group and project_config:
+        if not group_state.propagatable_config and project_config:
             self._validate_break_inheritance_flag(project_config, group_and_project)
 
-        effective_config_for_project = self._merge_configs(
-            effective_config_for_group,
+        project_state = self._build_configuration_state(
+            group_state.propagatable_config,
             project_config,
         )
         debug(
             "*Effective* config common+group/subgroup+project: %s",
-            to_str(effective_config_for_project),
+            to_str(project_state.effective_config),
         )
 
-        return effective_config_for_project
+        return project_state.effective_config
 
     def _get_project_config(self, group_and_project) -> dict:
         """

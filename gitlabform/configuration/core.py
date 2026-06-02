@@ -1,5 +1,6 @@
 import sys
 from typing import Any
+from dataclasses import dataclass
 
 import os
 import logging
@@ -19,6 +20,19 @@ from yamlpath.wrappers import ConsolePrinter
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from ruamel.yaml.comments import CommentedMap
+
+
+@dataclass(frozen=True)
+class ConfigurationState:
+    """
+    Internal configuration state for a single hierarchy node.
+
+    ``effective_config`` is the configuration that applies to the current node.
+    ``propagatable_config`` is the inheritance payload that may flow further down.
+    """
+
+    effective_config: dict
+    propagatable_config: dict
 
 
 class ConfigurationCore(ABC):
@@ -167,6 +181,23 @@ class ConfigurationCore(ABC):
                 ConfigurationCore._validate_break_inheritance_flag(value, section_name, key)
 
     @staticmethod
+    def _validate_propagation_break_flag(config: dict) -> None:
+        """
+        Validate that every ``propagate`` flag uses the supported ``false`` value.
+
+        The traversal intentionally mirrors the recursive traversal used by
+        ``inherit: false`` support so that both control flags are interpreted
+        across the same configuration shapes.
+        """
+        for key, value in config.items():
+            if key == "propagate":
+                if value is not False:
+                    critical("Cannot set the propagation break flag with a value other than false\n")
+                    sys.exit(EXIT_INVALID_INPUT)
+            elif type(value) in [CommentedMap, dict]:
+                ConfigurationCore._validate_propagation_break_flag(value)
+
+    @staticmethod
     def _merge_configs(more_general_config, more_specific_config) -> dict:
         """
         :return: merge more general config with more specific configs.
@@ -214,6 +245,196 @@ class ConfigurationCore(ABC):
         break_inheritance(more_specific_config)
 
         return dict(merged_dict)
+
+    @staticmethod
+    def _remove_control_flags(config: dict) -> dict:
+        """
+        Return a deep copy of ``config`` without propagation control flags.
+
+        The returned structure is safe to expose to processors because it no
+        longer contains ``inherit`` or ``propagate`` implementation details.
+        """
+        if type(config) not in [CommentedMap, dict]:
+            return deepcopy(config)
+
+        cleaned_config = {}
+        for key, value in config.items():
+            if key in ["inherit", "propagate"]:
+                continue
+
+            if type(value) in [CommentedMap, dict]:
+                cleaned_config[key] = ConfigurationCore._remove_control_flags(value)
+            else:
+                cleaned_config[key] = deepcopy(value)
+
+        return cleaned_config
+
+    @staticmethod
+    def _remove_non_propagatable_control_flags(config: dict) -> dict:
+        """
+        Return a deep copy of ``config`` without control flags that must not
+        flow to descendants.
+
+        Unlike ``_remove_control_flags()``, this also strips ``skip`` because
+        skipping is a decision for the current entity only and must not become
+        part of descendant inheritance payloads.
+        """
+        if type(config) not in [CommentedMap, dict]:
+            return deepcopy(config)
+
+        cleaned_config = {}
+        for key, value in config.items():
+            if key in ["inherit", "propagate", "skip"]:
+                continue
+
+            if type(value) in [CommentedMap, dict]:
+                cleaned_config[key] = ConfigurationCore._remove_non_propagatable_control_flags(value)
+            else:
+                cleaned_config[key] = deepcopy(value)
+
+        return cleaned_config
+
+    @staticmethod
+    def _remove_section_at_path(config: dict, path: tuple[str, ...]) -> None:
+        """
+        Remove the section at ``path`` from ``config`` if it exists.
+        """
+        if not path:
+            return
+
+        target_config = config
+        for key in path[:-1]:
+            if key not in target_config or type(target_config[key]) not in [CommentedMap, dict]:
+                return
+            target_config = target_config[key]
+
+        target_config.pop(path[-1], None)
+
+    @staticmethod
+    def _get_section_at_path(config: dict, path: tuple[str, ...]):
+        """
+        Return the config section at ``path`` or ``None`` if it does not exist.
+        """
+        current = config
+        for key in path:
+            if type(current) not in [CommentedMap, dict] or key not in current:
+                return None
+            current = current[key]
+
+        return current
+
+    @staticmethod
+    def _collect_non_propagating_sections(config: dict, parent_path: tuple[str, ...] = ()) -> set[tuple[str, ...]]:
+        """
+        Collect section paths that declare ``propagate: false``.
+
+        Paths are recorded for the mapping section that owns the flag, not for
+        the ``propagate`` key itself, so they can be removed from descendant
+        inheritance payloads later.
+        """
+        blocked_paths = set()
+
+        if type(config) not in [CommentedMap, dict]:
+            return blocked_paths
+
+        for key, value in config.items():
+            if key == "propagate":
+                blocked_paths.add(parent_path)
+            elif type(value) in [CommentedMap, dict]:
+                blocked_paths.update(
+                    ConfigurationCore._collect_non_propagating_sections(
+                        value,
+                        parent_path + (key,),
+                    )
+                )
+
+        return blocked_paths
+
+    @staticmethod
+    def _has_local_section_definition(section_config: dict) -> bool:
+        """
+        Return whether ``section_config`` contains a meaningful local definition.
+
+        A section only reopens propagation if, after removing control keys, at
+        least one non-control key remains.
+        """
+        if type(section_config) not in [CommentedMap, dict]:
+            return False
+
+        for key in section_config.keys():
+            if key not in ["inherit", "propagate", "skip"]:
+                return True
+
+        return False
+
+    @staticmethod
+    def _build_propagatable_config(
+        inherited_config: dict,
+        merged_config: dict,
+        local_config: dict,
+    ) -> dict:
+        """
+        Build the inheritance payload to pass from the current node downward.
+
+        The payload starts from the cleaned merged result and then removes
+        sections explicitly blocked by ``propagate: false``. Sections containing
+        only control flags, such as a lone ``skip: true``, do not reopen
+        propagation when there was no inherited section to propagate.
+        """
+        propagatable_config = ConfigurationCore._remove_non_propagatable_control_flags(merged_config)
+
+        for blocked_path in ConfigurationCore._collect_non_propagating_sections(local_config):
+            ConfigurationCore._remove_section_at_path(propagatable_config, blocked_path)
+
+        for path in ConfigurationCore._collect_section_paths(local_config):
+            local_section = ConfigurationCore._get_section_at_path(local_config, path)
+            inherited_section = ConfigurationCore._get_section_at_path(inherited_config, path)
+
+            if ConfigurationCore._has_local_section_definition(local_section):
+                continue
+
+            if inherited_section is None:
+                ConfigurationCore._remove_section_at_path(propagatable_config, path)
+
+        return propagatable_config
+
+    @staticmethod
+    def _collect_section_paths(config: dict, parent_path: tuple[str, ...] = ()) -> set[tuple[str, ...]]:
+        """
+        Collect paths for every mapping section in ``config``.
+        """
+        paths = set()
+
+        if type(config) not in [CommentedMap, dict]:
+            return paths
+
+        for key, value in config.items():
+            if type(value) in [CommentedMap, dict]:
+                current_path = parent_path + (key,)
+                paths.add(current_path)
+                paths.update(ConfigurationCore._collect_section_paths(value, current_path))
+
+        return paths
+
+    @staticmethod
+    def _build_configuration_state(inherited_config: dict, local_config: dict) -> ConfigurationState:
+        """
+        Build the effective and propagatable configuration for one hierarchy node.
+        """
+        ConfigurationCore._validate_propagation_break_flag(local_config)
+
+        merged_config = ConfigurationCore._merge_configs(inherited_config, local_config)
+        effective_config = ConfigurationCore._remove_control_flags(merged_config)
+        propagatable_config = ConfigurationCore._build_propagatable_config(
+            inherited_config,
+            merged_config,
+            local_config,
+        )
+
+        return ConfigurationState(
+            effective_config=effective_config,
+            propagatable_config=propagatable_config,
+        )
 
     @staticmethod
     def _get_case_insensitively(a_dict: dict, a_key: str):
