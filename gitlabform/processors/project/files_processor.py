@@ -7,7 +7,7 @@ from pathlib import Path
 from logging import debug, info, warning, critical
 
 from jinja2 import Environment, FileSystemLoader
-from gitlab import GitlabGetError, GitlabUpdateError
+from gitlab import GitlabGetError, GitlabUpdateError, GitlabListError
 from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
 from gitlab.base import RESTObject
 
@@ -66,26 +66,31 @@ class FilesProcessor(AbstractProcessor):
                     break
 
     def append_branches_matching_ref(self, branches_to_update: list[ProjectBranch], file, project: Project, ref: str):
-        try:
-            if "*" in ref:
-                # convert ref to re2 regular expression expected by Gitlab API https://docs.gitlab.com/api/branches/
-                regex_ref = fnmatch.translate(ref)
+
+        if "*" in ref:
+            try:
                 wildcard_branches = project.branches.list(get_all=True, regex=ref)
                 for wildcard_branch in wildcard_branches:
                     branch_id = wildcard_branch.get_id()
                     if branch_id:
-                        project_branch = project.branches.get(branch_id)
-                        branches_to_update.append(project_branch)
-            else:
+                        branches_to_update.append(wildcard_branch)
+            except GitlabListError:
+                message = f"! Could not list branches using {ref}, not processing file '{file}' on them"
+                if self.strict:
+                    critical(message)
+                    sys.exit(EXIT_INVALID_INPUT)
+                else:
+                    warning(message)
+        else:
+            try:
                 branches_to_update.append(project.branches.get(ref))
-
-        except GitlabGetError:
-            message = f"! Branch '{ref}' not found, not processing file '{file}' in it"
-            if self.strict:
-                critical(message)
-                sys.exit(EXIT_INVALID_INPUT)
-            else:
-                warning(message)
+            except GitlabGetError:
+                message = f"! Branch '{ref}' not found, not processing file '{file}' in it"
+                if self.strict:
+                    critical(message)
+                    sys.exit(EXIT_INVALID_INPUT)
+                else:
+                    warning(message)
 
     def process_branch(
         self,
