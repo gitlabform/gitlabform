@@ -269,6 +269,22 @@ class TestGetProjects:
         groups.add_requested(effective)
         return groups
 
+    def test__group_target_with_recursive_subgroups__uses_group_project_collection(self, gitlab_mock, configuration_mock):
+        gitlab_mock.get_projects.side_effect = [
+            ["group/project1", "group/subgroup/project2"],
+            ["group/subgroup/project2"],
+        ]
+        configuration_mock.get_projects.return_value = []
+        configuration_mock.is_project_skipped.return_value = False
+
+        provider = make_provider(gitlab_mock, configuration_mock)
+        provider.get_groups = MagicMock(return_value=self._make_groups(["group", "group/subgroup"]))
+
+        projects = provider.get_projects("group")
+
+        assert sorted(projects.get_effective()) == ["group/project1", "group/subgroup/project2"]
+        gitlab_mock.get_project_case_insensitive.assert_not_called()
+
     def test__scheduled_for_deletion_added_to_omitted_from_groups(self, gitlab_mock, configuration_mock):
         gitlab_mock.get_projects.return_value = [
             {"path_with_namespace": "group/project1", "archived": False, "marked_for_deletion_on": None},
