@@ -5,7 +5,7 @@ from logging import info  # for wraps
 from unittest.mock import patch
 from gitlab.exceptions import GitlabListError
 
-from tests.acceptance import run_gitlabform
+from tests.acceptance import create_project, run_gitlabform
 
 
 class TestVariables:
@@ -523,3 +523,31 @@ class TestVariables:
         assert variables[1].value == "456_updated"
         assert variables[2].key == "QUX"
         assert variables[2].value == "new"
+
+
+class TestVariablesRegression:
+    def test__running_for_group_target__processes_project_in_descendant_subgroup(
+        self,
+        group_for_function,
+        subgroup_for_function,
+    ):
+        project = create_project(subgroup_for_function, "descendant_subgroup_project")
+        try:
+            config = f"""
+            projects_and_groups:
+              {subgroup_for_function.full_path}/*:
+                variables:
+                  local_variable:
+                    key: LOCAL_VARIABLE
+                    value: local-value
+            """
+
+            run_gitlabform(config, group_for_function.full_path)
+
+            variables = project.variables.list(get_all=True)
+
+            assert len(variables) == 1
+            assert variables[0].key == "LOCAL_VARIABLE"
+            assert variables[0].value == "local-value"
+        finally:
+            project.delete()
