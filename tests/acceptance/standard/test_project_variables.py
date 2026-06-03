@@ -531,7 +531,10 @@ class TestVariablesRegression:
         group_for_function,
         subgroup_for_function,
     ):
-        project = create_project(subgroup_for_function, "descendant_subgroup_project")
+        project = create_project(
+            subgroup_for_function,
+            "descendant_subgroup_project",
+        )
         try:
             config = f"""
             projects_and_groups:
