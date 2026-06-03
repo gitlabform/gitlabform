@@ -282,9 +282,7 @@ class TestGetProjects:
         configuration_mock.is_project_skipped.return_value = False
 
         provider = make_provider(gitlab_mock, configuration_mock)
-        provider.get_groups = MagicMock(
-            return_value=self._make_groups(["group", "group/subgroup"])
-        )
+        provider.get_groups = MagicMock(return_value=self._make_groups(["group", "group/subgroup"]))
 
         projects = provider.get_projects("group")
 
