@@ -40,7 +40,7 @@ dependencies = [
     "markupsafe==3.0.3",
     "mergedeep==1.3.4",
     "packaging==26.2",
-    "python-gitlab[graphql]==8.3.0",
+    "python-gitlab[graphql]==8.4.0",
     "requests==2.34.2",
     "rich==15.0.0",
     # yamlpath and ruamel and tightly coupled, currently 0.19.1 of ruamel and 3.9.0 of yamlpath break support for
@@ -58,7 +58,7 @@ dev = [
     { include-group = "lint" },
     { include-group = "docs" },
     { include-group = "release" },
-    "commitizen==4.16.2",
+    "commitizen==4.16.3",
     "prek==0.4.3",
 ]
 # Minimum set of dependencies required to execute the test suite.
@@ -78,7 +78,7 @@ lint = [
     "codespell==2.4.2",
     "mypy==2.1.0",
     "mypy-extensions==1.1.0",
-    "ruff==0.15.14",
+    "ruff==0.15.15",
     "types-requests==2.33.0.20260518",
 ]
 # Documentation generation stack.
