@@ -404,6 +404,8 @@ class GitLabForm:
                 exclude_sections=self.exclude_sections,
             )
 
+        self.group_processors.set_effective_groups(groups)
+
         for group in groups:
             group_number += 1
 
