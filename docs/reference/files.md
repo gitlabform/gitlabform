@@ -8,7 +8,7 @@ Each key in this section is a path to a file in the repo and the values are dict
 
 * `overwrite` - if set to `false` and the file already exists, but has a different content, then it is not changed; default is `true`,
 * `skip_ci` - if set to `true` then the changes to a given file will be done with commits that will not trigger the CI pipeline; default is `false`,
-* `branches` - can be a single string `all`, string `protected` or an array of branch names - including support for wildcards,
+* `branches` - can be a single string `all`, string `protected` (all protected branches, with wildcard-protected rules expanded to matching branches), or an array of branch names where `*` can be used to match any sequence of characters (e.g. `bugfix/*`, `*release*`),
 * `only_first_branch` - if set to `true` then only the first branch from the list above that exists will be processed (unless you pass `--strict` as cli parameter to the app - then it will fail when trying to process a non-existent branch),
 * `commit_message` - set this to a custom commit message that will be used by the app; optional,
 * `content` - the literal contents that should be put into the target file; use this or `file`,
@@ -104,7 +104,7 @@ projects_and_groups:
       "README.md":
         overwrite: false
         branches:
-          - ".*gitlab*"
+          - "*gitlab*"
         skip_ci: true
         content: |
           This is a default README. Please replace it with a proper one!

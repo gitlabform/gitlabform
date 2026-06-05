@@ -554,7 +554,7 @@ class TestFiles:
           "CODEOWNERS":
             branches:
               - main
-              - ".*test.*"
+              - "*test*"
             commit_message: "GitlabForm: updating CODEOWNERS file"
             content: |
               [SomeGroup] @someuser

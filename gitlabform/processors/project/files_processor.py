@@ -1,4 +1,3 @@
-import fnmatch
 import os
 import re
 import sys
@@ -67,9 +66,15 @@ class FilesProcessor(AbstractProcessor):
 
     def append_branches_matching_ref(self, branches_to_update: list[ProjectBranch], file, project: Project, ref: str):
 
-        if "*" in ref:
+        if self.branch_processor.branch_name_contains_supported_wildcard(ref):
             try:
-                wildcard_branches = project.branches.list(get_all=True, regex=ref)
+                # GitLab's branches API expects an RE2 regex
+                regex_ref = "^" + re.escape(ref).replace(r"\*", ".*") + "$"
+                # sorted for deterministic only_first_branch
+                wildcard_branches = sorted(
+                    project.branches.list(get_all=True, regex=regex_ref),
+                    key=lambda b: b.name,
+                )
                 for wildcard_branch in wildcard_branches:
                     branch_id = wildcard_branch.get_id()
                     if branch_id:
