@@ -1,0 +1,56 @@
+name: Static Analysis
+
+on:
+  workflow_call:
+    inputs:
+      BRANCH_REF:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+# This workflow currently covers lockfile verification plus lint-style checks.
+# Bandit is treated here as a lightweight quality/security guardrail, not a full
+# security scanning pipeline. Future security-only workflows can be introduced
+# once heavier security tooling is needed.
+jobs:
+  lockfile-verify:
+    name: Lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Verify that uv.lock is in sync
+        run: uv lock --check
+
+  linting:
+    name: "${{ matrix.check == 'black' && 'Black' || matrix.check == 'mypy' && 'Mypy' || 'Bandit' }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [black, mypy, bandit]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev --group lint
+      - name: Run ${{ matrix.check }}
+        run: |
+          if [ "${{ matrix.check }}" == "black" ]; then
+            uv run --no-sync qa lint black --check .
+          elif [ "${{ matrix.check }}" == "mypy" ]; then
+            uv run --no-sync qa lint mypy .
+          elif [ "${{ matrix.check }}" == "bandit" ]; then
+            uv run --no-sync qa lint bandit .
+          fi

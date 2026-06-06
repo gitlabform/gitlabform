@@ -13,50 +13,53 @@ permissions:
 
 jobs:
 
-  linters:
-    uses: ./.github/workflows/linters.yml
+  static-analysis:
+    name: Lint
+    uses: ./.github/workflows/static-analysis.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 
-  tests-standard:
-    uses: ./.github/workflows/tests-standard.yml
+  tests:
+    name: Tests
+    uses: ./.github/workflows/tests.yml
     with:
       BRANCH_REF: ${{ github.ref }}
+    secrets: inherit
 
-  tests-premium:
-    uses: ./.github/workflows/tests-premium.yml
+  tests-acceptance:
+    name: Acceptance Tests
+    uses: ./.github/workflows/tests-acceptance.yml
     with:
       BRANCH_REF: ${{ github.ref }}
       environment: Main Tests
     secrets: inherit
 
-  tests-ultimate:
-    uses: ./.github/workflows/tests-ultimate.yml
+  build-and-test-artifacts:
+    name: Build & Test
+    needs:
+      - static-analysis
+      - tests
+      - tests-acceptance
+    uses: ./.github/workflows/build.yml
     with:
       BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
-    secrets: inherit
 
   publish-docs:
+    name: Docs
     needs:
-      - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - build-and-test-artifacts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
-      - name: Configure uv environment
-        uses: ./.github/actions/setup-uv-local
-      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
-        run: |
-          uv sync --frozen --no-dev --group docs
-      - name: Build docs
-        run: |
-          uv run --no-sync docs build
+      - name: Download built documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-site
+          path: site
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
@@ -64,11 +67,9 @@ jobs:
           folder: site
 
   publish-to-github:
+    name: Publish Release
     needs:
-      - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - build-and-test-artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Create release in GitHub
@@ -80,11 +81,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-to-pypi:
+    name: Publish PyPI
     needs:
-      - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - build-and-test-artifacts
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -92,15 +91,20 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group release
+      # TODO: In a separate PR, consume the build artifact (package-dist) uploaded
+      # in build-and-test-artifacts instead of rebuilding and verifying the package here.
       - name: Build and verify the package
         run: |
           uv run --no-sync package build
@@ -110,15 +114,16 @@ jobs:
           uv run --no-sync package publish
 
   publish-to-ghcr:
+    name: Publish GHCR
     needs:
-      - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - build-and-test-artifacts
       - publish-to-pypi
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      # TODO: In a separate PR, optimize docker image build to consume the built package artifact
+      # (package-dist) instead of copying and rebuilding from source if applicable.
+      - name: Checkout repository
+        uses: actions/checkout@v6
       - name: Get the version from the tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Docker metadata
