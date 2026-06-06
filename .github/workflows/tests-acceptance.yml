@@ -45,7 +45,6 @@ jobs:
       - name: Run Standard acceptance tests for ${{ matrix.flavor }} flavor
         run: uv run --no-sync qa test tests/acceptance/standard --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v3
@@ -81,7 +80,6 @@ jobs:
       - name: Run acceptance Tests for ${{ matrix.tier }} features
         run: uv run --no-sync qa test tests/acceptance/${{ matrix.tier }} --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v3
