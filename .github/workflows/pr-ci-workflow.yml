@@ -1,4 +1,4 @@
-name: Linter and tests (PRs)
+name: "Build · Lint · Tests"
 
 on:
   workflow_call:

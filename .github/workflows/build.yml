@@ -39,7 +39,6 @@ jobs:
   docs:
     name: Docs
     runs-on: ubuntu-latest
-    needs: package
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

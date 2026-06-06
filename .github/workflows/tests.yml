@@ -37,6 +37,7 @@ jobs:
       - name: Run unit tests
         run: uv run --no-sync qa test tests/unit --cov=. --cov-report=xml --log-cli-level=WARNING
       - name: Upload coverage to Codecov
+        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v3

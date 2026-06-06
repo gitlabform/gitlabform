@@ -1,4 +1,4 @@
-name: PR CI
+name: "PR CI"
 
 permissions:
   actions: read
@@ -18,7 +18,7 @@ on:
 
 jobs:
   pr_jobs:
-    name: PR CI
+    name: "Trigger"
     # github.event.pull_request object defined here: https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#get-a-pull-request
     if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'gitlabform/gitlabform') || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != 'gitlabform/gitlabform') }}
     uses: ./.github/workflows/pr-ci-workflow.yml

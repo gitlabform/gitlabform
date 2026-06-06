@@ -45,6 +45,7 @@ jobs:
       - name: Run Standard acceptance tests for ${{ matrix.flavor }} flavor
         run: uv run --no-sync qa test tests/acceptance/standard --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage
+        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v3
@@ -57,7 +58,6 @@ jobs:
 
   acceptance-licensed:
     name: "GitLab ${{ matrix.tier == 'premium' && 'Premium' || 'Ultimate' }}"
-    needs: [acceptance-standard]
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     strategy:
@@ -76,11 +76,12 @@ jobs:
         run: uv sync --frozen --no-dev --group test
       - name: Start GitLab (${{ matrix.tier }}) in docker
         env:
-          GITLAB_EE_LICENSE: ${{ matrix.tier == 'premium' && secrets.GITLAB_EE_LICENSE || secrets.GITLAB_EE_ULTIMATE_LICENSE }}
+          GITLAB_EE_LICENSE: "${{ matrix.tier == 'premium' && secrets.GITLAB_EE_LICENSE || secrets.GITLAB_EE_ULTIMATE_LICENSE }}"
         run: uv run --no-sync gitlab-local up
       - name: Run acceptance Tests for ${{ matrix.tier }} features
         run: uv run --no-sync qa test tests/acceptance/${{ matrix.tier }} --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Upload coverage
+        if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v3
