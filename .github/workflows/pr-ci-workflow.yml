@@ -1,4 +1,11 @@
-name: "Build · Lint · Tests"
+name: "CI - Build · Lint · Tests"
+
+# Reusable workflow containing the actual CI jobs for pull request validation.
+# This file is called by prs-entrypoint.yml and is intentionally separated so that
+# event/routing logic stays in the entrypoint while the CI job set remains reusable.
+
+# This reusable workflow does not receive secrets automatically from the PR event.
+# The caller workflow (prs-entrypoint.yml) must explicitly pass secrets when calling it.
 
 on:
   workflow_call:
@@ -23,7 +30,7 @@ jobs:
 
   tests:
     name: Tests
-    uses: ./.github/workflows/tests.yml
+    uses: ./.github/workflows/tests-unit.yml
     with:
       BRANCH_REF: ${{ inputs.BRANCH_REF }}
     secrets: inherit

@@ -1,4 +1,8 @@
-name: "PR CI"
+name: "CI"
+
+# This workflow is the entrypoint for pull request validation.
+# It selects the correct event path for same-repo vs fork PRs,
+# then forwards the branch SHA and explicit secrets to the reusable workflow.
 
 permissions:
   actions: read
@@ -9,17 +13,20 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  # PRs from branches in this repository
   pull_request:
     branches:
       - main
+  # PRs from forked repositories
   pull_request_target:
     branches:
       - main
 
 jobs:
   pr_jobs:
-    name: "Trigger"
-    # github.event.pull_request object defined here: https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#get-a-pull-request
+    name: "Pipeline"
+    # Only run pull_request for same-repo PRs, and pull_request_target for fork PRs.
+    # This prevents duplicate workflow runs and keeps fork secret handling safe.
     if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'gitlabform/gitlabform') || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != 'gitlabform/gitlabform') }}
     uses: ./.github/workflows/pr-ci-workflow.yml
     permissions:
