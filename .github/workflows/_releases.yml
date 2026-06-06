@@ -4,8 +4,16 @@ on:
   push:
     tags:
       - 'v*'
-  # Allow manual triggering of the workflow
+  # Allow manual triggering of the workflow.
+  # A maintainer can use the `force` input to bypass main workflow verification
+  # when a release must proceed due to unexpected issues with main workflow that prevent normal execution.
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Skip main workflow verification and force release'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -13,33 +21,41 @@ permissions:
 
 jobs:
 
-  static-analysis:
-    name: Lint
-    uses: ./.github/workflows/static-analysis.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
+  verify-main-workflow:
+    name: Verify main workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check main branch workflow completion
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const force = github.context.payload.inputs?.force === true || github.context.payload.inputs?.force === 'true';
+            if (force) {
+              console.log('Force release enabled; skipping main workflow verification.');
+              return;
+            }
 
-  tests:
-    name: Tests
-    uses: ./.github/workflows/tests.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-    secrets: inherit
-
-  tests-acceptance:
-    name: Acceptance Tests
-    uses: ./.github/workflows/tests-acceptance.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
-    secrets: inherit
+            const runs = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event: 'push',
+              branch: 'main',
+              per_page: 50,
+            });
+            const mainRun = runs.data.workflow_runs.find(
+              run => run.head_sha === context.sha && run.name === 'Main branch'
+            );
+            if (!mainRun) {
+              throw new Error('No completed main workflow was found for this commit.');
+            }
+            if (mainRun.status !== 'completed' || mainRun.conclusion !== 'success') {
+              throw new Error(`Main workflow did not pass. status=${mainRun.status} conclusion=${mainRun.conclusion}`);
+            }
 
   build-and-test-artifacts:
     name: Build & Test
     needs:
-      - static-analysis
-      - tests
-      - tests-acceptance
+      - verify-main-workflow
     uses: ./.github/workflows/build.yml
     with:
       BRANCH_REF: ${{ github.ref }}
