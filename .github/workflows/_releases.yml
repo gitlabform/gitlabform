@@ -27,9 +27,11 @@ jobs:
     steps:
       - name: Check main branch workflow completion
         uses: actions/github-script@v7
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
           script: |
-            const force = github.context.payload.inputs?.force === true || github.context.payload.inputs?.force === 'true';
+            const force = context.payload.inputs?.force === true || context.payload.inputs?.force === 'true';
             if (force) {
               console.log('Force release enabled; skipping main workflow verification.');
               return;
@@ -52,8 +54,8 @@ jobs:
               throw new Error(`Main workflow did not pass. status=${mainRun.status} conclusion=${mainRun.conclusion}`);
             }
 
-  build-and-test-artifacts:
-    name: Build & Test
+  build-release-artifacts:
+    name: Build release artifacts
     needs:
       - verify-main-workflow
     uses: ./.github/workflows/build.yml
@@ -63,7 +65,7 @@ jobs:
   publish-docs:
     name: Docs
     needs:
-      - build-and-test-artifacts
+      - build-release-artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -85,7 +87,7 @@ jobs:
   publish-to-github:
     name: Publish Release
     needs:
-      - build-and-test-artifacts
+      - build-release-artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Create release in GitHub
@@ -99,7 +101,7 @@ jobs:
   publish-to-pypi:
     name: Publish PyPI
     needs:
-      - build-and-test-artifacts
+      - build-release-artifacts
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -120,7 +122,7 @@ jobs:
         run: |
           uv sync --frozen --no-dev --group release
       # TODO: In a separate PR, consume the build artifact (package-dist) uploaded
-      # in build-and-test-artifacts instead of rebuilding and verifying the package here.
+      # in build-release-artifacts instead of rebuilding and verifying the package here.
       - name: Build and verify the package
         run: |
           uv run --no-sync package build
@@ -132,7 +134,7 @@ jobs:
   publish-to-ghcr:
     name: Publish GHCR
     needs:
-      - build-and-test-artifacts
+      - build-release-artifacts
       - publish-to-pypi
     runs-on: ubuntu-latest
     steps:
