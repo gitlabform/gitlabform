@@ -60,7 +60,7 @@ jobs:
           path: site
 
   smoke-tests:
-    name: "Smoke (${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'macos-latest' && 'macOS' || 'Windows' }}, ${{ matrix.python-version }})"
+    name: "Smoke test - (${{ matrix.os == 'ubuntu-latest' && 'Linux' || matrix.os == 'macos-latest' && 'macOS' || 'Windows' }}, ${{ matrix.python-version }})"
     strategy:
       fail-fast: false
       matrix:
