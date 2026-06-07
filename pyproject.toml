@@ -59,7 +59,7 @@ dev = [
     { include-group = "docs" },
     { include-group = "release" },
     "commitizen==4.16.3",
-    "prek==0.4.3",
+    "prek==0.4.4",
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
