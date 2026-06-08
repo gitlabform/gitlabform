@@ -2,7 +2,7 @@
 
 Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.
 
-## From 6.\* to 7.\*
+## From 5.\* to 6.\*
 
 We have upgraded to new major versions of underlying YAML libraries `ezyaml`, `yamlpath` and `ruamel.yaml`.
 
