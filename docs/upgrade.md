@@ -19,7 +19,7 @@ In order to retain `yaml 1.1` configuration you **must** add the `%YAML` directi
        foo: yes
 ```
 
-Alternatively update your YAML to be compatible with `yaml 1.2` specification, for example by replacing `yes` with `true` in the above example.
+Alternatively update your YAML to be compatible with `yaml 1.2` specification, for example by replacing `yes` with `true` in the above example, and any instances of `no` with `false`.
 
 ## From 4.\* to 5.\*
 
