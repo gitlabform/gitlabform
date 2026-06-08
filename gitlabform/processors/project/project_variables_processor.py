@@ -1,5 +1,5 @@
 from typing import Dict, Any, List, cast
-from logging import warning, info
+from logging import warning, info, INFO
 
 import copy
 import textwrap
@@ -14,8 +14,9 @@ from gitlabform.processors.util.variables_processor import VariablesProcessor
 
 
 class ProjectVariablesProcessor(AbstractProcessor):
-    def __init__(self, gitlab: GitLab):
+    def __init__(self, gitlab: GitLab, log_level: int):
         super().__init__("variables", gitlab)
+        self.log_level = log_level
         self._variables_processor = VariablesProcessor(self._needs_update)
 
     def _process_configuration(self, project_and_group: str, configuration: Dict[str, Any]) -> None:
@@ -65,12 +66,14 @@ class ProjectVariablesProcessor(AbstractProcessor):
                 variables_list.append(var_dict)
 
             info(f"Variables for {project_and_group} in GitLab:")
-            info(
-                textwrap.indent(
-                    ez_yaml.to_string(variables_list),
-                    "  ",
+            if self.log_level == INFO:
+                yaml = ez_yaml.to_string(variables_list)
+                info(
+                    textwrap.indent(
+                        yaml,
+                        "  ",
+                    )
                 )
-            )
         except GitlabGetError:
             info(f"Variables for {project_and_group} in GitLab cannot be checked.")
 
@@ -86,9 +89,11 @@ class ProjectVariablesProcessor(AbstractProcessor):
         for key in configured_variables.keys():
             configured_variables[key]["value"] = hide(configured_variables[key]["value"])
 
-        info(
-            textwrap.indent(
-                ez_yaml.to_string(configured_variables),
-                "  ",
+        if self.log_level == INFO:
+            yaml = ez_yaml.to_string(configured_variables)
+            info(
+                textwrap.indent(
+                    yaml,
+                    "  ",
+                )
             )
-        )

@@ -1,7 +1,6 @@
 import sys
-from logging import debug, info, critical
+from logging import debug, info, critical, DEBUG
 from abc import ABC, abstractmethod
-from ruamel.yaml import YAML
 from types import SimpleNamespace
 import ez_yaml
 from ruamel.yaml.comments import CommentedMap
@@ -23,23 +22,26 @@ from gitlabform.gitlab import GitLab
 
 
 class ConfigurationTransformers:
-    def __init__(self, gitlab: GitLab):
+    def __init__(self, gitlab: GitLab, log_level: int):
         self.user_transformer = UserTransformer(gitlab)
         self.group_transformer = GroupTransformer(gitlab)
         self.implicit_name_transformer = ImplicitNameTransformer(gitlab)
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
+        self.log_level = log_level
 
     def transform(self, configuration: Configuration) -> None:
-        config_before = ez_yaml.to_string(obj=configuration.config, options={})
-        debug(f"Config BEFORE transformations:\n{config_before}")
+        if self.log_level == DEBUG:
+            config_before = ez_yaml.to_string(obj=configuration.config, options={})
+            debug(f"Config BEFORE transformations:\n{config_before}")
 
         self.user_transformer.transform(configuration)
         self.group_transformer.transform(configuration)
         self.implicit_name_transformer.transform(configuration)
         self.access_level_transformer.transform(configuration, last=True)
 
-        config_after = ez_yaml.to_string(obj=configuration.config, options={})
-        debug(f"Config AFTER transformations:\n{config_after}")
+        if self.log_level == DEBUG:
+            config_after = ez_yaml.to_string(obj=configuration.config, options={})
+            debug(f"Config AFTER transformations:\n{config_after}")
 
 
 class ConfigurationTransformer(ABC):
