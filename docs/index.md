@@ -106,7 +106,8 @@ If so then:
   <a href="https://www.elasticpath.com" target="_blank"><img src="images/elastic-path-logo.svg" width="130px" style="margin: 10px; vertical-align: middle;" alt="Elastic Path" /></a>
   <a href="https://www.liquidlight.co.uk/" target="_blank"><img src="images/liquidlight-logo.svg" width="130px" style="margin: 10px; vertical-align: middle;" alt="Liquid Light" /></a>
   <a href="https://www.roche.com" target="_blank"><img src="images/roche-logo.png" width="130px" style="margin: 10px; vertical-align: middle;" alt="Roche logo" /></a>
-  <a href="https://stroeer-online-marketing.de/en/" target="_blank"><img src="images/stroeer-online-marketing-logo.svg" width="150px" style="margin: 10px; vertical-align: middle;" alt="Ströer Online Marketing logo" /></a>
+  <a href="https://stroeer-online-marketing.de/en/" target="_blank"><img src="images/stroeer-online-marketing-logo.svg" width="180px" style="margin: 10px; vertical-align: middle;" alt="Ströer Online Marketing logo" /></a>
+  <a href="https://www.opencastsoftware.com/" target="_blank"><img src="images/Opencast-logo.png" width="148px" style="margin: 10px; vertical-align: middle;" alt="Opencast" /></a>
 </div>
 ...and many more!
 
