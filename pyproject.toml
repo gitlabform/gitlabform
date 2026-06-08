@@ -41,6 +41,7 @@ dependencies = [
     "python-gitlab[graphql]==8.4.0",
     "requests==2.34.2",
     "rich==15.0.0",
+    "ruamel.yaml==0.19.1",
     "yamlpath==3.9.1",
 ]
 
@@ -137,6 +138,11 @@ line-length = 120
 [tool.uv]
 # Ensures 'uv sync' or 'uv run' implicitly includes development tools.
 default-groups = ["dev"]
+# ruamel.yaml is a dependency of ezyaml (as it wraps it), in order for consistency internally we should attempt to force
+# a consistent version of ruamel.yaml across all dependencies, matching the direct dependency
+build-constraint-dependencies = [
+    "ruamel.yaml==0.19.1",
+]
 
 [tool.commitizen]
 # Configuration for conventional commit enforcement and version management.
