@@ -1,6 +1,3 @@
-from unittest import TestCase
-
-import ez_yaml
 import pytest
 from unittest.mock import MagicMock
 
