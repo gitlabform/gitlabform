@@ -5,6 +5,18 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+## 5.5.5
+
+### Bug Fixes
+
+* allow editing and creation of files on wildcard protected branches [#1282](https://github.com/gitlabform/gitlabform/pull/1282). ([timknight01](https://github.com/TimKnight01) & [rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 5.5.4
 
 ### Build
