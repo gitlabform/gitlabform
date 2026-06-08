@@ -2,10 +2,8 @@ from unittest import TestCase
 
 import ez_yaml
 import pytest
-from deepdiff import DeepDiff
 from unittest.mock import MagicMock
 
-from gitlabform.constants import APPROVAL_RULE_NAME
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.transform import (
@@ -86,8 +84,7 @@ def test__config__with_access_level_names__branches():
     """
     configuration_with_numbers = Configuration(config_string=config_with_numbers)
 
-    ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
-    assert not ddiff
+    assert configuration.config == configuration_with_numbers.config
 
 
 def test__config__with_access_level_names__group_ldap_links():
@@ -128,8 +125,7 @@ def test__config__with_access_level_names__group_ldap_links():
     """
     configuration_with_numbers = Configuration(config_string=config_with_numbers)
 
-    ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
-    assert not ddiff
+    assert configuration_with_numbers.config == configuration_with_numbers.config
 
 
 def test__config__with_access_level_names__branches_premium_syntax():
@@ -174,8 +170,7 @@ def test__config__with_access_level_names__branches_premium_syntax():
     """
     configuration_with_numbers = Configuration(config_string=config_with_numbers)
 
-    ddiff = DeepDiff(configuration.config, configuration_with_numbers.config)
-    assert not ddiff
+    assert configuration.config == configuration_with_numbers.config
 
 
 def test__config__with_access_level_names__invalid_name():
