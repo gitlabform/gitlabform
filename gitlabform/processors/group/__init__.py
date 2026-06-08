@@ -36,7 +36,7 @@ from gitlabform.processors.group.group_protected_branches_processor import (
 
 
 class GroupProcessors(AbstractProcessors):
-    def __init__(self, gitlab: GitLab, config: Configuration, strict: bool, log_level: int):
+    def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
         super().__init__(gitlab, config, strict)
         self.processors: List[AbstractProcessor] = [
             GroupVariablesProcessor(gitlab),
