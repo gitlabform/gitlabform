@@ -1,3 +1,4 @@
+import fnmatch
 import sys
 from typing import Any
 
@@ -212,6 +213,26 @@ class ConfigurationCore(ABC):
         return dict(merged_dict)
 
     @staticmethod
+    def _get_key_type(a_key: str) -> str:
+        """
+        Classify a config key used under 'projects_and_groups'.
+        """
+        if a_key == "*":
+            return "common"
+        if a_key.endswith("/*"):
+            return "group"
+        if "*" in a_key:
+            return "project_pattern"
+        return "project"
+
+    @staticmethod
+    def _match_pattern(pattern: str, item: str) -> bool:
+        """
+        Case-insensitive fnmatch between pattern and item.
+        """
+        return fnmatch.fnmatchcase(item.lower(), pattern.lower())
+
+    @staticmethod
     def _get_case_insensitively(a_dict: dict, a_key: str):
         for dict_key in a_dict.keys():
             if dict_key.lower() == a_key.lower():
@@ -231,11 +252,16 @@ class ConfigurationCore(ABC):
             if list_element == item:
                 return True
 
+            # Support for traditional group/* skip pattern
             if (
                 list_element.endswith("/*")
                 and item.startswith(list_element[:-2])
                 and len(item) >= len(list_element[:-2])
             ):
+                return True
+
+            # Support for partial wildcard patterns like group/foo-*
+            if "*" in list_element and fnmatch.fnmatchcase(item, list_element):
                 return True
 
         return False
