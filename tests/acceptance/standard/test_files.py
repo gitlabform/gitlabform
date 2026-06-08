@@ -3,12 +3,14 @@ import pytest
 import time
 
 from gitlab import GitlabGetError
+from gitlab.v4.objects import Project
 
 from gitlabform.gitlab import AccessLevel
 from tests.acceptance import (
     get_only_branch_access_levels,
     run_gitlabform,
     DEFAULT_README,
+    get_random_name,
 )
 
 
@@ -456,3 +458,177 @@ class TestFiles:
         # check that this branch remains unprotected
         other_branch = project_for_function.branches.get(other_branch_for_function)
         assert other_branch.protected is False
+
+    def test__set_file_on_protected_branches_with_wildcard_ending(self, project_for_function, branch_for_function):
+        # Setup Test
+
+        ### Test-config:
+        set_file_protected_branches = f"""
+        protected branch: &protected_branch
+          allow_force_push: false
+          code_owner_approval_required: true
+          merge_access_level: developer
+          protected: true
+          push_access_level: maintainer
+          unprotect_access_level: maintainer
+        
+        code settings: &code_owner_settings
+          "CODEOWNERS":
+            branches: protected
+            commit_message: "GitlabForm: updating CODEOWNERS file"
+            content: |
+              [SomeGroup] @someuser
+              .gitlab-ci.yml
+              CODEOWNERS
+            overwrite: true
+            skip_ci: true
+            template: false
+        
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            branches:
+              main: *protected_branch
+              bugfix/*: *protected_branch
+            files: *code_owner_settings
+        """
+
+        ### Make sure "main" exists on project
+        main_branch_name: str = "main"
+        assert project_for_function.branches.get(main_branch_name) is not None
+
+        ### Make sure "branch_for_function" exists on project
+        assert project_for_function.branches.get(branch_for_function) is not None
+
+        ### Add a "bugfix/some-branch" and a "bugfix/other-fix" to project
+        bug_fix_branch_name_1 = f"bugfix/{get_random_name("branch")}"
+        bug_fix_branch_name_2 = f"bugfix/{get_random_name("branch")}"
+
+        project_for_function.branches.create({"branch": bug_fix_branch_name_1, "ref": main_branch_name})
+        project_for_function.branches.create({"branch": bug_fix_branch_name_2, "ref": main_branch_name})
+
+        time.sleep(5)
+        # Wait a bit to make sure GitLab has asynchronously created the branches before we run GitLabForm
+
+        # Run Test
+        run_gitlabform(set_file_protected_branches, project_for_function.path_with_namespace)
+
+        # Assert correct changes are applied
+        expected_file_contents = f"[SomeGroup] @someuser\n.gitlab-ci.yml\nCODEOWNERS"
+
+        ### Check Main branch is protected and has CODEOWNERS added
+        self.validate_branch_has_protection_state_and_contains_file(
+            expected_file_contents, "CODEOWNERS", main_branch_name, project_for_function, True
+        )
+
+        ### Check both Bugfix branches are protected and have CODEOWNERS added
+        self.validate_branch_has_protection_state_and_contains_file(
+            expected_file_contents, "CODEOWNERS", bug_fix_branch_name_1, project_for_function, True
+        )
+        self.validate_branch_has_protection_state_and_contains_file(
+            expected_file_contents, "CODEOWNERS", bug_fix_branch_name_2, project_for_function, True
+        )
+
+        ### Check branch_for_function is not protected and does not have CODEOWNERS added
+        branch = project_for_function.branches.get(branch_for_function)
+        assert branch.protected is False
+        with pytest.raises(GitlabGetError) as get_exception:
+            file_on_branch = project_for_function.files.get(ref=branch_for_function, file_path="CODEOWNERS")
+            assert file_on_branch is None
+        assert get_exception is not None
+        assert "File Not Found" in get_exception.value.error_message
+
+    def test__set_file_on_branches_with_two_wildcards(self, project_for_function, branch_for_function):
+        # Setup Test
+
+        ### Test-config:
+        set_file_protected_branches = f"""
+        protected branch: &protected_branch
+          allow_force_push: false
+          code_owner_approval_required: true
+          merge_access_level: developer
+          protected: true
+          push_access_level: maintainer
+          unprotect_access_level: maintainer
+
+        code settings: &code_owner_settings
+          "CODEOWNERS":
+            branches:
+              - main
+              - "*test*"
+            commit_message: "GitlabForm: updating CODEOWNERS file"
+            content: |
+              [SomeGroup] @someuser
+              .gitlab-ci.yml
+              CODEOWNERS
+            overwrite: true
+            skip_ci: true
+            template: false
+
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            branches:
+              main: *protected_branch
+            files: *code_owner_settings
+        """
+
+        ### Make sure "main" exists on project
+        main_branch_name: str = "main"
+        assert project_for_function.branches.get(main_branch_name) is not None
+
+        ### Make sure "branch_for_function" exists on project
+        assert project_for_function.branches.get(branch_for_function) is not None
+
+        ### Add a "test/..." and a ".../test" to project
+        test_branch_name_1 = f"test/{get_random_name("branch")}"
+        test_branch_name_2 = f"{get_random_name("branch")}/test"
+
+        project_for_function.branches.create({"branch": test_branch_name_1, "ref": main_branch_name})
+        project_for_function.branches.create({"branch": test_branch_name_2, "ref": main_branch_name})
+
+        time.sleep(5)
+        # Wait a bit to make sure GitLab has asynchronously created the branches before we run GitLabForm
+        branches = project_for_function.branches.list(get_all=True)
+
+        # Run Test
+        run_gitlabform(set_file_protected_branches, project_for_function.path_with_namespace)
+
+        # Assert correct changes are applied
+        expected_file_contents = f"[SomeGroup] @someuser\n.gitlab-ci.yml\nCODEOWNERS"
+
+        ### Check Main branch is protected and has CODEOWNERS added
+        self.validate_branch_has_protection_state_and_contains_file(
+            expected_file_contents, "CODEOWNERS", main_branch_name, project_for_function, True
+        )
+
+        ### Check both Gitlab branches have CODEOWNERS added
+        self.validate_branch_has_protection_state_and_contains_file(
+            expected_file_contents, "CODEOWNERS", test_branch_name_1, project_for_function, False
+        )
+        self.validate_branch_has_protection_state_and_contains_file(
+            expected_file_contents, "CODEOWNERS", test_branch_name_2, project_for_function, False
+        )
+
+        ### Check branch_for_function is not protected and does not have CODEOWNERS added
+        branch = project_for_function.branches.get(branch_for_function)
+        assert branch.protected is False
+        with pytest.raises(GitlabGetError) as get_exception:
+            file_on_branch = project_for_function.files.get(ref=branch_for_function, file_path="CODEOWNERS")
+            assert file_on_branch is None
+        assert get_exception is not None
+        assert "File Not Found" in get_exception.value.error_message
+
+    @staticmethod
+    def validate_branch_has_protection_state_and_contains_file(
+        expected_file_contents: str, file_name: str, branch_name: str, project: Project, protection_status: bool
+    ):
+        """
+        Validates branch with input branch_name is Protected and contains a file with file_name and that the file
+        content matches the expected_file_contents.
+        """
+        branch = project.branches.get(branch_name)
+        assert branch.protected is protection_status
+        file_on_branch = project.files.get(ref=branch_name, file_path=file_name)
+        assert file_on_branch is not None
+
+        file_contents: str = file_on_branch.decode().decode("utf-8")
+        assert expected_file_contents.strip() == file_contents.strip()

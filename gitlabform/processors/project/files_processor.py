@@ -4,10 +4,9 @@ import sys
 from pathlib import Path
 
 from logging import debug, info, warning, critical
-from typing import List
 
 from jinja2 import Environment, FileSystemLoader
-from gitlab import GitlabGetError, GitlabUpdateError
+from gitlab import GitlabGetError, GitlabUpdateError, GitlabListError
 from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
 from gitlab.base import RESTObject
 
@@ -35,27 +34,20 @@ class FilesProcessor(AbstractProcessor):
                 continue
 
             config_target_ref = configuration["files"][file]["branches"]
-            branches_to_update: List[RESTObject] = []
+            branches_to_update: list[ProjectBranch] = []
 
-            if isinstance(config_target_ref, str):
-                # Target ref could be either 'all' or 'protected'.
-                # Get a list of branches that should be updated.
-                if config_target_ref == "all":
-                    branches_to_update.extend(project.branches.list(get_all=True, lazy=True))
-                elif config_target_ref == "protected":
-                    branches_to_update.extend(project.protectedbranches.list(get_all=True, lazy=True))
+            if config_target_ref == "all":
+                # Get all Branches in the Project
+                branches_to_update.extend(project.branches.list(get_all=True, lazy=True))
+            elif config_target_ref == "protected":
+                # Get all Protected Branch definitions -> this could return wildcard branch names
+                protected_branches = project.protectedbranches.list(get_all=True, lazy=True)
+                for protected_branch in protected_branches:
+                    self.append_branches_matching_ref(branches_to_update, file, project, protected_branch.name)
             elif isinstance(config_target_ref, list):
-                # Get a list of branches from the config that should be updated.
-                for branch_name in config_target_ref:
-                    try:
-                        branches_to_update.append(project.branches.get(branch_name))
-                    except GitlabGetError:
-                        message = f"! Branch '{branch_name}' not found, not processing file '{file}' in it"
-                        if self.strict:
-                            critical(message)
-                            sys.exit(EXIT_INVALID_INPUT)
-                        else:
-                            warning(message)
+                # List of specific branch refs to update -> this could contain wildcard branch names
+                for ref in config_target_ref:
+                    self.append_branches_matching_ref(branches_to_update, file, project, ref)
 
             debug(
                 "File '%s' to be updated in '%s' branche(s)",
@@ -63,105 +55,150 @@ class FilesProcessor(AbstractProcessor):
                 len(branches_to_update),
             )
 
-            for branch in branches_to_update:
-                info(f"Processing file '{file}' in branch '{branch.name}'")
+            for branch_to_update in branches_to_update:
+                process_only_first: bool = configuration.get("files|" + file + "|only_first_branch", False)
 
-                if configuration.get("files|" + file + "|content") and configuration.get("files|" + file + "|file"):
-                    critical(
-                        f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
-                        "use only one of these keys."
-                    )
+                self.process_branch(branch_to_update, configuration, file, project, project_and_group)
+
+                if process_only_first:
+                    info("Skipping other branches for this file, as configured by only_first_branch.")
+                    break
+
+    def append_branches_matching_ref(self, branches_to_update: list[ProjectBranch], file, project: Project, ref: str):
+
+        if self.branch_processor.branch_name_contains_supported_wildcard(ref):
+            try:
+                # GitLab's branches API expects an RE2 regex
+                regex_ref = "^" + re.escape(ref).replace(r"\*", ".*") + "$"
+                # sorted for deterministic only_first_branch
+                wildcard_branches = sorted(
+                    project.branches.list(get_all=True, regex=regex_ref),
+                    key=lambda b: b.name,
+                )
+                for wildcard_branch in wildcard_branches:
+                    branch_id = wildcard_branch.get_id()
+                    if branch_id:
+                        branches_to_update.append(wildcard_branch)
+            except GitlabListError:
+                message = f"! Could not list branches using {ref}, not processing file '{file}' on them"
+                if self.strict:
+                    critical(message)
                     sys.exit(EXIT_INVALID_INPUT)
+                else:
+                    warning(message)
+        else:
+            try:
+                branches_to_update.append(project.branches.get(ref))
+            except GitlabGetError:
+                message = f"! Branch '{ref}' not found, not processing file '{file}' in it"
+                if self.strict:
+                    critical(message)
+                    sys.exit(EXIT_INVALID_INPUT)
+                else:
+                    warning(message)
 
-                if configuration.get("files|" + file + "|delete"):
-                    try:
-                        file_to_delete: ProjectFile = project.files.get(file_path=file, ref=branch.name)
-                        debug("Deleting file '%s' in branch '%s'", file, branch.name)
+    def process_branch(
+        self,
+        branch: ProjectBranch,
+        configuration: dict,
+        file: str,
+        project: Project,
+        project_and_group: str,
+    ):
+        info(f"Processing file '{file}' in branch '{branch.name}'")
+
+        if configuration.get("files|" + file + "|content") and configuration.get("files|" + file + "|file"):
+            critical(
+                f"File '{file}' in '{project_and_group}' has both `content` and `file` set - "
+                "use only one of these keys."
+            )
+            sys.exit(EXIT_INVALID_INPUT)
+
+        if configuration.get("files|" + file + "|delete"):
+            try:
+                file_to_delete: ProjectFile = project.files.get(file_path=file, ref=branch.name)
+                debug("Deleting file '%s' in branch '%s'", file, branch.name)
+                self.modify_file_dealing_with_branch_protection(
+                    project,
+                    branch,
+                    file_to_delete,
+                    "delete",
+                    configuration,
+                )
+            except GitlabGetError:
+                debug(
+                    "Not deleting file '%s' in branch '%s' (already doesn't exist)",
+                    file,
+                    branch.name,
+                )
+        else:
+            # change or create file
+
+            if configuration.get("files|" + file + "|content"):
+                new_content = configuration.get("files|" + file + "|content")
+            else:
+                path_in_config = Path(str(configuration.get("files|" + file + "|file")))
+                if path_in_config.is_absolute():
+                    effective_path = path_in_config
+                else:
+                    # relative paths are relative to config file location
+                    effective_path = Path(os.path.join(self.config.config_dir, str(path_in_config)))
+                new_content = effective_path.read_text()
+
+            # templating is documented to be enabled by default,
+            # see https://gitlabform.github.io/gitlabform/reference/files/#files
+            templating_enabled = True
+
+            if configuration.get("files|" + file + "|template", templating_enabled):
+                new_content = self.get_file_content_as_template(
+                    new_content,
+                    project_and_group,
+                    **configuration.get("files|" + file + "|jinja_env", dict()),
+                )
+
+            try:
+                # Returns base64 encoded content: https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#project-files
+                repo_file: ProjectFile = project.files.get(file_path=file, ref=branch.name)
+                decoded_file: bytes = repo_file.decode()
+                current_content: str = decoded_file.decode("utf-8")
+
+                if current_content != new_content:
+                    if configuration.get("files|" + file + "|overwrite"):
+                        debug(
+                            "Changing file '%s' in branch '%s'",
+                            file,
+                            branch.name,
+                        )
                         self.modify_file_dealing_with_branch_protection(
                             project,
                             branch,
-                            file_to_delete,
-                            "delete",
+                            repo_file,
+                            "modify",
                             configuration,
+                            new_content,
                         )
-                    except GitlabGetError:
+                    else:
                         debug(
-                            "Not deleting file '%s' in branch '%s' (already doesn't exist)",
+                            "Not changing file '%s' in branch '%s' - overwrite flag not set.",
                             file,
                             branch.name,
                         )
                 else:
-                    # change or create file
-
-                    if configuration.get("files|" + file + "|content"):
-                        new_content = configuration.get("files|" + file + "|content")
-                    else:
-                        path_in_config = Path(str(configuration.get("files|" + file + "|file")))
-                        if path_in_config.is_absolute():
-                            effective_path = path_in_config
-                        else:
-                            # relative paths are relative to config file location
-                            effective_path = Path(os.path.join(self.config.config_dir, str(path_in_config)))
-                        new_content = effective_path.read_text()
-
-                    # templating is documented to be enabled by default,
-                    # see https://gitlabform.github.io/gitlabform/reference/files/#files
-                    templating_enabled = True
-
-                    if configuration.get("files|" + file + "|template", templating_enabled):
-                        new_content = self.get_file_content_as_template(
-                            new_content,
-                            project_and_group,
-                            **configuration.get("files|" + file + "|jinja_env", dict()),
-                        )
-
-                    try:
-                        # Returns base64 encoded content: https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#project-files
-                        repo_file: ProjectFile = project.files.get(file_path=file, ref=branch.name)
-                        decoded_file: bytes = repo_file.decode()
-                        current_content: str = decoded_file.decode("utf-8")
-
-                        if current_content != new_content:
-                            if configuration.get("files|" + file + "|overwrite"):
-                                debug(
-                                    "Changing file '%s' in branch '%s'",
-                                    file,
-                                    branch.name,
-                                )
-                                self.modify_file_dealing_with_branch_protection(
-                                    project,
-                                    branch,
-                                    repo_file,
-                                    "modify",
-                                    configuration,
-                                    new_content,
-                                )
-                            else:
-                                debug(
-                                    "Not changing file '%s' in branch '%s' - overwrite flag not set.",
-                                    file,
-                                    branch.name,
-                                )
-                        else:
-                            debug(
-                                "Not changing file '%s' in branch '%s' - it's content is already" " as provided)",
-                                file,
-                                branch.name,
-                            )
-                    except GitlabGetError:
-                        debug("Creating file '%s' in branch '%s'", file, branch.name)
-                        self.modify_file_dealing_with_branch_protection(
-                            project,
-                            branch,
-                            file,
-                            "add",
-                            configuration,
-                            new_content,
-                        )
-
-                if configuration.get("files|" + file + "|only_first_branch"):
-                    info("Skipping other branches for this file, as configured.")
-                    break
+                    debug(
+                        "Not changing file '%s' in branch '%s' - it's content is already" " as provided)",
+                        file,
+                        branch.name,
+                    )
+            except GitlabGetError:
+                debug("Creating file '%s' in branch '%s'", file, branch.name)
+                self.modify_file_dealing_with_branch_protection(
+                    project,
+                    branch,
+                    file,
+                    "add",
+                    configuration,
+                    new_content,
+                )
 
     def modify_file_dealing_with_branch_protection(
         self,

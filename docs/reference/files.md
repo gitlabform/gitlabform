@@ -8,7 +8,7 @@ Each key in this section is a path to a file in the repo and the values are dict
 
 * `overwrite` - if set to `false` and the file already exists, but has a different content, then it is not changed; default is `true`,
 * `skip_ci` - if set to `true` then the changes to a given file will be done with commits that will not trigger the CI pipeline; default is `false`,
-* `branches` - can be a single string `all`, string `protected` or an array of branch names,
+* `branches` - can be a single string `all`, string `protected` (all protected branches, with wildcard-protected rules expanded to matching branches), or an array of branch names where `*` can be used to match any sequence of characters (e.g. `bugfix/*`, `*release*`),
 * `only_first_branch` - if set to `true` then only the first branch from the list above that exists will be processed (unless you pass `--strict` as cli parameter to the app - then it will fail when trying to process a non-existent branch),
 * `commit_message` - set this to a custom commit message that will be used by the app; optional,
 * `content` - the literal contents that should be put into the target file; use this or `file`,
@@ -93,4 +93,46 @@ projects_and_groups:
           - main
         only_first_branch: true
         skip_ci: true
+```
+
+Example 5 - adding a README to all branches with "gitlab" in their name:
+
+```yaml
+projects_and_groups:
+  group_1/project_1:
+    files:
+      "README.md":
+        overwrite: false
+        branches:
+          - "*gitlab*"
+        skip_ci: true
+        content: |
+          This is a default README. Please replace it with a proper one!
+        commit_message: Set default README
+```
+
+Example 6 - adding a README to protected branches, including protected branches defined with wildcards (e.g. all branches with "bugfix/" in their name are protected and will have the file added):
+
+```yaml
+projects_and_groups:
+  group_1/project_1:
+    branches:
+      main: 
+        allow_force_push: false
+        code_owner_approval_required: true
+        merge_access_level: developer
+        protected: true
+      bugfix/*: 
+        allow_force_push: true
+        code_owner_approval_required: false
+        merge_access_level: developer
+        protected: true
+    files:
+      "README.md":
+        overwrite: false
+        branches: protected
+        skip_ci: true
+        content: |
+          This is a protected branch README!
+        commit_message: Set protected branch README
 ```
