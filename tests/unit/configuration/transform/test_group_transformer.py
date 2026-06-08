@@ -1,4 +1,3 @@
-from deepdiff import DeepDiff
 from unittest.mock import MagicMock
 
 from gitlabform.configuration import Configuration
@@ -29,10 +28,6 @@ def test__transform_for_merge_request_approvals() -> None:
 
     assert gitlab_mock._get_group_id.call_count == 1
 
-    # effective_config_yaml_str = ez_yaml.to_string(obj=configuration.config, options={})
-    # print("!!!")
-    # print(effective_config_yaml_str)
-
     expected_transformed_config_yaml = f"""
     projects_and_groups:
       "foo/bar":
@@ -45,6 +40,5 @@ def test__transform_for_merge_request_approvals() -> None:
     """
 
     expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
-    transformer.convert_to_simple_types(expected_transformed_config)
 
-    assert not DeepDiff(configuration.config, expected_transformed_config.config)
+    assert configuration.config == expected_transformed_config.config

@@ -2,6 +2,25 @@
 
 Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.
 
+## From 6.\* to 7.\*
+
+We have upgraded to new major versions of underlying YAML libraries `ezyaml`, `yamlpath` and `ruamel.yaml`.
+
+This results in GitLabForm no longer defaulting to `yaml 1.1` support when parsing YAML configuration files.
+
+In order to retain `yaml 1.1` configuration you **must** add the `%YAML` directive to the top of your configuration file, for example:
+
+```yaml
+%yaml 1.1
+---
+ projects_and_groups:
+   some_group/*:
+     project_settings:
+       foo: yes
+```
+
+Alternatively update your YAML to be compatible with `yaml 1.2` specification, for example by replacing `yes` with `true` in the above example.
+
 ## From 4.\* to 5.\*
 
 ### Update `config_version`

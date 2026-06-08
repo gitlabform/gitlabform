@@ -1,23 +1,14 @@
-from unittest import TestCase
-
-import ez_yaml
-import pytest
-from deepdiff import DeepDiff
 from unittest.mock import MagicMock
 
-from gitlabform.constants import APPROVAL_RULE_NAME
-from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.transform import (
-    AccessLevelsTransformer,
     UserTransformer,
-    ImplicitNameTransformer,
 )
 from gitlabform.gitlab import GitLab
 
 
 def test__transform_for_protected_environments() -> None:
-    config_yaml = f"""
+    config_yaml = """
     projects_and_groups:
       "foo/bar":
         protected_environments:
@@ -41,7 +32,7 @@ def test__transform_for_protected_environments() -> None:
 
     assert gitlab_mock._get_user_id.call_count == 2
 
-    expected_transformed_config_yaml = f"""
+    expected_transformed_config_yaml = """
     projects_and_groups:
       "foo/bar":
         protected_environments:
@@ -58,11 +49,11 @@ def test__transform_for_protected_environments() -> None:
 
     expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
 
-    assert not DeepDiff(configuration.config, expected_transformed_config.config)
+    assert configuration.config == expected_transformed_config.config
 
 
 def test__transform_for_merge_request_approvals() -> None:
-    config_yaml = f"""
+    config_yaml = """
     projects_and_groups:
       "foo/bar":
         merge_requests_approval_rules:
@@ -82,7 +73,7 @@ def test__transform_for_merge_request_approvals() -> None:
 
     assert gitlab_mock._get_user_id.call_count == 1
 
-    expected_transformed_config_yaml = f"""
+    expected_transformed_config_yaml = """
     projects_and_groups:
       "foo/bar":
         merge_requests_approval_rules:
@@ -94,6 +85,4 @@ def test__transform_for_merge_request_approvals() -> None:
     """
 
     expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
-    transformer.convert_to_simple_types(expected_transformed_config)
-
-    assert not DeepDiff(configuration.config, expected_transformed_config.config)
+    assert configuration.config == expected_transformed_config.config

@@ -1,10 +1,9 @@
 import sys
 from logging import debug, info, critical
 from abc import ABC, abstractmethod
-from ez_yaml import ez_yaml
 from ruamel.yaml import YAML
 from types import SimpleNamespace
-
+import ez_yaml
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
@@ -46,22 +45,10 @@ class ConfigurationTransformers:
 class ConfigurationTransformer(ABC):
     def transform(self, configuration: Configuration, last: bool = False) -> None:
         self._do_transform(configuration)
-        if last:
-            self.convert_to_simple_types(configuration)
 
     @abstractmethod
     def _do_transform(self, configuration: Configuration) -> None:
         pass
-
-    @staticmethod
-    def convert_to_simple_types(configuration: Configuration):
-        # we needed complex ruamel.yaml's types like ordereddict and CommentedSeq
-        # for transformations, but at the end convert them to simple dict and lists
-        # for easier to understand debug output and tests
-
-        config_yaml_string = ez_yaml.to_string(obj=configuration.config, options={})
-        simple_yaml_loader = YAML(typ="safe", pure=True)
-        configuration.config = simple_yaml_loader.load(config_yaml_string)
 
 
 class UserTransformer(ConfigurationTransformer):
