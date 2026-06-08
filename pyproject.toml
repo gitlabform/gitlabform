@@ -138,11 +138,6 @@ line-length = 120
 [tool.uv]
 # Ensures 'uv sync' or 'uv run' implicitly includes development tools.
 default-groups = ["dev"]
-# ruamel.yaml is a dependency of ezyaml (as it wraps it), in order for consistency internally we should attempt to force
-# a consistent version of ruamel.yaml across all dependencies, matching the direct dependency
-build-constraint-dependencies = [
-    "ruamel.yaml==0.19.1",
-]
 
 [tool.commitizen]
 # Configuration for conventional commit enforcement and version management.

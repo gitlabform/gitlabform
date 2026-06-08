@@ -6,9 +6,6 @@ resolution-markers = [
     "python_full_version < '3.15'",
 ]
 
-[manifest]
-build-constraints = [{ name = "ruamel-yaml", specifier = "==0.19.1" }]
-
 [[package]]
 name = "annotated-types"
 version = "0.7.0"
@@ -556,15 +553,6 @@ wheels = [
 ]
 
 [[package]]
-name = "ez-yaml"
-version = "2.2.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2f/5c/bc0e52d9ea94a90d63645dc4df2724ad212ef918f3c89101dff78a4f8ed1/ez_yaml-2.2.0.tar.gz", hash = "sha256:aa02f14683cd4a32a1be621c5acabe587ddf0e647fef7e075b3c942db722d331", size = 381857, upload-time = "2024-02-02T16:37:34.999Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a6/f8/c7b927a739a658b6d574deabcd0eb293454c5218a3c0208595c98453f12e/ez_yaml-2.2.0-py3-none-any.whl", hash = "sha256:fb1fa5734c7ce948ba146d9efab0d5017a94f1e0eeb2a112d40b62df30468de2", size = 346960, upload-time = "2024-02-02T16:37:32.937Z" },
-]
-
-[[package]]
 name = "ghp-import"
 version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -583,7 +571,6 @@ source = { editable = "." }
 dependencies = [
     { name = "certifi" },
     { name = "cli-ui" },
-    { name = "ez-yaml" },
     { name = "jinja2" },
     { name = "luddite" },
     { name = "markupsafe" },
@@ -656,7 +643,6 @@ test = [
 requires-dist = [
     { name = "certifi", specifier = "==2026.5.20" },
     { name = "cli-ui", specifier = "==0.19.0" },
-    { name = "ez-yaml", specifier = "==2.2.0" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "luddite", specifier = "==1.0.4" },
     { name = "markupsafe", specifier = "==3.0.3" },

@@ -1,4 +1,3 @@
-import ez_yaml
 from unittest.mock import MagicMock
 
 from gitlabform.configuration import Configuration

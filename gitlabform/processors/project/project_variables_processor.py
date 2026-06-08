@@ -3,10 +3,11 @@ from logging import warning, info, INFO
 
 import copy
 import textwrap
-import ez_yaml
 
 from gitlab.exceptions import GitlabGetError
 from gitlab.v4.objects import Project, ProjectVariable
+
+from gitlabform import util
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.util.difference_logger import hide
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -67,7 +68,7 @@ class ProjectVariablesProcessor(AbstractProcessor):
 
             info(f"Variables for {project_and_group} in GitLab:")
             if self.log_level == INFO:
-                yaml = ez_yaml.to_string(variables_list)
+                yaml = util.yaml_config_to_string(variables_list)
                 info(
                     textwrap.indent(
                         yaml,
@@ -90,10 +91,10 @@ class ProjectVariablesProcessor(AbstractProcessor):
             configured_variables[key]["value"] = hide(configured_variables[key]["value"])
 
         if self.log_level == INFO:
-            yaml = ez_yaml.to_string(configured_variables)
+            yaml = util.yaml_config_to_string(configured_variables)
             info(
                 textwrap.indent(
-                    yaml,
+                    "",
                     "  ",
                 )
             )

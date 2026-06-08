@@ -2,12 +2,13 @@ import sys
 from logging import debug, info, critical, DEBUG
 from abc import ABC, abstractmethod
 from types import SimpleNamespace
-import ez_yaml
+from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
 from yamlpath.wrappers import ConsolePrinter
 
+from gitlabform import util
 from gitlabform.constants import EXIT_INVALID_INPUT, APPROVAL_RULE_NAME
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
@@ -31,7 +32,7 @@ class ConfigurationTransformers:
 
     def transform(self, configuration: Configuration) -> None:
         if self.log_level == DEBUG:
-            config_before = ez_yaml.to_string(obj=configuration.config, options={})
+            config_before = util.yaml_config_to_string(configuration.config)
             debug(f"Config BEFORE transformations:\n{config_before}")
 
         self.user_transformer.transform(configuration)
@@ -40,17 +41,29 @@ class ConfigurationTransformers:
         self.access_level_transformer.transform(configuration, last=True)
 
         if self.log_level == DEBUG:
-            config_after = ez_yaml.to_string(obj=configuration.config, options={})
+            config_after = util.yaml_config_to_string(configuration.config)
             debug(f"Config AFTER transformations:\n{config_after}")
 
 
 class ConfigurationTransformer(ABC):
     def transform(self, configuration: Configuration, last: bool = False) -> None:
         self._do_transform(configuration)
+        if last:
+            self.convert_to_simple_types(configuration)
 
     @abstractmethod
     def _do_transform(self, configuration: Configuration) -> None:
         pass
+
+    @staticmethod
+    def convert_to_simple_types(configuration: Configuration):
+        # we needed complex ruamel.yaml's types like ordereddict and CommentedSeq
+        # for transformations, but at the end convert them to simple dict and lists
+        # for easier to understand debug output and tests
+        config_yaml_string = util.yaml_config_to_string(configuration.config)
+
+        simple_yaml_loader = util.configure_ruamel_yaml_loader(typ="safe", pure=True)
+        configuration.config = simple_yaml_loader.load(config_yaml_string)
 
 
 class UserTransformer(ConfigurationTransformer):
