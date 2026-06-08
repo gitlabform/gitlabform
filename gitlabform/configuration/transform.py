@@ -2,7 +2,6 @@ import sys
 from logging import debug, info, critical, DEBUG
 from abc import ABC, abstractmethod
 from types import SimpleNamespace
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
