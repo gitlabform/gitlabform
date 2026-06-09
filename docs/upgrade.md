@@ -11,7 +11,7 @@ This results in GitLabForm no longer defaulting to `yaml 1.1` support when parsi
 In order to retain `yaml 1.1` configuration you **must** add the `%YAML` directive to the top of your configuration file, for example:
 
 ```yaml
-%yaml 1.1
+%YAML 1.1
 ---
  projects_and_groups:
    some_group/*:

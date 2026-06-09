@@ -43,7 +43,7 @@ def yaml11_annotated_configuration_with_yes():
 
 def test__unannotated_yaml_11(yaml11_configuration_with_yes):
     """
-    By default, in v7.+ we use YAML 1.2, so the "yes" value is not interpreted as a boolean.
+    By default, in v6.+ we use YAML 1.2, so the "yes" value is not interpreted as a boolean.
     This test validates that without annotation, the YAML file is treated as v1.2, and "yes" is just a string, not a boolean.
     """
     assert yaml11_configuration_with_yes.get("projects_and_groups|some_group/*|project_settings") == {"foo": "yes"}
@@ -51,7 +51,7 @@ def test__unannotated_yaml_11(yaml11_configuration_with_yes):
 
 def test__annotated_yaml_11(yaml11_annotated_configuration_with_yes):
     """
-    By default, in v7.+ we use YAML 1.2, so the "yes" value is not interpreted as a boolean, unless annotated as such.
+    By default, in v6.+ we use YAML 1.2, so the "yes" value is not interpreted as a boolean, unless annotated as such.
     This test validates the annotation can correctly set a YAML file to v1.1
     """
     assert yaml11_annotated_configuration_with_yes.get("projects_and_groups|some_group/*|project_settings") == {

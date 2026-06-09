@@ -89,7 +89,6 @@ class TestFilesTemplates:
         run_gitlabform(config, project.path_with_namespace)
 
         project_file = project.files.get(ref="main", file_path="README.md")
-        expectation = "This is a text containing literals: {{ group }}/{{ project }}\n"
         assert (
             project_file.decode().decode("utf-8") == "This is a text containing literals: {{ group }}/{{ project }}\n"
         )
