@@ -1,6 +1,7 @@
 name: Main branch
 
 permissions:
+  actions: read
   checks: read
   contents: read
   discussions: write
