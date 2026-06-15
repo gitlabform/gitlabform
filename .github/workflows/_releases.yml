@@ -3,7 +3,7 @@ name: Releases
 on:
   # Trigger A: Automatic execution when Main Workflow finishes
   workflow_run:
-    workflows: ["Main Workflow"]
+    workflows: ["Main branch"]
     types:
       - completed
   
@@ -43,14 +43,21 @@ jobs:
       - name: Validate release conditions
         id: validate
         env:
+          # Authentication Token
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Upstream Workflow Configuration
+          # This is the name of the workflow that both manual and automated
+          # release validations depend on.
+          UPSTREAM_WORKFLOW_NAME: "Main branch"
+          # GitHub Context Variables (provided by the workflow_run or workflow_dispatch event)
           REPO: ${{ github.repository }}
           EVENT: ${{ github.event_name }}
-          TAG: ${{ inputs.manual_tag }}
-          MANUAL_ID: ${{ inputs.override_run_id }}
           CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           SHA: ${{ github.event.workflow_run.head_sha }}
-          AUTO_ID: ${{ github.event.workflow_run.id }}
+          AUTOMATED_UPSTREAM_RUN_ID: ${{ github.event.workflow_run.id }}
+          # Manual Trigger Inputs (from workflow_dispatch)
+          MANUAL_RELEASE_TAG: ${{ inputs.manual_tag }}
+          MANUAL_UPSTREAM_RUN_ID: ${{ inputs.override_run_id }}
         run: uv run release gh-workflow-check
 
   # TODO: Remove this job when all the release jobs have been migrated

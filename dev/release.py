@@ -48,17 +48,22 @@ def _conclude_validation(is_valid: bool, message: str, severity: str = "notice")
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_file:
         with open(summary_file, "a", encoding="utf-8") as f:
-            status = "VALID" if is_valid else "SKIPPED"
+            if is_valid:
+                status = "VALID"
+            elif severity == "error":
+                status = "FAILED"
+            else:
+                status = "SKIPPED"
             f.write(f"### Release Validation: {status}\n{message}\n")
 
     _append_github_output("is_valid", "true" if is_valid else "false")
     sys.exit(1 if severity == "error" else 0)
 
 
-def _get_run_info(run_id: str, repo: str, headers: dict, base_url: str) -> dict:
+def _get_run_info(run_id: str, repo: str, headers: dict, base_url: str, upstream_name: str) -> dict:
     """
     Fetches workflow run metadata. Used to verify that a manual release
-    is targeting a successful run of the 'Main Workflow'.
+    is targeting a successful run of the 'Main branch' workflow.
     """
     run_url = f"{base_url}/actions/runs/{run_id}"
     response = requests.get(run_url, headers=headers, timeout=15)
@@ -69,8 +74,9 @@ def _get_run_info(run_id: str, repo: str, headers: dict, base_url: str) -> dict:
     run_data = response.json()
     if run_data.get("conclusion") != "success":
         raise ValueError(f"Run ID '{run_id}' status is '{run_data.get('conclusion')}'. Must be 'success'.")
-    if run_data.get("name") != "Main Workflow":
-        raise ValueError(f"Run ID '{run_id}' must belong to 'Main Workflow'.")
+    actual_name = run_data.get("name")
+    if actual_name != upstream_name:
+        raise ValueError(f"Run ID '{run_id}' belongs to workflow '{actual_name}' but must belong to '{upstream_name}'.")
 
     return run_data
 
@@ -120,20 +126,21 @@ def gh_workflow_check(extra_args: list[str] | None = None):
 
     LOCAL TESTING:
     1. Manual Trigger:
-       GH_TOKEN="your_pat" EVENT="workflow_dispatch" REPO="owner/repo" TAG="v1.0.0" MANUAL_ID="12345" uv run release gh-workflow-check
+       GH_TOKEN="your_pat" EVENT="workflow_dispatch" REPO="owner/repo" MANUAL_RELEASE_TAG="v1.0.0" MANUAL_UPSTREAM_RUN_ID="12345" uv run release gh-workflow-check
 
     2. Automated Trigger:
        GH_TOKEN="your_pat" EVENT="workflow_run" REPO="owner/repo" CONCLUSION="success" \
-       SHA="$(git rev-parse HEAD)" AUTO_ID="67890" uv run release gh-workflow-check
+       SHA="$(git rev-parse HEAD)" AUTOMATED_UPSTREAM_RUN_ID="67890" uv run release gh-workflow-check
     """
     event_name = os.environ.get("EVENT")
     repo = os.environ.get("REPO")
     token = os.environ.get("GH_TOKEN")
-    manual_tag = os.environ.get("TAG", "").strip()
-    manual_run_id = os.environ.get("MANUAL_ID", "").strip()
+    manual_tag = os.environ.get("MANUAL_RELEASE_TAG", "").strip()
+    manual_run_id = os.environ.get("MANUAL_UPSTREAM_RUN_ID", "").strip()
     upstream_conclusion = os.environ.get("CONCLUSION")
     commit_sha = os.environ.get("SHA")
-    automated_run_id = os.environ.get("AUTO_ID")
+    automated_run_id = os.environ.get("AUTOMATED_UPSTREAM_RUN_ID")
+    upstream_workflow = os.environ.get("UPSTREAM_WORKFLOW_NAME", "Main branch")
 
     if not event_name or not repo:
         _conclude_validation(False, "Missing EVENT or REPO env vars.", severity="error")
@@ -152,7 +159,7 @@ def gh_workflow_check(extra_args: list[str] | None = None):
             _conclude_validation(False, "Manual releases require a tag and numeric Run ID.", severity="error")
         try:
             # Verify the Workflow Run is successful and exists
-            run_data = _get_run_info(manual_run_id, repo, headers, base_url)
+            run_data = _get_run_info(manual_run_id, repo, headers, base_url, upstream_workflow)
             run_sha = run_data.get("head_sha")
             # Resolve the tag to a commit SHA
             tag_sha = _get_tag_sha(manual_tag, headers, base_url)
