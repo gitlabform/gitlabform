@@ -1,4 +1,8 @@
 name: Releases
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch'
+    && format('Manual Release: {0}', inputs.manual_tag)
+    || format('Release: {0}', github.event.workflow_run.display_title) }}
 
 on:
   # Trigger A: Automatic execution when Main Workflow finishes
