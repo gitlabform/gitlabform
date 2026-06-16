@@ -76,7 +76,7 @@ jobs:
       BRANCH_REF: ${{ needs.prep-release.outputs.semver_tag }}
 
   publish-docs:
-    name: Docs
+    name: Publish Docs
     if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
       - prep-release
