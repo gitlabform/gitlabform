@@ -33,7 +33,16 @@ class FilesProcessor(AbstractProcessor):
                 debug("Skipping file '%s'", file)
                 continue
 
-            config_target_ref = configuration["files"][file]["branches"]
+            file_config = configuration["files"][file]
+            if "branches" not in file_config:
+                critical(
+                    f"File '{file}' is missing the required 'branches' key."
+                    f" Specify which branches to apply the file to using one of:"
+                    f" 'all', 'protected', or a list of branch names (e.g. ['main'])."
+                )
+                sys.exit(EXIT_INVALID_INPUT)
+
+            config_target_ref = file_config["branches"]
             branches_to_update: list[ProjectBranch] = []
 
             if config_target_ref == "all":
