@@ -6,6 +6,12 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 5.5.7
+
+### Build
+
+* Fix an issue where the incorrect `ref` was used in docker/metadata-action preventing publishing to GHCR on a Tag. ([timknight01](https://github.com/TimKnight01))
+
 ## 5.5.6
 
 ### Documentation
