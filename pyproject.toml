@@ -127,6 +127,7 @@ docs = "dev.main:docs"
 # Packaging and distribution verification
 package = "dev.main:package"
 docker = "dev.main:docker"
+release = "dev.main:release"
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
