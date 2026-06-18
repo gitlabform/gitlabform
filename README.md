@@ -15,4 +15,4 @@
 
 ...and more using hierarchical configuration written in YAML.
 
-Please see <a href="https://gitlabform.github.io/gitlabform/">the project site</a> for more information.
+Please see [the project site](https://gitlabform.github.io/gitlabform/) for more information.
