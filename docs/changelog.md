@@ -5,6 +5,23 @@ This changelog follows industry-standard best practices. Each release includes t
 For details on how to migrate between major versions, please refer to the [upgrade guide](upgrade.md), which contains important instructions for breaking changes.
 
 ---
+
+## 5.5.6
+
+### Documentation
+
+* Add Opencast logo to used by. ([timknight01](https://github.com/TimKnight01))
+
+### Build
+
+* Restructure github actions workflow and updated release process [#1308](https://github.com/gitlabform/gitlabform/pull/1308). ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 5.5.5
 
 ### Bug Fixes
