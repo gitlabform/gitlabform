@@ -1525,7 +1525,7 @@
 <ul>
 <li><code>overwrite</code> - if set to <code>false</code> and the file already exists, but has a different content, then it is not changed; default is <code>true</code>,</li>
 <li><code>skip_ci</code> - if set to <code>true</code> then the changes to a given file will be done with commits that will not trigger the CI pipeline; default is <code>false</code>,</li>
-<li><code>branches</code> - can be a single string <code>all</code>, string <code>protected</code> or an array of branch names,</li>
+<li><code>branches</code> - can be a single string <code>all</code>, string <code>protected</code> (all protected branches, with wildcard-protected rules expanded to matching branches), or an array of branch names where <code>*</code> can be used to match any sequence of characters (e.g. <code>bugfix/*</code>, <code>*release*</code>),</li>
 <li><code>only_first_branch</code> - if set to <code>true</code> then only the first branch from the list above that exists will be processed (unless you pass <code>--strict</code> as cli parameter to the app - then it will fail when trying to process a non-existent branch),</li>
 <li><code>commit_message</code> - set this to a custom commit message that will be used by the app; optional,</li>
 <li><code>content</code> - the literal contents that should be put into the target file; use this or <code>file</code>,</li>
@@ -1603,6 +1603,42 @@
 <span class="w">        </span><span class="nt">only_first_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">skip_ci</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div></p>
+<p>Example 5 - adding a README to all branches with "gitlab" in their name:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;README.md&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">overwrite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*gitlab*&quot;</span>
+<span class="w">        </span><span class="nt">skip_ci</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">This is a default README. Please replace it with a proper one!</span>
+<span class="w">        </span><span class="nt">commit_message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set default README</span>
+</code></pre></div>
+<p>Example 6 - adding a README to protected branches, including protected branches defined with wildcards (e.g. all branches with "bugfix/" in their name are protected and will have the file added):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span>
+<span class="w">        </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">bugfix/*</span><span class="p">:</span><span class="w"> </span>
+<span class="w">        </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">code_owner_approval_required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">developer</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+<span class="w">      </span><span class="s">&quot;README.md&quot;</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">overwrite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">protected</span>
+<span class="w">        </span><span class="nt">skip_ci</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">This is a protected branch README!</span>
+<span class="w">        </span><span class="nt">commit_message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set protected branch README</span>
+</code></pre></div>
 
 
 

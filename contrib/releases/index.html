@@ -1624,6 +1624,7 @@
 <li>Upload new version of gitlabform to <a href="https://pypi.org/project/gitlabform/">pypi package registry under gitlabform</a>.</li>
 <li>A corresponding <a href="https://github.com/gitlabform/gitlabform/releases">GitHub release</a> will be created that references the new tag.</li>
 </ul>
+<p>The release workflow also verifies that the commit on <code>main</code> passed the build and quality. It will trigger a release workflow that will proceed only if a corresponding version tag exists in GitHub and main branch workflow on that commit passed. The release workflow can also be triggered manually, which will require 2 inputs: a release version tag and main branch workflow's run id from corresponding commit.</p>
 </li>
 <li>
 <p>Edit the release in GitHub and copy the changelog entry into its description.</p>
