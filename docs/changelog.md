@@ -6,6 +6,16 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.0.0
+
+### Breaking Changes
+
+**Drops default support for YAML 1.1 by upgrading dependency major versions:** [#1309](https://github.com/gitlabform/gitlabform/pull/1309). ([timknight01](https://github.com/TimKnight01))
+* Drops DeepDiff and ez_yaml dependencies
+* Upgrades ruamel.yaml and yamlpath to their latest versions
+
+See [upgrade guide](upgrade.md) for important upgrade instructions and migration details.
+
 ## 5.5.7
 
 ### Build
