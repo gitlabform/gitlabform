@@ -1292,6 +1292,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#from-5-to-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 5.* to 6.*
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#from-4-to-5" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1681,6 +1692,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#from-5-to-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 5.* to 6.*
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#from-4-to-5" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1841,6 +1863,18 @@
 
 <h1 id="upgrading-to-new-major-versions">Upgrading to new major versions<a class="headerlink" href="#upgrading-to-new-major-versions" title="Permanent link">&para;</a></h1>
 <p>Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.</p>
+<h2 id="from-5-to-6">From 5.* to 6.*<a class="headerlink" href="#from-5-to-6" title="Permanent link">&para;</a></h2>
+<p>We have upgraded to new major versions of underlying YAML libraries <code>ezyaml</code>, <code>yamlpath</code> and <code>ruamel.yaml</code>.</p>
+<p>This results in GitLabForm no longer defaulting to <code>yaml 1.1</code> support when parsing YAML configuration files.</p>
+<p>In order to retain <code>yaml 1.1</code> configuration you <strong>must</strong> add the <code>%YAML</code> directive to the top of your configuration file, for example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">%YAML</span><span class="w"> </span><span class="m">1.1</span>
+<span class="nn">---</span>
+<span class="w"> </span><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">some_group/*</span><span class="p">:</span>
+<span class="w">     </span><span class="nt">project_settings</span><span class="p">:</span>
+<span class="w">       </span><span class="nt">foo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
+</code></pre></div>
+<p>Alternatively update your YAML to be compatible with <code>yaml 1.2</code> specification, for example by replacing <code>yes</code> with <code>true</code> in the above example, and any instances of <code>no</code> with <code>false</code>.</p>
 <h2 id="from-4-to-5">From 4.* to 5.*<a class="headerlink" href="#from-4-to-5" title="Permanent link">&para;</a></h2>
 <h3 id="update-config_version">Update <code>config_version</code><a class="headerlink" href="#update-config_version" title="Permanent link">&para;</a></h3>
 <p>Update <code>config_version</code> to <code>4</code>. Then update configuration syntax as described in following sections.</p>

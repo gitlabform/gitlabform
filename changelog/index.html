@@ -1265,6 +1265,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#600" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.0.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.0.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#557" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1884,7 +1912,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#breaking-changes" class="md-nav__link">
+  <a href="#breaking-changes_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Breaking Changes
@@ -2273,7 +2301,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#breaking-changes_1" class="md-nav__link">
+  <a href="#breaking-changes_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Breaking Changes
@@ -3335,7 +3363,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#breaking-changes_2" class="md-nav__link">
+  <a href="#breaking-changes_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         BREAKING CHANGES
@@ -5240,6 +5268,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#600" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.0.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.0.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#557" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5859,7 +5915,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#breaking-changes" class="md-nav__link">
+  <a href="#breaking-changes_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Breaking Changes
@@ -6248,7 +6304,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#breaking-changes_1" class="md-nav__link">
+  <a href="#breaking-changes_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         Breaking Changes
@@ -7310,7 +7366,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#breaking-changes_2" class="md-nav__link">
+  <a href="#breaking-changes_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         BREAKING CHANGES
@@ -8961,6 +9017,12 @@
 <p>This changelog follows industry-standard best practices. Each release includes the version, date, and a list of categorized changes: <code>Breaking Changes</code>, <code>Features</code>, <code>Bug Fixes</code>, <code>Documentation</code>, <code>Refactors</code>, <code>Dependencies</code>, and <code>Chores</code>.</p>
 <p>For details on how to migrate between major versions, please refer to the <a href="../upgrade/">upgrade guide</a>, which contains important instructions for breaking changes.</p>
 <hr />
+<h2 id="600">6.0.0<a class="headerlink" href="#600" title="Permanent link">&para;</a></h2>
+<h3 id="breaking-changes">Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">&para;</a></h3>
+<p><strong>Drops default support for YAML 1.1 by upgrading dependency major versions:</strong> <a href="https://github.com/gitlabform/gitlabform/pull/1309">#1309</a>. (<a href="https://github.com/TimKnight01">timknight01</a>)
+* Drops DeepDiff and ez_yaml dependencies
+* Upgrades ruamel.yaml and yamlpath to their latest versions</p>
+<p>See <a href="../upgrade/">upgrade guide</a> for important upgrade instructions and migration details.</p>
 <h2 id="557">5.5.7<a class="headerlink" href="#557" title="Permanent link">&para;</a></h2>
 <h3 id="build">Build<a class="headerlink" href="#build" title="Permanent link">&para;</a></h3>
 <ul>
@@ -9125,7 +9187,7 @@
 </ul>
 <p>Thanks to all the contributors of this release!</p>
 <h2 id="500">5.0.0<a class="headerlink" href="#500" title="Permanent link">&para;</a></h2>
-<h3 id="breaking-changes">Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">&para;</a></h3>
+<h3 id="breaking-changes_1">Breaking Changes<a class="headerlink" href="#breaking-changes_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Branch Protection</strong>: Dynamic updates to branch protection rules instead of unprotect-and-reprotect proecss. <a href="https://github.com/gitlabform/gitlabform/pull/1070">#1070</a> (<a href="https://github.com/TimKnight-DWP">TimKnight-DWP</a> &amp; <a href="https://github.com/br0ziliy">br0ziliy</a>)</li>
 <li><strong>Group SAML Links</strong>: The group-level SAML link configuration key <code>saml_group_links</code> has been renamed to <code>group_saml_links</code> for consistency <a href="https://github.com/gitlabform/gitlabform/pull/1175">#1175</a> (<a href="https://github.com/amimas">amimas</a>)</li>
@@ -9245,7 +9307,7 @@
 </ul>
 <p>Thanks to all the contributors of this release!</p>
 <h2 id="500-beta1">5.0.0-beta.1<a class="headerlink" href="#500-beta1" title="Permanent link">&para;</a></h2>
-<h3 id="breaking-changes_1">Breaking Changes<a class="headerlink" href="#breaking-changes_1" title="Permanent link">&para;</a></h3>
+<h3 id="breaking-changes_2">Breaking Changes<a class="headerlink" href="#breaking-changes_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Branch Protection</strong>: Dynamic updates to branch protection rules instead of unprotect-and-reprotect proecss. <a href="https://github.com/gitlabform/gitlabform/pull/1070">#1070</a> (<a href="https://github.com/TimKnight-DWP">TimKnight-DWP</a> &amp; <a href="https://github.com/br0ziliy">br0ziliy</a>)</li>
 </ul>
@@ -9567,7 +9629,7 @@ It can be re-enabled again based on findings from the issue created in GitLab&#3
 <li>fix: project settings failing to apply because membership config is not processed <a href="https://github.com/gitlabform/gitlabform/pull/857">#857</a>, closes <a href="https://github.com/gitlabform/gitlabform/issues/765">#765</a>. (<a href="https://github.com/amimas">amimas</a>)</li>
 </ul>
 <h2 id="400">4.0.0<a class="headerlink" href="#400" title="Permanent link">&para;</a></h2>
-<h3 id="breaking-changes_2">BREAKING CHANGES<a class="headerlink" href="#breaking-changes_2" title="Permanent link">&para;</a></h3>
+<h3 id="breaking-changes_3">BREAKING CHANGES<a class="headerlink" href="#breaking-changes_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Stop supporting Python older than 3.12 <a href="https://github.com/gitlabform/gitlabform/pull/789">#789</a>, closes <a href="https://github.com/gitlabform/gitlabform/issues/754">#754</a>. (<a href="https://github.com/gdubicki">Greg Dubicki</a>) </li>
 </ul>
