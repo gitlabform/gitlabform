@@ -189,12 +189,21 @@ class TestProcessConfigurationDispatch:
         cfg = _ConfigDict({"files": {"README.md": {"overwrite": True}}})
 
         with pytest.raises(SystemExit), caplog.at_level("CRITICAL"):
-            self.processor._process_configuration("g/p", cfg)
+            self.processor._can_proceed("g/p", cfg)
 
         message = caplog.text
         assert "README.md" in message
         assert "'branches'" in message
-        self.processor.process_branch.assert_not_called()
+
+    def test_can_proceed_skips_validation_for_skipped_files(self):
+        cfg = _ConfigDict({"files": {"README.md": {"skip": True}}})
+
+        assert self.processor._can_proceed("g/p", cfg) is True
+
+    def test_can_proceed_returns_true_when_all_files_valid(self):
+        cfg = self._config("all")
+
+        assert self.processor._can_proceed("g/p", cfg) is True
 
 
 class TestProcessBranch:
