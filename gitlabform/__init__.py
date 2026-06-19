@@ -68,8 +68,9 @@ class GitLabForm:
             self.only_sections = "all"
             self.exclude_sections = []
             self.recurse_subgroups = recurse_subgroups
+            self.log_level = logging.DEBUG
 
-            self._configure_output(tests=True)
+            self._configure_logging()
         else:
             # normal mode
 
@@ -94,7 +95,16 @@ class GitLabForm:
                 self.recurse_subgroups,
             ) = self._parse_args()
 
-            self._configure_output()
+            if self.debug:
+                level = logging.DEBUG
+            elif self.verbose:
+                level = logging.INFO
+            else:
+                level = logging.WARNING
+
+            self.log_level = level
+
+            self._configure_logging()
 
             self._show_version(self.skip_version_check)
             if self.just_show_version:
@@ -108,7 +118,7 @@ class GitLabForm:
 
         self.application_processors = ApplicationProcessors(self.gitlab, self.configuration, self.strict)
         self.group_processors = GroupProcessors(self.gitlab, self.configuration, self.strict)
-        self.project_processors = ProjectProcessors(self.gitlab, self.configuration, self.strict)
+        self.project_processors = ProjectProcessors(self.gitlab, self.configuration, self.strict, self.log_level)
         self.groups_provider = GroupsProvider(
             self.gitlab,
             self.configuration,
@@ -323,27 +333,24 @@ class GitLabForm:
             args.recurse_subsgroups,
         )
 
-    def _configure_output(self, tests=False) -> None:
+    def _configure_logging(self) -> None:
         """
         Configures the application output using logging, based on debug and verbose flags:
 
         * normal mode - logging only WARNING logs
         * verbose mode - logging INFO level and above
         * debug / tests mode - logging DEBUG level and above, along with rich exception tracebacks (may expose secrets)
-
-        :param tests: True if we are running in tests mode
         """
         rich_tracebacks = False
-        if tests or self.debug:
-            level = logging.DEBUG
+
+        if self.log_level == logging.DEBUG:
             rich_tracebacks = True
-        elif self.verbose:
-            level = logging.INFO
-        else:
-            level = logging.WARNING
 
         logging.basicConfig(
-            level=level, format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=rich_tracebacks)]
+            level=self.log_level,
+            format="%(message)s",
+            datefmt="[%X]",
+            handlers=[RichHandler(rich_tracebacks=rich_tracebacks)],
         )
 
     def _initialize_configuration_and_gitlab(self) -> Tuple[GitLab, Configuration]:
@@ -362,7 +369,7 @@ class GitLabForm:
                 gitlab = GitLab(config_path=self.config)
             configuration = gitlab.get_configuration()
 
-            configuration_transformers = ConfigurationTransformers(gitlab)
+            configuration_transformers = ConfigurationTransformers(gitlab, self.log_level)
             configuration_transformers.transform(configuration)
 
         except ConfigFileNotFoundException as e:

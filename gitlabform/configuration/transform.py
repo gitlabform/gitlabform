@@ -1,15 +1,13 @@
 import sys
-from logging import debug, info, critical
+from logging import debug, info, critical, DEBUG
 from abc import ABC, abstractmethod
-from ez_yaml import ez_yaml
-from ruamel.yaml import YAML
 from types import SimpleNamespace
-
 from ruamel.yaml.comments import CommentedMap
 from yamlpath import Processor
 from yamlpath.exceptions import YAMLPathException
 from yamlpath.wrappers import ConsolePrinter
 
+from gitlabform import util
 from gitlabform.constants import EXIT_INVALID_INPUT, APPROVAL_RULE_NAME
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
@@ -24,23 +22,26 @@ from gitlabform.gitlab import GitLab
 
 
 class ConfigurationTransformers:
-    def __init__(self, gitlab: GitLab):
+    def __init__(self, gitlab: GitLab, log_level: int):
         self.user_transformer = UserTransformer(gitlab)
         self.group_transformer = GroupTransformer(gitlab)
         self.implicit_name_transformer = ImplicitNameTransformer(gitlab)
         self.access_level_transformer = AccessLevelsTransformer(gitlab)
+        self.log_level = log_level
 
     def transform(self, configuration: Configuration) -> None:
-        config_before = ez_yaml.to_string(obj=configuration.config, options={})
-        debug(f"Config BEFORE transformations:\n{config_before}")
+        if self.log_level == DEBUG:
+            config_before = util.yaml_config_to_string(configuration.config)
+            debug(f"Config BEFORE transformations:\n{config_before}")
 
         self.user_transformer.transform(configuration)
         self.group_transformer.transform(configuration)
         self.implicit_name_transformer.transform(configuration)
         self.access_level_transformer.transform(configuration, last=True)
 
-        config_after = ez_yaml.to_string(obj=configuration.config, options={})
-        debug(f"Config AFTER transformations:\n{config_after}")
+        if self.log_level == DEBUG:
+            config_after = util.yaml_config_to_string(configuration.config)
+            debug(f"Config AFTER transformations:\n{config_after}")
 
 
 class ConfigurationTransformer(ABC):
@@ -58,9 +59,9 @@ class ConfigurationTransformer(ABC):
         # we needed complex ruamel.yaml's types like ordereddict and CommentedSeq
         # for transformations, but at the end convert them to simple dict and lists
         # for easier to understand debug output and tests
+        config_yaml_string = util.yaml_config_to_string(configuration.config)
 
-        config_yaml_string = ez_yaml.to_string(obj=configuration.config, options={})
-        simple_yaml_loader = YAML(typ="safe", pure=True)
+        simple_yaml_loader = util.configure_ruamel_yaml_loader(typ="safe", pure=True)
         configuration.config = simple_yaml_loader.load(config_yaml_string)
 
 

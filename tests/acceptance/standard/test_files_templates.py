@@ -81,7 +81,7 @@ class TestFilesTemplates:
               "README.md":
                 overwrite: true
                 branches: all
-                template: no
+                template: false
                 content: |
                   This is a text containing literals: {{{{ group }}}}/{{{{ project }}}}
         """
