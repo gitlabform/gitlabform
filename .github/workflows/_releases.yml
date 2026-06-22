@@ -64,17 +64,6 @@ jobs:
           MANUAL_UPSTREAM_RUN_ID: ${{ inputs.override_run_id }}
         run: uv run release gh-workflow-check
 
-  # TODO: Remove this job when all the release jobs have been migrated
-  # to consume build artifacts from Main workflow instead of rebuilding.
-  build-release-artifacts:
-    name: Build release artifacts
-    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
-    needs:
-      - prep-release
-    uses: ./.github/workflows/build.yml
-    with:
-      BRANCH_REF: ${{ needs.prep-release.outputs.semver_tag }}
-
   publish-docs:
     name: Publish Docs
     if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
@@ -120,7 +109,6 @@ jobs:
     if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
       - prep-release
-      - build-release-artifacts
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -140,12 +128,13 @@ jobs:
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group release
-      # TODO: In a separate PR, consume the build artifact (package-dist) uploaded
-      # in build-release-artifacts instead of rebuilding and verifying the package here.
-      - name: Build and verify the package
-        run: |
-          uv run --no-sync package build
-          uv run --no-sync package verify
+      - name: Download built package
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ needs.prep-release.outputs.target_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: package-dist
+          path: dist
       - name: Publish to PyPI
         run: |
           uv run --no-sync release pypi
@@ -155,7 +144,6 @@ jobs:
     if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
       - prep-release
-      - build-release-artifacts
       - publish-to-pypi
     runs-on: ubuntu-latest
     steps:
