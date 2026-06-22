@@ -15,14 +15,14 @@ class ConfigurationProjects(ConfigurationGroups, ABC):
     depends on the groups (and common) configuration.
     """
 
-    def get_projects(self) -> list:
+    def get_projects(self, key_type: str = "project") -> list:
         """
         :return: sorted list of projects names, that are EXPLICITLY defined in the config
         """
         projects = []
         projects_and_groups = self.get("projects_and_groups")
         for element in projects_and_groups.keys():
-            if element != "*" and not element.endswith("/*"):
+            if self._get_key_type(element) == key_type:
                 projects.append(element)
         return sorted(projects)
 
@@ -68,6 +68,27 @@ class ConfigurationProjects(ConfigurationGroups, ABC):
         """
         :param group_and_project: 'group/project'
         :return: configuration for this project or empty dict if not defined,
-                 ignoring the case
+                 ignoring the case. Also checks for matching project patterns.
         """
-        return self._get_case_insensitively(self.get("projects_and_groups"), group_and_project)
+        projects_and_groups = self.get("projects_and_groups")
+
+        # 1. Exact match
+        exact = self._get_case_insensitively(projects_and_groups, group_and_project)
+        if exact:
+            return exact
+
+        # 2. Best matching pattern
+        matches = []
+        for key in projects_and_groups.keys():
+            if self._get_key_type(key) == "project_pattern":
+                if self._match_pattern(key, group_and_project):
+                    # store a 3-tuple for later sorting
+                    prefix = key.split("*", 1)[0]
+                    matches.append((len(prefix), -key.count("*"), key))
+        if matches:
+            # longest literal prefix wins; tie -> fewer wildcards; still tie -> first appearance
+            matches.sort(reverse=True)
+            best_key = matches[0][2]
+            return self._get_case_insensitively(projects_and_groups, best_key)
+
+        return {}

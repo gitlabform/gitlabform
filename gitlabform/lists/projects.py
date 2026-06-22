@@ -96,6 +96,13 @@ class ProjectsProvider(GroupsProvider):
             # defined in the configuration, but we don't need to re-check for
             # being archived or scheduled for deletion projects that we already got from groups
 
+            for resolved_project in self._resolve_project_patterns(groups.get_effective()):
+                if (
+                    resolved_project not in projects.requested
+                    and resolved_project not in projects_from_configuration_not_from_groups
+                ):
+                    projects_from_configuration_not_from_groups.append(resolved_project)
+
             (
                 archived_projects_from_configuration_not_from_groups,
                 scheduled_for_deletion_projects_from_configuration_not_from_groups,
@@ -197,6 +204,42 @@ class ProjectsProvider(GroupsProvider):
                 skipped.append(project)
 
         return skipped
+
+    def _resolve_project_patterns(self, effective_groups: list) -> list:
+        """
+        Resolve project patterns from config to concrete project paths.
+        Only resolves patterns whose parent group is not already in the effective groups list
+        to avoid redundant API calls.
+        """
+        pattern_projects = []
+        for pattern in self.configuration.get_projects("project_pattern"):
+            pattern_group = pattern.rsplit("/", 1)[0]
+            if pattern_group in effective_groups:
+                # projects from this group already fetched through normal means
+                continue
+
+            try:
+                maybe_group = self.gitlab.get_group_case_insensitive(pattern_group)
+                group_path = maybe_group["full_path"]
+            except NotFoundException:
+                debug(
+                    "Group '%s' for pattern '%s' not found in GitLab, skipping",
+                    pattern_group,
+                    pattern,
+                )
+                continue
+
+            try:
+                all_project_objects = self.gitlab.get_projects(group_path, include_archived=True, only_names=False)
+            except NotFoundException:
+                all_project_objects = []
+
+            for project_object in all_project_objects:
+                path = project_object["path_with_namespace"]
+                if self.configuration._match_pattern(pattern, path) and path not in pattern_projects:
+                    pattern_projects.append(path)
+
+        return pattern_projects
 
     def _get_project_transfer_source_from_config(self, project: str) -> Optional[str]:
         try:
