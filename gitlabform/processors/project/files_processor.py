@@ -27,8 +27,6 @@ class FilesProcessor(AbstractProcessor):
     def _can_proceed(self, project_or_group: str, configuration: dict):
         for file in sorted(configuration["files"]):
             file_config = configuration["files"][file]
-            if file_config.get("skip"):
-                continue
             if "branches" not in file_config:
                 critical(
                     f"File '{file}' is missing the required 'branches' key."

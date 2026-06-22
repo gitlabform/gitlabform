@@ -195,11 +195,6 @@ class TestProcessConfigurationDispatch:
         assert "README.md" in message
         assert "'branches'" in message
 
-    def test_can_proceed_skips_validation_for_skipped_files(self):
-        cfg = _ConfigDict({"files": {"README.md": {"skip": True}}})
-
-        assert self.processor._can_proceed("g/p", cfg) is True
-
     def test_can_proceed_returns_true_when_all_files_valid(self):
         cfg = self._config("all")
 
