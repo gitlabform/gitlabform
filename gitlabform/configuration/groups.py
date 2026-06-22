@@ -49,7 +49,7 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         debug("*Effective* common config: %s", to_str(common_config))
 
         if "/" in group:
-            group_config = self._get_effective_subgroup_config(group)
+            group_config = self._get_effective_subgroup_config(group, has_parent_context=bool(common_config))
         else:
             group_config = self._get_group_config(group)
         debug("*Effective* group/subgroup config: %s", to_str(group_config))
@@ -65,7 +65,7 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
 
         return effective_config_for_group
 
-    def _get_effective_subgroup_config(self, subgroup):
+    def _get_effective_subgroup_config(self, subgroup, has_parent_context: bool = False):
         #
         # Goes through a subgroups hierarchy, from top to bottom
         #
@@ -80,40 +80,26 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         #
         # ...where a = merged_config("x", "x/y") and b = merged_config(a, "x/y/z")
         #
+        # ``inherit: false`` on a layer is rejected only when no parent exists above it
+        # (no common config and no non-empty accumulated ancestor config).
 
-        effective_config = {}
+        effective_config: dict = {}
         elements = subgroup.split("/")
-        last_element = None
+        current_path = None
         for element in elements:
-            if not last_element:
-                effective_config = self._get_group_config(element)
-                debug("First level config for '%s': %s", element, to_str(effective_config))
-                last_element = element
+            current_path = element if current_path is None else current_path + "/" + element
+            current_layer = self._get_group_config(current_path)
+            debug("Config for '%s': %s", current_path, to_str(current_layer))
+
+            has_ancestor_context = has_parent_context or bool(effective_config)
+            if current_layer and not has_ancestor_context:
+                self._validate_break_inheritance_flag(current_layer, current_path)
+
+            if not effective_config:
+                effective_config = current_layer
             else:
-                next_level_subgroup = last_element + "/" + element
-                next_level_subgroup_config = self._get_group_config(next_level_subgroup)
-                debug(
-                    "Config for '%s': %s",
-                    next_level_subgroup,
-                    to_str(next_level_subgroup_config),
-                )
-
-                if effective_config:
-                    self._validate_break_inheritance_flag(effective_config, subgroup)
-                elif not effective_config and next_level_subgroup_config:
-                    self._validate_break_inheritance_flag(next_level_subgroup_config, next_level_subgroup)
-
-                effective_config = self._merge_configs(
-                    effective_config,
-                    next_level_subgroup_config,
-                )
-                debug(
-                    "Merged previous level config for '%s' with config for '%s': %s",
-                    last_element,
-                    next_level_subgroup,
-                    to_str(effective_config),
-                )
-                last_element = last_element + "/" + element
+                effective_config = self._merge_configs(effective_config, current_layer)
+            debug("Effective config at '%s': %s", current_path, to_str(effective_config))
 
         return effective_config
 
