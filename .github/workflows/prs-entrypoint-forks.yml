@@ -1,0 +1,34 @@
+name: "CI - Fork PRs"
+
+# This workflow handles pull requests from forked repositories.
+# It uses pull_request_target so the reusable CI workflow can receive explicit secrets.
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+  security-events: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  pr_jobs:
+    name: "Pipeline"
+    # github.event.pull_request object defined here: https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#get-a-pull-request
+    if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+    uses: ./.github/workflows/pr-ci-workflow.yml
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      pull-requests: write
+      security-events: write
+    with:
+      BRANCH_REF: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit

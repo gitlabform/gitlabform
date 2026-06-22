@@ -1,62 +1,99 @@
 name: Releases
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch'
+    && format('Manual Release: {0}', inputs.manual_tag)
+    || format('Release: {0}', github.event.workflow_run.display_title) }}
 
 on:
-  push:
-    tags:
-      - 'v*'
-  # Allow manual triggering of the workflow
+  # Trigger A: Automatic execution when Main Workflow finishes
+  workflow_run:
+    workflows: ["Main branch"]
+    types:
+      - completed
+  
+  # Trigger B: Manual execution fallback from the GitHub UI
   workflow_dispatch:
+    inputs:
+      manual_tag:
+        description: 'Tag to release (e.g., v1.2.3)'
+        required: true
+        type: string
+      override_run_id:
+        description: 'Main Workflow Run ID (Required if downloading artifacts)'
+        required: true
+        type: string
 
 permissions:
   contents: write
   packages: write
 
 jobs:
-
-  linters:
-    uses: ./.github/workflows/linters.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-
-  tests-standard:
-    uses: ./.github/workflows/tests-standard.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-
-  tests-premium:
-    uses: ./.github/workflows/tests-premium.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
-    secrets: inherit
-
-  tests-ultimate:
-    uses: ./.github/workflows/tests-ultimate.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
-    secrets: inherit
-
-  publish-docs:
-    needs:
-      - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+  prep-release:
+    name: Prepare release
     runs-on: ubuntu-latest
+    outputs:
+      is_valid_release: ${{ steps.validate.outputs.is_valid }}
+      semver_tag: ${{ steps.validate.outputs.version }}
+      target_run_id: ${{ steps.validate.outputs.run_id }}
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 2
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
-      - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
-        run: |
-          uv sync --frozen --no-dev --group docs
-      - name: Build docs
-        run: |
-          uv run --no-sync docs build
+        with:
+          python-version: "3.14"
+
+      - name: Validate release conditions
+        id: validate
+        env:
+          # Authentication Token
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Upstream Workflow Configuration
+          # This is the name of the workflow that both manual and automated
+          # release validations depend on.
+          UPSTREAM_WORKFLOW_NAME: "Main branch"
+          # GitHub Context Variables (provided by the workflow_run or workflow_dispatch event)
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          AUTOMATED_UPSTREAM_RUN_ID: ${{ github.event.workflow_run.id }}
+          # Manual Trigger Inputs (from workflow_dispatch)
+          MANUAL_RELEASE_TAG: ${{ inputs.manual_tag }}
+          MANUAL_UPSTREAM_RUN_ID: ${{ inputs.override_run_id }}
+        run: uv run release gh-workflow-check
+
+  # TODO: Remove this job when all the release jobs have been migrated
+  # to consume build artifacts from Main workflow instead of rebuilding.
+  build-release-artifacts:
+    name: Build release artifacts
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
+    needs:
+      - prep-release
+    uses: ./.github/workflows/build.yml
+    with:
+      BRANCH_REF: ${{ needs.prep-release.outputs.semver_tag }}
+
+  publish-docs:
+    name: Publish Docs
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
+    needs:
+      - prep-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
+          fetch-depth: 2
+      - name: Download built documentation
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ needs.prep-release.outputs.target_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: docs-site
+          path: site
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
@@ -64,27 +101,26 @@ jobs:
           folder: site
 
   publish-to-github:
+    name: Publish Release
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
-      - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - prep-release
     runs-on: ubuntu-latest
     steps:
       - name: Create release in GitHub
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ github.ref }}
+          tag: ${{ needs.prep-release.outputs.semver_tag }}
+          name: ${{ needs.prep-release.outputs.semver_tag }}
           body: "(this is a placeholder, it will be replaced with a changelog contents)"
-          # This token is provided by Actions, you do not need to create your own token
           token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-to-pypi:
+    name: Publish PyPI
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
-      - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - prep-release
+      - build-release-artifacts
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -92,39 +128,49 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
           fetch-depth: 2
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
       - name: Setup Python ${{ env.UV_PYTHON }} and install dependencies
         run: |
           uv sync --frozen --no-dev --group release
+      # TODO: In a separate PR, consume the build artifact (package-dist) uploaded
+      # in build-release-artifacts instead of rebuilding and verifying the package here.
       - name: Build and verify the package
         run: |
           uv run --no-sync package build
           uv run --no-sync package verify
       - name: Publish to PyPI
         run: |
-          uv run --no-sync package publish
+          uv run --no-sync release pypi
 
   publish-to-ghcr:
+    name: Publish GHCR
+    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
-      - linters
-      - tests-standard
-      - tests-premium
-      - tests-ultimate
+      - prep-release
+      - build-release-artifacts
       - publish-to-pypi
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - name: Get the version from the tag
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+      # TODO: In a separate PR, optimize docker image build to consume the built package artifact
+      # (package-dist) instead of copying and rebuilding from source if applicable.
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
       - name: Docker metadata
         id: metadata
         uses: docker/metadata-action@v6
         with:
+          # Get the ref and the sha from the checked out context - e.g. semver tag rather than triggering branch
+          context: git
           images: |
             ghcr.io/gitlabform/gitlabform
           flavor: |

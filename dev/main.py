@@ -13,12 +13,18 @@ from dev.docs import docs_build, docs_serve
 from dev.env import clean as run_clean_logic, setup as run_setup_logic
 from dev.infra import gitlab_down, gitlab_up
 from dev.qa import format_code, lint as run_qa_logic, test as run_test_logic
+from dev.package import (
+    python_build as run_build_logic,
+    python_verify as run_verify_logic,
+)
+from dev.docker import (
+    build as run_docker_build_logic,
+    verify as run_docker_verify_logic,
+)
 from dev.release import (
-    build as run_build_logic,
-    docker_build as run_docker_build_logic,
-    publish as run_publish_logic,
-    docker_verify as run_docker_verify_logic,
-    verify as run_verify_logic,
+    publish_pypi as run_publish_logic,
+    publish_docker as run_docker_push_logic,
+    gh_workflow_check as run_gh_workflow_check_logic,
 )
 
 # --- Constant Descriptions for Unification ---
@@ -26,9 +32,10 @@ from dev.release import (
 DESC_WORKSPACE = "Workspace and lifecycle management. Utilities for initializing, updating, and resetting the local development environment."
 DESC_QA = "Quality Assurance suite. Provides access to code formatting (Black), parallelized linting, and the pytest-driven test suite."
 DESC_DOCS = "Documentation management. Utilities for building the static documentation site and running the local development server with live-reloading."
-DESC_PACKAGE = "Python packaging and distribution. Manage the packaging lifecycle: build artifacts, verify integrity, and publish to PyPI."
+DESC_PACKAGE = "Python package lifecycle management. Build distribution artifacts and verify their integrity."
 DESC_DOCKER = "Docker image management. Build and verify the production-ready GitLabForm Docker images."
 DESC_INFRA = "Local infrastructure orchestration. Manage a disposable GitLab instance in Docker for acceptance testing and feature validation."
+DESC_RELEASE = "Artifact distribution and release management. Handles publishing Python packages to PyPI and pushing Docker images to registries."
 
 # --- Domain Helpers ---
 
@@ -96,13 +103,6 @@ def _add_package_subcommands(subparsers):
     )
     v.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for verification tools")
 
-    p = subparsers.add_parser(
-        "publish",
-        help="Upload built artifacts to PyPI",
-        description="Upload built artifacts to PyPI. Ensures that only verified distributions are released to the public index.",
-    )
-    p.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for uv publish")
-
 
 def _dispatch_package(args):
     """Executes packaging logic."""
@@ -110,8 +110,6 @@ def _dispatch_package(args):
         run_build_logic(args.extra_args)
     elif args.command == "verify":
         run_verify_logic(args.extra_args)
-    elif args.command == "publish":
-        run_publish_logic(args.extra_args)
 
 
 def _add_docker_subcommands(subparsers):
@@ -144,6 +142,45 @@ def _dispatch_docker(args):
         run_docker_build_logic(extra_args=extra_args)
     elif args.command == "verify":
         run_docker_verify_logic(extra_args=extra_args)
+
+
+def _add_release_subcommands(subparsers):
+    """Configures artifact distribution commands."""
+    subparsers.add_parser(
+        "gh-workflow-check",
+        help="Verify GitHub Workflow conditions before releasing",
+        description="Perform pre-flight validation for GitHub Actions. This command resolves version tags from git history and verifies the integrity of the triggering workflow run.",
+    )
+
+    pypi = subparsers.add_parser(
+        "pypi",
+        help="Publish the Python package to PyPI",
+        description="Upload built artifacts to PyPI. Ensures that only verified distributions are released to the public index.",
+    )
+    pypi.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for uv publish")
+
+    docker_p = subparsers.add_parser(
+        "docker",
+        help="Push the Docker image to a registry",
+        description="Push the built Docker image to the configured registry (e.g., GHCR).",
+    )
+    docker_p.add_argument("--image", default="localhost/gitlabform", help="Image name (default: localhost/gitlabform)")
+    docker_p.add_argument("--tag", default="latest", help="Image tag (default: latest)")
+    docker_p.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for docker push")
+
+
+def _dispatch_release(args):
+    """Executes release logic."""
+    if args.command == "gh-workflow-check":
+        run_gh_workflow_check_logic(args.extra_args if hasattr(args, "extra_args") else None)
+    elif args.command == "pypi":
+        run_publish_logic(args.extra_args)
+    elif args.command == "docker":
+        # Reconstruct arguments to maintain compatibility with the backend parser
+        extra_args = ["--image", args.image, "--tag", args.tag]
+        if args.extra_args:
+            extra_args.extend(args.extra_args)
+        run_docker_push_logic(extra_args=extra_args)
 
 
 def _add_infra_subcommands(subparsers):
@@ -258,6 +295,11 @@ def docker():
     _domain_entrypoint("docker", DESC_DOCKER, _add_docker_subcommands, _dispatch_docker)
 
 
+def release():
+    """Shortcut for 'uv run release'."""
+    _domain_entrypoint("release", DESC_RELEASE, _add_release_subcommands, _dispatch_release)
+
+
 def gitlab_local():
     """Shortcut for 'uv run gitlab-local'. Provides orchestration for the local GitLab instance."""
     _domain_entrypoint("gitlab-local", DESC_INFRA, _add_infra_subcommands, _dispatch_infra)
@@ -278,8 +320,9 @@ def main():
         ),
         "qa": ("Quality Assurance (linting, formatting, testing)", DESC_QA, _add_qa_subcommands, _dispatch_qa),
         "docs": ("Documentation management", DESC_DOCS, _add_docs_subcommands, _dispatch_docs),
-        "package": ("Python packaging and distribution", DESC_PACKAGE, _add_package_subcommands, _dispatch_package),
+        "package": ("Python package management", DESC_PACKAGE, _add_package_subcommands, _dispatch_package),
         "docker": ("Docker image management", DESC_DOCKER, _add_docker_subcommands, _dispatch_docker),
+        "release": ("Artifact distribution (PyPI, Docker)", DESC_RELEASE, _add_release_subcommands, _dispatch_release),
         "gitlab-local": ("Local infrastructure orchestration", DESC_INFRA, _add_infra_subcommands, _dispatch_infra),
     }
 
