@@ -18,30 +18,28 @@ on:
 
 jobs:
 
-  build-docs:
-    uses: ./.github/workflows/docs.yml
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 
-  linters:
-    uses: ./.github/workflows/linters.yml
+  static-analysis:
+    name: Lint
+    uses: ./.github/workflows/static-analysis.yml
     with:
       BRANCH_REF: ${{ github.ref }}
 
-  tests-standard:
-    uses: ./.github/workflows/tests-standard.yml
+  tests:
+    name: Tests
+    uses: ./.github/workflows/tests-unit.yml
     with:
       BRANCH_REF: ${{ github.ref }}
-
-  tests-premium:
-    uses: ./.github/workflows/tests-premium.yml
-    with:
-      BRANCH_REF: ${{ github.ref }}
-      environment: Main Tests
     secrets: inherit
 
-  tests-ultimate:
-    uses: ./.github/workflows/tests-ultimate.yml
+  tests-acceptance:
+    name: Acceptance Tests
+    uses: ./.github/workflows/tests-acceptance.yml
     with:
       BRANCH_REF: ${{ github.ref }}
       environment: Main Tests

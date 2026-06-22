@@ -47,7 +47,7 @@ from gitlabform.processors.project.remote_mirrors_processor import RemoteMirrors
 
 
 class ProjectProcessors(AbstractProcessors):
-    def __init__(self, gitlab: GitLab, config: Configuration, strict: bool):
+    def __init__(self, gitlab: GitLab, config: Configuration, strict: bool, log_level: int):
         super().__init__(gitlab, config, strict)
         self.processors: List[AbstractProcessor] = [
             # Order of processors matter. GitLabForm will process config sections
@@ -64,7 +64,7 @@ class ProjectProcessors(AbstractProcessors):
             ProjectLabelsProcessor(gitlab),
             JobTokenScopeProcessor(gitlab),
             DeployKeysProcessor(gitlab),
-            ProjectVariablesProcessor(gitlab),
+            ProjectVariablesProcessor(gitlab, log_level),
             BranchesProcessor(gitlab, strict),
             TagsProcessor(gitlab, strict),
             IntegrationsProcessor(gitlab),

@@ -1,4 +1,3 @@
-from deepdiff import DeepDiff
 from unittest.mock import MagicMock
 
 from gitlabform.configuration import Configuration
@@ -31,7 +30,7 @@ def test__transform_for_protected_environments():
 
     expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
 
-    assert not DeepDiff(configuration.config, expected_transformed_config.config)
+    assert configuration.config == expected_transformed_config.config
 
 
 def test__transform_for_protected_environments_sanity_check():
@@ -47,4 +46,4 @@ def test__transform_for_protected_environments_sanity_check():
 
     expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
 
-    assert DeepDiff(configuration.config, expected_transformed_config.config)
+    assert configuration.config != expected_transformed_config.config

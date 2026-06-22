@@ -20,4 +20,6 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
     - Upload new version of gitlabform to [pypi package registry under gitlabform](https://pypi.org/project/gitlabform/).
     - A corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) will be created that references the new tag.
 
+    The release workflow also verifies that the commit on `main` passed the build and quality. It will trigger a release workflow that will proceed only if a corresponding version tag exists in GitHub and main branch workflow on that commit passed. The release workflow can also be triggered manually, which will require 2 inputs: a release version tag and main branch workflow's run id from corresponding commit.
+
 3. Edit the release in GitHub and copy the changelog entry into its description.
