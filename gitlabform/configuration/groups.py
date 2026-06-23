@@ -124,3 +124,9 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
                  ignoring the case
         """
         return self._get_case_insensitively(self.get("projects_and_groups"), f"{group}/*")
+
+    def has_group_section_defined_locally(self, group: str, section_name: str) -> bool:
+        """
+        :return: True when ``section_name`` is defined directly on ``group/*`` in the config.
+        """
+        return section_name in self._get_group_config(group)
