@@ -137,7 +137,7 @@ jobs:
           path: dist
       - name: Publish to PyPI
         run: |
-          uv run --no-sync release pypi --publish-url https://test.pypi.org/legacy/
+          uv run --no-sync release pypi
 
   publish-to-ghcr:
     name: Publish GHCR
