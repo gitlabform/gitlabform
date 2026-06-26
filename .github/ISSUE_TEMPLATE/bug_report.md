@@ -18,3 +18,8 @@ Output of `gitlabform -V`
 **GitLab version**
 
 F.e. `13.12.4-ee`
+
+**Would you be open to contributing a fix?**
+- [ ] Yes
+- [ ] No
+- [ ] Maybe
