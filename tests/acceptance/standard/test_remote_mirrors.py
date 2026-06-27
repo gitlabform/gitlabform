@@ -407,27 +407,40 @@ class TestRemoteMirrorsProcessor:
 
         run_gitlabform(gitlabform_config, project.path_with_namespace)
 
-        # Validate mirror functionality: wait for sync and verify test file appears in target.
-        # Even with force_push: true, GitLab's Sidekiq worker may take a few seconds to
-        # complete the physical git push to the remote.
-        found = False
-        max_retries = 10
-        retry_interval = 5
+        # update_status may still be 'finished' from a prior sync in this class,
+        # so we require both 'finished' and the new file present in the target.
+        max_wait_seconds = 60
+        poll_interval = 3
+        deadline = time.time() + max_wait_seconds
+        last_status: str | None = None
+        last_error: str | None = None
+        synced = False
 
-        for i in range(max_retries):
-            try:
-                # Attempt to retrieve the file from the target repository
-                target_file = first_mirror_repo.files.get(ref=sync_branch_name, file_path=test_file_path)
-                if target_file.decode().decode("utf-8") == test_file_content:
-                    found = True
-                    break
-            except Exception:
-                # If 404/Exception, wait and try again
-                time.sleep(retry_interval)
+        while time.time() < deadline:
+            mirror = self._get_mirror_from_url(project, first_mirror_url_http_password_auth)
+            assert mirror is not None, "Mirror disappeared from source project during sync"
+            last_status = getattr(mirror, "update_status", None)
+            last_error = getattr(mirror, "last_error", None)
 
-        assert found, (
-            f"Mirror sync failed: File '{test_file_path}' not found in target project "
-            f"'{first_mirror_repo.path_with_namespace}' after {max_retries * retry_interval} seconds."
+            if last_status == "failed":
+                pytest.fail(f"Mirror sync reported failed by GitLab. last_error={last_error!r}")
+
+            if last_status == "finished":
+                try:
+                    target_file = first_mirror_repo.files.get(ref=sync_branch_name, file_path=test_file_path)
+                    if target_file.decode().decode("utf-8") == test_file_content:
+                        synced = True
+                        break
+                except Exception:
+                    pass
+
+            time.sleep(poll_interval)
+
+        assert synced, (
+            f"Mirror sync did not complete within {max_wait_seconds}s: "
+            f"file '{test_file_path}' not found in target project "
+            f"'{first_mirror_repo.path_with_namespace}' "
+            f"(last update_status={last_status!r}, last_error={last_error!r})."
         )
 
     def test_remote_mirrors_sync_error(
