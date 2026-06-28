@@ -24,6 +24,19 @@ class FilesProcessor(AbstractProcessor):
         self.strict = strict
         self.branch_processor = BranchesProcessor(gitlab, strict)
 
+    def _can_proceed(self, project_or_group: str, configuration: dict):
+        for file in sorted(configuration["files"]):
+            file_config = configuration["files"][file]
+            if "branches" not in file_config:
+                critical(
+                    f"File '{file}' is missing the required 'branches' key."
+                    f" Specify which branches to apply the file to using one of:"
+                    f" 'all', 'protected', or a list of branch names (e.g. ['main'])."
+                )
+                sys.exit(EXIT_INVALID_INPUT)
+
+        return True
+
     def _process_configuration(self, project_and_group: str, configuration: dict):
         for file in sorted(configuration["files"]):
             project: Project = self.gl.get_project_by_path_cached(project_and_group)

@@ -1,4 +1,7 @@
 gitlab_rails['initial_root_password']='mK9JnG7jwYdFcBNoQ3W3'
+# Bind nginx on IPv4 and IPv6 loopback. Without IPv6, Sidekiq's mirror sync
+# fails intermittently with ECONNREFUSED when libcurl resolves localhost to ::1.
+nginx['listen_addresses'] = ['0.0.0.0', '[::]']
 registry['enable']=false
 prometheus_monitoring['enable']=false
 gitlab_rails['initial_license_file']='/etc/gitlab/Gitlab.gitlab-license'

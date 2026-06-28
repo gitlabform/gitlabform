@@ -185,6 +185,21 @@ class TestProcessConfigurationDispatch:
 
         self.processor.process_branch.assert_not_called()
 
+    def test_missing_branches_key_exits_with_clear_message(self, caplog):
+        cfg = _ConfigDict({"files": {"README.md": {"overwrite": True}}})
+
+        with pytest.raises(SystemExit), caplog.at_level("CRITICAL"):
+            self.processor._can_proceed("g/p", cfg)
+
+        message = caplog.text
+        assert "README.md" in message
+        assert "'branches'" in message
+
+    def test_can_proceed_returns_true_when_all_files_valid(self):
+        cfg = self._config("all")
+
+        assert self.processor._can_proceed("g/p", cfg) is True
+
 
 class TestProcessBranch:
     def setup_method(self):
