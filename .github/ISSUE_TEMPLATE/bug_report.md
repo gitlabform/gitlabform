@@ -18,3 +18,14 @@ Output of `gitlabform -V`
 **GitLab version**
 
 F.e. `13.12.4-ee`
+
+**GitLabForm configuration**
+
+The relevant part of your gitlabform config (optionally anonymized).  
+If applicable, share both the before and after config.
+
+**Would you be open to contributing a fix?**
+
+- [ ] Yes
+- [ ] No
+- [ ] Maybe
