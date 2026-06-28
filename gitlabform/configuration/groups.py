@@ -45,7 +45,7 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
             debug(f"Group {group} is skipped, returning empty config")
             return {}
 
-        common_config = self.get_common_config()
+        common_config: dict = self.get_common_config()
         debug("*Effective* common config: %s", to_str(common_config))
 
         if "/" in group:
