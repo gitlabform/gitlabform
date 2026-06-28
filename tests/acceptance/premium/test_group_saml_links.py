@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from tests.acceptance import run_gitlabform
@@ -45,6 +47,36 @@ class TestGroupSamlLinks:
         assert len(saml_links) == 1
         assert saml_links[0].name == "devops_users"
         assert saml_links[0].access_level == AccessLevel.get_value("developer")
+
+    def test__no_churn_when_config_unchanged(self, gl, group_for_function, caplog):
+        assert len(group_for_function.saml_group_links.list()) == 0, "group_saml_links is not empty"
+
+        config = f"""
+        projects_and_groups:
+          {group_for_function.full_path}/*:
+             group_saml_links:
+               devops_users:
+                 saml_group_name: devops_users
+                 access_level: maintainer
+        """
+
+        # First run creates the link.
+        run_gitlabform(config, group_for_function)
+        assert len(gl.groups.get(group_for_function.id).saml_group_links.list(get_all=True)) == 1
+
+        # Second run with the same config must not trigger a delete + recreate.
+        caplog.clear()
+        with caplog.at_level(logging.DEBUG):
+            run_gitlabform(config, group_for_function)
+
+        assert (
+            "Updating SAML link" not in caplog.text
+        ), f"Expected no SAML link updates on second run, got: {caplog.text}"
+
+        saml_links = gl.groups.get(group_for_function.id).saml_group_links.list(get_all=True)
+        assert len(saml_links) == 1
+        assert saml_links[0].name == "devops_users"
+        assert saml_links[0].access_level == AccessLevel.get_value("maintainer")
 
     def test__enforce_saml_links(self, gl, group_for_function):
 
