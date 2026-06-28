@@ -16,6 +16,7 @@ class TestGroupSAMLLinksProcessor:
         link = MagicMock()
         link.name = name
         link.access_level = access_level
+        link.asdict.return_value = {"name": name, "access_level": access_level}
         return link
 
     def _group_with_links(self, *links: MagicMock) -> MagicMock:

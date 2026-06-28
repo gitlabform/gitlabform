@@ -29,7 +29,13 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
 
             if existing_link is None:
                 group.saml_group_links.create(link_configuration)
-            elif self._link_differs(existing_link, link_configuration):
+                continue
+
+            # GitLab API uses 'name' where the config uses 'saml_group_name'.
+            expected = {**link_configuration, "name": saml_group_name}
+            expected.pop("saml_group_name", None)
+
+            if self._needs_update(existing_link.asdict(), expected):
                 # GitLab API has no update endpoint for SAML links; delete and recreate instead.
                 debug(f"Updating SAML link: {saml_group_name} with {link_configuration}")
                 existing_link.delete()
@@ -37,15 +43,6 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
 
         if enforce_links:
             self._delete_extra_links(group, existing_links, configured_links)
-
-    def _link_differs(self, existing: GroupSAMLGroupLink, configured: dict) -> bool:
-        # 'saml_group_name' was already used to look up the existing link, so the names match.
-        for key, value in configured.items():
-            if key == "saml_group_name":
-                continue
-            if getattr(existing, key, None) != value:
-                return True
-        return False
 
     def _delete_extra_links(
         self,
