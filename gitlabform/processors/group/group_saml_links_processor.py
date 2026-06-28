@@ -31,7 +31,9 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
                 group.saml_group_links.create(link_configuration)
                 continue
 
-            # GitLab API uses 'name' where the config uses 'saml_group_name'.
+            # GitLab API's request and response attributes differs when SAML link is created vs retrieved.
+            # On creation or retrieving a link, attribute is called `saml_group_name` but and returned response is 'name' instead.
+            # To compare existing link (retrieved from GitLab) with configured link, link configuration need to replace `saml_group_name` with `name`
             expected = {**link_configuration, "name": saml_group_name}
             expected.pop("saml_group_name", None)
 
