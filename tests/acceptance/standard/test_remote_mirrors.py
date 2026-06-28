@@ -3,9 +3,9 @@ import os
 import pytest
 import time
 from typing import cast, Tuple, Generator
-from gitlab.v4.objects import Project, ProjectRemoteMirror, ProjectBranch, Group
+from gitlab.v4.objects import Project, ProjectRemoteMirror, Group
 
-from tests.acceptance import run_gitlabform, get_random_name, create_project
+from tests.acceptance import run_gitlabform, get_random_name, create_project, gl
 
 
 @pytest.fixture(scope="class")
@@ -349,99 +349,101 @@ class TestRemoteMirrorsProcessor:
 
     def test_remote_mirror_http_password_auth_sync(
         self,
-        project: Project,
-        mirror_urls: Tuple[str, str, str],
-        mirror_target_projects: Tuple[Project, Project, Project],
+        project_for_function: Project,
+        other_group: Group,
+        root_username: str,
+        root_access_token: str,
     ) -> None:
         """
         Test remote mirror functionality for http and password based authentication.
         This also tests configuration of `force_push` config key.
 
-        This is validated by creating a new branch and a test file in the source project.
-        Then run gitlabform with `force_push` enabled for the target mirror.
-        Then check the target mirror repo if the new branch and the test file exists.
+        Uses a function-scoped source and a dedicated empty target (no initial commit, so no
+        default-branch auto-protection race) to keep this test self-contained and free of the
+        cross-test state that previously made it flaky.
         """
-        first_mirror_url_http_password_auth, _, _ = mirror_urls
-        first_mirror_repo, _, _ = mirror_target_projects
-
-        # In GitLab, default setting for branch protection is to deny force push.
-        # For first mirror, we need to allow force push to the main branch, so that
-        # we can validate the mirror functionality.
-        first_mirror_repo_main_branch = cast(ProjectBranch, first_mirror_repo.protectedbranches.get("main"))
-        first_mirror_repo_main_branch.allow_force_push = True
-        first_mirror_repo_main_branch.save()
-
-        # Create a test file in a new branch in the source project to validate mirror functionality
-        # We use a unique branch name to ensure we are testing a fresh sync
-        sync_branch_name = get_random_name("sync_test_branch")
-        project.branches.create({"branch": sync_branch_name, "ref": "main"})
-
-        test_file_content = "This is a test file for remote mirror validation"
-        test_file_path = f"mirror_test_{sync_branch_name}.txt"
-
-        project.files.create(
-            {
-                "branch": sync_branch_name,
-                "file_path": test_file_path,
-                "content": test_file_content,
-                "commit_message": "Add test file for mirror validation",
-            }
+        # Empty target: no commits, no main branch yet, no protected-branch race. The mirror's
+        # first push creates main fresh from the source.
+        target = cast(
+            Project,
+            gl.projects.create(
+                {
+                    "name": get_random_name("mirror_sync_target"),
+                    "namespace_id": other_group.id,
+                    "default_branch": "main",
+                    "initialize_with_readme": False,
+                }
+            ),
         )
+        try:
+            gitlab_url = os.getenv("GITLAB_URL", "http://localhost").rstrip("/")
+            mirror_url = (
+                gitlab_url.replace("http://", f"http://{root_username}:{root_access_token}@")
+                + f"/{target.path_with_namespace}.git"
+            )
 
-        # Validate that the test file exists in the source project
-        source_file = project.files.get(ref=sync_branch_name, file_path=test_file_path)
-        assert source_file is not None
-        assert source_file.decode().decode("utf-8") == test_file_content
+            sync_branch_name = get_random_name("sync_test_branch")
+            project_for_function.branches.create({"branch": sync_branch_name, "ref": "main"})
 
-        # Run GitLabForm with force_push enabled.
-        # This should trigger the self._sync_remote_mirror(project, mirror_in_gitlab) logic.
-        gitlabform_config = f"""
-            projects_and_groups:
-              {project.path_with_namespace}:
-                remote_mirrors:
-                  {first_mirror_url_http_password_auth}:
-                    enabled: true
-                    auth_method: password
-                    force_push: true
-            """
+            test_file_content = "This is a test file for remote mirror validation"
+            test_file_path = f"mirror_test_{sync_branch_name}.txt"
 
-        run_gitlabform(gitlabform_config, project.path_with_namespace)
+            project_for_function.files.create(
+                {
+                    "branch": sync_branch_name,
+                    "file_path": test_file_path,
+                    "content": test_file_content,
+                    "commit_message": "Add test file for mirror validation",
+                }
+            )
 
-        # update_status may still be 'finished' from a prior sync in this class,
-        # so we require both 'finished' and the new file present in the target.
-        max_wait_seconds = 60
-        poll_interval = 3
-        deadline = time.time() + max_wait_seconds
-        last_status: str | None = None
-        last_error: str | None = None
-        synced = False
+            gitlabform_config = f"""
+                projects_and_groups:
+                  {project_for_function.path_with_namespace}:
+                    remote_mirrors:
+                      {mirror_url}:
+                        enabled: true
+                        auth_method: password
+                        force_push: true
+                """
 
-        while time.time() < deadline:
-            mirror = self._get_mirror_from_url(project, first_mirror_url_http_password_auth)
-            assert mirror is not None, "Mirror disappeared from source project during sync"
-            last_status = getattr(mirror, "update_status", None)
-            last_error = getattr(mirror, "last_error", None)
+            run_gitlabform(gitlabform_config, project_for_function.path_with_namespace)
 
-            if last_status == "failed":
-                pytest.fail(f"Mirror sync reported failed by GitLab. last_error={last_error!r}")
+            max_wait_seconds = 60
+            poll_interval = 3
+            deadline = time.time() + max_wait_seconds
+            last_status: str | None = None
+            last_error: str | None = None
+            synced = False
 
-            if last_status == "finished":
-                try:
-                    target_file = first_mirror_repo.files.get(ref=sync_branch_name, file_path=test_file_path)
-                    if target_file.decode().decode("utf-8") == test_file_content:
-                        synced = True
-                        break
-                except Exception:
-                    pass
+            while time.time() < deadline:
+                mirror = self._get_mirror_from_url(project_for_function, mirror_url)
+                assert mirror is not None, "Mirror disappeared from source project during sync"
+                last_status = getattr(mirror, "update_status", None)
+                last_error = getattr(mirror, "last_error", None)
 
-            time.sleep(poll_interval)
+                if last_status == "failed":
+                    pytest.fail(f"Mirror sync reported failed by GitLab. last_error={last_error!r}")
 
-        assert synced, (
-            f"Mirror sync did not complete within {max_wait_seconds}s: "
-            f"file '{test_file_path}' not found in target project "
-            f"'{first_mirror_repo.path_with_namespace}' "
-            f"(last update_status={last_status!r}, last_error={last_error!r})."
-        )
+                if last_status == "finished":
+                    try:
+                        target_file = target.files.get(ref=sync_branch_name, file_path=test_file_path)
+                        if target_file.decode().decode("utf-8") == test_file_content:
+                            synced = True
+                            break
+                    except Exception:
+                        pass
+
+                time.sleep(poll_interval)
+
+            assert synced, (
+                f"Mirror sync did not complete within {max_wait_seconds}s: "
+                f"file '{test_file_path}' not found in target project "
+                f"'{target.path_with_namespace}' "
+                f"(last update_status={last_status!r}, last_error={last_error!r})."
+            )
+        finally:
+            target.delete()
 
     def test_remote_mirrors_sync_error(
         self,
