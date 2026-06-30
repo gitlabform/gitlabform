@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -128,3 +130,72 @@ class TestGitLabCoreRetryConfiguration:
         assert retry_call_kwargs["total"] == 10
         assert retry_call_kwargs["backoff_factor"] == pytest.approx(0.1)
         assert retry_call_kwargs["status_forcelist"] == []
+
+
+class TestGitLabCoreUrlNormalization:
+    """
+    Tests for GitLabCore URL normalization.
+    Ensures that a trailing slash in the GitLab URL is stripped during initialization
+    so that API calls never produce a double slash (e.g. https://localhost//api/v4/...).
+    """
+
+    @patch("gitlabform.gitlab.core.requests.Session")
+    @patch("gitlabform.gitlab.core.Configuration")
+    def test_trailing_slash_in_config_is_stripped(self, mock_configuration, mock_session):
+        """URL with trailing slash provided via config file must be normalized."""
+        mock_configuration.return_value.get.return_value = {
+            "url": "https://localhost/",
+            "token": "test-token",
+        }
+        mock_session.return_value = MagicMock()
+
+        from gitlabform.gitlab.core import GitLabCore
+
+        with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
+            mock_api.side_effect = [
+                {"version": "16.0.0", "revision": "abc123", "enterprise": True},
+                {"username": "test_user", "is_admin": True},
+            ]
+            core = GitLabCore()
+
+        assert core.gitlab_config["url"] == "https://localhost"
+
+    @patch.dict(os.environ, {"GITLAB_URL": "https://localhost/", "GITLAB_TOKEN": "test-token"})
+    @patch("gitlabform.gitlab.core.requests.Session")
+    @patch("gitlabform.gitlab.core.Configuration")
+    def test_trailing_slash_in_env_var_is_stripped(self, mock_configuration, mock_session):
+        """URL with trailing slash provided via GITLAB_URL env var must be normalized."""
+        mock_configuration.return_value.get.return_value = {}
+        mock_session.return_value = MagicMock()
+
+        from gitlabform.gitlab.core import GitLabCore
+
+        with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
+            mock_api.side_effect = [
+                {"version": "16.0.0", "revision": "abc123", "enterprise": True},
+                {"username": "test_user", "is_admin": True},
+            ]
+            core = GitLabCore()
+
+        assert core.gitlab_config["url"] == "https://localhost"
+
+    @patch("gitlabform.gitlab.core.requests.Session")
+    @patch("gitlabform.gitlab.core.Configuration")
+    def test_url_without_trailing_slash_is_unchanged(self, mock_configuration, mock_session):
+        """URL without trailing slash must not be modified."""
+        mock_configuration.return_value.get.return_value = {
+            "url": "https://localhost",
+            "token": "test-token",
+        }
+        mock_session.return_value = MagicMock()
+
+        from gitlabform.gitlab.core import GitLabCore
+
+        with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
+            mock_api.side_effect = [
+                {"version": "16.0.0", "revision": "abc123", "enterprise": True},
+                {"username": "test_user", "is_admin": True},
+            ]
+            core = GitLabCore()
+
+        assert core.gitlab_config["url"] == "https://localhost"
