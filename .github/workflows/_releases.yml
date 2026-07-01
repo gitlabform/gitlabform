@@ -37,7 +37,7 @@ jobs:
       target_run_id: ${{ steps.validate.outputs.run_id }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prep-release.outputs.semver_tag }}
           fetch-depth: 2
@@ -129,7 +129,7 @@ jobs:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prep-release.outputs.semver_tag }}
           fetch-depth: 2
@@ -162,7 +162,7 @@ jobs:
       # TODO: In a separate PR, optimize docker image build to consume the built package artifact
       # (package-dist) instead of copying and rebuilding from source if applicable.
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.prep-release.outputs.semver_tag }}
       - name: Docker metadata
