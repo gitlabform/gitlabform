@@ -1,5 +1,5 @@
 import sys
-from logging import debug, critical, error, warning, info
+from logging import debug, critical, error, warning, info, log
 
 # Use Rich to make logs have a colorized and formatted output
 from rich.logging import RichHandler
@@ -21,7 +21,12 @@ from gitlabform.configuration.core import (
     ConfigInvalidException,
 )
 from gitlabform.configuration.transform import ConfigurationTransformers
-from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
+from gitlabform.constants import (
+    EXIT_INVALID_INPUT,
+    EXIT_PROCESSING_ERROR,
+    DIFF_LOG_LEVEL,
+    NOTICE_LOG_LEVEL,
+)
 from gitlabform.gitlab import GitLab
 from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.lists import Entities
@@ -33,7 +38,11 @@ from gitlabform.processors.application import ApplicationProcessors
 from gitlabform.processors.group import GroupProcessors
 from gitlabform.processors.project import ProjectProcessors
 
+# Setup rich console to output nicely formatted version information
 console = Console()
+
+logging.addLevelName(DIFF_LOG_LEVEL, "DIFF")
+logging.addLevelName(NOTICE_LOG_LEVEL, "NOTICE")
 
 
 class GitLabForm:
@@ -641,7 +650,7 @@ class GitLabForm:
 
         :param entities: groups or projects
         """
-        info(f"# of {entities.name} to process: {len(entities.get_effective())}")
+        log(NOTICE_LOG_LEVEL, f"# of {entities.name} to process: {len(entities.get_effective())}")
 
         entities_omitted = ""
         entities_verbose = f"{entities.name}: {entities.get_effective()}"
@@ -684,24 +693,24 @@ class GitLabForm:
         """
 
         if len(effective_groups) > 0 or len(effective_projects) > 0:
-            info(f"# of groups processed successfully: {successful_groups}")
-            info(f"# of projects processed successfully: {successful_projects}")
+            log(NOTICE_LOG_LEVEL, f"# of groups processed successfully: {successful_groups}")
+            log(NOTICE_LOG_LEVEL, f"# of projects processed successfully: {successful_projects}")
 
         if len(failed_groups) > 0:
-            console.print(f"# of groups failed: {len(failed_groups)}", style="red")
+            log(NOTICE_LOG_LEVEL, f"# of groups failed: {len(failed_groups)}")
             for group_number in failed_groups.keys():
-                console.print(f"Failed group {group_number}: {failed_groups[group_number]}", style="red")
+                log(NOTICE_LOG_LEVEL, f"Failed group {group_number}: {failed_groups[group_number]}")
         if len(failed_projects) > 0:
-            console.print(f"# of projects failed: {len(failed_projects)}", style="red")
+            log(NOTICE_LOG_LEVEL, f"# of projects failed: {len(failed_projects)}")
             for project_number in failed_projects.keys():
-                console.print(f"Failed project {project_number}: {failed_projects[project_number]}", style="red")
+                log(NOTICE_LOG_LEVEL, f"Failed project {project_number}: {failed_projects[project_number]}")
 
         if len(failed_groups) > 0 or len(failed_projects) > 0:
             sys.exit(EXIT_PROCESSING_ERROR)
         elif successful_groups > 0 or successful_projects > 0:
-            console.print("All requested groups/projects processed successfully! :sparkles:", style="green")
+            log(NOTICE_LOG_LEVEL, "All requested groups/projects processed successfully! :sparkles:")
         else:
-            console.print("Nothing to do.", style="yellow")
+            log(NOTICE_LOG_LEVEL, "Nothing to do.")
 
     @classmethod
     def _info_group_count(cls, prefix, i: int, n: int, second_color: str, second_text: str) -> None:

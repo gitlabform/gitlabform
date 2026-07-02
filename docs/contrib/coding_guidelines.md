@@ -6,6 +6,11 @@ Please do:
 * add tests along with the new code that prove that it works:
     * when adding/changing non-trivial logic please add unit tests,
     * for all bug fixes and new features using GitLab API please add acceptance tests
+* use info as the base log level, debug if you might expose sensitive information (such as raw API request/responses)
+    * by default we log out WARNING and above issues, with INFO logged out when specifying the `--verbose` argument in CLI 
+    * use `logging` module for logging, do not use `print` statements
+    * we have a custom log level for "diff" messages, used only in the difference_logger
+    * we have a custom log level "notice" used only in gitlabfor __init__.py in order to output version information and the total numbers of Projects/Groups processed
 * add or update the docs for new features,
 * use [pre-commit](https://pre-commit.com) to automatically reformat your code and run linters before committing,
 * squash your commits (unless there is a reason not to),
