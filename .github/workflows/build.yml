@@ -31,7 +31,7 @@ jobs:
           uv run --no-sync package build
           uv run --no-sync package verify
       - name: Upload package distribution
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: package-dist
           path: dist/*
@@ -54,7 +54,7 @@ jobs:
       - name: Build documentation
         run: uv run --no-sync docs build
       - name: Upload docs site
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs-site
           path: site
