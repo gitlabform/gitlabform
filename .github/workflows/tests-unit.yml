@@ -9,7 +9,7 @@ on:
         required: true
     secrets:
       CODECOV_TOKEN:
-        required: true
+        required: false
 
 permissions:
   contents: read
@@ -18,6 +18,8 @@ jobs:
   unit:
     name: "Unit (${{ matrix.python-version }})"
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
@@ -37,6 +39,7 @@ jobs:
       - name: Run unit tests
         run: uv run --no-sync qa test tests/unit --cov=. --cov-report=xml --log-cli-level=WARNING
       - name: Upload coverage to Codecov
+        if: ${{ env.CODECOV_TOKEN != '' }}
         uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v3

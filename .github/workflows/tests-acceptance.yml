@@ -36,6 +36,7 @@ jobs:
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
+          allow-unsafe-pr-checkout: true
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
       - name: Install dependencies
@@ -69,6 +70,7 @@ jobs:
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
+          allow-unsafe-pr-checkout: true
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
       - name: Install dependencies
