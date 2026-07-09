@@ -2,7 +2,9 @@ name: "Codecov Upload"
 
 on:
   workflow_run:
-    workflows: ["CI - PRs"]
+    workflows:
+      - "CI - PRs"
+      - "CI - Acceptance Tests"
     types:
       - completed
 
@@ -11,9 +13,9 @@ permissions:
   contents: read
 
 jobs:
-  upload:
-    name: "Upload coverage (${{ matrix.python-version }})"
-    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+  upload-unit:
+    name: "Upload unit coverage (${{ matrix.python-version }})"
+    if: ${{ github.event.workflow_run.name == 'CI - PRs' && github.event.workflow_run.event == 'pull_request' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -44,6 +46,55 @@ jobs:
           with: |
             name: unit-tests-${{ matrix.python-version }}
             flags: unittests
+            fail_ci_if_error: true
+            token: ${{ secrets.CODECOV_TOKEN }}
+            files: coverage.xml
+            override_pr: ${{ steps.pr.outputs.pr }}
+            override_commit: ${{ steps.pr.outputs.sha }}
+          attempt_limit: 5
+          attempt_delay: 10000
+
+  upload-acceptance:
+    name: "Upload acceptance coverage (${{ matrix.name }})"
+    if: ${{ github.event.workflow_run.name == 'CI - Acceptance Tests' && github.event.workflow_run.event == 'pull_request_target' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact: coverage-standard-ce
+            name: codecov-acceptance-test-standard-ce
+          - artifact: coverage-standard-ee
+            name: codecov-acceptance-test-standard-ee
+          - artifact: coverage-licensed-premium
+            name: codecov-acceptance-test-premium
+          - artifact: coverage-licensed-ultimate
+            name: codecov-acceptance-test-ultimate
+    steps:
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ matrix.artifact }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Read PR metadata
+        id: pr
+        run: |
+          pr=$(jq -r '.pr // empty' pr-info.json)
+          sha=$(jq -r '.sha // empty' pr-info.json)
+          if [[ "$pr" =~ ^[0-9]+$ ]]; then
+            echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "$sha" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Upload coverage to Codecov
+        uses: Wandalen/wretry.action@v3
+        with:
+          action: codecov/codecov-action@v3
+          with: |
+            name: ${{ matrix.name }}
+            flags: integration
             fail_ci_if_error: true
             token: ${{ secrets.CODECOV_TOKEN }}
             files: coverage.xml
