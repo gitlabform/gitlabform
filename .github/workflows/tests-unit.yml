@@ -7,9 +7,6 @@ on:
       BRANCH_REF:
         type: string
         required: true
-    secrets:
-      CODECOV_TOKEN:
-        required: false
 
 permissions:
   contents: read
@@ -18,8 +15,6 @@ jobs:
   unit:
     name: "Unit (${{ matrix.python-version }})"
     runs-on: ubuntu-latest
-    env:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
@@ -38,15 +33,18 @@ jobs:
         run: uv sync --frozen --no-dev --group test
       - name: Run unit tests
         run: uv run --no-sync qa test tests/unit --cov=. --cov-report=xml --log-cli-level=WARNING
-      - name: Upload coverage to Codecov
-        if: ${{ env.CODECOV_TOKEN != '' }}
-        uses: Wandalen/wretry.action@v3
+      - name: Save PR metadata
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          printf '{"pr": %s, "sha": "%s"}\n' "$PR_NUMBER" "$PR_SHA" > pr-info.json
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
         with:
-          action: codecov/codecov-action@v3
-          with: |
-            name: unit-tests-${{ matrix.python-version }}
-            flags: unittests
-            fail_ci_if_error: true
-            token: ${{ secrets.CODECOV_TOKEN }}
-          attempt_limit: 5
-          attempt_delay: 10000
+          name: coverage-${{ matrix.python-version }}
+          path: |
+            coverage.xml
+            pr-info.json
+          if-no-files-found: error
+          retention-days: 1

@@ -1,0 +1,53 @@
+name: "Codecov Upload"
+
+on:
+  workflow_run:
+    workflows: ["CI - PRs"]
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  upload:
+    name: "Upload coverage (${{ matrix.python-version }})"
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.14", "3.12"]
+    steps:
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: coverage-${{ matrix.python-version }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Read PR metadata
+        id: pr
+        run: |
+          pr=$(jq -r '.pr // empty' pr-info.json)
+          sha=$(jq -r '.sha // empty' pr-info.json)
+          if [[ "$pr" =~ ^[0-9]+$ ]]; then
+            echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "$sha" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Upload coverage to Codecov
+        uses: Wandalen/wretry.action@v3
+        with:
+          action: codecov/codecov-action@v3
+          with: |
+            name: unit-tests-${{ matrix.python-version }}
+            flags: unittests
+            fail_ci_if_error: true
+            token: ${{ secrets.CODECOV_TOKEN }}
+            files: coverage.xml
+            override_pr: ${{ steps.pr.outputs.pr }}
+            override_commit: ${{ steps.pr.outputs.sha }}
+          attempt_limit: 5
+          attempt_delay: 10000
