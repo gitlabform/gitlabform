@@ -32,10 +32,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
+          allow-unsafe-pr-checkout: true
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
       - name: Install dependencies
@@ -65,10 +66,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
+          allow-unsafe-pr-checkout: true
       - name: Configure uv environment
         uses: ./.github/actions/setup-uv-local
       - name: Install dependencies

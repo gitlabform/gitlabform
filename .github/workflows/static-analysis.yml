@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.BRANCH_REF }}
       - name: Configure uv environment
@@ -37,7 +37,7 @@ jobs:
         check: [black, mypy, bandit]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.BRANCH_REF }}
           fetch-depth: 2
