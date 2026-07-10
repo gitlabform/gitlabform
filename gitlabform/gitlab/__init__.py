@@ -29,6 +29,7 @@ class AccessLevel(enum.IntEnum):
     GUEST = 10
     PLANNER = 15  # introduced in GitLab 17.7
     REPORTER = 20
+    SECURITY_MANAGER = 25  # introduced in GitLab 18.4
     DEVELOPER = 30
     MAINTAINER = 40
     OWNER = 50  # only for groups

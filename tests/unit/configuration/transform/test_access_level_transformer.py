@@ -170,6 +170,37 @@ def test__config__with_access_level_names__branches_premium_syntax():
     assert configuration.config == configuration_with_numbers.config
 
 
+def test__config__with_access_level_names__security_manager():
+    config_yaml = f"""
+    projects_and_groups:
+      foobar/*:
+        branches:
+          main:
+            protected: true
+            push_access_level: no access
+            merge_access_level: security manager
+            unprotect_access_level: maintainer
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    transformer = AccessLevelsTransformer(MagicMock(GitLab))
+    transformer.transform(configuration)
+
+    config_with_numbers = f"""
+    projects_and_groups:
+      foobar/*:
+        branches:
+          main:
+            protected: true
+            push_access_level: 0
+            merge_access_level: 25
+            unprotect_access_level: 40
+    """
+    configuration_with_numbers = Configuration(config_string=config_with_numbers)
+
+    assert configuration.config == configuration_with_numbers.config
+
+
 def test__config__with_access_level_names__invalid_name():
     config_yaml = f"""
     projects_and_groups:
