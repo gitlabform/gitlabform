@@ -11,40 +11,38 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_saml_links", gitlab)
 
-    def _process_configuration(self, group_path: str, configuration: dict) -> None:
+    def _process_configuration(self, group_path_and_name: str, configuration: dict) -> None:
         """Process the SAML links configuration for a group."""
 
-        configured_links = configuration.get("group_saml_links", {})
+        configured_section = configuration.get("group_saml_links", {}) or {}
         enforce_links = configuration.get("group_saml_links|enforce", False)
 
-        group: Group = self.gl.get_group_by_path_cached(group_path)
+        configured_links = {k: v for k, v in configured_section.items() if k != "enforce"}
+
+        group: Group = self.gl.get_group_by_path_cached(group_path_and_name)
         existing_links: List[GroupSAMLGroupLink] = group.saml_group_links.list(get_all=True)
-        existing_link_names = [existing_link.name for existing_link in existing_links]
+        existing_by_name = {link.name: link for link in existing_links}
 
-        # Remove 'enforce' key from the config so that it's not treated as a "link"
-        if enforce_links:
-            configured_links.pop("enforce")
-
-        # Process each configured SAML link
         for _, link_configuration in configured_links.items():
             saml_group_name = link_configuration.get("saml_group_name")
+            existing_link = existing_by_name.get(saml_group_name)
 
-            if saml_group_name not in existing_link_names:
-                # Create the saml link as it does not already exist
+            if existing_link is None:
                 group.saml_group_links.create(link_configuration)
-                group.save()
-            else:
-                # Check if the existing link needs to be updated
-                # GitLab API does not provide an endpoint for updating SAML links
-                # If update required, we need to delete and recreate
-                existing_link_config = next((link for link in existing_links if link.name == saml_group_name), None)
-                if existing_link_config and self._needs_update(existing_link_config.asdict(), link_configuration):
-                    debug(f"Updating SAML link: {saml_group_name} with {link_configuration}")
-                    existing_link_config.delete()
-                    group.saml_group_links.create(link_configuration)
-                    group.save()
+                continue
 
-        # Process enforce mode
+            # GitLab API's request and response attributes differs when SAML link is created vs retrieved.
+            # On creation or retrieving a link, attribute is called `saml_group_name` but and returned response is 'name' instead.
+            # To compare existing link (retrieved from GitLab) with configured link, link configuration need to replace `saml_group_name` with `name`
+            expected = {**link_configuration, "name": saml_group_name}
+            expected.pop("saml_group_name", None)
+
+            if self._needs_update(existing_link.asdict(), expected):
+                # GitLab API has no update endpoint for SAML links; delete and recreate instead.
+                debug(f"Updating SAML link: {saml_group_name} with {link_configuration}")
+                existing_link.delete()
+                group.saml_group_links.create(link_configuration)
+
         if enforce_links:
             self._delete_extra_links(group, existing_links, configured_links)
 
@@ -55,9 +53,7 @@ class GroupSAMLLinksProcessor(AbstractProcessor):
         configured: dict,
     ) -> None:
         """Delete any SAML links that are not in the configuration."""
-        known_names = [
-            common_name["saml_group_name"] for common_name in configured.values() if common_name != "enforce"
-        ]
+        known_names = {link["saml_group_name"] for link in configured.values()}
 
         for link in existing:
             if link.name not in known_names:

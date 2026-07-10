@@ -37,6 +37,9 @@ class GitLabCore:
         gitlab_config_from_file = self.configuration.get("gitlab", {})
         self.gitlab_config = {**default_gitlab_config, **gitlab_config_from_file}
 
+        if self.gitlab_config["url"]:
+            self.gitlab_config["url"] = self.gitlab_config["url"].rstrip("/")
+
         self.session = requests.Session()
 
         retries_status_forcelist = []

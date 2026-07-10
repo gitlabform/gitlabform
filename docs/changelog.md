@@ -6,6 +6,24 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.1.0
+
+### Features
+
+* Add wildcard pattern support for project configuration [#1311](https://github.com/gitlabform/gitlabform/pull/1311). ([nikaro](https://github.com/nikaro)) 
+
+### Bug Fixes
+
+* group_saml_links: stop delete-and-recreate churn on unchanged links [#1331](https://github.com/gitlabform/gitlabform/pull/1331). ([rickbrouwer](https://github.com/rickbrouwer))
+* validate key in files config to avoid cryptic KeyError [#1317](https://github.com/gitlabform/gitlabform/pull/1317), resolves [#1312](https://github.com/gitlabform/gitlabform/issues/1312). ([rickbrouwer](https://github.com/rickbrouwer))
+* Normalize GitLab URL while parsing configuration [#1338](https://github.com/gitlabform/gitlabform/pull/1338). ([schurzi](https://github.com/schurzi))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.0.0
 
 ### Breaking Changes
