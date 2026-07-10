@@ -26,7 +26,6 @@ jobs:
     uses: ./.github/workflows/tests-unit.yml
     with:
       BRANCH_REF: ${{ inputs.BRANCH_REF }}
-    secrets: inherit
 
   analyze:
     name: Analyze (${{ matrix.language }})
