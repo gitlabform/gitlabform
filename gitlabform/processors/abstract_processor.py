@@ -23,7 +23,6 @@ class AbstractProcessor(ABC):
         self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
         # Set by subclasses to enable the centralized dry-run diff.
         self.get_entity_in_gitlab: Optional[Callable[[str], dict]] = None
-        self._hide_entries_in_diff: Optional[list[str]] = None
 
     @configuration_to_safe_dict
     def process(
@@ -140,7 +139,6 @@ class AbstractProcessor(ABC):
             entity_in_gitlab,
             entity_config,
             only_changed=diff_only_changed,
-            hide_entries=self._hide_entries_in_diff,
         )
 
     def _prepare_entities_for_diff(self, entity_in_gitlab: dict, entity_config: dict) -> tuple[dict, dict]:
