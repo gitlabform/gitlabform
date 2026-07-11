@@ -1,13 +1,9 @@
-from typing import Dict, Any, List, cast
-from logging import warning, info, INFO
-
-import copy
-import textwrap
+from typing import Dict, Any
+from logging import warning, info
 
 from gitlab.exceptions import GitlabGetError
-from gitlab.v4.objects import Project, ProjectVariable
+from gitlab.v4.objects import Project
 
-from gitlabform import util
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.util.difference_logger import hide
 from gitlabform.processors.abstract_processor import AbstractProcessor
@@ -19,6 +15,7 @@ class ProjectVariablesProcessor(AbstractProcessor):
         super().__init__("variables", gitlab)
         self.log_level = log_level
         self._variables_processor = VariablesProcessor(self._needs_update)
+        self.get_entity_in_gitlab = self._get_variables_in_gitlab
 
     def _process_configuration(self, project_and_group: str, configuration: Dict[str, Any]) -> None:
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
@@ -45,56 +42,36 @@ class ProjectVariablesProcessor(AbstractProcessor):
             warning(f"Cannot get project settings for {project_or_group}")
             return False
 
-    def _print_diff(
-        self,
-        project_and_group: str,
-        configuration: Dict[str, Any],
-        diff_only_changed: bool = False,
-    ) -> None:
-        """Print current and configured variables for comparison."""
+    def _get_variables_in_gitlab(self, project_and_group: str) -> Dict[str, Dict[str, Any]]:
         try:
             project: Project = self.gl.get_project_by_path_cached(project_and_group)
-            current_variables: List[ProjectVariable] = self._variables_processor.get_variables_from_gitlab(project)
-            variables_list: list[Dict[str, str]] = []
-
-            for variable in current_variables:
-                var_dict = {
-                    "key": variable.key,
-                    "value": hide(variable.value),
-                }
-                if hasattr(variable, "environment_scope"):
-                    var_dict["environment_scope"] = variable.environment_scope
-                variables_list.append(var_dict)
-
-            info(f"Variables for {project_and_group} in GitLab:")
-            if self.log_level == INFO:
-                yaml = util.yaml_config_to_string(variables_list)
-                info(
-                    textwrap.indent(
-                        yaml,
-                        "  ",
-                    )
-                )
+            variables = self._variables_processor.get_variables_from_gitlab(project)
         except GitlabGetError:
-            info(f"Variables for {project_and_group} in GitLab cannot be checked.")
+            return {}
 
-        info(f"Variables in {project_and_group} in configuration:")
+        return {self._variable_identity(v.asdict()): self._masked_variable(v.asdict()) for v in variables}
 
-        configured_variables = copy.deepcopy(configuration)
-        enforce_variables = configured_variables.get("enforce", False)
+    def _prepare_entities_for_diff(
+        self,
+        entity_in_gitlab: dict,
+        entity_config: dict,
+    ) -> tuple[dict, dict]:
+        # Config-side is keyed by user-chosen aliases and includes an "enforce" flag; normalize
+        # it to the same key@scope identity used for the GitLab side so keys line up.
+        normalized_config = {
+            self._variable_identity(var): self._masked_variable(var)
+            for alias, var in entity_config.items()
+            if alias != "enforce" and isinstance(var, dict)
+        }
+        return entity_in_gitlab, normalized_config
 
-        # Remove 'enforce' key from the config so that it's not treated as a "variable"
-        if enforce_variables:
-            configured_variables.pop("enforce")
+    @staticmethod
+    def _variable_identity(var: Dict[str, Any]) -> str:
+        return f"{var.get('key')}@{var.get('environment_scope', '*')}"
 
-        for key in configured_variables.keys():
-            configured_variables[key]["value"] = hide(configured_variables[key]["value"])
-
-        if self.log_level == INFO:
-            yaml = util.yaml_config_to_string(configured_variables)
-            info(
-                textwrap.indent(
-                    "",
-                    "  ",
-                )
-            )
+    @staticmethod
+    def _masked_variable(var: Dict[str, Any]) -> Dict[str, Any]:
+        masked = {k: v for k, v in var.items() if k not in {"id", "_links"}}
+        if "value" in masked:
+            masked["value"] = hide(str(masked["value"]))
+        return masked

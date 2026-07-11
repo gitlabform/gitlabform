@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from logging import debug
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import requests
 from logging import info
@@ -9,6 +9,7 @@ from gitlabform.gitlab import GitLab, PythonGitlab
 from gitlabform.gitlab import GitlabWrapper
 from gitlabform.output import EffectiveConfigurationFile
 from gitlabform.processors.util.decorators import configuration_to_safe_dict
+from gitlabform.processors.util.difference_logger import DifferenceLogger
 
 
 class AbstractProcessor(ABC):
@@ -20,6 +21,9 @@ class AbstractProcessor(ABC):
             Callable[[str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool],
         ] = {}
         self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
+        # Set by subclasses to enable the centralized dry-run diff.
+        self.get_entity_in_gitlab: Optional[Callable[[str], dict]] = None
+        self._hide_entries_in_diff: Optional[list[str]] = None
 
     @configuration_to_safe_dict
     def process(
@@ -124,7 +128,23 @@ class AbstractProcessor(ABC):
         pass
 
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        info(f"Diffing for section '{self.configuration_name}' is not supported yet")
+        if self.get_entity_in_gitlab is None:
+            info(f"Diffing for section '{self.configuration_name}' is not supported yet")
+            return
+
+        entity_in_gitlab = self.get_entity_in_gitlab(project_or_project_and_group)
+        entity_in_gitlab, entity_config = self._prepare_entities_for_diff(entity_in_gitlab, entity_config)
+
+        DifferenceLogger.log_diff(
+            f"{self.configuration_name} changes",
+            entity_in_gitlab,
+            entity_config,
+            only_changed=diff_only_changed,
+            hide_entries=self._hide_entries_in_diff,
+        )
+
+    def _prepare_entities_for_diff(self, entity_in_gitlab: dict, entity_config: dict) -> tuple[dict, dict]:
+        return entity_in_gitlab, entity_config
 
     def _needs_update(
         self,

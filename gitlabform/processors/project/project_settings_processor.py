@@ -1,6 +1,6 @@
 import os
 from logging import debug, error, warning, info
-from typing import Callable, Dict, List
+from typing import Dict, List
 
 from gitlab import GitlabGetError, GitlabUpdateError
 from gitlab.v4.objects import Project
@@ -8,13 +8,12 @@ from gql.transport.exceptions import TransportQueryError
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.util.difference_logger import DifferenceLogger
 
 
 class ProjectSettingsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("project_settings", gitlab)
-        self.get_entity_in_gitlab: Callable = getattr(self, "get_project_settings")
+        self.get_entity_in_gitlab = self.get_project_settings
 
     def _process_configuration(self, project_path: str, configuration: dict) -> None:
         debug("Processing project settings...")
@@ -61,16 +60,6 @@ class ProjectSettingsProcessor(AbstractProcessor):
     def get_project_settings(self, project_path: str):
         """Get project settings from GitLab."""
         return self.gl.get_project_by_path_cached(project_path).asdict()
-
-    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        entity_in_gitlab = self.get_project_settings(project_or_project_and_group)
-
-        DifferenceLogger.log_diff(
-            f"{self.configuration_name} changes",
-            entity_in_gitlab,
-            entity_config,
-            only_changed=diff_only_changed,
-        )
 
     def _process_project_topics(self, project_settings_in_config: Dict, project_settings_in_gitlab: Dict) -> None:
         project_settings_topics: Dict = project_settings_in_config.get("topics", [])

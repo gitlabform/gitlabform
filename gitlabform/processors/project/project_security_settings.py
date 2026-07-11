@@ -4,12 +4,12 @@ from gitlab.v4.objects import Project
 
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.util.difference_logger import DifferenceLogger
 
 
 class ProjectSecuritySettingsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("project_security_settings", gitlab)
+        self.get_entity_in_gitlab = self._get_project_security_settings_by_path
 
     def _process_configuration(self, project_name: str, configuration: dict) -> None:
         project: Project = self.gl.get_project_by_path_cached(project_name)
@@ -54,13 +54,6 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
         except Exception as e:
             warning(f"Failed to update project security settings for project {project.path_with_namespace}: {e}")
 
-    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        project = self.gl.get_project_by_path_cached(project_or_project_and_group)
-        entity_in_gitlab = self.get_project_security_settings(project)
-
-        DifferenceLogger.log_diff(
-            f"{self.configuration_name} changes",
-            entity_in_gitlab,
-            entity_config,
-            only_changed=diff_only_changed,
-        )
+    def _get_project_security_settings_by_path(self, project_path: str) -> dict:
+        project = self.gl.get_project_by_path_cached(project_path)
+        return self.get_project_security_settings(project)

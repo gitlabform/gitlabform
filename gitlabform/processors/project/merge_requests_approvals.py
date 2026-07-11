@@ -1,18 +1,16 @@
 import sys
 from logging import debug, info, critical
-from typing import Callable
 from gitlab.v4.objects import Project
 
 from gitlabform import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.util.difference_logger import DifferenceLogger
 
 
 class MergeRequestsApprovals(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("merge_requests_approvals", gitlab)
-        self.get_entity_in_gitlab: Callable = getattr(self, "get_project_mr_approvals_settings")
+        self.get_entity_in_gitlab = self.get_project_mr_approvals_settings
 
     def _process_configuration(self, project_path: str, configuration: dict) -> None:
         info("Processing project merge requests approvals settings...")
@@ -46,14 +44,3 @@ class MergeRequestsApprovals(AbstractProcessor):
             sys.exit(EXIT_INVALID_INPUT)
         else:
             return True
-
-    # TODO: duplicated logic with project_settings_processor.py. Should be refactored - ideally in the AbstractProcessor
-    def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        entity_in_gitlab = self.get_project_mr_approvals_settings(project_or_project_and_group)
-
-        DifferenceLogger.log_diff(
-            f"{self.configuration_name} changes",
-            entity_in_gitlab,
-            entity_config,
-            only_changed=diff_only_changed,
-        )
