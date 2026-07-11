@@ -134,3 +134,30 @@ class TestInheritanceBreakSubgroups:
                 "fizz": "buzz",
             },
         }
+
+    def test__inheritance_break__flag_inherited_from_wildcard_ancestor_does_not_abort_subgroup_lookup(
+        self,
+    ):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            merge_requests_approval_rules:
+              some_rule:
+                approvals_required: 1
+          acme/*:
+            merge_requests_approval_rules:
+              inherit: false
+              override_rule:
+                approvals_required: 2
+        """
+
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_group("acme/tools")
+
+        assert effective_config == {
+            "merge_requests_approval_rules": {
+                "override_rule": {"approvals_required": 2},
+            },
+        }
