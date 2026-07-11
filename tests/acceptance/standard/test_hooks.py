@@ -99,7 +99,7 @@ class TestHooksProcessor:
         # The hook contains a token, which is a secret. So, cannot confirm whether it's different from
         # existing config in. This is why the hook is always updated. The hook's current config is also
         # different from when it was created in previous test case.
-        assert f"Updating hook '{first_url}'" in caplog.text
+        assert f"Editing {first_url} of hooks in {target}" in caplog.text
         assert updated_first_hook.asdict() != first_hook.asdict()
         # push_events stays False from previous test case config
         assert (
@@ -110,7 +110,7 @@ class TestHooksProcessor:
 
         # The second hook should remain unchanged.
         # The hook did not change from the previous test case. So, updating it is not necessary.
-        assert f"Hook '{second_url}' remains unchanged" in caplog.text
+        assert f"{second_url} of hooks in {target} doesn't need an update." in caplog.text
         assert updated_second_hook.asdict() == second_hook.asdict()
         assert (
             updated_second_hook.job_events,
@@ -122,7 +122,7 @@ class TestHooksProcessor:
         # In the current run/config the token is removed but all other configs remain same.
         # GitLabForm does not have memory or awareness of previous configs. So, comparing with
         # existing config in GitLab, the hook did not change and is not updated.
-        assert f"Hook '{third_url}' remains unchanged" in caplog.text
+        assert f"{third_url} of hooks in {target} doesn't need an update." in caplog.text
         assert updated_third_hook.asdict() == third_hook.asdict()
         assert (
             updated_third_hook.push_events,
@@ -172,7 +172,7 @@ class TestHooksProcessor:
 
         # The last hook configured for deletion but it was never setup in gitlab.
         # Ensure expected error message is reported.
-        assert f"Not deleting hook '{non_existent_hook_url}', because it doesn't exist" in caplog.text
+        assert f"Not deleting {non_existent_hook_url} of hooks in {target} - it doesn't exist." in caplog.text
 
     def test_hooks_enforce(self, gl, group, project, urls):
         target = project.path_with_namespace

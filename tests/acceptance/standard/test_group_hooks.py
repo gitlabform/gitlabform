@@ -117,7 +117,7 @@ class TestGroupHooksProcessor:
         # The hook contains a token, which is a secret. So, cannot confirm whether it's different from
         # existing config in. This is why the hook is always updated. The hook's current config is also
         # different from when it was created in previous test case.
-        assert f"Updating group hook '{first_url}'" in caplog.text
+        assert f"Editing {first_url} of group_hooks in {group.full_path}" in caplog.text
         assert updated_first_hook.asdict() != first_hook.asdict()
         # push_events stays False from previous test case config
         assert (
@@ -128,7 +128,7 @@ class TestGroupHooksProcessor:
 
         # The second hook should remain unchanged.
         # The hook did not change from the previous test case. So, updating it is not necessary.
-        assert f"Group hook '{second_url}' remains unchanged" in caplog.text
+        assert f"{second_url} of group_hooks in {group.full_path} doesn't need an update." in caplog.text
         assert updated_second_hook.asdict() == second_hook.asdict()
         assert (
             updated_second_hook.job_events,
@@ -140,7 +140,7 @@ class TestGroupHooksProcessor:
         # In the current run/config the token is removed but all other configs remain same.
         # GitLabForm does not have memory or awareness of previous configs. So, comparing with
         # existing config in GitLab, the hook did not change and is not updated.
-        assert f"Group hook '{third_url}' remains unchanged" in caplog.text
+        assert f"{third_url} of group_hooks in {group.full_path} doesn't need an update." in caplog.text
         assert updated_third_hook.asdict() == third_hook.asdict()
         assert (
             updated_third_hook.push_events,
@@ -188,7 +188,10 @@ class TestGroupHooksProcessor:
         assert third_hook_after_test.asdict() == third_hook_before_test.asdict()
         # The last hook configured for deletion but it was never setup in gitlab.
         # Ensure expected error message is reported.
-        assert f"Not deleting group hook '{non_existent_hook_url}', because it doesn't exist" in caplog.text
+        assert (
+            f"Not deleting {non_existent_hook_url} of group_hooks in {group.full_path}"
+            " - it doesn't exist." in caplog.text
+        )
 
     def test_hooks_enforce(self, gl, group, urls):
         first_url, second_url, third_url = urls

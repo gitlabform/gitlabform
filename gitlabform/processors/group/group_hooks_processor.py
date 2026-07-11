@@ -1,75 +1,56 @@
-from logging import debug, warning
-from typing import Dict, Any, List
+from logging import warning
 
-from gitlab.base import RESTObject, RESTObjectList
 from gitlab.v4.objects import Group
-from gitlab.v4.objects import GroupHook
 
 from gitlabform.gitlab import GitLab
-from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.processors.defining_keys import Key
+from gitlabform.processors.multiple_entities_processor import MultipleEntitiesProcessor
 
 
-class GroupHooksProcessor(AbstractProcessor):
+class GroupHooksProcessor(MultipleEntitiesProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("group_hooks", gitlab)
+        super().__init__(
+            "group_hooks",
+            gitlab,
+            list_method_name=self._list_hooks,
+            add_method_name=self._add_hook,
+            delete_method_name=self._delete_hook,
+            edit_method_name=self._edit_hook,
+            defining=Key("url"),
+            required_to_create_or_update=Key("url"),
+        )
 
-    def _can_proceed(self, project_or_group: str, configuration: dict):
+    def _can_proceed(self, project_or_group: str, configuration: dict) -> bool:
         if not self.gitlab.enterprise:
-            hooks_in_config = configuration["group_hooks"]
-            if hooks_in_config is not None and len(hooks_in_config) > 0:
-                # Only raise error if user has defined hooks in config, otherwise exit silently out of processor
+            hooks_in_config = configuration.get("group_hooks") or {}
+            if len(hooks_in_config) > 0:
+                # Only warn if the user has actually configured hooks; otherwise exit silently.
                 warning("GitLab Community Edition does not support Group Webhooks")
-
             return False
-
         return True
 
     def _process_configuration(self, group_path_and_name: str, configuration: dict):
-        hooks_in_config: tuple[str, ...] = tuple(x for x in sorted(configuration["group_hooks"]) if x != "enforce")
-
-        debug("Processing group hooks...")
-        group: Group = self.gl.get_group_by_path_cached(group_path_and_name)
-        group_hooks: list[GroupHook] = group.hooks.list(get_all=True)
-
-        for hook in hooks_in_config:
-            hook_in_gitlab: RESTObject | None = next((h for h in group_hooks if h.url == hook), None)
-            hook_config = {"url": hook}
-            hook_config.update(configuration["group_hooks"][hook])
-
-            hook_id = hook_in_gitlab.id if hook_in_gitlab else None
-
-            # Process hooks configured for deletion
-            if configuration.get("group_hooks|" + hook + "|delete"):
-                if hook_id:
-                    debug(f"Deleting group hook '{hook}'")
-                    group.hooks.delete(hook_id)
-                    debug(f"Deleted group hook '{hook}'")
-                else:
-                    debug(f"Not deleting group hook '{hook}', because it doesn't exist")
+        # The yaml alias for each hook IS the url, but the nested dict doesn't include it.
+        # MultipleEntitiesProcessor matches entities via defining keys, so we inject `url` here.
+        hooks = configuration.get(self.configuration_name) or {}
+        for alias, hook_config in hooks.items():
+            if alias == "enforce":
                 continue
+            if isinstance(hook_config, dict):
+                hook_config.setdefault("url", alias)
+        super()._process_configuration(group_path_and_name, configuration)
 
-            # Process new hook creation
-            if not hook_id:
-                debug(f"Creating group hook '{hook}'")
-                created_hook: RESTObject = group.hooks.create(hook_config)
-                debug(f"Created group hook: {created_hook}")
-                continue
+    def _group(self, group_path_and_name: str) -> Group:
+        return self.gl.get_group_by_path_cached(group_path_and_name)
 
-            # Processing existing hook updates
-            gl_hook: dict = hook_in_gitlab.asdict() if hook_in_gitlab else {}
-            if self._needs_update(gl_hook, hook_config):
-                debug(f"The group hook '{hook}' config is different from what's in gitlab OR it contains a token")
-                debug(f"Updating group hook '{hook}'")
-                updated_hook: Dict[str, Any] = group.hooks.update(hook_id, hook_config)
-                debug(f"Updated group hook: {updated_hook}")
-            else:
-                debug(f"Group hook '{hook}' remains unchanged")
+    def _list_hooks(self, group_path_and_name: str) -> list[dict]:
+        return [h.asdict() for h in self._group(group_path_and_name).hooks.list(get_all=True)]
 
-        # Process hook config enforcements
-        if configuration.get("group_hooks|enforce"):
-            for gh in group_hooks:
-                if gh.url not in hooks_in_config:
-                    debug(
-                        f"Deleting group hook '{gh.url}' currently setup in the group but it is not in the configuration and enforce is enabled"
-                    )
-                    group.hooks.delete(gh.id)
+    def _add_hook(self, group_path_and_name: str, hook_config: dict) -> None:
+        self._group(group_path_and_name).hooks.create(hook_config)
+
+    def _delete_hook(self, group_path_and_name: str, hook_in_gitlab: dict) -> None:
+        self._group(group_path_and_name).hooks.delete(hook_in_gitlab["id"])
+
+    def _edit_hook(self, group_path_and_name: str, hook_in_gitlab: dict, hook_config: dict) -> None:
+        self._group(group_path_and_name).hooks.update(hook_in_gitlab["id"], hook_config)

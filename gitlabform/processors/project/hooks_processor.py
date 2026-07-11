@@ -1,64 +1,45 @@
-from logging import debug
-from typing import Dict, Any, List
-
-from gitlab.base import RESTObject, RESTObjectList
 from gitlab.v4.objects import Project
-from gitlab.v4.objects import ProjectHook
 
 from gitlabform.gitlab import GitLab
-from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.processors.defining_keys import Key
+from gitlabform.processors.multiple_entities_processor import MultipleEntitiesProcessor
 
 
-class HooksProcessor(AbstractProcessor):
+class HooksProcessor(MultipleEntitiesProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__("hooks", gitlab)
+        super().__init__(
+            "hooks",
+            gitlab,
+            list_method_name=self._list_hooks,
+            add_method_name=self._add_hook,
+            delete_method_name=self._delete_hook,
+            edit_method_name=self._edit_hook,
+            defining=Key("url"),
+            required_to_create_or_update=Key("url"),
+        )
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
-        debug("Processing hooks...")
-        project: Project = self.gl.get_project_by_path_cached(project_and_group)
-        project_hooks: list[ProjectHook] = project.hooks.list(get_all=True)
-
-        hooks_in_config: tuple[str, ...] = tuple(x for x in sorted(configuration["hooks"]) if x != "enforce")
-
-        for hook in hooks_in_config:
-            hook_in_gitlab: RESTObject | None = next((h for h in project_hooks if h.url == hook), None)
-            hook_config = {"url": hook}
-            hook_config.update(configuration["hooks"][hook])
-
-            hook_id = hook_in_gitlab.id if hook_in_gitlab else None
-
-            # Process hooks configured for deletion
-            if configuration.get("hooks|" + hook + "|delete"):
-                if hook_id:
-                    debug(f"Deleting hook '{hook}'")
-                    project.hooks.delete(hook_id)
-                    debug(f"Deleted hook '{hook}'")
-                else:
-                    debug(f"Not deleting hook '{hook}', because it doesn't exist")
+        # The yaml alias for each hook IS the url, but the nested dict doesn't include it.
+        # MultipleEntitiesProcessor matches entities via defining keys, so we inject `url` here.
+        hooks = configuration.get(self.configuration_name) or {}
+        for alias, hook_config in hooks.items():
+            if alias == "enforce":
                 continue
+            if isinstance(hook_config, dict):
+                hook_config.setdefault("url", alias)
+        super()._process_configuration(project_and_group, configuration)
 
-            # Process new hook creation
-            if not hook_id:
-                debug(f"Creating hook '{hook}'")
-                created_hook: RESTObject = project.hooks.create(hook_config)
-                debug(f"Created hook: {created_hook}")
-                continue
+    def _project(self, project_and_group: str) -> Project:
+        return self.gl.get_project_by_path_cached(project_and_group)
 
-            # Processing existing hook updates
-            gl_hook: dict = hook_in_gitlab.asdict() if hook_in_gitlab else {}
-            if self._needs_update(gl_hook, hook_config):
-                debug(f"The hook '{hook}' config is different from what's in gitlab OR it contains a token")
-                debug(f"Updating hook '{hook}'")
-                updated_hook: Dict[str, Any] = project.hooks.update(hook_id, hook_config)
-                debug(f"Updated hook: {updated_hook}")
-            else:
-                debug(f"Hook '{hook}' remains unchanged")
+    def _list_hooks(self, project_and_group: str) -> list[dict]:
+        return [h.asdict() for h in self._project(project_and_group).hooks.list(get_all=True)]
 
-        # Process hook config enforcements
-        if configuration.get("hooks|enforce"):
-            for gh in project_hooks:
-                if gh.url not in hooks_in_config:
-                    debug(
-                        f"Deleting hook '{gh.url}' currently setup in the project but it is not in the configuration and enforce is enabled"
-                    )
-                    project.hooks.delete(gh.id)
+    def _add_hook(self, project_and_group: str, hook_config: dict) -> None:
+        self._project(project_and_group).hooks.create(hook_config)
+
+    def _delete_hook(self, project_and_group: str, hook_in_gitlab: dict) -> None:
+        self._project(project_and_group).hooks.delete(hook_in_gitlab["id"])
+
+    def _edit_hook(self, project_and_group: str, hook_in_gitlab: dict, hook_config: dict) -> None:
+        self._project(project_and_group).hooks.update(hook_in_gitlab["id"], hook_config)
