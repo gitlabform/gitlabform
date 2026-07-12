@@ -2,6 +2,7 @@ from datetime import date
 from unittest.mock import MagicMock
 
 from gitlabform.processors.group.group_members_processor import GroupMembersProcessor
+from gitlabform.util import format_expires_at
 
 
 class TestGroupMembersProcessor:
@@ -10,13 +11,13 @@ class TestGroupMembersProcessor:
         self.processor.gl = MagicMock()
 
     def test__format_expires_at_converts_date_to_gitlab_string(self):
-        assert GroupMembersProcessor._format_expires_at(date(2026, 6, 18)) == "2026-06-18"
+        assert format_expires_at(date(2026, 6, 18)) == "2026-06-18"
 
     def test__format_expires_at_leaves_string_unchanged(self):
-        assert GroupMembersProcessor._format_expires_at("2026-06-18") == "2026-06-18"
+        assert format_expires_at("2026-06-18") == "2026-06-18"
 
     def test__format_expires_at_leaves_none_unchanged(self):
-        assert GroupMembersProcessor._format_expires_at(None) is None
+        assert format_expires_at(None) is None
 
     def test__process_groups_formats_date_expires_at_before_sharing(self):
         group = MagicMock()
