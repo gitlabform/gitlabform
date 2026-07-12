@@ -70,10 +70,10 @@ lint = [
     "bandit==1.9.4",
     "black==26.5.1",
     "codespell==2.4.2",
-    "mypy==2.1.0",
+    "mypy==2.2.0",
     "mypy-extensions==1.1.0",
-    "ruff==0.15.20",
-    "types-requests==2.33.0.20260518",
+    "ruff==0.15.21",
+    "types-requests==2.33.0.20260712",
 ]
 # Documentation generation stack.
 docs = [
