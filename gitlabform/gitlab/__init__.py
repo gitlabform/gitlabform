@@ -6,9 +6,7 @@ from typing import List
 
 from gitlab import Gitlab as GitlabClient, GraphQL
 
-from gitlabform.gitlab.commits import GitLabCommits
-from gitlabform.gitlab.merge_requests import GitLabMergeRequests
-from gitlabform.gitlab.pipelines import GitLabPipelines
+from gitlabform.gitlab.core import GitLabCore
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 
 
@@ -39,11 +37,7 @@ class AccessLevel(enum.IntEnum):
         return [level.name.lower().replace("_", " ") for level in AccessLevel]
 
 
-class GitLab(
-    GitLabCommits,
-    GitLabMergeRequests,
-    GitLabPipelines,
-):
+class GitLab(GitLabCore):
     pass
 
 
