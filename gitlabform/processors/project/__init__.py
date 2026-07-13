@@ -4,7 +4,7 @@ from gitlabform.configuration import Configuration
 from gitlabform.gitlab import GitLab
 from gitlabform.processors import AbstractProcessors
 from gitlabform.processors.abstract_processor import AbstractProcessor
-from gitlabform.processors.project.badges_processor import BadgesProcessor
+from gitlabform.processors.project.badges_processor import ProjectBadgesProcessor
 from gitlabform.processors.project.branches_processor import BranchesProcessor
 from gitlabform.processors.project.deploy_keys_processor import DeployKeysProcessor
 from gitlabform.processors.project.files_processor import FilesProcessor
@@ -36,7 +36,7 @@ from gitlabform.processors.project.resource_groups_processor import (
 from gitlabform.processors.project.schedules_processor import SchedulesProcessor
 from gitlabform.processors.project.tags_processor import TagsProcessor
 from gitlabform.processors.project.project_variables_processor import ProjectVariablesProcessor
-from gitlabform.processors.shared.protected_environments_processor import (
+from gitlabform.processors.project.protected_environments_processor import (
     ProtectedEnvironmentsProcessor,
 )
 
@@ -71,7 +71,7 @@ class ProjectProcessors(AbstractProcessors):
             FilesProcessor(gitlab, config, strict),
             HooksProcessor(gitlab),
             SchedulesProcessor(gitlab),
-            BadgesProcessor(gitlab),
+            ProjectBadgesProcessor(gitlab),
             ResourceGroupsProcessor(gitlab),
             ProtectedEnvironmentsProcessor(gitlab),
             MergeRequestsApprovals(gitlab),
