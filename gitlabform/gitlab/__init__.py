@@ -5,7 +5,8 @@ from typing import List
 
 from gitlab import Gitlab as GitlabClient, GraphQL
 
-from gitlabform.gitlab.core import GitLabCore
+from gitlabform.gitlab.groups import GitLabGroups
+from gitlabform.gitlab.projects import GitLabProjects
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 
 
@@ -36,7 +37,9 @@ class AccessLevel(enum.IntEnum):
         return [level.name.lower().replace("_", " ") for level in AccessLevel]
 
 
-class GitLab(GitLabCore):
+class GitLab(GitLabProjects, GitLabGroups):
+    # GitLabProjects and GitLabGroups both inherit from GitLabCore,
+    # so GitLab still gets the whole GitLabCore surface (session, HTTP helpers, etc.).
     pass
 
 
