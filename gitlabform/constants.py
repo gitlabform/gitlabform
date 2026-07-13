@@ -7,8 +7,10 @@ EXIT_PROCESSING_ERROR = 2
 APPROVAL_RULE_NAME = "Approvers (configured using GitLabForm)"
 
 # ------ Logging constants for custom log levels -----
-# Log out Diff logs higher than WARNING (i.e. not requiring --verbose too) but without having to masquerade as an
-# error/unexpected by using logger.warning/error etc
+# Why these numbers? https://docs.python.org/3/howto/logging.html#logging-levels
+# Anything in the 30-40 range will be logged out when the log level is set to WARNING -> we use WARNING as our
+# default level, unless --verbose is supplied at which point INFO level is set
+# Log out Diff logs without requiring --verbose
 DIFF_LOG_LEVEL = 32
-# Log out notices about number of failed projects etc
+# Log out notices about number of failed and successful projects, and processing completed etc. from __init__.py
 NOTICE_LOG_LEVEL = 33

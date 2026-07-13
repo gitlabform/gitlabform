@@ -7,6 +7,7 @@ Please do:
     * when adding/changing non-trivial logic please add unit tests,
     * for all bug fixes and new features using GitLab API please add acceptance tests
 * use info as the base log level, debug if you might expose sensitive information (such as raw API request/responses)
+    * [Logging levels information](https://docs.python.org/3/howto/logging.html#logging-levels)
     * by default we log out WARNING and above issues, with INFO logged out when specifying the `--verbose` argument in CLI 
     * use `logging` module for logging, do not use `print` statements
     * we have a custom log level for "diff" messages, used only in the difference_logger
