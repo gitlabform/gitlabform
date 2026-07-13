@@ -3,7 +3,6 @@ import re
 from logging import debug
 from typing import Dict, List
 
-from gitlab.base import RESTObjectList, RESTObject
 from gitlab.v4.objects import Project, ProjectPipelineSchedule
 
 from gitlabform.gitlab import GitLab

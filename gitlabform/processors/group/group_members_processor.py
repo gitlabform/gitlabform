@@ -1,7 +1,7 @@
 import sys
 from typing import Dict, Tuple
 
-from logging import debug, info, critical, error
+from logging import info, critical, error
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel

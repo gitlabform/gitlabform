@@ -1,5 +1,4 @@
-from logging import info
-from typing import Dict, List
+from typing import Dict
 
 
 from gitlabform.gitlab import GitLab

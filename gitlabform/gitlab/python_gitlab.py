@@ -70,10 +70,6 @@ class PythonGitlab(Gitlab):
         group = self.get_group_by_path_cached(groupname)
         return group.id
 
-    def get_project_id(self, name) -> int:
-        project = self.get_project_by_path_cached(name)
-        return project.id
-
     @functools.lru_cache()
     def get_project_by_path_cached(self, name: str, lazy: bool = False) -> Project:
         project: Project = self.projects.get(name, lazy)
