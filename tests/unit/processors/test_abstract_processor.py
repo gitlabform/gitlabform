@@ -15,13 +15,15 @@ def _make_processor(name: str = "test_section") -> _TestableProcessor:
 
 
 class TestPrintDiff:
-    def test_prints_not_supported_when_no_getter_configured(self, caplog) -> None:
+    def test_logs_not_supported_at_debug_when_no_getter_configured(self, caplog) -> None:
         processor = _make_processor("some_section")
 
-        with caplog.at_level("INFO"):
+        with caplog.at_level("DEBUG"):
             processor._print_diff("group/project", {"foo": 1}, diff_only_changed=False)
 
-        assert "Diffing for section 'some_section' is not supported yet" in caplog.text
+        matching = [r for r in caplog.records if "Diffing for section 'some_section'" in r.message]
+        assert len(matching) == 1
+        assert matching[0].levelname == "DEBUG"
 
     def test_calls_logger_with_entities_when_getter_set(self) -> None:
         processor = _make_processor("test_section")

@@ -128,7 +128,7 @@ class AbstractProcessor(ABC):
 
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
         if self.get_entity_in_gitlab is None:
-            info(f"Diffing for section '{self.configuration_name}' is not supported yet")
+            debug(f"Diffing for section '{self.configuration_name}' is not supported yet")
             return
 
         entity_in_gitlab = self.get_entity_in_gitlab(project_or_project_and_group)
