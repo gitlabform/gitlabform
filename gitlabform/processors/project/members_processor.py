@@ -6,6 +6,7 @@ from gitlab.v4.objects import Project, User
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.util import format_expires_at
 
 
 class MembersProcessor(AbstractProcessor):
@@ -39,7 +40,7 @@ class MembersProcessor(AbstractProcessor):
             current_groups = self.gitlab.get_groups_from_project(project_and_group)
             for group in groups:
                 info(f"Processing group {group}...")
-                expires_at = groups[group]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in groups[group] else None
+                expires_at = format_expires_at(groups[group].get("expires_at"))
                 access_level = groups[group]["group_access"] if "group_access" in groups[group] else None
 
                 # we only add the group if it doesn't have the correct settings
@@ -97,7 +98,7 @@ class MembersProcessor(AbstractProcessor):
                     continue
                 user_id = gitlab_user.id
 
-                expires_at = users[user]["expires_at"].strftime("%Y-%m-%d") if "expires_at" in users[user] else None
+                expires_at = format_expires_at(users[user].get("expires_at"))
                 access_level = users[user]["access_level"] if "access_level" in users[user] else None
                 member_role_id_or_name = users[user]["member_role"] if "member_role" in users[user] else None
                 if member_role_id_or_name:
