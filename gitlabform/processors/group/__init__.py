@@ -41,7 +41,7 @@ class GroupProcessors(AbstractProcessors):
         self.processors: List[AbstractProcessor] = [
             GroupVariablesProcessor(gitlab),
             GroupSettingsProcessor(gitlab),
-            GroupMembersProcessor(gitlab),
+            GroupMembersProcessor(gitlab, config),
             GroupLDAPLinksProcessor(gitlab),
             GroupBadgesProcessor(gitlab),
             GroupSAMLLinksProcessor(gitlab),
@@ -50,3 +50,8 @@ class GroupProcessors(AbstractProcessors):
             GroupPushRulesProcessor(gitlab),
             GroupProtectedBranchesProcessor(gitlab, strict),
         ]
+
+    def set_effective_groups(self, groups: list[str]) -> None:
+        for processor in self.processors:
+            if hasattr(processor, "set_effective_groups"):
+                processor.set_effective_groups(groups)

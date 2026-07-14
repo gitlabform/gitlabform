@@ -1,4 +1,5 @@
 import sys
+from collections.abc import Iterable
 from typing import Dict, Tuple
 
 from logging import debug, info, critical, error
@@ -11,8 +12,13 @@ from gitlab import GitlabDeleteError, GitlabError, GitlabGetError
 
 
 class GroupMembersProcessor(AbstractProcessor):
-    def __init__(self, gitlab: GitLab):
+    def __init__(self, gitlab: GitLab, configuration):
         super().__init__("group_members", gitlab)
+        self.configuration = configuration
+        self.effective_groups: set[str] = set()
+
+    def set_effective_groups(self, groups: Iterable[str]) -> None:
+        self.effective_groups = set(groups)
 
     def _process_configuration(self, group_name: str, configuration: dict):
         keep_bots = configuration.get("group_members|keep_bots", False)
@@ -285,3 +291,30 @@ class GroupMembersProcessor(AbstractProcessor):
         for member in members:
             users[member.username.lower()] = member
         return users
+
+    def _can_proceed(self, group_name: str, configuration: dict):
+        if "/" not in group_name:
+            return True
+
+        if self.configuration.has_group_section_defined_locally(group_name, self.configuration_name):
+            return True
+
+        if self._has_ancestor_in_current_run(group_name):
+            info(
+                "Skipping section '%s' for subgroup '%s' because it is inherited from an ancestor group "
+                "that is also being processed in this run.",
+                self.configuration_name,
+                group_name,
+            )
+            return False
+
+        return True
+
+    def _has_ancestor_in_current_run(self, group_name: str) -> bool:
+        current_group = group_name
+        while "/" in current_group:
+            current_group = current_group.rsplit("/", 1)[0]
+            if current_group in self.effective_groups:
+                return True
+
+        return False
