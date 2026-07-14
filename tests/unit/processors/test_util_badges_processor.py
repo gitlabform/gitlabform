@@ -23,7 +23,7 @@ class TestBadgesProcessor:
     @staticmethod
     def _project(*badges: MagicMock) -> MagicMock:
         project = MagicMock()
-        project.__class__ = Project  # satisfy isinstance() in the helper
+        project.__class__ = Project  # type: ignore[assignment]  # satisfy isinstance() in the helper
         project.path_with_namespace = "test/project"
         project.badges.list.return_value = list(badges)
         return project
@@ -31,7 +31,7 @@ class TestBadgesProcessor:
     @staticmethod
     def _group(*badges: MagicMock) -> MagicMock:
         group = MagicMock()
-        group.__class__ = Group
+        group.__class__ = Group  # type: ignore[assignment]
         group.full_path = "test/group"
         del group.path_with_namespace  # force the helper to fall back to full_path
         group.badges.list.return_value = list(badges)
