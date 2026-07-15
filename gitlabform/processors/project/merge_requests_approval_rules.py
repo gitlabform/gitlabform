@@ -22,7 +22,20 @@ class MergeRequestsApprovalRules(AbstractProcessor):
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
         existing_rules: List[ProjectApprovalRule] = list(project.approvalrules.list(get_all=True))
 
-        handled_names: set = set()
+        configured_names = {c.get("name") for c in configured_rules.values() if c.get("name")}
+
+        # Delete stale rules first so that unique-constraint slots (e.g. only one
+        # any_approver rule per project) are freed before we try to create the
+        # replacement rule below.
+        if enforce:
+            for existing in existing_rules:
+                if existing.name not in configured_names:
+                    info(
+                        f"Deleting rule '{existing.name}' of merge_requests_approval_rules"
+                        f" in {project_and_group} as it's not in config and enforce is set to true."
+                    )
+                    existing.delete()
+            existing_rules = [r for r in existing_rules if r.name in configured_names]
 
         for entity_name, rule_config in configured_rules.items():
             name = rule_config.get("name")
@@ -39,7 +52,6 @@ class MergeRequestsApprovalRules(AbstractProcessor):
                 if matching:
                     info(f"Deleting {entity_name} of merge_requests_approval_rules in {project_and_group}")
                     matching.delete()
-                handled_names.add(name)
                 continue
 
             self._validate_required(project_and_group, entity_name, rule_config)
@@ -58,16 +70,6 @@ class MergeRequestsApprovalRules(AbstractProcessor):
                 payload = self._payload_for_create(project, rule_config)
                 info(f" * Adding {entity_name} of merge_requests_approval_rules in {project_and_group}")
                 project.approvalrules.create(payload)
-            handled_names.add(name)
-
-        if enforce:
-            for existing in existing_rules:
-                if existing.name not in handled_names:
-                    info(
-                        f"Deleting rule '{existing.name}' of merge_requests_approval_rules"
-                        f" in {project_and_group} as it's not in config and enforce is set to true."
-                    )
-                    existing.delete()
 
     def _needs_update(self, entity_in_gitlab: Dict, entity_in_configuration: Dict) -> bool:
         # GitLab returns users/groups as lists of objects and protected_branches as list
