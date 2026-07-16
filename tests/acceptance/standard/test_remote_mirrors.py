@@ -754,7 +754,7 @@ class TestRemoteMirrorsProcessor:
 
     def test_remote_mirrors_print_details(
         self,
-        project: Project,
+        project_for_function: Project,
         mirror_urls: Tuple[str, str, str],
         root_username,
         root_access_token,
@@ -764,7 +764,7 @@ class TestRemoteMirrorsProcessor:
         Validates that when print_details is true, the full mirror object
         details are retrieved and printed to the info logs.
         """
-        target_path = project.path_with_namespace
+        target_path = project_for_function.path_with_namespace
         first_url, second_url, _ = mirror_urls
 
         # Normalize URLs as they will appear in the masked logs
@@ -773,7 +773,7 @@ class TestRemoteMirrorsProcessor:
 
         # 1. Setup: Ensure at least one mirror exists manually that is NOT in the config
         # This tests that the report shows the "Final State" of GitLab, not just the config.
-        project.remote_mirrors.create({"url": second_url, "enabled": True, "auth_method": "password"})
+        project_for_function.remote_mirrors.create({"url": second_url, "enabled": True, "auth_method": "password"})
 
         # 2. Run GitLabForm with global print_details: true
         # Config only contains the first mirror
