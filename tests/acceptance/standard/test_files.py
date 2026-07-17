@@ -177,6 +177,98 @@ class TestFiles:
                 break
         assert is_protected == True
 
+    def test__add_new_file_strongly_protected_branch(self, project, no_access_branch, is_enterprise_edition):
+        """
+        Creating a NEW file (as opposed to modifying an existing one) goes through
+        python-gitlab's files.create(), which raises GitlabCreateError instead of
+        GitlabUpdateError. This test validates that the temporary unprotect/re-protect
+        fallback also works in that case.
+        """
+        protected_branch = project.protectedbranches.get(no_access_branch.name)
+        push_access_level = protected_branch.push_access_levels[0]["access_level"]
+        merge_access_level = protected_branch.merge_access_levels[0]["access_level"]
+
+        # Unprotect access level is not available in GitLab CE.
+        unprotect_access_level_config = ""
+        if is_enterprise_edition:
+            unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
+            unprotect_access_level_config = f"unprotect_access_level: {unprotect_access_level}"
+
+        add_file_to_protected_branch = f"""
+            projects_and_groups:
+              {project.path_with_namespace}:
+                branches:
+                  {no_access_branch.name}:
+                    protected: true
+                    push_access_level: {push_access_level}
+                    merge_access_level: {merge_access_level}
+                    {unprotect_access_level_config}
+                files:
+                  "newly-created-file.txt":
+                    overwrite: true
+                    branches:
+                      - {no_access_branch.name}
+                    content: "Content of a new file on a strongly protected branch"
+            """
+
+        run_gitlabform(add_file_to_protected_branch, project)
+
+        project_file = project.files.get(ref=no_access_branch.name, file_path="newly-created-file.txt")
+        assert project_file.decode().decode("utf-8") == "Content of a new file on a strongly protected branch"
+
+        # the file must not exist on main
+        with pytest.raises(GitlabGetError):
+            project.files.get(ref="main", file_path="newly-created-file.txt")
+
+        # check that the branch protection was restored
+        protected_branches = project.protectedbranches.list()
+        assert any(pb.name == no_access_branch.name for pb in protected_branches)
+
+    def test__delete_file_strongly_protected_branch(self, project, no_access_branch, is_enterprise_edition):
+        """
+        Deleting a file goes through python-gitlab's file.delete(), which raises
+        GitlabDeleteError instead of GitlabUpdateError. This test validates that
+        the temporary unprotect/re-protect fallback also works in that case.
+        """
+        protected_branch = project.protectedbranches.get(no_access_branch.name)
+        push_access_level = protected_branch.push_access_levels[0]["access_level"]
+        merge_access_level = protected_branch.merge_access_levels[0]["access_level"]
+
+        # Unprotect access level is not available in GitLab CE.
+        unprotect_access_level_config = ""
+        if is_enterprise_edition:
+            unprotect_access_level = protected_branch.unprotect_access_levels[0]["access_level"]
+            unprotect_access_level_config = f"unprotect_access_level: {unprotect_access_level}"
+
+        delete_file_on_protected_branch = f"""
+            projects_and_groups:
+              {project.path_with_namespace}:
+                branches:
+                  {no_access_branch.name}:
+                    protected: true
+                    push_access_level: {push_access_level}
+                    merge_access_level: {merge_access_level}
+                    {unprotect_access_level_config}
+                files:
+                  "README.md":
+                    branches:
+                      - {no_access_branch.name}
+                    delete: true
+            """
+
+        run_gitlabform(delete_file_on_protected_branch, project)
+
+        with pytest.raises(GitlabGetError):
+            project.files.get(ref=no_access_branch.name, file_path="README.md")
+
+        # the file must still exist on main
+        project_file = project.files.get(ref="main", file_path="README.md")
+        assert project_file.decode().decode("utf-8") == DEFAULT_README
+
+        # check that the branch protection was restored
+        protected_branches = project.protectedbranches.list()
+        assert any(pb.name == no_access_branch.name for pb in protected_branches)
+
     def test__delete_file_protected_branch(self, project, branch):
         set_file_specific_branch = f"""
             projects_and_groups:
