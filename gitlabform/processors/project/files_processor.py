@@ -302,9 +302,7 @@ class FilesProcessor(AbstractProcessor):
                     "file_path": file_to_operate_on,
                     "branch": branch.name,
                     "content": new_content,
-                    "commit_message": self.get_commit_message_for_file_change(
-                        "delete", file_to_operate_on, configuration
-                    ),
+                    "commit_message": self.get_commit_message_for_file_change("add", file_to_operate_on, configuration),
                 }
             )
         elif operation == "delete" and isinstance(file_to_operate_on, ProjectFile):
