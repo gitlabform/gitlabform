@@ -10,7 +10,9 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 class MergeRequestsApprovals(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("merge_requests_approvals", gitlab)
-        self.get_entity_in_gitlab = self.get_project_mr_approvals_settings
+
+    def _get_entities_for_diff(self, project_path: str, entity_config: dict) -> tuple[dict, dict]:
+        return self.gl.get_project_by_path_cached(project_path).approvals.get().asdict(), entity_config
 
     def _process_configuration(self, project_path: str, configuration: dict) -> None:
         info("Processing project merge requests approvals settings...")
@@ -30,9 +32,6 @@ class MergeRequestsApprovals(AbstractProcessor):
             info("merge_requests_approvals AFTER: ^^^")
         else:
             info("No update needed for project merge requests approvals settings")
-
-    def get_project_mr_approvals_settings(self, project_path: str):
-        return self.gl.get_project_by_path_cached(project_path).approvals.get().asdict()
 
     def _can_proceed(self, project_or_group: str, configuration: dict):
         if "approvals_before_merge" in configuration["merge_requests_approvals"]:

@@ -15,7 +15,8 @@ def _make_processor(name: str = "test_section") -> _TestableProcessor:
 
 
 class TestPrintDiff:
-    def test_logs_not_supported_at_debug_when_no_getter_configured(self, caplog) -> None:
+    def test_logs_not_supported_at_debug_when_getter_returns_none(self, caplog) -> None:
+        # Base class implementation of _get_entities_for_diff returns None (opt out)
         processor = _make_processor("some_section")
 
         with caplog.at_level("DEBUG"):
@@ -25,15 +26,17 @@ class TestPrintDiff:
         assert len(matching) == 1
         assert matching[0].levelname == "DEBUG"
 
-    def test_calls_logger_with_entities_when_getter_set(self) -> None:
-        processor = _make_processor("test_section")
-        processor.get_entity_in_gitlab = MagicMock(return_value={"foo": "from-gitlab"})
-        entity_config = {"foo": "from-config"}
+    def test_calls_logger_with_entities_when_getter_overridden(self) -> None:
+        class OverridingProcessor(_TestableProcessor):
+            def _get_entities_for_diff(self, project_or_project_and_group, entity_config):
+                return {"foo": "from-gitlab"}, entity_config
+
+        with patch("gitlabform.processors.abstract_processor.GitlabWrapper"):
+            processor = OverridingProcessor("test_section", MagicMock(GitLab))
 
         with patch("gitlabform.processors.abstract_processor.DifferenceLogger") as logger:
-            processor._print_diff("group/project", entity_config, diff_only_changed=True)
+            processor._print_diff("group/project", {"foo": "from-config"}, diff_only_changed=True)
 
-        processor.get_entity_in_gitlab.assert_called_once_with("group/project")
         logger.log_diff.assert_called_once_with(
             "test_section changes",
             {"foo": "from-gitlab"},
@@ -41,26 +44,33 @@ class TestPrintDiff:
             only_changed=True,
         )
 
-    def test_prepare_entities_default_is_identity(self) -> None:
-        processor = _make_processor()
-        gitlab_side = {"a": 1}
-        config_side = {"b": 2}
+    def test_getter_receives_project_path_and_entity_config(self) -> None:
+        received: dict = {}
 
-        result = processor._prepare_entities_for_diff(gitlab_side, config_side)
+        class OverridingProcessor(_TestableProcessor):
+            def _get_entities_for_diff(self, project_or_project_and_group, entity_config):
+                received["path"] = project_or_project_and_group
+                received["config"] = entity_config
+                return {}, {}
 
-        assert result == (gitlab_side, config_side)
+        with patch("gitlabform.processors.abstract_processor.GitlabWrapper"):
+            processor = OverridingProcessor("t", MagicMock(GitLab))
 
-    def test_prepare_entities_override_transforms_both_sides(self) -> None:
-        class TransformingProcessor(_TestableProcessor):
-            def _prepare_entities_for_diff(self, entity_in_gitlab, entity_config):
+        with patch("gitlabform.processors.abstract_processor.DifferenceLogger"):
+            processor._print_diff("group/project", {"cfg": 1}, diff_only_changed=False)
+
+        assert received == {"path": "group/project", "config": {"cfg": 1}}
+
+    def test_getter_can_normalize_both_sides(self) -> None:
+        class NormalizingProcessor(_TestableProcessor):
+            def _get_entities_for_diff(self, project_or_project_and_group, entity_config):
                 return (
-                    {k: f"gl:{v}" for k, v in entity_in_gitlab.items()},
+                    {"foo": "gl:x"},
                     {k: f"cfg:{v}" for k, v in entity_config.items() if k != "meta"},
                 )
 
         with patch("gitlabform.processors.abstract_processor.GitlabWrapper"):
-            processor = TransformingProcessor("t", MagicMock(GitLab))
-        processor.get_entity_in_gitlab = MagicMock(return_value={"foo": "x"})
+            processor = NormalizingProcessor("t", MagicMock(GitLab))
 
         with patch("gitlabform.processors.abstract_processor.DifferenceLogger") as logger:
             processor._print_diff("group/project", {"foo": "y", "meta": "drop"}, diff_only_changed=False)

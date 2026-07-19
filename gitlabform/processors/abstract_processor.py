@@ -21,8 +21,6 @@ class AbstractProcessor(ABC):
             Callable[[str, list[dict[str, Union[str, int]]], list[dict[str, int]]], bool],
         ] = {}
         self.gl: PythonGitlab = GitlabWrapper(self.gitlab).get_gitlab()
-        # Set by subclasses to enable the centralized dry-run diff.
-        self.get_entity_in_gitlab: Optional[Callable[[str], dict]] = None
 
     @configuration_to_safe_dict
     def process(
@@ -126,23 +124,30 @@ class AbstractProcessor(ABC):
     def _process_configuration(self, project_or_project_and_group: str, configuration: dict):
         pass
 
+    def _get_entities_for_diff(
+        self, project_or_project_and_group: str, entity_config: dict
+    ) -> Optional[tuple[dict, dict]]:
+        """Return (gitlab_side, config_side) ready to be compared, or None to opt out.
+
+        Override in subclasses to enable the centralized dry-run diff for their section.
+        Both sides must be keyed the same way so `log_diff` can align them; if the shapes
+        differ between GitLab and the user's config, normalize them here.
+        """
+        return None
+
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        if self.get_entity_in_gitlab is None:
+        entities = self._get_entities_for_diff(project_or_project_and_group, entity_config)
+        if entities is None:
             debug(f"Diffing for section '{self.configuration_name}' is not supported yet")
             return
 
-        entity_in_gitlab = self.get_entity_in_gitlab(project_or_project_and_group)
-        entity_in_gitlab, entity_config = self._prepare_entities_for_diff(entity_in_gitlab, entity_config)
-
+        gitlab_side, config_side = entities
         DifferenceLogger.log_diff(
             f"{self.configuration_name} changes",
-            entity_in_gitlab,
-            entity_config,
+            gitlab_side,
+            config_side,
             only_changed=diff_only_changed,
         )
-
-    def _prepare_entities_for_diff(self, entity_in_gitlab: dict, entity_config: dict) -> tuple[dict, dict]:
-        return entity_in_gitlab, entity_config
 
     def _needs_update(
         self,

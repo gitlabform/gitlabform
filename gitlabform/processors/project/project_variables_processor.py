@@ -15,7 +15,6 @@ class ProjectVariablesProcessor(AbstractProcessor):
         super().__init__("variables", gitlab)
         self.log_level = log_level
         self._variables_processor = VariablesProcessor(self._needs_update)
-        self.get_entity_in_gitlab = self._get_variables_in_gitlab
 
     def _process_configuration(self, project_and_group: str, configuration: Dict[str, Any]) -> None:
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
@@ -42,28 +41,24 @@ class ProjectVariablesProcessor(AbstractProcessor):
             warning(f"Cannot get project settings for {project_or_group}")
             return False
 
-    def _get_variables_in_gitlab(self, project_and_group: str) -> Dict[str, Dict[str, Any]]:
+    def _get_entities_for_diff(
+        self, project_and_group: str, entity_config: dict
+    ) -> tuple[Dict[str, Dict[str, Any]], Dict[str, Dict[str, Any]]]:
         try:
             project: Project = self.gl.get_project_by_path_cached(project_and_group)
             variables = self._variables_processor.get_variables_from_gitlab(project)
         except GitlabGetError:
-            return {}
+            variables = []
 
-        return {self._variable_identity(v.asdict()): self._masked_variable(v.asdict()) for v in variables}
-
-    def _prepare_entities_for_diff(
-        self,
-        entity_in_gitlab: dict,
-        entity_config: dict,
-    ) -> tuple[dict, dict]:
+        gitlab_side = {self._variable_identity(v.asdict()): self._masked_variable(v.asdict()) for v in variables}
         # Config-side is keyed by user-chosen aliases and includes an "enforce" flag; normalize
         # it to the same key@scope identity used for the GitLab side so keys line up.
-        normalized_config = {
+        config_side = {
             self._variable_identity(var): self._masked_variable(var)
             for alias, var in entity_config.items()
             if alias != "enforce" and isinstance(var, dict)
         }
-        return entity_in_gitlab, normalized_config
+        return gitlab_side, config_side
 
     @staticmethod
     def _variable_identity(var: Dict[str, Any]) -> str:

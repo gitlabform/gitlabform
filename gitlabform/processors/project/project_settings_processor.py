@@ -13,7 +13,9 @@ from gitlabform.processors.abstract_processor import AbstractProcessor
 class ProjectSettingsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab, strict: bool):
         super().__init__("project_settings", gitlab)
-        self.get_entity_in_gitlab = self.get_project_settings
+
+    def _get_entities_for_diff(self, project_path: str, entity_config: dict) -> tuple[dict, dict]:
+        return self.gl.get_project_by_path_cached(project_path).asdict(), entity_config
 
     def _process_configuration(self, project_path: str, configuration: dict) -> None:
         debug("Processing project settings...")
@@ -56,10 +58,6 @@ class ProjectSettingsProcessor(AbstractProcessor):
             except Exception as e:
                 warning(f"Failed to process project avatar: {e}")
                 raise e
-
-    def get_project_settings(self, project_path: str):
-        """Get project settings from GitLab."""
-        return self.gl.get_project_by_path_cached(project_path).asdict()
 
     def _process_project_topics(self, project_settings_in_config: Dict, project_settings_in_gitlab: Dict) -> None:
         project_settings_topics: Dict = project_settings_in_config.get("topics", [])
