@@ -1,12 +1,14 @@
 """Tasks related to building and verifying Docker images."""
 
 import argparse
+import sys
+
 from dev.common import REPO_ROOT, logger, run_command, get_executable
 from dev.release import publish_docker
 
 
 def build(extra_args: list[str] | None = None):
-    """Builds the GitLabForm Docker image.
+    """Builds the GitLabForm Docker image from a prebuilt wheel in dist/.
 
     Args:
         extra_args: Arguments for the docker build command (e.g., --image, --tag, --push).
@@ -19,8 +21,11 @@ def build(extra_args: list[str] | None = None):
     parsed, remaining = parser.parse_known_args(extra_args or [])
     image_name = f"{parsed.image}:{parsed.tag}"
 
-    # TODO: Add a check here if the Dockerfile is ever updated to require
-    # pre-built wheels from the 'dist/' directory.
+    # Ensure the Docker build has access to the prebuilt wheel artifact.
+    dist_dir = REPO_ROOT / "dist"
+    if not dist_dir.exists() or not any(dist_dir.glob("*.whl")):
+        logger.error("No Python wheel found in dist/. Run `uv run package build` before building the Docker image.")
+        raise SystemExit(1)
 
     docker_bin = get_executable("docker")
     # Note: REPO_ROOT is the context, so the Dockerfile can access dist/ if needed.
