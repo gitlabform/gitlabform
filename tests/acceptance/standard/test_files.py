@@ -216,6 +216,9 @@ class TestFiles:
         project_file = project.files.get(ref=no_access_branch.name, file_path="newly-created-file.txt")
         assert project_file.decode().decode("utf-8") == "Content of a new file on a strongly protected branch"
 
+        branch = project.branches.get(no_access_branch.name)
+        assert branch.commit["message"] == "Automated add made by gitlabform"
+
         # the file must not exist on main
         with pytest.raises(GitlabGetError):
             project.files.get(ref="main", file_path="newly-created-file.txt")
