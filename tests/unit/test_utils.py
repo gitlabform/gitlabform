@@ -1,6 +1,6 @@
 import datetime
 
-from gitlabform.util import to_str
+from gitlabform.util import format_expires_at, to_str
 
 
 def test_date_stringification():
@@ -18,3 +18,15 @@ def test_date_stringification():
     }
     output = to_str(example_project_config)
     assert type(output) is str
+
+
+def test_format_expires_at_converts_date_to_gitlab_string():
+    assert format_expires_at(datetime.date(2026, 6, 18)) == "2026-06-18"
+
+
+def test_format_expires_at_leaves_string_unchanged():
+    assert format_expires_at("2026-06-18") == "2026-06-18"
+
+
+def test_format_expires_at_leaves_none_unchanged():
+    assert format_expires_at(None) is None

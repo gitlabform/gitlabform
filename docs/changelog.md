@@ -6,6 +6,28 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.2.0
+
+### Features
+
+* Add support for "Security Manager role" [issue: #1329](https://github.com/gitlabform/gitlabform/issues/1329), [#1342](https://github.com/gitlabform/gitlabform/pull/1342). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Bug Fixes
+
+* don't re-validate inherited config in subgroup lookup [#1318](https://github.com/gitlabform/gitlabform/pull/1318). ([rickbrouwer](https://github.com/rickbrouwer))
+* format group member expiry dates [#1349](https://github.com/gitlabform/gitlabform/pull/1349). ([w3lld1](https://github.com/w3lld1))
+* escape regex as a raw string to prevent errors in loges [#1351](https://github.com/gitlabform/gitlabform/pull/1351). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Documentation
+
+* update license renewal instructions (#1358)[https://github.com/gitlabform/gitlabform/pull/1358]. ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.1.0
 
 ### Features
