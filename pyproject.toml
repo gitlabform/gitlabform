@@ -53,8 +53,8 @@ dev = [
     { include-group = "lint" },
     { include-group = "docs" },
     { include-group = "release" },
-    "commitizen==4.16.4",
-    "prek==0.4.9",
+    "commitizen==4.16.5",
+    "prek==0.4.10",
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
