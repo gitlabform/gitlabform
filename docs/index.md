@@ -108,6 +108,7 @@ If so then:
   <a href="https://www.roche.com" target="_blank"><img src="images/roche-logo.png" width="130px" style="margin: 10px; vertical-align: middle;" alt="Roche logo" /></a>
   <a href="https://stroeer-online-marketing.de/en/" target="_blank"><img src="images/stroeer-online-marketing-logo.svg" width="180px" style="margin: 10px; vertical-align: middle;" alt="Ströer Online Marketing logo" /></a>
   <a href="https://www.opencastsoftware.com/" target="_blank"><img src="images/Opencast-logo.png" width="148px" style="margin: 10px; vertical-align: middle;" alt="Opencast" /></a>
+  <a href="https://www.ti8m.com/" target="_blank"><img src="images/ti8m-logo.png" width="130px" style="margin: 10px; vertical-align: middle;" alt="ti&m" /></a>
 </div>
 ...and many more!
 
