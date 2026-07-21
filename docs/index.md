@@ -3,7 +3,7 @@
 [![Downloads](https://pepy.tech/badge/gitlabform/month)](https://pepy.tech/project/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![codecov](https://codecov.io/gh/gitlabform/gitlabform/branch/main/graph/badge.svg?token=NOMttkpB2A)](https://codecov.io/gh/gitlabform/gitlabform)
-[![gitlabform](https://snyk.io/advisor/python/gitlabform/badge.svg)](https://snyk.io/advisor/python/gitlabform)
+[![gitlabform](https://snyk.io/test/github/gitlabform/gitlabform/badge.svg)](https://snyk.io/advisor/python/gitlabform)
 
 <figure markdown>
   ![GitLabForm logo](images/gitlabform-logo.png)
