@@ -6,6 +6,7 @@ from logging import info, critical, error
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
 from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.util import format_expires_at
 from gitlab.v4.objects import Group, GroupMember, User
 from gitlab import GitlabDeleteError, GitlabError, GitlabGetError
 
@@ -76,11 +77,7 @@ class GroupMembersProcessor(AbstractProcessor):
         for share_with_group_path in groups_to_share_with_by_path:
             group_access_to_set = groups_to_share_with_by_path[share_with_group_path]["group_access"]
 
-            expires_at_to_set = (
-                groups_to_share_with_by_path[share_with_group_path]["expires_at"]
-                if "expires_at" in groups_to_share_with_by_path[share_with_group_path]
-                else None
-            )
+            expires_at_to_set = format_expires_at(groups_to_share_with_by_path[share_with_group_path].get("expires_at"))
 
             if share_with_group_path in groups_before_by_group_path:
                 group_access_before = groups_before_by_group_path[share_with_group_path]["group_access_level"]
@@ -171,11 +168,7 @@ class GroupMembersProcessor(AbstractProcessor):
 
                 for user in users_to_set_with_this_level:
                     access_level_to_set = users_to_set_by_username[user]["access_level"]
-                    expires_at_to_set = (
-                        users_to_set_by_username[user]["expires_at"]
-                        if "expires_at" in users_to_set_by_username[user]
-                        else None
-                    )
+                    expires_at_to_set = format_expires_at(users_to_set_by_username[user].get("expires_at"))
 
                     member_role_id_or_name = (
                         users_to_set_by_username[user]["member_role"]

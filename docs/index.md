@@ -3,7 +3,7 @@
 [![Downloads](https://pepy.tech/badge/gitlabform/month)](https://pepy.tech/project/gitlabform)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![codecov](https://codecov.io/gh/gitlabform/gitlabform/branch/main/graph/badge.svg?token=NOMttkpB2A)](https://codecov.io/gh/gitlabform/gitlabform)
-[![gitlabform](https://snyk.io/advisor/python/gitlabform/badge.svg)](https://snyk.io/advisor/python/gitlabform)
+[![gitlabform](https://snyk.io/test/github/gitlabform/gitlabform/badge.svg)](https://snyk.io/advisor/python/gitlabform)
 
 <figure markdown>
   ![GitLabForm logo](images/gitlabform-logo.png)
@@ -108,6 +108,7 @@ If so then:
   <a href="https://www.roche.com" target="_blank"><img src="images/roche-logo.png" width="130px" style="margin: 10px; vertical-align: middle;" alt="Roche logo" /></a>
   <a href="https://stroeer-online-marketing.de/en/" target="_blank"><img src="images/stroeer-online-marketing-logo.svg" width="180px" style="margin: 10px; vertical-align: middle;" alt="Ströer Online Marketing logo" /></a>
   <a href="https://www.opencastsoftware.com/" target="_blank"><img src="images/Opencast-logo.png" width="148px" style="margin: 10px; vertical-align: middle;" alt="Opencast" /></a>
+  <a href="https://www.ti8m.com/" target="_blank"><img src="images/ti8m-logo.png" width="130px" style="margin: 10px; vertical-align: middle;" alt="ti&m" /></a>
 </div>
 ...and many more!
 
