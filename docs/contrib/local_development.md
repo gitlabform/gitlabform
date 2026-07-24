@@ -241,7 +241,7 @@ uv run docker verify --help
 
 ## Documentation
 
-We use **MkDocs** with the **Material** theme to generate our project documentation. The toolkit provides commands via the `docs` domain to preview changes locally and build the final static site.
+We use **Zensical** to generate our project documentation. The toolkit provides commands via the `docs` domain to preview changes locally and build the final static site.
 
 To serve the documentation with live-reloading (ideal for seeing your changes in real-time as you edit the markdown files):
 

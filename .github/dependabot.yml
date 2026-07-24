@@ -41,7 +41,7 @@ updates:
       documentation:
         patterns:
           - "markdown*"
-          - "mkdocs*"
+          - "zensical*"
           - "pygments"
           - "pymdown-extensions"
       release-tools:
