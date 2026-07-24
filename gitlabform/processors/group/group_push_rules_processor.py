@@ -1,4 +1,4 @@
-from logging import info, debug
+from logging import debug
 from typing import Dict
 
 from gitlabform.gitlab import GitLab

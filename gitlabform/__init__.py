@@ -13,7 +13,7 @@ import textwrap
 import traceback
 
 from packaging import version
-from typing import Any, Tuple
+from typing import Tuple
 
 from gitlabform.configuration import Configuration
 from gitlabform.configuration.core import (

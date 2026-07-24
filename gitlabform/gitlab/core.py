@@ -157,17 +157,6 @@ class GitLabCore:
         group = self._make_requests_to_api("groups/%s", path, "GET")
         return int(group["id"])
 
-    @functools.lru_cache()
-    def _get_protected_branch_id(self, project_and_group_name, branch) -> int:
-        branch = self._make_requests_to_api("projects/%s/protected_branches/%s", (project_and_group_name, branch))
-        return int(branch["id"])
-
-    @functools.lru_cache()
-    def _get_project_id(self, project_and_group):
-        # This is a NEW workaround for https://github.com/gitlabhq/gitlabhq/issues/8290
-        result = self.get_project(project_and_group)
-        return str(result["id"])
-
     def _make_requests_to_api(
         self,
         path_as_format_string,
@@ -316,14 +305,6 @@ class TestRequestFailedException(Exception):
 
 
 class NotFoundException(Exception):
-    pass
-
-
-class TimeoutWaitingForDeletion(Exception):
-    pass
-
-
-class InvalidParametersException(Exception):
     pass
 
 

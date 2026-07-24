@@ -1,7 +1,7 @@
 from logging import debug
-from typing import Dict, Any, List
+from typing import Dict, Any
 
-from gitlab.base import RESTObject, RESTObjectList
+from gitlab.base import RESTObject
 from gitlab.v4.objects import Project
 from gitlab.v4.objects import ProjectHook
 

@@ -1,7 +1,7 @@
 from logging import debug, warning
-from typing import Dict, Any, List
+from typing import Dict, Any
 
-from gitlab.base import RESTObject, RESTObjectList
+from gitlab.base import RESTObject
 from gitlab.v4.objects import Group
 from gitlab.v4.objects import GroupHook
 

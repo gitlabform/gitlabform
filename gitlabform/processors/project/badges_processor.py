@@ -1,17 +1,27 @@
+from typing import Dict
+
+from gitlab.v4.objects import Project
+
 from gitlabform.gitlab import GitLab
-from gitlabform.processors.defining_keys import Key, And
-from gitlabform.processors.multiple_entities_processor import MultipleEntitiesProcessor
+from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.processors.util.badges_processor import BadgesProcessor
 
 
-class BadgesProcessor(MultipleEntitiesProcessor):
+class ProjectBadgesProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
-        super().__init__(
-            "badges",
-            gitlab,
-            list_method_name="get_project_badges",
-            add_method_name="add_project_badge",
-            delete_method_name="delete_project_badge",
-            defining=Key("name"),
-            required_to_create_or_update=And(Key("name"), Key("link_url"), Key("image_url")),
-            edit_method_name="edit_project_badge",
+        super().__init__("badges", gitlab)
+        self._badges_processor = BadgesProcessor()
+
+    def _process_configuration(self, project_and_group: str, configuration: Dict):
+        configured_badges: Dict = configuration.get("badges", {})
+        enforce = configured_badges.pop("enforce", False)
+
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
+
+        self._badges_processor.process_badges(
+            self.configuration_name,
+            configured_badges,
+            enforce,
+            project,
+            self._needs_update,
         )

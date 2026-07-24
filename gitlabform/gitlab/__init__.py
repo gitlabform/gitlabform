@@ -1,24 +1,12 @@
 import enum
 import inspect
-import logging
 
 from typing import List
 
 from gitlab import Gitlab as GitlabClient, GraphQL
 
-from gitlabform.gitlab.commits import GitLabCommits
-from gitlabform.gitlab.group_badges import GitLabGroupBadges
-from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
-from gitlabform.gitlab.merge_requests import GitLabMergeRequests
-from gitlabform.gitlab.pipelines import GitLabPipelines
-from gitlabform.gitlab.project_badges import GitLabProjectBadges
-from gitlabform.gitlab.project_deploy_keys import GitLabProjectDeployKeys
-from gitlabform.gitlab.project_protected_environments import (
-    GitLabProjectProtectedEnvironments,
-)
-from gitlabform.gitlab.project_merge_requests_approvals import (
-    GitLabProjectMergeRequestsApprovals,
-)
+from gitlabform.gitlab.groups import GitLabGroups
+from gitlabform.gitlab.projects import GitLabProjects
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 
 
@@ -49,17 +37,9 @@ class AccessLevel(enum.IntEnum):
         return [level.name.lower().replace("_", " ") for level in AccessLevel]
 
 
-class GitLab(
-    GitLabCommits,
-    GitLabMergeRequests,
-    GitLabGroupLDAPLinks,
-    GitLabGroupBadges,
-    GitLabPipelines,
-    GitLabProjectBadges,
-    GitLabProjectDeployKeys,
-    GitLabProjectProtectedEnvironments,
-    GitLabProjectMergeRequestsApprovals,
-):
+class GitLab(GitLabProjects, GitLabGroups):
+    # GitLabProjects and GitLabGroups both inherit from GitLabCore,
+    # so GitLab still gets the whole GitLabCore surface (session, HTTP helpers, etc.).
     pass
 
 
