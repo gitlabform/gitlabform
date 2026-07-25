@@ -10,6 +10,28 @@ pytestmark = pytest.mark.requires_ultimate_license
 
 
 class TestGroupMembers:
+    def test__add_group_to_group_members_with_custom_role_by_id(self, gl, group_for_function, groups, random_string):
+        base_access_level = AccessLevel.REPORTER.value
+        member_role_id = self._create_custom_role(gl, base_access_level, random_string)
+
+        add_group = f"""
+              projects_and_groups:
+                {group_for_function.full_path}/*:
+                  group_members:
+                    groups:
+                      {groups[0].full_path}:
+                        group_access: {base_access_level}
+                        member_role: {member_role_id}
+              """
+
+        run_gitlabform(add_group, group_for_function)
+        run_gitlabform(add_group, group_for_function)
+
+        shared_with_groups = gl.groups.get(group_for_function.id).shared_with_groups
+        shared_group = next(group for group in shared_with_groups if group["group_id"] == groups[0].id)
+        assert shared_group["group_access_level"] == base_access_level
+        assert shared_group["member_role_id"] == member_role_id
+
     def test__add_user_to_group_members_with_custom_role_by_id(self, gl, group_for_function, users, random_string):
         base_access_level = AccessLevel.REPORTER.value
         member_role_id = self._create_custom_role(gl, base_access_level, random_string)
