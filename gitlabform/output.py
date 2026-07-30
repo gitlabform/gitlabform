@@ -32,6 +32,7 @@ class EffectiveConfigurationFile:
     def add_configuration(self, project_or_group: str, configuration_name: str, configuration: dict):
         if self.output_file:
             info(f"Adding effective configuration for {configuration_name}.")
+            self.config.setdefault(project_or_group, {})
             self.config[project_or_group][configuration_name] = configuration
 
     def write_to_file(self):
