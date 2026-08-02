@@ -53,7 +53,7 @@ dev = [
     { include-group = "lint" },
     { include-group = "docs" },
     { include-group = "release" },
-    "commitizen==4.16.5",
+    "commitizen==4.17.0",
     "prek==0.4.11",
 ]
 # Minimum set of dependencies required to execute the test suite.
@@ -87,7 +87,7 @@ docs = [
 # Tools required for building and verifying releases.
 release = [
     "check-wheel-contents==0.6.3",
-    "twine==6.2.0",
+    "twine==7.0.0",
 ]
 
 [project.urls]
