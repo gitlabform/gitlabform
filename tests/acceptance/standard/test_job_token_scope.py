@@ -83,6 +83,38 @@ class TestProjectJobTokenScope:
         scope = project.job_token_scope.get()
         assert not scope.inbound_enabled, "Project should have limit access disabled"
 
+    def test__enable_allow_push_repository_for_job_token(self, gl, project: Project):
+        project.ci_push_repository_for_job_token_allowed = False
+        project.save()
+
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            job_token_scope:
+              allow_push_repository_for_job_token: true
+        """
+
+        run_gitlabform(config, project)
+
+        updated_project = gl.projects.get(project.id)
+        assert updated_project.ci_push_repository_for_job_token_allowed is True
+
+    def test__disable_allow_push_repository_for_job_token(self, gl, project: Project):
+        project.ci_push_repository_for_job_token_allowed = True
+        project.save()
+
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            job_token_scope:
+              allow_push_repository_for_job_token: false
+        """
+
+        run_gitlabform(config, project)
+
+        updated_project = gl.projects.get(project.id)
+        assert updated_project.ci_push_repository_for_job_token_allowed is False
+
     def test__add_other_project_to_job_token_scope_by_name(
         self,
         project: Project,

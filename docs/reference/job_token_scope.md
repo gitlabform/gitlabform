@@ -15,6 +15,23 @@ In `gitlabform`, we use the `limit_access_to_this_project` setting to control th
 
 The [Job Token Scope API docs](https://docs.gitlab.com/ee/api/project_job_token_scopes.html) use `inbound_enabled` in GET requests and `enabled` in PATCH requests, which can be confusing. The `gitlabform` `limit_access_to_this_project` setting maps to the API's `enabled` field in PATCH requests.
 
+## Allow repository pushes using a job token
+
+Set `allow_push_repository_for_job_token` to control GitLab's **Allow Git push requests to the repository** permission:
+
+```yaml
+projects_and_groups:
+  group_1/project_1:
+    job_token_scope:
+      allow_push_repository_for_job_token: true
+```
+
+This GitLabForm key maps to `ci_push_repository_for_job_token_allowed` in the [Projects API](https://docs.gitlab.com/api/projects/). Set it to `true` to allow CI/CD job tokens created by this project's own pipelines to push to its repository, or `false` to disable those pushes. If the key is omitted, GitLabForm leaves the current value unchanged.
+
+GitLab introduced this setting in 17.2 behind a feature flag and made it generally available in 18.4. The user running GitLabForm must have the Maintainer or Owner role for the project.
+
+Pushes authenticated with a job token do not trigger CI/CD pipelines. Do not enable this setting on pull mirrors, especially when untrusted upstream changes can run pipelines: an upstream repository owner could use the job token to push commits back to the mirrored project. See GitLab's [CI/CD job token documentation](https://docs.gitlab.com/ci/jobs/ci_job_token/#allow-git-push-requests-to-your-project-repository) for the full behavior and security guidance.
+
 In addition to the main setting, you can manage the project's CI/CD job token allowlist. This allowlist determines which other projects and groups are authorized to use their job tokens to access this project when the "Only this project and any groups and projects in the allowlist" option is enabled.
 
 Within the `allowlist` section of the configuration, you can use the `enforce` setting:
@@ -34,6 +51,7 @@ projects_and_groups:
   group_1/project_1:
     job_token_scope:
       limit_access_to_this_project: true
+      allow_push_repository_for_job_token: true
       allowlist:
         enforce: true # When enforce enabled, projects/groups set in GitLab but not in Config will be removed from allowlists
         projects:
