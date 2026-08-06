@@ -67,16 +67,16 @@ def _add_docs_subcommands(subparsers):
     serve = subparsers.add_parser(
         "serve",
         help="Start the documentation server with live-reload",
-        description="Start the MkDocs live-reload server. Provides an interactive preview of the documentation at http://localhost:8000.",
+        description="Start the Zensical live-reload server. Provides an interactive preview of the documentation at http://localhost:8000.",
     )
-    serve.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for mkdocs serve")
+    serve.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for zensical serve")
 
     build_p = subparsers.add_parser(
         "build",
         help="Generate the static documentation site",
         description="Compile the markdown documentation into a static HTML site ready for deployment.",
     )
-    build_p.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for mkdocs build")
+    build_p.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for zensical build")
 
 
 def _dispatch_docs(args):
