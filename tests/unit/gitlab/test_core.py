@@ -1,7 +1,31 @@
 import os
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import call, patch, MagicMock
+
+
+class TestGitLabCoreMetadata:
+    @patch("gitlabform.gitlab.core.requests.Session")
+    @patch("gitlabform.gitlab.core.Configuration")
+    def test_uses_metadata_endpoint_for_server_information(self, mock_configuration, mock_session):
+        mock_configuration.return_value.get.return_value = {
+            "url": "https://gitlab.example.com",
+            "token": "test-token",
+        }
+        mock_session.return_value = MagicMock()
+
+        from gitlabform.gitlab.core import GitLabCore
+
+        with patch.object(GitLabCore, "_make_requests_to_api") as mock_api:
+            mock_api.side_effect = [
+                {"version": "16.0.0", "revision": "abc123", "enterprise": True},
+                {"username": "test_user", "is_admin": True},
+            ]
+            core = GitLabCore()
+
+        assert mock_api.call_args_list == [call("metadata"), call("user")]
+        assert core.version == "16.0.0"
+        assert core.enterprise is True
 
 
 class TestGitLabCoreRetryConfiguration:
