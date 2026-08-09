@@ -11,12 +11,6 @@ protection](https://docs.gitlab.com/ee/user/application_security/secret_detectio
 
 Values are documented at the [Project security settings API docs](https://docs.gitlab.com/api/project_security_settings/#update-the-secret_push_protection_enabled-setting).
 
-!!! note
-
-    This setting was renamed from `pre_receive_secret_detection_enabled` to `secret_push_protection_enabled` in GitLab 17.11.
-    Use the new name `secret_push_protection_enabled`. Configs still using the old name will trigger a redundant
-    update on every run, because the GitLab API only reports the setting under its new name.
-
 ## Example
 
 ```yaml
