@@ -17,16 +17,20 @@ The [Job Token Scope API docs](https://docs.gitlab.com/ee/api/project_job_token_
 
 ## Allow repository pushes using a job token
 
-Set `allow_push_repository_for_job_token` to control GitLab's **Allow Git push requests to the repository** permission:
+GitLab exposes **Allow Git push requests to the repository** as
+`ci_push_repository_for_job_token_allowed` in the [Projects API](https://docs.gitlab.com/api/projects/).
+Configure it through GitLabForm's [raw parameter passing](index.md#raw-parameters-passing):
 
 ```yaml
 projects_and_groups:
   group_1/project_1:
-    job_token_scope:
-      allow_push_repository_for_job_token: true
+    project_settings:
+      ci_push_repository_for_job_token_allowed: true
 ```
 
-This GitLabForm key maps to `ci_push_repository_for_job_token_allowed` in the [Projects API](https://docs.gitlab.com/api/projects/). Set it to `true` to allow CI/CD job tokens created by this project's own pipelines to push to its repository, or `false` to disable those pushes. If the key is omitted, GitLabForm leaves the current value unchanged.
+Set it to `true` to allow CI/CD job tokens created by this project's own pipelines to push to its
+repository, or `false` to disable those pushes. If the key is omitted, GitLabForm leaves the current
+value unchanged.
 
 GitLab introduced this setting in 17.2 behind a feature flag and made it generally available in 18.4. The user running GitLabForm must have the Maintainer or Owner role for the project.
 
@@ -51,7 +55,6 @@ projects_and_groups:
   group_1/project_1:
     job_token_scope:
       limit_access_to_this_project: true
-      allow_push_repository_for_job_token: true
       allowlist:
         enforce: true # When enforce enabled, projects/groups set in GitLab but not in Config will be removed from allowlists
         projects:

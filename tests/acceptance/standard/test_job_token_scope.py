@@ -90,8 +90,8 @@ class TestProjectJobTokenScope:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            job_token_scope:
-              allow_push_repository_for_job_token: true
+            project_settings:
+              ci_push_repository_for_job_token_allowed: true
         """
 
         run_gitlabform(config, project)
@@ -106,8 +106,8 @@ class TestProjectJobTokenScope:
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
-            job_token_scope:
-              allow_push_repository_for_job_token: false
+            project_settings:
+              ci_push_repository_for_job_token_allowed: false
         """
 
         run_gitlabform(config, project)

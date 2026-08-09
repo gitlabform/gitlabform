@@ -4,7 +4,6 @@ from gitlabform.gitlab import GitLab
 from gitlabform.processors import AbstractProcessor
 from logging import warning, info, debug
 
-from gitlab import GitlabUpdateError
 from gitlab.v4.objects import Project, ProjectJobTokenScope
 
 
@@ -17,7 +16,6 @@ class JobTokenScopeProcessor(AbstractProcessor):
         debug(f"Job Token Scope config: {job_token_config}")
 
         project = self.gl.get_project_by_path_cached(project_and_group)
-        self._process_allow_push_repository_for_job_token_setting(job_token_config, project)
         job_token_scope = project.job_token_scope.get()
 
         limit_access_state_updated = self._process_limit_access_to_this_project_setting(
@@ -39,30 +37,6 @@ class JobTokenScopeProcessor(AbstractProcessor):
         self._process_groups(job_token_scope, allowlist_config.get("groups", []), enforce)
 
         self._process_projects(project, job_token_scope, allowlist_config.get("projects", []), enforce)
-
-    @staticmethod
-    def _process_allow_push_repository_for_job_token_setting(configuration: dict, project: Project) -> None:
-        config_key = "allow_push_repository_for_job_token"
-
-        if config_key not in configuration:
-            debug("Allow push repository for job token is not configured; leaving it unchanged")
-            return
-
-        configured_value: bool = configuration[config_key]
-        current_value = getattr(project, "ci_push_repository_for_job_token_allowed", False)
-
-        if configured_value == current_value:
-            debug("Allow push repository for job token does not need updating")
-            return
-
-        info(f"Updating allow push repository for job token to: {configured_value}")
-        project.ci_push_repository_for_job_token_allowed = configured_value
-        try:
-            project.save()
-        except GitlabUpdateError as e:
-            warning(
-                "Could not set 'allow_push_repository_for_job_token'; " f"this GitLab version may not support it: {e}"
-            )
 
     @staticmethod
     def _process_limit_access_to_this_project_setting(configuration: dict, job_token_scope: ProjectJobTokenScope):
