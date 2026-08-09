@@ -124,28 +124,31 @@ class AbstractProcessor(ABC):
     def _process_configuration(self, project_or_project_and_group: str, configuration: dict):
         pass
 
-    def _get_entities_for_diff(
-        self, project_or_project_and_group: str, entity_config: dict
-    ) -> Optional[tuple[dict, dict]]:
-        """Return (gitlab_side, config_side) ready to be compared, or None to opt out.
+    def _get_current_state(self, project_or_project_and_group: str) -> Optional[dict]:
+        """Fetch the current state from GitLab for the centralized dry-run diff.
 
-        Override in subclasses to enable the centralized dry-run diff for their section.
-        Both sides must be keyed the same way so `log_diff` can align them; if the shapes
-        differ between GitLab and the user's config, normalize them here.
+        Override in subclasses to enable diffing for their section. Return None (the
+        default) to opt out.
         """
         return None
 
+    def _get_desired_state(self, entity_config: dict) -> dict:
+        """Return the config side of the diff. Override only when the config needs
+        slicing or normalizing so its keys line up with the current state.
+        """
+        return entity_config
+
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        entities = self._get_entities_for_diff(project_or_project_and_group, entity_config)
-        if entities is None:
+        current = self._get_current_state(project_or_project_and_group)
+        if current is None:
             debug(f"Diffing for section '{self.configuration_name}' is not supported yet")
             return
 
-        gitlab_side, config_side = entities
+        desired = self._get_desired_state(entity_config)
         DifferenceLogger.log_diff(
             f"{self.configuration_name} changes",
-            gitlab_side,
-            config_side,
+            current,
+            desired,
             only_changed=diff_only_changed,
         )
 

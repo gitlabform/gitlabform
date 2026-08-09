@@ -41,24 +41,23 @@ class ProjectVariablesProcessor(AbstractProcessor):
             warning(f"Cannot get project settings for {project_or_group}")
             return False
 
-    def _get_entities_for_diff(
-        self, project_and_group: str, entity_config: dict
-    ) -> tuple[Dict[str, Dict[str, Any]], Dict[str, Dict[str, Any]]]:
+    def _get_current_state(self, project_and_group: str) -> Dict[str, Dict[str, Any]]:
         try:
             project: Project = self.gl.get_project_by_path_cached(project_and_group)
             variables = self._variables_processor.get_variables_from_gitlab(project)
         except GitlabGetError:
             variables = []
 
-        gitlab_side = {self._variable_identity(v.asdict()): self._masked_variable(v.asdict()) for v in variables}
-        # Config-side is keyed by user-chosen aliases and includes an "enforce" flag; normalize
-        # it to the same key@scope identity used for the GitLab side so keys line up.
-        config_side = {
+        return {self._variable_identity(v.asdict()): self._masked_variable(v.asdict()) for v in variables}
+
+    def _get_desired_state(self, entity_config: dict) -> Dict[str, Dict[str, Any]]:
+        # Config is keyed by user-chosen aliases and includes an "enforce" flag; normalize
+        # it to the same key@scope identity used for the current state so keys line up.
+        return {
             self._variable_identity(var): self._masked_variable(var)
             for alias, var in entity_config.items()
             if alias != "enforce" and isinstance(var, dict)
         }
-        return gitlab_side, config_side
 
     @staticmethod
     def _variable_identity(var: Dict[str, Any]) -> str:

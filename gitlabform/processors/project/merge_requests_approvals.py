@@ -11,8 +11,8 @@ class MergeRequestsApprovals(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("merge_requests_approvals", gitlab)
 
-    def _get_entities_for_diff(self, project_path: str, entity_config: dict) -> tuple[dict, dict]:
-        return self.gl.get_project_by_path_cached(project_path).approvals.get().asdict(), entity_config
+    def _get_current_state(self, project_path: str) -> dict:
+        return self.gl.get_project_by_path_cached(project_path).approvals.get().asdict()
 
     def _process_configuration(self, project_path: str, configuration: dict) -> None:
         info("Processing project merge requests approvals settings...")

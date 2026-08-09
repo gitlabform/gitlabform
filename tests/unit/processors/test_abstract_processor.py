@@ -15,8 +15,8 @@ def _make_processor(name: str = "test_section") -> _TestableProcessor:
 
 
 class TestPrintDiff:
-    def test_logs_not_supported_at_debug_when_getter_returns_none(self, caplog) -> None:
-        # Base class implementation of _get_entities_for_diff returns None (opt out)
+    def test_logs_not_supported_at_debug_when_current_state_returns_none(self, caplog) -> None:
+        # Base class implementation of _get_current_state returns None (opt out)
         processor = _make_processor("some_section")
 
         with caplog.at_level("DEBUG"):
@@ -26,13 +26,13 @@ class TestPrintDiff:
         assert len(matching) == 1
         assert matching[0].levelname == "DEBUG"
 
-    def test_calls_logger_with_entities_when_getter_overridden(self) -> None:
-        class OverridingProcessor(_TestableProcessor):
-            def _get_entities_for_diff(self, project_or_project_and_group, entity_config):
-                return {"foo": "from-gitlab"}, entity_config
+    def test_desired_state_defaults_to_entity_config_unchanged(self) -> None:
+        class CurrentOnlyProcessor(_TestableProcessor):
+            def _get_current_state(self, project_or_project_and_group):
+                return {"foo": "from-gitlab"}
 
         with patch("gitlabform.processors.abstract_processor.GitlabWrapper"):
-            processor = OverridingProcessor("test_section", MagicMock(GitLab))
+            processor = CurrentOnlyProcessor("test_section", MagicMock(GitLab))
 
         with patch("gitlabform.processors.abstract_processor.DifferenceLogger") as logger:
             processor._print_diff("group/project", {"foo": "from-config"}, diff_only_changed=True)
@@ -44,14 +44,13 @@ class TestPrintDiff:
             only_changed=True,
         )
 
-    def test_getter_receives_project_path_and_entity_config(self) -> None:
+    def test_current_state_receives_project_path(self) -> None:
         received: dict = {}
 
         class OverridingProcessor(_TestableProcessor):
-            def _get_entities_for_diff(self, project_or_project_and_group, entity_config):
+            def _get_current_state(self, project_or_project_and_group):
                 received["path"] = project_or_project_and_group
-                received["config"] = entity_config
-                return {}, {}
+                return {}
 
         with patch("gitlabform.processors.abstract_processor.GitlabWrapper"):
             processor = OverridingProcessor("t", MagicMock(GitLab))
@@ -59,15 +58,15 @@ class TestPrintDiff:
         with patch("gitlabform.processors.abstract_processor.DifferenceLogger"):
             processor._print_diff("group/project", {"cfg": 1}, diff_only_changed=False)
 
-        assert received == {"path": "group/project", "config": {"cfg": 1}}
+        assert received == {"path": "group/project"}
 
-    def test_getter_can_normalize_both_sides(self) -> None:
+    def test_desired_state_override_normalizes_config(self) -> None:
         class NormalizingProcessor(_TestableProcessor):
-            def _get_entities_for_diff(self, project_or_project_and_group, entity_config):
-                return (
-                    {"foo": "gl:x"},
-                    {k: f"cfg:{v}" for k, v in entity_config.items() if k != "meta"},
-                )
+            def _get_current_state(self, project_or_project_and_group):
+                return {"foo": "gl:x"}
+
+            def _get_desired_state(self, entity_config):
+                return {k: f"cfg:{v}" for k, v in entity_config.items() if k != "meta"}
 
         with patch("gitlabform.processors.abstract_processor.GitlabWrapper"):
             processor = NormalizingProcessor("t", MagicMock(GitLab))
