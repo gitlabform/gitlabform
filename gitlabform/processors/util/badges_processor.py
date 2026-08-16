@@ -79,7 +79,8 @@ class BadgesProcessor:
     ) -> List[Union[GroupBadge, ProjectBadge]]:
         badges = group_or_project.badges.list(get_all=True)
         # For projects, .badges.list() also returns badges inherited from the parent group,
-        # so we must filter to project-kind only. The group endpoint returns only group badges.
+        # so we must filter to project-kind only. The group endpoint (also for subgroups)
+        # returns only that group's own badges, never inherited ones.
         if isinstance(group_or_project, Project):
             return [b for b in badges if b.kind == "project"]
         return list(badges)
