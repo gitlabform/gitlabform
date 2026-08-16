@@ -25,7 +25,7 @@ class BadgesProcessor:
     ) -> None:
         display_name = getattr(group_or_project, "path_with_namespace", None) or group_or_project.full_path
 
-        self._find_duplicates(configuration_name, display_name, configured_badges)
+        self._check_duplicates_or_exit(configuration_name, display_name, configured_badges)
 
         existing_badges = self._list_existing_badges(group_or_project)
 
@@ -86,7 +86,7 @@ class BadgesProcessor:
         return list(badges)
 
     @staticmethod
-    def _find_duplicates(configuration_name: str, display_name: str, configured_badges: Dict) -> None:
+    def _check_duplicates_or_exit(configuration_name: str, display_name: str, configured_badges: Dict) -> None:
         seen: Dict[str, str] = {}
         for key, badge in configured_badges.items():
             name = badge.get("name")
