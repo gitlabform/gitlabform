@@ -15,13 +15,12 @@ class ProjectSecuritySettingsProcessor(AbstractProcessor):
         return self.get_project_security_settings(project)
 
     def _process_configuration(self, project_name: str, configuration: dict) -> None:
-        project: Project = self.gl.get_project_by_path_cached(project_name)
-
         security_settings_in_config = configuration.get("project_security_settings", {})
-        security_settings_in_gitlab = self.get_project_security_settings(project)
+        security_settings_in_gitlab = self._get_current_state(project_name)
 
         if self._needs_update(security_settings_in_gitlab, security_settings_in_config):
             debug("Updating project security settings")
+            project: Project = self.gl.get_project_by_path_cached(project_name)
             self._update_project_security_settings(project, security_settings_in_gitlab, security_settings_in_config)
         else:
             debug("No update needed for project security settings")

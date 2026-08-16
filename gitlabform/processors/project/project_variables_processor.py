@@ -61,10 +61,15 @@ class ProjectVariablesProcessor(AbstractProcessor):
 
     @staticmethod
     def _variable_identity(var: Dict[str, Any]) -> str:
+        """Compose a stable diff key. GitLab allows the same variable key on multiple
+        environment scopes, so `key` alone is not unique; `key@scope` is."""
         return f"{var.get('key')}@{var.get('environment_scope', '*')}"
 
     @staticmethod
     def _masked_variable(var: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepare a variable for diff output. Drops `id`/`_links` (GitLab-side noise
+        that would always show as spurious differences) and masks `value` so secrets
+        don't end up in the log."""
         masked = {k: v for k, v in var.items() if k not in {"id", "_links"}}
         if "value" in masked:
             masked["value"] = hide(str(masked["value"]))
