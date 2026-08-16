@@ -1,7 +1,6 @@
 site_name: GitLabForm
 repo_url: https://github.com/gitlabform/gitlabform/
 docs_dir: docs
-strict: true
 
 nav:
   - 🏗 GitLabForm: index.md
@@ -61,14 +60,12 @@ markdown_extensions:
       separator: "-"
 
   - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-      options:
-        custom_icons:
-          - .overrides/.icons
+      emoji_index: !!python/name:zensical.extensions.emoji.twemoji ""
+      emoji_generator: !!python/name:zensical.extensions.emoji.to_svg ""
 
 theme:
   name: material
+  variant: classic
   custom_dir: .overrides
   logo: gitlabform-logo-favicon.png
   favicon: gitlabform-logo-favicon.png
@@ -82,12 +79,12 @@ theme:
       primary: deep orange
       accent: amber
       toggle:
-        icon: material/weather-sunny
+        icon: lucide/sun
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       primary: blue
       accent: cyan
       toggle:
-        icon: material/weather-night
+        icon: lucide/moon
         name: Switch to light mode
