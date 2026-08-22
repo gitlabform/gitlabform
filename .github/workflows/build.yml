@@ -126,15 +126,11 @@ jobs:
       - name: Build image for PR validation
         run: |
           uv run --no-sync docker build \
-            --image ghcr.io/gitlabform/gitlabform \
-            --tag sha-${{ github.sha }}-${{ matrix.tag_suffix }} \
             --platform ${{ matrix.platform }} \
             --output type=docker,dest=.docker/${{ matrix.tarball }}
       - name: Verify image
         run: |
           uv run --no-sync docker verify \
-            --image ghcr.io/gitlabform/gitlabform \
-            --tag sha-${{ github.sha }}-${{ matrix.tag_suffix }} \
             --input .docker/${{ matrix.tarball }}
       - name: Upload docker image archive
         uses: actions/upload-artifact@v7
