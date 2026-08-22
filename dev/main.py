@@ -129,11 +129,15 @@ def _add_docker_subcommands(subparsers):
     b.add_argument("--image", default="localhost/gitlabform", help="Image name (default: localhost/gitlabform)")
     b.add_argument("--tag", default="latest", help="Image tag (default: latest)")
     b.add_argument("--push", action="store_true", help="Push the image to the registry")
+    b.add_argument(
+        "--output", help="Write the built image to an archive file (for example: type=docker,dest=/tmp/image.tar)"
+    )
     b.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for docker build")
 
     v = subparsers.add_parser("verify", help="Validate the image with a smoke test", description=DESC_DOCKER)
     v.add_argument("--image", default="localhost/gitlabform", help="Image name (default: localhost/gitlabform)")
     v.add_argument("--tag", default="latest", help="Image tag (default: latest)")
+    v.add_argument("--input", help="Load a Docker image archive from disk before verifying it")
     v.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for docker run")
 
 
@@ -144,6 +148,10 @@ def _dispatch_docker(args):
     extra_args = ["--image", args.image, "--tag", args.tag]
     if args.command == "build" and args.push:
         extra_args.append("--push")
+    if args.command == "build" and getattr(args, "output", None):
+        extra_args.extend(["--output", args.output])
+    if args.command == "verify" and getattr(args, "input", None):
+        extra_args.extend(["--input", args.input])
 
     # Append any remaining raw arguments passed via REMAINDER
     if args.extra_args:

@@ -206,8 +206,10 @@ def gh_workflow_check(extra_args: list[str] | None = None):
         except Exception as e:
             _conclude_validation(False, f"Unexpected error during release check: {e}", severity="error")
 
+        head_sha = run_data.get("head_sha", "unknown")
         _append_github_output("version", manual_tag)
         _append_github_output("run_id", manual_run_id)
+        _append_github_output("head_sha", head_sha)
         _conclude_validation(True, f"Manual triggered release validation passed for {manual_tag}.")
 
     # Case 2: Automated Trigger (Trusted Input)
@@ -234,6 +236,7 @@ def gh_workflow_check(extra_args: list[str] | None = None):
 
             _append_github_output("version", tag_name)
             _append_github_output("run_id", automated_run_id)
+            _append_github_output("head_sha", commit_sha)
             _conclude_validation(True, f"Auto triggered release validation passed for {tag_name}")
         except Exception as e:
             msg = f"Resolution error: {e}"

@@ -6,6 +6,7 @@ permissions:
   contents: read
   discussions: write
   statuses: write
+  packages: write
 
 concurrency:
   group: ${{github.workflow}}-${{ github.ref }}
