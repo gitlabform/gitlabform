@@ -99,6 +99,9 @@ jobs:
             platform: linux/arm64
             tag_suffix: arm64
             tarball: docker-image-arm64.tar
+    # PRs and branch validation must confirm the image is healthy without exposing
+    # registry credentials to the build job. The actual GHCR publication happens in
+    # the release workflow after a successful main-branch run.
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7

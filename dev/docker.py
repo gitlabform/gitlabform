@@ -10,6 +10,16 @@ from dev.release import publish_docker
 def build(extra_args: list[str] | None = None):
     """Builds the GitLabForm Docker image from a prebuilt wheel in dist/.
 
+    The Dockerfile installs the packaged wheel rather than building from the source tree,
+    so the local prerequisite is always: `uv run package build` before `uv run docker build`.
+
+    Local development usually builds for the host architecture only (for example, `docker buildx build`
+    with no explicit `--platform` override). CI uses the same toolkit commands but passes explicit
+    `--platform` values for multi-arch validation; the reusable build workflow validates each target
+    architecture without pushing registry credentials. This keeps the CLI surface consistent across
+    local development and GitHub Actions while the actual GHCR publication remains in the release
+    workflow.
+
     Args:
         extra_args: Arguments for the docker build command (e.g., --image, --tag, --push, --output).
     """

@@ -244,6 +244,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify source image exists before promotion
+        run: |
+          set -euo pipefail
+          SOURCE=ghcr.io/gitlabform/gitlabform:sha-${{ needs.prep-release.outputs.head_sha }}
+          echo "Checking source image: ${SOURCE}"
+          docker buildx imagetools inspect "$SOURCE" >/dev/null
       - name: Promote image to release tags
         run: |
           set -euo pipefail
