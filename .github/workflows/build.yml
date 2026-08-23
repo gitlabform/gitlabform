@@ -117,6 +117,8 @@ jobs:
         uses: ./.github/actions/setup-uv-local
         with:
           python-version: "3.14"
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
