@@ -126,11 +126,13 @@ jobs:
       - name: Build image for PR validation
         run: |
           uv run --no-sync docker build \
+            --tag localhost/gitlabform:latest \
             --platform ${{ matrix.platform }} \
             --output type=docker,dest=.docker/${{ matrix.tarball }}
       - name: Verify image
         run: |
           uv run --no-sync docker verify \
+            --tag localhost/gitlabform:latest \
             --input .docker/${{ matrix.tarball }}
       - name: Upload docker image archive
         uses: actions/upload-artifact@v7

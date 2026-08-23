@@ -46,6 +46,8 @@ def build(extra_args: list[str] | None = None):
     build_cmd.extend(remaining)
     build_cmd.append(str(REPO_ROOT))
 
+    # Log the exact docker command we are going to run.
+    logger.info(f"[bold blue]==>[/bold blue] Executing: {build_cmd}")
     run_command(build_cmd, f"Building Docker image: [bold cyan]{parsed.tag}[/bold cyan]")
 
     if parsed.push:
