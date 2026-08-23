@@ -27,6 +27,9 @@ permissions:
   contents: write
   packages: write
 
+env:
+  IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+
 jobs:
   prep-release:
     name: Prepare release
@@ -105,8 +108,8 @@ jobs:
             IMAGE_REF=$(docker load --input "$TAR" | sed -n 's/Loaded image: //p')
             echo "Loaded: $IMAGE_REF"
             ARCH=$(basename "$TAR" | sed -E 's/^docker-image-(.*)\.tar$/\1/')
-            TARGET_ARCH_TAG_FULL=ghcr.io/gitlabform/gitlabform:sha-${FULL_SHA}-${ARCH}
-            TARGET_ARCH_TAG_SHORT=ghcr.io/gitlabform/gitlabform:sha-${SHORT_SHA}-${ARCH}
+            TARGET_ARCH_TAG_FULL=${IMAGE_BASE}:sha-${FULL_SHA}-${ARCH}
+            TARGET_ARCH_TAG_SHORT=${IMAGE_BASE}:sha-${SHORT_SHA}-${ARCH}
             echo "Tagging $IMAGE_REF -> $TARGET_ARCH_TAG_FULL"
             docker tag "$IMAGE_REF" "$TARGET_ARCH_TAG_FULL"
             echo "Pushing $TARGET_ARCH_TAG_FULL"
@@ -118,19 +121,19 @@ jobs:
           done
 
           echo "Creating multi-arch manifest: sha-${FULL_SHA}"
-          docker buildx imagetools create --tag ghcr.io/gitlabform/gitlabform:sha-${FULL_SHA} \
-            ghcr.io/gitlabform/gitlabform:sha-${FULL_SHA}-amd64 \
-            ghcr.io/gitlabform/gitlabform:sha-${FULL_SHA}-arm64
+          docker buildx imagetools create --tag ${IMAGE_BASE}:sha-${FULL_SHA} \
+            ${IMAGE_BASE}:sha-${FULL_SHA}-amd64 \
+            ${IMAGE_BASE}:sha-${FULL_SHA}-arm64
 
           echo "Creating multi-arch manifest: sha-${SHORT_SHA}"
-          docker buildx imagetools create --tag ghcr.io/gitlabform/gitlabform:sha-${SHORT_SHA} \
-            ghcr.io/gitlabform/gitlabform:sha-${SHORT_SHA}-amd64 \
-            ghcr.io/gitlabform/gitlabform:sha-${SHORT_SHA}-arm64
+          docker buildx imagetools create --tag ${IMAGE_BASE}:sha-${SHORT_SHA} \
+            ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
+            ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
           echo "Creating multi-arch manifest: latest"
-          docker buildx imagetools create --tag ghcr.io/gitlabform/gitlabform:latest \
-            ghcr.io/gitlabform/gitlabform:sha-${SHORT_SHA}-amd64 \
-            ghcr.io/gitlabform/gitlabform:sha-${SHORT_SHA}-arm64
+          docker buildx imagetools create --tag ${IMAGE_BASE}:latest \
+            ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
+            ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
           echo "Published commit image tags for ${FULL_SHA} (short: ${SHORT_SHA})"
 
@@ -229,7 +232,7 @@ jobs:
         with:
           context: git
           images: |
-            ghcr.io/gitlabform/gitlabform
+            ${{ env.IMAGE_BASE }}
           flavor: |
             latest=auto
           tags: |
@@ -247,7 +250,7 @@ jobs:
       - name: Verify source image exists before promotion
         run: |
           set -euo pipefail
-          SOURCE=ghcr.io/gitlabform/gitlabform:sha-${{ needs.prep-release.outputs.head_sha }}
+          SOURCE=${IMAGE_BASE}:sha-${{ needs.prep-release.outputs.head_sha }}
           echo "Checking source image: ${SOURCE}"
           docker buildx imagetools inspect "$SOURCE" >/dev/null
       - name: Promote image to release tags
@@ -261,6 +264,6 @@ jobs:
           for t in $TAGS; do
             FLAG_ARGS="$FLAG_ARGS --tag $t"
           done
-          docker buildx imagetools create $FLAG_ARGS $SOURCE
+            docker buildx imagetools create $FLAG_ARGS $SOURCE
           echo "Updating 'latest' to point to promoted release image"
-          docker buildx imagetools create --tag ghcr.io/gitlabform/gitlabform:latest $SOURCE
+          docker buildx imagetools create --tag ${IMAGE_BASE}:latest $SOURCE
