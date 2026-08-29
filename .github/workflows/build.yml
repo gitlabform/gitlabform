@@ -28,8 +28,8 @@ jobs:
         run: uv sync --frozen --no-dev --group release
       - name: Build and verify the package
         run: |
-          uv run --no-sync package build
-          uv run --no-sync package verify
+          uv run --no-sync glf-dev package build
+          uv run --no-sync glf-dev package verify
       - name: Upload package distribution
         uses: actions/upload-artifact@v7
         with:
@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --no-dev --group docs
       - name: Build documentation
-        run: uv run --no-sync docs build
+        run: uv run --no-sync glf-dev docs build
       - name: Upload docs site
         uses: actions/upload-artifact@v7
         with:
@@ -81,4 +81,4 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --no-dev --group test
       - name: Run smoke tests
-        run: uv run --no-sync gitlabform -V
+        run: uv run --no-sync glf-dev gitlabform -V

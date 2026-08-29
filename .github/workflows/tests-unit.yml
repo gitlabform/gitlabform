@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --no-dev --group test
       - name: Run unit tests
-        run: uv run --no-sync qa test tests/unit --cov=. --cov-report=xml --log-cli-level=WARNING
+        run: uv run --no-sync glf-dev qa test tests/unit --cov=. --cov-report=xml --log-cli-level=WARNING
       - name: Save PR metadata
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}

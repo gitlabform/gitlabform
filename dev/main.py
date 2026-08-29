@@ -7,7 +7,22 @@ import sys
 from pathlib import Path
 
 # Add the project root to sys.path to allow running this script directly
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(REPO_ROOT))
+
+
+def _ensure_repo_context() -> None:
+    """Fail fast unless the command is being run from inside the gitlabform repo."""
+    cwd = Path.cwd().resolve()
+    repo_root = REPO_ROOT.resolve()
+    if cwd == repo_root or repo_root in cwd.parents:
+        return
+
+    print("glf-dev: this command must be run from inside the gitlabform repository.", file=sys.stderr)
+    print(f"Current directory: {cwd}", file=sys.stderr)
+    print(f"Expected repo root: {repo_root}", file=sys.stderr)
+    raise SystemExit(2)
+
 
 from dev.docs import docs_build, docs_serve
 from dev.env import clean as run_clean_logic, setup as run_setup_logic
@@ -307,6 +322,7 @@ def gitlab_local():
 
 def main():
     """Main entry point for direct script execution."""
+    _ensure_repo_context()
     parser = argparse.ArgumentParser(description="GitLabForm Development Toolkit")
     subparsers = parser.add_subparsers(dest="domain", help="Task domains")
 
