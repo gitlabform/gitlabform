@@ -81,4 +81,4 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --no-dev --group test
       - name: Run smoke tests
-        run: uv run --no-sync glf-dev gitlabform -V
+        run: uv run --no-sync gitlabform -V
