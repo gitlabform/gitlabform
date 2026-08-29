@@ -103,23 +103,9 @@ content-type = "text/markdown"
 # Primary application entrypoint
 gitlabform = "gitlabform.run:run"
 
-# Development toolkit and environment management
-dev = "dev.main:main"
-workspace = "dev.main:workspace"
-
-# Development workflow (Linting, Formatting, and Testing)
-qa = "dev.main:qa"
-
-# Local infrastructure management
-gitlab-local = "dev.main:gitlab_local"
-
-# Documentation workflow
-docs = "dev.main:docs"
-
-# Packaging and distribution verification
-package = "dev.main:package"
-docker = "dev.main:docker"
-release = "dev.main:release"
+# GitlabForm development toolkit: only works when invoked from inside the
+# gitlabform repository itself.
+glf-dev = "dev.main:main"
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning"]
