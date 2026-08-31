@@ -29,7 +29,7 @@ def python_verify(extra_args: list[str] | None = None):
     # 1. Ensure build artifacts exist
     if not dist_path.exists() or not any(dist_path.iterdir()):
         logger.error(f"[bold red]❌ Build directory '{dist_path}/' is missing or empty.[/bold red]")
-        logger.info("Hint: Run [bold cyan]uv run package build[/bold cyan] first.")
+        logger.info("Hint: Run [bold cyan]uv run glf-dev package build[/bold cyan] first.")
         sys.exit(1)
 
     wheels = [str(p) for p in dist_path.glob("*.whl")]

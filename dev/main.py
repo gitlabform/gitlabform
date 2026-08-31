@@ -2,13 +2,9 @@
 """Central entry point and CLI facade for the GitLabForm development toolkit."""
 
 import argparse
-import os
 import sys
 from pathlib import Path
-
-# Add the project root to sys.path to allow running this script directly
-REPO_ROOT = Path(__file__).resolve().parent.parent
-sys.path.append(str(REPO_ROOT))
+from dev.common import REPO_ROOT
 
 
 def _ensure_repo_context() -> None:
@@ -261,65 +257,6 @@ def _dispatch_qa(args):
         run_test_logic(args.extra_args)
 
 
-# --- Domain Shortcut Entry Points ---
-
-
-def _domain_entrypoint(prog, description, setup_fn, dispatch_fn):
-    """Generic helper for domain-specific entry points."""
-    parser = argparse.ArgumentParser(prog=prog, description=description)
-    setup_fn(parser.add_subparsers(dest="command"))
-    args, extra = parser.parse_known_args()
-
-    # Combine unknown arguments (like flags) with the 'extra_args' list if it exists.
-    # This allows passthrough commands like 'up' to receive flags like --help.
-    if hasattr(args, "extra_args") and extra:
-        if args.extra_args is None:
-            args.extra_args = extra
-        else:
-            args.extra_args = extra + args.extra_args
-
-    if not args.command:
-        parser.print_help()
-        sys.exit(0)
-
-    dispatch_fn(args)
-
-
-def workspace():
-    """Shortcut for 'uv run workspace'."""
-    _domain_entrypoint("workspace", DESC_WORKSPACE, _add_workspace_subcommands, _dispatch_workspace)
-
-
-def qa():
-    """Shortcut for 'uv run qa'."""
-    _domain_entrypoint("qa", DESC_QA, _add_qa_subcommands, _dispatch_qa)
-
-
-def docs():
-    """Shortcut for 'uv run docs'."""
-    _domain_entrypoint("docs", DESC_DOCS, _add_docs_subcommands, _dispatch_docs)
-
-
-def package():
-    """Shortcut for 'uv run package'."""
-    _domain_entrypoint("package", DESC_PACKAGE, _add_package_subcommands, _dispatch_package)
-
-
-def docker():
-    """Shortcut for 'uv run docker'."""
-    _domain_entrypoint("docker", DESC_DOCKER, _add_docker_subcommands, _dispatch_docker)
-
-
-def release():
-    """Shortcut for 'uv run release'."""
-    _domain_entrypoint("release", DESC_RELEASE, _add_release_subcommands, _dispatch_release)
-
-
-def gitlab_local():
-    """Shortcut for 'uv run gitlab-local'. Provides orchestration for the local GitLab instance."""
-    _domain_entrypoint("gitlab-local", DESC_INFRA, _add_infra_subcommands, _dispatch_infra)
-
-
 def main():
     """Main entry point for direct script execution."""
     _ensure_repo_context()
@@ -351,7 +288,7 @@ def main():
     args, extra = parser.parse_known_args()
 
     # Combine unknown arguments (flags) with the 'extra_args' list if it exists.
-    # This applies when running via the main 'dev' entrypoint.
+    # This applies when running via the main 'glf-dev' entrypoint.
     if hasattr(args, "extra_args") and extra:
         if args.extra_args is None:
             args.extra_args = extra
