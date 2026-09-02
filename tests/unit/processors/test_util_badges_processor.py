@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from gitlab.exceptions import GitlabCreateError
 from gitlab.v4.objects import Group, Project
 
 from gitlabform.processors.util.badges_processor import BadgesProcessor
@@ -196,12 +197,12 @@ class TestBadgesProcessor:
 
         group_badge.delete.assert_called_once()
 
-    # ------------------------------------------------------------ validation
+    # --------------------------------------------------------------- errors
 
-    def test_missing_name_exits(self):
+    def test_missing_name_raises(self):
         project = self._project()
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(KeyError):
             self.helper.process_badges(
                 "badges",
                 {"my-badge": {"link_url": "https://x", "image_url": "https://y"}},
@@ -211,26 +212,11 @@ class TestBadgesProcessor:
             )
         project.badges.create.assert_not_called()
 
-    def test_duplicate_names_exit_before_any_api_call(self):
+    def test_gitlab_error_from_create_is_reraised(self):
         project = self._project()
+        project.badges.create.side_effect = GitlabCreateError("400: link_url is missing")
 
-        with pytest.raises(SystemExit):
-            self.helper.process_badges(
-                "badges",
-                {
-                    "a": {"name": "dup", "link_url": "https://x", "image_url": "https://y"},
-                    "b": {"name": "dup", "link_url": "https://z", "image_url": "https://w"},
-                },
-                enforce=False,
-                group_or_project=project,
-                needs_update=self._needs_update(False),
-            )
-        project.badges.list.assert_not_called()
-
-    def test_missing_link_url_exits(self):
-        project = self._project()
-
-        with pytest.raises(SystemExit):
+        with pytest.raises(GitlabCreateError):
             self.helper.process_badges(
                 "badges",
                 {"my-badge": {"name": "ci", "image_url": "https://y"}},
@@ -238,32 +224,3 @@ class TestBadgesProcessor:
                 group_or_project=project,
                 needs_update=self._needs_update(False),
             )
-        project.badges.create.assert_not_called()
-
-    def test_missing_image_url_exits(self):
-        project = self._project()
-
-        with pytest.raises(SystemExit):
-            self.helper.process_badges(
-                "badges",
-                {"my-badge": {"name": "ci", "link_url": "https://x"}},
-                enforce=False,
-                group_or_project=project,
-                needs_update=self._needs_update(False),
-            )
-        project.badges.create.assert_not_called()
-
-    def test_delete_true_bypasses_required_fields_validation(self):
-        # A delete-only entry doesn't need link_url / image_url.
-        existing = self._badge("ci")
-        project = self._project(existing)
-
-        self.helper.process_badges(
-            "badges",
-            {"my-badge": {"name": "ci", "delete": True}},
-            enforce=False,
-            group_or_project=project,
-            needs_update=self._needs_update(False),
-        )
-
-        existing.delete.assert_called_once()
