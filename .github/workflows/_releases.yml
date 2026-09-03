@@ -62,7 +62,7 @@ jobs:
           # Manual Trigger Inputs (from workflow_dispatch)
           MANUAL_RELEASE_TAG: ${{ inputs.manual_tag }}
           MANUAL_UPSTREAM_RUN_ID: ${{ inputs.override_run_id }}
-        run: uv run release gh-workflow-check
+        run: uv run glf-dev release gh-workflow-check
 
   publish-docs:
     name: Publish Docs
@@ -137,7 +137,7 @@ jobs:
           path: dist
       - name: Publish to PyPI
         run: |
-          uv run --no-sync release pypi
+          uv run --no-sync glf-dev release pypi
 
   publish-to-ghcr:
     name: Publish GHCR

@@ -219,7 +219,7 @@ echo ''
 
 # Provide instructions for stopping and starting GitLab
 cecho b 'To stop and delete the GitLab container, run:'
-cecho y 'uv run gitlab-local down'
+cecho y 'uv run glf-dev gitlab-local down'
 echo ''
 cecho b 'Alternatively to do it manually, you can run:'
 cecho r "docker stop --time=30 gitlab"
@@ -232,5 +232,5 @@ cecho b '(This is the only way to make GitLab in Docker stable.)'
 echo ''
 
 cecho b 'To start the acceptance tests, run:'
-cecho y 'uv run qa test tests/acceptance'
+cecho y 'uv run glf-dev qa test tests/acceptance'
 echo ''

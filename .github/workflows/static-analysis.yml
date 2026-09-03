@@ -48,9 +48,9 @@ jobs:
       - name: Run ${{ matrix.check }}
         run: |
           if [ "${{ matrix.check }}" == "black" ]; then
-            uv run --no-sync qa lint black --check .
+            uv run --no-sync glf-dev qa lint black --check .
           elif [ "${{ matrix.check }}" == "mypy" ]; then
-            uv run --no-sync qa lint mypy .
+            uv run --no-sync glf-dev qa lint mypy .
           elif [ "${{ matrix.check }}" == "bandit" ]; then
-            uv run --no-sync qa lint bandit .
+            uv run --no-sync glf-dev qa lint bandit .
           fi
