@@ -25,14 +25,15 @@ class EffectiveConfigurationFile:
 
         self.config = {}
 
-    def add_placeholder(self, project_or_group: str):
+    def add_placeholder(self, config_key: str):
         if self.output_file:
-            self.config[project_or_group] = {}
+            self.config[config_key] = {}
 
-    def add_configuration(self, project_or_group: str, configuration_name: str, configuration: dict):
+    def add_configuration(self, config_key: str, configuration_name: str, configuration: dict):
         if self.output_file:
             info(f"Adding effective configuration for {configuration_name}.")
-            self.config[project_or_group][configuration_name] = configuration
+            self.config.setdefault(config_key, {})
+            self.config[config_key][configuration_name] = configuration
 
     def write_to_file(self):
         if self.output_file:
