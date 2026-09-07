@@ -5,9 +5,27 @@
     This section requires GitLab Premium (paid). (This is a GitLab's limitation, not GitLabForm's.)
 
 
-These sections' purpose is to manage the project-Level Merge Requests **configuration** and **rules**.
+These sections' purpose is to manage the group-level and the project-level Merge Requests **configuration** and **rules**.
 
-## Configuration
+## Group Configuration
+
+The section `group_merge_requests_approvals` keys are as documented at GitLab's [Merge request approval settings API, update group MR approval settings](https://docs.gitlab.com/api/merge_request_approval_settings/#update-group-mr-approval-settings).
+
+These settings apply to all the subgroups and projects of the given group.
+
+Example:
+
+```yaml
+projects_and_groups:
+  group_1/*:
+    group_merge_requests_approvals:
+      allow_author_approval: false
+      allow_committer_approval: false
+      allow_overrides_to_approver_list_per_merge_request: false
+      retain_approvals_on_push: true
+```
+
+## Project Configuration
 
 The section `merge_requests_approvals` keys are as documented at GitLab's [project-level Merge Request approvals API, change configuration](https://docs.gitlab.com/ee/api/merge_request_approvals.html#change-configuration).
 
@@ -17,7 +35,7 @@ Note that under it the deprecated key `approvals_before_merge` is NOT allowed in
 
     Some Merge Requests-related settings are also set in the [project settings](settings.md#project-settings).
 
-## Rules
+## Project Rules
 
 In the `merge_requests_approval_rules` section, key names are just any labels, except if the key name is `enforce` and is set to `true` - then only the rules defined here will remain in the project, all other will be deleted.
 
