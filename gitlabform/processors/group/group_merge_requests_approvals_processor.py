@@ -1,4 +1,4 @@
-from logging import debug
+from logging import debug, info
 from typing import Any, cast
 
 from gitlab.v4.objects.groups import Group
@@ -25,10 +25,10 @@ class GroupMergeRequestsApprovalsProcessor(AbstractProcessor):
         debug("group_merge_requests_approvals BEFORE: ^^^")
 
         if self._needs_update(settings_in_gitlab, settings_in_config):
-            debug(f"Updating group merge requests approvals settings for group {group}")
+            info(f"Updating group merge requests approvals settings for group {group}")
             self._update_group_merge_requests_approvals(gitlab_group, settings_in_config)
         else:
-            debug("No update needed for group merge requests approvals settings")
+            info("No update needed for group merge requests approvals settings")
 
     def _get_group_merge_requests_approvals(self, gitlab_group: Group) -> dict:
         # TODO: python-gitlab has no manager for the /groups/:id/merge_request_approval_setting

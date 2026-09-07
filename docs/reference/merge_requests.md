@@ -11,7 +11,12 @@ These sections' purpose is to manage the group-level and the project-level Merge
 
 The section `group_merge_requests_approvals` keys are as documented at GitLab's [Merge request approval settings API, update group MR approval settings](https://docs.gitlab.com/api/merge_request_approval_settings/#update-group-mr-approval-settings).
 
-These settings apply to all the subgroups and projects of the given group.
+!!! warning
+
+    GitLab supports these settings **only for top-level groups** - it replies with `403 Forbidden`
+    for subgroups. (This is a GitLab's limitation, not GitLabForm's - note that it is not mentioned
+    in the GitLab API docs linked above.) Set these settings on the top-level group - they cascade
+    down to all its subgroups and projects.
 
 Example:
 
