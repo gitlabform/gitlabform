@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 import pytest
 
 from tests.acceptance import gl, run_gitlabform
@@ -7,7 +9,7 @@ pytestmark = pytest.mark.requires_license
 
 def get_group_merge_requests_approvals(group) -> dict:
     # python-gitlab does not support this API yet, see the processor for details
-    settings = gl.http_get(f"/groups/{group.id}/merge_request_approval_setting")
+    settings = cast(dict[str, Any], gl.http_get(f"/groups/{group.id}/merge_request_approval_setting"))
     return {key: setting["value"] for key, setting in settings.items()}
 
 
