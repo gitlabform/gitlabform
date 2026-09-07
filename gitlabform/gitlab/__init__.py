@@ -10,7 +10,6 @@ from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.group_ldap_links import GitLabGroupLDAPLinks
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
-from gitlabform.gitlab.project_deploy_keys import GitLabProjectDeployKeys
 from gitlabform.gitlab.project_protected_environments import (
     GitLabProjectProtectedEnvironments,
 )
@@ -52,7 +51,6 @@ class GitLab(
     GitLabMergeRequests,
     GitLabGroupLDAPLinks,
     GitLabPipelines,
-    GitLabProjectDeployKeys,
     GitLabProjectProtectedEnvironments,
     GitLabProjectMergeRequestsApprovals,
 ):
