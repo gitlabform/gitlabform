@@ -40,7 +40,7 @@ class ProjectsProvider(GroupsProvider):
         groups = self.get_groups(target)
 
         if target not in ["ALL", "ALL_DEFINED"]:
-            if len(groups.get_effective()) == 1:
+            if groups.get_effective():
                 projects = self._get_projects(target, groups)
             else:
                 projects = self._get_single_project(target)
