@@ -117,7 +117,7 @@ class GitLabCore:
         current_version = "0.0.0"
 
         if self.version != "unknown":
-            sem_ver_regex = "^\d*\.\d*\.\d*"
+            sem_ver_regex = r"^\d*\.\d*\.\d*"
             # Get the pure semantic version from self.version, for example Gitlab will return 18.2.1-ee
             match = re.search(sem_ver_regex, self.version)
             if match:

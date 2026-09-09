@@ -6,6 +6,46 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.2.1
+
+### Bug Fixes
+
+* catch GitlabCreateError and GitlabDeleteError when modifying files on protected branches [#1361](https://github.com/gitlabform/gitlabform/pull/1361). ([haijeploeg](https://github.com/haijeploeg))
+* fix merge_request_approval_rules to stop redundant edit calls on unchanged rules [#1350](https://github.com/gitlabform/gitlabform/pull/1350). ([rickbrouwer](https://github.com/rickbrouwer))
+* use add instead of delete in commit message for new files to reflect what actually happened in commit history [#1363](https://github.com/gitlabform/gitlabform/pull/1363). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Build
+
+* consume package artifact from main workflow in pypi release [#1327](https://github.com/gitlabform/gitlabform/pull/1327). ([amimas](https://github.com/amimas))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
+## 6.2.0
+
+### Features
+
+* Add support for "Security Manager role" [issue: #1329](https://github.com/gitlabform/gitlabform/issues/1329), [#1342](https://github.com/gitlabform/gitlabform/pull/1342). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Bug Fixes
+
+* don't re-validate inherited config in subgroup lookup [#1318](https://github.com/gitlabform/gitlabform/pull/1318). ([rickbrouwer](https://github.com/rickbrouwer))
+* format group member expiry dates [#1349](https://github.com/gitlabform/gitlabform/pull/1349). ([w3lld1](https://github.com/w3lld1))
+* escape regex as a raw string to prevent errors in loges [#1351](https://github.com/gitlabform/gitlabform/pull/1351). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Documentation
+
+* update license renewal instructions (#1358)[https://github.com/gitlabform/gitlabform/pull/1358]. ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.1.0
 
 ### Features

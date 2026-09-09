@@ -143,11 +143,11 @@ def gh_workflow_check(extra_args: list[str] | None = None):
 
     LOCAL TESTING:
     1. Manual Trigger:
-       GH_TOKEN="your_pat" EVENT="workflow_dispatch" REPO="owner/repo" MANUAL_RELEASE_TAG="v1.0.0" MANUAL_UPSTREAM_RUN_ID="12345" uv run release gh-workflow-check
+       GH_TOKEN="your_pat" EVENT="workflow_dispatch" REPO="owner/repo" MANUAL_RELEASE_TAG="v1.0.0" MANUAL_UPSTREAM_RUN_ID="12345" uv run glf-dev release gh-workflow-check
 
     2. Automated Trigger:
        GH_TOKEN="your_pat" EVENT="workflow_run" REPO="owner/repo" CONCLUSION="success" \
-       SHA="$(git rev-parse HEAD)" AUTOMATED_UPSTREAM_RUN_ID="67890" uv run release gh-workflow-check
+       SHA="$(git rev-parse HEAD)" AUTOMATED_UPSTREAM_RUN_ID="67890" uv run glf-dev release gh-workflow-check
     """
     event_name = os.environ.get("EVENT")
     repo = os.environ.get("REPO")

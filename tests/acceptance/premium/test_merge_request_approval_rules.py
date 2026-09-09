@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from gitlabform.gitlab import AccessLevel
@@ -546,3 +548,54 @@ class TestMergeRequestApprovers:
         coverage_check_approval_rule_details = mr_approval_rules_under_this_project[1]
         assert coverage_check_approval_rule_details.name == "Coverage-Check"
         assert coverage_check_approval_rule_details.approvals_required == 0
+
+    def test__no_churn_when_config_unchanged(
+        self,
+        project_for_function,
+        group_with_one_owner_and_two_developers,
+        make_user,
+        branch_for_function,
+        caplog,
+    ):
+        user1 = make_user(AccessLevel.DEVELOPER, add_to_project=False)
+        project_for_function.members.create({"user_id": user1.id, "access_level": AccessLevel.DEVELOPER.value})
+
+        config = f"""
+            projects_and_groups:
+              {project_for_function.path_with_namespace}:
+                branches:
+                  {branch_for_function}:
+                    protected: true
+                    push_access_level: no access
+                    merge_access_level: developer
+                    unprotect_access_level: maintainer
+                merge_requests_approval_rules:
+                  standard:
+                    approvals_required: 1
+                    name: "Regular approvers"
+                    users:
+                      - {user1.username}
+                  security:
+                    approvals_required: 2
+                    name: "Extra Security Team approval for selected branches"
+                    users:
+                      - {user1.username}
+                    groups:
+                      - {group_with_one_owner_and_two_developers.full_path}
+                    protected_branches:
+                      - {branch_for_function}
+            """
+
+        run_gitlabform(config, project_for_function)
+        assert len(project_for_function.approvalrules.list()) >= 2
+
+        caplog.clear()
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(config, project_for_function)
+
+        assert (
+            "Editing standard of merge_requests_approval_rules" not in caplog.text
+        ), f"Expected no edit for unchanged 'standard' rule, got: {caplog.text}"
+        assert (
+            "Editing security of merge_requests_approval_rules" not in caplog.text
+        ), f"Expected no edit for unchanged 'security' rule, got: {caplog.text}"

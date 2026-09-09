@@ -2,7 +2,7 @@
 github_url = "https://github.com/gitlabform/gitlabform/"
 
 [version]
-current = "6.1.0"
+current = "6.2.1"
 
 # Example of a semver regexp.
 # Make sure this matches current_version before
@@ -25,6 +25,7 @@ tag_template = "v{new_version}"
 # tbump.toml location.
 [[file]]
 src = "pyproject.toml"
+search = 'version = "{current_version}"'
 
 # You can specify a list of commands to
 # run after the files have been patched

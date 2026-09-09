@@ -1,7 +1,14 @@
 import json
+from datetime import date
 from io import StringIO
 
 from ruamel.yaml import YAML
+
+
+def format_expires_at(expires_at):
+    if isinstance(expires_at, date):
+        return expires_at.strftime("%Y-%m-%d")
+    return expires_at
 
 
 def to_str(a_dict: dict) -> str:

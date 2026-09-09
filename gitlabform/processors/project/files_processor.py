@@ -6,7 +6,7 @@ from pathlib import Path
 from logging import debug, info, warning, critical
 
 from jinja2 import Environment, FileSystemLoader
-from gitlab import GitlabGetError, GitlabUpdateError, GitlabListError
+from gitlab import GitlabCreateError, GitlabDeleteError, GitlabGetError, GitlabListError, GitlabUpdateError
 from gitlab.v4.objects import Project, ProjectFile, ProjectBranch
 from gitlab.base import RESTObject
 
@@ -235,7 +235,7 @@ class FilesProcessor(AbstractProcessor):
                 new_content,
             )
 
-        except GitlabUpdateError as e:
+        except (GitlabUpdateError, GitlabCreateError, GitlabDeleteError) as e:
             if (
                 e.response_code == 400 or e.response_code == 403
             ) and "You are not allowed to push into this branch" in e.error_message:
@@ -302,9 +302,7 @@ class FilesProcessor(AbstractProcessor):
                     "file_path": file_to_operate_on,
                     "branch": branch.name,
                     "content": new_content,
-                    "commit_message": self.get_commit_message_for_file_change(
-                        "delete", file_to_operate_on, configuration
-                    ),
+                    "commit_message": self.get_commit_message_for_file_change("add", file_to_operate_on, configuration),
                 }
             )
         elif operation == "delete" and isinstance(file_to_operate_on, ProjectFile):

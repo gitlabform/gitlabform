@@ -39,9 +39,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --no-dev --group test
       - name: Start GitLab (${{ matrix.flavor }}) in docker
-        run: uv run --no-sync gitlab-local up --gitlab-flavor ${{ matrix.flavor }}
+        run: uv run --no-sync glf-dev gitlab-local up --gitlab-flavor ${{ matrix.flavor }}
       - name: Run Standard acceptance tests for ${{ matrix.flavor }} flavor
-        run: uv run --no-sync qa test tests/acceptance/standard --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
+        run: uv run --no-sync glf-dev qa test tests/acceptance/standard --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Save PR metadata
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -80,9 +80,9 @@ jobs:
       - name: Start GitLab (${{ matrix.tier }}) in docker
         env:
           GITLAB_EE_LICENSE: "${{ matrix.tier == 'premium' && secrets.GITLAB_EE_LICENSE || secrets.GITLAB_EE_ULTIMATE_LICENSE }}"
-        run: uv run --no-sync gitlab-local up
+        run: uv run --no-sync glf-dev gitlab-local up
       - name: Run acceptance Tests for ${{ matrix.tier }} features
-        run: uv run --no-sync qa test tests/acceptance/${{ matrix.tier }} --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
+        run: uv run --no-sync glf-dev qa test tests/acceptance/${{ matrix.tier }} --cov=. --cov-report=xml --durations=0 --reruns 3 --reruns-delay 10 --log-cli-level=WARNING
       - name: Save PR metadata
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from logging import debug
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import requests
 from logging import info
@@ -9,6 +9,7 @@ from gitlabform.gitlab import GitLab, PythonGitlab
 from gitlabform.gitlab import GitlabWrapper
 from gitlabform.output import EffectiveConfigurationFile
 from gitlabform.processors.util.decorators import configuration_to_safe_dict
+from gitlabform.processors.util.difference_logger import DifferenceLogger
 
 
 class AbstractProcessor(ABC):
@@ -123,8 +124,33 @@ class AbstractProcessor(ABC):
     def _process_configuration(self, project_or_project_and_group: str, configuration: dict):
         pass
 
+    def _get_current_state(self, project_or_project_and_group: str) -> Optional[dict]:
+        """Fetch the current state from GitLab for the centralized dry-run diff.
+
+        Override in subclasses to enable diffing for their section. Return None (the
+        default) to opt out.
+        """
+        return None
+
+    def _get_desired_state(self, entity_config: dict) -> dict:
+        """Return the config side of the diff. Override only when the config needs
+        slicing or normalizing so its keys line up with the current state.
+        """
+        return entity_config
+
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
-        info(f"Diffing for section '{self.configuration_name}' is not supported yet")
+        current = self._get_current_state(project_or_project_and_group)
+        if current is None:
+            debug(f"Diffing for section '{self.configuration_name}' is not supported yet")
+            return
+
+        desired = self._get_desired_state(entity_config)
+        DifferenceLogger.log_diff(
+            f"{self.configuration_name} changes",
+            current,
+            desired,
+            only_changed=diff_only_changed,
+        )
 
     def _needs_update(
         self,
