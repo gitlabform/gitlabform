@@ -19,15 +19,28 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    allow:
-      - dependency-type: "production"
-
-  - package-ecosystem: "uv"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-    allow:
-      - dependency-type: "development"
+    cooldown:
+      default-days: 30
+      include:
+        - "pytest*"
+        - "coverage"
+        - "cryptography"
+        - "deepdiff"
+        - "xkcdpass"
+        - "bandit"
+        - "black"
+        - "codespell"
+        - "mypy*"
+        - "ruff"
+        - "types-*"
+        - "markdown*"
+        - "zensical*"
+        - "pygments"
+        - "pymdown-extensions"
+        - "check-wheel-contents"
+        - "twine"
+        - "commitizen"
+        - "prek"
     groups:
       # Keep the dev-only dependency update churn lower by checking it monthly,
       # while still keeping the largest dev tool groups focused.
