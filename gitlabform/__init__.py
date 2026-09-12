@@ -4,6 +4,7 @@ from logging import debug, critical, error, warning, info, log
 # Use Rich to make logs have a colorized and formatted output
 from rich.logging import RichHandler
 from rich.console import Console
+from rich.markup import escape
 
 import argparse
 import logging
@@ -359,7 +360,7 @@ class GitLabForm:
             level=self.log_level,
             format="%(message)s",
             datefmt="[%X]",
-            handlers=[RichHandler(markup=True, rich_tracebacks=rich_tracebacks)],
+            handlers=[RichHandler(rich_tracebacks=rich_tracebacks)],
         )
 
     def _initialize_configuration_and_gitlab(self) -> Tuple[GitLab, Configuration]:
@@ -697,20 +698,40 @@ class GitLabForm:
             log(NOTICE_LOG_LEVEL, f"# of projects processed successfully: {successful_projects}")
 
         if len(failed_groups) > 0:
-            log(NOTICE_LOG_LEVEL, f"# of groups failed: {len(failed_groups)}")
+            log(
+                NOTICE_LOG_LEVEL,
+                f"[red]# of groups failed: {len(failed_groups)}[/]",
+                extra={"markup": True},
+            )
             for group_number in failed_groups.keys():
-                log(NOTICE_LOG_LEVEL, f"Failed group {group_number}: {failed_groups[group_number]}")
+                log(
+                    NOTICE_LOG_LEVEL,
+                    f"[red]Failed group {group_number}: {escape(str(failed_groups[group_number]))}[/]",
+                    extra={"markup": True},
+                )
         if len(failed_projects) > 0:
-            log(NOTICE_LOG_LEVEL, f"# of projects failed: {len(failed_projects)}")
+            log(
+                NOTICE_LOG_LEVEL,
+                f"[red]# of projects failed: {len(failed_projects)}[/]",
+                extra={"markup": True},
+            )
             for project_number in failed_projects.keys():
-                log(NOTICE_LOG_LEVEL, f"Failed project {project_number}: {failed_projects[project_number]}")
+                log(
+                    NOTICE_LOG_LEVEL,
+                    f"[red]Failed project {project_number}: {escape(str(failed_projects[project_number]))}[/]",
+                    extra={"markup": True},
+                )
 
         if len(failed_groups) > 0 or len(failed_projects) > 0:
             sys.exit(EXIT_PROCESSING_ERROR)
         elif successful_groups > 0 or successful_projects > 0:
-            log(NOTICE_LOG_LEVEL, "All requested groups/projects processed successfully! :sparkles:")
+            log(
+                NOTICE_LOG_LEVEL,
+                "[green]All requested groups/projects processed successfully! :sparkles:[/]",
+                extra={"markup": True},
+            )
         else:
-            log(NOTICE_LOG_LEVEL, "Nothing to do.")
+            log(NOTICE_LOG_LEVEL, "[yellow]Nothing to do.[/]", extra={"markup": True})
 
     @classmethod
     def _info_group_count(cls, prefix, i: int, n: int, second_color: str, second_text: str) -> None:
