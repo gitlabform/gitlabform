@@ -33,8 +33,10 @@ gitlabform ALL_DEFINED --verbose
 To see what changes are being made but limit the output to only those settings that are changing, run:
 
 ```shell
-gitlabform -c config.yml ALL_DEFINED --verbose --diff-only-changed
+gitlabform -c config.yml ALL_DEFINED --diff-only-changed
 ```
+
+The diff output is emitted using GitLabForm's dedicated `DIFF` log level, so it is shown without requiring `--verbose`. Use `--verbose` when you also want the regular INFO-level details.
 
 Run:
 
