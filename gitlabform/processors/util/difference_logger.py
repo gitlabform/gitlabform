@@ -2,7 +2,10 @@ import hashlib
 import json
 from itertools import starmap
 
-from logging import log
+import logging
+
+# use the package logger name without importing the package to avoid circular imports
+logger = logging.getLogger("gitlabform")
 
 from gitlabform.constants import DIFF_LOG_LEVEL
 
@@ -67,6 +70,10 @@ class DifferenceLogger:
         text = "{subject}:\n{diff}".format(subject=subject, diff="\n".join(starmap(pattern.format, changes)))
 
         if not test:
-            log(DIFF_LOG_LEVEL, text)
+            logger.log(
+                DIFF_LOG_LEVEL,
+                text,
+                extra={"markup": False},
+            )
 
         return text

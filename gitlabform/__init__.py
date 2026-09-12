@@ -359,7 +359,7 @@ class GitLabForm:
             level=self.log_level,
             format="%(message)s",
             datefmt="[%X]",
-            handlers=[RichHandler(rich_tracebacks=rich_tracebacks)],
+            handlers=[RichHandler(markup=True, rich_tracebacks=rich_tracebacks)],
         )
 
     def _initialize_configuration_and_gitlab(self) -> Tuple[GitLab, Configuration]:
