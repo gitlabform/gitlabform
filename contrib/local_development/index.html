@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="zensical-0.0.58">
     
     
       
@@ -27,10 +27,15 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.38807bfb.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.c7ab7c71.min.css">
       
       
 
@@ -44,12 +49,12 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -70,7 +75,7 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
     <div data-md-component="skip">
       
         
@@ -92,10 +97,10 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="GitLabForm" class="md-header__button md-logo" aria-label="GitLabForm" data-md-component="logo">
       
-  <img src="../../gitlabform-logo-favicon.png" alt="logo">
+  <img src="../../gitlabform-logo-favicon.png" alt="GitLabForm">
 
     </a>
-    <label class="md-header__button md-icon" for="__drawer">
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
@@ -125,7 +130,7 @@
     <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
       </label>
     
   
@@ -135,7 +140,7 @@
     <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
       </label>
     
   
@@ -149,57 +154,30 @@
     
       
       
-        <label class="md-header__button md-icon" for="__search">
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
 </div>
       
     
-    
-      <div class="md-header__source">
+    <div class="md-header__source">
+      
         <a href="https://github.com/gitlabform/gitlabform/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
   </div>
 </a>
-      </div>
-    
+      
+    </div>
   </nav>
   
 </header>
@@ -227,7 +205,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../.." title="GitLabForm" class="md-nav__button md-logo" aria-label="GitLabForm" data-md-component="logo">
       
-  <img src="../../gitlabform-logo-favicon.png" alt="logo">
+  <img src="../../gitlabform-logo-favicon.png" alt="GitLabForm">
 
     </a>
     GitLabForm
@@ -237,7 +215,7 @@
       <a href="https://github.com/gitlabform/gitlabform/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -261,8 +239,7 @@
   <span class="md-ellipsis">
     
   
-    🏗 GitLabForm
-  
+  🏗 GitLabForm
 
     
   </span>
@@ -288,8 +265,7 @@
   <span class="md-ellipsis">
     
   
-    ✨ Features
-  
+  ✨ Features
 
     
   </span>
@@ -315,8 +291,7 @@
   <span class="md-ellipsis">
     
   
-    🫴 Requirements
-  
+  🫴 Requirements
 
     
   </span>
@@ -342,8 +317,7 @@
   <span class="md-ellipsis">
     
   
-    💾 Installation
-  
+  💾 Installation
 
     
   </span>
@@ -435,8 +409,7 @@
   <span class="md-ellipsis">
     
   
-    📋 Configuration
-  
+  📋 Configuration
 
     
   </span>
@@ -457,8 +430,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    📋 Configuration
-  
+  📋 Configuration
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -479,8 +451,7 @@
   <span class="md-ellipsis">
     
   
-    Archive/unarchive
-  
+  Archive/unarchive
 
     
   </span>
@@ -507,8 +478,7 @@
   <span class="md-ellipsis">
     
   
-    Avatar
-  
+  Avatar
 
     
   </span>
@@ -535,8 +505,7 @@
   <span class="md-ellipsis">
     
   
-    Badges
-  
+  Badges
 
     
   </span>
@@ -563,8 +532,7 @@
   <span class="md-ellipsis">
     
   
-    Branches
-  
+  Branches
 
     
   </span>
@@ -591,8 +559,7 @@
   <span class="md-ellipsis">
     
   
-    CI/CD Variables
-  
+  CI/CD Variables
 
     
   </span>
@@ -619,8 +586,7 @@
   <span class="md-ellipsis">
     
   
-    CI/CD Job Token Scope
-  
+  CI/CD Job Token Scope
 
     
   </span>
@@ -647,8 +613,7 @@
   <span class="md-ellipsis">
     
   
-    Deploy Keys
-  
+  Deploy Keys
 
     
   </span>
@@ -675,8 +640,7 @@
   <span class="md-ellipsis">
     
   
-    Files
-  
+  Files
 
     
   </span>
@@ -703,8 +667,7 @@
   <span class="md-ellipsis">
     
   
-    Group LDAP links
-  
+  Group LDAP links
 
     
   </span>
@@ -731,8 +694,7 @@
   <span class="md-ellipsis">
     
   
-    Group SAML links
-  
+  Group SAML links
 
     
   </span>
@@ -759,8 +721,7 @@
   <span class="md-ellipsis">
     
   
-    Integrations
-  
+  Integrations
 
     
   </span>
@@ -787,8 +748,7 @@
   <span class="md-ellipsis">
     
   
-    Labels
-  
+  Labels
 
     
   </span>
@@ -815,8 +775,7 @@
   <span class="md-ellipsis">
     
   
-    Members
-  
+  Members
 
     
   </span>
@@ -843,8 +802,7 @@
   <span class="md-ellipsis">
     
   
-    Merge Requests
-  
+  Merge Requests
 
     
   </span>
@@ -871,8 +829,7 @@
   <span class="md-ellipsis">
     
   
-    Pipeline schedules
-  
+  Pipeline schedules
 
     
   </span>
@@ -899,8 +856,7 @@
   <span class="md-ellipsis">
     
   
-    Project security settings
-  
+  Project security settings
 
     
   </span>
@@ -927,8 +883,7 @@
   <span class="md-ellipsis">
     
   
-    Protected environments
-  
+  Protected environments
 
     
   </span>
@@ -955,8 +910,7 @@
   <span class="md-ellipsis">
     
   
-    Push mirrors
-  
+  Push mirrors
 
     
   </span>
@@ -983,8 +937,7 @@
   <span class="md-ellipsis">
     
   
-    Push rules
-  
+  Push rules
 
     
   </span>
@@ -1011,8 +964,7 @@
   <span class="md-ellipsis">
     
   
-    Resource groups
-  
+  Resource groups
 
     
   </span>
@@ -1039,8 +991,7 @@
   <span class="md-ellipsis">
     
   
-    Settings
-  
+  Settings
 
     
   </span>
@@ -1067,8 +1018,7 @@
   <span class="md-ellipsis">
     
   
-    Tags protection
-  
+  Tags protection
 
     
   </span>
@@ -1095,8 +1045,7 @@
   <span class="md-ellipsis">
     
   
-    Transfer
-  
+  Transfer
 
     
   </span>
@@ -1123,8 +1072,7 @@
   <span class="md-ellipsis">
     
   
-    Webhooks
-  
+  Webhooks
 
     
   </span>
@@ -1158,8 +1106,7 @@
   <span class="md-ellipsis">
     
   
-    🏃 Running
-  
+  🏃 Running
 
     
   </span>
@@ -1185,8 +1132,7 @@
   <span class="md-ellipsis">
     
   
-    🤖 Automation
-  
+  🤖 Automation
 
     
   </span>
@@ -1212,8 +1158,7 @@
   <span class="md-ellipsis">
     
   
-    🗓 Changelog
-  
+  🗓 Changelog
 
     
   </span>
@@ -1239,8 +1184,7 @@
   <span class="md-ellipsis">
     
   
-    ⏫ Upgrading
-  
+  ⏫ Upgrading
 
     
   </span>
@@ -1294,8 +1238,7 @@
   <span class="md-ellipsis">
     
   
-    🙋 Contributing
-  
+  🙋 Contributing
 
     
   </span>
@@ -1316,8 +1259,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    🙋 Contributing
-  
+  🙋 Contributing
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
@@ -1334,7 +1276,9 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
       
         
@@ -1347,8 +1291,7 @@
   <span class="md-ellipsis">
     
   
-    Local Development
-  
+  Local Development
 
     
   </span>
@@ -1358,15 +1301,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local Development
-  
+  Local Development
 
     
   </span>
@@ -1377,7 +1319,8 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -1386,16 +1329,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#required-tools" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Required tools
-      
+      </span>
     </span>
   </a>
   
@@ -1404,9 +1347,9 @@
         <li class="md-nav__item">
   <a href="#typical-development-workflow" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Typical development workflow
-      
+      </span>
     </span>
   </a>
   
@@ -1414,11 +1357,11 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#command-shortcuts" class="md-nav__link">
+  <a href="#command-style" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Command Shortcuts
-      
+      <span class="md-typeset">
+        Command style
+      </span>
     </span>
   </a>
   
@@ -1432,9 +1375,9 @@
         <li class="md-nav__item">
   <a href="#workspace-management" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Workspace Management
-      
+      </span>
     </span>
   </a>
   
@@ -1443,9 +1386,9 @@
         <li class="md-nav__item">
   <a href="#code-quality" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Code Quality
-      
+      </span>
     </span>
   </a>
   
@@ -1455,9 +1398,9 @@
           <li class="md-nav__item">
   <a href="#formatting" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Formatting
-      
+      </span>
     </span>
   </a>
   
@@ -1466,9 +1409,9 @@
           <li class="md-nav__item">
   <a href="#linting" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Linting
-      
+      </span>
     </span>
   </a>
   
@@ -1482,9 +1425,9 @@
         <li class="md-nav__item">
   <a href="#testing" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Testing
-      
+      </span>
     </span>
   </a>
   
@@ -1494,9 +1437,9 @@
           <li class="md-nav__item">
   <a href="#unit-tests" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Unit Tests
-      
+      </span>
     </span>
   </a>
   
@@ -1505,9 +1448,9 @@
           <li class="md-nav__item">
   <a href="#acceptance-tests" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Acceptance Tests
-      
+      </span>
     </span>
   </a>
   
@@ -1516,9 +1459,9 @@
           <li class="md-nav__item">
   <a href="#using-a-remote-gitlab-instance" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Using a Remote GitLab Instance
-      
+      </span>
     </span>
   </a>
   
@@ -1532,9 +1475,9 @@
         <li class="md-nav__item">
   <a href="#building-verification" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Building &amp; Verification
-      
+      </span>
     </span>
   </a>
   
@@ -1544,9 +1487,9 @@
           <li class="md-nav__item">
   <a href="#python-distributions" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Python Distributions
-      
+      </span>
     </span>
   </a>
   
@@ -1555,9 +1498,9 @@
           <li class="md-nav__item">
   <a href="#docker-images" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Docker Images
-      
+      </span>
     </span>
   </a>
   
@@ -1571,9 +1514,9 @@
         <li class="md-nav__item">
   <a href="#documentation" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Documentation
-      
+      </span>
     </span>
   </a>
   
@@ -1602,8 +1545,7 @@
   <span class="md-ellipsis">
     
   
-    Implementation Design
-  
+  Implementation Design
 
     
   </span>
@@ -1630,8 +1572,7 @@
   <span class="md-ellipsis">
     
   
-    Coding Guidelines
-  
+  Coding Guidelines
 
     
   </span>
@@ -1658,8 +1599,7 @@
   <span class="md-ellipsis">
     
   
-    Releases
-  
+  Releases
 
     
   </span>
@@ -1693,8 +1633,7 @@
   <span class="md-ellipsis">
     
   
-    ⚖️ Similar Apps
-  
+  ⚖️ Similar Apps
 
     
   </span>
@@ -1716,10 +1655,12 @@
               
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
+                  
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -1728,16 +1669,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#required-tools" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Required tools
-      
+      </span>
     </span>
   </a>
   
@@ -1746,9 +1687,9 @@
         <li class="md-nav__item">
   <a href="#typical-development-workflow" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Typical development workflow
-      
+      </span>
     </span>
   </a>
   
@@ -1756,11 +1697,11 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#command-shortcuts" class="md-nav__link">
+  <a href="#command-style" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Command Shortcuts
-      
+      <span class="md-typeset">
+        Command style
+      </span>
     </span>
   </a>
   
@@ -1774,9 +1715,9 @@
         <li class="md-nav__item">
   <a href="#workspace-management" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Workspace Management
-      
+      </span>
     </span>
   </a>
   
@@ -1785,9 +1726,9 @@
         <li class="md-nav__item">
   <a href="#code-quality" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Code Quality
-      
+      </span>
     </span>
   </a>
   
@@ -1797,9 +1738,9 @@
           <li class="md-nav__item">
   <a href="#formatting" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Formatting
-      
+      </span>
     </span>
   </a>
   
@@ -1808,9 +1749,9 @@
           <li class="md-nav__item">
   <a href="#linting" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Linting
-      
+      </span>
     </span>
   </a>
   
@@ -1824,9 +1765,9 @@
         <li class="md-nav__item">
   <a href="#testing" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Testing
-      
+      </span>
     </span>
   </a>
   
@@ -1836,9 +1777,9 @@
           <li class="md-nav__item">
   <a href="#unit-tests" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Unit Tests
-      
+      </span>
     </span>
   </a>
   
@@ -1847,9 +1788,9 @@
           <li class="md-nav__item">
   <a href="#acceptance-tests" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Acceptance Tests
-      
+      </span>
     </span>
   </a>
   
@@ -1858,9 +1799,9 @@
           <li class="md-nav__item">
   <a href="#using-a-remote-gitlab-instance" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Using a Remote GitLab Instance
-      
+      </span>
     </span>
   </a>
   
@@ -1874,9 +1815,9 @@
         <li class="md-nav__item">
   <a href="#building-verification" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Building &amp; Verification
-      
+      </span>
     </span>
   </a>
   
@@ -1886,9 +1827,9 @@
           <li class="md-nav__item">
   <a href="#python-distributions" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Python Distributions
-      
+      </span>
     </span>
   </a>
   
@@ -1897,9 +1838,9 @@
           <li class="md-nav__item">
   <a href="#docker-images" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Docker Images
-      
+      </span>
     </span>
   </a>
   
@@ -1913,9 +1854,9 @@
         <li class="md-nav__item">
   <a href="#documentation" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Documentation
-      
+      </span>
     </span>
   </a>
   
@@ -1935,14 +1876,12 @@
               <article class="md-content__inner md-typeset">
                 
                   
-
-
   
   
 
 
 <h1 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h1>
-<p>Welcome to the GitLabForm development guide. We use <strong><code>uv</code></strong> and a unified development toolkit to manage our lifecycle, ensuring a fast, deterministic, and reproducible environment for all contributors.</p>
+<p>Welcome to the GitLabForm development guide. We use <strong><code>uv</code></strong> and a repo-scoped development toolkit to manage the project lifecycle in a fast, deterministic, and reproducible way.</p>
 <h2 id="required-tools">Required tools<a class="headerlink" href="#required-tools" title="Permanent link">&para;</a></h2>
 <p>Following tools are used in this project. Please make sure you have them installed:</p>
 <ul>
@@ -1952,42 +1891,38 @@
 </ul>
 <h2 id="typical-development-workflow">Typical development workflow<a class="headerlink" href="#typical-development-workflow" title="Permanent link">&para;</a></h2>
 <p>The project provides a comprehensive CLI (<strong>the development toolkit</strong>) organized into task domains. You can discover the available domains by running the main entry point:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>dev<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>--help
 </code></pre></div>
-<h3 id="command-shortcuts">Command Shortcuts<a class="headerlink" href="#command-shortcuts" title="Permanent link">&para;</a></h3>
-<p>While <code>dev</code> is the central entry point, each domain is also registered as a direct shortcut in your environment. You can omit the <code>dev</code> prefix from any command for a more concise experience. For example, these two commands are identical:</p>
+<h3 id="command-style">Command style<a class="headerlink" href="#command-style" title="Permanent link">&para;</a></h3>
+<p>Use <code>glf-dev</code> for all developer commands, for example:</p>
 <ul>
-<li>Full: <code>uv run dev workspace setup</code></li>
-<li>Shortcut: <code>uv run workspace setup</code></li>
+<li><code>uv run glf-dev workspace setup</code></li>
+<li><code>uv run glf-dev qa lint</code></li>
+<li><code>uv run glf-dev docker build --help</code></li>
 </ul>
-<p>Each domain (like qa, docs, or workspace) provides its own help context. If you are ever unsure of the available sub-commands or arguments, simply run the domain name or add the <code>--help</code> flag:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>workspace<span class="w">            </span><span class="c1"># Shows help for workspace setup and cleanup</span>
-uv<span class="w"> </span>run<span class="w"> </span>workspace<span class="w"> </span>--help<span class="w">     </span><span class="c1"># Same as above</span>
-uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--help<span class="w">  </span><span class="c1"># Shows help and available flags for Docker builds</span>
-</code></pre></div>
 <p>A standard lifecycle for implementing a new feature or bug fix typically involves:</p>
 <ol>
 <li><strong>New branch</strong>: Create a new branch for your changes.</li>
-<li><strong>Setup</strong>: Initialize or update your local workspace using uv run workspace setup. This also installs the Git hooks. See Workspace Management section for more details. See <a href="#workspace-management">Workspace management</a> section for more details.</li>
+<li><strong>Setup</strong>: Initialize or update your local workspace using <code>uv run glf-dev workspace setup</code>. This also installs the Git hooks. See <a href="#workspace-management">Workspace management</a> for more details.</li>
 <li><strong>Develop</strong>: Implement your logic or fix in the codebase.</li>
-<li><strong>Quality</strong>: Format and lint your code via the qa domain. See <a href="#code-quality">Code quality</a> section for more details.</li>
-<li><strong>Test</strong>: Be sure to include/update tests for your changes. See <a href="#testing">Testing</a> section for more details.</li>
-<li><strong>Validate</strong>: Perform a final check on the build artifacts. See <a href="#building-verification">Building &amp; Verification</a> section for more details.</li>
+<li><strong>Quality</strong>: Format and lint your code via the <code>qa</code> domain. See <a href="#code-quality">Code quality</a> for more details.</li>
+<li><strong>Test</strong>: Be sure to include/update tests for your changes. See <a href="#testing">Testing</a> for more details.</li>
+<li><strong>Validate</strong>: Perform a final check on the build artifacts. See <a href="#building-verification">Building &amp; Verification</a> for more details.</li>
 <li>
 <p><strong>Commit</strong>: Record your changes using the <strong>Conventional Commits</strong> standard. The Git hooks installed during setup will automatically validate your commit messages.</p>
 <div class="admonition tip">
 <p class="admonition-title">Guided experience via Commitizen</p>
-<p>You can use <code>uv run cz commit</code> that will present an interactive option in the terminal for selecting and commiting your changes.</p>
+<p>You can use <code>uv run cz commit</code> that will present an interactive option in the terminal for selecting and committing your changes.</p>
 </div>
 </li>
 <li>
-<p><strong>Documentation</strong>: Add/update documentation if necessary for the change being introduced. See <a href="#documentation">Documentation</a> section for more details.</p>
+<p><strong>Documentation</strong>: Add/update documentation if necessary for the change being introduced. See <a href="#documentation">Documentation</a> for more details.</p>
 </li>
 <li><strong>Open/Update PR</strong>: Push your changes to GitHub and create/update a pull request.</li>
 </ol>
 <h2 id="workspace-management">Workspace Management<a class="headerlink" href="#workspace-management" title="Permanent link">&para;</a></h2>
-<p>Managing your development environment is handled by the workspace domain. We use <code>uv</code> to provide a consistent, isolated, and reproducible environment where everything is contained within an automatically managed <code>.venv</code>.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>workspace<span class="w"> </span>setup
+<p>Managing your development environment is handled by the <code>workspace</code> domain. We use <code>uv</code> to provide a consistent, isolated, and reproducible environment where everything is contained within an automatically managed <code>.venv</code>.</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>workspace<span class="w"> </span>setup
 </code></pre></div>
 <p>This command performs several automated tasks:</p>
 <ol>
@@ -1997,40 +1932,40 @@ uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </sp
 <li><strong>Git Hook Installation</strong>: Configures Git hooks to enforce linting, formatting, and Conventional Commit standards.</li>
 </ol>
 <p>To reset your workspace and remove all build artifacts, caches, and the virtual environment:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>workspace<span class="w"> </span>clean
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>workspace<span class="w"> </span>clean
 </code></pre></div>
 <h2 id="code-quality">Code Quality<a class="headerlink" href="#code-quality" title="Permanent link">&para;</a></h2>
 <p>Maintaining high code quality is essential for the stability and readability of the project. We use a suite of tools for automatic formatting and static analysis.</p>
 <h3 id="formatting">Formatting<a class="headerlink" href="#formatting" title="Permanent link">&para;</a></h3>
 <p>We use <strong>black</strong> to enforce a consistent code style across the entire repository. This ensures that the codebase remains readable and reduces friction during code reviews.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span>format
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span>format
 </code></pre></div>
 <h3 id="linting">Linting<a class="headerlink" href="#linting" title="Permanent link">&para;</a></h3>
 <p>We use several tools (including <code>mypy</code> for type checking and <code>bandit</code> for security auditing) to catch potential issues before they are committed. By default, the <code>lint</code> command runs all configured checks in parallel.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span>lint
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span>lint
 </code></pre></div>
 <p>You can also run a specific tool or pass additional arguments directly to the underlying linter. For example, to run only mypy with specific flags:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span>lint<span class="w"> </span>mypy<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span>lint<span class="w"> </span>mypy<span class="w"> </span>.
 </code></pre></div>
 <p>To see the list of available linting tools and help:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span>lint<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span>lint<span class="w"> </span>--help
 </code></pre></div>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <p>We use <strong>pytest</strong> as the underlying engine for our entire test suite. The toolkit's <code>test</code> command acts as a passthrough, meaning any valid <code>pytest</code> argument or flag can be provided directly.</p>
 <p>To discover all available testing options for the <code>qa</code> domain:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--help
 </code></pre></div>
 <p><strong>Common examples:</strong></p>
 <ul>
-<li>Run tests matching a keyword: <code>uv run qa test -k "archive"</code></li>
-<li>Run tests with verbose output: <code>uv run qa test -v</code></li>
-<li>Run with coverage reporting: <code>uv run qa test --cov=.</code></li>
-<li>Run a specific test file/suite: <code>uv run qa test tests/&lt;path-to-test-file&gt;</code></li>
-<li>Run a specific test within a test file/suite: <code>uv run qa test tests/&lt;path-to-test-file&gt;::&lt;test-class&gt;::&lt;test-method&gt;</code></li>
+<li>Run tests matching a keyword: <code>uv run glf-dev qa test -k "archive"</code></li>
+<li>Run tests with verbose output: <code>uv run glf-dev qa test -v</code></li>
+<li>Run with coverage reporting: <code>uv run glf-dev qa test --cov=.</code></li>
+<li>Run a specific test file/suite: <code>uv run glf-dev qa test tests/&lt;path-to-test-file&gt;</code></li>
+<li>Run a specific test within a test file/suite: <code>uv run glf-dev qa test tests/&lt;path-to-test-file&gt;::&lt;test-class&gt;::&lt;test-method&gt;</code></li>
 </ul>
 <h3 id="unit-tests">Unit Tests<a class="headerlink" href="#unit-tests" title="Permanent link">&para;</a></h3>
 <p>Unit tests are fast, isolated, and do not require a running GitLab instance. They are ideal for validating logic and configuration parsing:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/unit
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/unit
 </code></pre></div>
 <h3 id="acceptance-tests">Acceptance Tests<a class="headerlink" href="#acceptance-tests" title="Permanent link">&para;</a></h3>
 <p>Acceptance tests perform real operations against a running GitLab instance. Because they interact with an actual API, they are slower and require more setup than unit tests.</p>
@@ -2038,19 +1973,19 @@ uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </sp
 <li>
 <p>Start Local GitLab</p>
 <p>We recommend running tests against a disposable GitLab instance in Docker to ensure your environment matches our CI/CD pipelines:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>gitlab-local<span class="w"> </span>up<span class="w"> </span><span class="c1"># Starts Enterprise Edition (EE) by default</span>
-uv<span class="w"> </span>run<span class="w"> </span>gitlab-local<span class="w"> </span>down<span class="w"> </span><span class="c1"># Cleanup: Stops and removes the local GitLab container</span>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>gitlab-local<span class="w"> </span>up<span class="w"> </span><span class="c1"># Starts Enterprise Edition (EE) by default</span>
+uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>gitlab-local<span class="w"> </span>down<span class="w"> </span><span class="c1"># Cleanup: Stops and removes the local GitLab container</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Use <code>uv run gitlab-local up --gitlab-flavor ce</code> to test against Community Edition.</p>
+<p>Use <code>uv run glf-dev gitlab-local up --gitlab-flavor ce</code> to test against Community Edition.</p>
 </div>
 <p>To see all available infrastructure management options:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>gitlab-local<span class="w"> </span>up<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>gitlab-local<span class="w"> </span>up<span class="w"> </span>--help
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Testing against specific versions</p>
-<p>You can test against specific GitLab releases using the version flag: <code>uv run gitlab-local up --gitlab-version 17.5.0-ee</code>.</p>
+<p>You can test against specific GitLab releases using the version flag: <code>uv run glf-dev gitlab-local up --gitlab-version 17.5.0-ee</code>.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Testing paid features</p>
@@ -2060,59 +1995,61 @@ uv<span class="w"> </span>run<span class="w"> </span>gitlab-local<span class="w"
 </li>
 <li>
 <p>Run the tests</p>
-<p>Once the GitLab instance is healthy and accessible, execute the acceptance located in <code>tests/acceptance/</code> directory. See the examples above on how to run the tests.</p>
+<p>Once the GitLab instance is healthy and accessible, execute the acceptance tests located in the <code>tests/acceptance/</code> directory. See the examples above on how to run the tests.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Acceptance tests are usually slower than unit tests since they run against a real GitLab instance. This involves creating, updating, and deleting resources in GitLab. You may find it helpful to run only select tests instead of entire test suite. For example: run all tests related to the feature you're working on.</p>
+<p>Acceptance tests are usually slower than unit tests since they run against a real GitLab instance. This involves creating, updating, and deleting resources in GitLab. You may find it helpful to run only select tests instead of the entire suite. For example: run all tests related to the feature you're working on.</p>
 </div>
 </li>
 </ol>
 <h3 id="using-a-remote-gitlab-instance">Using a Remote GitLab Instance<a class="headerlink" href="#using-a-remote-gitlab-instance" title="Permanent link">&para;</a></h3>
-<p>It's not recommended, but if you prefer to run tests against non-local/disposable GitLab instance, provide the credentials via environment variables:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GITLAB_URL</span><span class="o">=</span><span class="s2">&quot;https://mygitlab.company.com&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">GITLAB_TOKEN</span><span class="o">=</span><span class="s2">&quot;&lt;admin_api_token&gt;&quot;</span>
-uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/acceptance
+<p>It's not recommended, but if you prefer to run tests against a non-local/disposable GitLab instance, provide the credentials via environment variables:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GITLAB_URL</span><span class="o">=</span><span class="s2">"https://mygitlab.company.com"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GITLAB_TOKEN</span><span class="o">=</span><span class="s2">"&lt;admin_api_token&gt;"</span>
+uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>qa<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/acceptance
 </code></pre></div>
 <h2 id="building-verification">Building &amp; Verification<a class="headerlink" href="#building-verification" title="Permanent link">&para;</a></h2>
 <p>This section covers creating the distributable artifacts for the project, including the Python package and the Docker image.</p>
 <h3 id="python-distributions">Python Distributions<a class="headerlink" href="#python-distributions" title="Permanent link">&para;</a></h3>
 <p>We generate standard Python distribution artifacts (source distribution and wheels) that can be uploaded to PyPI. To generate the artifacts in the <code>dist/</code> directory:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>package<span class="w"> </span>build
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>package<span class="w"> </span>build
 </code></pre></div>
 <p>To see available build options:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>package<span class="w"> </span>build<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>package<span class="w"> </span>build<span class="w"> </span>--help
 </code></pre></div>
 <p>The <code>package verify</code> command performs an audit of the built files to ensure they are ready for release. This includes metadata validation via <code>twine</code>, content auditing via <code>check-wheel-contents</code>, and an automated smoke test that installs the wheel in a temporary isolated environment to check the entry point.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>package<span class="w"> </span>verify
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>package<span class="w"> </span>verify
 </code></pre></div>
 <h3 id="docker-images">Docker Images<a class="headerlink" href="#docker-images" title="Permanent link">&para;</a></h3>
 <p>The Docker image is the recommended way to run GitLabForm in CI/CD environments. To build the image locally using our multi-stage <code>Dockerfile</code>:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>build
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>build
 </code></pre></div>
 <p>You can customize the image name and tag via arguments:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--image<span class="w"> </span>my-registry/gitlabform<span class="w"> </span>--tag<span class="w"> </span>dev
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--image<span class="w"> </span>my-registry/gitlabform<span class="w"> </span>--tag<span class="w"> </span>dev
 </code></pre></div>
 <p>To see all Docker build options:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>--help
 </code></pre></div>
 <p>To ensure the newly built image is functional, run a smoke test that executes the application version check inside a container:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>verify
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>verify
 </code></pre></div>
 <p>To see options for Docker verification:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docker<span class="w"> </span>verify<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docker<span class="w"> </span>verify<span class="w"> </span>--help
 </code></pre></div>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
-<p>We use <strong>MkDocs</strong> with the <strong>Material</strong> theme to generate our project documentation. The toolkit provides commands via the <code>docs</code> domain to preview changes locally and build the final static site.</p>
-<p>To serve the documentation with live-reloading (ideal for seeing your changes in real-time as you edit the markdown files):</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docs<span class="w"> </span>serve
+<p>We use <strong>Zensical</strong> to generate our project documentation. The toolkit provides commands through the <code>docs</code> domain to preview changes locally and build the final static site.</p>
+<p>To serve the documentation with live-reloading (ideal for seeing your changes in real time as you edit the markdown files):</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docs<span class="w"> </span>serve
 </code></pre></div>
 <p>The site will be available at <code>http://localhost:8000</code>.</p>
 <p>To generate the static documentation site in the <code>site/</code> directory (used for deployment to GitHub Pages):</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docs<span class="w"> </span>build
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docs<span class="w"> </span>build
 </code></pre></div>
 <p>To see all documentation management options:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>docs<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>glf-dev<span class="w"> </span>docs<span class="w"> </span>--help
 </code></pre></div>
+
+
 
 
 
@@ -2143,8 +2080,8 @@ uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span><
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
     </a>
   
 </div>
@@ -2162,10 +2099,10 @@ uv<span class="w"> </span>run<span class="w"> </span>qa<span class="w"> </span><
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.indexes"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6970bfe9.min.js"></script>
       
     
   </body>
