@@ -9,29 +9,48 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
+
   - package-ecosystem: "uv"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 30
+      include:
+        - "pytest*"
+        - "coverage"
+        - "cryptography"
+        - "deepdiff"
+        - "xkcdpass"
+        - "bandit"
+        - "black"
+        - "codespell"
+        - "mypy*"
+        - "ruff"
+        - "types-*"
+        - "markdown*"
+        - "zensical*"
+        - "pygments"
+        - "pymdown-extensions"
+        - "check-wheel-contents"
+        - "twine"
+        - "commitizen"
+        - "prek"
     groups:
-      # Group dependencies by their type (testing, linting, documentation, release tools)
-      # to avoid overwhelming PRs and to allow for more focused updates.
-      # The patterns are based on the names of the dependencies as they appear in the pyproject.toml file
-      # and how they are grouped in the uv configuration.
-      # Dependencies that match the patterns will be grouped together in the same PR.
-      testing:
+      # Keep the dev-only dependency update churn lower by checking it monthly,
+      # while still keeping the largest dev tool groups focused.
+      dev-tooling:
         patterns:
           - "pytest*"
           - "coverage"
           - "cryptography"
           - "deepdiff"
           - "xkcdpass"
-      linting:
-        patterns:
           - "bandit"
           - "black"
           - "codespell"
