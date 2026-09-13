@@ -6,6 +6,37 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.2.2
+
+### Bug Fixes
+
+* prevent KeyError when using --output with application settings [#1384](https://github.com/gitlabform/gitlabform/pull/1384). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Documentation
+
+* use renamed secret_push_protection_enabled setting [#1395](https://github.com/gitlabform/gitlabform/pull/1395). ([rickbrouwer](https://github.com/rickbrouwer))
+* fix Snyk badge and add ti&m logo [#1371](https://github.com/gitlabform/gitlabform/pull/1371). ([marcelstoer](https://github.com/marcelstoer))
+
+### Refactors
+
+* migrate badges processor to python-gitlab [#1388](https://github.com/gitlabform/gitlabform/pull/1388). ([rickbrouwer](https://github.com/rickbrouwer))
+* centralize dry-run diff in AbstractProcessor [#1353](https://github.com/gitlabform/gitlabform/pull/1353). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Build
+
+* migrate documentation from MkDocs Material to Zensical [#1372](https://github.com/gitlabform/gitlabform/pull/1372). ([rickbrouwer](https://github.com/rickbrouwer))
+* replace gitlabform development toolkit shortcuts with one entrypoint [#1409](https://github.com/gitlabform/gitlabform/pull/1409). ([amimas](https://github.com/amimas))
+
+### Chores
+
+* update default PR reviewers [#1375](https://github.com/gitlabform/gitlabform/pull/1375). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.2.1
 
 ### Bug Fixes
