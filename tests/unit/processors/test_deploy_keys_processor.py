@@ -77,11 +77,14 @@ class TestDeployKeysProcessor:
         existing.delete.assert_called_once()
         project.keys.create.assert_not_called()
 
-    def test_delete_true_on_non_existent_is_noop(self):
+    def test_delete_true_on_non_existent_is_logged_and_skipped(self, caplog):
         project = self._project()
 
-        self._process({"foobar": {"title": "some_key", "delete": True}})
+        with caplog.at_level("INFO"):
+            self._process({"foobar": {"title": "some_key", "delete": True}})
 
+        matching = [r for r in caplog.records if "Not deleting foobar of deploy_keys" in r.message]
+        assert len(matching) == 1
         project.keys.create.assert_not_called()
 
     def test_delete_is_processed_before_add_regardless_of_config_order(self):

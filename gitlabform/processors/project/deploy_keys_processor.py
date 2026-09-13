@@ -17,31 +17,37 @@ class DeployKeysProcessor(AbstractProcessor):
         enforce = configured_keys.pop("enforce", False)
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
-        existing_keys: List[ProjectKey] = list(project.keys.list(get_all=True))
+        existing_keys: List[ProjectKey] = project.keys.list(get_all=True)
 
-        # All deletions happen before any addition, because a deploy key's value is unique
-        # within the instance: adding a key back under another title only succeeds once the
-        # key under the old title is gone.
+        # The two loops below delete before anything is added, because a deploy key's value is
+        # unique within the instance: adding a key back under another title only succeeds once
+        # the key under the old title is gone.
         if enforce:
             configured_titles = {key_config["title"] for key_config in configured_keys.values()}
-            for existing in list(existing_keys):
+            for existing in existing_keys:
                 if existing.title not in configured_titles:
                     info(
                         f"Deleting deploy key '{existing.title}' of {self.configuration_name} in {project_and_group}"
                         f" as it's not in config and enforce is set to true."
                     )
                     existing.delete()
-                    existing_keys.remove(existing)
 
         for entity_name, key_config in configured_keys.items():
             if not key_config.get("delete", False):
                 continue
 
-            matching = next((k for k in existing_keys if k.title == key_config["title"]), None)
+            title = key_config["title"]
+
+            matching = next((k for k in existing_keys if k.title == title), None)
+
             if matching:
                 info(f"Deleting {entity_name} of {self.configuration_name} in {project_and_group}")
                 matching.delete()
-                existing_keys.remove(matching)
+            else:
+                info(
+                    f"Not deleting {entity_name} of {self.configuration_name} in {project_and_group},"
+                    f" because it doesn't exist"
+                )
 
         for entity_name, key_config in configured_keys.items():
             if key_config.get("delete", False):
@@ -54,7 +60,7 @@ class DeployKeysProcessor(AbstractProcessor):
             if matching:
                 if self._needs_update(matching.asdict(), key_config):
                     # The GitLab API can only update a deploy key's title and can_push, not its value
-                    # (https://docs.gitlab.com/ee/api/deploy_keys/#update-deploy-key), so we recreate it.
+                    # (https://docs.gitlab.com/api/deploy_keys/#update-a-deploy-key), so we recreate it.
                     info(f" * Recreating {entity_name} of {self.configuration_name} in {project_and_group}")
                     matching.delete()
                     self._create_or_enable(project, key_config)
@@ -73,7 +79,8 @@ class DeployKeysProcessor(AbstractProcessor):
             # GitLab sometimes returns HTTP 400 with "has already been taken" when adding an SSH key
             # that already exists on another project, despite the docs saying it should just associate.
             # As a workaround, look up the existing key on the instance and enable it for this project.
-            if e.response_code != 400 or "has already been taken" not in str(e):
+            key_already_exists = e.response_code == 400 and "has already been taken" in str(e)
+            if not key_already_exists:
                 raise
 
             existing_id = self._find_existing_deploy_key_id(key_config["key"])
