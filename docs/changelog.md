@@ -10,6 +10,7 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ### Bug Fixes
 
+* diff log should not require verbose [#1343](https://github.com/gitlabform/gitlabform/pull/1343). ([timknight01](https://github.com/TimKnight01))
 * prevent KeyError when using --output with application settings [#1384](https://github.com/gitlabform/gitlabform/pull/1384). ([rickbrouwer](https://github.com/rickbrouwer))
 
 ### Documentation
@@ -19,6 +20,7 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ### Refactors
 
+* migrate deploy-keys processor to python-gitlab [#1422](https://github.com/gitlabform/gitlabform/pull/1422). ([rickbrouwer](https://github.com/rickbrouwer))
 * migrate badges processor to python-gitlab [#1388](https://github.com/gitlabform/gitlabform/pull/1388). ([rickbrouwer](https://github.com/rickbrouwer))
 * centralize dry-run diff in AbstractProcessor [#1353](https://github.com/gitlabform/gitlabform/pull/1353). ([rickbrouwer](https://github.com/rickbrouwer))
 
@@ -29,6 +31,7 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ### Chores
 
+* reduce uv dev dependency update cadence [#1423](https://github.com/gitlabform/gitlabform/pull/1423). ([amimas](https://github.com/amimas))
 * update default PR reviewers [#1375](https://github.com/gitlabform/gitlabform/pull/1375). ([rickbrouwer](https://github.com/rickbrouwer))
 
 ### Dependencies
