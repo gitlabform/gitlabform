@@ -120,3 +120,26 @@ class TestGroupLDAPLinks:
         assert ldap_links[0].provider == "LDAP Main"
         assert ldap_links[0].cn == "devops"
         assert ldap_links[0].group_access == AccessLevel.get_value("developer")
+
+    def test__delete_ldap_links(self, gl, group):
+        """Test deleting an LDAP link of a group with 'delete: true'."""
+
+        # Verify group has 1 ldap link - last state of the group in previous test
+        assert len(group.ldap_group_links.list()) == 1
+
+        delete_ldap_link = f"""
+        projects_and_groups:
+          {group.full_path}/*:
+            group_ldap_links:
+              devops_users:
+                provider: LDAP Main
+                cn: devops
+                delete: true
+        """
+        run_gitlabform(delete_ldap_link, group)
+
+        # Verify that the last LDAP link was removed.
+        # GitLab API returns 404 if there are no LDAP links configured.
+        refreshed_group = gl.groups.get(group.id)
+        with pytest.raises(GitlabListError):
+            refreshed_group.ldap_group_links.list(get_all=True)
