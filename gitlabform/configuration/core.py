@@ -221,6 +221,8 @@ class ConfigurationCore(ABC):
             return "common"
         if a_key.endswith("/*"):
             return "group"
+        if a_key.endswith("/"):
+            return "group_exact"
         if "*" in a_key:
             return "project_pattern"
         return "project"
