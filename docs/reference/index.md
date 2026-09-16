@@ -97,13 +97,14 @@ Some of the parameters are passed to the legacy REST client used by GitLabForm f
 
 ### Configuration hierarchy
 
-In GitLabForm you define the configuration for your groups and projects under the `projects_and_groups:` top-level key, on 3 levels:
+In GitLabForm you define the configuration for your groups and projects under the `projects_and_groups:` top-level key, on 4 levels:
 
-| Level name     | Key syntax                                                          | Description                                                                                                                                                                                                                |
-|----------------|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| common         | `"*"`                                                               | the configuration that will be applied to all projects and all groups                                                                                                                                                      |
-| group/subgroup | <nobr>`group/*`</nobr>, <nobr>`group/subgroup/*`</nobr>             | the configuration that will be applied to everything under a given group/subgroup, recursively (so the group/subgroup itself, all the projects in it, all the subgroups in it and all the projects in the subgroups in it) |
-| project        | <nobr>`group/project`</nobr>, <nobr>`group/subgroup/project`</nobr> | the configuration for specific single projects                                                                                                                                                                             |
+| Level name                    | Key syntax                                                          | Description                                                                                                                                                                                                                |
+|-------------------------------|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| common                        | `"*"`                                                               | the configuration that will be applied to all projects and all groups                                                                                                                                                      |
+| group/subgroup (recursive)    | <nobr>`group/*`</nobr>, <nobr>`group/subgroup/*`</nobr>             | the configuration that will be applied to everything under a given group/subgroup, recursively (so the group/subgroup itself, all the projects in it, all the subgroups in it and all the projects in the subgroups in it) |
+| group/subgroup (non-recursive)| <nobr>`group/`</nobr>, <nobr>`group/subgroup/`</nobr>               | the configuration that will be applied to only the given group/subgroup itself and its direct projects, but not to any subgroups or projects in those subgroups                                                            |
+| project                       | <nobr>`group/project`</nobr>, <nobr>`group/subgroup/project`</nobr> | the configuration for specific single projects                                                                                                                                                                             |
 
 Each level is optional. Order does not matter.
 
@@ -126,12 +127,20 @@ projects_and_groups:
     # project-level config
 
   group_2/*:
-    # group-level config
+    # group-level config (recursive)
+  group_2/:
+    # group-level config (non-recursive) - applies to group_2 and group_2/project_1,
+    # but not to group_2/subgroup or group_2/subgroup/nested_project_1
   group_2/project_1:
     # project-level config
   group_2/subgroup/*:
-    # subgroup-level config
+    # subgroup-level config (recursive)
+  group_2/subgroup/:
+    # subgroup-level config (non-recursive) - applies to group_2/subgroup and group_2/subgroup/nested_project_1,
+    # but not to group_2/subgroup/nested_subgroup or group_2/subgroup/nested_subgroup/nested_project_2
   group_2/subgroup/nested_project_1:
+    # project-level config
+  group_2/subgroup/nested_subgroup/nested_project_2:
     # project-level config
 ```
 
@@ -150,6 +159,38 @@ To generate the effective configuration to apply for a given project or group, i
 
 If under the exactly same keys there are different values in the more general (f.e. common) and more specific level (f.e. group level), then the more specific configuration will **overwrite** the more general one.
 
+The levels, from the most general to the most specific, are:
+
+1. common (`"*"`),
+2. group/subgroup recursive (`group/*`, then `group/subgroup/*`, ...),
+3. group/subgroup non-recursive (`group/`, `group/subgroup/`) - only for that exact group/subgroup and its direct projects,
+4. project (`group/project`).
+
+So for a given group, its non-recursive `group/` configuration overwrites its recursive `group/*` configuration.
+
+Example with a non-recursive subgroup configuration:
+
+```yaml
+projects_and_groups:
+  group_2/*:
+    group_settings:
+      visibility: private
+      project_creation_level: maintainer
+  group_2/subgroup/:
+    group_settings:
+      visibility: internal
+```
+
+The effective `group_settings` are:
+
+| Group                              | `visibility` | `project_creation_level` | Why                                                                  |
+|------------------------------------|--------------|--------------------------|----------------------------------------------------------------------|
+| `group_2`                          | `private`    | `maintainer`             | from `group_2/*`                                                     |
+| `group_2/subgroup`                 | `internal`   | `maintainer`             | `group_2/subgroup/` overwrites `visibility` from `group_2/*`         |
+| `group_2/subgroup/nested_subgroup` | `private`    | `maintainer`             | `group_2/subgroup/` is non-recursive, so only `group_2/*` applies    |
+
+The `group_2/subgroup/` configuration is also part of the effective configuration of the projects directly in `group_2/subgroup`, but `group_settings` only applies to groups, so those projects are not changed here. To configure them, use project sections (f.e. `project_settings`) under `group_2/subgroup/`.
+
 Example:
 ```yaml
 projects_and_groups:
@@ -162,7 +203,7 @@ projects_and_groups:
   group_1/*:
     project_settings:
       visibility: private # <-- different value!
-``` 
+```
 With this configuration, for a project `group_1/project_1` the effective configuration will be like:
 ```yaml
 project_settings:
@@ -181,7 +222,7 @@ projects_and_groups:
         key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDB2QKx6BPzL...
         title: global_key
         can_push: false
-  
+
   group_1/*:
     deploy_keys:
       key_b: # <-- another key under deploy_keys!
@@ -276,9 +317,31 @@ deploy_keys:
     can_push: false
 ```
 
+`inherit: false` works the same way in the non-recursive `group/` level. For example, to stop a group from
+inheriting a section from its own recursive `group/*` configuration, while its subgroups still inherit it:
+
+```yaml
+projects_and_groups:
+  group_1/*:
+    group_settings:
+      visibility: private   # applies to group_1's subgroups
+  group_1/:
+    group_settings:
+      inherit: false
+      visibility: public    # applies to group_1 only; its projects are not changed
+```
+
 !!! important
 
     `inherit: false` can be placed at ANY place in the configuration (if it makes sense).
+
+!!! warning
+
+    `inherit: false` is only valid if there is a higher level configuration to break from. If it is set on a level
+    with nothing above it, GitLabForm will exit with an error saying that the inheritance-break flag is invalid
+    because it has no higher level setting to inherit from. For example: in `"*"`, in `group_1/*` when there is
+    no `"*"`, or in `group_1/` when there is neither `"*"` nor `group_1/*`. The same applies to subgroups
+    and projects.
 
 ### Skipping sections
 
