@@ -97,13 +97,14 @@ Some of the parameters are passed to the legacy REST client used by GitLabForm f
 
 ### Configuration hierarchy
 
-In GitLabForm you define the configuration for your groups and projects under the `projects_and_groups:` top-level key, on 3 levels:
+In GitLabForm you define the configuration for your groups and projects under the `projects_and_groups:` top-level key, on 4 levels:
 
-| Level name     | Key syntax                                                          | Description                                                                                                                                                                                                                |
-|----------------|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| common         | `"*"`                                                               | the configuration that will be applied to all projects and all groups                                                                                                                                                      |
-| group/subgroup | <nobr>`group/*`</nobr>, <nobr>`group/subgroup/*`</nobr>             | the configuration that will be applied to everything under a given group/subgroup, recursively (so the group/subgroup itself, all the projects in it, all the subgroups in it and all the projects in the subgroups in it) |
-| project        | <nobr>`group/project`</nobr>, <nobr>`group/subgroup/project`</nobr> | the configuration for specific single projects                                                                                                                                                                             |
+| Level name                    | Key syntax                                                          | Description                                                                                                                                                                                                                |
+|-------------------------------|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| common                        | `"*"`                                                               | the configuration that will be applied to all projects and all groups                                                                                                                                                      |
+| group/subgroup (recursive)    | <nobr>`group/*`</nobr>, <nobr>`group/subgroup/*`</nobr>             | the configuration that will be applied to everything under a given group/subgroup, recursively (so the group/subgroup itself, all the projects in it, all the subgroups in it and all the projects in the subgroups in it) |
+| group/subgroup (non-recursive)| <nobr>`group/`</nobr>, <nobr>`group/subgroup/`</nobr>               | the configuration that will be applied to only the given group/subgroup itself and its direct projects, but not to any subgroups or projects in those subgroups                                                            |
+| project                       | <nobr>`group/project`</nobr>, <nobr>`group/subgroup/project`</nobr> | the configuration for specific single projects                                                                                                                                                                             |
 
 Each level is optional. Order does not matter.
 
