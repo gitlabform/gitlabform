@@ -34,6 +34,10 @@ test -f $done || {
     printf 'expires_at: 365.days.from_now);'
     printf "gitlabform_token.set_token('token-string-here123');"
     printf 'gitlabform_token.save!;'
+    # Job token scope enforcement is enabled by default, which blocks the tests
+    # that disable it per project
+    printf 'settings = Gitlab::CurrentSettings.current_application_settings;'
+    printf 'settings.update!(enforce_ci_inbound_job_token_scope_enabled: false) if settings.respond_to?(:enforce_ci_inbound_job_token_scope_enabled);'
   ) | gitlab-rails console
 
   touch $done
