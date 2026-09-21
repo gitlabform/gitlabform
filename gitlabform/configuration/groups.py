@@ -19,12 +19,13 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         """
         :return: sorted list of groups that are EXPLICITLY defined in the config
         """
-        groups = []
+        groups = set()
         projects_and_groups = self.get("projects_and_groups")
         for element in projects_and_groups.keys():
             if element.endswith("/*"):
-                # cut off that "/*"
-                groups.append(element[:-2])
+                groups.add(element[:-2])
+            elif element.endswith("/"):
+                groups.add(element[:-1])
         return sorted(groups)
 
     def is_group_skipped(self, group):
@@ -53,6 +54,15 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         else:
             group_config = self._get_group_config(group)
         debug("*Effective* group/subgroup config: %s", to_str(group_config))
+
+        exact_config = self._get_group_config(group, exact=True)
+        if exact_config:
+            debug("*Exact* (non-recursive) config for %s: %s", group, to_str(exact_config))
+            has_parent_context = bool(common_config) or bool(group_config)
+            if not has_parent_context:
+                self._validate_break_inheritance_flag(exact_config, group)
+            group_config = self._merge_configs(group_config, exact_config)
+            debug("*Effective* group/subgroup+exact config: %s", to_str(group_config))
 
         if not common_config and group_config:
             self._validate_break_inheritance_flag(group_config, group)
@@ -103,10 +113,12 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
 
         return effective_config
 
-    def _get_group_config(self, group) -> dict:
+    def _get_group_config(self, group, exact=False) -> dict:
         """
         :param group: group/subgroup
+        :param exact: if True, look up the non-recursive "group/" key instead of "group/*"
         :return: configuration for this group/subgroup or empty dict if not defined,
                  ignoring the case
         """
-        return self._get_case_insensitively(self.get("projects_and_groups"), f"{group}/*")
+        suffix = "/" if exact else "/*"
+        return self._get_case_insensitively(self.get("projects_and_groups"), f"{group}{suffix}")
