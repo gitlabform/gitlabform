@@ -6,6 +6,26 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.2.3
+
+### Bug Fixes
+
+* wait for asynchronous project transfer to complete [#1432](https://github.com/gitlabform/gitlabform/pull/1432). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Documentation
+
+* add missing entries into v6.2.2 changelog [#1426](https://github.com/gitlabform/gitlabform/pull/1426). ([amimas](https://github.com/amimas))
+
+### Tests
+
+* disable job token scope enforcement in the test environment [#1433](https://github.com/gitlabform/gitlabform/pull/1433). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.2.2
 
 ### Bug Fixes
