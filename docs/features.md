@@ -10,6 +10,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [Members (users) {add/remove user, change access level, optional enforce}](reference/members.md#group-members)
     * [Members using LDAP Group Links](reference/group_ldap_links.md) (**GitLab Premium (paid) only**)
     * [Members using SAML Group Links](reference/group_saml_links.md) (**GitLab Premium (paid) only**)
+    * [Merge Requests group-level approval settings](reference/merge_requests.md#group-configuration) (**GitLab Premium (paid) only**)
     * [Settings](reference/settings.md#group-settings)
 
 * Project:
@@ -24,7 +25,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [Integrations](reference/integrations.md)
     * [Members (groups) {share/unshare with group, change access level, optional enforce}](reference/members.md#project-members)
     * [Members (users) {add/remove user, change access level, optional enforce}](reference/members.md#project-members)
-    * [Merge Requests project-level configuration and approval rules](reference/merge_requests.md) (**GitLab Premium (paid) only**)
+    * [Merge Requests project-level configuration and approval rules](reference/merge_requests.md#project-configuration) (**GitLab Premium (paid) only**)
     * [Pipeline schedules](reference/pipeline_schedules.md)
     * [Project security settings](reference/project_security_settings.md)
     * [Protected branches](reference/protected_branches.md):
