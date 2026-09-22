@@ -1,4 +1,6 @@
 from logging import info, error
+from time import sleep
+
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlab import GitlabGetError, GitlabTransferProjectError
@@ -40,6 +42,7 @@ class ProjectProcessor(AbstractProcessor):
                 project_transfer_destination_group, _ = project_and_group.rsplit("/", 1)
                 info(f"Transferring project to '{project_transfer_destination_group}' group...")
                 project_to_be_transferred.transfer(project_transfer_destination_group)
+                self._wait_for_transfer(project_to_be_transferred.id, project_transfer_destination_group)
                 # TODO: Catch GitlabTransferProjectError exception.
                 #  The above code can run into exception for various reasons.
                 #  We should catch this exception and log a custom error message with hints.
@@ -60,3 +63,26 @@ class ProjectProcessor(AbstractProcessor):
             elif configuration["project"].get("archive") is False:
                 info("Unarchiving project...")
                 project.unarchive()
+
+    def _wait_for_transfer(self, project_id: int, destination_group: str) -> None:
+        # GitLab 19.4 and newer transfer projects asynchronously, so the API may still
+        # report the old namespace right after the transfer request returns
+        max_retries = 60
+        wait_before_retry = 2
+        retry = 0
+
+        while True:
+            current_namespace = self.gl.projects.get(project_id).namespace["full_path"]
+
+            if current_namespace == destination_group:
+                return
+
+            retry += 1
+
+            if retry > max_retries:
+                raise GitlabTransferProjectError(
+                    f"Project is still in '{current_namespace}' after waiting for the transfer"
+                    f" to '{destination_group}' to complete"
+                )
+
+            sleep(wait_before_retry)
