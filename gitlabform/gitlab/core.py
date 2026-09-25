@@ -154,7 +154,7 @@ class GitLabCore:
 
     @functools.lru_cache()
     def _get_group_id(self, path) -> int:
-        group = self._make_requests_to_api("groups/%s", path, "GET")
+        group = self._make_requests_to_api("groups/%s?with_projects=false", path, "GET")
         return int(group["id"])
 
     @functools.lru_cache()
