@@ -8,6 +8,14 @@ from unittest.mock import MagicMock, patch
 
 class TestPythonGitlab:
 
+    def test_get_group_by_path_cached_excludes_projects(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+
+        assert python_gitlab.get_group_by_path_cached("parent/group") is group
+        python_gitlab.groups.get.assert_called_once_with("parent/group", with_projects=False)
+
     def test_get_member_role_id_cached_gets_role_id_from_roles_in_group_on_saas(self):
         group_name = "Test"
         role_name = "custom_role"
