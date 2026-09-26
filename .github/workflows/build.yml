@@ -81,7 +81,7 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --no-dev --group test
       - name: Run smoke tests
-        run: uv run --no-sync gitlabform -V
+        run: uv run --no-sync glf-dev smoke-tests
 
   docker:
     name: Docker image (${{ matrix.arch }})
@@ -127,13 +127,13 @@ jobs:
         run: mkdir -p .docker
       - name: Build image for PR validation
         run: |
-          uv run --no-sync docker build \
+          uv run --no-sync glf-dev docker build \
             --tag localhost/gitlabform:latest \
             --platform ${{ matrix.platform }} \
             --output type=docker,dest=.docker/${{ matrix.tarball }}
       - name: Verify image
         run: |
-          uv run --no-sync docker verify \
+          uv run --no-sync glf-dev docker verify \
             --tag localhost/gitlabform:latest \
             --input .docker/${{ matrix.tarball }}
       - name: Upload docker image archive
