@@ -267,6 +267,3 @@ jobs:
           done <<EOF
           ${{ steps.metadata.outputs.tags }}
           EOF
-
-          echo "Updating 'latest' to point to promoted release image"
-          docker buildx imagetools create --tag ${IMAGE_BASE}:latest ${SOURCE}
