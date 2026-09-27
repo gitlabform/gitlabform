@@ -209,6 +209,10 @@ jobs:
           name: package-dist
           path: dist
       - name: Publish to PyPI
+        env:
+          UV_PUBLISH_URL: https://test.pypi.org/legacy/
+          UV_PUBLISH_CHECK_URL: https://test.pypi.org/simple/
+          UV_TRUSTED_PUBLISHING: always
         run: |
           uv run --no-sync glf-dev release pypi
 
