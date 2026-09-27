@@ -555,7 +555,7 @@ wheels = [
 
 [[package]]
 name = "gitlabform"
-version = "6.2.5"
+version = "6.2.6"
 source = { editable = "." }
 dependencies = [
     { name = "certifi" },
