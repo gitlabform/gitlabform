@@ -84,7 +84,7 @@ class PythonGitlab(Gitlab):
 
     @functools.lru_cache()
     def get_group_by_path_cached(self, groupname: str) -> Group:
-        group: Group = self.groups.get(groupname)
+        group: Group = self.groups.get(groupname, with_projects=False)
         if group:
             return group
 
