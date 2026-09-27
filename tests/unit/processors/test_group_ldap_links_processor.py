@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from gitlab.exceptions import GitlabListError
+from gitlab.exceptions import GitlabCreateError, GitlabListError
 
 from gitlabform.processors.group.group_ldap_links_processor import GroupLDAPLinksProcessor
 
@@ -146,3 +146,20 @@ class TestGroupLDAPLinksProcessor:
             self._process({"devops_users": {"provider": "LDAP Main", "cn": "devops", "group_access": 40}})
 
         group.ldap_group_links.create.assert_not_called()
+
+    # -------------------------------------------------------- create errors
+
+    def test_create_404_is_reraised_with_clearer_message(self):
+        # GitLab returns 404 instead of 400 when the create parameters are invalid
+        group = self._group()
+        group.ldap_group_links.create.side_effect = GitlabCreateError("404 Not Found", response_code=404)
+
+        with pytest.raises(GitlabCreateError, match="Invalid parameters"):
+            self._process({"devops_users": {"provider": "nonexistent", "cn": "devops", "group_access": 40}})
+
+    def test_other_create_error_is_reraised_unchanged(self):
+        group = self._group()
+        group.ldap_group_links.create.side_effect = GitlabCreateError("400 Bad Request", response_code=400)
+
+        with pytest.raises(GitlabCreateError, match="400 Bad Request"):
+            self._process({"devops_users": {"provider": "LDAP Main", "cn": "devops", "group_access": 40}})

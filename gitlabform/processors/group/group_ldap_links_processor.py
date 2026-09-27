@@ -1,7 +1,7 @@
 from logging import info
 from typing import Dict, List, Optional, Tuple
 
-from gitlab.exceptions import GitlabListError
+from gitlab.exceptions import GitlabCreateError, GitlabListError
 from gitlab.v4.objects import Group, GroupLDAPGroupLink
 
 from gitlabform.gitlab import GitLab
@@ -85,9 +85,17 @@ class GroupLDAPLinksProcessor(AbstractProcessor):
 
     @staticmethod
     def _create_link(group: Group, link_config: Dict) -> None:
-        # GitLab returns 404 instead of 400 when the create parameters are invalid
-        # (e.g. a non-existent provider), so a 404 here does not mean a missing group.
-        group.ldap_group_links.create(link_config)
+        try:
+            group.ldap_group_links.create(link_config)
+        except GitlabCreateError as e:
+            # GitLab returns 404 instead of 400 when the create parameters are invalid
+            # (e.g. a non-existent provider), so a 404 here does not mean a missing group.
+            if e.response_code == 404:
+                raise GitlabCreateError(
+                    f"Invalid parameters for an LDAP group link: {link_config}",
+                    response_code=404,
+                ) from e
+            raise
 
     @staticmethod
     def _defining_key_of_config(link_config: Dict) -> DefiningKey:
