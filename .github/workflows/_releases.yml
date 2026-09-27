@@ -259,11 +259,14 @@ jobs:
           SOURCE=${IMAGE_BASE}:sha-${{ needs.prep-release.outputs.head_sha }}
           echo "Promoting ${SOURCE} to:"
           echo "${{ steps.metadata.outputs.tags }}"
-          TAGS=${{ steps.metadata.outputs.tags }}
-          FLAG_ARGS=""
-          for t in $TAGS; do
-            FLAG_ARGS="$FLAG_ARGS --tag $t"
-          done
-            docker buildx imagetools create $FLAG_ARGS $SOURCE
+
+          while IFS= read -r tag; do
+            [ -n "$tag" ] || continue
+            echo "Creating docker image tag: $tag"
+            docker buildx imagetools create --tag "$tag" "$SOURCE"
+          done <<EOF
+          ${{ steps.metadata.outputs.tags }}
+          EOF
+
           echo "Updating 'latest' to point to promoted release image"
           docker buildx imagetools create --tag ${IMAGE_BASE}:latest ${SOURCE}
