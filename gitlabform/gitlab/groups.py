@@ -29,7 +29,7 @@ class GitLabGroups(GitLabCore):
             raise NotFoundException(f"Group/subgroup with path '{some_string}' not found.")
 
     def get_group(self, name):
-        return self._make_requests_to_api("groups/%s", name)
+        return self._make_requests_to_api("groups/%s?with_projects=false", name)
 
     def get_group_descendants(self, group_id_or_path):
         return self._make_requests_to_api("groups/%s/descendant_groups", group_id_or_path)
