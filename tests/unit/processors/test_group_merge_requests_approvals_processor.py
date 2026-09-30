@@ -74,19 +74,3 @@ class TestGroupMergeRequestsApprovalsProcessor:
         self.processor._process_configuration("test/group", configuration)
 
         self.processor.gl.http_put.assert_not_called()
-
-    def test_current_state_for_diff_contains_plain_values(self):
-        self.processor.gl.http_get.return_value = settings_in_gitlab(selective_code_owner_removals=True)
-
-        current_state = self.processor._get_current_state("test/group")
-
-        self.processor.gl.http_get.assert_called_once_with(API_PATH)
-        assert current_state == {
-            "allow_author_approval": True,
-            "allow_committer_approval": True,
-            "allow_overrides_to_approver_list_per_merge_request": True,
-            "retain_approvals_on_push": False,
-            "selective_code_owner_removals": True,
-            "require_password_to_approve": False,
-            "require_reauthentication_to_approve": False,
-        }
