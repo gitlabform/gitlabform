@@ -130,8 +130,8 @@ jobs:
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
-          echo "Creating multi-arch manifest: latest"
-          docker buildx imagetools create --tag ${IMAGE_BASE}:latest \
+          echo "Creating multi-arch manifest: main"
+          docker buildx imagetools create --tag ${IMAGE_BASE}:main \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
