@@ -13,10 +13,9 @@ COPY pyproject.toml uv.lock ./
 # Install dependencies into a virtualenv. This layer is cached based on uv.lock.
 RUN uv sync --frozen --no-dev --no-install-project
 
-# Now copy the application source code and install the project itself
-COPY gitlabform ./gitlabform
-COPY README.md ./
-RUN uv sync --frozen --no-dev --no-editable
+# Copy the built wheel artifact and install it into the builder virtualenv.
+COPY dist /dist
+RUN uv pip install --python /app/.venv/bin/python /dist/gitlabform-*.whl
 
 # ---- Final Stage ----
 FROM python:3.14-alpine AS final

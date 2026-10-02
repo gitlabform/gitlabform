@@ -14,12 +14,21 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
 
     Executing `tbump` will create a commit containing version updates to necessary files (i.e. `tbump.toml`, `pyproject.toml`), create a new tag from for the new version from the current `ref` in `main` branch, and finally push the commits and tag to remote.
 
-    Following the above steps when a new tag is created, GitHub Action workflow will do following:
+    When the version tag is created, the release workflow will do the following:
 
-    - Create a docker image containing new version of gitlabform and publish to [github's package registry under gitlabform](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform).
-    - Upload new version of gitlabform to [pypi package registry under gitlabform](https://pypi.org/project/gitlabform/).
-    - A corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) will be created that references the new tag.
+    - validate that the upstream Main workflow passed for the same commit and that the tag points to that commit
+    - upload the new version of gitlabform to [PyPI](https://pypi.org/project/gitlabform/)
+    - create the corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) that references the new tag
+    - promote the already published SHA-tagged Docker image to release tags such as `vX.Y.Z`, `vX.Y`, and `vX` using `docker buildx imagetools create`
 
-    The release workflow also verifies that the commit on `main` passed the build and quality. It will trigger a release workflow that will proceed only if a corresponding version tag exists in GitHub and main branch workflow on that commit passed. The release workflow can also be triggered manually, which will require 2 inputs: a release version tag and main branch workflow's run id from corresponding commit.
+    The immutable `sha-<full-sha>` and `sha-<short-sha>` Docker tags are created earlier, as part of the successful main-branch publication flow, and are not created as part of the version-tag release procedure itself.
 
-3. Edit the release in GitHub and copy the changelog entry into its description.
+    The release workflow can also be triggered manually, in which case it requires a release version tag and the corresponding main workflow run id.
+
+4. Edit the release in GitHub and copy the changelog entry into its description.
+
+## Docker publication model
+
+The Docker image is built and verified by the reusable `build.yml` workflow, and the resulting artifacts are then published by the release pipeline.
+
+This avoids rebuilding the image during the final release step and keeps PR validation free of registry credentials. The image that gets promoted to the semver tags is always the already published `sha-<head_sha>` image from the successful main-branch publication flow.

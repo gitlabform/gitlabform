@@ -82,3 +82,62 @@ jobs:
         run: uv sync --frozen --no-dev --group test
       - name: Run smoke tests
         run: uv run --no-sync gitlabform -V
+
+  docker:
+    name: Docker image (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            tag_suffix: amd64
+            tarball: docker-image-amd64.tar
+          - arch: arm64
+            platform: linux/arm64
+            tag_suffix: arm64
+            tarball: docker-image-arm64.tar
+    # PRs and branch validation must confirm the image is healthy without exposing
+    # registry credentials to the build job. The actual GHCR publication happens in
+    # the release workflow after a successful main-branch run.
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.BRANCH_REF }}
+          fetch-depth: 2
+      - name: Download built package artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: package-dist
+          path: dist
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Create archive directory
+        run: mkdir -p .docker
+      - name: Build image for PR validation
+        run: |
+          uv run --no-sync glf-dev docker build \
+            --tag localhost/gitlabform:latest \
+            --platform ${{ matrix.platform }} \
+            --output type=docker,dest=.docker/${{ matrix.tarball }}
+      - name: Verify image
+        run: |
+          uv run --no-sync glf-dev docker verify \
+            --tag localhost/gitlabform:latest \
+            --input .docker/${{ matrix.tarball }}
+      - name: Upload docker image archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-image-${{ matrix.tag_suffix }}
+          path: .docker/${{ matrix.tarball }}
