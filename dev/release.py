@@ -261,18 +261,15 @@ def publish_pypi(extra_args: list[str] | None = None):
     run_command(["uv", "publish"] + (extra_args or []), "Publishing package to PyPI")
 
 
-def publish_docker(extra_args: list[str] | None = None):
-    """Pushes the built Docker image to a registry.
+def publish_docker(image_name: str | None = None):
+    """Pushes a Docker image to a registry.
 
-    Args:
-        extra_args: Arguments for the docker push command (e.g., --image, --tag).
+    The image reference is resolved by the caller (for example, from the Docker build
+    command's tag) and passed through as a single value. This keeps the CLI consistent
+    with Docker's own image-reference semantics and avoids reconstructing tags from
+    separate image/name arguments.
     """
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--image", default="localhost/gitlabform")
-    parser.add_argument("--tag", default="latest")
-
-    parsed, remaining = parser.parse_known_args(extra_args or [])
-    image_name = f"{parsed.image}:{parsed.tag}"
+    image_name = image_name or "localhost/gitlabform:latest"
     docker_bin = get_executable("docker")
 
     run_command([docker_bin, "push", image_name], f"Pushing Docker image: [bold cyan]{image_name}[/bold cyan]")

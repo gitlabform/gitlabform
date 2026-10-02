@@ -51,8 +51,8 @@ def build(extra_args: list[str] | None = None):
     run_command(build_cmd, f"Building Docker image: [bold cyan]{parsed.tag}[/bold cyan]")
 
     if parsed.push:
-        # Delegate to the release domain to ensure consistent push logic
-        publish_docker([f"--tag={parsed.tag}"])
+        # The build already resolved the image reference; pass it through as-is.
+        publish_docker(parsed.tag)
 
 
 def verify(extra_args: list[str] | None = None):
