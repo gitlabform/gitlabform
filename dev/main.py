@@ -134,7 +134,9 @@ def _add_docker_subcommands(subparsers):
     b.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for docker build")
 
     v = subparsers.add_parser("verify", help="Validate the image with a smoke test", description=DESC_DOCKER)
-    v.add_argument("--tag", default="localhost/gitlabform:latest", help="Image tag (default: latest)")
+    v.add_argument(
+        "--tag", default="localhost/gitlabform:latest", help="Image tag (default: localhost/gitlabform:latest)"
+    )
     v.add_argument("--input", help="Load a Docker image archive from disk before verifying it")
     v.add_argument("extra_args", nargs=argparse.REMAINDER, help="Additional arguments for docker run")
 
