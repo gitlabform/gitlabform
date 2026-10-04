@@ -193,7 +193,8 @@ def gh_workflow_check(extra_args: list[str] | None = None):
         try:
             # Verify the Workflow Run is successful and exists.
             run_data = _get_run_info(manual_run_id, repo, headers, base_url, upstream_workflow)
-            run_sha = run_data.get("head_sha")
+            # Ensure run_sha is a string so slicing and downstream outputs are safe
+            run_sha = run_data.get("head_sha") or "unknown"
 
             # If a version tag is supplied, this is a release workflow and we must validate it.
             if manual_tag:
