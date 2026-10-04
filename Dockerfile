@@ -20,6 +20,11 @@ RUN uv pip install --python /app/.venv/bin/python /dist/gitlabform-*.whl
 # ---- Final Stage ----
 FROM python:3.14-alpine AS final
 
+LABEL org.opencontainers.image.title="GitLabForm" \
+      org.opencontainers.image.description="GitLabForm is a declarative GitLab configuration management tool." \
+      org.opencontainers.image.vendor="gitlabform" \
+      org.opencontainers.image.licenses="MIT"
+
 # Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
