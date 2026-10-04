@@ -196,7 +196,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://test.pypi.org/p/gitlabform
+      url: https://pypi.org/p/gitlabform
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
@@ -220,10 +220,6 @@ jobs:
           name: package-dist
           path: dist
       - name: Publish to PyPI
-        env:
-          UV_PUBLISH_URL: https://test.pypi.org/legacy/
-          UV_PUBLISH_CHECK_URL: https://test.pypi.org/simple/
-          UV_TRUSTED_PUBLISHING: always
         run: |
           uv run --no-sync glf-dev release pypi
 
@@ -278,7 +274,6 @@ jobs:
           echo "Promoting ${SOURCE} to:"
           echo "${{ steps.metadata.outputs.tags }}"
 
-<<<<<<< HEAD
           while IFS= read -r tag; do
             [ -n "$tag" ] || continue
             echo "Creating docker image tag: $tag"
@@ -286,23 +281,6 @@ jobs:
           done <<EOF
           ${{ steps.metadata.outputs.tags }}
           EOF
-=======
-          annotation_args=()
-          while IFS= read -r annotation; do
-            [ -n "$annotation" ] || continue
-            annotation_args+=(--annotation "$annotation")
-          done <<EOF
-          ${{ steps.metadata.outputs.annotations }}
-          EOF
-
-          while IFS= read -r tag; do
-            [ -n "$tag" ] || continue
-            echo "Creating docker image tag: $tag"
-            docker buildx imagetools create "${annotation_args[@]}" --tag "$tag" "$SOURCE"
-          done <<EOF
-          ${{ steps.metadata.outputs.tags }}
-          EOF
 
           echo "Updating 'latest' to point to promoted release image"
           docker buildx imagetools create --tag ${IMAGE_BASE}:latest ${SOURCE}
->>>>>>> main
