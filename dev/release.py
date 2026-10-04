@@ -256,10 +256,11 @@ def gh_workflow_check(extra_args: list[str] | None = None):
 
         if upstream_conclusion != "success":
             # This trigger is only valid when the upstream main-branch workflow succeeded.
-            # A failed upstream build is a legitimate non-release outcome, not an error.
+            # A failed upstream build should block the release validation and be treated
+            # as an error so downstream jobs do not proceed.
             _conclude_validation(
                 f"Upstream build status was '{upstream_conclusion}'.",
-                severity="warning",
+                severity="error",
                 release_type="unknown",
             )
         try:
