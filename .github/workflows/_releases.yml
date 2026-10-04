@@ -80,21 +80,9 @@ jobs:
         run: |
           echo "full_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
           echo "short_sha=$(echo "${HEAD_SHA}" | cut -c1-12)" >> "$GITHUB_OUTPUT"
-      - name: Docker metadata
-        uses: docker/metadata-action@v6
-        id: metadata
-        with:
-          context: git
-          images: |
-            ${{ env.IMAGE_BASE }}
-          flavor: |
-            latest=false
-          tags: |
-            type=raw,value=main
-            type=raw,value=sha-${{ steps.meta.outputs.full_sha }}
-            type=raw,value=sha-${{ steps.meta.outputs.short_sha }}
-          labels: |
-            org.opencontainers.image.revision=${{ steps.meta.outputs.full_sha }}
+      # Note: metadata (labels/annotations) are produced at build time
+      # in the `docker` job. Avoid running docker/metadata-action here so the
+      # publish job does not require a git checkout.
       - name: Download docker image artifacts (amd64)
         uses: actions/download-artifact@v8
         with:
@@ -124,12 +112,6 @@ jobs:
           SHORT_SHA=${{ steps.meta.outputs.short_sha }}
 
           annotation_args=()
-          while IFS= read -r annotation; do
-            [ -n "$annotation" ] || continue
-            annotation_args+=(--annotation "$annotation")
-          done <<EOF
-          ${{ steps.metadata.outputs.annotations }}
-          EOF
 
           for TAR in .docker/docker-image-*.tar; do
             echo "Loading $TAR"
@@ -149,17 +131,17 @@ jobs:
           done
 
           echo "Creating multi-arch manifest: sha-${FULL_SHA}"
-          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:sha-${FULL_SHA} \
+          docker buildx imagetools create --tag ${IMAGE_BASE}:sha-${FULL_SHA} \
             ${IMAGE_BASE}:sha-${FULL_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${FULL_SHA}-arm64
 
           echo "Creating multi-arch manifest: sha-${SHORT_SHA}"
-          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:sha-${SHORT_SHA} \
+          docker buildx imagetools create --tag ${IMAGE_BASE}:sha-${SHORT_SHA} \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
           echo "Creating multi-arch manifest: main"
-          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:main \
+          docker buildx imagetools create --tag ${IMAGE_BASE}:main \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
