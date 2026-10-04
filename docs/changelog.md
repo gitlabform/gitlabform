@@ -6,6 +6,26 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.2.5
+
+### Build
+
+* align release image promotion with the generated semver aliases for major/minor/full tags.
+
+## 6.2.3
+## 6.2.5
+
+### Build
+
+* align release image promotion with the generated semver aliases for major/minor/full tags.
+
+## 6.2.3
+## 6.2.5
+
+### Build
+
+* align release image promotion with the generated semver aliases for major/minor/full tags.
+
 ## 6.2.3
 
 ### Bug Fixes
