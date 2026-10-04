@@ -273,18 +273,10 @@ jobs:
           echo "Promoting ${SOURCE} to:"
           echo "${{ steps.metadata.outputs.tags }}"
 
-          annotation_args=()
-          while IFS= read -r annotation; do
-            [ -n "$annotation" ] || continue
-            annotation_args+=(--annotation "$annotation")
-          done <<EOF
-          ${{ steps.metadata.outputs.annotations }}
-          EOF
-
           while IFS= read -r tag; do
             [ -n "$tag" ] || continue
             echo "Creating docker image tag: $tag"
-            docker buildx imagetools create "${annotation_args[@]}" --tag "$tag" "$SOURCE"
+            docker buildx imagetools create --tag "$tag" "$SOURCE"
           done <<EOF
           ${{ steps.metadata.outputs.tags }}
           EOF
