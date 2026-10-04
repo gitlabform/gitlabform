@@ -15,11 +15,11 @@ on:
   workflow_dispatch:
     inputs:
       manual_tag:
-        description: 'Tag to release (e.g., v1.2.3)'
-        required: true
+        description: 'Optional version tag to release (e.g., v1.2.3). Leave blank for unversioned release.'
+        required: false
         type: string
       override_run_id:
-        description: 'Main Workflow Run ID (Required if downloading artifacts)'
+        description: 'Main Workflow Run ID (Required when downloading artifacts for a manual main-image publish)'
         required: true
         type: string
 
@@ -35,7 +35,7 @@ jobs:
     name: Prepare release
     runs-on: ubuntu-latest
     outputs:
-      is_valid_release: ${{ steps.validate.outputs.is_valid }}
+      release_type: ${{ steps.validate.outputs.release_type }}
       semver_tag: ${{ steps.validate.outputs.version }}
       target_run_id: ${{ steps.validate.outputs.run_id }}
       head_sha: ${{ steps.validate.outputs.head_sha }}
@@ -68,25 +68,44 @@ jobs:
 
   publish-to-ghcr-main:
     name: Publish GHCR from main build
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.name == 'Main branch' }}
+    needs:
+      - prep-release
+    if: ${{ needs.prep-release.outputs.release_type == 'versioned' || needs.prep-release.outputs.release_type == 'unversioned' }}
     runs-on: ubuntu-latest
     steps:
       - name: Set SHA tags
         id: meta
+        env:
+          HEAD_SHA: ${{ needs.prep-release.outputs.head_sha }}
         run: |
-          echo "full_sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
-          echo "short_sha=$(echo '${{ github.event.workflow_run.head_sha }}' | cut -c1-12)" >> "$GITHUB_OUTPUT"
+          echo "full_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          echo "short_sha=$(echo "${HEAD_SHA}" | cut -c1-12)" >> "$GITHUB_OUTPUT"
+      - name: Docker metadata
+        uses: docker/metadata-action@v6
+        id: metadata
+        with:
+          context: git
+          images: |
+            ${{ env.IMAGE_BASE }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=main
+            type=raw,value=sha-${{ steps.meta.outputs.full_sha }}
+            type=raw,value=sha-${{ steps.meta.outputs.short_sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.meta.outputs.full_sha }}
       - name: Download docker image artifacts (amd64)
         uses: actions/download-artifact@v8
         with:
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ needs.prep-release.outputs.target_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: docker-image-amd64
           path: .docker
       - name: Download docker image artifacts (arm64)
         uses: actions/download-artifact@v8
         with:
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ needs.prep-release.outputs.target_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: docker-image-arm64
           path: .docker
@@ -103,6 +122,15 @@ jobs:
           set -euo pipefail
           FULL_SHA=${{ steps.meta.outputs.full_sha }}
           SHORT_SHA=${{ steps.meta.outputs.short_sha }}
+
+          annotation_args=()
+          while IFS= read -r annotation; do
+            [ -n "$annotation" ] || continue
+            annotation_args+=(--annotation "$annotation")
+          done <<EOF
+          ${{ steps.metadata.outputs.annotations }}
+          EOF
+
           for TAR in .docker/docker-image-*.tar; do
             echo "Loading $TAR"
             IMAGE_REF=$(docker load --input "$TAR" | sed -n 's/Loaded image: //p')
@@ -121,17 +149,17 @@ jobs:
           done
 
           echo "Creating multi-arch manifest: sha-${FULL_SHA}"
-          docker buildx imagetools create --tag ${IMAGE_BASE}:sha-${FULL_SHA} \
+          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:sha-${FULL_SHA} \
             ${IMAGE_BASE}:sha-${FULL_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${FULL_SHA}-arm64
 
           echo "Creating multi-arch manifest: sha-${SHORT_SHA}"
-          docker buildx imagetools create --tag ${IMAGE_BASE}:sha-${SHORT_SHA} \
+          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:sha-${SHORT_SHA} \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
           echo "Creating multi-arch manifest: main"
-          docker buildx imagetools create --tag ${IMAGE_BASE}:main \
+          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:main \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
@@ -139,7 +167,7 @@ jobs:
 
   publish-docs:
     name: Publish Docs
-    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
+    if: ${{ needs.prep-release.outputs.release_type == 'versioned' || needs.prep-release.outputs.release_type == 'unversioned' }}
     needs:
       - prep-release
     runs-on: ubuntu-latest
@@ -164,7 +192,7 @@ jobs:
 
   publish-to-github:
     name: Publish Release
-    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
+    if: ${{ needs.prep-release.outputs.release_type == 'versioned' }}
     needs:
       - prep-release
     runs-on: ubuntu-latest
@@ -179,7 +207,7 @@ jobs:
 
   publish-to-pypi:
     name: Publish PyPI
-    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
+    if: ${{ needs.prep-release.outputs.release_type == 'versioned' }}
     needs:
       - prep-release
     runs-on: ubuntu-latest
@@ -218,7 +246,7 @@ jobs:
 
   publish-to-ghcr-release:
     name: Publish GHCR (release)
-    if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
+    if: ${{ needs.prep-release.outputs.release_type == 'versioned' }}
     needs:
       - prep-release
       - publish-to-pypi
@@ -243,6 +271,9 @@ jobs:
             type=pep440,pattern={{version}}
             type=pep440,pattern={{major}}.{{minor}}
             type=pep440,pattern={{major}}
+          labels: |
+            org.opencontainers.image.version=${{ needs.prep-release.outputs.semver_tag }}
+            org.opencontainers.image.revision=${{ needs.prep-release.outputs.head_sha }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Login to GitHub Container Registry
@@ -264,10 +295,18 @@ jobs:
           echo "Promoting ${SOURCE} to:"
           echo "${{ steps.metadata.outputs.tags }}"
 
+          annotation_args=()
+          while IFS= read -r annotation; do
+            [ -n "$annotation" ] || continue
+            annotation_args+=(--annotation "$annotation")
+          done <<EOF
+          ${{ steps.metadata.outputs.annotations }}
+          EOF
+
           while IFS= read -r tag; do
             [ -n "$tag" ] || continue
             echo "Creating docker image tag: $tag"
-            docker buildx imagetools create --tag "$tag" "$SOURCE"
+            docker buildx imagetools create "${annotation_args[@]}" --tag "$tag" "$SOURCE"
           done <<EOF
           ${{ steps.metadata.outputs.tags }}
           EOF
