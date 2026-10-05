@@ -107,17 +107,41 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push arch-specific images and create multi-arch manifest
+        shell: bash
         run: |
           set -euo pipefail
           FULL_SHA=${{ steps.meta.outputs.full_sha }}
           SHORT_SHA=${{ steps.meta.outputs.short_sha }}
 
+          # Ensure jq is available for JSON parsing of image labels.
+          if ! command -v jq >/dev/null 2>&1; then
+            echo "Installing jq"
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+
           annotation_args=()
+          declare -A seen_keys_map=()
 
           for TAR in .docker/docker-image-*.tar; do
             echo "Loading $TAR"
             IMAGE_REF=$(docker load --input "$TAR" | sed -n 's/Loaded image: //p')
             echo "Loaded: $IMAGE_REF"
+
+            # Extract LABELs from the image and convert to manifest annotations
+            # before we tag/push so we capture the original image metadata.
+            labels_json=$(docker image inspect --format '{{json .Config.Labels}}' "$IMAGE_REF")
+            if [ "$labels_json" != "null" ] && [ -n "$labels_json" ]; then
+              for key in $(echo "$labels_json" | jq -r 'keys[]'); do
+                if [ -z "${seen_keys_map[$key]+_}" ]; then
+                  seen_keys_map[$key]=1
+                  value=$(echo "$labels_json" | jq -r --arg k "$key" '.[$k]')
+                  if [ -n "$value" ] && [ "$value" != "null" ]; then
+                    annotation_args+=(--annotation "$key=$value")
+                  fi
+                fi
+              done
+            fi
+
             ARCH=$(basename "$TAR" | sed -E 's/^docker-image-(.*)\.tar$/\1/')
             TARGET_ARCH_TAG_FULL=${IMAGE_BASE}:sha-${FULL_SHA}-${ARCH}
             TARGET_ARCH_TAG_SHORT=${IMAGE_BASE}:sha-${SHORT_SHA}-${ARCH}
@@ -132,17 +156,17 @@ jobs:
           done
 
           echo "Creating multi-arch manifest: sha-${FULL_SHA}"
-          docker buildx imagetools create --tag ${IMAGE_BASE}:sha-${FULL_SHA} \
+          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:sha-${FULL_SHA} \
             ${IMAGE_BASE}:sha-${FULL_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${FULL_SHA}-arm64
 
           echo "Creating multi-arch manifest: sha-${SHORT_SHA}"
-          docker buildx imagetools create --tag ${IMAGE_BASE}:sha-${SHORT_SHA} \
+          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:sha-${SHORT_SHA} \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
           echo "Creating multi-arch manifest: main"
-          docker buildx imagetools create --tag ${IMAGE_BASE}:main \
+          docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:main \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
