@@ -10,9 +10,7 @@ from gitlabform.gitlab.commits import GitLabCommits
 from gitlabform.gitlab.groups import GitLabGroups
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
-from gitlabform.gitlab.project_protected_environments import (
-    GitLabProjectProtectedEnvironments,
-)
+from gitlabform.gitlab.projects import GitLabProjects
 from gitlabform.gitlab.project_merge_requests_approvals import (
     GitLabProjectMergeRequestsApprovals,
 )
@@ -46,12 +44,13 @@ class AccessLevel(enum.IntEnum):
         return [level.name.lower().replace("_", " ") for level in AccessLevel]
 
 
+# GitLabGroups and GitLabProjects stay as bases until gitlabform/lists/ no longer uses their methods
 class GitLab(
     GitLabCommits,
     GitLabGroups,
     GitLabMergeRequests,
     GitLabPipelines,
-    GitLabProjectProtectedEnvironments,
+    GitLabProjects,
     GitLabProjectMergeRequestsApprovals,
 ):
     pass

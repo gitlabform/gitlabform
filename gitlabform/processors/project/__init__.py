@@ -36,7 +36,7 @@ from gitlabform.processors.project.resource_groups_processor import (
 from gitlabform.processors.project.schedules_processor import SchedulesProcessor
 from gitlabform.processors.project.tags_processor import TagsProcessor
 from gitlabform.processors.project.project_variables_processor import ProjectVariablesProcessor
-from gitlabform.processors.shared.protected_environments_processor import (
+from gitlabform.processors.project.protected_environments_processor import (
     ProtectedEnvironmentsProcessor,
 )
 
