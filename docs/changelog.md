@@ -6,6 +6,22 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.2.4
+
+### Performance
+
+* skip fetching projects when querying groups [#1436](https://github.com/gitlabform/gitlabform/pull/1436). ([ryanpham-gitlab](https://github.com/ryanpham-gitlab))
+
+### Refactors
+
+* migrate group ldap links processor to python-gitlab [#1428](https://github.com/gitlabform/gitlabform/pull/1428). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.2.3
 
 ### Bug Fixes
