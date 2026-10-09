@@ -43,6 +43,9 @@ from gitlabform.processors.shared.protected_environments_processor import (
 from gitlabform.processors.project.project_security_settings import (
     ProjectSecuritySettingsProcessor,
 )
+from gitlabform.processors.project.project_pull_mirror_processor import (
+    ProjectPullMirrorProcessor,
+)
 from gitlabform.processors.project.remote_mirrors_processor import RemoteMirrorsProcessor
 
 
@@ -77,4 +80,5 @@ class ProjectProcessors(AbstractProcessors):
             MergeRequestsApprovals(gitlab),
             MergeRequestsApprovalRules(gitlab),
             RemoteMirrorsProcessor(gitlab),
+            ProjectPullMirrorProcessor(gitlab),
         ]
