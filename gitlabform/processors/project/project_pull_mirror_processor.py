@@ -76,7 +76,9 @@ class ProjectPullMirrorProcessor(AbstractProcessor):
         try:
             return project.pull_mirror.get()
         except GitlabGetError as e:
-            if e.response_code == 404:
+            # GitLab returns 400 "The project is not mirrored" when no pull
+            # mirror is configured
+            if e.response_code == 404 or (e.response_code == 400 and "not mirrored" in str(e.error_message)):
                 return None
             raise
 

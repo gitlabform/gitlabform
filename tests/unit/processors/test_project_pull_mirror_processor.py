@@ -21,7 +21,8 @@ class TestProjectPullMirrorProcessor:
     def _project(self, existing_mirror: dict | None) -> MagicMock:
         project = MagicMock()
         if existing_mirror is None:
-            project.pull_mirror.get.side_effect = GitlabGetError("404 Not Found", response_code=404)
+            # this is what GitLab actually returns when no pull mirror is configured
+            project.pull_mirror.get.side_effect = GitlabGetError("The project is not mirrored", response_code=400)
         else:
             mirror = MagicMock()
             mirror.asdict.return_value = existing_mirror
@@ -93,9 +94,27 @@ class TestProjectPullMirrorProcessor:
         project.pull_mirror.create.assert_not_called()
         assert "Skip configuring pull mirror" in caplog.text
 
-    def test_get_error_other_than_404_is_raised(self):
+    def test_get_404_is_treated_as_no_mirror(self):
+        project = self._project(None)
+        project.pull_mirror.get.side_effect = GitlabGetError("404 Not Found", response_code=404)
+        config = {"url": MIRROR_URL, "enabled": True}
+
+        self._process(config)
+
+        project.pull_mirror.create.assert_called_once_with(config)
+
+    def test_get_error_other_than_no_mirror_is_raised(self):
         project = self._project(None)
         project.pull_mirror.get.side_effect = GitlabGetError("403 Forbidden", response_code=403)
+
+        with pytest.raises(GitlabGetError):
+            self._process({"url": MIRROR_URL, "enabled": True})
+
+        project.pull_mirror.create.assert_not_called()
+
+    def test_get_other_400_error_is_raised(self):
+        project = self._project(None)
+        project.pull_mirror.get.side_effect = GitlabGetError("400 Bad Request", response_code=400)
 
         with pytest.raises(GitlabGetError):
             self._process({"url": MIRROR_URL, "enabled": True})
