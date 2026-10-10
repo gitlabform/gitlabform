@@ -10,15 +10,12 @@ from dev.release import publish_docker
 def build(extra_args: list[str] | None = None):
     """Builds the GitLabForm Docker image from a prebuilt wheel in dist/.
 
-    The Dockerfile installs the packaged wheel rather than building from the source tree,
-    so the local prerequisite is always: `uv run package build` before `uv run docker build`.
+    The Dockerfile installs the packaged wheel rather than building from the source tree.
+    So building the package is a prerequisite.
 
     Local development usually builds for the host architecture only (for example, `docker buildx build`
-    with no explicit `--platform` override). CI uses the same toolkit commands but passes explicit
-    `--platform` values for multi-arch validation; the reusable build workflow validates each target
-    architecture without pushing registry credentials. This keeps the CLI surface consistent across
-    local development and GitHub Actions while the actual GHCR publication remains in the release
-    workflow.
+    with no explicit `--platform` override). CI can use the same toolkit commands but passes explicit
+    `--platform` values for multi-arch validation.
 
     Args:
         extra_args: Arguments for the docker build command (e.g., --tag, --push, --output).
@@ -35,7 +32,9 @@ def build(extra_args: list[str] | None = None):
     # Ensure the Docker build has access to the prebuilt wheel artifact.
     dist_dir = REPO_ROOT / "dist"
     if not dist_dir.exists() or not any(dist_dir.glob("*.whl")):
-        logger.error("No Python wheel found in dist/. Run `uv run package build` before building the Docker image.")
+        logger.error(
+            "No Python wheel found in dist/. Run `uv run glf-dev package build` before building the Docker image."
+        )
         raise SystemExit(1)
 
     docker_bin = get_executable("docker")

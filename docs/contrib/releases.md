@@ -21,7 +21,7 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
     - create the corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) that references the new tag
     - promote the already published SHA-tagged Docker image to release tags such as `vX.Y.Z`, `vX.Y`, and `vX` using `docker buildx imagetools create`
 
-    The immutable `sha-<full-sha>` and `sha-<short-sha>` Docker tags are created earlier, as part of the successful main-branch publication flow, and are not created as part of the version-tag release procedure itself.
+    The `sha-<full-sha>` and `sha-<short-sha>` Docker tags are created earlier, as part of the successful main-branch publication flow, and are not created as part of the version-tag release procedure itself.
 
     The release workflow can also be triggered manually, in which case it requires a release version tag and the corresponding main workflow run id.
 
