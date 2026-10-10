@@ -1,7 +1,7 @@
 name: Releases
 run-name: >-
   ${{ github.event_name == 'workflow_dispatch'
-    && format('Manual Release: {0}', inputs.manual_tag)
+    && (inputs.manual_tag != '' && format('Manual Release: {0}', inputs.manual_tag) || format('Manual Release: {0}', github.sha))
     || format('Release: {0}', github.event.workflow_run.display_title) }}
 
 on:
@@ -113,6 +113,11 @@ jobs:
           FULL_SHA=${{ steps.meta.outputs.full_sha }}
           SHORT_SHA=${{ steps.meta.outputs.short_sha }}
 
+          # Per-arch tags (sha-<hash>-amd64 / sha-<hash>-arm64) are internal
+          # registry plumbing required to build the final multi-arch manifest.
+          # The tags without the platform suffix are the public/canonical tags
+          # that should be considered the user-facing release tags.
+
           # Ensure jq is available for JSON parsing of image labels.
           if ! command -v jq >/dev/null 2>&1; then
             echo "Installing jq"
@@ -155,22 +160,22 @@ jobs:
             docker push "$TARGET_ARCH_TAG_SHORT"
           done
 
-          echo "Creating multi-arch manifest: sha-${FULL_SHA}"
+          echo "Creating public multi-arch manifest: sha-${FULL_SHA}"
           docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:sha-${FULL_SHA} \
             ${IMAGE_BASE}:sha-${FULL_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${FULL_SHA}-arm64
 
-          echo "Creating multi-arch manifest: sha-${SHORT_SHA}"
+          echo "Creating public multi-arch manifest: sha-${SHORT_SHA}"
           docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:sha-${SHORT_SHA} \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
-          echo "Creating multi-arch manifest: main"
+          echo "Creating public multi-arch manifest: main"
           docker buildx imagetools create "${annotation_args[@]}" --tag ${IMAGE_BASE}:main \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-amd64 \
             ${IMAGE_BASE}:sha-${SHORT_SHA}-arm64
 
-          echo "Published commit image tags for ${FULL_SHA} (short: ${SHORT_SHA})"
+          echo "Published canonical image tags for ${FULL_SHA} (short: ${SHORT_SHA})"
 
   publish-docs:
     name: Publish Docs
