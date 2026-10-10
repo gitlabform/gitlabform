@@ -31,7 +31,6 @@ def build(extra_args: list[str] | None = None):
     )
 
     parsed, remaining = parser.parse_known_args(extra_args or [])
-    # image_name = f"{parsed.tag}"
 
     # Ensure the Docker build has access to the prebuilt wheel artifact.
     dist_dir = REPO_ROOT / "dist"

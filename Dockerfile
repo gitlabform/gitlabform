@@ -15,7 +15,13 @@ RUN uv sync --frozen --no-dev --no-install-project
 
 # Copy the built wheel artifact and install it into the builder virtualenv.
 COPY dist /dist
-RUN uv pip install --python /app/.venv/bin/python /dist/gitlabform-*.whl
+RUN set -eux; \
+    set -- /dist/gitlabform-*.whl; \
+    if [ "$#" -ne 1 ]; then \
+      echo "Expected exactly one gitlabform wheel under /dist, found $#"; \
+      exit 1; \
+    fi; \
+    uv pip install --python /app/.venv/bin/python "$1"
 
 # ---- Final Stage ----
 FROM python:3.14-alpine AS final
