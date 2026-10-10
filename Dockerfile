@@ -13,13 +13,23 @@ COPY pyproject.toml uv.lock ./
 # Install dependencies into a virtualenv. This layer is cached based on uv.lock.
 RUN uv sync --frozen --no-dev --no-install-project
 
-# Now copy the application source code and install the project itself
-COPY gitlabform ./gitlabform
-COPY README.md ./
-RUN uv sync --frozen --no-dev --no-editable
+# Copy the built wheel artifact and install it into the builder virtualenv.
+COPY dist /dist
+RUN set -eux; \
+    set -- /dist/gitlabform-*.whl; \
+    if [ "$#" -ne 1 ]; then \
+      echo "Expected exactly one gitlabform wheel under /dist, found $#"; \
+      exit 1; \
+    fi; \
+    uv pip install --python /app/.venv/bin/python "$1"
 
 # ---- Final Stage ----
 FROM python:3.14-alpine AS final
+
+LABEL org.opencontainers.image.title="GitLabForm" \
+      org.opencontainers.image.description="GitLabForm is a declarative GitLab configuration management tool." \
+      org.opencontainers.image.vendor="gitlabform" \
+      org.opencontainers.image.licenses="MIT"
 
 # Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

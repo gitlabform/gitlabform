@@ -25,23 +25,27 @@ def _append_github_output(key: str, value: str):
         logger.debug(f"[Local Simulation] GITHUB_OUTPUT: {key}={value}")
 
 
-def _conclude_validation(is_valid: bool, message: str, severity: str = "notice") -> NoReturn:
+def _conclude_validation(
+    message: str,
+    severity: str,
+    release_type: str,
+) -> NoReturn:
     """
     Finalizes the validation process and signals the GitHub runner.
 
-    - Sets 'is_valid' output for conditional job execution.
+    - Emits a release-type classification ('versioned' or 'unversioned').
     - Writes a Markdown summary to the GitHub Job Summary page.
     - Uses workflow commands (::error:: or ::notice::) to highlight status in the UI.
     - Exits with 1 on error to stop the workflow, or 0 to continue (even if skipping).
     """
-    if is_valid:
-        status, icon, color, gh_severity = "VALID", "✅", "green", "notice"
-    elif severity == "error":
+    if severity == "error":
         status, icon, color, gh_severity = "FAILED", "❌", "red", "error"
+    elif release_type == "versioned":
+        status, icon, color, gh_severity = "VERSIONED", "✅", "green", "notice"
+    elif release_type == "unversioned":
+        status, icon, color, gh_severity = "UNVERSIONED", "✅", "green", "notice"
     else:
-        # We use 'warning' for skips because it shows up more prominently on the
-        # GitHub Summary page (yellow triangle) than a neutral 'notice'.
-        status, icon, color, gh_severity = "SKIPPED", "⏭️", "yellow", "warning"
+        status, icon, color, gh_severity = "UNKNOWN", "⚠️", "orange", "warning"
 
     # 1. Terminal Narrative
     logger.info("─" * 80)
@@ -58,7 +62,7 @@ def _conclude_validation(is_valid: bool, message: str, severity: str = "notice")
             f.write(f"## {icon} Release Eligibility: {status}\n\n")
             f.write(f"> {message}\n")
 
-    _append_github_output("is_valid", "true" if is_valid else "false")
+    _append_github_output("release_type", release_type)
     sys.exit(1 if severity == "error" else 0)
 
 
@@ -163,7 +167,7 @@ def gh_workflow_check(extra_args: list[str] | None = None):
     logger.info(f"Trigger Event: [bold blue]{event_name or 'Unknown Event'}[/bold blue]")
 
     if not event_name or not repo:
-        _conclude_validation(False, "Missing EVENT or REPO env vars.", severity="error")
+        _conclude_validation("Missing EVENT or REPO env vars.", severity="error", release_type="unknown")
 
     if not token:
         logger.warning("GH_TOKEN environment variable is not set. API calls to GitHub will likely fail.")
@@ -176,39 +180,64 @@ def gh_workflow_check(extra_args: list[str] | None = None):
     # and ensure the Tag points to the same SHA as the Workflow Run.
     if event_name == "workflow_dispatch":
         logger.info(
-            f"Processing manual release for tag [bold green]{manual_tag or '[MISSING]'}[/bold green] (Upstream Run: {manual_run_id or '[MISSING]'})"
+            f"Processing manual workflow dispatch for tag [bold green]{manual_tag or '[MISSING]'}[/bold green] (Upstream Run: {manual_run_id or '[MISSING]'})"
         )
 
-        if not manual_tag or not manual_run_id or not re.match(r"^[0-9]+$", manual_run_id):
+        if not manual_run_id or not re.match(r"^[0-9]+$", manual_run_id):
             _conclude_validation(
-                False,
-                "Manual releases require MANUAL_RELEASE_TAG and a numeric MANUAL_UPSTREAM_RUN_ID.",
+                "Manual workflow dispatch requires a numeric MANUAL_UPSTREAM_RUN_ID.",
                 severity="error",
+                release_type="unknown",
             )
 
         try:
-            # Verify the Workflow Run is successful and exists
+            # Verify the Workflow Run is successful and exists.
             run_data = _get_run_info(manual_run_id, repo, headers, base_url, upstream_workflow)
-            run_sha = run_data.get("head_sha")
+            # Ensure run_sha is a string so slicing and downstream outputs are safe
+            run_sha = run_data.get("head_sha") or "unknown"
 
-            # Resolve the tag to a commit SHA
-            tag_sha = _get_tag_sha(manual_tag, headers, base_url)
+            # If a version tag is supplied, this is a release workflow and we must validate it.
+            if manual_tag:
+                tag_sha = _get_tag_sha(manual_tag, headers, base_url)
+                if tag_sha != run_sha:
+                    _conclude_validation(
+                        f"Tag SHA mismatch for Run {manual_run_id}.",
+                        severity="error",
+                        release_type="unknown",
+                    )
 
-            if tag_sha != run_sha:
-                _conclude_validation(False, f"Tag SHA mismatch for Run {manual_run_id}.", severity="error")
+                head_sha = run_data.get("head_sha", "unknown")
+                _append_github_output("version", manual_tag)
+                _append_github_output("run_id", manual_run_id)
+                _append_github_output("head_sha", head_sha)
+                _conclude_validation(
+                    f"Manually triggered versioned release for tag '{manual_tag}'.",
+                    severity="notice",
+                    release_type="versioned",
+                )
+
+            logger.info("No version tag supplied; treating this as a main-branch unversioned release.")
+            _append_github_output("version", "")
+            _append_github_output("run_id", manual_run_id)
+            _append_github_output("head_sha", run_sha or "unknown")
+            _conclude_validation(
+                f"Manually triggered unversioned release for commit '{run_sha[:8]}'.",
+                severity="notice",
+                release_type="unversioned",
+            )
         except ValueError as e:
-            _conclude_validation(False, str(e), severity="error")
+            _conclude_validation(str(e), severity="error", release_type="unknown")
         except requests.exceptions.RequestException as e:
             error_msg = f"GitHub API communication error: {e}"
             if e.response is not None and e.response.status_code == 401:
                 error_msg = "Unauthorized (401). Ensure GH_TOKEN is set and valid for the target repository."
-            _conclude_validation(False, error_msg, severity="error")
+            _conclude_validation(error_msg, severity="error", release_type="unknown")
         except Exception as e:
-            _conclude_validation(False, f"Unexpected error during release check: {e}", severity="error")
-
-        _append_github_output("version", manual_tag)
-        _append_github_output("run_id", manual_run_id)
-        _conclude_validation(True, f"Manual triggered release validation passed for {manual_tag}.")
+            _conclude_validation(
+                f"Unexpected error during release check: {e}",
+                severity="error",
+                release_type="unknown",
+            )
 
     # Case 2: Automated Trigger (Trusted Input)
     # GitHub provides the Run ID and SHA automatically. We verify that a SemVer
@@ -219,22 +248,45 @@ def gh_workflow_check(extra_args: list[str] | None = None):
         )
 
         if not commit_sha or not automated_run_id:
-            _conclude_validation(False, "Missing SHA or AUTO_ID env vars for automated release.", severity="error")
+            _conclude_validation(
+                "Missing SHA or AUTO_ID env vars for automated release.",
+                severity="error",
+                release_type="unknown",
+            )
 
         if upstream_conclusion != "success":
-            # We exit 0 here because the trigger might be valid but the upstream failed;
-            # we just skip the release without failing the check job itself.
-            _conclude_validation(False, f"Upstream build status was '{upstream_conclusion}'.", severity="warning")
+            # This trigger is only valid when the upstream main-branch workflow succeeded.
+            # A failed upstream build should block the release validation and be treated
+            # as an error so downstream jobs do not proceed.
+            _conclude_validation(
+                f"Upstream build status was '{upstream_conclusion}'.",
+                severity="error",
+                release_type="unknown",
+            )
         try:
-            # Automated releases only happen if the commit has a 'v*' tag.
-            # This prevents every successful main build from triggering a release.
+            # A successful workflow_run is always a legitimate main-branch validation event.
+            # The release classification is decided afterward based on whether a version tag
+            # exists for that commit. Lack of a v* tag means it is a valid unversioned publish,
+            # not a failed automated release check.
             tag_name = _find_tag_for_sha(commit_sha, headers, base_url)
             if not tag_name:
-                _conclude_validation(False, f"No version tag (v*) found for SHA {commit_sha[:8]}.", severity="warning")
+                _append_github_output("version", "")
+                _append_github_output("run_id", automated_run_id)
+                _append_github_output("head_sha", commit_sha)
+                _conclude_validation(
+                    f"No version tag (v*) found for SHA {commit_sha[:8]}; treating this as an unversioned release.",
+                    severity="notice",
+                    release_type="unversioned",
+                )
 
             _append_github_output("version", tag_name)
             _append_github_output("run_id", automated_run_id)
-            _conclude_validation(True, f"Auto triggered release validation passed for {tag_name}")
+            _append_github_output("head_sha", commit_sha)
+            _conclude_validation(
+                f"Auto triggered versioned release for tag '{tag_name}'",
+                severity="notice",
+                release_type="versioned",
+            )
         except Exception as e:
             msg = f"Resolution error: {e}"
             if (
@@ -243,10 +295,10 @@ def gh_workflow_check(extra_args: list[str] | None = None):
                 and e.response.status_code == 401
             ):
                 msg = "Unauthorized (401). Ensure GH_TOKEN is valid."
-            _conclude_validation(False, msg, severity="error")
+            _conclude_validation(msg, severity="error", release_type="unknown")
         return
 
-    _conclude_validation(False, f"Unsupported event: {event_name}", severity="error")
+    _conclude_validation(f"Unsupported event: {event_name}", severity="error", release_type="unknown")
 
 
 def publish_pypi(extra_args: list[str] | None = None):
@@ -258,18 +310,15 @@ def publish_pypi(extra_args: list[str] | None = None):
     run_command(["uv", "publish"] + (extra_args or []), "Publishing package to PyPI")
 
 
-def publish_docker(extra_args: list[str] | None = None):
-    """Pushes the built Docker image to a registry.
+def publish_docker(image_name: str | None = None):
+    """Pushes a Docker image to a registry.
 
-    Args:
-        extra_args: Arguments for the docker push command (e.g., --image, --tag).
+    The image reference is resolved by the caller (for example, from the Docker build
+    command's tag) and passed through as a single value. This keeps the CLI consistent
+    with Docker's own image-reference semantics and avoids reconstructing tags from
+    separate image/name arguments.
     """
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--image", default="localhost/gitlabform")
-    parser.add_argument("--tag", default="latest")
-
-    parsed, remaining = parser.parse_known_args(extra_args or [])
-    image_name = f"{parsed.image}:{parsed.tag}"
+    image_name = image_name or "localhost/gitlabform:latest"
     docker_bin = get_executable("docker")
 
     run_command([docker_bin, "push", image_name], f"Pushing Docker image: [bold cyan]{image_name}[/bold cyan]")
