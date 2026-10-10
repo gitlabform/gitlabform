@@ -2,7 +2,12 @@ import hashlib
 import json
 from itertools import starmap
 
-from logging import info
+import logging
+
+# use the package logger name without importing the package to avoid circular imports
+logger = logging.getLogger("gitlabform")
+
+from gitlabform.constants import DIFF_LOG_LEVEL
 
 
 # Simple function to create strings for values which should be hidden
@@ -64,7 +69,11 @@ class DifferenceLogger:
         # create string
         text = "{subject}:\n{diff}".format(subject=subject, diff="\n".join(starmap(pattern.format, changes)))
 
-        if test:
-            return text
-        else:
-            info(text)
+        if not test:
+            logger.log(
+                DIFF_LOG_LEVEL,
+                text,
+                extra={"markup": False},
+            )
+
+        return text

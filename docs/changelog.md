@@ -6,6 +6,76 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.2.4
+
+### Performance
+
+* skip fetching projects when querying groups [#1436](https://github.com/gitlabform/gitlabform/pull/1436). ([ryanpham-gitlab](https://github.com/ryanpham-gitlab))
+
+### Refactors
+
+* migrate group ldap links processor to python-gitlab [#1428](https://github.com/gitlabform/gitlabform/pull/1428). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
+## 6.2.3
+
+### Bug Fixes
+
+* wait for asynchronous project transfer to complete [#1432](https://github.com/gitlabform/gitlabform/pull/1432). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Documentation
+
+* add missing entries into v6.2.2 changelog [#1426](https://github.com/gitlabform/gitlabform/pull/1426). ([amimas](https://github.com/amimas))
+
+### Tests
+
+* disable job token scope enforcement in the test environment [#1433](https://github.com/gitlabform/gitlabform/pull/1433). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
+## 6.2.2
+
+### Bug Fixes
+
+* diff log should not require verbose [#1343](https://github.com/gitlabform/gitlabform/pull/1343). ([timknight01](https://github.com/TimKnight01))
+* prevent KeyError when using --output with application settings [#1384](https://github.com/gitlabform/gitlabform/pull/1384). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Documentation
+
+* use renamed secret_push_protection_enabled setting [#1395](https://github.com/gitlabform/gitlabform/pull/1395). ([rickbrouwer](https://github.com/rickbrouwer))
+* fix Snyk badge and add ti&m logo [#1371](https://github.com/gitlabform/gitlabform/pull/1371). ([marcelstoer](https://github.com/marcelstoer))
+
+### Refactors
+
+* migrate deploy-keys processor to python-gitlab [#1422](https://github.com/gitlabform/gitlabform/pull/1422). ([rickbrouwer](https://github.com/rickbrouwer))
+* migrate badges processor to python-gitlab [#1388](https://github.com/gitlabform/gitlabform/pull/1388). ([rickbrouwer](https://github.com/rickbrouwer))
+* centralize dry-run diff in AbstractProcessor [#1353](https://github.com/gitlabform/gitlabform/pull/1353). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Build
+
+* migrate documentation from MkDocs Material to Zensical [#1372](https://github.com/gitlabform/gitlabform/pull/1372). ([rickbrouwer](https://github.com/rickbrouwer))
+* replace gitlabform development toolkit shortcuts with one entrypoint [#1409](https://github.com/gitlabform/gitlabform/pull/1409). ([amimas](https://github.com/amimas))
+
+### Chores
+
+* reduce uv dev dependency update cadence [#1423](https://github.com/gitlabform/gitlabform/pull/1423). ([amimas](https://github.com/amimas))
+* update default PR reviewers [#1375](https://github.com/gitlabform/gitlabform/pull/1375). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.2.1
 
 ### Bug Fixes

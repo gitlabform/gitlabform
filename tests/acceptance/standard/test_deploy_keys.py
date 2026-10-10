@@ -214,3 +214,34 @@ class TestDeployKeys:
         deploy_keys = project_for_function.keys.list()
         assert not any([key.key == public_ssh_key for key in deploy_keys])
         assert any([key.key == other_public_ssh_key for key in deploy_keys])
+
+    def test__deploy_key_rename_with_enforce(self, project_for_function, public_ssh_key):
+        config_add = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            deploy_keys:
+              foobar:
+                key: {public_ssh_key}
+                title: title_before
+        """
+        run_gitlabform(config_add, project_for_function.path_with_namespace)
+
+        deploy_keys = project_for_function.keys.list()
+        assert single_true([key.title == "title_before" for key in deploy_keys])
+
+        config_renamed = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            deploy_keys:
+              # a key's value is unique within the instance, so the key under the old title has to be
+              # deleted before the same key can be added under the new one. here enforce does that delete.
+              enforce: true
+              foobar:
+                key: {public_ssh_key}
+                title: title_after
+        """
+        run_gitlabform(config_renamed, project_for_function.path_with_namespace)
+
+        deploy_keys = project_for_function.keys.list()
+        assert single_true([key.title == "title_after" for key in deploy_keys])
+        assert not any([key.title == "title_before" for key in deploy_keys])
