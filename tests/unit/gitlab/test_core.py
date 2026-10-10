@@ -4,6 +4,20 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 
+def test_get_group_id_excludes_projects():
+    from gitlabform.gitlab.core import GitLabCore
+
+    core = GitLabCore.__new__(GitLabCore)
+    core._make_requests_to_api = MagicMock(return_value={"id": "123"})
+
+    assert core._get_group_id("parent/group") == 123
+    core._make_requests_to_api.assert_called_once_with(
+        "groups/%s?with_projects=false",
+        "parent/group",
+        "GET",
+    )
+
+
 class TestGitLabCoreRetryConfiguration:
     """
     Tests for GitLabCore retry configuration.

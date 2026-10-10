@@ -16,7 +16,3 @@
 ...and more using hierarchical configuration written in YAML.
 
 Please see <a href="https://gitlabform.github.io/gitlabform/">the project site</a> for more information.
-
-Testing main branch docker image release
-
-Testing manual release workflow.

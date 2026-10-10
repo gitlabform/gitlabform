@@ -6,25 +6,21 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
-## 6.2.5
+## 6.2.4
 
-### Build
+### Performance
 
-* align release image promotion with the generated semver aliases for major/minor/full tags.
+* skip fetching projects when querying groups [#1436](https://github.com/gitlabform/gitlabform/pull/1436). ([ryanpham-gitlab](https://github.com/ryanpham-gitlab))
 
-## 6.2.3
-## 6.2.5
+### Refactors
 
-### Build
+* migrate group ldap links processor to python-gitlab [#1428](https://github.com/gitlabform/gitlabform/pull/1428). ([rickbrouwer](https://github.com/rickbrouwer))
 
-* align release image promotion with the generated semver aliases for major/minor/full tags.
+### Dependencies
 
-## 6.2.3
-## 6.2.5
+* Update various dependencies to newer versions.
 
-### Build
-
-* align release image promotion with the generated semver aliases for major/minor/full tags.
+Thanks to all the contributors of this release!
 
 ## 6.2.3
 
