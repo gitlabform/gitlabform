@@ -54,6 +54,10 @@ projects_and_groups:
       enabled: false
 ```
 
+!!! note
+
+    After disabling, GitLab reports the project as not mirrored at all, so GitLabForm treats it as having no pull mirror. To re-enable mirroring later, apply the full configuration again, including the `url`.
+
 ## Special configuration keys
 
 ### `force_pull`

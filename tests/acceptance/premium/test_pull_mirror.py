@@ -88,7 +88,7 @@ class TestProjectPullMirrorProcessor:
         assert mirror.enabled is True
         assert mirror.mirror_trigger_builds is True
 
-    def test_pull_mirror_disable(self, project: Project, mirror_source_url: str) -> None:
+    def test_pull_mirror_disable(self, project: Project, mirror_source_url: str, caplog) -> None:
         # Ensure the mirror exists
         self.test_pull_mirror_create(project, mirror_source_url)
 
@@ -101,8 +101,16 @@ class TestProjectPullMirrorProcessor:
 
         run_gitlabform(config, project.path_with_namespace)
 
-        mirror = project.pull_mirror.get()
-        assert mirror.enabled is False
+        # after disabling, GitLab reports the project as not mirrored
+        with pytest.raises(GitlabGetError) as e:
+            project.pull_mirror.get()
+        assert "not mirrored" in str(e.value)
+
+        # a second disable run is idempotent: the mirror now looks absent,
+        # and without a 'url' there is nothing to configure
+        with caplog.at_level(logging.INFO):
+            run_gitlabform(config, project.path_with_namespace)
+        assert "Skip configuring pull mirror" in caplog.text
 
     def test_pull_mirror_force_pull(self, project_for_function: Project, mirror_source_url: str, caplog) -> None:
         config = f"""
