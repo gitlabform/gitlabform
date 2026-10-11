@@ -127,11 +127,14 @@ jobs:
         id: docker_meta
         uses: docker/metadata-action@v6
         with:
-          context: git
+          context: workflow
           images: |
             ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
           flavor: |
             latest=false
+          tags: |
+            type=sha
+            type=ref,event=branch
           labels: |
             org.opencontainers.image.url=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
