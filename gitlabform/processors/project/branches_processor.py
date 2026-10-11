@@ -54,27 +54,33 @@ class BranchesProcessor(AbstractProcessor):
         """
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
+        branches_config: dict = configuration["branches"]
+        skip_missing_branch_enabled: bool = branches_config.pop("skip_missing_branch", False)
 
-        for branch in sorted(configuration["branches"]):
+        for branch in sorted(branches_config):
             branch_configuration: dict = self.convert_user_and_group_names_to_ids(configuration["branches"][branch])
 
-            self.process_branch_protection(project, branch, branch_configuration)
+            self.process_branch_protection(project, branch, branch_configuration, skip_missing_branch_enabled)
 
-    def process_branch_protection(self, project: Project, branch_name: str, branch_config: dict):
+    def process_branch_protection(self, project: Project, branch_name: str, branch_config: dict, skip_if_missing: bool):
         """
         High-level logic for processing branch protection.
 
         1. Validates branch existence (unless wildcard).
         2. Handles 'protected: false' (unprotecting).
         3. Handles 'protected: true':
-           - If not currently protected: Create protection.
-           - If protected: Update using PATCH (EE > 15.6) or Unprotect/Reprotect (CE/Old EE).
+            - If not currently protected: Create protection.
+            - If protected: Update using PATCH (EE > 15.6) or Unprotect/Reprotect (CE/Old EE).
+        4. Skips protection if the branch does not exist and 'skip_if_missing' is enabled.
+            - This is only applicable for literal branch names, not wildcards.
         """
         protected_branch: Optional[ProjectProtectedBranch] = None
 
         # If protected branch name contains a supported wildcard do not try looking it up
         if not self.branch_name_contains_supported_wildcard(branch_name):
-            # Check branch we are trying to protect actually exists first
+            # Check branch we are trying to protect actually exists first.
+            # When explicitly requested, skip missing literal branches instead of creating
+            # a protection rule for a branch that does not exist yet.
             try:
                 project.branches.get(branch_name)
             except GitlabGetError:
@@ -83,6 +89,13 @@ class BranchesProcessor(AbstractProcessor):
                     critical(message)
                     sys.exit(EXIT_INVALID_INPUT)
                 else:
+                    if skip_if_missing and not "*" in branch_name:
+                        info(
+                            f"Skipping branch protection for '{branch_name}' because the branch does not exist and "
+                            "skip_missing_branch is enabled."
+                        )
+                        return
+
                     warning(message)
 
         try:
