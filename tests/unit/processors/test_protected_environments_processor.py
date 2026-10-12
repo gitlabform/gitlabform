@@ -117,3 +117,14 @@ class TestProtectedEnvironmentsProcessor:
         self._process({})
 
         stray.delete.assert_not_called()
+
+    def test_enforce_is_not_removed_from_the_shared_configuration(self):
+        # the configuration dict is reused when processing is retried, so a run must not mutate it
+        stray = self._env("staging")
+        self._project(stray)
+        configuration = {"protected_environments": {"enforce": True}}
+
+        self.processor._process_configuration("test/project", configuration)
+
+        stray.delete.assert_called_once()
+        assert configuration["protected_environments"] == {"enforce": True}

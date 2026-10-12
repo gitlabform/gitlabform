@@ -15,7 +15,9 @@ class ProtectedEnvironmentsProcessor(AbstractProcessor):
         self.custom_diff_analyzers["deploy_access_levels"] = self.recursive_diff_analyzer
 
     def _process_configuration(self, project_and_group: str, configuration: Dict):
-        configured_envs: Dict = configuration.get("protected_environments", {})
+        # copy, so that popping "enforce" does not mutate the shared configuration,
+        # which is reused when this method is retried
+        configured_envs: Dict = dict(configuration.get("protected_environments", {}))
         enforce = configured_envs.pop("enforce", False)
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
