@@ -452,3 +452,62 @@ class TestBranches:
 
         ### Check branch_for_function is not protected
         assert project_for_function.branches.get(branch_for_function).protected is False
+
+    def test__skip_missing_literal_branch_but_keep_wildcard_behavior(
+        self, project_for_function, branch_for_function, is_enterprise_edition
+    ):
+        project = project_for_function
+        branch = branch_for_function
+        missing_branch_name = get_random_name("missing-")
+        wildcard_branch = "skip-*"
+
+        config_protect_branches = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              skip_missing_branch: true
+              {branch}:
+                protected: true
+                push_access_level: {AccessLevel.NO_ACCESS.value}
+                merge_access_level: {AccessLevel.MAINTAINER.value}
+                unprotect_access_level: {AccessLevel.MAINTAINER.value}
+              "{missing_branch_name}":
+                protected: true
+                push_access_level: {AccessLevel.NO_ACCESS.value}
+                merge_access_level: {AccessLevel.MAINTAINER.value}
+                unprotect_access_level: {AccessLevel.MAINTAINER.value}
+              "{wildcard_branch}":
+                protected: true
+                push_access_level: {AccessLevel.NO_ACCESS.value}
+                merge_access_level: {AccessLevel.MAINTAINER.value}
+                unprotect_access_level: {AccessLevel.MAINTAINER.value}
+        """
+
+        # Run gitlabform with strict mode enabled, which should raise an error due to the missing branch
+        with pytest.raises(SystemExit) as exc_info:
+            run_gitlabform(config_protect_branches, project.path_with_namespace, strict=True)
+        assert exc_info.value.code == 1
+
+        # Run gitlabform with strict mode disabled, which should skip the missing branch and continue processing
+        run_gitlabform(config_protect_branches, project.path_with_namespace, strict=False)
+
+        protected_branches = {pb.name for pb in project.protectedbranches.list()}
+        assert branch in protected_branches
+        assert missing_branch_name not in protected_branches
+
+        wildcard_matching_branch = project.branches.create({"branch": "skip-1", "ref": "main"})
+        assert wildcard_matching_branch.protected is True
+
+        if is_enterprise_edition:
+            (
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                unprotect_access_level,
+            ) = get_only_branch_access_levels(project, branch)
+            assert unprotect_access_level is AccessLevel.MAINTAINER.value
+        else:
+            assert True

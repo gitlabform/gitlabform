@@ -39,8 +39,11 @@ class BranchesProcessor(AbstractProcessor):
         self.custom_diff_analyzers["unprotect_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
 
     def _can_proceed(self, project_or_group: str, configuration: dict):
-        for branch in sorted(configuration["branches"]):
-            branch_config = configuration["branches"][branch]
+        branches_config = dict(configuration.get("branches", {}))
+        branches_config.pop("skip_missing_branch", None)
+
+        for branch in sorted(branches_config):
+            branch_config = branches_config[branch]
             if branch_config.get("protected") is None:
                 critical(f"The Protected key is mandatory in branches configuration, fix {branch} YAML config")
                 sys.exit(EXIT_INVALID_INPUT)
@@ -54,11 +57,11 @@ class BranchesProcessor(AbstractProcessor):
         """
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
-        branches_config: dict = configuration["branches"]
+        branches_config: dict = dict(configuration["branches"])
         skip_missing_branch_enabled: bool = branches_config.pop("skip_missing_branch", False)
 
         for branch in sorted(branches_config):
-            branch_configuration: dict = self.convert_user_and_group_names_to_ids(configuration["branches"][branch])
+            branch_configuration: dict = self.convert_user_and_group_names_to_ids(branches_config[branch])
 
             self.process_branch_protection(project, branch, branch_configuration, skip_missing_branch_enabled)
 
