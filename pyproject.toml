@@ -72,8 +72,8 @@ lint = [
     "codespell==2.4.3",
     "mypy==2.3.1",
     "mypy-extensions==1.1.0",
-    "ruff==0.16.6",
-    "types-requests==2.33.0.20260712",
+    "ruff==0.16.7",
+    "types-requests==2.33.0.20260906",
 ]
 # Documentation generation stack.
 docs = [
