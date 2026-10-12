@@ -45,7 +45,7 @@ class ProtectedEnvironmentsProcessor(AbstractProcessor):
                     # but python-gitlab's ProjectProtectedEnvironmentManager doesn't support it, so we recreate.
                     info(f" * Recreating {entity_name} of {self.configuration_name} in {project_and_group}")
                     matching.delete()
-                    self._create_env(project, env_config)
+                    project.protected_environments.create(env_config)
                 else:
                     info(
                         f" * {entity_name} of {self.configuration_name} in {project_and_group}"
@@ -53,7 +53,7 @@ class ProtectedEnvironmentsProcessor(AbstractProcessor):
                     )
             else:
                 info(f" * Adding {entity_name} of {self.configuration_name} in {project_and_group}")
-                self._create_env(project, env_config)
+                project.protected_environments.create(env_config)
             processed_names.add(name)
 
         if enforce:
@@ -64,16 +64,3 @@ class ProtectedEnvironmentsProcessor(AbstractProcessor):
                         f" in {project_and_group} as it's not in config and enforce is set to true."
                     )
                     existing.delete()
-
-    def _create_env(self, project: Project, env_config: Dict, retry: bool = True) -> None:
-        created = project.protected_environments.create(env_config)
-
-        # Workaround for https://gitlab.com/gitlab-org/gitlab/-/issues/378657:
-        # GitLab sometimes applies fewer deploy_access_levels than were sent,
-        # so we unprotect the environment and try once more.
-        configured_levels = env_config.get("deploy_access_levels", [])
-        returned_levels = getattr(created, "deploy_access_levels", None) or []
-        if retry and configured_levels and len(returned_levels) != len(configured_levels):
-            info("Gitlab's returned 'deploy_access_levels' differs from the sent cfg, trying again...")
-            created.delete()
-            self._create_env(project, env_config, retry=False)

@@ -24,10 +24,6 @@ class TestProtectedEnvironmentsProcessor:
     def _project(self, *envs: MagicMock) -> MagicMock:
         project = MagicMock()
         project.protected_environments.list.return_value = list(envs)
-        # by default GitLab returns the environment as it was sent
-        project.protected_environments.create.side_effect = lambda config: self._env(
-            config["name"], config.get("deploy_access_levels", [])
-        )
         self.gl.get_project_by_path_cached.return_value = project
         return project
 
@@ -121,29 +117,3 @@ class TestProtectedEnvironmentsProcessor:
         self._process({})
 
         stray.delete.assert_not_called()
-
-    # -------------------------------------------------- create retry (gitlab#378657)
-
-    def test_create_retries_once_when_access_levels_are_dropped(self):
-        # GitLab sometimes applies fewer deploy_access_levels than were sent
-        project = self._project()
-        incomplete = self._env("production", [])
-        complete = self._env("production", MAINTAINER_ACCESS)
-        project.protected_environments.create.side_effect = [incomplete, complete]
-
-        self._process({"prod": {"name": "production", "deploy_access_levels": MAINTAINER_ACCESS}})
-
-        assert project.protected_environments.create.call_count == 2
-        incomplete.delete.assert_called_once()
-        complete.delete.assert_not_called()
-
-    def test_create_does_not_retry_more_than_once(self):
-        project = self._project()
-        incomplete_1 = self._env("production", [])
-        incomplete_2 = self._env("production", [])
-        project.protected_environments.create.side_effect = [incomplete_1, incomplete_2]
-
-        self._process({"prod": {"name": "production", "deploy_access_levels": MAINTAINER_ACCESS}})
-
-        assert project.protected_environments.create.call_count == 2
-        incomplete_2.delete.assert_not_called()

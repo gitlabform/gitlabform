@@ -106,9 +106,9 @@ class TestProtectedEnvironments:
 
     def test__deploy_access_levels_are_not_dropped_on_create(self, project, make_user):
         # Check for https://gitlab.com/gitlab-org/gitlab/-/issues/378657: GitLab sometimes
-        # applied fewer deploy_access_levels than were sent on create. The processor contains
-        # a workaround for it, so this test calls the API directly to see if it still happens.
-        # The bug was intermittent, hence the loop.
+        # applied fewer deploy_access_levels than were sent on create. The processor used to
+        # contain a retry workaround for it; this test calls the API directly to verify the
+        # bug stays gone. The bug was intermittent, hence the loop.
         user_ids = [make_user(AccessLevel.DEVELOPER).id for _ in range(2)]
 
         for attempt in range(10):
