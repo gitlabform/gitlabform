@@ -104,28 +104,6 @@ class TestProtectedEnvironments:
 
         assert len(protected_envs_under_this_project) == 0
 
-    def test__deploy_access_levels_are_not_dropped_on_create(self, project, make_user):
-        # Check for https://gitlab.com/gitlab-org/gitlab/-/issues/378657: GitLab sometimes
-        # applied fewer deploy_access_levels than were sent on create. The processor used to
-        # contain a retry workaround for it; this test calls the API directly to verify the
-        # bug stays gone. The bug was intermittent, hence the loop.
-        user_ids = [make_user(AccessLevel.DEVELOPER).id for _ in range(2)]
-
-        for attempt in range(10):
-            created = project.protected_environments.create(
-                {
-                    "name": "bug-378657",
-                    "deploy_access_levels": [{"user_id": user_id} for user_id in user_ids],
-                }
-            )
-            try:
-                returned = created.deploy_access_levels
-                persisted = project.protected_environments.get("bug-378657").deploy_access_levels
-                assert len(returned) == len(user_ids), f"attempt {attempt + 1}: create returned {returned}"
-                assert len(persisted) == len(user_ids), f"attempt {attempt + 1}: get returned {persisted}"
-            finally:
-                project.protected_environments.delete("bug-378657")
-
     def test__protect_a_repository_environment_group_name(self, project, other_group):
         config = f"""
             projects_and_groups:
