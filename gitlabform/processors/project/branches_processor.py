@@ -61,11 +61,11 @@ class BranchesProcessor(AbstractProcessor):
         skip_missing_branch_enabled: bool = branches_config.pop("skip_missing_branch", False)
 
         for branch in sorted(branches_config):
-            branch_configuration: dict = self.convert_user_and_group_names_to_ids(branches_config[branch])
+            self.process_branch_protection(project, branch, branches_config[branch], skip_missing_branch_enabled)
 
-            self.process_branch_protection(project, branch, branch_configuration, skip_missing_branch_enabled)
-
-    def process_branch_protection(self, project: Project, branch_name: str, branch_config: dict, skip_if_missing: bool):
+    def process_branch_protection(
+        self, project: Project, branch_name: str, branch_configuration: dict, skip_if_missing: bool
+    ):
         """
         High-level logic for processing branch protection.
 
@@ -86,26 +86,30 @@ class BranchesProcessor(AbstractProcessor):
             # a protection rule for a branch that does not exist yet.
             try:
                 project.branches.get(branch_name)
-            except GitlabGetError:
+            except GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
+
                 message = f"Branch '{branch_name}' not found when processing it to be protected/unprotected!"
                 if self.strict:
                     critical(message)
                     sys.exit(EXIT_INVALID_INPUT)
                 else:
-                    if skip_if_missing and not "*" in branch_name:
+                    warning(message)
+                    if skip_if_missing:
                         info(
                             f"Skipping branch protection for '{branch_name}' because the branch does not exist and "
                             "skip_missing_branch is enabled."
                         )
                         return
 
-                    warning(message)
-
         try:
             protected_branch = project.protectedbranches.get(branch_name)
         except GitlabGetError:
             message = f"The branch '{branch_name}' is not protected!"
             info(message)
+
+        branch_config: dict = self.convert_user_and_group_names_to_ids(branch_configuration)
 
         if branch_config.get("protected"):
             if not protected_branch:
