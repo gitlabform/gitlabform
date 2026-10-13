@@ -11,9 +11,6 @@ from gitlabform.gitlab.groups import GitLabGroups
 from gitlabform.gitlab.merge_requests import GitLabMergeRequests
 from gitlabform.gitlab.pipelines import GitLabPipelines
 from gitlabform.gitlab.projects import GitLabProjects
-from gitlabform.gitlab.project_merge_requests_approvals import (
-    GitLabProjectMergeRequestsApprovals,
-)
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 
 
@@ -51,7 +48,6 @@ class GitLab(
     GitLabMergeRequests,
     GitLabPipelines,
     GitLabProjects,
-    GitLabProjectMergeRequestsApprovals,
 ):
     pass
 

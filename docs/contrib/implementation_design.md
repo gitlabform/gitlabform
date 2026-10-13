@@ -99,7 +99,7 @@ Sometimes there is some logic in these methods if:
 
 * we only need a specific part of the response from GitLab API - see `GitLabProjects.get_all_projects()` as an example,
 * some GitLab APIs need some workarounds for their bugs or documentation inconsistencies, like:
-    * some APIs declare in the docs that they accept both "group/project" string OR a project id while in fact only the latter works - see `GitLabProjects.post_approvals()` as an example,
+    * some APIs declare in the docs that they accept both "group/project" string OR a project id while in fact only the latter works,
     * some APIs return invalid HTTP error codes, like 404 instead of 400 - see `GroupLDAPLinksProcessor._create_link` as an example.
 
 **Note**: Some of the code here is **NOT used by the GitLabForm app**, but utilized by internal Egnyte
