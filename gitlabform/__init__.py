@@ -56,6 +56,7 @@ class GitLabForm:
         noop=False,
         output_file=None,
         recurse_subgroups=True,
+        strict=True,
     ):
         if target and config_string:
             # this mode is basically only for testing
@@ -64,7 +65,7 @@ class GitLabForm:
             self.config_string = config_string
             self.verbose = True
             self.debug = True
-            self.strict = True
+            self.strict = strict
             self.start_from = 1
             self.start_from_group = 1
             self.noop = noop
