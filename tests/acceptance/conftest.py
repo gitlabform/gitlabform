@@ -72,7 +72,7 @@ def is_enterprise_edition(gl: Gitlab):
     # Mypy fix: cast the union return type (dict | Response) to dict[str, Any]
     metadata = cast(
         Dict[str, Any],
-        gl.http_get("/version"),
+        gl.http_get("/metadata"),
     )
     return metadata.get("enterprise") or False
 
