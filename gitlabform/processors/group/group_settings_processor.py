@@ -11,6 +11,9 @@ class GroupSettingsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_settings", gitlab)
 
+    def _get_current_state(self, group: str) -> dict:
+        return self.gl.get_group_by_path_cached(group).asdict()
+
     def _process_configuration(self, group: str, configuration: Dict):
         configured_group_settings = configuration.get("group_settings", {})
 
