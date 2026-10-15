@@ -30,6 +30,13 @@ class TestMergeRequestsApprovalRulesProcessor:
         }
         return rule
 
+    @staticmethod
+    def _branch(name: str, branch_id: int) -> MagicMock:
+        branch = MagicMock()
+        branch.name = name
+        branch.id = branch_id
+        return branch
+
     def _project(self, *rules: MagicMock) -> MagicMock:
         project = MagicMock()
         project.approvalrules.list.return_value = list(rules)
@@ -53,7 +60,7 @@ class TestMergeRequestsApprovalRulesProcessor:
 
     def test_protected_branches_are_converted_to_ids_on_create(self):
         project = self._project()
-        project.protectedbranches.get.return_value = MagicMock(id=42)
+        project.protectedbranches.list.return_value = [self._branch("main", 42)]
 
         self._process({"default": {"name": "standard", "approvals_required": 1, "protected_branches": ["main"]}})
 
@@ -61,18 +68,25 @@ class TestMergeRequestsApprovalRulesProcessor:
             {"name": "standard", "approvals_required": 1, "protected_branch_ids": [42]}
         )
 
-    def test_each_unique_branch_is_resolved_once(self):
+    def test_branches_are_resolved_with_a_single_list_call(self):
         project = self._project()
-        project.protectedbranches.get.return_value = MagicMock(id=42)
+        project.protectedbranches.list.return_value = [self._branch("main", 42), self._branch("release", 43)]
 
         self._process(
             {
                 "first": {"name": "first", "approvals_required": 1, "protected_branches": ["main"]},
-                "second": {"name": "second", "approvals_required": 2, "protected_branches": ["main"]},
+                "second": {"name": "second", "approvals_required": 2, "protected_branches": ["main", "release"]},
             }
         )
 
-        project.protectedbranches.get.assert_called_once_with("main")
+        project.protectedbranches.list.assert_called_once()
+
+    def test_no_branch_lookup_when_no_protected_branches_configured(self):
+        project = self._project()
+
+        self._process({"default": {"name": "standard", "approvals_required": 1}})
+
+        project.protectedbranches.list.assert_not_called()
 
     # --------------------------------------------------------------- update
 
@@ -174,9 +188,9 @@ class TestMergeRequestsApprovalRulesProcessor:
         # in the config cannot leave the project without approval rules
         stray = self._rule("stray")
         project = self._project(stray)
-        project.protectedbranches.get.side_effect = GitlabGetError("404 Not Found", response_code=404)
+        project.protectedbranches.list.return_value = [self._branch("main", 42)]
 
-        with pytest.raises(GitlabGetError):
+        with pytest.raises(GitlabGetError, match="typo"):
             self._process(
                 {
                     "enforce": True,

@@ -1,6 +1,7 @@
 from logging import info
 from typing import Dict, List
 
+from gitlab.exceptions import GitlabGetError
 from gitlab.v4.objects import Project, ProjectApprovalRule
 
 from gitlabform.gitlab import GitLab
@@ -23,7 +24,7 @@ class MergeRequestsApprovalRules(AbstractProcessor):
         # Resolve branch names to ids before anything is deleted, so that a bad branch
         # name in the config fails the section before it can remove existing rules,
         # and so that each unique branch is fetched only once.
-        branch_ids = self._protected_branch_ids(project, configured_rules)
+        protected_branch_ids = self._protected_branch_ids(project, configured_rules)
 
         if enforce:
             # Delete stale rules before adding new ones, so that unique-constraint slots
@@ -56,7 +57,9 @@ class MergeRequestsApprovalRules(AbstractProcessor):
             if matching:
                 if self._needs_update(matching.asdict(), rule_config):
                     info(f" * Editing {entity_name} of {self.configuration_name} in {project_and_group}")
-                    project.approvalrules.update(matching.id, self._payload_for_update(rule_config, branch_ids))
+                    project.approvalrules.update(
+                        matching.id, self._payload_for_update(rule_config, protected_branch_ids)
+                    )
                 else:
                     info(
                         f" * {entity_name} of {self.configuration_name} in {project_and_group}"
@@ -64,7 +67,7 @@ class MergeRequestsApprovalRules(AbstractProcessor):
                     )
             else:
                 info(f" * Adding {entity_name} of {self.configuration_name} in {project_and_group}")
-                project.approvalrules.create(self._payload_for_create(rule_config, branch_ids))
+                project.approvalrules.create(self._payload_for_create(rule_config, protected_branch_ids))
 
     def _needs_update(self, entity_in_gitlab: Dict, entity_in_configuration: Dict) -> bool:
         # GitLab returns users/groups as lists of objects and protected_branches as list
@@ -76,7 +79,7 @@ class MergeRequestsApprovalRules(AbstractProcessor):
         gitlab_norm = dict(entity_in_gitlab)
         gitlab_norm["user_ids"] = sorted(u["id"] for u in gitlab_norm.pop("users", []))
         gitlab_norm["group_ids"] = sorted(g["id"] for g in gitlab_norm.pop("groups", []))
-        gitlab_branches = gitlab_norm.pop("protected_branches", [])
+        gitlab_protected_branches = gitlab_norm.pop("protected_branches", [])
 
         # The update payload treats missing user_ids/group_ids/protected_branches
         # as "clear them", so mirror that here to keep the comparison honest.
@@ -89,10 +92,10 @@ class MergeRequestsApprovalRules(AbstractProcessor):
         # The config can reference branches by name (protected_branches) or directly
         # by id (protected_branch_ids); compare whichever representation it uses.
         if "protected_branch_ids" in config_norm:
-            gitlab_norm["protected_branch_ids"] = sorted(b["id"] for b in gitlab_branches)
+            gitlab_norm["protected_branch_ids"] = sorted(b["id"] for b in gitlab_protected_branches)
             config_norm["protected_branch_ids"] = sorted(config_norm["protected_branch_ids"])
         if "protected_branch_ids" not in config_norm or "protected_branches" in config_norm:
-            gitlab_norm["protected_branches"] = sorted(b["name"] for b in gitlab_branches)
+            gitlab_norm["protected_branches"] = sorted(b["name"] for b in gitlab_protected_branches)
             config_norm["protected_branches"] = sorted(config_norm.get("protected_branches", []))
 
         return super()._needs_update(gitlab_norm, config_norm)
@@ -105,20 +108,30 @@ class MergeRequestsApprovalRules(AbstractProcessor):
             if not rule_config.get("delete", False)
             for branch_name in rule_config.get("protected_branches", [])
         }
-        return {branch_name: project.protectedbranches.get(branch_name).id for branch_name in branch_names}
+        if not branch_names:
+            return {}
+
+        existing = {branch.name: branch.id for branch in project.protectedbranches.list(get_all=True)}
+        missing = branch_names - existing.keys()
+        if missing:
+            raise GitlabGetError(
+                f"Protected branches {sorted(missing)} not found in this project",
+                response_code=404,
+            )
+        return {branch_name: existing[branch_name] for branch_name in branch_names}
 
     @staticmethod
-    def _payload_for_create(rule_config: Dict, branch_ids: Dict[str, int]) -> Dict:
+    def _payload_for_create(rule_config: Dict, protected_branch_ids: Dict[str, int]) -> Dict:
         # "delete" is a gitlabform control key and should not be sent to the API
         payload = {k: v for k, v in rule_config.items() if k != "delete"}
         if "protected_branches" in payload:
             # the API expects protected_branch_ids, while the config has branch names
             branch_names = payload.pop("protected_branches")
-            payload["protected_branch_ids"] = [branch_ids[branch_name] for branch_name in branch_names]
+            payload["protected_branch_ids"] = [protected_branch_ids[branch_name] for branch_name in branch_names]
         return payload
 
-    def _payload_for_update(self, rule_config: Dict, branch_ids: Dict[str, int]) -> Dict:
-        payload = self._payload_for_create(rule_config, branch_ids)
+    def _payload_for_update(self, rule_config: Dict, protected_branch_ids: Dict[str, int]) -> Dict:
+        payload = self._payload_for_create(rule_config, protected_branch_ids)
         # GitLab interprets omitted user_ids/group_ids/protected_branch_ids as "no change",
         # but we want them to mean "clear them" so removals in config take effect.
         payload.setdefault("user_ids", [])
