@@ -31,6 +31,8 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
       * access levels (roles) allowed to push/merge/unprotect, allow force push flag,
       * users/groups allowed to push/merge/unprotect, code owner approval required flag (**GitLab Premium (paid) only**),
     * [Protected environments](reference/protected_environments.md)
+    * [Pull mirror](reference/pull_mirror.md) (**GitLab Premium (paid) only**)
+    * [Push mirrors](reference/push_mirrors.md)
     * [Push Rules](reference/push_rules.md) (**GitLab Premium (paid) only**)
     * [Resource groups](reference/resource_groups.md)
     * [Settings](reference/settings.md#project-settings)
