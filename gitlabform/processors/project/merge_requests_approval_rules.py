@@ -1,9 +1,11 @@
-from logging import info
+import sys
+from logging import critical, info
 from typing import Dict, List
 
 from gitlab.exceptions import GitlabGetError
 from gitlab.v4.objects import Project, ProjectApprovalRule
 
+from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
@@ -17,6 +19,10 @@ class MergeRequestsApprovalRules(AbstractProcessor):
         # which is reused when this method is retried
         configured_rules: Dict = dict(configuration.get("merge_requests_approval_rules", {}))
         enforce = configured_rules.pop("enforce", False)
+
+        # Rules are matched against GitLab by name, so entries sharing a name would
+        # reconcile ambiguously; reject them before any changes are made.
+        self._fail_on_duplicate_names(project_and_group, configured_rules)
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
         existing_rules: List[ProjectApprovalRule] = project.approvalrules.list(get_all=True)
@@ -99,6 +105,16 @@ class MergeRequestsApprovalRules(AbstractProcessor):
             config_norm["protected_branches"] = sorted(config_norm.get("protected_branches", []))
 
         return super()._needs_update(gitlab_norm, config_norm)
+
+    def _fail_on_duplicate_names(self, project_and_group: str, configured_rules: Dict) -> None:
+        names = [rule_config.get("name") for rule_config in configured_rules.values() if rule_config.get("name")]
+        duplicates = {name for name in names if names.count(name) > 1}
+        if duplicates:
+            critical(
+                f"Entities in {self.configuration_name} for {project_and_group}"
+                f" share the same name(s): {sorted(duplicates)}"
+            )
+            sys.exit(EXIT_INVALID_INPUT)
 
     @staticmethod
     def _protected_branch_ids(project: Project, configured_rules: Dict) -> Dict[str, int]:

@@ -183,6 +183,24 @@ class TestMergeRequestsApprovalRulesProcessor:
 
         assert [name for name, args, kwargs in order.mock_calls] == ["stray_delete", "create"]
 
+    def test_duplicate_names_are_rejected_before_any_changes(self):
+        # two config entries with the same rule name would reconcile ambiguously,
+        # so the run must abort before enforce deletes or creates anything
+        stray = self._rule("stray")
+        project = self._project(stray)
+
+        with pytest.raises(SystemExit):
+            self._process(
+                {
+                    "enforce": True,
+                    "first": {"name": "Approvers", "approvals_required": 1},
+                    "second": {"name": "Approvers", "approvals_required": 2},
+                }
+            )
+
+        stray.delete.assert_not_called()
+        project.approvalrules.create.assert_not_called()
+
     def test_enforce_does_not_delete_when_branch_resolution_fails(self):
         # branch names are resolved before anything is deleted, so a bad branch name
         # in the config cannot leave the project without approval rules
