@@ -19,18 +19,18 @@
       
       
       <link rel="icon" href="../../gitlabform-logo-favicon.png">
-      <meta name="generator" content="zensical-0.0.58">
+      <meta name="generator" content="zensical-0.0.62">
     
     
       
-        <title>Protected branches - GitLabForm</title>
+        <title>Branches - GitLabForm</title>
       
     
     
       
         
       
-      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.38807bfb.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.e0592429.min.css">
       
         
           
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Protected branches
+              Branches
             
           </span>
         </div>
@@ -637,6 +637,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Common features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project-only-option" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Project only option
       </span>
     </span>
   </a>
@@ -1613,6 +1624,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#project-only-option" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Project only option
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#premium-only-features" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1740,6 +1762,32 @@
 <span class="w">        </span><span class="nt">unprotect_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
 <span class="w">        </span><span class="nt">allow_force_push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
+<h3 id="project-only-option">Project only option<a class="headerlink" href="#project-only-option" title="Permanent link">&para;</a></h3>
+<p>This option is only supported for project-level branch protection under <code>branches</code>, and is a GitLabForm-specific feature.</p>
+<p>GitLab allows creating branch protection even when a branch does not exist. This is useful so that a branch is automatically protected when it matches the configured name. If this is not desired, use a top-level key named <code>skip_missing_branch: true</code>. Setting this flag will skip branch protection for a branch when it does not exist.</p>
+<p>This is intended for exact branch names only. It does not apply to wildcard patterns such as <code>release-*</code>.</p>
+<ul>
+<li>If <code>strict</code> mode is enabled, GitLabForm still fails on missing literal branches.</li>
+<li>If <code>strict</code> mode is disabled, GitLabForm skips protecting a missing literal branch and continues.</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">projects_and_groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group_1/project_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">skip_missing_branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">main</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+<span class="w">      </span><span class="nt">branch-that-does-not-exist-yet</span><span class="p">:</span><span class="w">  </span><span class="c1"># This will be skipped</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+<span class="w">      </span><span class="s">"release-*"</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">protected</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">push_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no access</span>
+<span class="w">        </span><span class="nt">merge_access_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintainer</span>
+</code></pre></div>
 <h3 id="premium-only-features">Premium-only features<a class="headerlink" href="#premium-only-features" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
@@ -1833,10 +1881,14 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.indexes"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+      
+      
+        
+        
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["navigation.indexes"],"redirect":null,"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.6970bfe9.min.js"></script>
+      <script src="../../assets/javascripts/bundle.8dcc8e9c.min.js"></script>
       
     
   </body>
