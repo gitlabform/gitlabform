@@ -62,7 +62,7 @@ projects_and_groups:
 
 ### `force_pull`
 
-Set this to `true` to trigger an immediate pull from the remote repository after the configuration is applied.
+Set this to `true` to request a pull from the remote repository after the configuration is applied. GitLab schedules the pull asynchronously and enforces a minimum interval between such updates ([once every five minutes on GitLab.com](https://docs.gitlab.com/user/project/repository/mirror/#force-an-update), configurable by the administrator on self-managed instances), so workflows that depend on the synchronization having happened should account for that interval.
 
 ```yaml
 projects_and_groups:
@@ -70,7 +70,7 @@ projects_and_groups:
     pull_mirror:
       url: "https://username:token@example.com/some/repo.git"
       enabled: true
-      force_pull: true       # Sync immediately after configuration
+      force_pull: true       # Request a pull after configuration
 ```
 
 ### `force_update`

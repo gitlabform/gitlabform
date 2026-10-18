@@ -58,19 +58,22 @@ class ProjectPullMirrorProcessor(AbstractProcessor):
         if mirror_payload or force_pull:
             mirror_in_gitlab = self._get_pull_mirror(project)
 
+        update_succeeded: bool = True
         if mirror_payload:
             if mirror_in_gitlab:
-                self._update_existing_mirror(project, mirror_in_gitlab, mirror_payload, force_update)
+                update_succeeded = self._update_existing_mirror(project, mirror_in_gitlab, mirror_payload, force_update)
             elif "url" in mirror_payload:
                 mirror_in_gitlab = self._create_new_mirror(project, mirror_payload)
             else:
                 info("Skip configuring pull mirror, because it doesn't exist and no 'url' is set")
 
         if force_pull:
-            if mirror_in_gitlab:
-                self._sync_pull_mirror(project)
-            else:
+            if not mirror_in_gitlab:
                 info("Skip triggering pull mirror sync, because the project has no pull mirror")
+            elif not update_succeeded:
+                info("Skip triggering pull mirror sync, because the pull mirror update failed")
+            else:
+                self._sync_pull_mirror(project)
 
     def _get_pull_mirror(self, project: Project) -> Optional[ProjectPullMirror]:
         try:
@@ -105,7 +108,9 @@ class ProjectPullMirrorProcessor(AbstractProcessor):
         mirror_in_gitlab: ProjectPullMirror,
         payload: Dict[str, Any],
         force_update: bool,
-    ) -> None:
+    ) -> bool:
+        """Returns whether the mirror matches the config: True after a successful
+        or unnecessary update, False when the update failed."""
         should_update: bool = force_update or self._needs_update(mirror_in_gitlab.asdict(), payload)
 
         if should_update:
@@ -124,8 +129,11 @@ class ProjectPullMirrorProcessor(AbstractProcessor):
                     )
             except GitlabUpdateError as e:
                 warning(f"Failed to update pull mirror: {e}")
+                return False
         else:
             info("Pull mirror remains unchanged")
+
+        return True
 
     def _create_new_mirror(self, project: Project, payload: Dict[str, Any]) -> Optional[ProjectPullMirror]:
         info("Creating pull mirror")

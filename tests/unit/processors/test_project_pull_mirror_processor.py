@@ -203,6 +203,17 @@ class TestProjectPullMirrorProcessor:
         project.pull_mirror.create.assert_not_called()
         project.pull_mirror.update.assert_not_called()
 
+    def test_force_pull_skipped_when_update_fails(self, caplog):
+        # syncing after a failed update would pull with the old settings
+        project = self._project(self._existing_mirror())
+        project.pull_mirror.update.side_effect = GitlabUpdateError("400: bad request", response_code=400)
+
+        with caplog.at_level("INFO"):
+            self._process({"url": MIRROR_URL, "enabled": False, "force_pull": True})
+
+        project.pull_mirror.start.assert_not_called()
+        assert "Skip triggering pull mirror sync, because the pull mirror update failed" in caplog.text
+
     def test_sync_error_is_logged_and_not_raised(self, caplog):
         project = self._project(self._existing_mirror())
         project.pull_mirror.start.side_effect = GitlabCreateError("403: forbidden", response_code=403)
