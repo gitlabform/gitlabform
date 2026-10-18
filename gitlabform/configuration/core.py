@@ -20,6 +20,26 @@ from yamlpath.wrappers import ConsolePrinter
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.constructor import ConstructorError, RoundTripConstructor
+
+
+def construct_env_tag(loader: Any, node: Any) -> str:
+    """Resolve "!env VARIABLE_NAME" into the value of that environment variable."""
+    name = loader.construct_scalar(node)
+    if not name:
+        raise ConstructorError(None, None, "!env requires an environment variable name", node.start_mark)
+    if name not in os.environ:
+        raise ConstructorError(None, None, f"environment variable '{name}' used with !env is not set", node.start_mark)
+    return os.environ[name]
+
+
+class ConfigurationConstructor(RoundTripConstructor):
+    """A constructor subclass, so that the custom tags are scoped to gitlabform's
+    own YAML parsing and not registered on every round-trip ruamel load in the
+    process (relevant when gitlabform is used as a library)."""
+
+
+ConfigurationConstructor.add_constructor("!env", construct_env_tag)
 
 
 class ConfigurationCore(ABC):
@@ -93,6 +113,7 @@ class ConfigurationCore(ABC):
         log = ConsolePrinter(logging_args)
 
         yaml = Parsers.get_yaml_editor()
+        yaml.Constructor = ConfigurationConstructor
 
         if config_string:
             config = textwrap.dedent(source)
