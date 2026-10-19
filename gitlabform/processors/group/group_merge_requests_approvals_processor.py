@@ -36,11 +36,11 @@ class GroupMergeRequestsApprovalsProcessor(AbstractProcessor):
             return
 
         values_in_gitlab = self._extract_setting_values(settings_in_gitlab)
-        debug(values_in_gitlab)
-        debug("group_merge_requests_approvals BEFORE: ^^^")
+        info(values_in_gitlab)
+        info("group_merge_requests_approvals BEFORE: ^^^")
 
         if self._needs_update(values_in_gitlab, settings_in_config):
-            info(f"Updating group merge requests approvals settings for group {group}")
+            debug(f"Updating group merge requests approvals settings for group {group}")
             self._update_group_merge_requests_approvals(gitlab_group, settings_in_config)
         else:
             info("No update needed for group merge requests approvals settings")
@@ -67,8 +67,8 @@ class GroupMergeRequestsApprovalsProcessor(AbstractProcessor):
             )
             return
 
-        debug(self._extract_setting_values(updated_settings))
-        debug("group_merge_requests_approvals AFTER: ^^^")
+        info(self._extract_setting_values(updated_settings))
+        info("group_merge_requests_approvals AFTER: ^^^")
 
     @staticmethod
     def _api_path(gitlab_group: Group) -> str:
