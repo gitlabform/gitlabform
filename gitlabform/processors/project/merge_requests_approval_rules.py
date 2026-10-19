@@ -87,8 +87,9 @@ class MergeRequestsApprovalRules(AbstractProcessor):
         gitlab_norm["group_ids"] = sorted(g["id"] for g in gitlab_norm.pop("groups", []))
         gitlab_protected_branches = gitlab_norm.pop("protected_branches", [])
 
-        # The update payload treats missing user_ids/group_ids/protected_branches
-        # as "clear them", so mirror that here to keep the comparison honest.
+        # The update payload still sends omitted user_ids/group_ids/protected_branches as
+        # empty lists (old behavior, kept until #1468), so the comparison here has to
+        # mirror what _payload_for_update will send, or a rule would never converge.
         # "delete" is a gitlabform control key, not a rule attribute.
         config_norm = dict(entity_in_configuration)
         config_norm.pop("delete", None)
@@ -149,7 +150,8 @@ class MergeRequestsApprovalRules(AbstractProcessor):
     def _payload_for_update(self, rule_config: Dict, protected_branch_ids: Dict[str, int]) -> Dict:
         payload = self._payload_for_create(rule_config, protected_branch_ids)
         # GitLab interprets omitted user_ids/group_ids/protected_branch_ids as "no change",
-        # but we want them to mean "clear them" so removals in config take effect.
+        # but the old code sent them as empty lists, clearing them. That behavior is kept
+        # for now; changing it is a breaking change, tracked in #1468.
         payload.setdefault("user_ids", [])
         payload.setdefault("group_ids", [])
         payload.setdefault("protected_branch_ids", [])
