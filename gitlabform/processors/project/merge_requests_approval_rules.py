@@ -16,6 +16,20 @@ class MergeRequestsApprovalRules(MultipleEntitiesProcessor):
             required_to_create_or_update=And(Key("name"), Key("approvals_required")),
         )
 
+    def _get_current_state(self, project_or_project_and_group: str) -> dict:
+        """Approval rules keyed by name, for the dry-run diff.
+
+        The config side is keyed by an arbitrary identifier per rule (``any``,
+        ``security``, ...), so name is the only key the two sides share.
+        """
+        return {rule["name"]: rule for rule in self.list_method(project_or_project_and_group)}
+
+    def _get_desired_state(self, entity_config: dict) -> dict:
+        """Drop ``enforce`` (a processor directive, not an API field) and key by
+        rule name, matching :meth:`_get_current_state`.
+        """
+        return {rule.get("name", key): rule for key, rule in entity_config.items() if key != "enforce"}
+
     def _needs_update(self, entity_in_gitlab: dict, entity_in_configuration: dict) -> bool:
         # GitLab returns users/groups as lists of objects and protected_branches as list
         # of objects with a "name" field, while the config (post-transform) has user_ids /
