@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+from gitlab import GitlabGetError
+
 from gitlabform.gitlab import AccessLevel
 from gitlabform.processors.project.branches_processor import BranchesProcessor
 from gitlabform.processors.util.branch_protection import BranchProtection
@@ -26,6 +28,36 @@ class TestBranchesProcessor:
         assert BranchesProcessor.branch_name_contains_supported_wildcard("branch") is False
         assert BranchesProcessor.branch_name_contains_supported_wildcard("main") is False
         assert BranchesProcessor.branch_name_contains_supported_wildcard("feature-123") is False
+
+    def test_skip_missing_branch_skips_protection_for_missing_literal_branch_from_global_branches_config(self):
+        project = MagicMock()
+        project.branches.get.side_effect = GitlabGetError("not found", 404)
+        project.protectedbranches.get.side_effect = GitlabGetError("not protected", 404)
+
+        self.processor.gl = MagicMock()
+        self.processor.gl.get_project_by_path_cached.return_value = project
+
+        self.processor._process_configuration(
+            "group/project",
+            {"branches": {"skip_missing_branch": True, "main": {"protected": True}}},
+        )
+
+        project.protectedbranches.create.assert_not_called()
+
+    def test_skip_missing_branch_does_not_skip_wildcard_branch_protection(self):
+        project = MagicMock()
+        project.branches.get.side_effect = GitlabGetError("not found", 404)
+        project.protectedbranches.get.side_effect = GitlabGetError("not protected", 404)
+
+        self.processor.gl = MagicMock()
+        self.processor.gl.get_project_by_path_cached.return_value = project
+
+        self.processor._process_configuration(
+            "group/project",
+            {"branches": {"skip_missing_branch": True, "release-*": {"protected": True}}},
+        )
+
+        project.protectedbranches.create.assert_called_once()
 
     def test_convert_user_and_group_names_to_ids(self):
         # Setup

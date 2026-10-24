@@ -1,4 +1,5 @@
 import json
+import sys
 from datetime import date
 from io import StringIO
 
@@ -46,6 +47,8 @@ def configure_ruamel_yaml_loader(typ=None, pure=False, output=None, plug_ins=Non
     yaml_loader.indent(mapping=3, sequence=2, offset=0)
     yaml_loader.allow_duplicate_keys = True
     yaml_loader.explicit_start = False
+    # never wrap long scalars: a wrapped double-quoted string that is reloaded can gain spaces after backslash escapes
+    yaml_loader.width = sys.maxsize
     # show null
     yaml_loader.representer.add_representer(
         type(None),
