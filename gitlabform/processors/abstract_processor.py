@@ -138,13 +138,22 @@ class AbstractProcessor(ABC):
         """
         return entity_config
 
+    def _get_desired_state_for(self, entity_config: dict, current_state: dict) -> dict:
+        """Return the desired state, given both the config and the GitLab state.
+
+        Override this instead of :meth:`_get_desired_state` when resolving the
+        config needs the current state -- for example value markers such as
+        ``keep_existing`` that expand into the values GitLab already has.
+        """
+        return self._get_desired_state(entity_config)
+
     def _print_diff(self, project_or_project_and_group: str, entity_config, diff_only_changed: bool):
         current = self._get_current_state(project_or_project_and_group)
         if current is None:
             debug(f"Diffing for section '{self.configuration_name}' is not supported yet")
             return
 
-        desired = self._get_desired_state(entity_config)
+        desired = self._get_desired_state_for(entity_config, current)
         DifferenceLogger.log_diff(
             f"{self.configuration_name} changes",
             current,
