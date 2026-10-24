@@ -50,6 +50,23 @@ class BranchesProcessor(AbstractProcessor):
 
         return True
 
+    def _get_current_state(self, project_and_group: str) -> dict:
+        """Protected branches keyed by branch name, for the dry-run diff."""
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
+        return {
+            protected_branch.name: protected_branch.asdict()
+            for protected_branch in project.protectedbranches.list(all=True)
+        }
+
+    def _get_desired_state(self, entity_config: dict) -> dict:
+        """The config side of the diff, in the shape GitLab's GET endpoint returns."""
+        desired: dict = {}
+        for branch_name, branch_config in entity_config.items():
+            if branch_name == "skip_missing_branch":
+                continue
+            desired[branch_name] = BranchProtection.map_config_to_protected_branch_get_data(dict(branch_config))
+        return desired
+
     def _process_configuration(self, project_and_group: str, configuration: dict):
         """
         Called from process defined in abstract_processor.py after checking self._can_proceed
