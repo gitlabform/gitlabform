@@ -59,6 +59,20 @@ class ProjectSettingsProcessor(AbstractProcessor):
                 warning(f"Failed to process project avatar: {e}")
                 raise e
 
+    def _get_desired_state_for(self, entity_config: dict, current_state: dict) -> dict:
+        """Resolve the topic markers in dry-run too.
+
+        ``topics`` may contain ``keep_existing`` and ``delete`` markers that are
+        only expanded in :meth:`_process_configuration`. A dry-run never gets
+        there, so without this it diffed the raw markers against the plain topic
+        list GitLab returns.
+        """
+        desired = dict(entity_config)
+        if desired.get("topics"):
+            desired["topics"] = list(desired["topics"])
+            self._process_project_topics(desired, current_state)
+        return desired
+
     def _process_project_topics(self, project_settings_in_config: Dict, project_settings_in_gitlab: Dict) -> None:
         project_settings_topics: Dict = project_settings_in_config.get("topics", [])
 
