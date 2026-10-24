@@ -105,6 +105,38 @@ projects_and_groups:
         allow_force_push: true
 ```
 
+### Project only option
+
+This option is only supported for project-level branch protection under `branches`, and is a GitLabForm-specific feature.
+
+GitLab allows creating branch protection even when a branch does not exist. This is useful so that a branch is automatically protected when it matches the configured name. If this is not desired, use a top-level key named `skip_missing_branch: true`. Setting this flag will skip branch protection for a branch when it does not exist.
+
+This is intended for exact branch names only. It does not apply to wildcard patterns such as `release-*`.
+
+- If `strict` mode is enabled, GitLabForm still fails on missing literal branches.
+- If `strict` mode is disabled, GitLabForm skips protecting a missing literal branch and continues.
+
+Example:
+
+```yaml
+projects_and_groups:
+  group_1/project_1:
+    branches:
+      skip_missing_branch: true
+      main:
+        protected: true
+        push_access_level: no access
+        merge_access_level: maintainer
+      branch-that-does-not-exist-yet:  # This will be skipped
+        protected: true
+        push_access_level: no access
+        merge_access_level: maintainer
+      "release-*":
+        protected: true
+        push_access_level: no access
+        merge_access_level: maintainer
+```
+
 ### Premium-only features
 
 !!! info

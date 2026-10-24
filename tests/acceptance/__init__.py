@@ -338,6 +338,7 @@ def run_gitlabform(
     noop: bool = False,
     output_file: Optional[str] = None,
     recurse_subgroups: bool = True,
+    strict: bool = True,
 ) -> None:
     """
     Runs GitLabForm with the given configuration and target.
@@ -362,5 +363,6 @@ def run_gitlabform(
         noop=noop,
         output_file=output_file,
         recurse_subgroups=recurse_subgroups,
+        strict=strict,
     )
     gf.run()
