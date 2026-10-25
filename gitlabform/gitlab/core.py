@@ -308,10 +308,6 @@ class NotFoundException(Exception):
     pass
 
 
-class TimeoutWaitingForDeletion(Exception):
-    pass
-
-
 class InvalidParametersException(Exception):
     pass
 
