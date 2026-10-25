@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12.0"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -555,7 +555,7 @@ wheels = [
 
 [[package]]
 name = "gitlabform"
-version = "6.3.0"
+version = "6.3.1"
 source = { editable = "." }
 dependencies = [
     { name = "certifi" },
