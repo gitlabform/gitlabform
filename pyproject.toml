@@ -10,7 +10,7 @@ packages = ["gitlabform"]
 
 [project]
 name = "gitlabform"
-version = "6.3.0"
+version = "6.3.1"
 requires-python = ">=3.12.0"
 authors = [{ name = "Greg Dubicki and Contributors" }]
 description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
@@ -31,7 +31,7 @@ classifiers = [
 
 # Main runtime dependencies. Pinned strictly to ensure production stability.
 dependencies = [
-    "certifi==2026.7.22",
+    "certifi==2026.10.23",
     "cli-ui==0.19.0",
     "jinja2==3.1.6",
     "luddite==1.0.4",
@@ -53,7 +53,7 @@ dev = [
     { include-group = "lint" },
     { include-group = "docs" },
     { include-group = "release" },
-    "commitizen==4.18.1",
+    "commitizen==4.19.0",
     "prek==0.5.3",
 ]
 # Minimum set of dependencies required to execute the test suite.
@@ -68,19 +68,19 @@ test = [
 # Static analysis and formatting tools.
 lint = [
     "bandit==1.9.4",
-    "black==26.5.1",
+    "black==26.10.1",
     "codespell==2.4.3",
     "mypy==2.3.1",
     "mypy-extensions==1.1.0",
-    "ruff==0.16.8",
+    "ruff==0.16.9",
     "types-requests==2.33.0.20260906",
 ]
 # Documentation generation stack.
 docs = [
     "markdown==3.10.3",
-    "zensical==0.0.62",
+    "zensical==0.0.65",
     "pygments==2.21.0",
-    "pymdown-extensions==12.0.1",
+    "pymdown-extensions==12.1",
 ]
 # Tools required for building and verifying releases.
 release = [
