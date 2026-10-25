@@ -10,7 +10,7 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ### Bug Fixes
 
-* keep long configuration values from being wrapped [#1470](https://github.com/gitlabform/gitlabform/pull/1470). ([robertrotaru](https://github.com/robertrotaru))
+* keep long configuration values from being wrapped [#1470](https://github.com/gitlabform/gitlabform/pull/1470). ([rrotaru](https://github.com/rrotaru))
 
 ### Refactors
 
