@@ -1,12 +1,124 @@
 import pytest
-from gitlab import GitlabGetError
+from gitlab import GitlabGetError, GitlabListError
 
+from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.gitlab import GitlabWrapper, GitLab
 from unittest.mock import MagicMock, patch
 
 
 class TestPythonGitlab:
+
+    @staticmethod
+    def _group(full_path: str) -> MagicMock:
+        group = MagicMock()
+        group.full_path = full_path
+        group.asdict.return_value = {"full_path": full_path}
+        return group
+
+    @staticmethod
+    def _project(path_with_namespace: str) -> MagicMock:
+        project = MagicMock()
+        project.path_with_namespace = path_with_namespace
+        project.asdict.return_value = {"path_with_namespace": path_with_namespace}
+        return project
+
+    # ------------------------------------------------- case-insensitive lookups
+
+    def test_get_group_case_insensitive_with_exact_case(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab.groups.get = MagicMock(return_value=self._group("Group/Sub"))
+
+        assert python_gitlab.get_group_case_insensitive("Group/Sub") == {"full_path": "Group/Sub"}
+        python_gitlab.groups.get.assert_called_once_with("Group/Sub", with_projects=False)
+
+    def test_get_group_case_insensitive_falls_back_to_search(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab.groups.get = MagicMock(side_effect=GitlabGetError("404 Not Found", response_code=404))
+        python_gitlab.groups.list = MagicMock(return_value=[self._group("Other"), self._group("Group/Sub")])
+
+        assert python_gitlab.get_group_case_insensitive("group/SUB") == {"full_path": "Group/Sub"}
+        python_gitlab.groups.list.assert_called_once_with(search="group/sub", get_all=True)
+
+    def test_get_group_case_insensitive_not_found(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab.groups.get = MagicMock(side_effect=GitlabGetError("404 Not Found", response_code=404))
+        python_gitlab.groups.list = MagicMock(return_value=[])
+
+        with pytest.raises(NotFoundException):
+            python_gitlab.get_group_case_insensitive("no/such/group")
+
+    def test_get_project_case_insensitive_falls_back_to_search(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab.projects.get = MagicMock(side_effect=GitlabGetError("404 Not Found", response_code=404))
+        python_gitlab.projects.list = MagicMock(return_value=[self._project("Group/Project")])
+
+        assert python_gitlab.get_project_case_insensitive("group/project") == {"path_with_namespace": "Group/Project"}
+        python_gitlab.projects.list.assert_called_once_with(search="group/project", get_all=True)
+
+    def test_get_project_case_insensitive_not_found(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab.projects.get = MagicMock(side_effect=GitlabGetError("404 Not Found", response_code=404))
+        python_gitlab.projects.list = MagicMock(return_value=[])
+
+        with pytest.raises(NotFoundException):
+            python_gitlab.get_project_case_insensitive("no/such/project")
+
+    # ------------------------------------------------------- groups & projects
+
+    def test_get_groups_as_admin_gets_all_available(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=True)
+        python_gitlab.groups.list = MagicMock(return_value=[self._group("b"), self._group("a")])
+
+        assert python_gitlab.get_groups() == ["a", "b"]
+        python_gitlab.groups.list.assert_called_once_with(get_all=True, all_available=True)
+
+    def test_get_groups_as_non_admin_requires_reporter_access(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        python_gitlab.groups.list = MagicMock(return_value=[self._group("a")])
+
+        assert python_gitlab.get_groups() == ["a"]
+        python_gitlab.groups.list.assert_called_once_with(get_all=True, min_access_level=20)
+
+    def test_get_projects_filters_to_group_namespace_and_sorts(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+        group.projects.list.return_value = [
+            self._project("group/b"),
+            self._project("group/a"),
+            # shared with the group, but in another namespace
+            self._project("other/shared"),
+        ]
+
+        assert python_gitlab.get_projects("group") == ["group/a", "group/b"]
+        group.projects.list.assert_called_once_with(
+            get_all=True, include_subgroups=True, archived=False, min_access_level=20
+        )
+
+    def test_get_projects_can_return_whole_project_dicts(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+        group.projects.list.return_value = [self._project("group/a")]
+
+        assert python_gitlab.get_projects("group", include_archived=True, only_names=False) == [
+            {"path_with_namespace": "group/a"}
+        ]
+        group.projects.list.assert_called_once_with(get_all=True, include_subgroups=True, min_access_level=20)
+
+    def test_get_projects_returns_empty_list_when_group_not_found(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+        group.projects.list.side_effect = GitlabListError("404 Not Found", response_code=404)
+
+        assert python_gitlab.get_projects("no/such/group") == []
 
     def test_get_group_by_path_cached_excludes_projects(self):
         python_gitlab = PythonGitlab(MagicMock())

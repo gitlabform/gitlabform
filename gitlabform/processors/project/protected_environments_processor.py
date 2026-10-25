@@ -41,6 +41,10 @@ class ProtectedEnvironmentsProcessor(AbstractProcessor):
                 processed_names.add(name)
                 continue
 
+            # "delete" is a gitlabform control key, not an environment attribute: it must not
+            # trigger an update on every run, nor be sent to the API
+            env_config = {k: v for k, v in env_config.items() if k != "delete"}
+
             if matching:
                 if self._needs_update(matching.asdict(), env_config):
                     # The API has an update endpoint (https://docs.gitlab.com/api/protected_environments/),

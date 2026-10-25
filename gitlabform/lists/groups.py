@@ -2,6 +2,7 @@ import sys
 from logging import critical
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab.core import NotFoundException
+from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.lists import OmissionReason, Groups
 
 
@@ -12,8 +13,8 @@ class GroupsProvider:
     and the fact that the group and project names case are somewhat case-sensitive.
     """
 
-    def __init__(self, gitlab, configuration, recurse_subgroups):
-        self.gitlab = gitlab
+    def __init__(self, gl: PythonGitlab, configuration, recurse_subgroups):
+        self.gl = gl
         self.configuration = configuration
         self.recurse_subgroups = recurse_subgroups
 
@@ -35,12 +36,12 @@ class GroupsProvider:
 
         # it may be a subgroup or a group...
         try:
-            maybe_group = self.gitlab.get_group_case_insensitive(target)
+            maybe_group = self.gl.get_group_case_insensitive(target)
             path = maybe_group["full_path"]
             groups.add_requested([path])
 
             if recurse_subgroups:
-                descendants = self.gitlab.get_group_descendants(path)
+                descendants = self.gl.get_group_descendants(path)
                 groups.add_requested([group["full_path"] for group in descendants])
 
                 groups.add_omitted(
@@ -58,7 +59,7 @@ class GroupsProvider:
         groups = Groups()
 
         if target == "ALL":
-            groups.add_requested(self.gitlab.get_groups())
+            groups.add_requested(self.gl.get_groups())
         else:  # ALL_DEFINED
             groups.add_requested(self.configuration.get_groups())
 
@@ -73,7 +74,7 @@ class GroupsProvider:
     def _verify_if_groups_exist(self, groups: list):
         for group in groups:
             try:
-                self.gitlab.get_group_case_insensitive(group)
+                self.gl.get_group_case_insensitive(group)
             except NotFoundException:
                 critical(f"Configuration contains group {group} but it cannot be found in GitLab!")
                 sys.exit(EXIT_INVALID_INPUT)

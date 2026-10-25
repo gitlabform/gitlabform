@@ -34,10 +34,12 @@ class MembersProcessor(AbstractProcessor):
         self._process_users(project_and_group, users, enforce_members, keep_bots)
 
     def _process_groups(self, project_and_group: str, groups: dict, enforce_members: bool):
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
+
         if groups:
             info("Processing groups as members...")
 
-            current_groups = self.gitlab.get_groups_from_project(project_and_group)
+            current_groups = self._get_shared_with_groups(project)
             for group in groups:
                 info(f"Processing group {group}...")
                 expires_at = format_expires_at(groups[group].get("expires_at"))
@@ -54,16 +56,16 @@ class MembersProcessor(AbstractProcessor):
                     info(f"Current settings for '{common_group_name}' are: {current_groups[common_group_name]}")
                 else:
                     info(f"Setting group '{common_group_name}' as a member")
-                    access = access_level
-                    expiry = expires_at
 
                     # we will remove group access first and then re-add them,
                     # to ensure that the groups have the expected access level
-                    self.gitlab.unshare_with_group(project_and_group, common_group_name)
-                    self.gitlab.share_with_group(project_and_group, common_group_name, access, expiry)
+                    self._unshare(project, common_group_name)
+                    # access_level can be None when it's not in the config; the API will then reject
+                    # the request, like it did with the previous implementation
+                    project.share(self.gl.get_group_id(common_group_name), access_level, expires_at)  # type: ignore[arg-type]
 
         if enforce_members:
-            current_groups = self.gitlab.get_groups_from_project(project_and_group)
+            current_groups = self._get_shared_with_groups(project)
 
             groups_in_config = [group_name.lower() for group_name in groups.keys()]
             groups_in_gitlab = current_groups.keys()
@@ -71,9 +73,27 @@ class MembersProcessor(AbstractProcessor):
 
             for group_not_in_config in groups_not_in_config:
                 info(f"Removing group '{group_not_in_config}' that is not configured to be a member.")
-                self.gitlab.unshare_with_group(project_and_group, group_not_in_config)
+                self._unshare(project, group_not_in_config)
         else:
             info("Not enforcing group members.")
+
+    def _get_shared_with_groups(self, project: Project) -> dict:
+        # fetch the project fresh instead of using the cached object,
+        # because the shared groups are changed within this processor's run.
+        # The keys are lowercased because the group names in the config are
+        # compared in lowercase too.
+        project_info = self.gl.projects.get(project.id)
+        return {group["group_full_path"].lower(): group for group in project_info.shared_with_groups}
+
+    def _unshare(self, project: Project, group_name: str) -> None:
+        group_id = self.gl.get_group_id(group_name)
+        try:
+            project.unshare(group_id)
+        except GitlabDeleteError as e:
+            # 404 means the group is not shared with the project, which is fine for idempotency
+            if e.response_code != 404:
+                raise
+            info(f"Group with id {group_id} could not be unshared, likely was never shared to begin with")
 
     def _process_users(
         self,
