@@ -101,8 +101,10 @@ class PythonGitlab(Gitlab):
             if e.response_code != 404:
                 raise
 
-        # try case insensitive
-        for group in self.groups.list(search=some_string.lower(), get_all=True):
+        # try case insensitive; search by the last path component, because GitLab's
+        # search only matches a group's own name/path, not its full path
+        last_path_component = some_string.lower().rsplit("/", 1)[-1]
+        for group in self.groups.list(search=last_path_component, get_all=True):
             if group.full_path.lower() == some_string.lower():
                 return group.asdict()
         raise NotFoundException(f"Group/subgroup with path '{some_string}' not found.")
@@ -116,9 +118,12 @@ class PythonGitlab(Gitlab):
             if e.response_code != 404:
                 raise
 
-        # try case insensitive; note: no simple=True here, because the callers
-        # need fields like "archived" that the simple representation lacks
-        for project in self.projects.list(search=some_string.lower(), get_all=True):
+        # try case insensitive; search by the last path component, because GitLab's
+        # search only matches a project's own name/path, not its full path.
+        # Note: no simple=True here, because the callers need fields like "archived"
+        # that the simple representation lacks.
+        last_path_component = some_string.lower().rsplit("/", 1)[-1]
+        for project in self.projects.list(search=last_path_component, get_all=True):
             if project.path_with_namespace.lower() == some_string.lower():
                 return project.asdict()
         raise NotFoundException(f"Project with path '{some_string}' not found.")
@@ -166,8 +171,12 @@ class PythonGitlab(Gitlab):
                 raise
             projects = []
 
+        # compare case-insensitively, because the group may be spelled with a different
+        # case in the config than its canonical path in GitLab; the returned paths
+        # are the canonical ones from GitLab
+        group_prefix = group.lower() + "/"
         projects_in_group_namespace = [
-            project.asdict() for project in projects if project.path_with_namespace.startswith(group + "/")
+            project.asdict() for project in projects if project.path_with_namespace.lower().startswith(group_prefix)
         ]
 
         if only_names:

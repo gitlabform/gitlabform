@@ -38,7 +38,9 @@ class TestPythonGitlab:
         python_gitlab.groups.list = MagicMock(return_value=[self._group("Other"), self._group("Group/Sub")])
 
         assert python_gitlab.get_group_case_insensitive("group/SUB") == {"full_path": "Group/Sub"}
-        python_gitlab.groups.list.assert_called_once_with(search="group/sub", get_all=True)
+        # the search is done by the last path component, because GitLab's search
+        # only matches a group's own name/path, not its full path
+        python_gitlab.groups.list.assert_called_once_with(search="sub", get_all=True)
 
     def test_get_group_case_insensitive_not_found(self):
         python_gitlab = PythonGitlab(MagicMock())
@@ -54,7 +56,7 @@ class TestPythonGitlab:
         python_gitlab.projects.list = MagicMock(return_value=[self._project("Group/Project")])
 
         assert python_gitlab.get_project_case_insensitive("group/project") == {"path_with_namespace": "Group/Project"}
-        python_gitlab.projects.list.assert_called_once_with(search="group/project", get_all=True)
+        python_gitlab.projects.list.assert_called_once_with(search="project", get_all=True)
 
     def test_get_project_case_insensitive_not_found(self):
         python_gitlab = PythonGitlab(MagicMock())
@@ -98,6 +100,16 @@ class TestPythonGitlab:
         group.projects.list.assert_called_once_with(
             get_all=True, include_subgroups=True, archived=False, min_access_level=20
         )
+
+    def test_get_projects_matches_group_namespace_case_insensitively(self):
+        # the group may be spelled with a different case in the config than in GitLab
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+        group.projects.list.return_value = [self._project("group/a")]
+
+        assert python_gitlab.get_projects("GROUP") == ["group/a"]
 
     def test_get_projects_can_return_whole_project_dicts(self):
         python_gitlab = PythonGitlab(MagicMock())
