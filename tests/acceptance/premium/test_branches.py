@@ -665,3 +665,61 @@ class TestBranches:
 
         assert found_deploy_key_1 is True, "First deploy key should still be present (additive design)"
         assert found_deploy_key_2 is True, "Second deploy key should have been added"
+
+    def test__no_access_push_rule_keeps_deploy_key(self, project, branch, public_ssh_key):
+        """
+        Tests that changing allowed_to_push from a role to "No Access" removes the role rule
+        but keeps a deploy key rule, which GitLab also reports with an access_level.
+        """
+        try:
+            project.protectedbranches.get(branch).delete()
+        except GitlabGetError:
+            pass
+
+        deploy_key = project.keys.create(
+            {
+                "title": "test-deploy-key-no-access",
+                "key": public_ssh_key,
+                "can_push": True,
+            }
+        )
+
+        # 1. Maintainers and the deploy key may push
+        config_with_maintainers_and_deploy_key = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                allowed_to_push:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+                  - deploy_key_id: {deploy_key.id}
+                allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+        """
+        run_gitlabform(config_with_maintainers_and_deploy_key, project.path_with_namespace)
+
+        # 2. No role may push. The deploy key is not in this config.
+        config_with_no_access = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                allowed_to_push:
+                  - access_level: {AccessLevel.NO_ACCESS.value}
+                allowed_to_merge:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+        """
+        run_gitlabform(config_with_no_access, project.path_with_namespace)
+
+        push_access_levels = project.protectedbranches.get(branch).push_access_levels
+        role_levels = {
+            access["access_level"]
+            for access in push_access_levels
+            if access.get("deploy_key_id") is None and access.get("user_id") is None and access.get("group_id") is None
+        }
+        found_deploy_key = any(access.get("deploy_key_id") == deploy_key.id for access in push_access_levels)
+
+        assert role_levels == {AccessLevel.NO_ACCESS.value}, "The Maintainer push rule should have been replaced"
+        assert found_deploy_key is True, "The deploy key push rule should have been kept"
