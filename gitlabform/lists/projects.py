@@ -8,6 +8,7 @@ from gitlabform.lists import OmissionReason, Groups, Projects
 from gitlabform.lists.groups import GroupsProvider
 
 from gitlabform.gitlab.core import NotFoundException
+from gitlabform.gitlab.python_gitlab import PythonGitlab
 
 
 class ProjectsProvider(GroupsProvider):
@@ -21,13 +22,13 @@ class ProjectsProvider(GroupsProvider):
 
     def __init__(
         self,
-        gitlab,
+        gl: PythonGitlab,
         configuration,
         include_archived_projects,
         include_projects_scheduled_for_deletion,
         recurse_subgroups,
     ):
-        super().__init__(gitlab, configuration, recurse_subgroups)
+        super().__init__(gl, configuration, recurse_subgroups)
         self.include_archived_projects = include_archived_projects
         self.include_projects_scheduled_for_deletion = include_projects_scheduled_for_deletion
 
@@ -54,7 +55,7 @@ class ProjectsProvider(GroupsProvider):
 
         # it may be a single project
         try:
-            maybe_project = self.gitlab.get_project_case_insensitive(target)
+            maybe_project = self.gl.get_project_case_insensitive(target)
             projects.add_requested([maybe_project["path_with_namespace"]])
 
         except NotFoundException:
@@ -144,7 +145,7 @@ class ProjectsProvider(GroupsProvider):
         scheduled_for_deletion = []
         for project in projects:
             try:
-                project_object = self.gitlab.get_project_case_insensitive(project)
+                project_object = self.gl.get_project_case_insensitive(project)
                 if not self.include_archived_projects and project_object["archived"]:
                     archived.append(project_object["path_with_namespace"])
                 if not self.include_projects_scheduled_for_deletion and project_object.get("marked_for_deletion_on"):
@@ -180,9 +181,9 @@ class ProjectsProvider(GroupsProvider):
         scheduled_for_deletion = []
         for group in groups:
             if self.include_archived_projects and self.include_projects_scheduled_for_deletion:
-                all += self.gitlab.get_projects(group, include_archived=True)
+                all += self.gl.get_projects(group, include_archived=True)
             else:
-                project_objects = self.gitlab.get_projects(group, include_archived=True, only_names=False)
+                project_objects = self.gl.get_projects(group, include_archived=True, only_names=False)
                 for project_object in project_objects:
                     project = project_object["path_with_namespace"]
                     all.append(project)
@@ -219,7 +220,7 @@ class ProjectsProvider(GroupsProvider):
                 continue
 
             try:
-                maybe_group = self.gitlab.get_group_case_insensitive(pattern_group)
+                maybe_group = self.gl.get_group_case_insensitive(pattern_group)
                 group_path = maybe_group["full_path"]
             except NotFoundException:
                 debug(
@@ -230,7 +231,7 @@ class ProjectsProvider(GroupsProvider):
                 continue
 
             try:
-                all_project_objects = self.gitlab.get_projects(group_path, include_archived=True, only_names=False)
+                all_project_objects = self.gl.get_projects(group_path, include_archived=True, only_names=False)
             except NotFoundException:
                 all_project_objects = []
 
@@ -267,7 +268,7 @@ class ProjectsProvider(GroupsProvider):
                 "Checking if project transfer source ('%s') exists in GitLab",
                 project_transfer_source,
             )
-            maybe_project = self.gitlab.get_project_case_insensitive(project_transfer_source)
+            maybe_project = self.gl.get_project_case_insensitive(project_transfer_source)
             debug(
                 "Project transfer source ('%s') exists",
                 project_transfer_source,
