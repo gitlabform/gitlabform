@@ -17,6 +17,13 @@ class GroupMergeRequestsApprovalsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("group_merge_requests_approvals", gitlab)
 
+    def _can_proceed(self, group: str, configuration: dict) -> bool:
+        if "/" in group:
+            debug(f"Skipping group_merge_requests_approvals for '{group}' - only supported for top-level groups")
+            return False
+
+        return True
+
     def _get_current_state(self, group: str) -> dict | None:
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
         settings_in_gitlab = self._get_group_merge_requests_approvals(gitlab_group)
