@@ -243,3 +243,77 @@ class TestBranchesProcessor:
         result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
         # Additive Design: Omitted users should be retained, not destroyed.
         assert result == []
+
+    def test_build_patch_request_data_no_access_keeps_deploy_key_listed_after_role(self):
+        # A deploy key record carries an access_level too. "No Access" must only replace role-based records.
+        transformed_access_levels = [
+            {
+                "access_level": AccessLevel.NO_ACCESS.value,
+            }
+        ]
+        existing_records = tuple(
+            [
+                {"access_level": AccessLevel.MAINTAINER.value, "id": 17},
+                {"access_level": AccessLevel.MAINTAINER.value, "deploy_key_id": 5, "id": 18},
+            ]
+        )
+
+        result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [
+            {
+                "access_level": AccessLevel.NO_ACCESS.value,
+            },
+            {
+                "id": 17,
+                "_destroy": True,
+            },
+        ]
+
+    def test_build_patch_request_data_no_access_keeps_deploy_key_listed_before_role(self):
+        transformed_access_levels = [
+            {
+                "access_level": AccessLevel.NO_ACCESS.value,
+            }
+        ]
+        existing_records = tuple(
+            [
+                {"access_level": AccessLevel.MAINTAINER.value, "deploy_key_id": 5, "id": 18},
+                {"access_level": AccessLevel.MAINTAINER.value, "id": 17},
+            ]
+        )
+
+        result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [
+            {
+                "access_level": AccessLevel.NO_ACCESS.value,
+            },
+            {
+                "id": 17,
+                "_destroy": True,
+            },
+        ]
+
+    def test_build_patch_request_data_no_access_keeps_user_and_group_records(self):
+        transformed_access_levels = [
+            {
+                "access_level": AccessLevel.NO_ACCESS.value,
+            }
+        ]
+        existing_records = tuple(
+            [
+                {"access_level": AccessLevel.MAINTAINER.value, "id": 17},
+                {"access_level": AccessLevel.DEVELOPER.value, "user_id": 23, "id": 19},
+                {"access_level": AccessLevel.DEVELOPER.value, "group_id": 54, "id": 20},
+            ]
+        )
+
+        result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [
+            {
+                "access_level": AccessLevel.NO_ACCESS.value,
+            },
+            {
+                "id": 17,
+                "_destroy": True,
+            },
+        ]
