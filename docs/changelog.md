@@ -6,6 +6,22 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.3.1
+
+### Bug Fixes
+
+* keep long configuration values from being wrapped [#1470](https://github.com/gitlabform/gitlabform/pull/1470). ([rrotaru](https://github.com/rrotaru))
+
+### Refactors
+
+* migrate merge requests approval rules processor to python-gitlab [#1459](https://github.com/gitlabform/gitlabform/pull/1459). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.3.0
 
 ### Features

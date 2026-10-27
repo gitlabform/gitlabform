@@ -39,9 +39,9 @@ Please see the below doc sections for more info about these packages.
 
 ## Common pattern - multiple inheritance
 
-In many of the above packages we are using _multiple inheritance_.
- 
-The basic features are often implemented in the "core" class defined in `core.py`. Extensions to it are defined in all other
+The legacy `gitlabform.gitlab` package uses _multiple inheritance_.
+
+The basic features are implemented in the "core" class defined in `core.py`. Extensions to it are defined in other
 files as "feature" classes that inherit the "core". Finally, there is an "everything" class that groups them all - it is
 defined in the `__init__.py` file.
 
@@ -63,9 +63,11 @@ logic for skipping the configuration parts and running in dry-run mode. The proc
 packages - `group` where the processors applied to the group settings are implemented and `project` - where processors
 executed on the project level are located.
 
-Since v2.2.0 there is a new way of implementing processors - by inheriting form `MultipleEntitiesProcessor` class.
-It should be applied for new features which manage 0-N entities of some kind under a group or a project.
-See `BadgesProcessor` as an example how to use it.
+Processors call the GitLab API through `python-gitlab` (available as `self.gl`). For features that manage
+0-N entities of some kind under a group or a project, see `DeployKeysProcessor` or `GroupLDAPLinksProcessor`
+as examples of the common pattern: list the existing entities, match them against the config by their
+identifying fields, and apply the changes (add, update or delete, and optionally `enforce`). The order of
+these operations differs per processor, where API constraints demand it.
 
 #### Usage
 
@@ -74,7 +76,6 @@ the code in the processor classes (for example, in `BranchesProcessor`).
 
 If you want to **add support for a new config section** (= completely new feature), then you need to:
 
-0. (TODO: expand this sections) Consider writing a new processor using `MultipleEntitiesProcessor` class as a base.
 1. Create a new class `group_<new_config_section_name>_processor` (if it applies to the group settings) or 
 `<new_config_section_name>_processor` (if it applies to project settings) and implement two methods:
     - `_process_configuration` - which does the actual processing by calling the API and applying the changes in GitLab;
@@ -97,25 +98,17 @@ GitLab API requests with proper authentication, pagination, retries, timeouts an
 
 Sometimes there is some logic in these methods if:
 
-* we only need a specific part of the response from GitLab API - see `GitLabProjects.get_all_projects()` as an example,
+* we only need a specific part of the response from GitLab API - see `GitLabGroups.get_groups()` as an example,
 * some GitLab APIs need some workarounds for their bugs or documentation inconsistencies, like:
-    * some APIs declare in the docs that they accept both "group/project" string OR a project id while in fact only the latter works - see `GitLabProjects.post_approvals()` as an example,
+    * some APIs declare in the docs that they accept both "group/project" string OR a project id while in fact only the latter works,
     * some APIs return invalid HTTP error codes, like 404 instead of 400 - see `GroupLDAPLinksProcessor._create_link` as an example.
-
-**Note**: Some of the code here is **NOT used by the GitLabForm app**, but utilized by internal Egnyte
-applications that have not (yet) switched to the more standard `python-gitlab`.
 
 #### Usage
 
-If you want to **add/change/fix code that operates on an existing GitLab API** you should look around 
-the "feature" classes in this package (for example `GitLabMergeRequests` in `merge_requests.py`).
-
-If you want to **add code that operates on the new GitLab API** you should:
- 
-1. create a new `new_gitlab_api_name.py` file in `gitlabform.gitlab` and define a "feature" class there
-   that inherits `GitLabCore` (for example: `GitLabApiName`).
-2. add the new feature class to the list of classes inherited by the "everything" `GitLab` class
-   defined in `__init__.py`. 
+Do not add new code here: new code should use `python-gitlab` (see the processors for examples).
+The remaining "feature" classes in this package (`GitLabGroups` in `groups.py` and `GitLabProjects`
+in `projects.py`) only exist because `gitlabform.lists.*` and a few processors still use them,
+and they will be removed once those are migrated to `python-gitlab` too.
 
 ### gitlabform.configuration.*
 

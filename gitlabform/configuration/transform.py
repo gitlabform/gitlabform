@@ -8,7 +8,7 @@ from yamlpath.exceptions import YAMLPathException
 from yamlpath.wrappers import ConsolePrinter
 
 from gitlabform import util
-from gitlabform.constants import EXIT_INVALID_INPUT, APPROVAL_RULE_NAME
+from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.configuration import Configuration
 from gitlabform.gitlab import AccessLevel
 from gitlabform.gitlab import GitLab
