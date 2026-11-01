@@ -6,6 +6,18 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.3.2
+
+### Refactors
+
+* remove dead code after the python-gitlab migration [#1476](https://github.com/gitlabform/gitlabform/pull/1476). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.3.1
 
 ### Bug Fixes
