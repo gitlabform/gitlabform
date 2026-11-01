@@ -58,8 +58,8 @@ dev = [
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
-    "coverage==7.16.1",
-    "cryptography==50.0.1",
+    "coverage==7.16.2",
+    "cryptography==50.0.2",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "pytest-rerunfailures==16.7",
@@ -70,9 +70,9 @@ lint = [
     "bandit==1.9.4",
     "black==26.10.1",
     "codespell==2.4.3",
-    "mypy==2.3.1",
+    "mypy==2.4.0",
     "mypy-extensions==1.1.0",
-    "ruff==0.16.9",
+    "ruff==0.16.10",
     "types-requests==2.33.0.20260906",
 ]
 # Documentation generation stack.
