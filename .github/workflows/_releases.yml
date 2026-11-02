@@ -96,6 +96,37 @@ jobs:
       - prep-release
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
+      # Install the package and its locked runtime dependencies (uv.lock) into a clean
+      # virtualenv. The SBOM describes that locked set, which is also what the Docker image ships.
+      - name: Install package with runtime dependencies
+        run: uv sync --frozen --no-dev --no-editable
+      # Name the SBOM after the version without the "v" tag prefix, matching the PyPI and
+      # Docker versions, and tell syft that the scanned directory is gitlabform itself so the
+      # root component of the SBOM is not a bare directory path.
+      - name: Prepare SBOM metadata
+        env:
+          TAG: ${{ needs.prep-release.outputs.semver_tag }}
+        run: |
+          VERSION="${TAG#v}"
+          echo "SBOM_FILE=gitlabform-${VERSION}.cdx.json" >> "$GITHUB_ENV"
+          printf 'source:\n  name: gitlabform\n  version: "%s"\n' "$VERSION" > syft-config.yaml
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .venv/lib
+          config: syft-config.yaml
+          format: cyclonedx-json
+          output-file: ${{ env.SBOM_FILE }}
+          upload-artifact: false
+          upload-release-assets: false
       - name: Create release in GitHub
         uses: ncipollo/release-action@v1
         with:
@@ -103,6 +134,9 @@ jobs:
           name: ${{ needs.prep-release.outputs.semver_tag }}
           body: "(this is a placeholder, it will be replaced with a changelog contents)"
           token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: ${{ env.SBOM_FILE }}
+          artifactContentType: application/vnd.cyclonedx+json
+          artifactErrorsFailBuild: true
 
   publish-to-pypi:
     name: Publish PyPI
@@ -189,3 +223,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
+          # Attach an SBOM and full build provenance to the image index in GHCR
+          sbom: true
+          provenance: mode=max

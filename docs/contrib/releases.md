@@ -16,9 +16,9 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
 
     Following the above steps when a new tag is created, GitHub Action workflow will do following:
 
-    - Create a docker image containing new version of gitlabform and publish to [github's package registry under gitlabform](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform).
+    - Create a docker image containing new version of gitlabform and publish to [github's package registry under gitlabform](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform). The image is published with an SBOM and build provenance attestations attached, which can be inspected with `docker buildx imagetools inspect ghcr.io/gitlabform/gitlabform:<version> --format '{{ json .SBOM }}'`.
     - Upload new version of gitlabform to [pypi package registry under gitlabform](https://pypi.org/project/gitlabform/).
-    - A corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) will be created that references the new tag.
+    - A corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) will be created that references the new tag. A [CycloneDX](https://cyclonedx.org/) SBOM (`gitlabform-<version>.cdx.json`) is attached to the release as an asset. It lists the package and the locked runtime dependencies from `uv.lock`, which is the set the Docker image ships. Installing from PyPI on other platforms may resolve transitive dependencies differently.
 
     The release workflow also verifies that the commit on `main` passed the build and quality. It will trigger a release workflow that will proceed only if a corresponding version tag exists in GitHub and main branch workflow on that commit passed. The release workflow can also be triggered manually, which will require 2 inputs: a release version tag and main branch workflow's run id from corresponding commit.
 
