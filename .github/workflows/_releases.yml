@@ -137,12 +137,22 @@ jobs:
           artifacts: ${{ env.SBOM_FILE }}
           artifactContentType: application/vnd.cyclonedx+json
           artifactErrorsFailBuild: true
+          # On a rerun the release already exists: replace the SBOM asset but keep the
+          # release body (the changelog is pasted in by hand), name, draft and prerelease state
+          allowUpdates: true
+          replacesArtifacts: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
 
   publish-to-pypi:
     name: Publish PyPI
     if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
       - prep-release
+      # Publishing to PyPI cannot be undone, so it waits for the GitHub release and its SBOM
+      - publish-to-github
     runs-on: ubuntu-latest
     environment:
       name: pypi
