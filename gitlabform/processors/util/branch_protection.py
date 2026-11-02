@@ -138,8 +138,13 @@ class BranchProtection:
                         item.get("user_id") is None
                         and item.get("group_id") is None
                         and item.get("deploy_key_id") is None
+                        and existing_records_user_id is None
+                        and existing_records_group_id is None
+                        and existing_records_deploy_key_id is None
                     ):
-                        # Role-based rule logic
+                        # Role-based rule logic. Only compare with role-based records: a user,
+                        # group or deploy key record also carries an access_level, but it is
+                        # not a role, so "No Access" must not mark it for destruction.
                         local_level = item.get("access_level")
                         if local_level == existing_records_access_level:
                             is_match = True
