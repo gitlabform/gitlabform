@@ -1,4 +1,5 @@
 import sys
+from copy import deepcopy
 from typing import Optional, Any
 
 from logging import info, warning, error, critical
@@ -13,6 +14,7 @@ from gitlabform.constants import EXIT_INVALID_INPUT, EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.util.branch_protection import BranchProtection
+from gitlabform.processors.util.difference_logger import DifferenceLogger
 
 
 class BranchesProcessor(AbstractProcessor):
@@ -37,6 +39,53 @@ class BranchesProcessor(AbstractProcessor):
         self.custom_diff_analyzers["merge_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
         self.custom_diff_analyzers["push_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
         self.custom_diff_analyzers["unprotect_access_levels"] = BranchProtection.naive_access_level_diff_analyzer
+
+    def _print_diff(self, project_and_group: str, entity_config: dict, diff_only_changed: bool):
+        """
+        Dry-run diff with one row per setting (e.g. 'main.allow_force_push'), comparing GitLab to the config.
+        Extra access rules in GitLab are not shown as changes, because applying never removes them.
+        """
+        project = self.gl.get_project_by_path_cached(project_and_group)
+        protected = {branch.name: branch.attributes for branch in project.protectedbranches.list(all=True)}
+
+        branches_config = dict(entity_config)
+        branches_config.pop("skip_missing_branch", None)
+
+        current: dict = {}
+        desired: dict = {}
+        for branch_name, branch_config in branches_config.items():
+            is_protected = bool(branch_config.get("protected"))
+            wanted: dict = {"protected": is_protected}
+            if is_protected:
+                config = self.convert_user_and_group_names_to_ids(deepcopy(branch_config))
+                wanted.update(BranchProtection.map_config_to_protected_branch_get_data(config))
+
+            existing = {"protected": branch_name in protected, **protected.get(branch_name, {})}
+            for key, value in wanted.items():
+                row = f"{branch_name}.{key}"
+                desired[row] = self._simplify_access_levels(value)
+                # Applying is additive, so _needs_update decides if GitLab already satisfies the config.
+                if key in existing and not self._needs_update({key: existing[key]}, {key: value}):
+                    current[row] = desired[row]
+                elif key in existing:
+                    current[row] = self._simplify_access_levels(existing[key])
+
+        DifferenceLogger.log_diff(
+            f"{self.configuration_name} changes", current, desired, only_changed=diff_only_changed
+        )
+
+    @staticmethod
+    def _simplify_access_levels(value):
+        """Display only: keep the identifying keys of access rules and drop nulls."""
+        if not isinstance(value, list):
+            return value
+        identity_keys = ("access_level", "user_id", "group_id", "deploy_key_id")
+        simplified = []
+        for item in value:
+            if isinstance(item, dict):
+                item = {k: v for k, v in item.items() if k in identity_keys and v is not None}
+            simplified.append(item)
+        return simplified
 
     def _can_proceed(self, project_or_group: str, configuration: dict):
         branches_config = dict(configuration.get("branches", {}))
