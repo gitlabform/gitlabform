@@ -26,6 +26,7 @@ nav:
       - Pipeline schedules: reference/pipeline_schedules.md
       - Project security settings: reference/project_security_settings.md
       - Protected environments: reference/protected_environments.md
+      - Pull mirror: reference/pull_mirror.md
       - Push mirrors: reference/push_mirrors.md
       - Push rules: reference/push_rules.md
       - Resource groups: reference/resource_groups.md
