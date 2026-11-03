@@ -93,6 +93,27 @@ Some of the parameters are passed to the legacy REST client used by GitLabForm f
 | `backoff_factor` | float | `0.25` | Factor for exponential backoff between retries |
 | `retry_transient_errors` | bool | `true` | Retry requests that fail due to transient errors (429, 5xx) |
 
+## Reading values from environment variables
+
+Any string value in the config can be read from an environment variable with the `!env` tag, so that secrets do not have to be committed to git:
+
+```yaml
+projects_and_groups:
+  my-group/my-project:
+    pull_mirror:
+      url: "https://example.com/some/repo.git"
+      auth_user: "mirror-bot"
+      auth_password: !env PULL_MIRROR_TOKEN
+```
+
+In GitLab CI, [CI/CD variables](https://docs.gitlab.com/ci/variables/) are injected as environment variables, so this reads straight from a CI/CD variable. The variable must be of type "Variable" (a "File" type variable resolves to a file path, not the content) and marking it "Masked" is recommended. Note that "Protected" variables only exist in jobs on protected branches/tags.
+
+If the environment variable is not set, GitLabForm aborts with an error before processing anything.
+
+!!! warning
+
+    The resolved value is used as if it was written in the config, so it will appear in the effective configuration output file (`--output-file`) and may appear in dry-run diffs of sections that do not mask secrets.
+
 ## Projects and groups configuration
 
 ### Configuration hierarchy
