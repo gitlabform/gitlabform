@@ -101,9 +101,6 @@ class GitLabCore:
     def get_configuration(self):
         return self.configuration
 
-    def get_project(self, project_and_group_or_id):
-        return self._make_requests_to_api("projects/%s", project_and_group_or_id)
-
     def is_version_at_least(self, min_version: Union[str, version.Version]) -> bool:
         """
         Check if GitLab server version is at least the specified version
@@ -305,10 +302,6 @@ class TestRequestFailedException(Exception):
 
 
 class NotFoundException(Exception):
-    pass
-
-
-class InvalidParametersException(Exception):
     pass
 
 

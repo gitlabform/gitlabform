@@ -16,7 +16,9 @@ class GroupLDAPLinksProcessor(AbstractProcessor):
         super().__init__("group_ldap_links", gitlab)
 
     def _process_configuration(self, group_path_and_name: str, configuration: Dict):
-        configured_links: Dict = configuration.get("group_ldap_links", {})
+        # copy, so that popping "enforce" does not mutate the shared configuration,
+        # which is reused when this method is retried
+        configured_links: Dict = dict(configuration.get("group_ldap_links", {}))
         enforce = configured_links.pop("enforce", False)
 
         group: Group = self.gl.get_group_by_path_cached(group_path_and_name)
@@ -42,6 +44,10 @@ class GroupLDAPLinksProcessor(AbstractProcessor):
                     )
                 processed_keys.add(key)
                 continue
+
+            # "delete" is a gitlabform control key, not a link attribute: it must not
+            # trigger an update on every run, nor be sent to the API
+            link_config = {k: v for k, v in link_config.items() if k != "delete"}
 
             if matching:
                 if self._needs_update(matching.asdict(), link_config):
