@@ -105,34 +105,35 @@ Support is provided for both SaaS and Self-Managed/Dedicated deployments of GitL
 
 !!! warning
 
-    * user `access_level` MUST still be supplied and MUST match the base_access_level of the custom role
+    * `access_level` for a user or `group_access` for an invited group MUST still be supplied and MUST match the
+      `base_access_level` of the custom role
 
 ```yaml
 projects_and_groups:
-group_1/*:
+  group_1/*:
     group_members:
       groups:
         another-group:
-          group_access: no access
+          group_access: reporter
+          member_role: 2
       users:
         my-user:
           access_level: owner
-          member_role: 2
       enforce: true
       keep_bots: false
 ```
 
 ```yaml
 projects_and_groups:
-group_1/*:
+  group_1/*:
     group_members:
       groups:
         another-group:
-          group_access: no access
+          group_access: reporter
+          member_role: Dev_ReadOnly
       users:
         my-user:
           access_level: owner
-          member_role: Dev_ReadOnly
       enforce: true
       keep_bots: false
 ```
