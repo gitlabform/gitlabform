@@ -74,12 +74,12 @@ class GitLabCore:
         )
 
         try:
-            version_response = self._make_requests_to_api("version")
+            metadata_response = self._make_requests_to_api("metadata")
             info(
-                f"Connected to GitLab version: {version_response['version']} ({version_response['revision']}), Enterprise Edition: {version_response['enterprise']}"
+                f"Connected to GitLab version: {metadata_response['version']} ({metadata_response['revision']}), Enterprise Edition: {metadata_response['enterprise']}"
             )
-            self.version = version_response["version"]
-            self.enterprise = version_response["enterprise"]
+            self.version = metadata_response["version"]
+            self.enterprise = metadata_response["enterprise"]
 
             if self.is_version_less_than("16"):
                 warning(
