@@ -78,7 +78,7 @@ lint = [
 # Documentation generation stack.
 docs = [
     "markdown==3.11",
-    "zensical==0.0.67",
+    "zensical==0.0.69",
     "pygments==2.21.0",
     "pymdown-extensions==12.1",
 ]
