@@ -39,6 +39,7 @@ updates:
         - "pymdown-extensions"
         - "check-wheel-contents"
         - "twine"
+        - "pypi-attestations"
         - "commitizen"
         - "prek"
     groups:
@@ -67,5 +68,6 @@ updates:
         patterns:
           - "check-wheel-contents"
           - "twine"
+          - "pypi-attestations"
           - "commitizen"
           - "prek"
