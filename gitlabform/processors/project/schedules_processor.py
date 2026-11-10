@@ -184,6 +184,10 @@ class ExtendedCronPattern:
         interval = match.group("interval") or ""
         if interval:
             interval = int(interval[1:])
+            if interval < 1:
+                raise ValueError(
+                    f"Invalid step in H cron expression: {match.string!r} (step must be a positive integer)"
+                )
             times = int(default_max / interval)
             first = self._random.randint(0, interval)
             result = [str(first)]
