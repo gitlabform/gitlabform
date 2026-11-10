@@ -35,3 +35,9 @@ def test_invalid_cron_expression():
     with pytest.raises(ValueError) as exc_info:
         schedules_processor.ExtendedCronPattern(1, "* * *")
     assert str(exc_info.value) == str(ValueError("Expected 5 parts in the cron expression, got ['*', '*', '*']"))
+
+
+def test_zero_step_cron_expression():
+    with pytest.raises(ValueError) as exc_info:
+        schedules_processor._replace_extended_cron_pattern(1, "H/0 * * * *")
+    assert "step" in str(exc_info.value).lower()
