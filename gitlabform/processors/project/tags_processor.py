@@ -3,7 +3,7 @@ from logging import debug, warning, critical, error
 
 from gitlabform.constants import EXIT_PROCESSING_ERROR
 from gitlabform.gitlab import GitLab
-from gitlab import GitlabDeleteError, GitlabGetError
+from gitlab import GitlabCreateError, GitlabDeleteError, GitlabGetError
 from gitlabform.processors.abstract_processor import AbstractProcessor
 
 
@@ -76,6 +76,13 @@ class TagsProcessor(AbstractProcessor):
 
                     debug("Setting tag '%s' as *protected*", tag)
                     try:
+                        previous_rule = project.protectedtags.get(tag)
+                    except GitlabGetError as e:
+                        if e.response_code != 404:
+                            raise
+                        previous_rule = None
+
+                    try:
                         # try to unprotect first
                         project.protectedtags.delete(tag)
                     except GitlabDeleteError:
@@ -87,7 +94,30 @@ class TagsProcessor(AbstractProcessor):
                         data["allowed_to_create"] = allowed_to_create
                     if create_access_level is not None:
                         data["create_access_level"] = create_access_level
-                    project.protectedtags.create(data)
+                    try:
+                        project.protectedtags.create(data)
+                    except GitlabCreateError:
+                        if previous_rule is None:
+                            raise
+                        warning(f"Could not protect tag '{tag}' as configured, restoring its previous protection")
+                        # GitLab CE takes a role only as create_access_level, not in allowed_to_create
+                        previous_data: dict = {"name": tag, "allowed_to_create": []}
+                        for level in previous_rule.create_access_levels:
+                            if level.get("user_id"):
+                                previous_data["allowed_to_create"].append({"user_id": level["user_id"]})
+                            elif level.get("group_id"):
+                                previous_data["allowed_to_create"].append({"group_id": level["group_id"]})
+                            elif level.get("deploy_key_id"):
+                                previous_data["allowed_to_create"].append({"deploy_key_id": level["deploy_key_id"]})
+                            elif "create_access_level" not in previous_data:
+                                previous_data["create_access_level"] = level["access_level"]
+                            else:
+                                previous_data["allowed_to_create"].append({"access_level": level["access_level"]})
+                        try:
+                            project.protectedtags.create(previous_data)
+                        except GitlabCreateError as restore_error:
+                            error(f"Could not restore the previous protection of tag '{tag}': {restore_error}")
+                        raise
                 else:
                     debug("Setting tag '%s' as *unprotected*", tag)
                     project.protectedtags.delete(tag)
@@ -99,10 +129,12 @@ class TagsProcessor(AbstractProcessor):
                 else:
                     warning(message)
             except GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
                 if self.strict:
                     critical(
                         e,
                     )
                     sys.exit(EXIT_PROCESSING_ERROR)
                 else:
-                    warning(message)
+                    warning(e)
