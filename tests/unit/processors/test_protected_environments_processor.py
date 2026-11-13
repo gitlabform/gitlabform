@@ -72,6 +72,17 @@ class TestProtectedEnvironmentsProcessor:
         existing.delete.assert_not_called()
         project.protected_environments.create.assert_not_called()
 
+    def test_delete_false_is_ignored_and_not_sent_to_the_api(self):
+        # "delete" is a gitlabform control key: an explicit "delete: false" must not
+        # trigger a recreate on every run, nor end up in the API payload
+        existing = self._env("production", MAINTAINER_ACCESS)
+        project = self._project(existing)
+
+        self._process({"prod": {"name": "production", "deploy_access_levels": MAINTAINER_ACCESS, "delete": False}})
+
+        existing.delete.assert_not_called()
+        project.protected_environments.create.assert_not_called()
+
     # --------------------------------------------------------------- delete
 
     def test_delete_true_removes_matching_environment(self):
