@@ -1,5 +1,8 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+from gitlab.exceptions import GitlabError
+
 from gitlabform.processors.group.group_merge_requests_approvals_processor import (
     GroupMergeRequestsApprovalsProcessor,
 )
@@ -74,3 +77,11 @@ class TestGroupMergeRequestsApprovalsProcessor:
         self.processor._process_configuration("test/group", configuration)
 
         self.processor.gl.http_put.assert_not_called()
+
+    def test_raises_when_group_settings_lookup_fails(self):
+        self.processor.gl.http_get.side_effect = GitlabError("403")
+
+        configuration = SafeDict({"group_merge_requests_approvals": {"allow_author_approval": False}})
+
+        with pytest.raises(GitlabError):
+            self.processor._process_configuration("test/group", configuration)

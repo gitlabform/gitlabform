@@ -62,7 +62,7 @@ class GroupMergeRequestsApprovalsProcessor(AbstractProcessor):
                 f"Failed to get the merge requests approvals settings "
                 f"for group {gitlab_group.full_path}: {e} {REQUIREMENTS_HINT}"
             )
-            return None
+            raise
 
     def _update_group_merge_requests_approvals(self, gitlab_group: Group, settings: dict) -> None:
         try:
@@ -72,7 +72,7 @@ class GroupMergeRequestsApprovalsProcessor(AbstractProcessor):
                 f"Failed to update the merge requests approvals settings "
                 f"for group {gitlab_group.full_path}: {e} {REQUIREMENTS_HINT}"
             )
-            return
+            raise
 
         info(self._extract_setting_values(updated_settings))
         info("group_merge_requests_approvals AFTER: ^^^")
