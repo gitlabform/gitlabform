@@ -1,7 +1,7 @@
 [build-system]
 # Modern build backend (PEP 517). Pinned for reproducibility.
 # hatchling is preferred for uv-centric projects.
-requires = ["hatchling==1.32.4"]
+requires = ["hatchling==1.33.0"]
 build-backend = "hatchling.build"
 
 # Build backend configuration.
@@ -10,7 +10,7 @@ packages = ["gitlabform"]
 
 [project]
 name = "gitlabform"
-version = "6.3.1"
+version = "6.3.2"
 requires-python = ">=3.12.0"
 authors = [{ name = "Greg Dubicki and Contributors" }]
 description = "🏗 Specialized configuration as a code tool for GitLab projects, groups and more using hierarchical configuration written in YAML"
@@ -53,13 +53,13 @@ dev = [
     { include-group = "lint" },
     { include-group = "docs" },
     { include-group = "release" },
-    "commitizen==4.19.0",
-    "prek==0.5.3",
+    "commitizen==4.19.2",
+    "prek==0.5.5",
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
-    "coverage==7.16.1",
-    "cryptography==50.0.1",
+    "coverage==7.16.2",
+    "cryptography==50.0.2",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "pytest-rerunfailures==16.7",
@@ -70,15 +70,15 @@ lint = [
     "bandit==1.9.4",
     "black==26.10.1",
     "codespell==2.4.3",
-    "mypy==2.3.1",
+    "mypy==2.4.0",
     "mypy-extensions==1.1.0",
-    "ruff==0.16.9",
-    "types-requests==2.33.0.20260906",
+    "ruff==0.16.10",
+    "types-requests==2.33.0.20261006",
 ]
 # Documentation generation stack.
 docs = [
-    "markdown==3.10.3",
-    "zensical==0.0.65",
+    "markdown==3.11",
+    "zensical==0.0.69",
     "pygments==2.21.0",
     "pymdown-extensions==12.1",
 ]
