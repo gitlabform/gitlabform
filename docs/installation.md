@@ -42,3 +42,7 @@ pipx install gitlabform
 ```shell
 pip3 install gitlabform
 ```
+
+## Verify what you install
+
+Every release ships with a software bill of materials (SBOM) and signed attestations. See [Supply chain artifacts](contrib/releases.md#supply-chain-artifacts) for what is published and how to verify it.
