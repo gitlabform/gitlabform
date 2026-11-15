@@ -13,9 +13,7 @@ class IntegrationsProcessor(AbstractProcessor):
     def _process_configuration(self, project_and_group: str, configuration: dict):
         # Remove 'enforce' key from the config so that it's not treated as an integration
         configured_integrations = {
-            name: settings
-            for name, settings in configuration.get("integrations", {}).items()
-            if name != "enforce"
+            name: settings for name, settings in configuration.get("integrations", {}).items() if name != "enforce"
         }
         enforce_integrations = configuration.get("integrations|enforce", False)
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
