@@ -77,10 +77,10 @@ lint = [
 ]
 # Documentation generation stack.
 docs = [
-    "markdown==3.11",
-    "zensical==0.0.69",
+    "markdown==3.11.1",
+    "zensical==0.0.70",
     "pygments==2.21.0",
-    "pymdown-extensions==12.1",
+    "pymdown-extensions==12.3",
 ]
 # Tools required for building and verifying releases.
 release = [
