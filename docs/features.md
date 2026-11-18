@@ -19,6 +19,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [CI/CD Job Token Scope](reference/job_token_scope.md)
     * [CI/CD Job Token Scope](reference/job_token_scope.md)
     * [CI/CD variables](reference/ci_cd_variables.md#project-cicd-variables)
+    * [Deploy freezes](reference/deploy_freezes.md)
     * [Deploy keys](reference/deploy_keys.md)
     * [Files {add, edit or delete}, with templating based on Jinja2 (now supports custom variables!)](reference/files.md)
     * [Integrations](reference/integrations.md)
