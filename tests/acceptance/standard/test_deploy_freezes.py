@@ -66,3 +66,22 @@ class TestDeployFreezes:
         run_gitlabform(config, project)
 
         assert freezes(project) == []
+
+    def test_duplicates_are_deleted(self, project):
+        path = f"/projects/{project.id}/freeze_periods"
+        payload = {"freeze_start": WEEKEND[0], "freeze_end": WEEKEND[1], "cron_timezone": WEEKEND[2]}
+        seeded_ids = {project.manager.gitlab.http_post(path, post_data=payload)["id"] for _ in range(2)}
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            deploy_freezes:
+              periods:
+                - freeze_start: "{WEEKEND[0]}"
+                  freeze_end: "{WEEKEND[1]}"
+                  cron_timezone: {WEEKEND[2]}
+        """
+
+        run_gitlabform(config, project)
+
+        assert freezes(project) == [WEEKEND]
+        assert len(freeze_ids(project) & seeded_ids) == 1

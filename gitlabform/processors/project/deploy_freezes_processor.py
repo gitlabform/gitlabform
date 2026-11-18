@@ -12,11 +12,12 @@ class DeployFreezesProcessor(AbstractProcessor):
 
     @staticmethod
     def _key(period: dict) -> tuple[str, str, str]:
-        return period["freeze_start"], period["freeze_end"], period.get("cron_timezone") or "UTC"
+        return period["freeze_start"].strip(), period["freeze_end"].strip(), period.get("cron_timezone") or "UTC"
 
     def _process_configuration(self, project_and_group: str, configuration: dict):
         debug("Processing deploy freezes...")
-        periods = configuration.get("deploy_freezes|periods")
+        section = configuration.get("deploy_freezes")
+        periods = section.get("periods") if isinstance(section, dict) else None
         if not isinstance(periods, list):
             raise Exception("'deploy_freezes|periods' must be a list, use an empty list to delete all freeze periods")
 
