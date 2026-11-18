@@ -38,7 +38,7 @@ class TestDeployFreezes:
         assert freezes(project) == sorted([WEEKEND, CHRISTMAS])
         assert freeze_ids(project) == ids_after_first_run
 
-    def test_periods_not_in_config_are_deleted(self, project):
+    def test_without_enforce_others_are_kept(self, project):
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
@@ -53,13 +53,32 @@ class TestDeployFreezes:
 
         run_gitlabform(config, project)
 
-        assert freezes(project) == sorted([WEEKEND, NEW_YEAR])
+        assert freezes(project) == sorted([WEEKEND, CHRISTMAS, NEW_YEAR])
 
-    def test_empty_list_deletes_all(self, project):
+    def test_enforce_deletes_others(self, project):
         config = f"""
         projects_and_groups:
           {project.path_with_namespace}:
             deploy_freezes:
+              enforce: true
+              periods:
+                - freeze_start: "{WEEKEND[0]}"
+                  freeze_end: "{WEEKEND[1]}"
+                  cron_timezone: {WEEKEND[2]}
+                - freeze_start: "{NEW_YEAR[0]}"
+                  freeze_end: "{NEW_YEAR[1]}"
+        """
+
+        run_gitlabform(config, project)
+
+        assert freezes(project) == sorted([WEEKEND, NEW_YEAR])
+
+    def test_enforce_with_empty_list_deletes_all(self, project):
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            deploy_freezes:
+              enforce: true
               periods: []
         """
 

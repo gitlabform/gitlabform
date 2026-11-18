@@ -4,7 +4,9 @@ This section purpose is to manage the project [Deploy freezes](https://docs.gitl
 
 Freeze periods are defined as a list under the `periods` key. Each period takes the parameters described at [create a freeze period](https://docs.gitlab.com/ee/api/freeze_periods.html#create-a-freeze-period): `freeze_start`, `freeze_end` (both cron expressions) and the optional `cron_timezone` (defaults to `UTC`).
 
-The `periods` list is required and is the complete list of freeze periods of the project: periods missing in GitLab are created, and periods that exist in GitLab but are not in the list are deleted. Use an empty list (`periods: []`) to delete all of them.
+The `periods` list is required. Periods missing in GitLab are created. GitLab freeze periods have no name, so a period is identified by all of its 3 values: changing a value is equivalent to adding a new period.
+
+When `enforce` is set to `true`, the periods that exist in GitLab but are not in the list are deleted, so the list becomes the complete list of freeze periods of the project. Use `enforce: true` with an empty list (`periods: []`) to delete all of them.
 
 !!! note
 
@@ -12,7 +14,7 @@ The `periods` list is required and is the complete list of freeze periods of the
 
 ## Examples
 
-Example 1: the project will have exactly these 2 freeze periods.
+Example 1: add these 2 freeze periods, keep any other periods already set in the project.
 
 ```yaml
 projects_and_groups:
@@ -32,6 +34,7 @@ Example 2: all projects in `group_1` will have only the weekend freeze period, e
 projects_and_groups:
   group_1/*:
     deploy_freezes:
+      enforce: true
       periods:
         - freeze_start: "0 23 * * 5"
           freeze_end: "0 7 * * 1"
