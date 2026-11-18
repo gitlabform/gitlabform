@@ -38,78 +38,36 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
     @functools.lru_cache()
     def get_effective_config_for_group(self, group) -> dict:
         """
-        :param group: "group_name"
-        :return: merged configuration for this group, from common, group. Merging is additive.
+        :param group: "group_name" or "group/subgroup/..."
+        :return: merged configuration for this group. Layers are merged from the most general to the most
+                 specific: common ("*"), then "x/*", "x/y/*", ..., and finally the non-recursive "x/y/" key.
+                 Merging is additive, but ``inherit: false`` in any layer discards that section from ALL
+                 layers above it, including the common config.
         """
         # Check if group must be skipped
         if self.is_group_skipped(group):
             debug(f"Group {group} is skipped, returning empty config")
             return {}
 
-        common_config: dict = self.get_common_config()
-        debug("*Effective* common config: %s", to_str(common_config))
+        # Merge into a copy so callers never get (and mutate) the shared common config object
+        effective_config: dict = self._merge_configs({}, self.get_common_config())
+        debug("*Effective* common config: %s", to_str(effective_config))
 
-        if "/" in group:
-            group_config = self._get_effective_subgroup_config(group, has_parent_context=bool(common_config))
-        else:
-            group_config = self._get_group_config(group)
-        debug("*Effective* group/subgroup config: %s", to_str(group_config))
+        # "x/y/z" -> ["x", "x/y", "x/y/z"] recursive layers, followed by the exact "x/y/z/" layer
+        elements = group.split("/")
+        paths = ["/".join(elements[: i + 1]) for i in range(len(elements))]
+        layers = [(path, self._get_group_config(path)) for path in paths]
+        layers.append((f"{group}/", self._get_group_config(group, exact=True)))
 
-        exact_config = self._get_group_config(group, exact=True)
-        if exact_config:
-            debug("*Exact* (non-recursive) config for %s: %s", group, to_str(exact_config))
-            has_parent_context = bool(common_config) or bool(group_config)
-            if not has_parent_context:
-                self._validate_break_inheritance_flag(exact_config, group)
-            group_config = self._merge_configs(group_config, exact_config)
-            debug("*Effective* group/subgroup+exact config: %s", to_str(group_config))
-
-        if not common_config and group_config:
-            self._validate_break_inheritance_flag(group_config, group)
-
-        effective_config_for_group = self._merge_configs(common_config, group_config)
-        debug(
-            "*Effective* config common+group/subgroup: %s",
-            to_str(effective_config_for_group),
-        )
-
-        return effective_config_for_group
-
-    def _get_effective_subgroup_config(self, subgroup, has_parent_context: bool = False):
-        #
-        # Goes through a subgroups hierarchy, from top to bottom
-        #
-        # "x/y/x" -> ["x", "x/y", "x/y/z"]
-        #
-        # ...and for each element after 1st generate effective config from previous effective one merged with current:
-        #
-        #              |     v       |
-        #              \---> a       |
-        #                    |       v
-        #                    \------>b = effective config to return
-        #
-        # ...where a = merged_config("x", "x/y") and b = merged_config(a, "x/y/z")
-        #
-        # ``inherit: false`` on a layer is rejected only when no parent exists above it
-        # (no common config and no non-empty accumulated ancestor config).
-
-        effective_config: dict = {}
-        elements = subgroup.split("/")
-        current_path = None
-        for element in elements:
-            current_path = element if current_path is None else current_path + "/" + element
-            current_layer = self._get_group_config(current_path)
-            debug("Config for '%s': %s", current_path, to_str(current_layer))
-
-            has_ancestor_context = has_parent_context or bool(effective_config)
-            if current_layer and not has_ancestor_context:
-                self._validate_break_inheritance_flag(current_layer, current_path)
-
+        for layer_name, layer in layers:
+            if not layer:
+                continue
+            debug("Config for '%s': %s", layer_name, to_str(layer))
+            # ``inherit: false`` is rejected only when there is nothing above this layer to break from
             if not effective_config:
-                effective_config = current_layer
-            else:
-                effective_config = self._merge_configs(effective_config, current_layer)
-            debug("Effective config at '%s': %s", current_path, to_str(effective_config))
+                self._validate_break_inheritance_flag(layer, layer_name)
+            effective_config = self._merge_configs(effective_config, layer)
+            debug("*Effective* config after '%s': %s", layer_name, to_str(effective_config))
 
         return effective_config
 

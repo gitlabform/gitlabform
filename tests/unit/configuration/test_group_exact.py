@@ -123,10 +123,9 @@ class TestInheritFalseInteraction:
             },
         }
 
-    def test__exact_config__inherit_false_common_still_merges(self):
-        """inherit: false in exact config breaks from the recursive layer,
-        but common (*) config still merges — consistent with existing behavior
-        where inherit: false only breaks from the immediate parent in the merge chain."""
+    def test__exact_config__inherit_false_also_breaks_from_common(self):
+        """inherit: false in exact config breaks inheritance from ALL higher levels:
+        the group's own recursive layer and the common (*) config."""
         config_yaml = """
         ---
         projects_and_groups:
@@ -147,12 +146,8 @@ class TestInheritFalseInteraction:
 
         effective_config = configuration.get_effective_config_for_group("some_group")
 
-        # inherit: false breaks from recursive (so "visibility: private" is dropped),
-        # but common config still merges in
-        assert effective_config["group_settings"] == {
-            "setting_from_common": "common_value",
-            "visibility": "public",
-        }
+        # inherit: false drops both "visibility: private" (recursive) and "setting_from_common" (common)
+        assert effective_config["group_settings"] == {"visibility": "public"}
 
 
 class TestGetGroupsAndKeyType:

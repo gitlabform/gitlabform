@@ -2,6 +2,48 @@
 
 Some of these changes between major application versions may affect the effective configuration that would be applied if you run the application. Therefore to do the upgrade safely please follow this procedure.
 
+## From 6.\* to 7.\*
+
+### `inherit: false` now also breaks inheritance from `"*"` for subgroups
+
+As documented, `inherit: false` breaks inheritance from all higher levels. Before 7.0 this only worked for top-level
+`group/*` keys. In a subgroup (`group/subgroup/*`), the flag only dropped values from the parent group levels,
+and values from `"*"` were still merged in.
+
+For example, with this configuration:
+
+```yaml
+projects_and_groups:
+  "*":
+    group_settings:
+      from_common: true
+  some_group/*:
+    group_settings:
+      from_recursive: true
+  some_group/subgroup/*:
+    group_settings:
+      inherit: false
+      visibility: public
+```
+
+...the effective `group_settings` for `some_group/subgroup` (and its projects) was:
+
+```yaml
+group_settings:
+  from_common: true
+  visibility: public
+```
+
+...and starting with 7.0 it is:
+
+```yaml
+group_settings:
+  visibility: public
+```
+
+If you relied on values from `"*"` still being applied in such a section, copy them into the section that has
+`inherit: false`.
+
 ## From 5.\* to 6.\*
 
 We have upgraded to new major versions of underlying YAML libraries `ezyaml`, `yamlpath` and `ruamel.yaml`.

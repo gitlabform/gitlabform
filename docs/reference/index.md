@@ -317,8 +317,28 @@ deploy_keys:
     can_push: false
 ```
 
+`inherit: false` discards the section from **every** higher level, not just the nearest one. This includes
+`"*"` and all parent `group/*` levels. For example, with this configuration:
+
+```yaml
+projects_and_groups:
+  "*":
+    group_settings:
+      from_common: true
+  group_1/*:
+    group_settings:
+      from_group: true
+  group_1/subgroup_1/*:
+    group_settings:
+      inherit: false
+      visibility: public
+```
+
+...the effective `group_settings` for `group_1/subgroup_1` (and its projects) is only `visibility: public`.
+
 `inherit: false` works the same way in the non-recursive `group/` level. For example, to stop a group from
-inheriting a section from its own recursive `group/*` configuration, while its subgroups still inherit it:
+inheriting a section from its own recursive `group/*` configuration (and from `"*"`, if defined), while its
+subgroups still inherit it:
 
 ```yaml
 projects_and_groups:
