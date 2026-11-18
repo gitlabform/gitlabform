@@ -35,11 +35,15 @@ class DeployFreezesProcessor(AbstractProcessor):
                 post_data={"freeze_start": freeze_start, "freeze_end": freeze_end, "cron_timezone": cron_timezone},
             )
 
+        enforce = configuration.get("deploy_freezes|enforce")
         kept = set()
         for period in periods_in_gitlab:
             key = self._key(period)
             if key in keys_in_config and key not in kept:
                 kept.add(key)
-            else:
-                debug(f"Deleting deploy freeze {key}, it is not in the configuration or is a duplicate")
+            elif key in keys_in_config:
+                debug(f"Deleting duplicate deploy freeze {key}")
+                self.gl.http_delete(f"{path}/{period['id']}")
+            elif enforce:
+                debug(f"Deleting deploy freeze {key}, it is not in the configuration and enforce is enabled")
                 self.gl.http_delete(f"{path}/{period['id']}")
