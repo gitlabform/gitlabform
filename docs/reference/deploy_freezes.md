@@ -8,6 +8,8 @@ The `periods` list is required. Periods missing in GitLab are created. GitLab fr
 
 When `enforce` is set to `true`, the periods that exist in GitLab but are not in the list are deleted, so the list becomes the complete list of freeze periods of the project. Use `enforce: true` with an empty list (`periods: []`) to delete all of them.
 
+If GitLab has several identical copies of a period from the list, only one is kept, even without `enforce`.
+
 !!! note
 
     The `periods` list is not merged with the one inherited from a more general level (e.g. `group/*`) - a more specific list replaces it.
