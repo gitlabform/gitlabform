@@ -6,6 +6,7 @@ from gitlabform.processors import AbstractProcessors
 from gitlabform.processors.abstract_processor import AbstractProcessor
 from gitlabform.processors.project.badges_processor import ProjectBadgesProcessor
 from gitlabform.processors.project.branches_processor import BranchesProcessor
+from gitlabform.processors.project.deploy_freezes_processor import DeployFreezesProcessor
 from gitlabform.processors.project.deploy_keys_processor import DeployKeysProcessor
 from gitlabform.processors.project.files_processor import FilesProcessor
 from gitlabform.processors.project.hooks_processor import HooksProcessor
@@ -73,6 +74,7 @@ class ProjectProcessors(AbstractProcessors):
             SchedulesProcessor(gitlab),
             ProjectBadgesProcessor(gitlab),
             ResourceGroupsProcessor(gitlab),
+            DeployFreezesProcessor(gitlab),
             ProtectedEnvironmentsProcessor(gitlab),
             MergeRequestsApprovals(gitlab),
             MergeRequestsApprovalRules(gitlab),
