@@ -4,7 +4,7 @@ This section purpose is to manage the project [Deploy freezes](https://docs.gitl
 
 Freeze periods are defined as a list under the `periods` key. Each period takes the parameters described at [create a freeze period](https://docs.gitlab.com/ee/api/freeze_periods.html#create-a-freeze-period): `freeze_start`, `freeze_end` (both cron expressions) and the optional `cron_timezone` (defaults to `UTC`).
 
-The `periods` list is the complete list of freeze periods of the project: periods missing in GitLab are created, and periods that exist in GitLab but are not in the list are deleted. Use an empty list (`periods: []`) to delete all of them.
+The `periods` list is required and is the complete list of freeze periods of the project: periods missing in GitLab are created, and periods that exist in GitLab but are not in the list are deleted. Use an empty list (`periods: []`) to delete all of them.
 
 !!! note
 

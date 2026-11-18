@@ -5,9 +5,16 @@ CHRISTMAS = ("0 0 24 12 *", "0 0 26 12 *", "UTC")
 NEW_YEAR = ("0 0 31 12 *", "0 0 2 1 *", "UTC")
 
 
+def list_freezes(project) -> list[dict]:
+    return project.manager.gitlab.http_list(f"/projects/{project.id}/freeze_periods", get_all=True)
+
+
 def freezes(project) -> list[tuple[str, str, str]]:
-    periods = project.manager.gitlab.http_list(f"/projects/{project.id}/freeze_periods", get_all=True)
-    return sorted((p["freeze_start"], p["freeze_end"], p["cron_timezone"]) for p in periods)
+    return sorted((p["freeze_start"], p["freeze_end"], p["cron_timezone"]) for p in list_freezes(project))
+
+
+def freeze_ids(project) -> set[int]:
+    return {p["id"] for p in list_freezes(project)}
 
 
 class TestDeployFreezes:
@@ -25,9 +32,11 @@ class TestDeployFreezes:
         """
 
         run_gitlabform(config, project)
+        ids_after_first_run = freeze_ids(project)
         run_gitlabform(config, project)
 
         assert freezes(project) == sorted([WEEKEND, CHRISTMAS])
+        assert freeze_ids(project) == ids_after_first_run
 
     def test_periods_not_in_config_are_deleted(self, project):
         config = f"""
