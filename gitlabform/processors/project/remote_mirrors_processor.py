@@ -5,6 +5,7 @@ from gitlab.exceptions import GitlabCreateError, GitlabUpdateError, GitlabDelete
 from gitlab.v4.objects import Project, ProjectRemoteMirror
 from gitlabform.gitlab import GitLab
 from gitlabform.processors.abstract_processor import AbstractProcessor
+from gitlabform.processors.util.mirrors import normalize_mirror_url_for_comparison
 
 
 class RemoteMirrorsProcessor(AbstractProcessor):
@@ -54,12 +55,7 @@ class RemoteMirrorsProcessor(AbstractProcessor):
         This can be used to compare mirror URLs without credentials to
         find matching mirrors.
         """
-        from urllib.parse import urlparse
-
-        parsed = urlparse(url)
-        # Remove credentials (user:pass@) from netloc
-        clean_netloc = parsed.netloc.split("@")[-1]
-        return parsed._replace(netloc=clean_netloc).geturl()
+        return normalize_mirror_url_for_comparison(url)
 
     def _process_configuration(self, project_and_group: str, configuration: Dict[str, Any]) -> None:
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
