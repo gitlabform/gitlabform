@@ -15,12 +15,18 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
     depends on the common configuration.
     """
 
+    def get_projects_and_groups(self) -> dict:
+        """
+        :return: the 'projects_and_groups' section or an empty dict if it is not defined
+        """
+        return self.get("projects_and_groups", {})
+
     def get_groups(self) -> list:
         """
         :return: sorted list of groups that are EXPLICITLY defined in the config
         """
         groups = []
-        projects_and_groups = self.get("projects_and_groups")
+        projects_and_groups = self.get_projects_and_groups()
         for element in projects_and_groups.keys():
             if element.endswith("/*"):
                 # cut off that "/*"
@@ -109,4 +115,4 @@ class ConfigurationGroups(ConfigurationCommon, ABC):
         :return: configuration for this group/subgroup or empty dict if not defined,
                  ignoring the case
         """
-        return self._get_case_insensitively(self.get("projects_and_groups"), f"{group}/*")
+        return self._get_case_insensitively(self.get_projects_and_groups(), f"{group}/*")

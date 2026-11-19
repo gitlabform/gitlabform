@@ -20,7 +20,7 @@ class ConfigurationProjects(ConfigurationGroups, ABC):
         :return: sorted list of projects names, that are EXPLICITLY defined in the config
         """
         projects = []
-        projects_and_groups = self.get("projects_and_groups")
+        projects_and_groups = self.get_projects_and_groups()
         for element in projects_and_groups.keys():
             if self._get_key_type(element) == key_type:
                 projects.append(element)
@@ -70,7 +70,7 @@ class ConfigurationProjects(ConfigurationGroups, ABC):
         :return: configuration for this project or empty dict if not defined,
                  ignoring the case. Also checks for matching project patterns.
         """
-        projects_and_groups = self.get("projects_and_groups")
+        projects_and_groups = self.get_projects_and_groups()
 
         # 1. Exact match
         exact = self._get_case_insensitively(projects_and_groups, group_and_project)

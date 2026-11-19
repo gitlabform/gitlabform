@@ -33,3 +33,20 @@ def test_show_summary_with_bracketed_error_text_is_logged_literally():
         root_logger.setLevel(original_level)
 
     assert "KeyError [/oops] in [a-z]+" in stream.getvalue()
+
+
+def test_show_summary_with_only_application_settings_processed(caplog):
+    caplog.set_level(NOTICE_LOG_LEVEL)
+
+    GitLabForm._show_summary([], [], 0, 0, {}, {}, application_processed=True)
+
+    assert "Application settings processed successfully" in caplog.text
+    assert "Nothing to do" not in caplog.text
+
+
+def test_show_summary_with_nothing_processed(caplog):
+    caplog.set_level(NOTICE_LOG_LEVEL)
+
+    GitLabForm._show_summary([], [], 0, 0, {}, {})
+
+    assert "Nothing to do" in caplog.text
