@@ -26,7 +26,11 @@ class AbstractProcessors(ABC):
         effective_configuration: EffectiveConfigurationFile,
         only_sections: List[str] | str,
         exclude_sections: List[str],
-    ):
+    ) -> int:
+        """
+        :return: number of processors that were run
+        """
+        processed = 0
         for processor in self.processors:
             if processor.configuration_name not in exclude_sections:
                 if only_sections == "all" or processor.configuration_name in only_sections:
@@ -37,7 +41,9 @@ class AbstractProcessors(ABC):
                         diff_only_changed,
                         effective_configuration,
                     )
+                    processed += 1
                 else:
                     info(f"Skipping section '{processor.configuration_name}' - not in --only-sections list.")
             else:
                 info(f"Excluding section '{processor.configuration_name}'.")
+        return processed

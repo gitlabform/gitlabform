@@ -410,16 +410,20 @@ class GitLabForm:
 
         effective_configuration = EffectiveConfigurationFile(self.output_file)
 
+        application_processed = False
         application_configuration = self.configuration.get("application", {})
         if application_configuration:
-            self.application_processors.process_entity(
-                "",
-                application_configuration,
-                dry_run=self.noop,
-                diff_only_changed=self.diff_only_changed,
-                effective_configuration=effective_configuration,
-                only_sections=self.only_sections,
-                exclude_sections=self.exclude_sections,
+            application_processed = (
+                self.application_processors.process_entity(
+                    "",
+                    application_configuration,
+                    dry_run=self.noop,
+                    diff_only_changed=self.diff_only_changed,
+                    effective_configuration=effective_configuration,
+                    only_sections=self.only_sections,
+                    exclude_sections=self.exclude_sections,
+                )
+                > 0
             )
 
         for group in groups:
@@ -551,7 +555,7 @@ class GitLabForm:
             successful_projects,
             failed_groups,
             failed_projects,
-            bool(application_configuration),
+            application_processed,
         )
 
     @classmethod

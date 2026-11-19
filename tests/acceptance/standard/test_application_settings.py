@@ -91,6 +91,8 @@ class TestApplicationSettings:
         initial_settings = gl.settings.get()
         assert initial_settings is not None
         assert initial_settings.require_two_factor_authentication is False
+        original_require_two_factor_authentication = initial_settings.require_two_factor_authentication
+        original_two_factor_grace_period = initial_settings.two_factor_grace_period
 
         config_app_settings = """
         application:
@@ -99,17 +101,18 @@ class TestApplicationSettings:
             two_factor_grace_period: 2
         """
 
-        run_gitlabform(config_app_settings, "ALL_DEFINED")
+        try:
+            run_gitlabform(config_app_settings, "ALL_DEFINED")
 
-        updated_settings = gl.settings.get()
-        assert updated_settings is not None
-        assert updated_settings.require_two_factor_authentication is True
-        assert updated_settings.two_factor_grace_period == 2
-
-        # Tear down
-        updated_settings.require_two_factor_authentication = False
-        updated_settings.two_factor_grace_period = 0
-        updated_settings.save()
+            updated_settings = gl.settings.get()
+            assert updated_settings is not None
+            assert updated_settings.require_two_factor_authentication is True
+            assert updated_settings.two_factor_grace_period == 2
+        finally:
+            settings = gl.settings.get()
+            settings.require_two_factor_authentication = original_require_two_factor_authentication
+            settings.two_factor_grace_period = original_two_factor_grace_period
+            settings.save()
 
     def test__fails_without_application_and_projects_and_groups(self, gl):
         config_without_anything_to_do = """
