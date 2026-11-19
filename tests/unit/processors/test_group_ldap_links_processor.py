@@ -147,6 +147,30 @@ class TestGroupLDAPLinksProcessor:
 
         group.ldap_group_links.create.assert_not_called()
 
+    # ------------------------------------------------------- shared config
+
+    def test_enforce_is_not_removed_from_the_shared_configuration(self):
+        # the configuration dict is reused when processing is retried, so a run must not mutate it
+        stray = self._link(cn="stray")
+        self._group(stray)
+        configuration = {"group_ldap_links": {"enforce": True}}
+
+        self.processor._process_configuration("test/group", configuration)
+
+        stray.delete.assert_called_once()
+        assert configuration["group_ldap_links"] == {"enforce": True}
+
+    def test_delete_false_is_ignored_and_not_sent_to_the_api(self):
+        # "delete" is a gitlabform control key: an explicit "delete: false" must not
+        # trigger a recreate on every run, nor end up in the API payload
+        existing = self._link(cn="devops", group_access=40)
+        group = self._group(existing)
+
+        self._process({"devops_users": {"provider": "LDAP Main", "cn": "devops", "group_access": 40, "delete": False}})
+
+        existing.delete.assert_not_called()
+        group.ldap_group_links.create.assert_not_called()
+
     # -------------------------------------------------------- create errors
 
     def test_create_404_is_reraised_with_clearer_message(self):
