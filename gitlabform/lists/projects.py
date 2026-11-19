@@ -7,15 +7,16 @@ from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
 from gitlabform.lists.groups import GroupsProvider
 
-from gitlabform.gitlab.core import NotFoundException
+from gitlab import GitlabGetError
+
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 
 
 class ProjectsProvider(GroupsProvider):
     """
     For a query like "project/group", "group", "group/subgroup", ALL or ALL_DEFINED this
-    class gets the effective lists of projects, taking into account skipped projects
-    and the fact that the group and project names case are somewhat case-sensitive.
+    class gets the effective lists of projects, taking into account skipped projects,
+    even when the group and project paths in the config are spelled with a different case.
 
     Because the projects depend on groups requested, this class inherits GroupsProvider.
     """
@@ -58,7 +59,9 @@ class ProjectsProvider(GroupsProvider):
             maybe_project = self.gl.get_project_case_insensitive(target)
             projects.add_requested([maybe_project["path_with_namespace"]])
 
-        except NotFoundException:
+        except GitlabGetError as e:
+            if e.response_code != 404:
+                raise
             debug("Could not find '%s'", target)
             if project_transfer_source := self._get_project_transfer_source_from_config(target):
                 if self._find_project_transfer_source_in_gitlab(project_transfer_source):
@@ -150,7 +153,9 @@ class ProjectsProvider(GroupsProvider):
                     archived.append(project_object["path_with_namespace"])
                 if not self.include_projects_scheduled_for_deletion and project_object.get("marked_for_deletion_on"):
                     scheduled_for_deletion.append(project_object["path_with_namespace"])
-            except NotFoundException:
+            except GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
                 debug("Could not find '%s'", project)
                 if project_transfer_source := self._get_project_transfer_source_from_config(project):
                     source_project = self._find_project_transfer_source_in_gitlab(project_transfer_source)
@@ -222,7 +227,9 @@ class ProjectsProvider(GroupsProvider):
             try:
                 maybe_group = self.gl.get_group_case_insensitive(pattern_group)
                 group_path = maybe_group["full_path"]
-            except NotFoundException:
+            except GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
                 debug(
                     "Group '%s' for pattern '%s' not found in GitLab, skipping",
                     pattern_group,
@@ -230,10 +237,8 @@ class ProjectsProvider(GroupsProvider):
                 )
                 continue
 
-            try:
-                all_project_objects = self.gl.get_projects(group_path, include_archived=True, only_names=False)
-            except NotFoundException:
-                all_project_objects = []
+            # get_projects itself returns an empty list for a non-existent group
+            all_project_objects = self.gl.get_projects(group_path, include_archived=True, only_names=False)
 
             for project_object in all_project_objects:
                 path = project_object["path_with_namespace"]
@@ -273,7 +278,9 @@ class ProjectsProvider(GroupsProvider):
                 "Project transfer source ('%s') exists",
                 project_transfer_source,
             )
-        except NotFoundException:
+        except GitlabGetError as e:
+            if e.response_code != 404:
+                raise
             debug(
                 "Project transfer source ('%s') does not exist",
                 project_transfer_source,

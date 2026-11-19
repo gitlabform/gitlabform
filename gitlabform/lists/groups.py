@@ -1,7 +1,8 @@
 import sys
 from logging import critical
 from gitlabform.constants import EXIT_INVALID_INPUT
-from gitlabform.gitlab.core import NotFoundException
+from gitlab import GitlabGetError, GitlabListError
+
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.lists import OmissionReason, Groups
 
@@ -9,8 +10,8 @@ from gitlabform.lists import OmissionReason, Groups
 class GroupsProvider:
     """
     For a query like "project/group", "group", "group/subgroup", ALL or ALL_DEFINED this
-    class gets the effective lists of groups, taking into account skipped groups
-    and the fact that the group and project names case are somewhat case-sensitive.
+    class gets the effective lists of groups, taking into account skipped groups,
+    even when the group and project paths in the config are spelled with a different case.
     """
 
     def __init__(self, gl: PythonGitlab, configuration, recurse_subgroups):
@@ -49,9 +50,10 @@ class GroupsProvider:
                     self._get_skipped_groups(groups.get_effective()),
                 )
 
-        except NotFoundException:
+        except (GitlabGetError, GitlabListError) as e:
+            if e.response_code != 404:
+                raise
             # ...or a single project, which we ignore here
-            pass
 
         return groups
 
@@ -75,7 +77,9 @@ class GroupsProvider:
         for group in groups:
             try:
                 self.gl.get_group_case_insensitive(group)
-            except NotFoundException:
+            except GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
                 critical(f"Configuration contains group {group} but it cannot be found in GitLab!")
                 sys.exit(EXIT_INVALID_INPUT)
 

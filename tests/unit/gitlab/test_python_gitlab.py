@@ -1,7 +1,6 @@
 import pytest
 from gitlab import GitlabGetError, GitlabListError
 
-from gitlabform.gitlab.core import NotFoundException
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.gitlab import GitlabWrapper, GitLab
 from unittest.mock import MagicMock, patch
@@ -25,46 +24,20 @@ class TestPythonGitlab:
 
     # ------------------------------------------------- case-insensitive lookups
 
-    def test_get_group_case_insensitive_with_exact_case(self):
+    def test_get_group_case_insensitive_does_a_plain_get(self):
+        # GitLab itself resolves the path case-insensitively and returns the canonical path
         python_gitlab = PythonGitlab(MagicMock())
         python_gitlab.groups.get = MagicMock(return_value=self._group("Group/Sub"))
 
-        assert python_gitlab.get_group_case_insensitive("Group/Sub") == {"full_path": "Group/Sub"}
-        python_gitlab.groups.get.assert_called_once_with("Group/Sub", with_projects=False)
-
-    def test_get_group_case_insensitive_falls_back_to_search(self):
-        python_gitlab = PythonGitlab(MagicMock())
-        python_gitlab.groups.get = MagicMock(side_effect=GitlabGetError("404 Not Found", response_code=404))
-        python_gitlab.groups.list = MagicMock(return_value=[self._group("Other"), self._group("Group/Sub")])
-
         assert python_gitlab.get_group_case_insensitive("group/SUB") == {"full_path": "Group/Sub"}
-        # the search is done by the last path component, because GitLab's search
-        # only matches a group's own name/path, not its full path
-        python_gitlab.groups.list.assert_called_once_with(search="sub", get_all=True)
+        python_gitlab.groups.get.assert_called_once_with("group/SUB", with_projects=False)
 
-    def test_get_group_case_insensitive_not_found(self):
+    def test_get_project_case_insensitive_does_a_plain_get(self):
         python_gitlab = PythonGitlab(MagicMock())
-        python_gitlab.groups.get = MagicMock(side_effect=GitlabGetError("404 Not Found", response_code=404))
-        python_gitlab.groups.list = MagicMock(return_value=[])
-
-        with pytest.raises(NotFoundException):
-            python_gitlab.get_group_case_insensitive("no/such/group")
-
-    def test_get_project_case_insensitive_falls_back_to_search(self):
-        python_gitlab = PythonGitlab(MagicMock())
-        python_gitlab.projects.get = MagicMock(side_effect=GitlabGetError("404 Not Found", response_code=404))
-        python_gitlab.projects.list = MagicMock(return_value=[self._project("Group/Project")])
+        python_gitlab.projects.get = MagicMock(return_value=self._project("Group/Project"))
 
         assert python_gitlab.get_project_case_insensitive("group/project") == {"path_with_namespace": "Group/Project"}
-        python_gitlab.projects.list.assert_called_once_with(search="project", get_all=True)
-
-    def test_get_project_case_insensitive_not_found(self):
-        python_gitlab = PythonGitlab(MagicMock())
-        python_gitlab.projects.get = MagicMock(side_effect=GitlabGetError("404 Not Found", response_code=404))
-        python_gitlab.projects.list = MagicMock(return_value=[])
-
-        with pytest.raises(NotFoundException):
-            python_gitlab.get_project_case_insensitive("no/such/project")
+        python_gitlab.projects.get.assert_called_once_with("group/project", False)
 
     # ------------------------------------------------------- groups & projects
 

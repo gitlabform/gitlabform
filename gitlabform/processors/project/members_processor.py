@@ -1,5 +1,5 @@
 import sys
-from logging import critical, info, warning, error
+from logging import critical, debug, info, warning, error
 from gitlab import GitlabDeleteError
 from gitlab.v4.objects import Project, User
 
@@ -90,10 +90,11 @@ class MembersProcessor(AbstractProcessor):
         try:
             project.unshare(group_id)
         except GitlabDeleteError as e:
-            # 404 means the group is not shared with the project, which is fine for idempotency
+            # 404 means the group is not shared with the project, which is expected
+            # when adding a new member, as the unshare always runs before the share
             if e.response_code != 404:
                 raise
-            info(f"Group with id {group_id} could not be unshared, likely was never shared to begin with")
+            debug(f"Group with id {group_id} was not unshared, it was not shared to begin with")
 
     def _process_users(
         self,

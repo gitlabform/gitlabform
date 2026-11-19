@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from gitlabform.gitlab.core import NotFoundException
+from gitlab import GitlabGetError
 from gitlabform.lists import OmissionReason, Groups
 from gitlabform.lists.projects import ProjectsProvider
 
@@ -222,7 +222,7 @@ class TestVerifyIfProjectsExistAndGetOmittedProjects:
 
     def test__transfer_source_scheduled_for_deletion__omitted_when_flag_false(self, gitlab_mock, configuration_mock):
         gitlab_mock.get_project_case_insensitive.side_effect = [
-            NotFoundException("not found at target path"),
+            GitlabGetError("not found at target path", response_code=404),
             {
                 "path_with_namespace": "old_group/project1",
                 "archived": False,
@@ -243,7 +243,7 @@ class TestVerifyIfProjectsExistAndGetOmittedProjects:
 
     def test__transfer_source_scheduled_for_deletion__not_omitted_when_flag_true(self, gitlab_mock, configuration_mock):
         gitlab_mock.get_project_case_insensitive.side_effect = [
-            NotFoundException("not found at target path"),
+            GitlabGetError("not found at target path", response_code=404),
             {
                 "path_with_namespace": "old_group/project1",
                 "archived": False,

@@ -6,8 +6,6 @@ from gitlab import Gitlab, GitlabGetError, GitlabListError, GraphQL
 from gitlab.base import RESTObject
 from gitlab.v4.objects import Group, Project, User
 
-from gitlabform.gitlab.core import NotFoundException
-
 from logging import info
 
 
@@ -93,40 +91,14 @@ class PythonGitlab(Gitlab):
         raise GitlabGetError("No group found when getting '%s'" % groupname, 404)
 
     def get_group_case_insensitive(self, some_string: str) -> Dict:
-        # maybe "foo/bar" is some group's path
-        try:
-            # try with exact case
-            return self.groups.get(some_string, with_projects=False).asdict()
-        except GitlabGetError as e:
-            if e.response_code != 404:
-                raise
-
-        # try case insensitive; search by the last path component, because GitLab's
-        # search only matches a group's own name/path, not its full path
-        last_path_component = some_string.lower().rsplit("/", 1)[-1]
-        for group in self.groups.list(search=last_path_component, get_all=True):
-            if group.full_path.lower() == some_string.lower():
-                return group.asdict()
-        raise NotFoundException(f"Group/subgroup with path '{some_string}' not found.")
+        # GitLab resolves group paths case-insensitively and returns the canonical
+        # path, so a plain (cached) get is enough; raises GitlabGetError when not found
+        return self.get_group_by_path_cached(some_string).asdict()
 
     def get_project_case_insensitive(self, some_string: str) -> Dict:
-        # maybe "foo/bar" is some project's path
-        try:
-            # try with exact case
-            return self.projects.get(some_string).asdict()
-        except GitlabGetError as e:
-            if e.response_code != 404:
-                raise
-
-        # try case insensitive; search by the last path component, because GitLab's
-        # search only matches a project's own name/path, not its full path.
-        # Note: no simple=True here, because the callers need fields like "archived"
-        # that the simple representation lacks.
-        last_path_component = some_string.lower().rsplit("/", 1)[-1]
-        for project in self.projects.list(search=last_path_component, get_all=True):
-            if project.path_with_namespace.lower() == some_string.lower():
-                return project.asdict()
-        raise NotFoundException(f"Project with path '{some_string}' not found.")
+        # GitLab resolves project paths case-insensitively and returns the canonical
+        # path, so a plain (cached) get is enough; raises GitlabGetError when not found
+        return self.get_project_by_path_cached(some_string).asdict()
 
     def get_group_descendants(self, group_id_or_path) -> List[Dict]:
         group = self.groups.get(group_id_or_path, lazy=True)
