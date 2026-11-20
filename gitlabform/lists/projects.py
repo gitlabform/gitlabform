@@ -8,6 +8,7 @@ from gitlabform.lists import OmissionReason, Groups, Projects
 from gitlabform.lists.groups import GroupsProvider
 
 from gitlab import GitlabGetError
+from gitlab.v4.objects import Project
 
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 
@@ -56,8 +57,9 @@ class ProjectsProvider(GroupsProvider):
 
         # it may be a single project
         try:
-            maybe_project = self.gl.get_project_case_insensitive(target)
-            projects.add_requested([maybe_project["path_with_namespace"]])
+            # GitLab resolves project paths case-insensitively and returns the canonical path
+            maybe_project = self.gl.get_project_by_path_cached(target)
+            projects.add_requested([maybe_project.path_with_namespace])
 
         except GitlabGetError as e:
             if e.response_code != 404:
@@ -148,11 +150,15 @@ class ProjectsProvider(GroupsProvider):
         scheduled_for_deletion = []
         for project in projects:
             try:
-                project_object = self.gl.get_project_case_insensitive(project)
-                if not self.include_archived_projects and project_object["archived"]:
-                    archived.append(project_object["path_with_namespace"])
-                if not self.include_projects_scheduled_for_deletion and project_object.get("marked_for_deletion_on"):
-                    scheduled_for_deletion.append(project_object["path_with_namespace"])
+                project_object = self.gl.get_project_by_path_cached(project)
+                # append the project as spelled in the config, not the canonical path,
+                # as the requested projects to omit it from use the config spelling too
+                if not self.include_archived_projects and project_object.archived:
+                    archived.append(project)
+                if not self.include_projects_scheduled_for_deletion and getattr(
+                    project_object, "marked_for_deletion_on", None
+                ):
+                    scheduled_for_deletion.append(project)
             except GitlabGetError as e:
                 if e.response_code != 404:
                     raise
@@ -160,10 +166,10 @@ class ProjectsProvider(GroupsProvider):
                 if project_transfer_source := self._get_project_transfer_source_from_config(project):
                     source_project = self._find_project_transfer_source_in_gitlab(project_transfer_source)
                     if source_project:
-                        if not self.include_archived_projects and source_project["archived"]:
+                        if not self.include_archived_projects and source_project.archived:
                             archived.append(project)
-                        if not self.include_projects_scheduled_for_deletion and source_project.get(
-                            "marked_for_deletion_on"
+                        if not self.include_projects_scheduled_for_deletion and getattr(
+                            source_project, "marked_for_deletion_on", None
                         ):
                             scheduled_for_deletion.append(project)
                     else:
@@ -218,15 +224,16 @@ class ProjectsProvider(GroupsProvider):
         to avoid redundant API calls.
         """
         pattern_projects = []
+        effective_groups_lower = {group.lower() for group in effective_groups}
         for pattern in self.configuration.get_projects("project_pattern"):
             pattern_group = pattern.rsplit("/", 1)[0]
-            if pattern_group in effective_groups:
+            if pattern_group.lower() in effective_groups_lower:
                 # projects from this group already fetched through normal means
                 continue
 
             try:
-                maybe_group = self.gl.get_group_case_insensitive(pattern_group)
-                group_path = maybe_group["full_path"]
+                maybe_group = self.gl.get_group_by_path_cached(pattern_group)
+                group_path = maybe_group.full_path
             except GitlabGetError as e:
                 if e.response_code != 404:
                     raise
@@ -267,13 +274,13 @@ class ProjectsProvider(GroupsProvider):
 
         return project_transfer_source
 
-    def _find_project_transfer_source_in_gitlab(self, project_transfer_source: str) -> Optional[dict]:
+    def _find_project_transfer_source_in_gitlab(self, project_transfer_source: str) -> Optional[Project]:
         try:
             debug(
                 "Checking if project transfer source ('%s') exists in GitLab",
                 project_transfer_source,
             )
-            maybe_project = self.gl.get_project_case_insensitive(project_transfer_source)
+            maybe_project = self.gl.get_project_by_path_cached(project_transfer_source)
             debug(
                 "Project transfer source ('%s') exists",
                 project_transfer_source,

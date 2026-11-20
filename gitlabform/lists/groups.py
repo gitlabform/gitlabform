@@ -37,8 +37,9 @@ class GroupsProvider:
 
         # it may be a subgroup or a group...
         try:
-            maybe_group = self.gl.get_group_case_insensitive(target)
-            path = maybe_group["full_path"]
+            # GitLab resolves group paths case-insensitively and returns the canonical path
+            maybe_group = self.gl.get_group_by_path_cached(target)
+            path = maybe_group.full_path
             groups.add_requested([path])
 
             if recurse_subgroups:
@@ -76,7 +77,7 @@ class GroupsProvider:
     def _verify_if_groups_exist(self, groups: list):
         for group in groups:
             try:
-                self.gl.get_group_case_insensitive(group)
+                self.gl.get_group_by_path_cached(group)
             except GitlabGetError as e:
                 if e.response_code != 404:
                     raise

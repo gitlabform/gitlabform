@@ -90,16 +90,6 @@ class PythonGitlab(Gitlab):
 
         raise GitlabGetError("No group found when getting '%s'" % groupname, 404)
 
-    def get_group_case_insensitive(self, some_string: str) -> Dict:
-        # GitLab resolves group paths case-insensitively and returns the canonical
-        # path, so a plain (cached) get is enough; raises GitlabGetError when not found
-        return self.get_group_by_path_cached(some_string).asdict()
-
-    def get_project_case_insensitive(self, some_string: str) -> Dict:
-        # GitLab resolves project paths case-insensitively and returns the canonical
-        # path, so a plain (cached) get is enough; raises GitlabGetError when not found
-        return self.get_project_by_path_cached(some_string).asdict()
-
     def get_group_descendants(self, group_id_or_path) -> List[Dict]:
         group = self.groups.get(group_id_or_path, lazy=True)
         return [descendant.asdict() for descendant in group.descendant_groups.list(get_all=True)]
@@ -148,12 +138,15 @@ class PythonGitlab(Gitlab):
         # are the canonical ones from GitLab
         group_prefix = group.lower() + "/"
         projects_in_group_namespace = [
-            project.asdict() for project in projects if project.path_with_namespace.lower().startswith(group_prefix)
+            project for project in projects if project.path_with_namespace.lower().startswith(group_prefix)
         ]
 
         if only_names:
-            return sorted(project["path_with_namespace"] for project in projects_in_group_namespace)
-        return sorted(projects_in_group_namespace, key=lambda project: project["path_with_namespace"])
+            return sorted(project.path_with_namespace for project in projects_in_group_namespace)
+        return sorted(
+            (project.asdict() for project in projects_in_group_namespace),
+            key=lambda project: project["path_with_namespace"],
+        )
 
     @functools.lru_cache()
     def _is_admin(self) -> bool:

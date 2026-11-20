@@ -22,23 +22,6 @@ class TestPythonGitlab:
         project.asdict.return_value = {"path_with_namespace": path_with_namespace}
         return project
 
-    # ------------------------------------------------- case-insensitive lookups
-
-    def test_get_group_case_insensitive_does_a_plain_get(self):
-        # GitLab itself resolves the path case-insensitively and returns the canonical path
-        python_gitlab = PythonGitlab(MagicMock())
-        python_gitlab.groups.get = MagicMock(return_value=self._group("Group/Sub"))
-
-        assert python_gitlab.get_group_case_insensitive("group/SUB") == {"full_path": "Group/Sub"}
-        python_gitlab.groups.get.assert_called_once_with("group/SUB", with_projects=False)
-
-    def test_get_project_case_insensitive_does_a_plain_get(self):
-        python_gitlab = PythonGitlab(MagicMock())
-        python_gitlab.projects.get = MagicMock(return_value=self._project("Group/Project"))
-
-        assert python_gitlab.get_project_case_insensitive("group/project") == {"path_with_namespace": "Group/Project"}
-        python_gitlab.projects.get.assert_called_once_with("group/project", False)
-
     # ------------------------------------------------------- groups & projects
 
     def test_get_groups_as_admin_gets_all_available(self):
