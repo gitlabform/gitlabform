@@ -1,5 +1,5 @@
 # ---- Builder Stage ----
-FROM python:3.14-alpine AS builder
+FROM python:3.15-alpine AS builder
 
 # Install uv binary directly
 COPY --from=ghcr.io/astral-sh/uv:0.11.2 /uv /uvx /bin/
@@ -19,7 +19,7 @@ COPY README.md ./
 RUN uv sync --frozen --no-dev --no-editable
 
 # ---- Final Stage ----
-FROM python:3.14-alpine AS final
+FROM python:3.15-alpine AS final
 
 # Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

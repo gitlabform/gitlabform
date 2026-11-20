@@ -582,7 +582,7 @@ class GitLabForm:
                 error(f"Checking latest version failed:\n{e}")
                 return
 
-            latest_stable_text = "(the latest stable is {latest_version})"
+            latest_stable_text = f"(the latest stable is {latest_version})"
 
             if local_version == latest_version:
                 version_info = "= the latest stable"
