@@ -19,7 +19,7 @@ class DeployFreezesProcessor(AbstractProcessor):
         section = configuration.get("deploy_freezes")
         periods = section.get("periods") if isinstance(section, dict) else None
         if not isinstance(periods, list):
-            raise Exception("'deploy_freezes|periods' must be a list, use an empty list to delete all freeze periods")
+            raise Exception("'deploy_freezes|periods' must be a list")
 
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
         path = f"/projects/{project.id}/freeze_periods"

@@ -73,6 +73,18 @@ class TestDeployFreezes:
 
         assert freezes(project) == sorted([WEEKEND, NEW_YEAR])
 
+    def test_empty_list_without_enforce_keeps_all(self, project):
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            deploy_freezes:
+              periods: []
+        """
+
+        run_gitlabform(config, project)
+
+        assert freezes(project) == sorted([WEEKEND, NEW_YEAR])
+
     def test_enforce_with_empty_list_deletes_all(self, project):
         config = f"""
         projects_and_groups:
