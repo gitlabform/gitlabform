@@ -161,3 +161,122 @@ class TestInheritanceBreakSubgroups:
                 "override_rule": {"approvals_required": 2},
             },
         }
+
+
+class TestInheritanceBreakBlocksCommon:
+    @pytest.fixture
+    def configuration_with_break_at_subgroup_and_common(self):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            group_settings:
+              from_common: true
+            project_settings:
+              common_project_setting: true
+          some_group/*:
+            group_settings:
+              from_recursive: true
+          some_group/subgroup/*:
+            group_settings:
+              inherit: false
+              visibility: public
+        """
+        return Configuration(config_string=config_yaml)
+
+    def test__inheritance_break__subgroup_break_blocks_common(self, configuration_with_break_at_subgroup_and_common):
+        effective_config = configuration_with_break_at_subgroup_and_common.get_effective_config_for_group(
+            "some_group/subgroup"
+        )
+
+        assert effective_config["group_settings"] == {"visibility": "public"}
+
+    def test__inheritance_break__subgroup_break_only_affects_its_section(
+        self, configuration_with_break_at_subgroup_and_common
+    ):
+        effective_config = configuration_with_break_at_subgroup_and_common.get_effective_config_for_group(
+            "some_group/subgroup"
+        )
+
+        assert effective_config["project_settings"] == {"common_project_setting": True}
+
+    def test__inheritance_break__project_in_breaking_subgroup_does_not_get_common(
+        self, configuration_with_break_at_subgroup_and_common
+    ):
+        effective_config = configuration_with_break_at_subgroup_and_common.get_effective_config_for_project(
+            "some_group/subgroup/some_project"
+        )
+
+        assert effective_config["group_settings"] == {"visibility": "public"}
+
+    def test__inheritance_break__deep_subgroup_below_break_does_not_get_common(self):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            group_settings:
+              from_common: true
+          a/*:
+            group_settings:
+              from_a: true
+          a/b/*:
+            group_settings:
+              inherit: false
+              x: 1
+          a/b/c/*:
+            group_settings:
+              y: 2
+        """
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_group("a/b/c")
+
+        assert effective_config["group_settings"] == {"x": 1, "y": 2}
+
+    def test__inheritance_break__nested_key_break_at_subgroup_level_blocks_common(self):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            merge_requests_approval_rules:
+              some_rule:
+                approvals_required: 1
+                name: common
+              other_rule:
+                approvals_required: 3
+          acme/*:
+            merge_requests_approval_rules:
+              some_rule:
+                name: acme
+          acme/tools/*:
+            merge_requests_approval_rules:
+              some_rule:
+                inherit: false
+                approvals_required: 2
+        """
+        configuration = Configuration(config_string=config_yaml)
+
+        effective_config = configuration.get_effective_config_for_group("acme/tools")
+
+        assert effective_config["merge_requests_approval_rules"] == {
+            "some_rule": {"approvals_required": 2},
+            "other_rule": {"approvals_required": 3},
+        }
+
+    def test__effective_config_for_group_without_own_layers_is_a_copy_of_common(self):
+        config_yaml = """
+        ---
+        projects_and_groups:
+          "*":
+            group_badges:
+              enforce: true
+          other_group/*:
+            group_settings:
+              visibility: public
+        """
+        configuration = Configuration(config_string=config_yaml)
+
+        lonely_group_config = configuration.get_effective_config_for_group("lonely_group")
+        lonely_group_config["group_badges"].pop("enforce")
+
+        assert configuration.get_effective_config_for_group("other_group")["group_badges"] == {"enforce": True}
