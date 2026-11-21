@@ -2,6 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from gitlabform.configuration import Configuration
 from gitlabform.gitlab.core import NotFoundException
 from gitlabform.lists import OmissionReason, Groups
 from gitlabform.lists.projects import ProjectsProvider
@@ -307,3 +308,16 @@ class TestGetProjects:
 
         assert projects.get_omitted(OmissionReason.SCHEDULED_FOR_DELETION) == ["group/project1"]
         assert "group/project1" not in projects.get_effective()
+
+
+class TestGetProjectTransferSourceFromConfig:
+    def test__empty_projects_and_groups__returns_none(self, gitlab_mock):
+        configuration = Configuration(config_string="""
+            application:
+              settings:
+                require_two_factor_authentication: true
+            projects_and_groups:
+            """)
+        provider = make_provider(gitlab_mock, configuration)
+
+        assert provider._get_project_transfer_source_from_config("group/project") is None

@@ -1,5 +1,8 @@
 import logging
 
+import pytest
+
+from gitlabform.constants import EXIT_INVALID_INPUT
 from tests.acceptance import run_gitlabform
 
 
@@ -14,8 +17,6 @@ class TestApplicationSettings:
           settings:
             require_two_factor_authentication: true
             two_factor_grace_period: 2
-        projects_and_groups:
-          placeholder:
         """
 
         run_gitlabform(config_app_settings, project)
@@ -39,8 +40,6 @@ class TestApplicationSettings:
           application:
             settings:
               asset_proxy_allowlist: ["example.com", "*.example.com", "your-instance.com"]
-          projects_and_groups:
-            placeholder:
           """
 
         run_gitlabform(config_app_settings, project)
@@ -71,8 +70,6 @@ class TestApplicationSettings:
           settings:
             require_two_factor_authentication: true
             two_factor_grace_period: 2
-        projects_and_groups:
-          placeholder:
         """
 
         run_gitlabform(config_app_settings, project)
@@ -89,3 +86,39 @@ class TestApplicationSettings:
         updated_settings.require_two_factor_authentication = False
         updated_settings.two_factor_grace_period = 0
         updated_settings.save()
+
+    def test__can_set_application_settings_with_only_application_config(self, gl):
+        initial_settings = gl.settings.get()
+        assert initial_settings is not None
+        assert initial_settings.require_two_factor_authentication is False
+        original_require_two_factor_authentication = initial_settings.require_two_factor_authentication
+        original_two_factor_grace_period = initial_settings.two_factor_grace_period
+
+        config_app_settings = """
+        application:
+          settings:
+            require_two_factor_authentication: true
+            two_factor_grace_period: 2
+        """
+
+        try:
+            run_gitlabform(config_app_settings, "ALL_DEFINED")
+
+            updated_settings = gl.settings.get()
+            assert updated_settings is not None
+            assert updated_settings.require_two_factor_authentication is True
+            assert updated_settings.two_factor_grace_period == 2
+        finally:
+            settings = gl.settings.get()
+            settings.require_two_factor_authentication = original_require_two_factor_authentication
+            settings.two_factor_grace_period = original_two_factor_grace_period
+            settings.save()
+
+    def test__fails_without_application_and_projects_and_groups(self, gl):
+        config_without_anything_to_do = """
+        skip_groups: []
+        """
+
+        with pytest.raises(SystemExit) as e:
+            run_gitlabform(config_without_anything_to_do, "ALL_DEFINED")
+        assert e.value.code == EXIT_INVALID_INPUT
