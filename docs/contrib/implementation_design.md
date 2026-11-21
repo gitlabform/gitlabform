@@ -37,14 +37,6 @@ A python_gitlab instance `./gitlabform/gitlab/python_gitlab.py` is provided on `
 
 Please see the below doc sections for more info about these packages.
 
-## Common pattern - multiple inheritance
-
-The legacy `gitlabform.gitlab` package uses _multiple inheritance_.
-
-The basic features are implemented in the "core" class defined in `core.py`. Extensions to it are defined in other
-files as "feature" classes that inherit the "core". Finally, there is an "everything" class that groups them all - it is
-defined in the `__init__.py` file.
-
 ### gitlabform.*, gitlabform.lists.* and gitlabform.processors.*
 
 The entry point for running the app is in `run.py` and the main logic is in the `GitLabForm` class.
@@ -86,29 +78,20 @@ to `ProjectProcessors` in `project > __init__.py`.
 
 ### gitlabform.gitlab.*
 
-!!! important
+This package contains two things:
 
-    We have decided to move away from our own homegrown GitLab API client to the `python-gitlab` library. (See [issue #73](https://github.com/gitlabform/gitlabform/issues/73) for info.) Therefore, you should **NOT** add any more code to this package!
+* `python_gitlab.py` - the `PythonGitlab` class that extends `python-gitlab`'s `Gitlab` class with
+  convenience methods and caching used throughout the app. This is the place to add shared helpers
+  for calling the GitLab API.
+* `core.py` - the legacy `GitLabCore` class, which reads the app configuration, sets up the HTTP
+  session and checks the GitLab version and the connected user. A few configuration transformers
+  still use its helpers; the long-term plan is to move the rest of this to `python-gitlab` as well
+  (see [issue #73](https://github.com/gitlabform/gitlabform/issues/73)).
 
-With the basics for making requests to the GitLab API covered in the `GitLabCore` class in `core.py`, all other code
-is simple (most of the time).
+Do not add new REST client code to `core.py`: new code should use `python-gitlab`, through `PythonGitlab`.
 
-Almost all methods in other classes end up calling `self._make_requests_to_api`, which takes care of making the HTTP
-GitLab API requests with proper authentication, pagination, retries, timeouts and more.
-
-Sometimes there is some logic in these methods if:
-
-* we only need a specific part of the response from GitLab API - see `GitLabGroups.get_groups()` as an example,
-* some GitLab APIs need some workarounds for their bugs or documentation inconsistencies, like:
-    * some APIs declare in the docs that they accept both "group/project" string OR a project id while in fact only the latter works,
-    * some APIs return invalid HTTP error codes, like 404 instead of 400 - see `GroupLDAPLinksProcessor._create_link` as an example.
-
-#### Usage
-
-Do not add new code here: new code should use `python-gitlab` (see the processors for examples).
-The remaining "feature" classes in this package (`GitLabGroups` in `groups.py` and `GitLabProjects`
-in `projects.py`) only exist because `gitlabform.lists.*` and a few processors still use them,
-and they will be removed once those are migrated to `python-gitlab` too.
+Sometimes some logic is needed around the API calls, for example because some GitLab APIs return
+invalid HTTP error codes, like 404 instead of 400 - see `GroupLDAPLinksProcessor._create_link` as an example.
 
 ### gitlabform.configuration.*
 

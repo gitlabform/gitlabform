@@ -1,5 +1,5 @@
 import pytest
-from gitlab import GitlabGetError
+from gitlab import GitlabGetError, GitlabListError
 
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.gitlab import GitlabWrapper, GitLab
@@ -7,6 +7,86 @@ from unittest.mock import MagicMock, patch
 
 
 class TestPythonGitlab:
+
+    @staticmethod
+    def _group(full_path: str) -> MagicMock:
+        group = MagicMock()
+        group.full_path = full_path
+        group.asdict.return_value = {"full_path": full_path}
+        return group
+
+    @staticmethod
+    def _project(path_with_namespace: str) -> MagicMock:
+        project = MagicMock()
+        project.path_with_namespace = path_with_namespace
+        project.asdict.return_value = {"path_with_namespace": path_with_namespace}
+        return project
+
+    # ------------------------------------------------------- groups & projects
+
+    def test_get_group_paths_as_admin_gets_all_available(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=True)
+        python_gitlab.groups.list = MagicMock(return_value=[self._group("b"), self._group("a")])
+
+        assert python_gitlab.get_group_paths() == ["a", "b"]
+        python_gitlab.groups.list.assert_called_once_with(get_all=True, all_available=True)
+
+    def test_get_group_paths_as_non_admin_requires_reporter_access(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        python_gitlab.groups.list = MagicMock(return_value=[self._group("a")])
+
+        assert python_gitlab.get_group_paths() == ["a"]
+        python_gitlab.groups.list.assert_called_once_with(get_all=True, min_access_level=20)
+
+    def test_get_projects_filters_to_group_namespace_and_sorts(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+        group.projects.list.return_value = [
+            self._project("group/b"),
+            self._project("group/a"),
+            # shared with the group, but in another namespace
+            self._project("other/shared"),
+        ]
+
+        assert python_gitlab.get_projects("group") == ["group/a", "group/b"]
+        group.projects.list.assert_called_once_with(
+            get_all=True, include_subgroups=True, archived=False, min_access_level=20
+        )
+
+    def test_get_projects_matches_group_namespace_case_insensitively(self):
+        # the group may be spelled with a different case in the config than in GitLab
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+        group.projects.list.return_value = [self._project("group/a")]
+
+        assert python_gitlab.get_projects("GROUP") == ["group/a"]
+
+    def test_get_projects_can_return_whole_project_dicts(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+        group.projects.list.return_value = [self._project("group/a")]
+
+        assert python_gitlab.get_projects("group", include_archived=True, only_names=False) == [
+            {"path_with_namespace": "group/a"}
+        ]
+        group.projects.list.assert_called_once_with(get_all=True, include_subgroups=True, min_access_level=20)
+
+    def test_get_projects_returns_empty_list_when_group_not_found(self):
+        python_gitlab = PythonGitlab(MagicMock())
+        python_gitlab._is_admin = MagicMock(return_value=False)
+        group = MagicMock()
+        python_gitlab.groups.get = MagicMock(return_value=group)
+        group.projects.list.side_effect = GitlabListError("404 Not Found", response_code=404)
+
+        assert python_gitlab.get_projects("no/such/group") == []
 
     def test_get_group_by_path_cached_excludes_projects(self):
         python_gitlab = PythonGitlab(MagicMock())
@@ -189,6 +269,38 @@ class TestGitlabWrapperExtraKwargs:
 
         assert "token" not in call_kwargs
         assert call_kwargs["private_token"] == "my-secret-token"
+
+    @patch("gitlabform.gitlab.GraphQL")
+    @patch("gitlabform.gitlab.PythonGitlab")
+    def test_per_page_defaults_to_100(self, mock_python_gitlab, mock_graphql):
+        """Test that per_page defaults to 100, like the legacy REST layer did"""
+        mock_gitlab = MagicMock(spec=GitLab)
+        mock_gitlab.session = MagicMock()
+        mock_gitlab.gitlab_config = {
+            "url": "https://gitlab.example.com",
+            "token": "test-token",
+        }
+
+        _ = GitlabWrapper(mock_gitlab)
+
+        call_kwargs = mock_python_gitlab.call_args.kwargs
+        assert call_kwargs["per_page"] == 100
+
+    @patch("gitlabform.gitlab.GraphQL")
+    @patch("gitlabform.gitlab.PythonGitlab")
+    def test_per_page_can_be_overridden(self, mock_python_gitlab, mock_graphql):
+        mock_gitlab = MagicMock(spec=GitLab)
+        mock_gitlab.session = MagicMock()
+        mock_gitlab.gitlab_config = {
+            "url": "https://gitlab.example.com",
+            "token": "test-token",
+            "per_page": 50,
+        }
+
+        _ = GitlabWrapper(mock_gitlab)
+
+        call_kwargs = mock_python_gitlab.call_args.kwargs
+        assert call_kwargs["per_page"] == 50
 
     @patch("gitlabform.gitlab.GraphQL")
     @patch("gitlabform.gitlab.PythonGitlab")

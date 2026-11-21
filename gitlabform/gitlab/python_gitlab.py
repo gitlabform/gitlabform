@@ -2,7 +2,7 @@ import functools
 from typing import Union, Any, Optional, Dict, List
 
 import gitlab.const
-from gitlab import Gitlab, GitlabGetError, GraphQL
+from gitlab import Gitlab, GitlabGetError, GitlabListError, GraphQL
 from gitlab.base import RESTObject
 from gitlab.v4.objects import Group, Project, User
 
@@ -89,6 +89,69 @@ class PythonGitlab(Gitlab):
             return group
 
         raise GitlabGetError("No group found when getting '%s'" % groupname, 404)
+
+    def get_group_descendants(self, group_id_or_path) -> List[Dict]:
+        group = self.groups.get(group_id_or_path, lazy=True)
+        return [descendant.asdict() for descendant in group.descendant_groups.list(get_all=True)]
+
+    def get_group_paths(self) -> List[str]:
+        """
+        :return: sorted list of group full paths
+        """
+        if self._is_admin():
+            groups = self.groups.list(get_all=True, all_available=True)
+        else:
+            # as a non-admin it's pointless to get groups with a lower role than Reporter
+            # - it's the minimal role that is needed to manage something (f.e. group labels)
+            groups = self.groups.list(get_all=True, min_access_level=20)
+        return sorted(group.full_path for group in groups)
+
+    def get_projects(self, group: str, include_archived: bool = False, only_names: bool = True) -> List:
+        """
+        :param group: group name
+        :param include_archived: set to True if archived projects should also be returned
+        :param only_names: set to False to get the whole project dicts
+        :return: sorted list of strings "group/project_name". Note that only projects from the "group" namespace are
+                 returned, so if "group" (= members of this group) is also a member of some projects, they won't be
+                 returned here.
+        """
+        list_args: Dict[str, Any] = {"include_subgroups": True}
+        # there are 3 states of the "archived" flag: true, false, undefined - we use the last 2
+        if not include_archived:
+            list_args["archived"] = False
+        if self._is_admin():
+            list_args["all_available"] = True
+        else:
+            # it's pointless to get projects with a lower role than Reporter
+            # - it's the minimal role that is needed to manage something (f.e. labels)
+            list_args["min_access_level"] = 20
+
+        try:
+            projects = self.groups.get(group, lazy=True).projects.list(get_all=True, **list_args)
+        except GitlabListError as e:
+            if e.response_code != 404:
+                raise
+            projects = []
+
+        # compare case-insensitively, because the group may be spelled with a different
+        # case in the config than its canonical path in GitLab; the returned paths
+        # are the canonical ones from GitLab
+        group_prefix = group.lower() + "/"
+        projects_in_group_namespace = [
+            project for project in projects if project.path_with_namespace.lower().startswith(group_prefix)
+        ]
+
+        if only_names:
+            return sorted(project.path_with_namespace for project in projects_in_group_namespace)
+        return sorted(
+            (project.asdict() for project in projects_in_group_namespace),
+            key=lambda project: project["path_with_namespace"],
+        )
+
+    @functools.lru_cache()
+    def _is_admin(self) -> bool:
+        current_user = self.http_get("/user")
+        return isinstance(current_user, dict) and bool(current_user.get("is_admin", False))
 
     #  Uses "LIST" to get a user by username, to get the full User object, call get using the user's id
     @functools.lru_cache()

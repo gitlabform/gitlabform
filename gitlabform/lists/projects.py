@@ -7,27 +7,30 @@ from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.lists import OmissionReason, Groups, Projects
 from gitlabform.lists.groups import GroupsProvider
 
-from gitlabform.gitlab.core import NotFoundException
+from gitlab import GitlabGetError
+from gitlab.v4.objects import Project
+
+from gitlabform.gitlab.python_gitlab import PythonGitlab
 
 
 class ProjectsProvider(GroupsProvider):
     """
     For a query like "project/group", "group", "group/subgroup", ALL or ALL_DEFINED this
-    class gets the effective lists of projects, taking into account skipped projects
-    and the fact that the group and project names case are somewhat case-sensitive.
+    class gets the effective lists of projects, taking into account skipped projects,
+    even when the group and project paths in the config are spelled with a different case.
 
     Because the projects depend on groups requested, this class inherits GroupsProvider.
     """
 
     def __init__(
         self,
-        gitlab,
+        gl: PythonGitlab,
         configuration,
         include_archived_projects,
         include_projects_scheduled_for_deletion,
         recurse_subgroups,
     ):
-        super().__init__(gitlab, configuration, recurse_subgroups)
+        super().__init__(gl, configuration, recurse_subgroups)
         self.include_archived_projects = include_archived_projects
         self.include_projects_scheduled_for_deletion = include_projects_scheduled_for_deletion
 
@@ -54,10 +57,13 @@ class ProjectsProvider(GroupsProvider):
 
         # it may be a single project
         try:
-            maybe_project = self.gitlab.get_project_case_insensitive(target)
-            projects.add_requested([maybe_project["path_with_namespace"]])
+            # GitLab resolves project paths case-insensitively and returns the canonical path
+            maybe_project = self.gl.get_project_by_path_cached(target)
+            projects.add_requested([maybe_project.path_with_namespace])
 
-        except NotFoundException:
+        except GitlabGetError as e:
+            if e.response_code != 404:
+                raise
             debug("Could not find '%s'", target)
             if project_transfer_source := self._get_project_transfer_source_from_config(target):
                 if self._find_project_transfer_source_in_gitlab(project_transfer_source):
@@ -86,9 +92,11 @@ class ProjectsProvider(GroupsProvider):
 
         projects_from_configuration = self.configuration.get_projects()
 
-        # TODO: this check should be case-insensitive
+        # compare case-insensitively, as the requested projects hold the canonical paths
+        # from GitLab while the config may spell them with a different case
+        requested_lower = {project.lower() for project in projects.requested}
         projects_from_configuration_not_from_groups = [
-            project for project in projects_from_configuration if project not in projects.requested
+            project for project in projects_from_configuration if project.lower() not in requested_lower
         ]
 
         if target == "ALL_DEFINED":
@@ -96,12 +104,14 @@ class ProjectsProvider(GroupsProvider):
             # defined in the configuration, but we don't need to re-check for
             # being archived or scheduled for deletion projects that we already got from groups
 
+            not_from_groups_lower = {project.lower() for project in projects_from_configuration_not_from_groups}
             for resolved_project in self._resolve_project_patterns(groups.get_effective()):
                 if (
-                    resolved_project not in projects.requested
-                    and resolved_project not in projects_from_configuration_not_from_groups
+                    resolved_project.lower() not in requested_lower
+                    and resolved_project.lower() not in not_from_groups_lower
                 ):
                     projects_from_configuration_not_from_groups.append(resolved_project)
+                    not_from_groups_lower.add(resolved_project.lower())
 
             (
                 archived_projects_from_configuration_not_from_groups,
@@ -144,20 +154,26 @@ class ProjectsProvider(GroupsProvider):
         scheduled_for_deletion = []
         for project in projects:
             try:
-                project_object = self.gitlab.get_project_case_insensitive(project)
-                if not self.include_archived_projects and project_object["archived"]:
-                    archived.append(project_object["path_with_namespace"])
-                if not self.include_projects_scheduled_for_deletion and project_object.get("marked_for_deletion_on"):
-                    scheduled_for_deletion.append(project_object["path_with_namespace"])
-            except NotFoundException:
+                project_object = self.gl.get_project_by_path_cached(project)
+                # append the project as spelled in the config, not the canonical path,
+                # as the requested projects to omit it from use the config spelling too
+                if not self.include_archived_projects and project_object.archived:
+                    archived.append(project)
+                if not self.include_projects_scheduled_for_deletion and getattr(
+                    project_object, "marked_for_deletion_on", None
+                ):
+                    scheduled_for_deletion.append(project)
+            except GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
                 debug("Could not find '%s'", project)
                 if project_transfer_source := self._get_project_transfer_source_from_config(project):
                     source_project = self._find_project_transfer_source_in_gitlab(project_transfer_source)
                     if source_project:
-                        if not self.include_archived_projects and source_project["archived"]:
+                        if not self.include_archived_projects and source_project.archived:
                             archived.append(project)
-                        if not self.include_projects_scheduled_for_deletion and source_project.get(
-                            "marked_for_deletion_on"
+                        if not self.include_projects_scheduled_for_deletion and getattr(
+                            source_project, "marked_for_deletion_on", None
                         ):
                             scheduled_for_deletion.append(project)
                     else:
@@ -180,9 +196,9 @@ class ProjectsProvider(GroupsProvider):
         scheduled_for_deletion = []
         for group in groups:
             if self.include_archived_projects and self.include_projects_scheduled_for_deletion:
-                all += self.gitlab.get_projects(group, include_archived=True)
+                all += self.gl.get_projects(group, include_archived=True)
             else:
-                project_objects = self.gitlab.get_projects(group, include_archived=True, only_names=False)
+                project_objects = self.gl.get_projects(group, include_archived=True, only_names=False)
                 for project_object in project_objects:
                     project = project_object["path_with_namespace"]
                     all.append(project)
@@ -212,16 +228,19 @@ class ProjectsProvider(GroupsProvider):
         to avoid redundant API calls.
         """
         pattern_projects = []
+        effective_groups_lower = {group.lower() for group in effective_groups}
         for pattern in self.configuration.get_projects("project_pattern"):
             pattern_group = pattern.rsplit("/", 1)[0]
-            if pattern_group in effective_groups:
+            if pattern_group.lower() in effective_groups_lower:
                 # projects from this group already fetched through normal means
                 continue
 
             try:
-                maybe_group = self.gitlab.get_group_case_insensitive(pattern_group)
-                group_path = maybe_group["full_path"]
-            except NotFoundException:
+                maybe_group = self.gl.get_group_by_path_cached(pattern_group)
+                group_path = maybe_group.full_path
+            except GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
                 debug(
                     "Group '%s' for pattern '%s' not found in GitLab, skipping",
                     pattern_group,
@@ -229,10 +248,8 @@ class ProjectsProvider(GroupsProvider):
                 )
                 continue
 
-            try:
-                all_project_objects = self.gitlab.get_projects(group_path, include_archived=True, only_names=False)
-            except NotFoundException:
-                all_project_objects = []
+            # get_projects itself returns an empty list for a non-existent group
+            all_project_objects = self.gl.get_projects(group_path, include_archived=True, only_names=False)
 
             for project_object in all_project_objects:
                 path = project_object["path_with_namespace"]
@@ -261,18 +278,20 @@ class ProjectsProvider(GroupsProvider):
 
         return project_transfer_source
 
-    def _find_project_transfer_source_in_gitlab(self, project_transfer_source: str) -> Optional[dict]:
+    def _find_project_transfer_source_in_gitlab(self, project_transfer_source: str) -> Optional[Project]:
         try:
             debug(
                 "Checking if project transfer source ('%s') exists in GitLab",
                 project_transfer_source,
             )
-            maybe_project = self.gitlab.get_project_case_insensitive(project_transfer_source)
+            maybe_project = self.gl.get_project_by_path_cached(project_transfer_source)
             debug(
                 "Project transfer source ('%s') exists",
                 project_transfer_source,
             )
-        except NotFoundException:
+        except GitlabGetError as e:
+            if e.response_code != 404:
+                raise
             debug(
                 "Project transfer source ('%s') does not exist",
                 project_transfer_source,
