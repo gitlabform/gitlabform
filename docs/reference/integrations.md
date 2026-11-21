@@ -6,12 +6,17 @@ The keys name are as in the endpoints described in the [GitLab Integrations API 
 
 The values are like the params for a given integration, as described in the same doc OR a single special value `delete: true` causing the given integration to be removed.
 
+There is one gitlabform specific key that can be set under `integrations`:
+
+- `enforce` - set this to `true` under `integrations` so that any integrations that are active in the project but not in the `integrations` section are deleted.
+
 Example:
 
 ```yaml
 projects_and_groups:
   group_1/project_1:
     integrations:
+      enforce: true  # Delete all other active integrations that exist for this project
       slack:
         delete: true
       drone-ci:
