@@ -6,6 +6,12 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.3.3
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
 ## 6.3.2
 
 ### Refactors
