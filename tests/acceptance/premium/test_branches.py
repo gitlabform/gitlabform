@@ -665,3 +665,195 @@ class TestBranches:
 
         assert found_deploy_key_1 is True, "First deploy key should still be present (additive design)"
         assert found_deploy_key_2 is True, "Second deploy key should have been added"
+
+    @staticmethod
+    def _access_level_records_snapshot(project, branch) -> dict:
+        """
+        Returns the id and identity of each push/merge access level record on the protected branch.
+        Used to verify re-runs neither destroy nor recreate existing records.
+        """
+        protected_branch = project.protectedbranches.get(branch)
+        return {
+            key: sorted(
+                (
+                    record["id"],
+                    record.get("access_level") if record.get("user_id") is None else None,
+                    record.get("user_id"),
+                    record.get("group_id"),
+                )
+                for record in protected_branch.attributes.get(key, [])
+            )
+            for key in ("push_access_levels", "merge_access_levels")
+        }
+
+    @pytest.mark.parametrize("role_listed_first", [True, False], ids=["role_first", "users_first"])
+    def test__rerun_is_idempotent_when_role_and_users_are_combined(
+        self, project, branch, three_maintainers, role_listed_first
+    ):
+        """
+        Re-applying an unchanged config which combines a role (No access / Maintainer) with users
+        must not send any changes to GitLab.
+
+        Recent GitLab versions return access_level 40 on user records. GitLabForm used to compare those
+        against the role in the config which, depending on the order of the config items, made it either
+        destroy and re-add the user (No access: "Push access levels user has already been taken") or
+        re-add the user (Maintainer: "Merge access levels user has already been taken", issue #1399).
+        """
+        try:
+            project.protectedbranches.get(branch).delete()
+        except GitlabGetError:
+            pass
+
+        first_user, second_user, third_user = three_maintainers
+
+        push_role = f"- access_level: {AccessLevel.NO_ACCESS.value}"
+        push_users = f"- user: {first_user.username}\n                  - user: {second_user.username}"
+        merge_role = "- access_level: maintainer"
+        merge_users = f"- user: {third_user.username}"
+
+        if role_listed_first:
+            push_items = f"{push_role}\n                  {push_users}"
+            merge_items = f"{merge_role}\n                  {merge_users}"
+        else:
+            push_items = f"{push_users}\n                  {push_role}"
+            merge_items = f"{merge_users}\n                  {merge_role}"
+
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            branches:
+              {branch}:
+                protected: true
+                allowed_to_push:
+                  {push_items}
+                allowed_to_merge:
+                  {merge_items}
+        """
+
+        run_gitlabform(config, project.path_with_namespace)
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            push_access_user_ids,
+            merge_access_user_ids,
+            _,
+            _,
+            _,
+        ) = get_only_branch_access_levels(project, branch)
+
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert push_access_user_ids == sorted([first_user.id, second_user.id])
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_user_ids == [third_user.id]
+
+        records_before = self._access_level_records_snapshot(project, branch)
+
+        # Re-runs used to fail here; run_gitlabform is strict by default, so a failed update exits the run
+        run_gitlabform(config, project.path_with_namespace)
+        run_gitlabform(config, project.path_with_namespace)
+
+        assert self._access_level_records_snapshot(project, branch) == records_before
+
+    def test__rerun_is_idempotent_when_role_and_group_are_combined(self, project, group_for_function, branch):
+        """
+        Same as test__rerun_is_idempotent_when_role_and_users_are_combined but for group records,
+        which also carry an access_level in recent GitLab versions.
+        """
+        try:
+            project.protectedbranches.get(branch).delete()
+        except GitlabGetError:
+            pass
+
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            members:
+              groups:
+                {group_for_function.full_path}:
+                  group_access: {AccessLevel.DEVELOPER.value}
+            branches:
+              {branch}:
+                protected: true
+                allowed_to_push:
+                  - access_level: {AccessLevel.NO_ACCESS.value}
+                  - group_id: {group_for_function.id}
+                allowed_to_merge:
+                  - access_level: maintainer
+                  - group_id: {group_for_function.id}
+        """
+
+        run_gitlabform(config, project.path_with_namespace)
+
+        (
+            push_access_levels,
+            merge_access_levels,
+            _,
+            _,
+            push_access_group_ids,
+            merge_access_group_ids,
+            _,
+        ) = get_only_branch_access_levels(project, branch)
+
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert push_access_group_ids == [group_for_function.id]
+        assert merge_access_levels == [AccessLevel.MAINTAINER.value]
+        assert merge_access_group_ids == [group_for_function.id]
+
+        records_before = self._access_level_records_snapshot(project, branch)
+
+        run_gitlabform(config, project.path_with_namespace)
+
+        assert self._access_level_records_snapshot(project, branch) == records_before
+
+    def test__switching_role_between_no_access_and_maintainer_keeps_user_records(
+        self, project, branch, three_maintainers
+    ):
+        """
+        Changing the role in a config that also lists a user must replace only the role record.
+        The user record must be kept as is, i.e. not destroyed and re-added.
+        """
+        try:
+            project.protectedbranches.get(branch).delete()
+        except GitlabGetError:
+            pass
+
+        first_user, _, _ = three_maintainers
+
+        def config_with_push_role(role: str) -> str:
+            return f"""
+            projects_and_groups:
+              {project.path_with_namespace}:
+                branches:
+                  {branch}:
+                    protected: true
+                    allowed_to_push:
+                      - access_level: {role}
+                      - user: {first_user.username}
+            """
+
+        def push_user_record_ids() -> list:
+            protected_branch = project.protectedbranches.get(branch)
+            return [r["id"] for r in protected_branch.push_access_levels if r.get("user_id") == first_user.id]
+
+        run_gitlabform(config_with_push_role("no access"), project.path_with_namespace)
+
+        push_access_levels, _, push_access_user_ids, _, _, _, _ = get_only_branch_access_levels(project, branch)
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert push_access_user_ids == [first_user.id]
+        user_record_ids = push_user_record_ids()
+        assert len(user_record_ids) == 1
+
+        run_gitlabform(config_with_push_role("maintainer"), project.path_with_namespace)
+
+        push_access_levels, _, push_access_user_ids, _, _, _, _ = get_only_branch_access_levels(project, branch)
+        assert push_access_levels == [AccessLevel.MAINTAINER.value]
+        assert push_access_user_ids == [first_user.id]
+        assert push_user_record_ids() == user_record_ids
+
+        run_gitlabform(config_with_push_role("no access"), project.path_with_namespace)
+
+        push_access_levels, _, push_access_user_ids, _, _, _, _ = get_only_branch_access_levels(project, branch)
+        assert push_access_levels == [AccessLevel.NO_ACCESS.value]
+        assert push_access_user_ids == [first_user.id]
+        assert push_user_record_ids() == user_record_ids
