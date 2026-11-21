@@ -24,6 +24,11 @@ FROM python:3.15-alpine AS final
 # Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
+# Remove pip and its bundled wheel. The app runs from the copied venv and never installs packages.
+RUN rm -rf /usr/local/lib/python3.*/site-packages/pip* \
+           /usr/local/lib/python3.*/ensurepip \
+           /usr/local/bin/pip*
+
 # Copy the virtual environment to the same location to preserve absolute paths in shebangs
 COPY --from=builder /app/.venv /app/.venv
 
