@@ -24,20 +24,20 @@ class TestPythonGitlab:
 
     # ------------------------------------------------------- groups & projects
 
-    def test_get_groups_as_admin_gets_all_available(self):
+    def test_get_group_paths_as_admin_gets_all_available(self):
         python_gitlab = PythonGitlab(MagicMock())
         python_gitlab._is_admin = MagicMock(return_value=True)
         python_gitlab.groups.list = MagicMock(return_value=[self._group("b"), self._group("a")])
 
-        assert python_gitlab.get_groups() == ["a", "b"]
+        assert python_gitlab.get_group_paths() == ["a", "b"]
         python_gitlab.groups.list.assert_called_once_with(get_all=True, all_available=True)
 
-    def test_get_groups_as_non_admin_requires_reporter_access(self):
+    def test_get_group_paths_as_non_admin_requires_reporter_access(self):
         python_gitlab = PythonGitlab(MagicMock())
         python_gitlab._is_admin = MagicMock(return_value=False)
         python_gitlab.groups.list = MagicMock(return_value=[self._group("a")])
 
-        assert python_gitlab.get_groups() == ["a"]
+        assert python_gitlab.get_group_paths() == ["a"]
         python_gitlab.groups.list.assert_called_once_with(get_all=True, min_access_level=20)
 
     def test_get_projects_filters_to_group_namespace_and_sorts(self):
@@ -269,6 +269,38 @@ class TestGitlabWrapperExtraKwargs:
 
         assert "token" not in call_kwargs
         assert call_kwargs["private_token"] == "my-secret-token"
+
+    @patch("gitlabform.gitlab.GraphQL")
+    @patch("gitlabform.gitlab.PythonGitlab")
+    def test_per_page_defaults_to_100(self, mock_python_gitlab, mock_graphql):
+        """Test that per_page defaults to 100, like the legacy REST layer did"""
+        mock_gitlab = MagicMock(spec=GitLab)
+        mock_gitlab.session = MagicMock()
+        mock_gitlab.gitlab_config = {
+            "url": "https://gitlab.example.com",
+            "token": "test-token",
+        }
+
+        _ = GitlabWrapper(mock_gitlab)
+
+        call_kwargs = mock_python_gitlab.call_args.kwargs
+        assert call_kwargs["per_page"] == 100
+
+    @patch("gitlabform.gitlab.GraphQL")
+    @patch("gitlabform.gitlab.PythonGitlab")
+    def test_per_page_can_be_overridden(self, mock_python_gitlab, mock_graphql):
+        mock_gitlab = MagicMock(spec=GitLab)
+        mock_gitlab.session = MagicMock()
+        mock_gitlab.gitlab_config = {
+            "url": "https://gitlab.example.com",
+            "token": "test-token",
+            "per_page": 50,
+        }
+
+        _ = GitlabWrapper(mock_gitlab)
+
+        call_kwargs = mock_python_gitlab.call_args.kwargs
+        assert call_kwargs["per_page"] == 50
 
     @patch("gitlabform.gitlab.GraphQL")
     @patch("gitlabform.gitlab.PythonGitlab")

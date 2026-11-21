@@ -1,7 +1,7 @@
 import sys
 from logging import critical
 from gitlabform.constants import EXIT_INVALID_INPUT
-from gitlab import GitlabGetError, GitlabListError
+from gitlab import GitlabGetError
 
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.lists import OmissionReason, Groups
@@ -39,22 +39,23 @@ class GroupsProvider:
         try:
             # GitLab resolves group paths case-insensitively and returns the canonical path
             maybe_group = self.gl.get_group_by_path_cached(target)
-            path = maybe_group.full_path
-            groups.add_requested([path])
-
-            if recurse_subgroups:
-                descendants = self.gl.get_group_descendants(path)
-                groups.add_requested([group["full_path"] for group in descendants])
-
-                groups.add_omitted(
-                    OmissionReason.SKIPPED,
-                    self._get_skipped_groups(groups.get_effective()),
-                )
-
-        except (GitlabGetError, GitlabListError) as e:
+        except GitlabGetError as e:
             if e.response_code != 404:
                 raise
             # ...or a single project, which we ignore here
+            return groups
+
+        path = maybe_group.full_path
+        groups.add_requested([path])
+
+        if recurse_subgroups:
+            descendants = self.gl.get_group_descendants(path)
+            groups.add_requested([group["full_path"] for group in descendants])
+
+            groups.add_omitted(
+                OmissionReason.SKIPPED,
+                self._get_skipped_groups(groups.get_effective()),
+            )
 
         return groups
 
@@ -62,7 +63,7 @@ class GroupsProvider:
         groups = Groups()
 
         if target == "ALL":
-            groups.add_requested(self.gl.get_groups())
+            groups.add_requested(self.gl.get_group_paths())
         else:  # ALL_DEFINED
             groups.add_requested(self.configuration.get_groups())
 

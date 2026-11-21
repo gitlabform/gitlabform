@@ -94,7 +94,7 @@ class PythonGitlab(Gitlab):
         group = self.groups.get(group_id_or_path, lazy=True)
         return [descendant.asdict() for descendant in group.descendant_groups.list(get_all=True)]
 
-    def get_groups(self) -> List[str]:
+    def get_group_paths(self) -> List[str]:
         """
         :return: sorted list of group full paths
         """

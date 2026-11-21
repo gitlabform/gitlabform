@@ -58,6 +58,9 @@ class GitlabWrapper:
 
         default_gitlab_kwargs = {
             "retry_transient_errors": True,
+            # without this list calls use the server default page size of 20;
+            # the legacy REST layer always requested pages of 100
+            "per_page": 100,
         }
         renamed_gitlab_kwargs = {
             # Bandit is used for security scanning and it complains about 'private_token' being

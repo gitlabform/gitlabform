@@ -293,6 +293,39 @@ class TestGetProjects:
         assert "group/project2" not in projects.get_effective()
         assert projects.get_omitted(OmissionReason.SCHEDULED_FOR_DELETION) == ["group/project2"]
 
+    def test__all_defined__config_spelling_differing_in_case_is_not_processed_twice(
+        self, gitlab_mock, configuration_mock
+    ):
+        gitlab_mock.get_projects.return_value = ["group/project1"]
+        configuration_mock.get_projects.side_effect = lambda *args: [] if args else ["Group/Project1"]
+        configuration_mock.is_project_skipped.return_value = False
+
+        provider = make_provider(gitlab_mock, configuration_mock)
+        groups = self._make_groups(["group"])
+
+        projects = provider._get_projects("ALL_DEFINED", groups)
+
+        assert projects.get_effective() == ["group/project1"]
+        gitlab_mock.get_project_by_path_cached.assert_not_called()
+
+    def test__all_defined__pattern_resolving_to_config_project_with_different_case_is_requested_once(
+        self, gitlab_mock, configuration_mock
+    ):
+        gitlab_mock.get_projects.return_value = [
+            {"path_with_namespace": "group/web-api", "archived": False, "marked_for_deletion_on": None}
+        ]
+        gitlab_mock.get_group_by_path_cached.return_value = SimpleNamespace(full_path="group")
+        gitlab_mock.get_project_by_path_cached.return_value = project_object("group/web-api")
+        configuration_mock.get_projects.side_effect = lambda *args: ["Group/web-*"] if args else ["Group/web-api"]
+        configuration_mock.is_project_skipped.return_value = False
+
+        provider = make_provider(gitlab_mock, configuration_mock)
+        groups = self._make_groups([])
+
+        projects = provider._get_projects("ALL_DEFINED", groups)
+
+        assert projects.get_effective() == ["Group/web-api"]
+
     def test__all_defined__scheduled_for_deletion_from_configuration(self, gitlab_mock, configuration_mock):
         gitlab_mock.get_projects.return_value = []
         gitlab_mock.get_project_by_path_cached.return_value = project_object(

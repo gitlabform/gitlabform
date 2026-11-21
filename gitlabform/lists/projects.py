@@ -92,9 +92,11 @@ class ProjectsProvider(GroupsProvider):
 
         projects_from_configuration = self.configuration.get_projects()
 
-        # TODO: this check should be case-insensitive
+        # compare case-insensitively, as the requested projects hold the canonical paths
+        # from GitLab while the config may spell them with a different case
+        requested_lower = {project.lower() for project in projects.requested}
         projects_from_configuration_not_from_groups = [
-            project for project in projects_from_configuration if project not in projects.requested
+            project for project in projects_from_configuration if project.lower() not in requested_lower
         ]
 
         if target == "ALL_DEFINED":
@@ -102,12 +104,14 @@ class ProjectsProvider(GroupsProvider):
             # defined in the configuration, but we don't need to re-check for
             # being archived or scheduled for deletion projects that we already got from groups
 
+            not_from_groups_lower = {project.lower() for project in projects_from_configuration_not_from_groups}
             for resolved_project in self._resolve_project_patterns(groups.get_effective()):
                 if (
-                    resolved_project not in projects.requested
-                    and resolved_project not in projects_from_configuration_not_from_groups
+                    resolved_project.lower() not in requested_lower
+                    and resolved_project.lower() not in not_from_groups_lower
                 ):
                     projects_from_configuration_not_from_groups.append(resolved_project)
+                    not_from_groups_lower.add(resolved_project.lower())
 
             (
                 archived_projects_from_configuration_not_from_groups,
