@@ -1,6 +1,9 @@
 from datetime import date
 from unittest.mock import MagicMock
 
+import pytest
+from gitlab import GitlabDeleteError
+
 from gitlabform.processors.group.group_members_processor import GroupMembersProcessor
 
 
@@ -8,6 +11,19 @@ class TestGroupMembersProcessor:
     def setup_method(self):
         self.processor = GroupMembersProcessor.__new__(GroupMembersProcessor)
         self.processor.gl = MagicMock()
+
+    def test__unshare_tolerates_a_not_shared_group(self):
+        group = MagicMock()
+        group.unshare.side_effect = GitlabDeleteError("404 Not Found", response_code=404)
+
+        self.processor._unshare(group, 123)
+
+    def test__unshare_reraises_other_errors(self):
+        group = MagicMock()
+        group.unshare.side_effect = GitlabDeleteError("403 Forbidden", response_code=403)
+
+        with pytest.raises(GitlabDeleteError):
+            self.processor._unshare(group, 123)
 
     def test__process_groups_formats_date_expires_at_before_sharing(self):
         group = MagicMock()
