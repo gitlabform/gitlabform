@@ -96,6 +96,15 @@ class TestMembersProcessorGroups:
 
         project.share.assert_not_called()
 
+    def test_case_variant_duplicate_config_entries_share_only_once(self):
+        # GitLab rejects sharing with an already shared group with a 409
+        project = self._project()
+        self.gl.get_group_id.return_value = 7
+
+        self._process_groups({"Some/Group": {"group_access": 30}, "some/group": {"group_access": 30}})
+
+        project.share.assert_called_once_with(7, 30, None)
+
     def test_group_with_uppercase_path_in_gitlab_is_matched_and_kept(self):
         # the config side is compared in lowercase, so the GitLab side must be too
         project = self._project(self._shared_group("MyTeam/Sub", group_access_level=30))

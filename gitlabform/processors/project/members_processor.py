@@ -67,6 +67,12 @@ class MembersProcessor(AbstractProcessor):
                     # access_level can be None when it's not in the config; the API will then reject
                     # the request, like it did with the previous implementation
                     project.share(group_id, access_level, expires_at)  # type: ignore[arg-type]
+                    # update the snapshot, so that a second config entry for the same
+                    # group spelled with a different case is not shared again
+                    snapshot = current_groups.setdefault(
+                        common_group_name, {"group_id": group_id, "group_full_path": group}
+                    )
+                    snapshot.update({"group_access_level": access_level, "expires_at": expires_at})
 
         if enforce_members:
             current_groups = self._get_shared_with_groups(project)
