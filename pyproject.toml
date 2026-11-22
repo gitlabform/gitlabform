@@ -31,7 +31,7 @@ classifiers = [
 
 # Main runtime dependencies. Pinned strictly to ensure production stability.
 dependencies = [
-    "certifi==2026.10.23",
+    "certifi==2026.11.20",
     "jinja2==3.1.6",
     "luddite==1.0.4",
     "markupsafe==3.0.4",
