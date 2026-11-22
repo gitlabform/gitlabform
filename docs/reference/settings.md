@@ -21,10 +21,9 @@ projects_and_groups:
 ```
 
 The `projects_and_groups` section is optional when you only want to manage the application settings.
-Run GitLabForm with the `ALL_DEFINED` target in that case:
+Run GitLabForm with the `ALL_DEFINED` or `ALL` target in that case:
 
 ```yaml
-config_version: 4
 application:
   settings:
     require_two_factor_authentication: true

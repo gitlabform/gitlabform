@@ -53,7 +53,7 @@ class OmitEmptyConfigs(GroupsAndProjectsFilter):
         self.project_processors = project_processors
 
         if not self.configuration.get_projects_and_groups() and not self.configuration.get("application", {}):
-            critical("Configuration has to contain non-empty 'projects_and_groups' key.")
+            critical("Configuration has to contain non-empty 'projects_and_groups' or 'application' key.")
             sys.exit(EXIT_INVALID_INPUT)
 
     def filter(self, groups: Groups, projects: Projects) -> None:

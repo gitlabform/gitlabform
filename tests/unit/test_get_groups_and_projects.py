@@ -37,10 +37,11 @@ def make_gitlabform(config_yaml: str) -> GitLabForm:
     return gf
 
 
-def test__no_groups_and_projects_with_application_only_config():
+@pytest.mark.parametrize("target", ["ALL", "ALL_DEFINED"])
+def test__no_groups_and_projects_with_application_only_config(target):
     gf = make_gitlabform(APPLICATION_ONLY_CONFIG)
 
-    projects, groups = gf._get_groups_and_projects("ALL_DEFINED")
+    projects, groups = gf._get_groups_and_projects(target)
 
     assert projects == []
     assert groups == []
@@ -55,10 +56,9 @@ def test__no_groups_and_projects_without_application_config(target):
     assert e.value.code == EXIT_INVALID_INPUT
 
 
-@pytest.mark.parametrize("target", ["ALL", "group/project"])
-def test__no_groups_and_projects_with_application_only_config_and_other_targets(target):
+def test__single_target_not_found_with_application_only_config():
     gf = make_gitlabform(APPLICATION_ONLY_CONFIG)
 
     with pytest.raises(SystemExit) as e:
-        gf._get_groups_and_projects(target)
+        gf._get_groups_and_projects("group/project")
     assert e.value.code == EXIT_INVALID_INPUT

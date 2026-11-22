@@ -634,7 +634,7 @@ class GitLabForm:
         projects = self.projects_provider.get_projects(target)
 
         no_groups_or_projects = len(groups.get_effective()) == 0 and len(projects.get_effective()) == 0
-        has_application_config = target == "ALL_DEFINED" and bool(self.configuration.get("application", {}))
+        has_application_config = target in ["ALL", "ALL_DEFINED"] and bool(self.configuration.get("application", {}))
         if no_groups_or_projects and not has_application_config:
             if target == "ALL":
                 error_message = "GitLab has no projects and groups!"
