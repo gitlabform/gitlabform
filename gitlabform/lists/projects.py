@@ -132,7 +132,11 @@ class ProjectsProvider(GroupsProvider):
             # that are being transferred to a different namespace
             for project in projects_from_configuration_not_from_groups:
                 # if the target is a group, and the project is not in the group
-                if len(groups.get_effective()) == 1 and target != "ALL" and target != project.rsplit("/", 1)[0]:
+                if (
+                    len(groups.get_effective()) == 1
+                    and target != "ALL"
+                    and target.lower() != project.rsplit("/", 1)[0].lower()
+                ):
                     debug(
                         "Ignore project '%s', since it's not in target group '%s",
                         project,

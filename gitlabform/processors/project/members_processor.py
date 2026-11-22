@@ -59,10 +59,14 @@ class MembersProcessor(AbstractProcessor):
 
                     # we will remove group access first and then re-add them,
                     # to ensure that the groups have the expected access level
-                    self._unshare(project, common_group_name)
+                    if common_group_name in current_groups:
+                        group_id = current_groups[common_group_name]["group_id"]
+                        self._unshare(project, group_id)
+                    else:
+                        group_id = self.gl.get_group_id(common_group_name)
                     # access_level can be None when it's not in the config; the API will then reject
                     # the request, like it did with the previous implementation
-                    project.share(self.gl.get_group_id(common_group_name), access_level, expires_at)  # type: ignore[arg-type]
+                    project.share(group_id, access_level, expires_at)  # type: ignore[arg-type]
 
         if enforce_members:
             current_groups = self._get_shared_with_groups(project)
@@ -73,7 +77,9 @@ class MembersProcessor(AbstractProcessor):
 
             for group_not_in_config in groups_not_in_config:
                 info(f"Removing group '{group_not_in_config}' that is not configured to be a member.")
-                self._unshare(project, group_not_in_config)
+                # the id comes from the shared_with_groups data, so this also works
+                # when the token cannot see the group itself
+                self._unshare(project, current_groups[group_not_in_config]["group_id"])
         else:
             info("Not enforcing group members.")
 
@@ -85,13 +91,12 @@ class MembersProcessor(AbstractProcessor):
         project_info = self.gl.projects.get(project.id)
         return {group["group_full_path"].lower(): group for group in project_info.shared_with_groups}
 
-    def _unshare(self, project: Project, group_name: str) -> None:
-        group_id = self.gl.get_group_id(group_name)
+    def _unshare(self, project: Project, group_id: int) -> None:
         try:
             project.unshare(group_id)
         except GitlabDeleteError as e:
-            # 404 means the group is not shared with the project, which is expected
-            # when adding a new member, as the unshare always runs before the share
+            # 404 means the group is no longer shared with the project, which can
+            # happen when it was removed between listing and unsharing
             if e.response_code != 404:
                 raise
             debug(f"Group with id {group_id} was not unshared, it was not shared to begin with")

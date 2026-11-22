@@ -24,8 +24,9 @@ class TestMembersProcessorGroups:
         return project
 
     @staticmethod
-    def _shared_group(full_path: str, group_access_level: int = 30, expires_at=None) -> dict:
+    def _shared_group(full_path: str, group_access_level: int = 30, expires_at=None, group_id: int = 7) -> dict:
         return {
+            "group_id": group_id,
             "group_full_path": full_path,
             "group_access_level": group_access_level,
             "expires_at": expires_at,
@@ -44,7 +45,6 @@ class TestMembersProcessorGroups:
 
     def test_reshares_group_when_access_level_differs(self):
         project = self._project(self._shared_group("some/group", group_access_level=10))
-        self.gl.get_group_id.return_value = 7
         order = MagicMock()
         order.attach_mock(project.unshare, "unshare")
         order.attach_mock(project.share, "share")
@@ -63,8 +63,10 @@ class TestMembersProcessorGroups:
         project.unshare.assert_not_called()
 
     def test_enforce_removes_groups_not_in_config(self):
-        project = self._project(self._shared_group("stray/group"))
-        self.gl.get_group_id.return_value = 9
+        # the id comes from the shared_with_groups data, so no group lookup is
+        # needed, which also works when the token cannot see the group itself
+        project = self._project(self._shared_group("stray/group", group_id=9))
+        self.gl.get_group_id.side_effect = AssertionError("should not be called")
 
         self._process_groups({}, enforce=True)
 
@@ -79,7 +81,6 @@ class TestMembersProcessorGroups:
 
     def test_unshare_of_a_not_shared_group_is_tolerated(self):
         project = self._project(self._shared_group("some/group", group_access_level=10))
-        self.gl.get_group_id.return_value = 7
         project.unshare.side_effect = GitlabDeleteError("404 Not Found", response_code=404)
 
         self._process_groups({"some/group": {"group_access": 30}})
@@ -88,7 +89,6 @@ class TestMembersProcessorGroups:
 
     def test_other_unshare_error_is_reraised(self):
         project = self._project(self._shared_group("some/group", group_access_level=10))
-        self.gl.get_group_id.return_value = 7
         project.unshare.side_effect = GitlabDeleteError("403 Forbidden", response_code=403)
 
         with pytest.raises(GitlabDeleteError):

@@ -293,6 +293,21 @@ class TestGetProjects:
         assert "group/project2" not in projects.get_effective()
         assert projects.get_omitted(OmissionReason.SCHEDULED_FOR_DELETION) == ["group/project2"]
 
+    def test__group_target__config_project_whose_group_differs_in_case_is_not_ignored(
+        self, gitlab_mock, configuration_mock
+    ):
+        gitlab_mock.get_projects.return_value = []
+        gitlab_mock.get_project_by_path_cached.return_value = project_object("mygroup/project")
+        configuration_mock.get_projects.return_value = ["mygroup/project"]
+        configuration_mock.is_project_skipped.return_value = False
+
+        provider = make_provider(gitlab_mock, configuration_mock)
+        groups = self._make_groups(["mygroup"])
+
+        projects = provider._get_projects("MyGroup", groups)
+
+        assert projects.get_effective() == ["mygroup/project"]
+
     def test__all_defined__config_spelling_differing_in_case_is_not_processed_twice(
         self, gitlab_mock, configuration_mock
     ):
