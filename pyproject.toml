@@ -31,7 +31,7 @@ classifiers = [
 
 # Main runtime dependencies. Pinned strictly to ensure production stability.
 dependencies = [
-    "certifi==2026.10.23",
+    "certifi==2026.11.20",
     "jinja2==3.1.6",
     "luddite==1.0.4",
     "markupsafe==3.0.4",
@@ -53,11 +53,11 @@ dev = [
     { include-group = "docs" },
     { include-group = "release" },
     "commitizen==4.19.2",
-    "prek==0.5.5",
+    "prek==0.5.7",
 ]
 # Minimum set of dependencies required to execute the test suite.
 test = [
-    "coverage==7.16.2",
+    "coverage==7.17.0",
     "cryptography==50.0.2",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
@@ -71,13 +71,13 @@ lint = [
     "codespell==2.4.3",
     "mypy==2.4.0",
     "mypy-extensions==1.1.0",
-    "ruff==0.17.1",
+    "ruff==0.17.2",
     "types-requests==2.33.0.20261006",
 ]
 # Documentation generation stack.
 docs = [
-    "markdown==3.11.1",
-    "zensical==0.0.70",
+    "markdown==3.11.2",
+    "zensical==0.0.71",
     "pygments==2.21.0",
     "pymdown-extensions==12.3",
 ]
