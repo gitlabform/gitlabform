@@ -6,6 +6,24 @@ For details on how to migrate between major versions, please refer to the [upgra
 
 ---
 
+## 6.3.4
+
+### Bug Fixes
+
+* consistent enforce, delete key and unshare handling across processors [#1512](https://github.com/gitlabform/gitlabform/pull/1512). ([rickbrouwer](https://github.com/rickbrouwer))
+* show latest stable version in CLI notices [#1511](https://github.com/gitlabform/gitlabform/pull/1511). ([andrew-demb](https://github.com/andrew-demb))
+
+### Build
+
+* remove pip from the final Docker image [#1508](https://github.com/gitlabform/gitlabform/pull/1508). ([rickbrouwer](https://github.com/rickbrouwer))
+* remove unused cli-ui dependency [#1492](https://github.com/gitlabform/gitlabform/pull/1492). ([rickbrouwer](https://github.com/rickbrouwer))
+
+### Dependencies
+
+* Update various dependencies to newer versions.
+
+Thanks to all the contributors of this release!
+
 ## 6.3.3
 
 ### Dependencies
