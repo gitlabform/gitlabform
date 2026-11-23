@@ -75,28 +75,49 @@ class GroupMembersProcessor(AbstractProcessor):
             groups_before_by_group_path[shared_with_group["group_full_path"]] = shared_with_group
 
         for share_with_group_path in groups_to_share_with_by_path:
-            group_access_to_set = groups_to_share_with_by_path[share_with_group_path]["group_access"]
+            group_configuration = groups_to_share_with_by_path[share_with_group_path]
+            group_access_to_set = group_configuration["group_access"]
 
-            expires_at_to_set = format_expires_at(groups_to_share_with_by_path[share_with_group_path].get("expires_at"))
+            expires_at_to_set = format_expires_at(group_configuration.get("expires_at"))
+            member_role_id_or_name = group_configuration.get("member_role")
+            member_role_id_to_set = (
+                self.gl.get_member_role_id_cached(member_role_id_or_name, group_being_processed.full_path)
+                if member_role_id_or_name is not None
+                else None
+            )
 
             if share_with_group_path in groups_before_by_group_path:
                 group_access_before = groups_before_by_group_path[share_with_group_path]["group_access_level"]
                 expires_at_before = groups_before_by_group_path[share_with_group_path]["expires_at"]
+                member_role_id_before = groups_before_by_group_path[share_with_group_path].get("member_role_id") or None
 
-                if group_access_before == group_access_to_set and expires_at_before == expires_at_to_set:
+                if (
+                    group_access_before == group_access_to_set
+                    and expires_at_before == expires_at_to_set
+                    and member_role_id_before == member_role_id_to_set
+                ):
                     info(
                         "Nothing to change for group '%s' - same config now as to set.",
                         share_with_group_path,
                     )
                 else:
-                    info(f"Re-adding group {share_with_group_path} to change their access level or expires at.")
+                    info(
+                        f"Re-adding group {share_with_group_path} to change their access level, expires at,"
+                        " or member role."
+                    )
                     share_with_group_id = groups_before_by_group_path[share_with_group_path]["group_id"]
                     # we will remove the group first and then re-add them,
-                    # to ensure that the group has the expected access level
+                    # to ensure that the group has the expected access level, expiration and custom role
                     self._unshare(group_being_processed, share_with_group_id)
 
                     try:
-                        group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                        self._share(
+                            group_being_processed,
+                            share_with_group_id,
+                            group_access_to_set,
+                            expires_at_to_set,
+                            member_role_id_to_set,
+                        )
                     except GitlabError as e:
                         error(f"Error processing {share_with_group_path}, {e.error_message}")
                         raise e
@@ -108,7 +129,13 @@ class GroupMembersProcessor(AbstractProcessor):
 
                 share_with_group_id = self.gl.get_group_id(share_with_group_path)
                 try:
-                    group_being_processed.share(share_with_group_id, group_access_to_set, expires_at_to_set)
+                    self._share(
+                        group_being_processed,
+                        share_with_group_id,
+                        group_access_to_set,
+                        expires_at_to_set,
+                        member_role_id_to_set,
+                    )
                 except GitlabError as e:
                     error(f"Error processing {share_with_group_path}, {e.error_message}")
                     raise e
@@ -129,6 +156,30 @@ class GroupMembersProcessor(AbstractProcessor):
         info(
             "Group shared with AFTER: %s",
             group_being_processed.members.list(get_all=True),
+        )
+
+    @staticmethod
+    def _share(
+        group_being_processed: Group,
+        share_with_group_id: int,
+        group_access: int,
+        expires_at: str | None,
+        member_role_id: int | None,
+    ):
+        if member_role_id is None:
+            group_being_processed.share(share_with_group_id, group_access, expires_at)
+            return
+
+        # python-gitlab's Group.share() does not currently include member_role_id
+        # in the request body, so use its lower-level API for custom role shares.
+        group_being_processed.manager.gitlab.http_post(
+            f"/groups/{group_being_processed.encoded_id}/share",
+            post_data={
+                "group_id": share_with_group_id,
+                "group_access": group_access,
+                "expires_at": expires_at,
+                "member_role_id": member_role_id,
+            },
         )
 
     @staticmethod
