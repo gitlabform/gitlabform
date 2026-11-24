@@ -1,7 +1,7 @@
 import sys
 from typing import Dict, Tuple
 
-from logging import info, critical, error
+from logging import debug, info, critical, error
 
 from gitlabform.constants import EXIT_INVALID_INPUT
 from gitlabform.gitlab import GitLab, AccessLevel
@@ -135,9 +135,13 @@ class GroupMembersProcessor(AbstractProcessor):
     def _unshare(group_being_processed, share_with_group_id):
         try:
             group_being_processed.unshare(share_with_group_id)
-        except GitlabDeleteError:
-            info(f"Group with id {share_with_group_id} could not be unshared, likely was never shared to begin with")
-            pass
+        except GitlabDeleteError as e:
+            # 404 means the group is not shared, which is expected when adding a new
+            # member, as the unshare always runs before the share; other errors
+            # (like a 403) are real failures and should not be swallowed
+            if e.response_code != 404:
+                raise
+            debug(f"Group with id {share_with_group_id} was not unshared, it was not shared to begin with")
 
     def _process_users(
         self,
