@@ -1,10 +1,33 @@
 from unittest.mock import MagicMock
 
+import pytest
 from gitlab import GitlabGetError
 
 from gitlabform.gitlab import AccessLevel
 from gitlabform.processors.project.branches_processor import BranchesProcessor
 from gitlabform.processors.util.branch_protection import BranchProtection
+
+def _config_item(**kwargs):
+    """A transformed config item, as produced by BranchProtection.map_config_to_protected_branch_get_data"""
+    return {"id": None, "access_level": None, "user_id": None, "group_id": None, "deploy_key_id": None, **kwargs}
+
+
+def _gitlab_record(record_id, **kwargs):
+    """An access level record, as returned by GitLab's protected branches GET endpoint"""
+    return {"id": record_id, "access_level": None, "user_id": None, "group_id": None, "deploy_key_id": None, **kwargs}
+
+# Since GitLab 19 user/group/deploy key records carry a non-null access_level (e.g. 40 for maintainer),
+# earlier versions returned null. See https://github.com/gitlabform/gitlabform/issues/1399
+USER_ID = 9518
+OTHER_USER_ID = 42
+GROUP_ID = 5
+DEPLOY_KEY_ID = 7
+USER_RECORD = _gitlab_record(41361, user_id=USER_ID, access_level=AccessLevel.MAINTAINER.value)
+OTHER_USER_RECORD = _gitlab_record(41362, user_id=OTHER_USER_ID, access_level=AccessLevel.MAINTAINER.value)
+GROUP_RECORD = _gitlab_record(41363, group_id=GROUP_ID, access_level=AccessLevel.MAINTAINER.value)
+DEPLOY_KEY_RECORD = _gitlab_record(41364, deploy_key_id=DEPLOY_KEY_ID, access_level=AccessLevel.MAINTAINER.value)
+NO_ACCESS_RECORD = _gitlab_record(41360, access_level=AccessLevel.NO_ACCESS.value)
+MAINTAINER_RECORD = _gitlab_record(41365, access_level=AccessLevel.MAINTAINER.value)
 
 
 class TestBranchesProcessor:
@@ -243,3 +266,150 @@ class TestBranchesProcessor:
         result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
         # Additive Design: Omitted users should be retained, not destroyed.
         assert result == []
+
+    @pytest.mark.parametrize(
+        "transformed_access_levels, existing_records",
+        [
+            pytest.param(
+                [_config_item(access_level=AccessLevel.NO_ACCESS.value), _config_item(user_id=USER_ID)],
+                (USER_RECORD, NO_ACCESS_RECORD),
+                id="no_access_then_user",
+            ),
+            pytest.param(
+                [_config_item(user_id=USER_ID), _config_item(access_level=AccessLevel.NO_ACCESS.value)],
+                (USER_RECORD, NO_ACCESS_RECORD),
+                id="user_then_no_access",
+            ),
+            pytest.param(
+                [_config_item(access_level=AccessLevel.NO_ACCESS.value), _config_item(user_id=USER_ID)],
+                (NO_ACCESS_RECORD, USER_RECORD),
+                id="no_access_then_user_gitlab_returns_role_first",
+            ),
+            pytest.param(
+                [_config_item(access_level=AccessLevel.MAINTAINER.value), _config_item(user_id=USER_ID)],
+                (USER_RECORD, MAINTAINER_RECORD),
+                id="issue_1399_maintainer_then_user",
+            ),
+            pytest.param(
+                [_config_item(access_level=AccessLevel.MAINTAINER.value), _config_item(user_id=USER_ID)],
+                (MAINTAINER_RECORD, USER_RECORD),
+                id="issue_1399_maintainer_then_user_gitlab_returns_role_first",
+            ),
+            pytest.param(
+                [
+                    _config_item(access_level=AccessLevel.MAINTAINER.value),
+                    _config_item(user_id=USER_ID),
+                    _config_item(user_id=OTHER_USER_ID),
+                ],
+                (USER_RECORD, OTHER_USER_RECORD, MAINTAINER_RECORD),
+                id="issue_1399_maintainer_then_two_users",
+            ),
+            pytest.param(
+                [_config_item(access_level=AccessLevel.NO_ACCESS.value), _config_item(group_id=GROUP_ID)],
+                (GROUP_RECORD, NO_ACCESS_RECORD),
+                id="no_access_then_group",
+            ),
+            pytest.param(
+                [_config_item(access_level=AccessLevel.NO_ACCESS.value), _config_item(deploy_key_id=DEPLOY_KEY_ID)],
+                (DEPLOY_KEY_RECORD, NO_ACCESS_RECORD),
+                id="no_access_then_deploy_key",
+            ),
+        ],
+    )
+    def test_build_patch_request_data_returns_nothing_when_gitlab_user_group_or_deploy_key_records_have_access_level(
+        self, transformed_access_levels, existing_records
+    ):
+        result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == []
+
+    def test_build_patch_request_data_no_access_destroys_existing_role_but_keeps_existing_user(self):
+        transformed_access_levels = [
+            _config_item(access_level=AccessLevel.NO_ACCESS.value),
+            _config_item(user_id=USER_ID),
+        ]
+        existing_records = (USER_RECORD, MAINTAINER_RECORD)
+
+        result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [
+            {"access_level": AccessLevel.NO_ACCESS.value},
+            {"id": MAINTAINER_RECORD["id"], "_destroy": True},
+        ]
+
+    def test_build_patch_request_data_role_destroys_existing_no_access_but_keeps_existing_user(self):
+        transformed_access_levels = [
+            _config_item(access_level=AccessLevel.MAINTAINER.value),
+            _config_item(user_id=USER_ID),
+        ]
+        existing_records = (USER_RECORD, NO_ACCESS_RECORD)
+
+        result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [
+            {"access_level": AccessLevel.MAINTAINER.value},
+            {"id": NO_ACCESS_RECORD["id"], "_destroy": True},
+        ]
+
+    def test_build_patch_request_data_adds_new_user_alongside_no_access_without_destroying_anything(self):
+        transformed_access_levels = [
+            _config_item(access_level=AccessLevel.NO_ACCESS.value),
+            _config_item(user_id=USER_ID),
+            _config_item(user_id=OTHER_USER_ID),
+        ]
+        existing_records = (USER_RECORD, NO_ACCESS_RECORD)
+
+        result = BranchProtection.build_patch_request_data(transformed_access_levels, existing_records)
+        assert result == [{"user_id": OTHER_USER_ID}]
+
+    def _setup_existing_protected_branch(self, push_access_levels, merge_access_levels):
+        self.gitlab.is_version_less_than.return_value = False
+        self.gitlab.enterprise = True
+
+        protected_branch = MagicMock()
+        protected_branch.attributes = {
+            "name": "main",
+            "push_access_levels": push_access_levels,
+            "merge_access_levels": merge_access_levels,
+            "unprotect_access_levels": [],
+        }
+
+        project = MagicMock()
+        project.protectedbranches.get.return_value = protected_branch
+        return project
+
+    def test_process_branch_protection_does_not_update_when_config_with_role_and_users_is_unchanged(self):
+        project = self._setup_existing_protected_branch(
+            push_access_levels=[USER_RECORD, NO_ACCESS_RECORD],
+            merge_access_levels=[OTHER_USER_RECORD, MAINTAINER_RECORD],
+        )
+        branch_config = {
+            "protected": True,
+            "allowed_to_push": [{"access_level": AccessLevel.NO_ACCESS.value}, {"user_id": USER_ID}],
+            "allowed_to_merge": [{"access_level": AccessLevel.MAINTAINER.value}, {"user_id": OTHER_USER_ID}],
+        }
+
+        self.processor.process_branch_protection(project, "main", branch_config, False)
+
+        project.protectedbranches.update.assert_not_called()
+        project.protectedbranches.create.assert_not_called()
+        protected_branch = project.protectedbranches.get.return_value
+        protected_branch.delete.assert_not_called()
+
+    def test_process_branch_protection_only_sends_new_user_when_added_to_config_with_role(self):
+        project = self._setup_existing_protected_branch(
+            push_access_levels=[USER_RECORD, NO_ACCESS_RECORD],
+            merge_access_levels=[MAINTAINER_RECORD],
+        )
+        branch_config = {
+            "protected": True,
+            "allowed_to_push": [
+                {"access_level": AccessLevel.NO_ACCESS.value},
+                {"user_id": USER_ID},
+                {"user_id": OTHER_USER_ID},
+            ],
+            "allowed_to_merge": [{"access_level": AccessLevel.MAINTAINER.value}],
+        }
+
+        self.processor.process_branch_protection(project, "main", branch_config, False)
+
+        project.protectedbranches.update.assert_called_once_with(
+            "main", {"allowed_to_push": [{"user_id": OTHER_USER_ID}]}
+        )
