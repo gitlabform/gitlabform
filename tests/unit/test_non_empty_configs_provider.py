@@ -27,3 +27,27 @@ def test_error_on_empty_key():
         configuration = Configuration(config_string=config_yaml)
         OmitEmptyConfigs(configuration, None, None)
     assert e.value.code == EXIT_INVALID_INPUT
+
+
+def test_error_on_missing_key_with_empty_application():
+    config_yaml = """
+    ---
+    application:
+    """
+
+    with pytest.raises(SystemExit) as e:
+        configuration = Configuration(config_string=config_yaml)
+        OmitEmptyConfigs(configuration, None, None)
+    assert e.value.code == EXIT_INVALID_INPUT
+
+
+def test_no_error_on_missing_key_with_application():
+    config_yaml = """
+    ---
+    application:
+      settings:
+        require_two_factor_authentication: true
+    """
+
+    configuration = Configuration(config_string=config_yaml)
+    OmitEmptyConfigs(configuration, None, None)

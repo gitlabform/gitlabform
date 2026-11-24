@@ -20,6 +20,19 @@ projects_and_groups:
       default_branch: main
 ```
 
+The `projects_and_groups` section is optional when you only want to manage the application settings.
+Run GitLabForm with the `ALL_DEFINED` or `ALL` target in that case:
+
+```yaml
+application:
+  settings:
+    require_two_factor_authentication: true
+```
+
+```shell
+gitlabform ALL_DEFINED
+```
+
 ## Project Settings
 
 This section purpose is to manage the [project settings](https://docs.gitlab.com/ee/user/project/settings/).

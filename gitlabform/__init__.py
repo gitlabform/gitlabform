@@ -410,16 +410,20 @@ class GitLabForm:
 
         effective_configuration = EffectiveConfigurationFile(self.output_file)
 
+        application_processed = False
         application_configuration = self.configuration.get("application", {})
         if application_configuration:
-            self.application_processors.process_entity(
-                "",
-                application_configuration,
-                dry_run=self.noop,
-                diff_only_changed=self.diff_only_changed,
-                effective_configuration=effective_configuration,
-                only_sections=self.only_sections,
-                exclude_sections=self.exclude_sections,
+            application_processed = (
+                self.application_processors.process_entity(
+                    "",
+                    application_configuration,
+                    dry_run=self.noop,
+                    diff_only_changed=self.diff_only_changed,
+                    effective_configuration=effective_configuration,
+                    only_sections=self.only_sections,
+                    exclude_sections=self.exclude_sections,
+                )
+                > 0
             )
 
         for group in groups:
@@ -551,6 +555,7 @@ class GitLabForm:
             successful_projects,
             failed_groups,
             failed_projects,
+            application_processed,
         )
 
     @classmethod
@@ -628,7 +633,9 @@ class GitLabForm:
         groups = self.groups_provider.get_groups(target)
         projects = self.projects_provider.get_projects(target)
 
-        if len(groups.get_effective()) == 0 and len(projects.get_effective()) == 0:
+        no_groups_or_projects = len(groups.get_effective()) == 0 and len(projects.get_effective()) == 0
+        has_application_config = target in ["ALL", "ALL_DEFINED"] and bool(self.configuration.get("application", {}))
+        if no_groups_or_projects and not has_application_config:
             if target == "ALL":
                 error_message = "GitLab has no projects and groups!"
             elif target == "ALL_DEFINED":
@@ -682,6 +689,7 @@ class GitLabForm:
         successful_projects: int,
         failed_groups: dict,
         failed_projects: dict,
+        application_processed: bool = False,
     ):
         """
         Prints out the summary after processing has ended with the info of what was done and what failed.
@@ -692,6 +700,7 @@ class GitLabForm:
         :param successful_projects: number of successfully processed projects
         :param failed_groups: a dict with failed groups, where keys are their numbers in the processing order
         :param failed_projects: a dict with failed projects, where keys are their numbers in the processing order
+        :param application_processed: if the application settings were processed
         """
 
         if len(effective_groups) > 0 or len(effective_projects) > 0:
@@ -729,6 +738,12 @@ class GitLabForm:
             log(
                 NOTICE_LOG_LEVEL,
                 "[green]All requested groups/projects processed successfully! :sparkles:[/]",
+                extra={"markup": True},
+            )
+        elif application_processed:
+            log(
+                NOTICE_LOG_LEVEL,
+                "[green]Application settings processed successfully! :sparkles:[/]",
                 extra={"markup": True},
             )
         else:

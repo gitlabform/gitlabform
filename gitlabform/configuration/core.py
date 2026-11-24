@@ -61,6 +61,9 @@ class ConfigurationCore(ABC):
                     )
                     sys.exit(EXIT_INVALID_INPUT)
 
+            if self.config and self.config.get("projects_and_groups", {}) is None:
+                self.config["projects_and_groups"] = {}
+
             self._find_almost_duplicates()
 
             # we are NOT checking for the existence of non-empty 'projects_and_groups' key here

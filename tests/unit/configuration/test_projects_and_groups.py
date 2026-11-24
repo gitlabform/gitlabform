@@ -139,3 +139,34 @@ def test__get_effective_config_for_project__configuration_for_other_project():
             },
         }
     }
+
+
+def test__missing_projects_and_groups_with_application():
+    config_yaml = """
+    application:
+      settings:
+        require_two_factor_authentication: true
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    assert configuration.get_groups() == []
+    assert configuration.get_projects() == []
+    assert configuration.get_projects("project_pattern") == []
+    assert configuration.get_effective_config_for_group("group") == {}
+    assert configuration.get_effective_config_for_project("group/project") == {}
+
+
+def test__empty_projects_and_groups_with_application():
+    config_yaml = """
+    application:
+      settings:
+        require_two_factor_authentication: true
+    projects_and_groups:
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    assert configuration.config["projects_and_groups"] == {}
+    assert configuration.get_groups() == []
+    assert configuration.get_projects() == []
+    assert configuration.get_effective_config_for_group("group") == {}
+    assert configuration.get_effective_config_for_project("group/project") == {}
