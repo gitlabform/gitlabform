@@ -95,7 +95,55 @@ jobs:
     needs:
       - prep-release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # Sigstore signing and the GitHub attestation store
+      id-token: write
+      attestations: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
+      - name: Configure uv environment
+        uses: ./.github/actions/setup-uv-local
+        with:
+          python-version: "3.14"
+      # Clean virtualenv with the package and its locked runtime dependencies, so the SBOM
+      # covers exactly that set and nothing else
+      - name: Install package with runtime dependencies
+        run: uv sync --frozen --no-dev --no-editable
+      # Version without the "v" tag prefix, like PyPI and Docker. The syft config makes
+      # gitlabform the root component of the SBOM instead of the scanned directory.
+      - name: Prepare SBOM metadata
+        env:
+          TAG: ${{ needs.prep-release.outputs.semver_tag }}
+        run: |
+          VERSION="${TAG#v}"
+          echo "SBOM_FILE=gitlabform-${VERSION}.cdx.json" >> "$GITHUB_ENV"
+          printf 'source:\n  name: gitlabform\n  version: "%s"\n' "$VERSION" > syft-config.yaml
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .venv/lib
+          config: syft-config.yaml
+          format: cyclonedx-json
+          output-file: ${{ env.SBOM_FILE }}
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Download built package
+        uses: actions/download-artifact@v8
+        with:
+          run-id: ${{ needs.prep-release.outputs.target_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: package-dist
+          path: dist
+      # Signed statement that this SBOM describes the published wheel and sdist
+      - name: Attest the SBOM of the package
+        uses: actions/attest@v4
+        with:
+          subject-path: dist/*
+          sbom-path: ${{ env.SBOM_FILE }}
       - name: Create release in GitHub
         uses: ncipollo/release-action@v1
         with:
@@ -103,12 +151,25 @@ jobs:
           name: ${{ needs.prep-release.outputs.semver_tag }}
           body: "(this is a placeholder, it will be replaced with a changelog contents)"
           token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: ${{ env.SBOM_FILE }}
+          artifactContentType: application/vnd.cyclonedx+json
+          artifactErrorsFailBuild: true
+          # On a rerun the release already exists: replace the SBOM asset but keep the
+          # release body (the changelog is pasted in by hand), name, draft and prerelease state
+          allowUpdates: true
+          replacesArtifacts: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
 
   publish-to-pypi:
     name: Publish PyPI
     if: ${{ needs.prep-release.outputs.is_valid_release == 'true' }}
     needs:
       - prep-release
+      # Publishing to PyPI cannot be undone, so it waits for the GitHub release and its SBOM
+      - publish-to-github
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -135,6 +196,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: package-dist
           path: dist
+      # Writes <dist>.publish.attestation files, which uv publish uploads along with the files
+      - name: Sign the package (PEP 740 attestations)
+        run: |
+          uv run --no-sync pypi-attestations sign dist/*.whl dist/*.tar.gz
       - name: Publish to PyPI
         run: |
           uv run --no-sync glf-dev release pypi
@@ -146,6 +211,12 @@ jobs:
       - prep-release
       - publish-to-pypi
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # Sigstore signing and the GitHub attestation store
+      id-token: write
+      attestations: write
     steps:
       # TODO: In a separate PR, optimize docker image build to consume the built package artifact
       # (package-dist) instead of copying and rebuilding from source if applicable.
@@ -181,6 +252,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       # Docker image will use UV internally and builds the image from the Codebase at the current tag, rather than downloding from PyPi
       - name: Publish image to registries
+        id: build
         uses: docker/build-push-action@v7
         with:
           push: true
@@ -189,3 +261,49 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
+          # Attach an SBOM and full build provenance to the image index in GHCR
+          sbom: true
+          provenance: mode=max
+      # The buildx attestations above are unsigned. The steps below add Sigstore-signed ones,
+      # pushed next to the image and stored on GitHub. Storage records are a separate feature
+      # that needs the artifact-metadata permission, so they are off.
+      - name: Attest build provenance of the image
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-name: ghcr.io/gitlabform/gitlabform
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false
+      # Reuse the SPDX SBOM that buildx made per platform, and attest each one against the
+      # digest of the platform manifest it describes
+      - name: Extract the platform SBOMs from the image index
+        id: sboms
+        env:
+          IMAGE: ghcr.io/gitlabform/gitlabform@${{ steps.build.outputs.digest }}
+        run: |
+          for platform in linux/amd64 linux/arm64; do
+            arch="${platform#linux/}"
+            docker buildx imagetools inspect "$IMAGE" \
+              --format "{{ json (index .SBOM \"${platform}\").SPDX }}" > "sbom-${arch}.spdx.json"
+            test -s "sbom-${arch}.spdx.json"
+            digest=$(docker buildx imagetools inspect "$IMAGE" --format '{{ json .Manifest }}' \
+              | jq -r --arg a "$arch" '.manifests[] | select(.platform.architecture == $a) | .digest')
+            test -n "$digest"
+            echo "${arch}=${digest}" >> "$GITHUB_OUTPUT"
+          done
+      - name: Attest the SBOM of the linux/amd64 image
+        uses: actions/attest@v4
+        with:
+          subject-name: ghcr.io/gitlabform/gitlabform
+          subject-digest: ${{ steps.sboms.outputs.amd64 }}
+          sbom-path: sbom-amd64.spdx.json
+          push-to-registry: true
+          create-storage-record: false
+      - name: Attest the SBOM of the linux/arm64 image
+        uses: actions/attest@v4
+        with:
+          subject-name: ghcr.io/gitlabform/gitlabform
+          subject-digest: ${{ steps.sboms.outputs.arm64 }}
+          sbom-path: sbom-arm64.spdx.json
+          push-to-registry: true
+          create-storage-record: false
