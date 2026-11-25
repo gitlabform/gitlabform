@@ -96,12 +96,38 @@ jobs:
       - prep-release
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
+      # Release notes are the `## <version>` changelog section, with relative
+      # docs links rewritten to the docs site.
+      - name: Extract release notes from changelog
+        id: notes
+        env:
+          TAG: ${{ needs.prep-release.outputs.semver_tag }}
+        run: |
+          version="${TAG#v}"
+          awk -v v="$version" '/^(```|~~~)/ {c=!c} !c && $1=="##" {sub(/[[:space:]]+$/, ""); f=($0=="## " v); next} f' docs/changelog.md \
+            | sed -E 's#\]\((\./)?([A-Za-z0-9_/-]+)\.md(\#[^)]*)?\)#](https://gitlabform.github.io/gitlabform/\2/\3)#g; s#(gitlabform\.github\.io/gitlabform/([A-Za-z0-9_/-]+/)?)index/#\1#g' \
+            > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "::error::no or empty '## $version' section in docs/changelog.md"
+            exit 1
+          fi
+          # PEP 440: only alpha, beta, rc and dev versions are pre-releases.
+          if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([._-]?(post|rev|r)[0-9]*|-[0-9]+)?$ ]]; then
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Create release in GitHub
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.prep-release.outputs.semver_tag }}
           name: ${{ needs.prep-release.outputs.semver_tag }}
-          body: "(this is a placeholder, it will be replaced with a changelog contents)"
+          bodyFile: release-notes.md
+          prerelease: ${{ steps.notes.outputs.prerelease }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-to-pypi:
