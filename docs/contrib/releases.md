@@ -7,7 +7,7 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
 ## Procedure
 
 1. Make sure you're on `main` branch and it is up-to-date.
-2. Add an entry in [changelog.md](../changelog.md). Remember to give thanks to all the contributors! Commit this change.
+2. Add an entry in [changelog.md](../changelog.md) under a `## <new-semantic-version-number>` heading. Everything up to the next `## ` heading becomes the GitHub release notes. Remember to give thanks to all the contributors! Commit this change.
 3. Update version using [`tbump`](https://github.com/your-tools/tbump). Run `pipx run tbump <new-semantic-version-number>`.
 
     **Note**: You may need to install `pipx` first if it's not already installed. Follow the instructions at [`pipx` documentation](https://pypa.github.io/pipx/installation/).
@@ -18,8 +18,6 @@ We try to follow the [PEP 440](https://peps.python.org/pep-0440/) versioning sch
 
     - Create a docker image containing new version of gitlabform and publish to [github's package registry under gitlabform](https://github.com/gitlabform/gitlabform/pkgs/container/gitlabform).
     - Upload new version of gitlabform to [pypi package registry under gitlabform](https://pypi.org/project/gitlabform/).
-    - A corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) will be created that references the new tag.
+    - A corresponding [GitHub release](https://github.com/gitlabform/gitlabform/releases) will be created that references the new tag, with the version's changelog entry as its release notes.
 
     The release workflow also verifies that the commit on `main` passed the build and quality. It will trigger a release workflow that will proceed only if a corresponding version tag exists in GitHub and main branch workflow on that commit passed. The release workflow can also be triggered manually, which will require 2 inputs: a release version tag and main branch workflow's run id from corresponding commit.
-
-3. Edit the release in GitHub and copy the changelog entry into its description.

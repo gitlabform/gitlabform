@@ -96,12 +96,41 @@ jobs:
       - prep-release
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prep-release.outputs.semver_tag }}
+      # The release notes are the changelog section of this version: every
+      # line between the `## <version>` heading and the next `## ` heading.
+      # Links to other docs pages are relative in the changelog and would
+      # break on the release page, so they are rewritten to the docs site.
+      # A missing or empty section fails the job instead of publishing a
+      # release without notes.
+      - name: Extract release notes from changelog
+        id: notes
+        env:
+          TAG: ${{ needs.prep-release.outputs.semver_tag }}
+        run: |
+          version="${TAG#v}"
+          awk -v v="$version" '$1=="##" {f=($2==v); next} f' docs/changelog.md \
+            | sed -E 's#\]\(([A-Za-z0-9_/-]+)\.md\)#](https://gitlabform.github.io/gitlabform/\1/)#g' \
+            > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "::error::no or empty '## $version' section in docs/changelog.md"
+            exit 1
+          fi
+          if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Create release in GitHub
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.prep-release.outputs.semver_tag }}
           name: ${{ needs.prep-release.outputs.semver_tag }}
-          body: "(this is a placeholder, it will be replaced with a changelog contents)"
+          bodyFile: release-notes.md
+          prerelease: ${{ steps.notes.outputs.prerelease }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-to-pypi:
