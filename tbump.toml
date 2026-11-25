@@ -33,7 +33,7 @@ search = 'version = "{current_version}"'
 
 [[before_commit]]
 name = "check changelog"
-cmd = "grep -qE '^## {new_version}[[:space:]]*$' docs/changelog.md"
+cmd = "sed 's/[[:space:]]*$//' docs/changelog.md | grep -qxF '## {new_version}'"
 
 [[before_commit]]
 name = "update lockfile"
