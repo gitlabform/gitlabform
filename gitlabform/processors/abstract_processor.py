@@ -171,7 +171,9 @@ class AbstractProcessor(ABC):
         keys_on_both_sides = set(entity_in_configuration.keys()) & set(entity_in_gitlab.keys())
         for key in keys_on_both_sides:
             if key in self.custom_diff_analyzers:
-                return self.custom_diff_analyzers[key](key, entity_in_gitlab[key], entity_in_configuration[key])
+                if self.custom_diff_analyzers[key](key, entity_in_gitlab[key], entity_in_configuration[key]):
+                    return True
+                continue
 
             if entity_in_gitlab[key] != entity_in_configuration[key]:
                 debug(
@@ -193,11 +195,17 @@ class AbstractProcessor(ABC):
             from_gitlab = {k: v for k, v in cfg_in_gitlab[index].items() if v is not None}
             from_local_cfg = local_cfg[index]
 
+            if set(from_local_cfg.keys()) - set(from_gitlab.keys()):
+                debug(f"* Missing key(s) in [{cfg_key}]:\n GitLab :: {from_gitlab} != Local :: {from_local_cfg}")
+                return True
+
             keys_on_both_sides = set(from_gitlab.keys()) & set(from_local_cfg.keys())
 
             for key in keys_on_both_sides:
                 if isinstance(from_gitlab[key], list) and isinstance(from_local_cfg[key], list):
-                    AbstractProcessor.recursive_diff_analyzer(key, from_gitlab[key], from_local_cfg[key])
+                    if AbstractProcessor.recursive_diff_analyzer(key, from_gitlab[key], from_local_cfg[key]):
+                        return True
+                    continue
 
                 if from_gitlab[key] != from_local_cfg[key]:
                     debug(f"* A <{key}> in [{cfg_key}] differs:\n GitLab :: {from_gitlab} != Local :: {from_local_cfg}")

@@ -86,3 +86,47 @@ def test__transform_for_merge_request_approvals() -> None:
 
     expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
     assert configuration.config == expected_transformed_config.config
+
+
+def test__transform_for_group_protected_environments() -> None:
+    config_yaml = """
+    projects_and_groups:
+      "foo/*":
+        group_protected_environments:
+          production:
+            name: production
+            deploy_access_levels:
+              - access_level: maintainer
+              - user: jsmith
+              - user_id: 123
+            approval_rules:
+              - user: bdoe
+                required_approvals: 1
+    """
+    configuration = Configuration(config_string=config_yaml)
+
+    gitlab_mock = MagicMock(GitLab)
+    gitlab_mock._get_user_id = MagicMock(side_effect=[78, 89])
+
+    transformer = UserTransformer(gitlab_mock)
+    transformer.transform(configuration)
+
+    assert gitlab_mock._get_user_id.call_count == 2
+
+    expected_transformed_config_yaml = """
+    projects_and_groups:
+      "foo/*":
+        group_protected_environments:
+          production:
+            name: production
+            deploy_access_levels:
+              - access_level: maintainer
+              - user_id: 78
+              - user_id: 123
+            approval_rules:
+              - required_approvals: 1
+                user_id: 89
+    """
+    expected_transformed_config = Configuration(config_string=expected_transformed_config_yaml)
+
+    assert configuration.config == expected_transformed_config.config

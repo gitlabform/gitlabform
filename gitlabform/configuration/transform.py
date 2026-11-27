@@ -74,18 +74,24 @@ class UserTransformer(ConfigurationTransformer):
         log = ConsolePrinter(logging_args)
         processor = Processor(log, configuration.config)
         info("Getting user ids for users defined in protect_environments config")
-        try:
-            for node_coordinate in processor.get_nodes(
-                "projects_and_groups.*.protected_environments.*.deploy_access_levels.user",
-                mustexist=True,
-            ):
-                user = node_coordinate.parent.pop("user")
+        for path in (
+            "projects_and_groups.*.protected_environments.*.deploy_access_levels.user",
+            "projects_and_groups.*.protected_environments.*.approval_rules.user",
+            "projects_and_groups.*.group_protected_environments.*.deploy_access_levels.user",
+            "projects_and_groups.*.group_protected_environments.*.approval_rules.user",
+        ):
+            try:
+                for node_coordinate in processor.get_nodes(
+                    path,
+                    mustexist=True,
+                ):
+                    user = node_coordinate.parent.pop("user")
 
-                node_coordinate.parent["user_id"] = self.gitlab._get_user_id(user)
-        except YAMLPathException as e:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
+                    node_coordinate.parent["user_id"] = self.gitlab._get_user_id(user)
+            except YAMLPathException:
+                # this just means that we haven't found any keys in YAML
+                # under the given path
+                pass
 
         info("Getting user ids for users defined in merge_requests_approval_rules config")
         try:
@@ -113,18 +119,24 @@ class GroupTransformer(ConfigurationTransformer):
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
 
-        try:
-            for node_coordinate in processor.get_nodes(
-                "projects_and_groups.*.protected_environments.*.deploy_access_levels.group",
-                mustexist=True,
-            ):
-                group = node_coordinate.parent.pop("group")
-                node_coordinate.parent["group_id"] = self.gitlab._get_group_id(group)
+        for path in (
+            "projects_and_groups.*.protected_environments.*.deploy_access_levels.group",
+            "projects_and_groups.*.protected_environments.*.approval_rules.group",
+            "projects_and_groups.*.group_protected_environments.*.deploy_access_levels.group",
+            "projects_and_groups.*.group_protected_environments.*.approval_rules.group",
+        ):
+            try:
+                for node_coordinate in processor.get_nodes(
+                    path,
+                    mustexist=True,
+                ):
+                    group = node_coordinate.parent.pop("group")
+                    node_coordinate.parent["group_id"] = self.gitlab._get_group_id(group)
 
-        except YAMLPathException as e:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
+            except YAMLPathException:
+                # this just means that we haven't found any keys in YAML
+                # under the given path
+                pass
 
         try:
             for node_coordinate in processor.get_nodes(
@@ -167,19 +179,24 @@ class ImplicitNameTransformer(ConfigurationTransformer):
         logging_args = SimpleNamespace(quiet=False, verbose=False, debug=False)
         processor = Processor(ConsolePrinter(logging_args), configuration.config)
 
-        try:
-            for node_coordinate in processor.get_nodes(
-                "projects_and_groups.*.protected_environments.*",
-                mustexist=True,
-            ):
-                if type(node_coordinate.node) not in [CommentedMap, dict]:
-                    continue
+        for path in (
+            "projects_and_groups.*.protected_environments.*",
+            "projects_and_groups.*.group_protected_environments.*",
+        ):
+            try:
+                for node_coordinate in processor.get_nodes(
+                    path,
+                    mustexist=True,
+                ):
+                    if type(node_coordinate.node) not in [CommentedMap, dict]:
+                        continue
 
-                node_coordinate.parent[node_coordinate.parentref]["name"] = node_coordinate.parentref
-        except YAMLPathException:
-            # this just means that we haven't found any keys in YAML
-            # under the given path
-            pass
+                    if "name" not in node_coordinate.parent[node_coordinate.parentref]:
+                        node_coordinate.parent[node_coordinate.parentref]["name"] = node_coordinate.parentref
+            except YAMLPathException:
+                # this just means that we haven't found any keys in YAML
+                # under the given path
+                pass
 
 
 class AccessLevelsTransformer(ConfigurationTransformer):

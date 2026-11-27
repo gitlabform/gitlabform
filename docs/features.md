@@ -10,6 +10,7 @@ GitLabForm enables you to manage the [(GitLab's) Application Settings](reference
     * [Members (users) {add/remove user, change access level, optional enforce}](reference/members.md#group-members)
     * [Members using LDAP Group Links](reference/group_ldap_links.md) (**GitLab Premium (paid) only**)
     * [Members using SAML Group Links](reference/group_saml_links.md) (**GitLab Premium (paid) only**)
+    * [Protected environments](reference/protected_environments.md#group-level-protected-environments) (**GitLab Premium (paid) only**)
     * [Settings](reference/settings.md#group-settings)
 
 * Project:
