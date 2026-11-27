@@ -114,3 +114,27 @@ class TestRecursiveDiffAnalyzer:
         modified_cfg[1]["group_inheritance_type"] = 1
 
         assert AbstractProcessor.recursive_diff_analyzer("deploy_access_levels", self._cfg_a, modified_cfg)
+
+    def test__equal_explicit_null_fields(self) -> None:
+        remote = [{"access_level": 40, "user_id": None}]
+        local = [{"access_level": 40, "user_id": None}]
+
+        assert not AbstractProcessor.recursive_diff_analyzer("deploy_access_levels", remote, local)
+
+    def test__unequal_when_configured_value_differs_from_remote_null(self) -> None:
+        remote = [{"access_level": 40, "group_id": None}]
+        local = [{"group_id": 77}]
+
+        assert AbstractProcessor.recursive_diff_analyzer("deploy_access_levels", remote, local)
+
+    def test__unequal_when_configured_non_null_missing_remotely(self) -> None:
+        remote = [{"access_level": 40}]
+        local = [{"group_id": 77}]
+
+        assert AbstractProcessor.recursive_diff_analyzer("deploy_access_levels", remote, local)
+
+    def test__unequal_when_configured_null_differs_from_remote_non_null(self) -> None:
+        remote = [{"access_level": 40, "user_id": 967}]
+        local = [{"access_level": 40, "user_id": None}]
+
+        assert AbstractProcessor.recursive_diff_analyzer("deploy_access_levels", remote, local)

@@ -58,7 +58,9 @@ class TestGroupProtectedEnvironments:
               production:
                 deploy_access_levels:
                   - access_level: {AccessLevel.DEVELOPER.value}
-                required_approval_count: 1
+                approval_rules:
+                  - access_level: {AccessLevel.MAINTAINER.value}
+                    required_approvals: 1
         """
 
         run_gitlabform(updated_config, group_for_function)
@@ -68,7 +70,9 @@ class TestGroupProtectedEnvironments:
         assert len(protected_envs) == 1
         assert protected_envs[0]["name"] == "production"
         assert protected_envs[0]["deploy_access_levels"][0]["access_level"] == AccessLevel.DEVELOPER.value
-        assert protected_envs[0]["required_approval_count"] == 1
+        assert len(protected_envs[0]["approval_rules"]) == 1
+        assert protected_envs[0]["approval_rules"][0]["access_level"] == AccessLevel.MAINTAINER.value
+        assert protected_envs[0]["approval_rules"][0]["required_approvals"] == 1
 
     def test__delete_and_enforce_group_protected_environments(self, gl, group_for_function):
         initial_config = f"""

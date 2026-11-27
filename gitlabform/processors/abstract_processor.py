@@ -192,10 +192,13 @@ class AbstractProcessor(ABC):
             return True
 
         for index in range(len(cfg_in_gitlab)):
-            from_gitlab = {k: v for k, v in cfg_in_gitlab[index].items() if v is not None}
+            from_gitlab = cfg_in_gitlab[index]
             from_local_cfg = local_cfg[index]
 
-            if set(from_local_cfg.keys()) - set(from_gitlab.keys()):
+            missing_keys = {
+                k for k in (set(from_local_cfg.keys()) - set(from_gitlab.keys())) if from_local_cfg[k] is not None
+            }
+            if missing_keys:
                 debug(f"* Missing key(s) in [{cfg_key}]:\n GitLab :: {from_gitlab} != Local :: {from_local_cfg}")
                 return True
 
