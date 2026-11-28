@@ -33,6 +33,9 @@ from gitlabform.processors.group.group_hooks_processor import (
 from gitlabform.processors.group.group_protected_branches_processor import (
     GroupProtectedBranchesProcessor,
 )
+from gitlabform.processors.group.group_protected_environments_processor import (
+    GroupProtectedEnvironmentsProcessor,
+)
 
 
 class GroupProcessors(AbstractProcessors):
@@ -49,4 +52,5 @@ class GroupProcessors(AbstractProcessors):
             GroupHooksProcessor(gitlab),
             GroupPushRulesProcessor(gitlab),
             GroupProtectedBranchesProcessor(gitlab, strict),
+            GroupProtectedEnvironmentsProcessor(gitlab),
         ]
