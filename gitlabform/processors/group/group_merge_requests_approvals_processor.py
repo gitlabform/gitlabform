@@ -25,6 +25,9 @@ class GroupMergeRequestsApprovalsProcessor(AbstractProcessor):
         return True
 
     def _get_current_state(self, group: str) -> dict | None:
+        if "/" in group:
+            return None
+
         gitlab_group: Group = self.gl.get_group_by_path_cached(group)
         settings_in_gitlab = self._get_group_merge_requests_approvals(gitlab_group)
 

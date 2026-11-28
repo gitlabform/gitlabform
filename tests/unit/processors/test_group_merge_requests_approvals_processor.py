@@ -85,3 +85,16 @@ class TestGroupMergeRequestsApprovalsProcessor:
 
         with pytest.raises(GitlabError):
             self.processor._process_configuration("test/group", configuration)
+
+    def test_get_current_state_skips_subgroups(self):
+        assert self.processor._get_current_state("test/group") is None
+        self.processor.gl.get_group_by_path_cached.assert_not_called()
+
+    def test_get_current_state_returns_top_level_group_settings(self):
+        self.processor.gl.http_get.return_value = settings_in_gitlab()
+
+        current_state = self.processor._get_current_state("test")
+
+        assert current_state["allow_author_approval"] is True
+        self.processor.gl.get_group_by_path_cached.assert_called_once_with("test")
+        self.processor.gl.http_get.assert_called_once_with(API_PATH)
