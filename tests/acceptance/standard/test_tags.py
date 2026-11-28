@@ -126,6 +126,36 @@ class TestTags:
         with pytest.raises(SystemExit):
             run_gitlabform(config, project)
 
+    def test__keep_previous_protection_when_protect_fails(self, project, tags):
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            tags:
+              tag1:
+                protected: true
+                create_access_level: {AccessLevel.DEVELOPER.value}
+        """
+
+        run_gitlabform(config, project)
+
+        # GitLab does not accept the Owner role for protected tags
+        config = f"""
+        projects_and_groups:
+          {project.path_with_namespace}:
+            tags:
+              tag1:
+                protected: true
+                create_access_level: {AccessLevel.OWNER.value}
+        """
+
+        with pytest.raises(SystemExit):
+            run_gitlabform(config, project)
+
+        protected_tags = project.protectedtags.list()
+        assert len(protected_tags) == 1
+        assert protected_tags[0].name == "tag1"
+        assert protected_tags[0].create_access_levels[0]["access_level"] == AccessLevel.DEVELOPER.value
+
     def test__protect_single_tag_no_access(self, project, tags):
         config = f"""
             projects_and_groups:
