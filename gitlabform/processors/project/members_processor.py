@@ -1,5 +1,5 @@
 import sys
-from logging import critical, info, warning, error
+from logging import critical, debug, info, warning, error
 from gitlab import GitlabDeleteError
 from gitlab.v4.objects import Project, User
 
@@ -34,10 +34,12 @@ class MembersProcessor(AbstractProcessor):
         self._process_users(project_and_group, users, enforce_members, keep_bots)
 
     def _process_groups(self, project_and_group: str, groups: dict, enforce_members: bool):
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
+
         if groups:
             info("Processing groups as members...")
 
-            current_groups = self.gitlab.get_groups_from_project(project_and_group)
+            current_groups = self._get_shared_with_groups(project)
             for group in groups:
                 info(f"Processing group {group}...")
                 expires_at = format_expires_at(groups[group].get("expires_at"))
@@ -54,16 +56,26 @@ class MembersProcessor(AbstractProcessor):
                     info(f"Current settings for '{common_group_name}' are: {current_groups[common_group_name]}")
                 else:
                     info(f"Setting group '{common_group_name}' as a member")
-                    access = access_level
-                    expiry = expires_at
 
                     # we will remove group access first and then re-add them,
                     # to ensure that the groups have the expected access level
-                    self.gitlab.unshare_with_group(project_and_group, common_group_name)
-                    self.gitlab.share_with_group(project_and_group, common_group_name, access, expiry)
+                    if common_group_name in current_groups:
+                        group_id = current_groups[common_group_name]["group_id"]
+                        self._unshare(project, group_id)
+                    else:
+                        group_id = self.gl.get_group_id(common_group_name)
+                    # access_level can be None when it's not in the config; the API will then reject
+                    # the request, like it did with the previous implementation
+                    project.share(group_id, access_level, expires_at)  # type: ignore[arg-type]
+                    # update the snapshot, so that a second config entry for the same
+                    # group spelled with a different case is not shared again
+                    snapshot = current_groups.setdefault(
+                        common_group_name, {"group_id": group_id, "group_full_path": group}
+                    )
+                    snapshot.update({"group_access_level": access_level, "expires_at": expires_at})
 
         if enforce_members:
-            current_groups = self.gitlab.get_groups_from_project(project_and_group)
+            current_groups = self._get_shared_with_groups(project)
 
             groups_in_config = [group_name.lower() for group_name in groups.keys()]
             groups_in_gitlab = current_groups.keys()
@@ -71,9 +83,29 @@ class MembersProcessor(AbstractProcessor):
 
             for group_not_in_config in groups_not_in_config:
                 info(f"Removing group '{group_not_in_config}' that is not configured to be a member.")
-                self.gitlab.unshare_with_group(project_and_group, group_not_in_config)
+                # the id comes from the shared_with_groups data, so this also works
+                # when the token cannot see the group itself
+                self._unshare(project, current_groups[group_not_in_config]["group_id"])
         else:
             info("Not enforcing group members.")
+
+    def _get_shared_with_groups(self, project: Project) -> dict:
+        # fetch the project fresh instead of using the cached object,
+        # because the shared groups are changed within this processor's run.
+        # The keys are lowercased because the group names in the config are
+        # compared in lowercase too.
+        project_info = self.gl.projects.get(project.id)
+        return {group["group_full_path"].lower(): group for group in project_info.shared_with_groups}
+
+    def _unshare(self, project: Project, group_id: int) -> None:
+        try:
+            project.unshare(group_id)
+        except GitlabDeleteError as e:
+            # 404 means the group is no longer shared with the project, which can
+            # happen when it was removed between listing and unsharing
+            if e.response_code != 404:
+                raise
+            debug(f"Group with id {group_id} was not unshared, it was not shared to begin with")
 
     def _process_users(
         self,
