@@ -28,7 +28,7 @@ from gitlabform.constants import (
     DIFF_LOG_LEVEL,
     NOTICE_LOG_LEVEL,
 )
-from gitlabform.gitlab import GitLab
+from gitlabform.gitlab import GitLab, GitlabWrapper
 from gitlabform.gitlab.core import TestRequestFailedException
 from gitlabform.lists import Entities
 from gitlabform.lists.filter import GroupsAndProjectsFilters
@@ -130,13 +130,14 @@ class GitLabForm:
         self.application_processors = ApplicationProcessors(self.gitlab, self.configuration, self.strict)
         self.group_processors = GroupProcessors(self.gitlab, self.configuration, self.strict)
         self.project_processors = ProjectProcessors(self.gitlab, self.configuration, self.strict, self.log_level)
+        gl = GitlabWrapper(self.gitlab).get_gitlab()
         self.groups_provider = GroupsProvider(
-            self.gitlab,
+            gl,
             self.configuration,
             self.recurse_subgroups,
         )
         self.projects_provider = ProjectsProvider(
-            self.gitlab,
+            gl,
             self.configuration,
             self.include_archived_projects,
             self.include_projects_scheduled_for_deletion,

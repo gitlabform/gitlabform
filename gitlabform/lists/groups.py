@@ -1,19 +1,21 @@
 import sys
 from logging import critical
 from gitlabform.constants import EXIT_INVALID_INPUT
-from gitlabform.gitlab.core import NotFoundException
+from gitlab import GitlabGetError
+
+from gitlabform.gitlab.python_gitlab import PythonGitlab
 from gitlabform.lists import OmissionReason, Groups
 
 
 class GroupsProvider:
     """
     For a query like "project/group", "group", "group/subgroup", ALL or ALL_DEFINED this
-    class gets the effective lists of groups, taking into account skipped groups
-    and the fact that the group and project names case are somewhat case-sensitive.
+    class gets the effective lists of groups, taking into account skipped groups,
+    even when the group and project paths in the config are spelled with a different case.
     """
 
-    def __init__(self, gitlab, configuration, recurse_subgroups):
-        self.gitlab = gitlab
+    def __init__(self, gl: PythonGitlab, configuration, recurse_subgroups):
+        self.gl = gl
         self.configuration = configuration
         self.recurse_subgroups = recurse_subgroups
 
@@ -35,22 +37,25 @@ class GroupsProvider:
 
         # it may be a subgroup or a group...
         try:
-            maybe_group = self.gitlab.get_group_case_insensitive(target)
-            path = maybe_group["full_path"]
-            groups.add_requested([path])
-
-            if recurse_subgroups:
-                descendants = self.gitlab.get_group_descendants(path)
-                groups.add_requested([group["full_path"] for group in descendants])
-
-                groups.add_omitted(
-                    OmissionReason.SKIPPED,
-                    self._get_skipped_groups(groups.get_effective()),
-                )
-
-        except NotFoundException:
+            # GitLab resolves group paths case-insensitively and returns the canonical path
+            maybe_group = self.gl.get_group_by_path_cached(target)
+        except GitlabGetError as e:
+            if e.response_code != 404:
+                raise
             # ...or a single project, which we ignore here
-            pass
+            return groups
+
+        path = maybe_group.full_path
+        groups.add_requested([path])
+
+        if recurse_subgroups:
+            descendants = self.gl.get_group_descendants(path)
+            groups.add_requested([group["full_path"] for group in descendants])
+
+            groups.add_omitted(
+                OmissionReason.SKIPPED,
+                self._get_skipped_groups(groups.get_effective()),
+            )
 
         return groups
 
@@ -58,7 +63,7 @@ class GroupsProvider:
         groups = Groups()
 
         if target == "ALL":
-            groups.add_requested(self.gitlab.get_groups())
+            groups.add_requested(self.gl.get_group_paths())
         else:  # ALL_DEFINED
             groups.add_requested(self.configuration.get_groups())
 
@@ -73,8 +78,10 @@ class GroupsProvider:
     def _verify_if_groups_exist(self, groups: list):
         for group in groups:
             try:
-                self.gitlab.get_group_case_insensitive(group)
-            except NotFoundException:
+                self.gl.get_group_by_path_cached(group)
+            except GitlabGetError as e:
+                if e.response_code != 404:
+                    raise
                 critical(f"Configuration contains group {group} but it cannot be found in GitLab!")
                 sys.exit(EXIT_INVALID_INPUT)
 

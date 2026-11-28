@@ -6,8 +6,7 @@ from typing import List
 
 from gitlab import Gitlab as GitlabClient, GraphQL
 
-from gitlabform.gitlab.groups import GitLabGroups
-from gitlabform.gitlab.projects import GitLabProjects
+from gitlabform.gitlab.core import GitLabCore
 from gitlabform.gitlab.python_gitlab import PythonGitlab
 
 
@@ -38,12 +37,7 @@ class AccessLevel(enum.IntEnum):
         return [level.name.lower().replace("_", " ") for level in AccessLevel]
 
 
-# GitLabGroups and GitLabProjects stay as bases until gitlabform/lists/ and the few
-# processors that still call their methods are migrated to python-gitlab
-class GitLab(
-    GitLabGroups,
-    GitLabProjects,
-):
+class GitLab(GitLabCore):
     pass
 
 
@@ -64,6 +58,9 @@ class GitlabWrapper:
 
         default_gitlab_kwargs = {
             "retry_transient_errors": True,
+            # without this list calls use the server default page size of 20;
+            # the legacy REST layer always requested pages of 100
+            "per_page": 100,
         }
         renamed_gitlab_kwargs = {
             # Bandit is used for security scanning and it complains about 'private_token' being
