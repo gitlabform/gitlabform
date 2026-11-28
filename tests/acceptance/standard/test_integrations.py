@@ -84,6 +84,36 @@ class TestIntegrations:
         project_integrations = project_for_function.integrations.list(get_all=True)
         assert len(project_integrations) == 0
 
+    def test__if_enforce_works(self, project_for_function):
+        config_integrations = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            integrations:
+              asana:
+                api_key: foo
+                push_events: true
+              slack:
+                webhook: http://foo.bar.com
+                push_events: true
+        """
+
+        run_gitlabform(config_integrations, project_for_function)
+
+        config_integrations_enforce = f"""
+        projects_and_groups:
+          {project_for_function.path_with_namespace}:
+            integrations:
+              enforce: true
+              slack:
+                webhook: http://foo.bar.com
+                push_events: true
+        """
+
+        run_gitlabform(config_integrations_enforce, project_for_function)
+
+        project_integrations = project_for_function.integrations.list(get_all=True)
+        assert [integration.slug for integration in project_integrations] == ["slack"]
+
     def test__if_push_events_true_works(self, project):
         config_integration_push_events_true = f"""
         projects_and_groups:
