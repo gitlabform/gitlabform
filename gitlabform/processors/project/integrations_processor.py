@@ -10,6 +10,15 @@ class IntegrationsProcessor(AbstractProcessor):
     def __init__(self, gitlab: GitLab):
         super().__init__("integrations", gitlab)
 
+    def _get_current_state(self, project_and_group: str) -> dict:
+        """Configured integrations keyed by their GitLab slug, for the dry-run diff."""
+        project: Project = self.gl.get_project_by_path_cached(project_and_group)
+        return {integration.name: integration.asdict() for integration in project.integrations.list(all=True)}
+
+    def _get_desired_state(self, entity_config: dict) -> dict:
+        """The config side of the diff: ``delete: true`` entries are removals, not settings."""
+        return {name: settings for name, settings in entity_config.items() if not settings.get("delete")}
+
     def _process_configuration(self, project_and_group: str, configuration: dict):
         configured_integrations = configuration.get("integrations", {})
         project: Project = self.gl.get_project_by_path_cached(project_and_group)
